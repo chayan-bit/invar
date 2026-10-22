@@ -2,7 +2,7 @@
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
 Counts: statements=268 citations=285
-Size record: tokens=25565 estimator=bytes/3 limit=30000
+Size record: tokens=25533 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 

@@ -46,7 +46,7 @@ impl CostModel {
         node_us: 0.37,
         cores: 10,
         // Host-scope 256-lane cells missed by up to 0.32% in the exclusive
-        // runs (`tests/fixtures/archived-evidence/p4a-path-sum/metal-gate-*.txt`); 32 lanes passed.
+        // runs (`archived-evidence/p4a-path-sum/metal-gate-*.txt`); 32 lanes passed.
         host_refusal: &[(Shape::Fused, 33, MAX_LANES)],
     };
     /// RTX 5070 Ti (sm_120, 70 SMs), calibrated on a Linux CUDA host.
@@ -56,7 +56,7 @@ impl CostModel {
         node_us: 0.25,
         cores: 70,
         // Every host-scope cell missed on an idle GPU (two-speed launch
-        // latency, `tests/fixtures/archived-evidence/p4a-path-sum/cuda-gate-idle.txt`).
+        // latency, `archived-evidence/p4a-path-sum/cuda-gate-idle.txt`).
         host_refusal: &[
             (Shape::Root, 0, MAX_LANES),
             (Shape::Fused, 0, MAX_LANES),

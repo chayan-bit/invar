@@ -50,13 +50,27 @@ jobs:
         run: cargo check --all-targets --locked
 
   test:
-    name: Test (shard ${{ matrix.shard }}/4)
+    name: Test (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        # One test, issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles every corpus program to C++ three times (about 1 h on a
+        # 2-vCPU runner). It runs alone in its own job, built from its own test binary only, and is
+        # excluded from the four shards below; no test is skipped overall.
+        include:
+          - name: shard 1/4
+            args: --partition count:1/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            doctests: true
+          - name: shard 2/4
+            args: --partition count:2/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          - name: shard 3/4
+            args: --partition count:3/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          - name: shard 4/4
+            args: --partition count:4/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          - name: CPU-model corpus
+            args: --test issue_gnet_03_device -E 'test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
     env:
       # tests/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
       INVAR_CI_PROFILE: debug
@@ -79,9 +93,12 @@ jobs:
         with:
           key: ci-debug
       - name: Test (default features, ci-debug profile)
-        run: cargo nextest run --locked --profile ci --cargo-profile ci-debug --partition count:${{ matrix.shard }}/4
+        env:
+          NEXTEST_ARGS: ${{ matrix.args }}
+        # NEXTEST_ARGS is intentionally word-split (it holds flags and a quoted filterset).
+        run: eval "cargo nextest run --locked --profile ci --cargo-profile ci-debug $NEXTEST_ARGS"
       - name: Doctests
-        if: matrix.shard == 1
+        if: matrix.doctests
         run: cargo test --locked --doc
 
   hygiene:
