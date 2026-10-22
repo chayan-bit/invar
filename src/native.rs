@@ -55,13 +55,20 @@ fn foreign_tag(ty: &Type) -> Result<u32, String> {
 pub struct Object {
     pub triple: String,
     pub data_layout: String,
+    /// The emitted IR as LLVM parsed it, before any pass (what the audit checked).
     pub ir: String,
+    /// The IR after [`optimize::PIPELINE`], when it ran.
+    pub optimized_ir: Option<String>,
     pub bytes: Vec<u8>,
     pub names: Vec<String>,
     pub blobs: EmbeddedBlobs,
     pub foreign: Vec<Option<ForeignSpec>>,
     /// Set by [`emit_mir_debug`]: DWARF to keep and the host's value layouts (DX-20).
     pub debug: Option<String>,
+    /// CPU, features and pipeline the code was generated for (#329).
+    pub machine: Machine,
+    /// The facts behind every promise in `ir`, indexed by `!invar.fact` node.
+    pub facts: Vec<Fact>,
 }
 
 fn error(message: impl Into<String>) -> String {
@@ -99,17 +106,29 @@ include!("native/ir.rs");
 include!("native/floating.rs");
 mod debug;
 pub(crate) mod export;
+mod optimize;
 pub use debug::{Source as DebugSource, canonical_ir, run_program_debug};
+pub use optimize::{
+    Build, Cpu, Fact, IntervalOp, Machine, Operand, PIPELINE, Promise, audit, compile_ir,
+    fact_nodes, resolve,
+};
 
 include!("native/emit.rs");
 
-/// Lower a verified MIR program to a host object. LLVM verifies the resulting IR.
+/// Lower a verified MIR program to a portable, optimized host object
+/// ([`Build::PORTABLE`]). LLVM verifies the resulting IR.
 pub fn emit_mir(program: &mir::Program) -> Result<Object, String> {
-    object_from_ir(llvm_ir(program)?)
+    emit_mir_for(program, &Build::PORTABLE)
 }
 
-/// Lower like [`emit_mir`], plus DWARF 5 mapping the code back to `source`
-/// (DX-20). The code is the same as `emit_mir`'s; only debug metadata is added.
+/// Lower like [`emit_mir`] for the CPU and pipeline `build` names.
+pub fn emit_mir_for(program: &mir::Program, build: &Build) -> Result<Object, String> {
+    optimize::object(llvm_ir(program)?, Vec::new(), build)
+}
+
+/// Lower unoptimized ([`Build::UNOPTIMIZED`]), plus DWARF 5 mapping the code
+/// back to `source` (#305). The code is the same as `emit_mir_for(program,
+/// &Build::UNOPTIMIZED)`'s; only debug metadata is added.
 pub fn emit_mir_debug(program: &mir::Program, source: &DebugSource) -> Result<Object, String> {
     let mut object = object_from_ir(llvm_ir_debug(program, None, Some(source))?)?;
     object.debug = Some(debug::host_types(program));
@@ -139,60 +158,9 @@ pub fn trig_sweep_object() -> Result<Vec<u8>, String> {
     Ok(object_from_ir((ir, Vec::new(), Vec::new(), Vec::new()))?.bytes)
 }
 
+/// The unoptimized generic path: debug and export objects (see [`Build::UNOPTIMIZED`]).
 fn object_from_ir(data: NativeIr) -> Result<Object, String> {
-    let (ir, names, blobs, foreign) = data;
-    Target::initialize_native(&InitializationConfig::default())?;
-    let triple = TargetMachine::get_default_triple();
-    let target = Target::from_triple(&triple).map_err(|error| error.to_string())?;
-    let machine = target
-        .create_target_machine(
-            &triple,
-            "generic",
-            "",
-            OptimizationLevel::Default,
-            // The host links as a position-independent executable, and the
-            // invar-trig-f32-v1 helpers address local constant tables, so the
-            // object is PIC on every target (x86_64 rejected R_X86_64_32S).
-            RelocMode::PIC,
-            CodeModel::Default,
-        )
-        .ok_or("LLVM could not create the native target machine")?;
-    let context = Context::create();
-    let buffer = MemoryBuffer::create_from_memory_range_copy(ir.as_bytes(), "invar-native-v1");
-    let module = context
-        .create_module_from_ir(buffer)
-        .map_err(|error| error.to_string())?;
-    let layout = machine.get_target_data().get_data_layout();
-    module.set_triple(&triple);
-    module.set_data_layout(&layout);
-    module.verify().map_err(|error| error.to_string())?;
-    let rendered = module.print_to_string().to_string();
-    for forbidden in [
-        " nsw ",
-        " nuw ",
-        " noalias ",
-        " mustprogress ",
-        " inbounds ",
-    ] {
-        if rendered.contains(forbidden) {
-            return Err(format!("native IR contains forbidden promise: {forbidden}"));
-        }
-    }
-    let bytes = machine
-        .write_to_memory_buffer(&module, FileType::Object)
-        .map_err(|error| error.to_string())?
-        .as_slice()
-        .to_vec();
-    Ok(Object {
-        triple: triple.as_str().to_string_lossy().into_owned(),
-        data_layout: layout.as_str().to_string_lossy().into_owned(),
-        ir: rendered,
-        bytes,
-        names,
-        blobs,
-        foreign,
-        debug: None,
-    })
+    optimize::object(data, Vec::new(), &Build::UNOPTIMIZED)
 }
 
 pub fn unique_directory() -> Result<PathBuf, String> {
@@ -578,7 +546,8 @@ pub fn run_program_with_library(
     fuel: u64,
     library: Option<&Path>,
 ) -> Result<(i32, serde_json::Value), String> {
-    run_object(&emit_mir(program)?, fuel, library)
+    // The object runs here and now, so it is tuned for the live CPU.
+    run_object(&emit_mir_for(program, &Build::HOST)?, fuel, library)
 }
 
 fn run_object(
