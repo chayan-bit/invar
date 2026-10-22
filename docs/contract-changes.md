@@ -4,6 +4,25 @@ The v0.1 contracts (schemas, code registries and the v0.1 benchmark corpus) are 
 A frozen contract changes only with a maintainer decision, recorded here with the files, the exact change, the reason, the effect on existing documents and the tests that pin the new bytes.
 Without such an entry, a change ships under a new schema version instead.
 
+## 2026-10-23: tracker references and the integration-start range owner
+
+Decided 2026-10-23: schema descriptions cite this repository's issue tracker, and the S1 milestone is named integration-start.
+
+Reason: the descriptions named issues by their numbers in the previous tracker, which the public repository does not have; the S1-06 milestone and its acceptance file are renamed to integration-start.
+
+| File | Change | FNV-1a 64 (pinned) |
+| --- | --- | --- |
+| `schema/invar-diagnostics-v1.schema.json` | the `normal_form` description cites `#54` for the normal-form route | `0xdfa28d616759b86d` to `0x879d475c646c15bf` |
+| `schema/explain-v1.schema.json` | the `device_execution.normal_form` description, the same | `0xd64e62b004f4341c` to `0x9583d18ffbf72f5e` |
+| `schema/invar-explain-device-v1.schema.json` | the `normal_form` description, the same | `0x3be8b64f24eb50c9` to `0xbe4976c7c7b31a61` |
+| `schema/invar-diagnostics-v3.schema.json`, `schema/explain-v5.schema.json`, `schema/invar-explain-device-v5.schema.json` | the same in their copies of `normal_form`; the `numeric_contracts.fold` description drops its tracker reference (diagnostics v3 and explain v5 only) | not pinned |
+| `schema/diagnostic-codes-v1.json` | the `S1800`-`S1899` range owner is renamed to `integration-start acceptance`; the retired-code justification cites `#57` | not pinned |
+
+Effect on existing documents: none; descriptions and range owners constrain no document, and no code, range bound or category changes.
+
+Tests that pin the new contract:
+- `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
+
 ## 2026-10-22: schema `$id` URLs move to the public repository
 
 Decided 2026-10-22: every schema's `$id` now names its file in the public repository, `https://github.com/chayan-bit/invar/blob/main/schema/<file>`.
@@ -22,11 +41,11 @@ Effect on existing documents: none; `$id` identifies the schema and constrains n
 Tests that pin the new contract:
 - `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
 
-## 2026-10-21: fold tiers in `numeric_contracts` (#280 step 7)
+## 2026-10-21: fold tiers in `numeric_contracts` (ENG-03 step 7)
 
 Decided 2026-10-21 (D12): the optional `fold` key goes only into the newest schemas that carry `numeric_contracts`, and the frozen older versions are unchanged.
 
-Reason: numeric policy v2 lets a function declare how its f32 folds associate ([numeric-v2](numeric-v2.md)), and the checker lowers each tiered fold to `sum_tree` or `sum_exact`. Relaxed folds, and the `reassoc_add` folds of a Strict function, take the Tree lowering (#280 step 5'). A receipt must say which algorithm ran.
+Reason: numeric policy v2 lets a function declare how its f32 folds associate ([numeric-v2](numeric-v2.md)), and the checker lowers each tiered fold to `sum_tree` or `sum_exact`. Relaxed folds, and the `reassoc_add` folds of a Strict function, take the Tree lowering (ENG-03 step 5'). A receipt must say which algorithm ran.
 
 | File | Change | FNV-1a 64 (pinned) |
 | --- | --- | --- |
@@ -46,9 +65,9 @@ Effect on existing documents:
 Tests that pin the new contract:
 - `tests/issue_eng_03_fold_receipts.rs`: the receipt for each tier and their mix, none without a lowered fold; placement run and explain documents carry it and validate, and the established documents do not.
 
-## 2026-10-21: `INVAR_NO_NORMAL_FORM` removed (#263, step 6)
+## 2026-10-21: `INVAR_NO_NORMAL_FORM` removed (#54, step 6)
 
-Approved 2026-10-21 under #263's scope (after the five family lowerings, the opt-out is removed).
+Approved 2026-10-21 under #54's scope (after the five family lowerings, the opt-out is removed).
 
 Reason: every family is now a lowering of the checked normal form (`src/schedule/families.rs`), so there is no second region source to fall back to; the variable only hid the `normal_form` object.
 No schema changes and no digest moves.
@@ -60,9 +79,9 @@ Effect on existing documents:
 Tests that pin the new contract:
 - `tests/v01_normal_form_run.rs`, `run_receipt_records_the_law_and_the_removed_opt_out_changes_nothing`: the receipt with `INVAR_NO_NORMAL_FORM=1` set equals the receipt without it.
 
-## 2026-10-20: `no-lowering` fallback reason (#263, families as lowerings)
+## 2026-10-20: `no-lowering` fallback reason (#54, families as lowerings)
 
-Approved 2026-10-20 under #263's scope (a certified loop that no family lowers records a typed fallback in the #265 receipt, with no new field).
+Approved 2026-10-20 under #54's scope (a certified loop that no family lowers records a typed fallback in the normal-form route receipt, with no new field).
 
 Reason: `invar run`, `auto`, `explain`, `calibrate` and `build` now take regions only from the checked normal form, and each family is a lowering of its admissions (`src/schedule/lowering.rs`).
 A loop the form certifies as parallel but no family lowers runs on the existing CPU path, and the run receipt names it.
@@ -72,7 +91,7 @@ A loop the form certifies as parallel but no family lowers runs on the existing 
 | `schema/invar-diagnostics-v1.schema.json` | `normal_form.reason` also accepts `^no-lowering:[a-z]+/[a-z]+(-[a-z]+)*$` | `0x9ef0ddb3fff29617` to `0x17a9ac9464b5db80` |
 | `schema/explain-v1.schema.json` | `device_execution.normal_form.reason`, same alternative | `0x666c0e12c62fe194` to `0x07cc9fed38031263` |
 | `schema/invar-explain-device-v1.schema.json` | `normal_form.reason`, same alternative | `0x1005fe866174dcb8` to `0xada00bfdc734e9b9` |
-| `schema/invar-diagnostics-v3.schema.json`, `schema/explain-v5.schema.json`, `schema/invar-explain-device-v5.schema.json` | the same alternative in their copies of `normal_form` (#216, added after #363) | not pinned |
+| `schema/invar-diagnostics-v3.schema.json`, `schema/explain-v5.schema.json`, `schema/invar-explain-device-v5.schema.json` | the same alternative in their copies of `normal_form` (#50, added after those schemas accepted `auto_path: "established"`) | not pinned |
 
 The reason is `no-lowering:<shape>/<rep>`: `<shape>` is the loop's normal-form shape (`map`, `reduce`, `scan`, `scatter`, `frontier`, `first`) and `<rep>` the representation of its first carried value, else of its first array law, else `none` (for example `no-lowering:reduce/lifted-sum`).
 
@@ -82,11 +101,11 @@ Effect on existing documents:
 
 Tests that pin the new contract:
 - `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
-- `tests/v01_normal_form_run.rs`, `issue_263_a_loop_no_family_lowers_records_a_typed_fallback`: the receipt names the gap and validates; `issue_263_a_sort_program_keeps_its_versioned_explain_document`: a sort program's explain v3 document stays valid.
+- `tests/v01_normal_form_run.rs`, `issue_54_a_loop_no_family_lowers_records_a_typed_fallback`: the receipt names the gap and validates; `issue_54_a_sort_program_keeps_its_versioned_explain_document`: a sort program's explain v3 document stays valid.
 
-## 2026-10-20: normal-form route in run receipts (#263, P6(a))
+## 2026-10-20: normal-form route in run receipts (#54, P6(a))
 
-Approved 2026-10-20 (v0.1 scope decision for #263: one optional receipt field naming the law or the fallback reason).
+Approved 2026-10-20 (v0.1 scope decision for #54: one optional receipt field naming the law or the fallback reason).
 
 Reason: `invar run --engine cpu-parallel` (and `--engine auto` on builds without a device) now executes a program that no family, f32, sort, spatial or reduction path claims through its checked parallel normal form (`src/schedule/normal_form.rs`).
 The run receipt and the explain device receipt record whether that happened, with the applied laws and the certificate identity, or why the serial path ran.
@@ -110,7 +129,7 @@ Tests that pin the new contract:
 - `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
 - `tests/v01_normal_form_run.rs`: routed receipts and explain documents validate, the opt-out and law-free programs carry no field.
 
-## 2026-10-19: strict-f64-v1 and invar-math-cr-v1 (#173)
+## 2026-10-19: strict-f64-v1 and invar-math-cr-v1
 
 Approved 2026-10-19.
 
@@ -133,7 +152,7 @@ The maintainers chose to extend the v1 documents in place rather than emit these
 
 `numeric_contracts` has at least one and at most three keys: `binary64: "strict-f64-v1"`, `math: "invar-math-cr-v1"` and `trig: "invar-trig-f32-v1"`.
 It appears only when a program uses `f64` or a library function.
-`trig` records main's `invar-trig-f32-v1` (#158), which f32 `sin`, `cos` and `sqrt` keep under the C4 interim ruling (2026-10-19): `invar-math-cr-v1` applies to `f64` and every other library function until the tracked C4 follow-up makes it the f32 default.
+`trig` records main's `invar-trig-f32-v1`, which f32 `sin`, `cos` and `sqrt` keep under the C4 interim ruling (2026-10-19): `invar-math-cr-v1` applies to `f64` and every other library function until the tracked C4 follow-up makes it the f32 default.
 The reason was spelled `metal_no_f64` during development and renamed to `metal-no-f64` before merge to match every other reason in the enum (decision, 2026-10-19); no released document ever carried the old spelling.
 
 Breaking for v0.1 source: a user function named like a library function no longer checks.

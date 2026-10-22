@@ -1,4 +1,4 @@
-# Debugging native programs (#305)
+# Debugging native programs
 
 `--debug` builds keep DWARF 5 debug info for the Invar source. gdb and lldb can then:
 

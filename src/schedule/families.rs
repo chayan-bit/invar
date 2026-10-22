@@ -1,5 +1,5 @@
 //! Ordered, closed family dispatch. One file and one registration per family.
-//! A family is a lowering of checked normal-form nodes (#263). Only a
+//! A family is a lowering of checked normal-form nodes (#54). Only a
 //! completed Step can reach publication.
 use super::*;
 use crate::general_net::normal_form::NormalForm;

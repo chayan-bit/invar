@@ -1,4 +1,4 @@
-//! #278 ENG-08 part A: the summary matcher has no read-size cap of 16. A scan form of any
+//! #57 ENG-08 part A: the summary matcher has no read-size cap of 16. A scan form of any
 //! dimension is matched; the family's own shape bound (d <= 4, K <= 16) stays a typed
 //! `FamilyBound` refusal with the `summary_family_bound` reason, and the matcher's analysis storage
 //! is held to the byte budget. Every test asserts a nonzero case count.

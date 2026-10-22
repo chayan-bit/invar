@@ -213,7 +213,7 @@ def test_fuel_keeps_bytes_and_callee_temporaries_follow_the_language_limit(modul
         assert raised.value.steps_used == fuel
         assert a.tolist() == [1, 2, 3]
     # The callee temporary is the core's allocation, bounded by the language
-    # limit (raised by #142), not by the host-array bound: this call now runs.
+    # limit (raised separately), not by the host-array bound: this call now runs.
     big = np.ones(1_000_000, np.int32)
     other = np.ones(1_000_000, np.int32)
     assert module.call_reference("grow_after", big, other)["result"] == 1_000_001
@@ -285,7 +285,7 @@ def test_f32_exact_alias_counts_once_toward_the_host_live_bound(module):
     i = np.zeros(1_000_000, np.int32)
     g, j = f.copy(), i.copy()
     # The callee temporary is the core's allocation, bounded by the language
-    # limit (raised by #142), so distinct arrays plus a temporary run.
+    # limit (raised separately), so distinct arrays plus a temporary run.
     assert module.call_reference("near_f", f, g)["result"] == 2_000_001
     assert module.call_reference("near_i", i, j)["result"] == 2_000_001
     # An exact alias counts once toward the 2,000,000-element host union.

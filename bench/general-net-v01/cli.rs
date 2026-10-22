@@ -337,15 +337,15 @@ mod observe_tests {
 
     fn script_result(body: &str) -> Result<Value, String> {
         // A counter, not SystemTime (microseconds on macOS): parallel tests
-        // must never publish over each other's script (#255).
+        // must never publish over each other's script.
         static NEXT: AtomicU64 = AtomicU64::new(0);
         let path = std::env::temp_dir().join(format!(
             "invar-gnet-observe-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
-        // #119's writer (loaded once, in `baseline_families`) never leaves a writable
-        // descriptor for a sibling test's fork to inherit (#245).
+        // The shared writer (loaded once, in `baseline_families`) never leaves a writable
+        // descriptor for a sibling test's fork to inherit (ETXTBSY).
         crate::baseline_families::executable::write(
             &path,
             format!("#!/bin/sh\n{body}\n").as_bytes(),

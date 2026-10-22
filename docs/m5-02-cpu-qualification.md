@@ -1,6 +1,6 @@
 # M5-02 CPU adversarial qualification
 
-Issue #34 at base `39ee676ae7e59317577d403668f371f038781f07`.
+Issue #9 at base `39ee676ae7e59317577d403668f371f038781f07`.
 This is CPU semantic preparation before the M4/GNET integration, M5-01 freeze, and hardware qualification.
 The issue remains open and M5-03 remains blocked.
 The local contract and current benchmark binary use `invar-bench`.

@@ -1,4 +1,4 @@
-"""PR #94: same-signature exports keep their named behavior in either order."""
+"""Zero-copy NumPy exports (L1-06): same-signature exports keep their named behavior in either order."""
 import invar_python as inv
 import numpy as np
 

@@ -1,16 +1,16 @@
 {
   "baselines": {
-    "owner": "#337 (ENG-26)",
+    "owner": "#109 (ENG-26)",
     "reported_separately": true,
     "status": "pending"
   },
-  "freeze": "not frozen: the permanent held-out freeze is gated by #228 and needs maintainer confirmation",
+  "freeze": "not frozen: the permanent held-out freeze is gated by #52 and needs maintainer confirmation",
   "generator": "domain-suites-v1",
   "gpu_performance": "not_run",
   "pending": [
     {
       "program": "ml-quantized_matmul",
-      "reason": "i8 storage with i32 accumulation needs the reduced-precision storage types of #280 (ENG-03); not approximated with wider types"
+      "reason": "i8 storage with i32 accumulation needs the reduced-precision storage types of ENG-03; not approximated with wider types"
     }
   ],
   "schema_version": 1,

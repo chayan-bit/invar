@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! P6(a) (#263): `invar run` executes serial-only programs through the checked
+//! P6(a) (#54): `invar run` executes serial-only programs through the checked
 //! parallel normal form. Every law program of the P1b differential harness
 //! (`tests/net_normal_form_laws.rs`, read from that file so the corpus cannot
 //! drift) is wrapped in a `main` with seeded inputs and run through the CPU
@@ -269,7 +269,7 @@ fn write(name: &str, source: &str) -> PathBuf {
 }
 
 /// `stale_opt_out` sets the removed `INVAR_NO_NORMAL_FORM=1`, which must
-/// change nothing (#263).
+/// change nothing (#54).
 fn cli(args: &[&str], stale_opt_out: bool) -> (i32, Json) {
     let mut command = Command::new(env!("CARGO_BIN_EXE_invar"));
     command.args(args).env_remove("INVAR_NO_NORMAL_FORM");
@@ -329,7 +329,7 @@ fn run_receipt_records_the_law_and_the_removed_opt_out_changes_nothing() {
 const GAP: &str = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 0u32; for i in 0u32..n { s = s + a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); var out = filled_u32(8u32, 0u32); for i in 0u32..8u32 { out[i] = wrapping_add(a[i], 3u32); } if run(out, 8u32) != 40u32 { return 1; } return 42; }";
 
 #[test]
-fn issue_263_a_loop_no_family_lowers_records_a_typed_fallback() {
+fn issue_54_a_loop_no_family_lowers_records_a_typed_fallback() {
     let path = write("gap.inv", GAP);
     let path = path.to_str().unwrap();
     let args = [
@@ -359,7 +359,7 @@ fn issue_263_a_loop_no_family_lowers_records_a_typed_fallback() {
 }
 
 #[test]
-fn issue_263_every_normal_form_schema_accepts_the_typed_fallback() {
+fn issue_54_every_normal_form_schema_accepts_the_typed_fallback() {
     let fallback =
         serde_json::json!({"status": "fallback", "reason": "no-lowering:reduce/lifted-sum"});
     let malformed = serde_json::json!({"status": "fallback", "reason": "no-lowering:reduce/"});
@@ -396,9 +396,9 @@ fn issue_263_every_normal_form_schema_accepts_the_typed_fallback() {
 }
 
 #[test]
-fn issue_263_a_sort_program_keeps_its_versioned_explain_document() {
+fn issue_54_a_sort_program_keeps_its_versioned_explain_document() {
     // The engine records no gap for a sort program, whose auto explain was
-    // v3 (no `normal_form`) before #216 made every auto explain v5.
+    // v3 (no `normal_form`) before #50 made every auto explain v5.
     let source = GAP.replace(
         "return 42; }",
         "let xs: Array<u32> = [3u32, 1u32, 2u32]; let ids = argsort(xs); if ids[0u32] != 1u32 { return 2; } return 42; }",

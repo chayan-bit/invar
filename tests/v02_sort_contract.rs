@@ -38,7 +38,7 @@ fn returns_seven(source: &str) {
 fn sort_contract_explain_schema_and_registered_reasons() {
     let v3: serde_json::Value =
         serde_json::from_str(include_str!("../schema/explain-v3.schema.json")).unwrap();
-    // #216: an auto explain is the unified v5, the same sort sites as v3.
+    // #50: an auto explain is the unified v5, the same sort sites as v3.
     let v5: serde_json::Value =
         serde_json::from_str(include_str!("../schema/explain-v5.schema.json")).unwrap();
     let device_schema: serde_json::Value = serde_json::from_str(include_str!(

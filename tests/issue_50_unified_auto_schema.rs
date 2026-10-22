@@ -1,4 +1,4 @@
-//! #216 parts 1 and 4: one auto version. Every `--engine auto` explain is
+//! #50 parts 1 and 4: one auto version. Every `--engine auto` explain is
 //! `invar-explain-v5` (with `invar-explain-device-v5`) and every auto run
 //! receipt `invar-diagnostics-v3`; the established path records
 //! `auto_path: "established"`, normal-form route included, and only
@@ -8,7 +8,7 @@ use serde_json::{Value, json};
 use std::{path::PathBuf, process::Command};
 
 const SUM: &str = "fn f(xs: read Array<i32>, n: u32, s0: i32) -> i32 { var s = s0; for i in 0u32 .. n { s = s + xs[i]; } return s; } fn main() -> i32 { let xs: Array<i32> = [4, 9, (0 - 3), 12]; return f(xs, 4u32, 20); }";
-/// A certified loop no family lowers: the typed `no-lowering` fallback (#263).
+/// A certified loop no family lowers: the typed `no-lowering` fallback (#54).
 const GAP: &str = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 0u32; for i in 0u32..n { s = s + a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); var out = filled_u32(8u32, 0u32); for i in 0u32..8u32 { out[i] = wrapping_add(a[i], 3u32); } if run(out, 8u32) != 40u32 { return 1; } return 42; }";
 const SORT: &str =
     "fn main() -> i32 { var keys: Array<u32> = [2u32, 1u32]; sort(keys); return 42; }";

@@ -23,7 +23,7 @@ const NODE_BYTES: usize = size_of::<Option<Node>>() + 2 * size_of::<NodeId>();
 /// chain the byte budget admits in practice; a deeper graph is refused and runs serially.
 const STACK_DEPTH: usize = 256;
 
-/// The graph limits an analysis budget implies (#278): as many nodes as `analysis_bytes` holds,
+/// The graph limits an analysis budget implies (#57): as many nodes as `analysis_bytes` holds,
 /// two ports per node, as many map operations as nodes, and the language's per-array limit.
 /// Only `depth` is not a byte budget: it is the stack guard `STACK_DEPTH`.
 pub const fn graph_limits(analysis_bytes: usize) -> Limits {

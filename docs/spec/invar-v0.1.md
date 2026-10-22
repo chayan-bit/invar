@@ -1006,8 +1006,8 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 10.3 Cell imports
 
-[N10.3.1] `import component "relative/path/manifest.inv" [for robot menagerie::name];` inserts one checked manifest from beneath the source directory into the IR. `tests/issue_s1_06_company_start.rs`
-[N10.3.2] The import needs a current passing contract-test record, and a missing or changed record is `S1405` before generation. `tests/issue_s1_06_company_start.rs`
+[N10.3.1] `import component "relative/path/manifest.inv" [for robot menagerie::name];` inserts one checked manifest from beneath the source directory into the IR. `tests/issue_s1_06_integration_start.rs`
+[N10.3.2] The import needs a current passing contract-test record, and a missing or changed record is `S1405` before generation. `tests/issue_s1_06_integration_start.rs`
 [N10.3.3] A path that escapes the cell directory is `S1400`, and a project root is the nearest ancestor holding `.git`. `src/system.rs`
 [N10.3.4] An ordinary port may use `std::robotics::JointPositions<f64,robot_dof>`, resolved from the selected robot to a seven or six joint type. `spec/bootstrap.md`
 
@@ -1136,30 +1136,30 @@ fn main() -> i32 { return 0; }
 
 Note: the open content in this appendix is not current behaviour, and no statement above relies on it.
 Note: AI-02 depends on L1-06, S1-06 and M5-03, none of which is closed, so the spec must be re-verified after each of them closes.
-Note: the open set is every open `release:v0.1` issue plus the GNET slices #196, #188 and #218, and `docs/remaining-work.md` records each item's evidence, remaining gate and blocker.
+Note: the open set is every open `release:v0.1` issue plus the GNET slices #47, #45 and #51, and `docs/remaining-work.md` records each item's evidence, remaining gate and blocker.
 
 | Issue | Open content | Spec sections that change when it closes |
 | --- | --- | --- |
-| #26 M4-01 | f32 family gates through the M5-01 harness on the named targets | 5.8, 11.4 |
-| #27 M4-02 | Transpose and stencil family gates | 11.4 |
-| #28 M4-03 | Matrix family gate, generated and library-assisted tracks | 11.4 |
-| #29 M4-04 | Segmented family gate, including the CUDA shared-budget gate | 11.4 |
-| #30 M4-05 | Gather/scatter and frontier family gates | 11.4 |
-| #31 M4-07 | Summary family gate | 11.4 |
-| #33 M4-06 | Schedule tuning on the tuning set after the held-out freeze | 11.5 |
-| #32 M5-01 | Permanent held-out freeze (#228), baseline timing (#214), calibration in `invar-placement-v1` (#215) | 11.5, B.5 |
-| #34 M5-02 | Device qualification of the full pipeline | 11.5 |
-| #35 M5-03 | CUDA-class performance acceptance and report | 11.5 |
-| #54 L1-06 | Python binding platform matrix beyond the private wheel, starting with macOS arm64 | 14 |
-| #76 S1-04 | Runtime smoke on the S1-06 cell with `mujoco_ros2_control` | 8.3 |
-| #78 S1-06 | Recorded two-arm reach-and-place run | 8.3, 10.3 |
-| #196 GNET-04 | Calibrated automatic dispatch for general nets after the M5-01 freeze, plus specialization and residency (D1(a) and D2(a) landed in #259 and #262) | 11.6, 13.3, B.5 |
-| #188 GNET-05 | Six Metal census observations and a deep-device count | 11.6 |
-| #218 GNET-05 | One completed nightly with the CUDA census compile wall time inside the 3 h bound; its compile-deadline refusals are the v0.1 outcome (#253) | 11.6 |
-| #263 GNET P6/P7 | One normal-form dispatcher with the families as its lowerings, GNET-05 device parity (correctness on the H100 and the Apple M4, timing on the RTX 5070 Ti) and calibrated placement (P6(b)) | 11.3, 11.4, 11.6, 13.3 |
+| #1 M4-01 | f32 family gates through the M5-01 harness on the named targets | 5.8, 11.4 |
+| #2 M4-02 | Transpose and stencil family gates | 11.4 |
+| #3 M4-03 | Matrix family gate, generated and library-assisted tracks | 11.4 |
+| #4 M4-04 | Segmented family gate, including the CUDA shared-budget gate | 11.4 |
+| #5 M4-05 | Gather/scatter and frontier family gates | 11.4 |
+| #6 M4-07 | Summary family gate | 11.4 |
+| #8 M4-06 | Schedule tuning on the tuning set after the held-out freeze | 11.5 |
+| #7 M5-01 | Permanent held-out freeze (#52), baseline timing, calibration in `invar-placement-v1` (#49) | 11.5, B.5 |
+| #9 M5-02 | Device qualification of the full pipeline | 11.5 |
+| #10 M5-03 | CUDA-class performance acceptance and report | 11.5 |
+| #14 L1-06 | Python binding platform matrix beyond the private wheel, starting with macOS arm64 | 14 |
+| S1-04 | Runtime smoke on the S1-06 cell with `mujoco_ros2_control` | 8.3 |
+| #29 S1-06 | Recorded two-arm reach-and-place run | 8.3, 10.3 |
+| #47 GNET-04 | Calibrated automatic dispatch for general nets after the M5-01 freeze, plus specialization and residency (D1(a) and D2(a) have landed) | 11.6, 13.3, B.5 |
+| #45 GNET-05 | Six Metal census observations and a deep-device count | 11.6 |
+| #51 GNET-05 | One completed nightly with the CUDA census compile wall time inside the 3 h bound; its compile-deadline refusals are the v0.1 outcome | 11.6 |
+| #54 GNET P6/P7 | One normal-form dispatcher with the families as its lowerings, GNET-05 device parity (correctness on the H100 and the Apple M4, timing on the RTX 5070 Ti) and calibrated placement (P6(b)) | 11.3, 11.4, 11.6, 13.3 |
 
-Note: since #265, `cpu-parallel`, and `auto` in builds without a device feature, run a program that no existing parallel path claims through the checked normal form, so the serial MIR fallback of N11.4.2 applies only where that route refuses; the sections listed for #263 are re-verified when it closes.
-Note: hardware results in this specification stay pinned to their recorded hosts, and CUDA re-verification of merged device work is tracked in #187.
+Note: `cpu-parallel`, and `auto` in builds without a device feature, run a program that no existing parallel path claims through the checked normal form, so the serial MIR fallback of N11.4.2 applies only where that route refuses; the sections listed for #54 are re-verified when it closes.
+Note: hardware results in this specification stay pinned to their recorded hosts.
 
 ## Appendix B. Beyond v0.1: v0.2 features on main
 
@@ -1264,7 +1264,7 @@ fn main() -> i32 {
 [NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `docs/design/v02-f64math.md`
 [NB.4.7] An `extern c fn` of N7.3.1 also accepts `f64` as a value argument, the result `T` stays `i32`, `u32`, `Bytes` or `String`, and an `f64` result or any `f32` argument or result is `TYPE_MISMATCH`. `tests/issue_l1_04_bytes_strings_cabi.rs::v02_f64_foreign_scalar_argument_matches_its_oracle` `src/check.rs::valid_result`
 [NB.4.8] An `f64` argument has tag `INV_TAG_F64_V1` (5) and mode `INV_MODE_VALUE_V1`, and its `scalar` holds the binary64 encoding, which C reads with `memcpy` into a `double`. `include/invar_foreign_v1.h` `tests/fixtures/l1_04/foreign.c`
-Note: the binary64 CUDA kernels whose CORE-MATH sources declare an anonymous struct inside a union (`cos`, `tan`, `atan2`, `log`, `log10` and `pow`) need NVRTC 12.9 or newer, every other CUDA unit keeps the 12.4 floor of N11.5.2, and a rewrite for NVRTC 12.4 and 12.6 is tracked in #225.
+Note: the binary64 CUDA kernels whose CORE-MATH sources declare an anonymous struct inside a union (`cos`, `tan`, `atan2`, `log`, `log10` and `pow`) need NVRTC 12.9 or newer, every other CUDA unit keeps the 12.4 floor of N11.5.2, and a rewrite for NVRTC 12.4 and 12.6 is deferred to the Jetson Orin target (#21).
 
 ```invar outcome=value:4
 fn main() -> i32 {

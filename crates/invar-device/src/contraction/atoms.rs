@@ -1,4 +1,4 @@
-//! Matrix-atom schedules of the generic contraction emitter (#283): the
+//! Matrix-atom schedules of the generic contraction emitter (#61): the
 //! `tc-f16-f32-v1` contraction through a target's `mma.sync` m16n8k16 or
 //! `simdgroup_matrix` 8x8 atom. The atom, its instruction text, the tile, the
 //! tiles per group and the warp width come from the verified moves and the

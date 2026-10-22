@@ -1,4 +1,4 @@
-//! Interval range inference for P4a narrow licences (#140 item 1).
+//! Interval range inference for P4a narrow licences (P4a profile item 1).
 //!
 //! Given a box of root parameter ranges (the licence), the analysis proves
 //! that every operator demanded by a path-sum lane stays inside its source

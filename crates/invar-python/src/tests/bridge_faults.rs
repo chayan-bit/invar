@@ -219,7 +219,7 @@ fn ha1_4_bridge_plan_counts_f64_and_bool_by_element_size() {
 
 /// The binding refuses before any bridge exists at the HA-1 protocol bounds
 /// (frozen in docs/host-array-arguments-ha1.md): they are not the language
-/// limits, which #142 raised, and must change only with the protocol.
+/// limits, which were raised separately, and must change only with the protocol.
 #[test]
 fn ha1_bridge_limits_are_the_protocol_bounds() {
     use invar_foreign::host_array;
@@ -397,7 +397,7 @@ fn ha1_f32_live_union_matches_i32_and_exact_aliases_count_once() {
         let j = numpy::PyArray1::<i32>::zeros(py, 1_000_000, false);
         let k = numpy::PyArray1::<i32>::zeros(py, 1_000_000, false);
         // The callee temporary is the core's allocation, bounded by the
-        // language limit (raised by #142), not by the host-array bound.
+        // language limit (raised separately), not by the host-array bound.
         for (name, x, y) in [
             ("near_f", f.as_any(), g.as_any()),
             ("near_i", i.as_any(), j.as_any()),

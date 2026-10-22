@@ -279,7 +279,7 @@ impl Report {
     }
     /// Rebuild a region `keep` refuses as a fresh rejection, as `analyze` would
     /// record it: its plan was not selected by the normal-form dispatcher
-    /// (#263). The checked normal form is the dependence proof of record
+    /// (#54). The checked normal form is the dependence proof of record
     /// (decision L1), so a loop it does not certify fails that obligation.
     pub(crate) fn demote(&mut self, source: &[u8], keep: impl Fn(&Region) -> bool) {
         for region in &mut self.regions {
@@ -336,7 +336,7 @@ pub fn validate_serialized(
     if value.get("schema_version") != Some(&json!(SCHEMA_VERSION)) {
         return Err(error("ADMISSION_SCHEMA", "unknown admission schema"));
     }
-    // `explain` documents the dispatcher's regions (#263), so a record is
+    // `explain` documents the dispatcher's regions (#54), so a record is
     // checked against that view.
     let current = crate::schedule::regions(source, program)?.to_json();
     if *value != current {

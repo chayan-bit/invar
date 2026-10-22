@@ -318,7 +318,7 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
 }
 
 /// Byte spans of the matched `{`...`}` pairs in `source`, in closing order,
-/// for native debug scopes (#305). Comments and literals are skipped by the
+/// for native debug scopes (DX-20). Comments and literals are skipped by the
 /// lexer, so their braces never count.
 #[cfg(feature = "native")]
 pub(crate) fn brace_spans(source: &str) -> Result<Vec<Span>, FrontError> {

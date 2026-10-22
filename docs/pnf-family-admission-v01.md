@@ -39,7 +39,7 @@ Every family still needs its existing live guard and source-bound contract.
 In particular, offsets must be ordered/covered, scatter indices must be in range
 and injective where required, numeric policies must match, and pending device
 work must be quiescent before fallback. None of those runtime facts is inferred
-from a static match. The publication bridge remains `CompletedRegion` from #143;
+from a static match. The publication bridge remains `CompletedRegion`;
 P3 constructs no completion, MIR override or device receipt.
 
 ## Verification and current gaps
@@ -47,7 +47,7 @@ P3 constructs no completion, MIR override or device receipt.
 `tests/pnf_family_admission.rs` compares admissions by function and exact source
 span with the existing recognizers. It uses the existing 60 GNET-05 and 140
 M5-01 fixtures, plus snapshots of 48 robotics and 12 C1 residual forkjoin
-programs from #141. Snapshot provenance and every SHA-256 are in
+programs from the GNET-05 robotics corpus. Snapshot provenance and every SHA-256 are in
 `tests/pnf_family_fixtures/lineage.json`; no source generator is rerun. Focused
 family programs and rename/near-miss variants supplement the corpus.
 

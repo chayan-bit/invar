@@ -111,7 +111,7 @@ impl Profile {
     };
 }
 
-/// Fingerprints of the C1 fork-join family (#141); `C1[i]` is C1-i.
+/// Fingerprints of the C1 fork-join family (GNET-05 corpus request C1); `C1[i]` is C1-i.
 const C1: [&str; 12] = [
     "ab5862dc1292cfa056ebb4f726b67eb9b0a2b1ae424b720e3bda082166caa4f6",
     "8db40fd2892187423857f4077534aac90aaf71a352aac04cc29bde22bbd2bc1a",
@@ -214,7 +214,7 @@ pub fn route(program: &Program, profile: &Profile) -> Result<Plan, Refusal> {
 /// measured on (Apple M4, including Pro and Max). Metal has no occupancy query
 /// and no forward-progress guarantee for persistent threadgroups, and cascade
 /// workers spin on a device-wide claim list, so other devices take the staged
-/// MSL 3.1 schedule (#207).
+/// MSL 3.1 schedule (P4b cascade liveness).
 pub fn metal_cascade_measured(device_name: &str) -> bool {
     device_name == "Apple M4" || device_name.starts_with("Apple M4 ")
 }

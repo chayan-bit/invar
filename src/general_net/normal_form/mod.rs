@@ -1,6 +1,6 @@
 //! P1b: law-directed parallel normal form (PNF) with checked law certificates
-//! (#133 sections 2, 3 and 6; v0.1 law set L1-L7, L9-L15, L19, L20), plus the
-//! cost-gated L8 and large-k L5 of #281 (see [`COST_UNCALIBRATED`]).
+//! (`docs/design/net-parallel-laws-v01.md` sections 2, 3 and 6; v0.1 law set L1-L7, L9-L15, L19, L20), plus the
+//! cost-gated L8 and large-k L5 of #59 (see [`COST_UNCALIBRATED`]).
 //!
 //! [`extract`] derives the PNF from the region partition of a verified net. Every
 //! applied law yields a [`Certificate`]; [`certificate::check`] re-verifies it
@@ -30,7 +30,7 @@ pub use annotation::{
 
 pub const VERSION: u32 = 1;
 
-/// The v0.1 law set of #133 section 10 (decision L4).
+/// The v0.1 law set of normal-form design section 10 (decision L4).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum LawId {
     L1Map,
@@ -40,7 +40,7 @@ pub enum LawId {
     L5Matrix,
     L6Tropical,
     L7Select,
-    /// L8 (#281): outside the v0.1 set [`LawId::ALL`]; cost-gated.
+    /// L8 (#59): outside the v0.1 set [`LawId::ALL`]; cost-gated.
     L8FiniteState,
     L9PathSum,
     L10RangeSum,
@@ -163,11 +163,11 @@ pub enum Rep {
     Last,
     /// L13: an exclusive counter scan whose prefixes are store positions.
     Counter(IntTy),
-    /// A representation given as data (#281 decision 2).
+    /// A representation given as data (#59 decision 2).
     Lifted(RepExpr),
 }
 
-/// Law representations as data (#281 decision 2): laws beyond the sealed
+/// Law representations as data (#59 decision 2): laws beyond the sealed
 /// v0.1 catalogue are described here, so a new law adds no executor variant.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum RepExpr {
@@ -182,7 +182,7 @@ pub enum RepExpr {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Guard {
     /// Lemma B: the carried seed is a reduced residue, `0 <= seed < P`, so its
-    /// ring word is its source value and lane replay sees `a s + b` (#266).
+    /// ring word is its source value and lane replay sees `a s + b`.
     ReducedSeed(String),
     /// Lemma B: every per-iteration coefficient of the update is non-negative.
     NonNegativeCoefficients(String),
@@ -297,7 +297,7 @@ pub struct LoopNode {
 }
 
 impl LoopNode {
-    /// The PNF node kind of #133 section 3 (`map`, `reduce`, `scan`, ...).
+    /// The PNF node kind of normal-form design section 3 (`map`, `reduce`, `scan`, ...).
     pub fn shape(&self) -> &'static str {
         if self.first_exit {
             return "first";
@@ -410,7 +410,7 @@ pub enum Error {
 
 /// Laws whose work grows with a state count (L8) or with `(k + 1)^2` (L5 over
 /// more than four variables) are chosen only when the cost model prefers them
-/// (#133 section 6.4), which needs the M5-01 calibration (#228). Until then
+/// (normal-form design section 6.4), which needs the M5-01 calibration (#52). Until then
 /// [`extract`] keeps such a loop serial with this reason, and
 /// [`extract_uncalibrated`] admits it for the reference executor.
 pub const COST_UNCALIBRATED: &str = "law_cost_uncalibrated";

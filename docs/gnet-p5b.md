@@ -135,6 +135,6 @@ robotics size fits or executes. The frozen D5 diagnostic measures the actual
 emitted kernel against unchanged handwritten baselines; its retained-buffer
 wall scope does not replace production host-to-host acceptance.
 
-Changes to #129 code remain limited to ABI13 integration, the archive hook and
+Changes to the compiled-ahead Metal library code remain limited to ABI13 integration, the archive hook and
 identity, shared file validation/publication, metrics and reporting. No unrelated
 compiler-option or AOT container-format change is intended.

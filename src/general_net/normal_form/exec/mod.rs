@@ -1,4 +1,4 @@
-//! CPU reference semantics of the parallel normal form (#133 sections 3-5).
+//! CPU reference semantics of the parallel normal form (normal-form design sections 3-5).
 //!
 //! [`run`] interprets the net-derived statement trees, but every region the
 //! normal form certifies is executed through its law, not in source order:

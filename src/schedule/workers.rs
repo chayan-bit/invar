@@ -78,7 +78,7 @@ pub struct Hooks {
     /// With a fault injected: every live `Array<u32>` at the failing loop head,
     /// read before the region's workers ran and again after they failed.
     pub live_arrays: Arc<Mutex<Option<LiveArrays>>>,
-    /// Test seam (#263): forge the extracted normal form before it is checked.
+    /// Test seam (#54): forge the extracted normal form before it is checked.
     pub forge: Option<fn(&mut crate::general_net::normal_form::NormalForm)>,
 }
 

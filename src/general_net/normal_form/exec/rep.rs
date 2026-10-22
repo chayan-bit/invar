@@ -1,5 +1,5 @@
 //! Law representations as executable elements: identity, lane element,
-//! associative combine and application to the loop-entry seed (#133 section 3).
+//! associative combine and application to the loop-entry seed (normal-form design section 3).
 
 use super::{
     Stop,
@@ -138,7 +138,7 @@ pub(super) fn embed(
 
 /// Lemma B entry guard: `seed` lies in `[0, P)` of the residue ring of `rep`,
 /// so its ring word is its source value. A seed at or above `P` would replay
-/// from `seed mod P` and miss the overflow of `a s + b` (#266).
+/// from `seed mod P` and miss the overflow of `a s + b`.
 pub(super) fn reduced(rep: Option<&Rep>, seed: Option<i128>) -> bool {
     match (rep.and_then(super::sym::ring_of), seed) {
         (Some(Ring::Residue { modulus, .. }), Some(x)) => (0..i128::from(modulus)).contains(&x),

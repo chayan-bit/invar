@@ -1,4 +1,4 @@
-//! Lowering annotations a certificate can carry (#140, P4a iteration 2).
+//! Lowering annotations a certificate can carry (P4a iteration 2).
 //!
 //! P4a showed that a law-directed flat form matches handwritten device code
 //! once the normal form carries: (1) bounds and signedness of intermediates

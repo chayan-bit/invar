@@ -259,7 +259,7 @@ fn programs() -> Vec<Program> {
                 let n = r.len();
                 let (a, b) = (short(r, n), short(r, n));
                 let neg = r.chance(15);
-                // #266: rarely a coefficient whose product overflows.
+                // Rarely a coefficient whose product overflows.
                 let coef = |r: &mut Rng| match r.below(40) {
                     0 | 1 if neg => -(r.range(1, 50) as i32),
                     2 => r.range(60000, i64::from(i32::MAX)) as i32,
@@ -296,7 +296,7 @@ fn programs() -> Vec<Program> {
                 let a = short(r, n);
                 let neg = r.chance(10);
                 vec![
-                    // #266: seeds above P and overflowing coefficients.
+                    // Seeds above P and overflowing coefficients.
                     ai32(vec_i32(r, a, &mut |r| match r.below(40) {
                         0..=11 if neg => -1,
                         12 => r.range(30000, i64::from(i32::MAX)) as i32,

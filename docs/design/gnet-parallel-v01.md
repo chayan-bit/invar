@@ -3,7 +3,7 @@
 Status: proposal for user approval, 2026-10-15.
 Nothing here is implemented, accepted or a performance claim.
 It changes no contract by itself; the contract changes it needs are listed as decisions in section 11.
-Superseded in part: the P1, P3 and P4 plan of section 9 is superseded by the law-directed design in `docs/design/net-parallel-laws-v01.md` (#133), adopted on 2026-10-15; the rest of this document stands, with the strict-f32 corrections to sections 3 and 8 below.
+Superseded in part: the P1, P3 and P4 plan of section 9 is superseded by the law-directed design in `docs/design/net-parallel-laws-v01.md`, adopted on 2026-10-15; the rest of this document stands, with the strict-f32 corrections to sections 3 and 8 below.
 Authority: `docs/general-gpu-v01.md`, `docs/cuda-parity-v01.md` and `src/general_net/CONTRACT.md` govern; this document proposes how to meet them.
 
 Reconciliation, 2026-10-16: section 3 follows the GNET oracle at the external host-array boundary. Private source prefixes survive internally; external arrays commit only on normal return. No oracle behavior changes.
@@ -27,10 +27,10 @@ Spikes on the M4 show the body map close to handwritten parity for batched FK (r
 - The device host boundary is scalar: entry parameters other than i32/u32/Bool are `unsupported_type`, and f32 programs are refused (probe below).
 - Every device run writes the full Demand/Complete trace; the trace buffer is sized by `trace_events`.
 - The M4 family recognizers on their branches (`segmented_source`, `indexed_source`, `transpose_source`, `stencil_source`, `contraction_source`, `summary_source`) are **whole-entry checked-source matchers** (`from_source(source, entry)` / `from_checked(source, entry)`); only `src/plan.rs` `classify` (via `loops::single`, `recurrence::candidate_in`, `laws::reduction_in`) recognizes MIR loop regions inside arbitrary functions.
-- The GNET-05 corpus (draft #131, `evidence/gnet-05/EVIDENCE.md`): 60 generated programs in 5 families, 240 runtime inputs; on Metal all 51 admitted programs match the oracle exactly, 528 child lanes spawned, 411 committed, peak width 8 (the slot cap); 16 of the 51 have nothing to parallelize; 9 are refused `compiler_structural_budget` (8 compose, 1 branch).
-- Cold Metal compile dominates: the first corpus run took 1884 s, mostly `MTLCompilerService` at 100 percent on single kernels, against 27 s with a warm shader cache; a compiled-ahead `.metallib` (#129) does not remove the backend step that runs at pipeline creation.
+- The GNET-05 corpus (draft, `evidence/gnet-05/EVIDENCE.md`): 60 generated programs in 5 families, 240 runtime inputs; on Metal all 51 admitted programs match the oracle exactly, 528 child lanes spawned, 411 committed, peak width 8 (the slot cap); 16 of the 51 have nothing to parallelize; 9 are refused `compiler_structural_budget` (8 compose, 1 branch).
+- Cold Metal compile dominates: the first corpus run took 1884 s, mostly `MTLCompilerService` at 100 percent on single kernels, against 27 s with a warm shader cache; a compiled-ahead `.metallib` does not remove the backend step that runs at pipeline creation.
 - The CLI's default speculation limits (2 slots) are smaller than the 8 lanes the tests use, and `invar gnet-device` refuses capacity 8 with `Compiler(Limit)`.
-- The language has no `sin`, `cos` or `sqrt` intrinsic on main or any open branch (searched `src/` on main, #109, #108, #121).
+- The language has no `sin`, `cos` or `sqrt` intrinsic on main or any open branch (searched `src/` on main and on the open numeric-contract, integration and M5-01 branches).
 
 Measured on the Apple M4 with the GNET-04 branch binary (section 8 has the method): the existing path computes the `divide_conquer` fixture at n = 4096 in about 1.3 to 1.4 s of device-blocked wall time over 95 submissions, against 0.002 to 0.009 ms resident and 0.15 to 0.19 ms host-to-host for a handwritten kernel.
 That gap is the problem this design addresses, and it is not a tuning gap.
@@ -72,7 +72,7 @@ Cost estimates never produce or alter a certificate.
 | Segmented / nested loop | outer map whose body contains an inner loop with an outer-dependent trip count | outer map is legal as above; inner loop is either sequential in the lane (default) or a lawful segmented reduction or stable compaction | **M** (moderate flattening) or family segmented, chosen by placement among legal variants |
 | Frontier worklist (array form) | loop over rounds with a dense mask/adjacency array, monotone `seen` update | M4-05 frontier certificate re-derived on MIR | family frontier |
 | Independent recursive calls | call sites in one block whose arguments do not depend on earlier sibling results and whose callees are observationally pure (no `Host`, no owner escape), as `speculation_analysis` does today, extended to calls inside children | same `ForkPlan` serialization reasons; additionally a bounded arity per fork site and a static join continuation | **T** |
-| Batched robotics math | no special recognizer: FK, Jacobian, mass (CRBA), rollouts and per-query distance are maps over the batch whose bodies loop over joints, links, horizon steps or spheres | map legality on the batch index; inner loops sequential | **M**, plus min-distance and argmin reductions under the NaN-lifted f32 min rule (NaN elements are the identity, the leftmost minimum wins ties, signed zero is preserved; #133 law L7); f32 cost sums stay in source order inside each lane, and a cost sum across rollouts is not a family reduction under strict-f32-v1 |
+| Batched robotics math | no special recognizer: FK, Jacobian, mass (CRBA), rollouts and per-query distance are maps over the batch whose bodies loop over joints, links, horizon steps or spheres | map legality on the batch index; inner loops sequential | **M**, plus min-distance and argmin reductions under the NaN-lifted f32 min rule (NaN elements are the identity, the leftmost minimum wins ties, signed zero is preserved; law L7 of the law-directed design); f32 cost sums stay in source order inside each lane, and a cost sum across rollouts is not a family reduction under strict-f32-v1 |
 
 Two rules make this general rather than a template list.
 First, a missing family never removes coverage: anything legal as a map becomes **M** with the full compiled body, including branches, inner loops, calls and traps.
@@ -157,14 +157,14 @@ Interaction with source-ordered commit:
   Physical transition counts necessarily differ in parallel execution and are reported separately (decision D3).
 - **Tracing.** Event traces are produced only in verification mode; a parallel region reconstructs its source-order events from per-lane records after the fence.
   Performance runs execute trace-off variants, which are separate certified artifacts compared against the traced ones on the full corpus.
-- **Differential tests.** Every runnable corpus program (332 today) and the 240 seeded GNET-02 generated programs run in forced serial-device, forced parallel-device, CPU native and oracle modes; the six `tests/fixtures/gnet_parallel` programs (#120) plus the GNET-05 generator families run at capacity 0 (serial control) and full width.
-  Oracle comparisons run on the 64 MiB helper thread in `tests/support/gnet_agree.rs` (#131), because the reference evaluator overflows a 2 MiB Debug test thread before its 64-frame limit.
+- **Differential tests.** Every runnable corpus program (332 today) and the 240 seeded GNET-02 generated programs run in forced serial-device, forced parallel-device, CPU native and oracle modes; the six `tests/fixtures/gnet_parallel` programs (GNET-04 fault injection) plus the GNET-05 generator families run at capacity 0 (serial control) and full width.
+  Oracle comparisons run on the 64 MiB helper thread in `tests/support/gnet_agree.rs`, because the reference evaluator overflows a 2 MiB Debug test thread before its 64-frame limit.
   Boundary sizes: 0, 1, lanes plus or minus 1, group size plus or minus 1, arena capacity plus or minus 1, and per-array limits.
-- **Fuzzing.** Extend `tests/support/gnet_generator.rs` (#99) with region fragments: maps with a trap at a random index, reductions one step from overflow, nested loops with skewed trip counts, forks with random arity and depth, an older divergent sibling ahead of a trapping or allocating younger one, and fuel cuts inside a region.
+- **Fuzzing.** Extend `tests/support/gnet_generator.rs` with region fragments: maps with a trap at a random index, reductions one step from overflow, nested loops with skewed trip counts, forks with random arity and depth, an older divergent sibling ahead of a trapping or allocating younger one, and fuel cuts inside a region.
 - **Mutation plan** (each must be killed by a named test): take the last instead of the first trap index; regroup a checked signed sum without its guard; drop the generation check on T commit; remove a group barrier in a join; off-by-one in the grid length guard; ignore arena overflow; wrong fuel prefix; commit a younger sibling before an older one; publish a region output before trap resolution.
-- **Fault injection.** Reuse #120's `gnet-fault-injection` feature and its barrier-bracketed hook discipline.
+- **Fault injection.** Reuse the GNET-04 `gnet-fault-injection` feature and its barrier-bracketed hook discipline.
   New faults at region phase boundaries: stale region descriptor generation, poisoned partial results with a stale generation, forced arena exhaustion, cancellation at an epoch boundary.
-  The CPU group model of every new kernel runs under ThreadSanitizer, with a barrier-removal mutation that TSan must report, as #120 did.
+  The CPU group model of every new kernel runs under ThreadSanitizer, with a barrier-removal mutation that TSan must report, as GNET-04 fault injection did.
 - **Numerics.** Strict f32 needs no contraction and no fast math on both targets (Metal `mathMode = safe` with precise functions; CUDA `--fmad=false`, no FTZ).
   The FK spike confirms bitwise-identical outputs between the generated-shape and handwritten kernels under these options (0 differing words of 12,582,912).
 
@@ -215,16 +215,16 @@ The existing GNET path refuses this workload (`unsupported_type`, probed with a 
 | Mass matrix (CRBA) | M, inner loops over links | likely within 1.0 to 1.1 per element; parity depends on register pressure | Panda mass reference is a recorded failed cross-library gate, separate from compiler parity |
 | Collision / distance | M over (query, sphere set) plus an f32 min-reduction under the NaN-lifted rule; sparse candidates as T | parity for dense sphere sets; at risk for sparse traversal | handwritten baselines use BVH or voxel structures the source may not express |
 | Rollout / cost | M over rollouts with a sequential horizon loop; each rollout's f32 cost accumulates in source order inside its lane; argmin over rollouts under the NaN-lifted rule | parity expected | none beyond trig |
-| Point cloud transform / filter / compact | M, then family stable compaction (M4-04) | parity expected for transform and compaction | 1,000,000-element source array limit (use SoA arrays); device caps raised separately (#123) |
+| Point cloud transform / filter / compact | M, then family stable compaction (M4-04) | parity expected for transform and compaction | 1,000,000-element source array limit (use SoA arrays); device caps raised separately |
 | Point cloud neighborhood | grid hashing needs a sort or segmented family | **at risk**: no sort family exists | likely a v0.1 gap unless a radix-sort family lands |
 | Composed robotics pipeline | host frame chaining resident M and family regions in one submission | parity expected if every stage is at parity and there are no host waits | launch count; fusion of adjacent maps (M3-03 laws) |
 | Irregular recursive divide and conquer | T, plus recursion-to-reduction rewrite when a law and guard hold | 2x to 3x without the rewrite (spike 1); parity only with it | data-dependent splits defeat the rewrite |
 | Input-dependent branch trees | T with data-dependent arity; divergence within SIMD groups | **at risk** | expert baselines flatten to a level-synchronous frontier with compaction; T must match that |
 | Discovered frontiers | dense form: family frontier; recursive form: level-synchronous T | dense: per M4-05; recursive: **at risk** | per-level dispatch cost on small frontiers |
 
-Strict-f32 correction (adopted with #133, decision F2).
-Reassociating an f32 sum changes its result for almost every input, so under strict-f32-v1 an f32 cost sum is a source-order fold: it parallelizes only across independent accumulators (one per rollout lane), and a sum across rollouts is not a family reduction unless a separately declared f32 summation contract exists (deferred, decision F1 of #133).
-An f32 min or argmin is exact under any tree shape only with the NaN-lifted f32 min rule (NaN elements are the identity, the leftmost minimum wins ties, signed zero is preserved; #133 law L7); the family reduction must implement that rule, and the baseline must match it.
+Strict-f32 correction (adopted with the law-directed design, decision F2).
+Reassociating an f32 sum changes its result for almost every input, so under strict-f32-v1 an f32 cost sum is a source-order fold: it parallelizes only across independent accumulators (one per rollout lane), and a sum across rollouts is not a family reduction unless a separately declared f32 summation contract exists (deferred, decision F1 of the law-directed design).
+An f32 min or argmin is exact under any tree shape only with the NaN-lifted f32 min rule (NaN elements are the identity, the leftmost minimum wins ties, signed zero is preserved; law L7 of the law-directed design); the family reduction must implement that rule, and the baseline must match it.
 
 ### What each required robotics workload needs from the parallel path
 
@@ -254,11 +254,11 @@ This design shrinks what the device compiles:
 - body maps and family kernels are small, one function per region;
 - the device frame and T kernels contain only the functions reachable from their region, not the whole program;
 - variants per region stay within the M4-06 bound of 32, and placement prefers fewer variants when they tie.
-A compiled-ahead `.metallib` (#129) only removes the front end; the backend compile from AIR to GPU code still happens at pipeline creation.
+A compiled-ahead `.metallib` only removes the front end; the backend compile from AIR to GPU code still happens at pipeline creation.
 `MTLBinaryArchive` stores those backend results, but an archive is specific to the GPU family and OS build, so it must be built on (or for) the exact gate device and is invalidated by OS updates.
 **Binary archives are a v0.1 need** for honest cold-process numbers and for usable CI on Metal: P5b adds an archive cache keyed like the M4-06 cache (source, net, region and rule IDs, numeric/layout policy, target GPU family, OS build, toolchain), revalidated on load, with a cold-process report that states archive hit or miss.
 The scored resident and warm host-to-host scopes are unaffected; cold-process and first-result costs are reported separately as the contract already requires.
-CUDA has the analogous answer already: the compiled-ahead CUBIN (#122) contains machine code for the gate GPU, so no driver JIT runs.
+CUDA has the analogous answer already: the compiled-ahead CUBIN contains machine code for the gate GPU, so no driver JIT runs.
 
 The 9 `compiler_structural_budget` refusals (8 compose) are frame-size refusals.
 P1 records which limit each one hits (values, places, continuation states or source bytes) before any budget changes; the host frame (LLVM native) does not carry the device frame's limits, so those programs become admissible in the default placement, while forced device-frame mode keeps the refusal visible.
@@ -275,31 +275,31 @@ Later: heartbeat promotion and work donation, persistent or cooperative kernels,
 | Phase | Content | Files (main) | Code / tests | Depends on |
 | --- | --- | --- | --- | --- |
 | P0a | strict-f32 `sin`/`cos`/`sqrt` contract and oracle | `numeric_contract.rs`, oracle, emitters | 800 / 600 | D6 |
-| P0b | f32, records and host array arguments at the GNET device entry | `general_net/device_host`, `compiled/owned_f32.rs` | 1,000 / 800 | HA-1, #109 |
-| P1 | region partition and `RegionCertificate` verifier on `compiled_mir` | new `general_net/regions/{mod,map,fork,cert}.rs` | 1,200 / 900 | #99, #114 merged |
+| P0b | f32, records and host array arguments at the GNET device entry | `general_net/device_host`, `compiled/owned_f32.rs` | 1,000 / 800 | HA-1, M4-01 numeric contracts |
+| P1 | region partition and `RegionCertificate` verifier on `compiled_mir` | new `general_net/regions/{mod,map,fork,cert}.rs` | 1,200 / 900 | GNET-01/02 and GNET-03 merged |
 | P2 | body map M emitter and host-frame launcher, CUDA and Metal | `compiled/body_map.rs`, `device_host`, `invar-metal`/`invar-cuda` glue | 1,300 / 900 | P1 |
 | P3 | family bridge: MIR-region entries per family, AST-agreement tests | `general_net/regions/family.rs`; per-family recognizers coordinated with stage "a" | 1,800 / 900 | P1, stage "a" interface |
 | P4 | fork-join T (ABI6): nested forks, many groups, arena, joins; recursion-to-reduction rewrite | `compiled/task.rs`, `compiled/task_layout.rs`, `regions/homomorphism.rs` | 1,700 / 1,200 | P1 |
-| P5b | Metal binary archive cache keyed by the full cache identity; cold-process reporting with hit/miss | `invar-metal/src/macos/library.rs` (with #129), cache module | 400 / 300 | #129 |
+| P5b | Metal binary archive cache keyed by the full cache identity; cold-process reporting with hit/miss | `invar-metal/src/macos/library.rs` (with compiled-ahead Metal libraries), cache module | 400 / 300 | compiled-ahead Metal libraries |
 | P5 | device frame epochs with indirect dispatch | `compiled/device.rs`, `device_fence.rs`, `invar-metal/src/macos/gnet.rs`, `invar-cuda` | 600 / 500 | P2 |
 | P6 | placement (a), explain and receipts; then (b) after calibration; the `gnet-device` CLI takes the same certified limits as the tests (today it caps at 2 slots) | `general_net/placement.rs`, explain schema | 500 / 400 | P2, M5-01 freeze for (b) |
-| P7 | GNET-05 wiring, parity runs on the RTX 5070 Ti and the Apple M4 | bench runner integration | 400 / evidence | P2 to P6, GNET-05 corpus, #122, #129 |
+| P7 | GNET-05 wiring, parity runs on the RTX 5070 Ti and the Apple M4 | bench runner integration | 400 / evidence | P2 to P6, GNET-05 corpus, CUDA and Metal AOT |
 
 Total: about 9,700 lines of code and 6,500 of tests, plus evidence.
 
 ### Dependencies
 
-- M5-01 freeze (#121): calibration constants, frozen baselines and the profitable size band, before placement (b) and any scored timing.
-- #122 (CUDA AOT CUBIN) and #129 (Metal AOT `.metallib`): scored runs use ahead-of-time artifacts; runtime MSL/NVRTC compile is reported separately.
+- M5-01 freeze: calibration constants, frozen baselines and the profitable size band, before placement (b) and any scored timing.
+- CUDA AOT CUBIN and Metal AOT `.metallib`: scored runs use ahead-of-time artifacts; runtime MSL/NVRTC compile is reported separately.
 - Stage "a" (`feat/v01-family-dispatch`): the region-level entry for P3.
-- GNET-05 corpus (#131, `feat/v01-gnet-05-corpus`), its robotics workloads (in progress) and the reviewed handwritten baselines for P7.
-- #99, #114, #120 merged first: ABI5, the fault hook and the parallel slice are the base P4 generalises.
+- GNET-05 corpus (`feat/v01-gnet-05-corpus`), its robotics workloads (in progress) and the reviewed handwritten baselines for P7.
+- GNET-01/02, GNET-03 and GNET-04 fault injection merged first: ABI5, the fault hook and the parallel slice are the base P4 generalises.
 
 ### What can run in parallel
 
-- From day 0: P0a (numeric owner), P0b (GNET agent after #114/#120), P1 (GNET main), and stage "a" finishing its extension point.
+- From day 0: P0a (numeric owner), P0b (GNET agent after GNET-03 and GNET-04 fault injection), P1 (GNET main), and stage "a" finishing its extension point.
 - After P1: P2, P3 and P4 in parallel, each in its own files (`body_map.rs`; `regions/family.rs` plus coordinated recognizer files; `task.rs`); one writer per file.
-- After P2: P5 and P6(a); P5b any time after #129, independent of the rest.
+- After P2: P5 and P6(a); P5b any time after compiled-ahead Metal libraries, independent of the rest.
 - P7 last, one timing job at a time per host.
 
 ## 10. Top risks
@@ -323,7 +323,7 @@ Further risks: cold Metal backend compile (1884 s cold versus 27 s warm on the G
 | D6 | Strict-f32 trigonometry and sqrt: a frozen software algorithm (`invar-trig-f32-v1`, IEEE basic operations plus explicit `fma`, bit-identical on CPU, CUDA and Metal), with baselines required to implement the same contract | Frozen software algorithm; correctly rounded CORE-MATH style needs double precision that Metal lacks; vendor `sin`/`cos` differ across targets and cannot be the oracle |
 | D7 | Allow compile-time specialisation of robot-model constants from checked robot declarations into emitted kernels, with a guarded generic variant | Yes |
 | D8 | Epoch mechanism on CUDA: host-encoded epochs with static-capacity grids and device-side guards (portable with Metal's indirect dispatch), versus CUDA graph conditional nodes or cooperative persistent kernels | Host-encoded epochs for v0.1; the others later, only with profile evidence |
-| D9 | Pending GNET-04 D1/D2 from #120: placement before calibration is CPU default plus explain; the compiled CPU engine is LLVM native | Confirm (a) and (a) |
+| D9 | Pending GNET-04 D1/D2 from the fault-injection work: placement before calibration is CPU default plus explain; the compiled CPU engine is LLVM native | Confirm (a) and (a) |
 | D10 | Metal binary archives in v0.1, as a validated cache keyed by GPU family and OS build, built on the gate device | Yes; smaller kernels first, archives for the remainder |
 
 ## Appendix A. Survey (reuse before writing)
@@ -341,7 +341,7 @@ Repository facts checked with `gh` on 2026-10-15 (stars, last push, license).
 | Halide (`halide/Halide`, MIT) / Taichi (`taichi-dev/taichi`, Apache-2.0) | none | Halide's algorithm/schedule split matches certificate plus placement; Taichi parallelises only outermost loops, exactly M | fixed-function or Python-embedded; no recursion or source-order traps |
 | Merrill, Garland, Grimshaw BFS (PPoPP 2012); Gunrock (`gunrock/gunrock`, Apache-2.0) | none (CUDA-only C++ templates) | advance/filter with prefix-sum frontier compaction and warp/CTA neighbor expansion, for the level-synchronous T and any sparse frontier family | library dependency would be CUDA-only and graph-API shaped |
 | Persistent threads (Gupta, Stuart, Owens 2012); Whippletree (Steinberger et al. 2014); Atos (`owensgroup/ATOS`, ICPP 2022) | none | queue designs for later work donation | rely on co-residency for progress; Metal gives no inter-threadgroup forward-progress guarantee (Sorensen et al., OOPSLA 2016 on occupancy-bound execution) |
-| Kokkos tasking (`kokkos/kokkos`) | none | none | the tasking interface was deprecated (#7393) and removed (#8390) |
+| Kokkos tasking (`kokkos/kokkos`) | none | none | the tasking interface was deprecated (kokkos/kokkos#7393) and removed (kokkos/kokkos#8390) |
 | CUDA dynamic parallelism | none | none | CDP2 removed device-side synchronization; per-launch cost and no Metal equivalent |
 | Heartbeat scheduling (Acar et al., PLDI 2018); lazy task creation (Mohr, Kranz, Halstead 1991) | none | promote fork points to tasks only when parallelism is needed: the later T promotion | none |
 | cuRobo (`NVlabs/curobo`, Apache-2.0) | as a reviewed baseline source for FK and sphere collision, pinned and labelled | its FK kernel layout (`kinematics_forward_kernel.cuh`: 32 threads per batch element for transforms, 16 for outputs, per-link 3x4 matrices in shared memory) for a later team-per-element variant of M | as a compiler dependency; calling it from Invar is the separately labelled integration track |

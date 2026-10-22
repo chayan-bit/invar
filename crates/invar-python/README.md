@@ -189,11 +189,11 @@ Traps and fuel/resource exhaustion raise `TrapError` and `ResourceError`.
 `capabilities()["engine_features"]` reports compiled features, not live device availability.
 
 Build the binding with `--features native`, `--features cuda` or `--features metal` as needed.
-`run_main(artifact=path)` takes a compiled-ahead Metal library, as the CLI's `--artifact` does, for `metal` and `auto` (#193).
+`run_main(artifact=path)` takes a compiled-ahead Metal library, as the CLI's `--artifact` does, for `metal` and `auto` (#46).
 Build it with `invar build PATH --target metal --output FILE`; `path` is a `str` or `os.PathLike` naming that file.
 The binding passes it to the same `invar::engine::run_mir` parameter, so validation and refusals match the CLI.
 A missing, unreadable or corrupt file raises `EngineError` / `DEVICE_TOOLCHAIN_MISMATCH` for `metal` and `auto`.
-A library built from another program raises the same error for `metal` and `auto`, including where `auto` runs a sort or spatial program on the CPU alone (#273).
+A library built from another program raises the same error for `metal` and `auto`, including where `auto` runs a sort or spatial program on the CPU alone.
 In-memory bytes and bytes paths raise `ValidationError` / `TYPE_MISMATCH`.
 Other engines refuse `artifact` with `EngineError` / `PY_ENGINE_UNAVAILABLE`.
 A build without Metal on macOS refuses it with `EngineError` / `METAL_UNAVAILABLE` before any backend is chosen, as the CLI does.
@@ -215,7 +215,7 @@ An explicit `exports=[...]` selection with `cpu-parallel`, `auto`, `cuda` or `me
 These engines support whole-program `run_main`, not a new NumPy device ABI.
 `call_reference` remains explicitly copying even on a module with another selected engine, including f32 and returned arrays.
 The public C ABI is unchanged, and NumPy `take` remains refused.
-Native f32 device execution from PR #98 is not a dependency of this change.
+Native f32 device execution from the M4-01 strict-f32 contraction work is not a dependency of this change.
 
 The crate has its own Cargo workspace and lockfile. `nix develop .#python`
 (Linux x86_64/aarch64, macOS aarch64) provides Rust 1.95.0, maturin, Python

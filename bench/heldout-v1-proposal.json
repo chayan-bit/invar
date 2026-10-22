@@ -3,17 +3,17 @@
     {
       "family": "reduction",
       "form": "ordered affine pair composition",
-      "source": "#115 pair_reduction::extract plus Execution::PairReduction admission"
+      "source": "pair_reduction::extract plus Execution::PairReduction admission"
     },
     {
       "family": "segmented",
       "form": "per-segment map",
-      "source": "#100 segmented_device::MapContract"
+      "source": "segmented_device::MapContract"
     },
     {
       "family": "matrix",
       "form": "explicit Tensor Core tc-f16-f32-v1",
-      "source": "#110 contraction_source tc_mul_add; strict twin reference-evaluated, exact-sum reference checked independently"
+      "source": "contraction_source tc_mul_add; strict twin reference-evaluated, exact-sum reference checked independently"
     }
   ],
   "count_scope": "eligible bounded CPU oracle programs; unavailable forms are counted separately",
@@ -3608,7 +3608,7 @@
     {
       "family": "transpose",
       "form": "strided read view",
-      "reason": "the merged transpose source recognizer (M4-02, #104) admits direct row-major transpose only",
+      "reason": "the merged transpose source recognizer (M4-02) admits direct row-major transpose only",
       "status": "unavailable"
     }
   ]

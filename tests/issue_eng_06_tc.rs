@@ -1,4 +1,4 @@
-//! ENG-06 (#283) matrix-atom schedules through the generic contraction
+//! ENG-06 (#61) matrix-atom schedules through the generic contraction
 //! emitter: the `tc_cuda_v1` and `tc_metal_v1` move sequences emit exactly the
 //! `tc.rs` text on every built-in target, and a CPU emulation of the emitted
 //! fragment index math covers every A, B and C element of each atom tile

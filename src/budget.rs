@@ -12,17 +12,17 @@
 //! Both types are plain `Copy` values with no global state, so every consumer
 //! shares one rule and one refusal shape:
 //!
-//! - **Families** (#278) compute an exact `footprint(..)` next to their
+//! - **Families** (#57) compute an exact `footprint(..)` next to their
 //!   admission from element counts times element size, plus staging, summaries
 //!   and per-round storage, then call `admit`. The old element-count constants
 //!   are gone; a larger input is refused only when it needs more bytes than the
 //!   budget holds.
-//! - **Run budget** (#162): `--memory-limit` becomes
+//! - **Run budget** (#37): `--memory-limit` becomes
 //!   [`ByteBudget::from_run_budget`]; every family then sees the run's host
 //!   ceiling without its own plumbing.
-//! - **Source limits** (#286): module, record, view and MIR sizes are charged
+//! - **Source limits** (#64): module, record, view and MIR sizes are charged
 //!   as [`Footprint::analysis`] against `analysis_bytes`.
-//! - **Growable collections** (#294): a collection keeps a running
+//! - **Growable collections** (#72): a collection keeps a running
 //!   `Footprint`, extends it with [`Footprint::plus`] before each growth and
 //!   calls `admit` again. `admit` is pure and cheap, so it needs no ledger.
 //!
@@ -143,7 +143,7 @@ pub struct BudgetExceeded {
 }
 impl fmt::Display for BudgetExceeded {
     // The `BUDGET_EXCEEDED` tool-error code is registered when a receipt or explain first
-    // reports it (#278 part B); until then it appears only in this message.
+    // reports it (#57 part B); until then it appears only in this message.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -191,7 +191,7 @@ impl ByteBudget {
         Self::new(DEFAULT_HOST_BYTES, MAX_DEVICE_BYTES, DEFAULT_ANALYSIS_BYTES)
     }
 
-    /// The budget of a run limited to `host_bytes` (#162's `--memory-limit`).
+    /// The budget of a run limited to `host_bytes` (#37's `--memory-limit`).
     /// Device and analysis ceilings keep their defaults.
     pub const fn from_run_budget(host_bytes: usize) -> Self {
         Self::new(host_bytes, MAX_DEVICE_BYTES, DEFAULT_ANALYSIS_BYTES)

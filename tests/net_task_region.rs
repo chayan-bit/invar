@@ -7,7 +7,7 @@
 //! as C++ under ASan and UBSan, with small widths so expansion, nested forks,
 //! joins, continuation calls and arena-full fallbacks all run.
 //!
-//! Corpus: the C1 fork-join family of #141 (`tests/net_task_fixtures/c1`,
+//! Corpus: the C1 fork-join family of the GNET-05 robotics corpus (`tests/net_task_fixtures/c1`,
 //! vendored from `bench/general-net-v01/gnet05/programs/gnet05-forkjoin-*.inv`
 //! at `origin/feat/v01-gnet-05-robotics` 005e145f, with the GNET-05 v2
 //! manifest inputs below), plus generated trap-heavy fork-join programs.
@@ -62,7 +62,7 @@ fn c1_fork_join_family_agrees_with_the_net_oracle() {
     });
 }
 
-/// The #207 device tests' program stays a residual task region, and its CPU
+/// The cascade-liveness device tests' program stays a residual task region, and its CPU
 /// model agrees with the net oracle on every plan (the device tests add a
 /// 64-poll cascade limit on real hardware).
 #[test]

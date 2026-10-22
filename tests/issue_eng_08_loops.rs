@@ -1,4 +1,4 @@
-//! #278 ENG-08 part B (loops): the typed-graph limits come from the analysis byte budget and the
+//! #57 ENG-08 part B (loops): the typed-graph limits come from the analysis byte budget and the
 //! chain and owner-walk caps no longer hide in `loops.rs`. The stack guard, the owner-walk bound
 //! and the extractor's fused plan size (`typed_net::MAX_DAG_MAPS`) remain, and `src/loops.rs`
 //! says why. Every test asserts a nonzero case count.

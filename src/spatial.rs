@@ -107,7 +107,7 @@ pub(crate) fn run_cpu(
 }
 
 /// [`run_cpu`] with the caller's float reducer (auto passes its cost-model
-/// choice, #195); the caller keeps the reduction receipts.
+/// choice); the caller keeps the reduction receipts.
 pub(crate) fn run_cpu_with(
     source: &[u8],
     program: &crate::mir::Program,

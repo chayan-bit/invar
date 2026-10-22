@@ -10,8 +10,8 @@ mod corpus;
 mod ops;
 
 /// These tests run emitted and deliberately mutated MSL, which no
-/// compiled-ahead library holds, so they open the developer source device
-/// (#204). `issue_metal_aot_gpu` covers the compiled-ahead route.
+/// compiled-ahead library holds, so they open the developer source device.
+/// `issue_metal_aot_gpu` covers the compiled-ahead route.
 #[cfg(all(feature = "metal", target_os = "macos"))]
 fn source_device() -> invar_metal::MetalDevice {
     invar_metal::MetalDevice::open_runtime_source().expect("a real Apple7+ Metal GPU is required")

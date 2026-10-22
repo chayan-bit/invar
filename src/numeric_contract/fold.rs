@@ -8,7 +8,7 @@ use super::{F32, F32Bits};
 use num_bigint::BigInt;
 use num_rational::BigRational;
 
-/// The folds the numeric checker lowered (#280), as (declared tier, algorithm
+/// The folds the numeric checker lowered (ENG-03), as (declared tier, algorithm
 /// that ran). A Strict function's `reassoc_add` folds record as Relaxed.
 pub type LoweredFolds = std::collections::BTreeSet<(FoldTier, FoldTier)>;
 

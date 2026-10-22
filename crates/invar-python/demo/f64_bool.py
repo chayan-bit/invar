@@ -1,4 +1,4 @@
-"""#237 proof: f64 and Array<Bool> through call_reference, exact bits and one rejected malformed input."""
+"""#53 proof: f64 and Array<Bool> through call_reference, exact bits and one rejected malformed input."""
 import invar_python as inv
 import numpy as np
 

@@ -336,7 +336,7 @@ impl SourcePlan {
         }))
     }
 
-    /// The PNF family this plan implements; the #263 lowering requires the
+    /// The PNF family this plan implements; the #54 lowering requires the
     /// normal form to admit exactly this family at the plan's loop.
     pub(crate) fn family(&self) -> crate::general_net::regions::family::Family {
         use crate::general_net::regions::family::Family;

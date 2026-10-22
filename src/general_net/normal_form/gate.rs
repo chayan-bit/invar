@@ -1,6 +1,6 @@
-//! Cost-gated admission (#281, #133 section 6.4). L8 multiplies the work of
+//! Cost-gated admission (#59, normal-form design section 6.4). L8 multiplies the work of
 //! every iteration by its state count and L5 by `(k + 1)^2`; both are legal,
-//! but only the calibrated cost model (#228) may choose them over the serial
+//! but only the calibrated cost model (#52) may choose them over the serial
 //! loop. Until then an extracted loop that uses either stays serial with
 //! [`super::COST_UNCALIBRATED`], unless the caller admits uncalibrated laws.
 

@@ -1,6 +1,6 @@
 # Net normal form v0.1 (P1a regions, P1b laws and certificates)
 
-Status: implemented on `feat/v01-net-normal-form` for the v0.1 law set adopted on 2026-10-15 (#133 decisions M1, L1-L4, E1).
+Status: implemented on `feat/v01-net-normal-form` for the v0.1 law set adopted on 2026-10-15 ([normal-form design](design/net-parallel-laws-v01.md) decisions M1, L1-L4, E1).
 This document is the contract that the lowering phases (P2, P3, P4a, P4b and P8) consume.
 Lowering itself is out of scope here.
 The law catalogue, the soundness argument and the plan behind these layers are in the design [net-parallel-laws-v01](design/net-parallel-laws-v01.md).
@@ -49,7 +49,7 @@ A `LoopNode` has:
 - `first_exit`: the loop has an early `return` (L15);
 - `fused_with`: the adjacent loop executed in the same lanes (L19).
 
-`LoopNode::shape()` gives the PNF node kind of #133 section 3 (`map`, `reduce`, `scan`, `scatter`, `frontier`, `first`).
+`LoopNode::shape()` gives the PNF node kind of normal-form design section 3 (`map`, `reduce`, `scan`, `scatter`, `frontier`, `first`).
 `NormalForm::is_flat()` is true when no residual fork-join remains, which selects D5 tier 1.
 
 ### Representations
@@ -111,12 +111,12 @@ pub struct Certificate {
 
 Every applied law yields one certificate; a parallel loop carries one `L1 Iterations` certificate, one per carried group, one per written array, one for an early exit and one for a fusion.
 
-### Lowering annotations (P4a iteration 2, #140)
+### Lowering annotations (P4a iteration 2)
 
 P4a iteration 2 found that a law-directed flat form matches or beats handwritten Metal on 31 of 32 gate cells once the normal form carries the right facts.
 `normal_form::annotation` gives those facts a typed place on the certificate, and the checker validates them; range inference itself comes later.
 
-| #140 item | Where it lives | Checker in v1 |
+| P4a profile item | Where it lives | Checker in v1 |
 | --- | --- | --- |
 | 1. Bounds and signedness of every intermediate, and the guards that license narrow 32-bit unchecked arithmetic with an exact checked fallback | `Annotation::Bounds { target, low, high, signedness }` and `Annotation::Narrow { target, bits, signedness, license: Vec<RangeGuard> }` over `Target::{Var, Array, Edge, PathWeight, Op(Span)}` | well-formedness, then verified by the named `Analysis` that produced it, else `Rejection::Unverified` |
 | 2. Exact operator spans, demand order and checked-fallback state | `Target::Op(Span)`, `Annotation::Demand(Vec<Span>)`, `Annotation::Fallback { vars, arrays }` | re-derived from the region and compared exactly |
@@ -185,9 +185,9 @@ A false guard, an unrepresentable state or an unknown control decision falls bac
 
 Every consumer should call `certificate::check_all` (or `check_with` on its own partition) before trusting a form it did not extract itself.
 
-## 8. Corpus classification against the #133 prototype
+## 8. Corpus classification against the net-laws prototype
 
-`tests/net_normal_form_corpus.rs` classifies every GNET-05 program (60, #131) and every M5-01 held-out candidate (140) and compares each loop's class and law list, and each function's recursion law and modulus, with `tests/net_normal_form_fixtures/prototype.json`.
+`tests/net_normal_form_corpus.rs` classifies every GNET-05 program (60) and every M5-01 held-out candidate (140) and compares each loop's class and law list, and each function's recursion law and modulus, with `tests/net_normal_form_fixtures/prototype.json`.
 All 200 programs match the prototype with zero differences, and the checker accepts every normal form in full (`check_all`).
 
 ## 9. Tests

@@ -1,4 +1,4 @@
-//! P1a: region partition of a verified GNET net (#132 section 3, #133 P1a).
+//! P1a: region partition of a verified GNET net (region design section 3, normal-form design P1a).
 //!
 //! Regions are cut on `Net::compiled_mir(proof)` and on the net's own agent and
 //! control annotations, never on source text, file names, hashes or benchmark
@@ -72,7 +72,7 @@ pub struct Ownership {
     pub moved: Vec<String>,
 }
 
-/// The region certificate of #132 section 3: every field is re-derived by
+/// The region certificate of region design section 3: every field is re-derived by
 /// [`verify`] from the current net.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Region {

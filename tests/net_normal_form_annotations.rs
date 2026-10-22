@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! Lowering annotations (#140 items 1-3 and 6): re-derived demand order,
+//! Lowering annotations (P4a profile items 1-3 and 6): re-derived demand order,
 //! fallback state and modulus boundaries are accepted; malformed, altered or
 //! non-legality annotations are rejected; well-formed bounds and narrowing
 //! are reported as unverified unless a named analysis the caller supplies

@@ -1,4 +1,4 @@
-//! ENG-03 (#280): source folds under the Tree and Exact tiers on every CPU
+//! ENG-03: source folds under the Tree and Exact tiers on every CPU
 //! engine (reference, MIR, cpu-parallel at 1, 2, 7 and 64 workers, and
 //! native-serial with `--features native`), against the numeric oracle.
 
@@ -353,7 +353,7 @@ fn issue_eng_03_folds_past_the_array_limit_trap_array_size_limit() {
 
 /// Under Relaxed, a fold the lowering can take runs as Tree on every engine,
 /// and a shape it cannot take runs strict, which the contract admits, instead
-/// of being refused (#280 step 5').
+/// of being refused (ENG-03 step 5').
 #[test]
 fn issue_eng_03_relaxed_folds_run_as_tree_and_other_sums_run_strict() {
     let mut rng = Rng(0x5e1a_0005);

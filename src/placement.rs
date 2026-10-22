@@ -711,7 +711,7 @@ pub fn select(profile: Option<&Profile>, trust_provisional: bool, f: &Facts<'_>)
 /// is always legal; a device is legal when its source plan admits the program,
 /// otherwise its typed refusal class is recorded. No profile row measures
 /// general-net dispatch yet, so the reason stays `uncalibrated` until M5-01
-/// timing (#214) gives a measured policy. Admission never runs device work.
+/// timing gives a measured policy. Admission never runs device work.
 pub fn legality(source: &[u8]) -> Value {
     use crate::general_net::{compiled::Target, device_host};
     let device = |engine: Engine, target| match device_host::Plan::from_source(
@@ -741,7 +741,7 @@ pub fn legality(source: &[u8]) -> Value {
 
 /// GNET-04 D1(a)/D2(a) host route of a placement run. Before calibration the
 /// CPU route runs: the whole program on LLVM native when the build has it and
-/// no trusted profile exists. A trusted profile keeps #172's profiled host,
+/// no trusted profile exists. A trusted profile keeps the identity-matched profile's host,
 /// the MIR reference evaluator offering measured regions to other engines.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Route {

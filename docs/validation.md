@@ -1,6 +1,6 @@
 # Validation contract
 
-Status: M0, M1-01, and M1-03 landed in PR #43, and M1-02 through M1-05 (native LLVM CPU, the revised typed graph/source agreement, checked rewrites, and extraction) and the later increments are on `main`; open items are in [remaining work](remaining-work.md). The specification and example gate is `cargo test --locked --test issue_ai_02_spec_examples`. See [M1 acceptance](m1-acceptance.md) and [native evidence](native-toolchain-v1.md). Automatic source-loop recognition, CPU parallel scheduling, device acceptance, and source-to-three-agent encoding are outside M1. The historical document-only bootstrap was not compiler evidence.
+Status: M0, M1-01, and M1-03 landed with the initial Rust bootstrap, and M1-02 through M1-05 (native LLVM CPU, the revised typed graph/source agreement, checked rewrites, and extraction) and the later increments are on `main`; open items are in [remaining work](remaining-work.md). The specification and example gate is `cargo test --locked --test issue_ai_02_spec_examples`. See [M1 acceptance](m1-acceptance.md) and [native evidence](native-toolchain-v1.md). Automatic source-loop recognition, CPU parallel scheduling, device acceptance, and source-to-three-agent encoding are outside M1. The historical document-only bootstrap was not compiler evidence.
 
 ## M0 required commands
 

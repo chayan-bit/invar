@@ -1,7 +1,7 @@
 //! The domain-suite manifest proposal (`bench/manifest-v3-proposal.json`) and
 //! its validator. It is a separate document from the frozen-candidate v1 and
 //! v2 manifests: the domain suites are a later set and are never merged into
-//! the M5-01 held-out hash (#228). The proposal records no freeze.
+//! the M5-01 held-out hash (#52). The proposal records no freeze.
 use super::{Program, SEED, SUITES, held_out_kernels, programs};
 use crate::{hash::sha256, heldout};
 use serde_json::{Value, json};
@@ -85,16 +85,16 @@ fn generate() -> Result<Value, String> {
         "schema_version": 1,
         "status": "proposal-pending-review",
         "generator": "domain-suites-v1",
-        "freeze": "not frozen: the permanent held-out freeze is gated by #228 and needs maintainer confirmation",
+        "freeze": "not frozen: the permanent held-out freeze is gated by #52 and needs maintainer confirmation",
         "split_policy": "seeded 25% of each suite's kernels, rounded up, all cases of a kernel on one side; independent of every result",
         "v1_held_out_sha256": v1["held_out_sha256"],
         "v1_held_out_sha256_note": "unchanged: the domain suites never enter the M5-01 held-out hash",
         "suites": suites,
         "pending": [{
             "program": "ml-quantized_matmul",
-            "reason": "i8 storage with i32 accumulation needs the reduced-precision storage types of #280 (ENG-03); not approximated with wider types",
+            "reason": "i8 storage with i32 accumulation needs the reduced-precision storage types of ENG-03; not approximated with wider types",
         }],
-        "baselines": {"owner": "#337 (ENG-26)", "status": "pending", "reported_separately": true},
+        "baselines": {"owner": "#109 (ENG-26)", "status": "pending", "reported_separately": true},
         "gpu_performance": "not_run",
     }))
 }

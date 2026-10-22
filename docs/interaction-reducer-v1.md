@@ -1,6 +1,6 @@
 # Minimal interaction reducer v1
 
-Status: M1-03 reference implementation, landed in PR #43. This is an untyped
+Status: M1-03 reference implementation, landed with the initial Rust bootstrap. This is an untyped
 pure graph calculus. It provides no source encoding, demand, ownership, or
 automatic parallelization admission.
 

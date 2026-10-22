@@ -28,7 +28,7 @@ Amended 2026-10-14: the CUDA performance gates in this contract are measured on 
 `issue_m4_04_segmented_device_ir` checks the reference model against the CPU net oracle on CPU; the ignored `issue_m4_04_gpu` (CUDA) and `issue_m4_04_metal_gpu` (Metal) suites compare device output bit for bit with the source expectation, including empty and all-empty segments, 0/1/50/99/100% selection and maximum sizes.
 The CUB/Metal baseline measurements and the M5-01 gates remain open.
 
-Continuation (October 14): the map callback is now a verified, extracted typed-net DAG, bounded by operation count; reduction and compaction lowering recheck their existing extracted plans. The source-runtime and performance gates remain open. f32 remains unavailable while PR #98 is open.
+Continuation (October 14): the map callback is now a verified, extracted typed-net DAG, bounded by operation count; reduction and compaction lowering recheck their existing extracted plans. The source-runtime and performance gates remain open. f32 remains unavailable while the M4-01 strict-f32 contraction work is open.
 
 Size-cap continuation (October 15): the physical segmented IR admits 2^28 elements
 and segments, with at most 2^20 compaction blocks and typed above-cap refusals.
@@ -44,7 +44,7 @@ and the shared transfer budget. Ordinary-source execution is still bounded by
 its reference limits. An unrelated Metal benchmark-binary build gap was recorded
 separately from the successfully emitted and executed test harness.
 
-Ordinary-source A1 adapter (15-16 October, draft PR #151): segmented maps,
+Ordinary-source A1 adapter (15-16 October, the segmented family routing draft): segmented maps,
 wrapping sum/product and stable compaction now register through the shared family
 bridge and publish only CompletedRegion. Compaction preserves MIR allocation
 between count and copy regions. Native Metal Debug/Release parity, forced/auto

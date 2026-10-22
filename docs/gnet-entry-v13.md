@@ -1,6 +1,6 @@
 # GNET entry ABI13
 
-P0b extends the existing one-group GNET device route. It changes neither launch geometry, child extraction nor source-order speculation. #109 was merged normally for its strict-f32 prerequisites. No schedule-family implementation is changed.
+P0b extends the existing one-group GNET device route. It changes neither launch geometry, child extraction nor source-order speculation. The M4-01 numeric contracts were merged normally for their strict-f32 prerequisites. No schedule-family implementation is changed.
 
 An expanded entry uses ABI13; scalar integer entries keep ABI5. Parameters are i32/u32/Bool/f32, `read` or `mut Array<i32|u32|f32>`, or `read` flat records of i32/u32/Bool/f32. Flat scalar records and owned `Array<i32|u32|f32>` results are supported. `take` parameters, variants, nested records and records containing owners are typed refusals. At most eight parameters and sixteen fields per record are admitted. Field order is checked-source declaration order, never host struct padding.
 
@@ -16,7 +16,7 @@ The original 1,000,000 source-array cap bounded allocation; it was repeated in t
 
 Native integer source allocation caps are qualified on x86_64 Linux with LLVM 21.1.8 in Debug and Release. Six per-array/aggregate cases match the reference, and the private HA-1 protocol cap is retained. This qualification covers admitted integer ordinary-source allocations; it does not renew device, performance or unsupported-type acceptance.
 
-The hard storage ceiling is 8 GiB, following #123. Before allocating the packet, host admission also checks four payload copies plus the retained input against that ceiling, covering adapter storage, byte capture, decoded checkpoints and readback overlap. Metal checks live maxBufferLength and recommended working set minus current allocations; CUDA checks threefold concurrent storage and free memory less a ten-percent margin. Checked arithmetic is retained for lengths, byte extents, heap sizes and totals. Allocation failure remains explicit. The CPU device model retains its smaller 64 MiB bound; full-size source acceptance and full-size Metal admission are separate tests.
+The hard storage ceiling is 8 GiB, following the 2^28 device caps policy. Before allocating the packet, host admission also checks four payload copies plus the retained input against that ceiling, covering adapter storage, byte capture, decoded checkpoints and readback overlap. Metal checks live maxBufferLength and recommended working set minus current allocations; CUDA checks threefold concurrent storage and free memory less a ten-percent margin. Checked arithmetic is retained for lengths, byte extents, heap sizes and totals. Allocation failure remains explicit. The CPU device model retains its smaller 64 MiB bound; full-size source acceptance and full-size Metal admission are separate tests.
 
 The private `gnet-device` command accepts f32 as `{"bits":1065353216}`, arrays as JSON arrays of exact typed elements, and flat records as arrays in declaration order. f32 array elements use the same bits object. Expanded receipts include `arguments_after` after reclaim releases all leases. The CLI's OS argument-size limit is separate from the Rust host API's supported array size.
 

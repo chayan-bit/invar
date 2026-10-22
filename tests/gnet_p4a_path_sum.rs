@@ -442,7 +442,7 @@ fn cuda_kernels_agree_with_the_net_oracle() {
     device_agrees("cuda", &mut open, &CostModel::CUDA);
 }
 
-/// Review finding: kernels may write `stops[blockIdx.x]` (the #140
+/// Review finding: kernels may write `stops[blockIdx.x]` (the P4a profile's
 /// handwritten gate kernels do), so the stop buffer must cover every group the
 /// launcher admits, not only one 256-thread reduce width.
 #[cfg(feature = "cuda")]
@@ -658,7 +658,7 @@ fn the_shape_model_fuses_small_roots_and_splits_large_ones() {
         Plan::Launch(launch) => Some(launch.shape),
         Plan::Fallback(_) => None,
     };
-    // The #140 scored inputs all lie inside the proven licence.
+    // The P4a profile's scored inputs all lie inside the proven licence.
     assert_eq!(shape(0, 0), Some(Shape::Root));
     assert_eq!(shape(32, 3), Some(Shape::Fused));
     assert_eq!(shape(256, 8), Some(Shape::Fused));

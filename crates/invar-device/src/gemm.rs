@@ -9,7 +9,7 @@
 //! Edge rows/columns are masked on load and store; every physical index is
 //! still checked against its verified allocation.
 //!
-//! The kernel text comes from the generic contraction emitter (#283): the
+//! The kernel text comes from the generic contraction emitter (#61): the
 //! `contraction::gemm_tiled_v1` move sequence, verified against the target
 //! file the plan's live capabilities select.
 

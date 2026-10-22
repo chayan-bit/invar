@@ -1,4 +1,4 @@
-//! `--numeric-contract trig-f32-v1` (#210 C4, `math::select_trig_f32_v1`):
+//! `--numeric-contract trig-f32-v1` (#48 C4, `math::select_trig_f32_v1`):
 //! after typing, every f32 `sin` and `cos` call takes the name of its
 //! `invar-trig-f32-v1` helper, so MIR, explain and receipts record the
 //! contract the program ran under. f64 calls and every other function keep

@@ -1,6 +1,6 @@
 //! ML suite: normalisation, GEMM and attention written as ordinary loops.
 //! Quantized matmul (i8 storage, i32 accumulate) waits for the reduced-
-//! precision storage types of #280 (ENG-03) and is recorded pending in the
+//! precision storage types of ENG-03 and is recorded pending in the
 //! manifest, never approximated here.
 use super::{Case, Input, Kernel, Wanted, oracle};
 

@@ -1,6 +1,6 @@
 # M1 acceptance record
 
-Scope: M1-01 and M1-03 landed in PR #43. PR #44 contains M1-02 and the
+Scope: M1-01 and M1-03 landed with the initial Rust bootstrap. The M1 native and interaction foundations contain M1-02 and the
 2026-09-23 revised M1-04/M1-05 contracts. The revised decision requires a
 typed, demand-aware production graph and checked extraction. It does not
 claim source translation into Lafont's three-agent reference calculus.

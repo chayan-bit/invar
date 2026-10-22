@@ -1,4 +1,4 @@
-//! DX-20 (#305): DWARF 5 from the native backend. The object's DWARF is read
+//! DX-20: DWARF 5 from the native backend. The object's DWARF is read
 //! back with gimli; debug info must leave the code itself unchanged.
 #![cfg(feature = "native")]
 
@@ -328,7 +328,7 @@ fn issue_dx_20_debug_info_dwarf_describes_the_fixture() {
         ]
     );
     assert_eq!(variables("identity<i32>"), ["parameter x: i32"]);
-    // A local bound in a nested block lives in a lexical block (#356 review).
+    // A local bound in a nested block lives in a lexical block (DWARF emitter review).
     assert_eq!(
         variables("nested"),
         [
@@ -338,7 +338,7 @@ fn issue_dx_20_debug_info_dwarf_describes_the_fixture() {
         ]
     );
     // A loop variable lives in the loop body, a match payload in its arm
-    // (#373 review).
+    // (lexical scope review).
     assert_eq!(
         variables("walk"),
         [
@@ -613,7 +613,7 @@ fn issue_dx_20_debug_info_cli_build_and_run() {
 }
 
 /// macOS publishes `OUT.dSYM` before `OUT`, so when the symbols cannot be
-/// published no executable is left behind without them (#361 review).
+/// published no executable is left behind without them (`--debug` review).
 #[cfg(target_os = "macos")]
 #[test]
 fn issue_dx_20_debug_info_never_publishes_an_executable_without_symbols() {

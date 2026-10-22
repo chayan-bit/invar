@@ -3,7 +3,7 @@
 // entry calls, and element access through validated private host-array records
 // (HA-1 section 12). Library lifetime and caller pointer validity are boundary contracts.
 //
-// The image is `no_std` and holds no thread-local storage (#320): `std` itself
+// The image is `no_std` and holds no thread-local storage: `std` itself
 // links thread-local statics (panic count, current thread, output capture). On
 // macOS any such static gives the image a thread-local variable descriptor, which
 // dyld can never unload and which costs one of the process's 512 pthread keys, so
@@ -103,7 +103,7 @@ struct Runtime {
 /// On macOS any thread-local makes dyld give the image a thread-local variable
 /// descriptor: the image can then never be unloaded and it consumes one of the
 /// process's 512 pthread keys, so about 500 loaded export libraries abort the
-/// interpreter (#320). Loaders are thread-confined, so one transaction at a time
+/// interpreter. Loaders are thread-confined, so one transaction at a time
 /// per image is the contract; `begin` on a second thread's loader reports busy.
 /// The lock only serializes each entry's own short access.
 struct Global { lock: AtomicBool, cell: RefCell<Runtime> }

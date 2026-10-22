@@ -1,6 +1,6 @@
 # M1-02 native CPU and trap ABI v1
 
-Status: the verified MIR CPU backend is implemented on `main` (landed in PR #44) on the recorded macOS
+Status: the verified MIR CPU backend is implemented on `main` (landed with the M1 native and interaction foundations) on the recorded macOS
 arm64 host. The `native` Cargo feature uses LLVM 21.1.8 from locked nixpkgs
 `e2587caef70cea85dd97d7daab492899902dbf5d`, Inkwell 0.8.0, and
 `llvm-sys` 211.1.0. Rust/Cargo are 1.95.0; rustc's own LLVM is 22.1.2 and

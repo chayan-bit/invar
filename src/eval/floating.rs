@@ -83,7 +83,7 @@ pub(crate) fn intrinsic(
         category: crate::eval::TrapCategory::IntegerOverflow,
         span,
     };
-    // C4 interim (#173): f32 sin, cos and sqrt keep main's invar-trig-f32-v1;
+    // C4 interim: f32 sin, cos and sqrt keep main's invar-trig-f32-v1;
     // invar-math-cr-v1 covers f64 and every other library function.
     match (name, values) {
         ("sin" | TRIG_F32_SIN, [Value::F32(a)]) => return Ok(Value::F32(a.sin())),
@@ -122,7 +122,7 @@ pub(crate) fn intrinsic(
         ("u32_from_f64", [Value::F64(a)]) => a.trunc_u32().map(Value::U32).map_err(trap),
         // v0.1 spelling of `i32_from_f32`, kept for existing sources.
         ("trunc_i32", [Value::F32(a)]) => a.trunc_i32().map(Value::I32).map_err(trap),
-        // Stores into storage arrays (`check::storage`, #280).
+        // Stores into storage arrays (`check::storage`, ENG-03).
         ("store-f16", [Value::F32(a)]) => Ok(Value::F32(F16Bits::round(*a).widen())),
         ("store-bf16", [Value::F32(a)]) => Ok(Value::F32(Bf16Bits::round(*a).widen())),
         ("store-i8", [Value::I32(a)]) => narrow_i8(*a).map(|_| Value::I32(*a)).map_err(trap),

@@ -1,9 +1,9 @@
 #![forbid(unsafe_code)]
-//! ENG-02 (#281): laws beyond the sealed v0.1 catalogue. L8 finite-state maps
+//! ENG-02 (#59): laws beyond the sealed v0.1 catalogue. L8 finite-state maps
 //! and L5 matrix groups above four variables are certified, re-checked by the
 //! independent checker, and executed by the law executor equal to the CPU net
 //! oracle (value or first source-order trap); they stay serial with
-//! `law_cost_uncalibrated` until the cost model is calibrated (#228).
+//! `law_cost_uncalibrated` until the cost model is calibrated (#52).
 
 #[path = "support/normal_form.rs"]
 mod support;
@@ -393,7 +393,7 @@ fn recurrence_args(rng: &mut Rng, ring: Ring) -> Vec<eval::Value> {
         }
         _ => {
             // Small coefficients, sometimes negative (residue guard) or huge
-            // (overflow), and seeds above the modulus (#266).
+            // (overflow), and seeds above the modulus.
             let cs: Vec<i32> = (0..len)
                 .map(|_| match rng.below(20) {
                     0 => -(rng.below(5) as i32),

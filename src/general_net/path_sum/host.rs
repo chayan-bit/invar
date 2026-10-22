@@ -11,7 +11,7 @@ use crate::{
     general_net::{Net, Proof, oracle},
 };
 
-/// Kernel shape of one launch (#140 size-dependent fusion).
+/// Kernel shape of one launch (P4a profile size-dependent fusion).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Shape {
     /// One lane in one group: the root is a leaf, a chain or serial.
@@ -39,7 +39,7 @@ pub struct CostModel {
 }
 
 impl CostModel {
-    /// Apple M4 (10 GPU cores), from the #140 pilot (`policy.tsv`).
+    /// Apple M4 (10 GPU cores), from the P4a profile pilot (`policy.tsv`).
     pub const METAL: Self = Self {
         fused_launch_us: 13.75,
         parallel_launch_us: 20.25,
