@@ -2,7 +2,7 @@
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
 Counts: statements=268 citations=285
-Size record: tokens=25565 estimator=bytes/3 limit=30000
+Size record: tokens=25507 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1136,7 +1136,7 @@ fn main() -> i32 { return 0; }
 
 Note: the open content in this appendix is not current behaviour, and no statement above relies on it.
 Note: AI-02 depends on L1-06, S1-06 and M5-03, none of which is closed, so the spec must be re-verified after each of them closes.
-Note: the open set is every open `release:v0.1` issue plus the GNET slices #196, #188 and #218, and `docs/remaining-work.md` records each item's evidence, remaining gate and blocker.
+Note: the open set is every open `release:v0.1` issue plus the GNET slices #196 and #188, and `docs/remaining-work.md` records each item's evidence, remaining gate and blocker.
 
 | Issue | Open content | Spec sections that change when it closes |
 | --- | --- | --- |
@@ -1155,7 +1155,6 @@ Note: the open set is every open `release:v0.1` issue plus the GNET slices #196,
 | #78 S1-06 | Recorded two-arm reach-and-place run | 8.3, 10.3 |
 | #196 GNET-04 | Calibrated automatic dispatch for general nets after the M5-01 freeze, plus specialization and residency (D1(a) and D2(a) landed in #259 and #262) | 11.6, 13.3, B.5 |
 | #188 GNET-05 | Six Metal census observations and a deep-device count | 11.6 |
-| #218 GNET-05 | One completed nightly with the CUDA census compile wall time inside the 3 h bound; its compile-deadline refusals are the v0.1 outcome (#253) | 11.6 |
 | #263 GNET P6/P7 | One normal-form dispatcher with the families as its lowerings, GNET-05 device parity (correctness on the H100 and the Apple M4, timing on the RTX 5070 Ti) and calibrated placement (P6(b)) | 11.3, 11.4, 11.6, 13.3 |
 
 Note: since #265, `cpu-parallel`, and `auto` in builds without a device feature, run a program that no existing parallel path claims through the checked normal form, so the serial MIR fallback of N11.4.2 applies only where that route refuses; the sections listed for #263 are re-verified when it closes.
