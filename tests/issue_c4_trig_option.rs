@@ -1,4 +1,4 @@
-//! #210 C4 part A: `--numeric-contract trig-f32-v1` on `run`, `explain` and
+//! #48 C4 part A: `--numeric-contract trig-f32-v1` on `run`, `explain` and
 //! `build`. Under it, f32 `sin` and `cos` take the names of their
 //! invar-trig-f32-v1 helpers after typing, so MIR, explain and receipts carry
 //! the contract; every CPU engine runs them with the same bits. The default

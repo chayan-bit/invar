@@ -1,4 +1,4 @@
-//! #278 ENG-08 part A: the single `ByteBudget` mechanism. Every test asserts that it ran a nonzero
+//! #57 ENG-08 part A: the single `ByteBudget` mechanism. Every test asserts that it ran a nonzero
 //! number of cases so an emptied table cannot pass.
 use invar::array_limits::{MAX_DEVICE_BYTES, MAX_LIVE_ELEMENTS};
 use invar::budget::{

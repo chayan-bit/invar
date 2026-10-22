@@ -32,7 +32,7 @@ const MAX_SOURCE_LIBRARIES: usize = 8;
 /// Pipeline states kept per device; the least recently used goes first.
 pub const MAX_PIPELINES: usize = 16;
 /// Default wall bound on one uncached pipeline creation. Creation is
-/// asynchronous, so a kernel that would block the compiler for hours (#188:
+/// asynchronous, so a kernel that would block the compiler for hours (#45:
 /// 300-600 KB general-net kernels past a 9,000 s alarm) is refused instead.
 /// `INVAR_METAL_PIPELINE_DEADLINE_SECS` overrides it per process.
 pub const PIPELINE_DEADLINE: Duration = Duration::from_secs(900);

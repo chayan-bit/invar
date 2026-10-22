@@ -51,7 +51,7 @@ The check command requires byte equality with complete regeneration, including s
 Input and generated output are bounded to 4 MiB.
 The committed proposal stores only the 139 held-out sources and stays below 500 KiB.
 All 608 programs, including the 431 tuning sources and the 38 recorded duplicates, are regenerated and validated before selecting the stored subset.
-The candidate held-out SHA-256 is `d69a2607c312e9a608648143eade5eff6d912f51164f5eed4f411e74f95dfbbc`, and the proposal file SHA-256 is `602f5ea1f9141025d0b18e1fe027e9248aa182fe91c6f86da93416e6bb51c67b`.
+The candidate held-out SHA-256 is `d69a2607c312e9a608648143eade5eff6d912f51164f5eed4f411e74f95dfbbc`, and the proposal file SHA-256 is `4db0f96b09a961922008aac78f6fe9e0c5a0d7e610b55355dff03d1a6afcddea`.
 There is no freeze command.
 The generator uses the existing xorshift64 implementation and seed `0x5a17202609010001`.
 Its nondefault-seed API exists for determinism and seed-sensitivity checks, not postmeasurement corpus selection.
@@ -98,8 +98,8 @@ The source recognizers and their metadata caps may impose additional limits; CPU
 
 Review the 25% ratio, subtype split, exact recipes, proposed class sizes, seed and generator/source/oracle revisions.
 After the M4-02..05 device paths merge, rerun all CPU checks and family recognition against the merged revision.
-The merged workstreams now provide ordered affine-pair reduction (#115), per-segment map (#100) and explicit Tensor Core `tc-f16-f32-v1` contraction (#110), and the candidate includes all three forms.
-Strided-view transpose stays unavailable, because the M4-02 recognizer (#104) admits direct row-major transpose only; it is never approximated by direct transpose.
+The merged workstreams now provide ordered affine-pair reduction, per-segment map and explicit Tensor Core `tc-f16-f32-v1` contraction, and the candidate includes all three forms.
+Strided-view transpose stays unavailable, because the M4-02 recognizer admits direct row-major transpose only; it is never approximated by direct transpose.
 Numeric adversarial and large-invocation acceptance remains separate and unexecuted.
 The candidate is family-complete for the eligible oracle forms, with these broader contract gates pending.
 Only then may review authorize a manifest version bump that binds the candidate content hash permanently before M4-06 tuning.

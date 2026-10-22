@@ -24,7 +24,7 @@ fn lock() -> std::sync::MutexGuard<'static, ()> {
 }
 /// The tiled and Tensor Core kernels here are emitted per shape and some are
 /// deliberately mutated, so no compiled-ahead library holds them: open the
-/// developer source device (#204). `issue_metal_aot_gpu` covers the
+/// developer source device. `issue_metal_aot_gpu` covers the
 /// compiled-ahead tensor route.
 fn open() -> MetalDevice {
     let mut device =

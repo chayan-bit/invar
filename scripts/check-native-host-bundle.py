@@ -4,15 +4,15 @@
 The native host (src/native.rs) and the export host (src/native/export.rs) are single-file rustc compilations
 assembled from include_str! sources, so a source in the bundle cannot declare a file module (`mod x;`) unless the
 bundle inlines or strips it: otherwise every native link fails with E0583, which only a `--features native` build
-shows (#377: `pub mod fold;` and `pub mod storage;` reached main and turned it red for 3 h). This checks, for every
+shows (once, `pub mod fold;` and `pub mod storage;` reached main and turned it red for 3 h). This checks, for every
 bundled source:
 
   * each file module it declares (outside `#[cfg(test)]`) is inlined, or stripped through SEPARATE_MODULES
     (src/native_foreign_source.rs). Inlined means src/native.rs includes the module's file and holds the
     declaration's exact text as a string literal: native.rs swaps one for the other with `replacen` (a tuple list
-    since #377, chained calls before), which silently does nothing when the text differs;
+    now, chained calls before), which silently does nothing when the text differs;
   * each `crate::NAME` path it uses names a module the host declares, a host alias or constant, or a top-level item
-    of a bundled source (the second half of #377: fold.rs reached crate::fsum_reference).
+    of a bundled source (the second half of that breakage: fold.rs reached crate::fsum_reference).
 
 Usage: check-native-host-bundle.py [--root DIR]      (exit 1 with one line per problem)
        check-native-host-bundle.py --root DIR --list  (print the bundled sources)
@@ -112,7 +112,7 @@ def check(root):
             if not any(home in bundled for home in homes):
                 problems.append(f'{path}:{number}: `{declaration}` is a file module, but the native host bundle does '
                                 f'not inline it: add ("{declaration}", include_str!("...{homes[0]}")) to the inline '
-                                f'list in src/native.rs (or strip it), see #377')
+                                f'list in src/native.rs (or strip it)')
             elif declaration not in literals.get(name, ()):
                 problems.append(f'{path}:{number}: src/native.rs inlines {homes[0]} as '
                                 f'{" or ".join(f"`{d}`" for d in sorted(literals.get(name, ()))) or "no declaration"}, '
@@ -120,7 +120,7 @@ def check(root):
         for name in sorted(set(re.findall(r'\bcrate::(\w+)', code(text)))):
             if name not in allowed:
                 problems.append(f'{path}: uses crate::{name}, which the native host does not declare: add '
-                                f'`mod {name} {{{{ {{}} }}}}` with its source to the host in src/native.rs, see #377')
+                                f'`mod {name} {{{{ {{}} }}}}` with its source to the host in src/native.rs')
     for name, declarations in sorted(literals.items()):
         parents = [p for p in sources if any(home in sources for home in module_file(p, name))]
         for declaration in sorted(declarations):

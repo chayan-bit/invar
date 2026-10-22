@@ -1,4 +1,4 @@
-//! P6(a): `invar run` through the general-net parallel normal form (#263).
+//! P6(a): `invar run` through the general-net parallel normal form (#54).
 //!
 //! A program that no family, f32, sort, spatial or reduction path claims would
 //! otherwise run as serial MIR. [`route`] derives its normal form from the
@@ -8,7 +8,7 @@
 //! published only when a law was applied, no law state was violated, and the
 //! run provably stays inside the source limits the reference evaluator
 //! enforces (fuel, call depth and live array elements); anything else is a [`Route::Fallback`] and
-//! the caller runs the unchanged serial path. There is no opt-out (#263).
+//! the caller runs the unchanged serial path. There is no opt-out (#54).
 
 use crate::{
     eval::{EvalError, Value},
@@ -103,7 +103,7 @@ pub fn route(program: &mir::Program, fuel: u64) -> Route {
         return Route::Fallback("certificate-rejected");
     };
     // Lemma B regroups checked `(a s + b) % P` updates in `Z/P`, which does
-    // not see an overflow trap of `a s + b` itself (#263 differential run).
+    // not see an overflow trap of `a s + b` itself (#54 differential run).
     if form.certificates().any(|c| {
         matches!(
             c.rep,

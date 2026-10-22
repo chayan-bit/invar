@@ -25,7 +25,7 @@ MAP = """fn main() -> i32 {
 
 
 def metal_library(cli, source, stem):
-    """The compiled-ahead Metal library `invar build --target metal` writes for source (#193)."""
+    """The compiled-ahead Metal library `invar build --target metal` writes for source (#46)."""
     program = stem.with_suffix(".inv")
     program.write_text(source)
     library = stem.with_suffix(".metallibc")

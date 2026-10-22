@@ -1,4 +1,4 @@
-//! Loop-region law extraction (#133 section 6.2): counted regions, inlined
+//! Loop-region law extraction (normal-form design section 6.2): counted regions, inlined
 //! body-local definitions, per-variable linear forms joined in a class lattice,
 //! carried strongly connected sets, argmin companions and array footprint
 //! classes. Each applied law produces a certificate.

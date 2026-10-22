@@ -67,7 +67,7 @@ pub(crate) fn run(
         }
     };
     let mut reductions = Vec::new();
-    // #195: reached float reductions run on the device, as in `--engine cuda`.
+    // Reached float reductions run on the device, as in `--engine cuda`.
     let mut reducer = |call: &crate::mir_eval::ReduceCall<'_>| {
         schedule::cuda::reduce::forced(call, &mut device.borrow_mut(), compiler, &mut reductions)
     };

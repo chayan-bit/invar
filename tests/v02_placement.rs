@@ -326,7 +326,7 @@ fn calibrate_cli_exports_a_valid_provisional_profile() {
     let v: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
     assert_eq!(v["provisional"], true);
     // Map rows keep the placement family; native builds add the M5-01
-    // family probes (#215), and every row keeps the wrapping-u32 contract.
+    // family probes (#49), and every row keeps the wrapping-u32 contract.
     for row in v["measurements"].as_array().unwrap() {
         assert_eq!(
             row["table_family"] == "map",

@@ -1,4 +1,4 @@
-//! Storage-only array element types of numeric policy v2 (#280,
+//! Storage-only array element types of numeric policy v2 (ENG-03,
 //! `docs/numeric-v2.md`): `Array<f16>`, `Array<bf16>`, `Array<i8>` and
 //! `Array<u8>`. A load widens exactly to `f32`, `i32` or `u32`, so no
 //! arithmetic ever sees a narrow value. After typing, each storage array runs

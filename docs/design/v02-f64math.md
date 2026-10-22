@@ -14,7 +14,7 @@ The workstream needs correctly rounded binary32 and binary64 elementary function
 | `pxfm` 0.1.30 | BSD-3 / Apache-2.0 | Pure Rust port of many CORE-MATH routines | Rejected: a second implementation to keep bit-equal with upstream, partial coverage of the list, and nothing reusable for CUDA or MSL |
 | `libm` 0.2.16 | MIT / Apache-2.0 | musl port, faithfully rounded | Rejected: not correctly rounded, so engines would not be bit-identical |
 | CRlibm | LGPL | Older correctly rounded binary64 library | Rejected: license, unmaintained, binary64 only |
-| PRs #135 / #139 (`invar-trig-f32-v1`) | in repo | Strict f32 sin, cos and sqrt plus the device plumbing | Superseded, see section 6 |
+| P0a and its compiled GNET device path (`invar-trig-f32-v1`) | in repo | Strict f32 sin, cos and sqrt plus the device plumbing | Superseded, see section 6 |
 
 Decision: vendor the unmodified CORE-MATH C sources at upstream commit `dae5dd8c0d5bd2691b45de28c9edbe12f067c3d3` (2026-10-15) into `crates/invar-math/core-math/`, with `LICENSE`, `UPSTREAM` and `SHA256SUMS` recorded and checked by a unit test.
 `crates/invar-math/build.rs` compiles the 40 translation units (20 functions in two formats) with `-O2 -ffp-contract=off -fno-fast-math -fno-math-errno -fexcess-precision=standard` into one static archive.
@@ -91,7 +91,7 @@ Each rewrite refuses shapes it does not recognize, and a variable still used aft
 `invar_math::CUDA_OPTIONS` (`--fmad=false --ftz=false --prec-div=true --prec-sqrt=true -default-device --device-int128 --std=c++20`) keeps every operation upstream performs exact: IEEE `+ - * /`, `sqrt` and `fma`, rounding to integers, `fabs`, `copysign`, `fmin` and `fmax`.
 The exact library functions use CUDA operations that are exact under the same options.
 `invar_cuda::cuda::BitsMap` compiles, loads and runs one elementwise kernel over raw encodings; NaN results leave as the canonical quiet NaN.
-The anonymous structs inside unions need NVRTC 12.9 or newer: NVRTC 12.4 rejects them (#225), and every other unit compiles from 12.4.
+The anonymous structs inside unions need NVRTC 12.9 or newer: NVRTC 12.4 rejects them, and every other unit compiles from 12.4.
 `invar_math::cuda_min_nvrtc` derives the floor from the emitted units, and `invar::math::load_cuda_map` checks the loaded NVRTC against it before compiling, so an older NVRTC is a compile refusal that names both versions instead of a compiler log.
 
 ### Metal emitter
@@ -114,11 +114,11 @@ Without `__METAL_VERSION__` the prelude maps the address spaces away and the sam
 ## 6. Numeric contract versions (ruling C4)
 
 `invar-math-cr-v1` is the v0.2 default math contract.
-It supersedes `invar-trig-f32-v1` from PRs #135 and #139, whose strict but not correctly rounded f32 `sin` and `cos` can differ in the last bit; `sqrt` is identical in both.
+It supersedes `invar-trig-f32-v1` from P0a and its compiled GNET device path, whose strict but not correctly rounded f32 `sin` and `cos` can differ in the last bit; `sqrt` is identical in both.
 `invar explain --format json` and the `invar run --format json` receipt record `numeric_contracts` (`binary64: strict-f64-v1`, `math: invar-math-cr-v1`) whenever a program uses f64 or a library function; programs that use neither keep their previous documents byte for byte.
 The MIR program's `numeric_policy` stays `strict-f32-v1` for binary32 and its identity hash is unchanged.
 The v0.2 release notes must state the sin/cos bit change against trig-f32-v1.
-`--numeric-contract trig-f32-v1` is kept for one release by C4, but trig-f32-v1 is not on main (#135 is unmerged), so the flag lands with whichever of #135 or this workstream merges second.
+`--numeric-contract trig-f32-v1` is kept for one release by C4, but trig-f32-v1 is not on main (P0a is unmerged), so the flag lands with whichever of P0a or this workstream merges second.
 
 ## 7. Acceptance evidence
 

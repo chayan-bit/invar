@@ -1,4 +1,4 @@
-//! #278 ENG-08 part A: the weighted histogram admits by bytes, not by 4096 elements or 128
+//! #57 ENG-08 part A: the weighted histogram admits by bytes, not by 4096 elements or 128
 //! contributions. Every test asserts a nonzero case count. Device rows above the old caps are
 //! pending until run on hardware.
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};

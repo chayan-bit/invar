@@ -1,4 +1,4 @@
-//! L8 finite-state map (#281, #133 section 2): a carried `u32` state updated
+//! L8 finite-state map (#59, normal-form design section 2): a carried `u32` state updated
 //! only by `s := table[stride * s + c]` from one table the loop never writes.
 //! Each iteration is then a map `[0, S) -> [0, S)` with `S = len(table) /
 //! stride`, and maps compose, so the loop is a scan over function tables.

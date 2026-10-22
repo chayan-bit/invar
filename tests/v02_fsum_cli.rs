@@ -60,7 +60,7 @@ fn write(name: &str, text: &str) -> PathBuf {
     path
 }
 
-/// Metal runs only compiled-ahead libraries (#129), so a forced Metal run
+/// Metal runs only compiled-ahead libraries, so a forced Metal run
 /// first builds the program's library with the real `invar build`.
 fn run(path: &PathBuf, engine: &[&str]) -> serde_json::Value {
     let mut command = Command::new(env!("CARGO_BIN_EXE_invar"));
@@ -127,8 +127,8 @@ fn v02_fsum_cli_every_engine_returns_oracle_bits() {
     }
 }
 
-/// A program that also sorts runs through the sort engines (#170), which pass
-/// the fsum reducer on CPU (#195). Its result must equal the fsum-only
+/// A program that also sorts runs through the sort engines, which pass
+/// the fsum reducer on CPU. Its result must equal the fsum-only
 /// program's on every engine.
 #[test]
 fn v02_fsum_cli_sorting_program_matches_the_fsum_only_result() {

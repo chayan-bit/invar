@@ -15,7 +15,7 @@ pub(crate) fn source_directory(path: &OsString) -> &std::path::Path {
         .unwrap_or(std::path::Path::new("."))
 }
 
-/// `--numeric-contract trig-f32-v1` on `run`, `explain` and `build` (#210 C4):
+/// `--numeric-contract trig-f32-v1` on `run`, `explain` and `build` (#48 C4):
 /// f32 `sin` and `cos` run `invar-trig-f32-v1` for this process. Returns the
 /// arguments without the option, or the exit code of a refused value.
 pub(crate) fn numeric_contract(mut args: Vec<OsString>) -> Result<Vec<OsString>, i32> {

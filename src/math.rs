@@ -12,7 +12,7 @@ use crate::numeric_contract::{F32Bits, F64Bits};
 /// Contract identifier recorded in docs, receipts and device artifacts.
 pub const CONTRACT: &str = "invar-math-cr-v1";
 
-/// `--numeric-contract trig-f32-v1` (#210 C4): f32 `sin` and `cos` run
+/// `--numeric-contract trig-f32-v1` (#48 C4): f32 `sin` and `cos` run
 /// `invar-trig-f32-v1` for the whole process. The CLI sets it once, before any
 /// program is checked; it is never cleared.
 static TRIG_F32_V1: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
@@ -221,7 +221,7 @@ pub fn eval_f64(f: MathFn, args: &[F64Bits]) -> F64Bits {
 }
 
 /// The `numeric_contracts.fold` receipt of explain-v5 and invar-diagnostics-v3
-/// (#280, D12): each declared tier a lowered fold used (`tree`, `exact`, or
+/// (ENG-03, D12): each declared tier a lowered fold used (`tree`, `exact`, or
 /// `relaxed`, which a Strict function's `reassoc_add` folds also record), to
 /// the algorithm that ran. `None` when no fold was lowered.
 pub fn fold_receipt(program: &crate::mir::Program) -> Option<serde_json::Value> {
@@ -249,7 +249,7 @@ pub fn contracts(program: &crate::mir::Program) -> Option<serde_json::Value> {
     };
     let binary64 =
         instructions().any(|i| matches!(i.output, Some((_, Type::F64 | Type::ArrayF64))));
-    // C4 interim (#173): f32 sin, cos and sqrt are invar-trig-f32-v1.
+    // C4 interim: f32 sin, cos and sqrt are invar-trig-f32-v1.
     let trig_f32 = |i: &crate::mir::Instruction| {
         matches!(&i.kind, Operation::Call { name, .. } if matches!(name.as_str(), "sin" | "cos" | "sqrt") || trig_f32_v1(name))
             && matches!(i.output, Some((_, Type::F32)))

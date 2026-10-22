@@ -263,10 +263,10 @@ fn issue_m4_07_metal_gpu_invalid_inputs_are_refused_before_launch() {
         result.output
     );
     // The repeat compiles and creates nothing and keeps every cumulative
-    // counter. Since #154 the archive report describes the last lookup, and
+    // counter. Since Metal binary archives, the archive report describes the last lookup, and
     // the reuse is an in-memory hit on the same key: no archive lookup, no
     // write (so no write refusal, even when the earlier write was refused,
-    // e.g. a full cache) and no pipeline-creation time (#221).
+    // e.g. a full cache) and no pipeline-creation time.
     let mut expected = cached;
     expected.archive.last = invar_metal::ArchiveState::MemoryHit;
     expected.archive.write_refusal = None;

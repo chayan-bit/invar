@@ -321,7 +321,7 @@ fn operations(repr: &LawRepr) -> String {
                     range(*ty, "x")
                 );
             }
-            // `LawRepr::new` refuses lifted representations (#281).
+            // `LawRepr::new` refuses lifted representations (#59).
             Rep::Lifted(_) => unreachable!("no collective for a lifted law"),
         },
     }

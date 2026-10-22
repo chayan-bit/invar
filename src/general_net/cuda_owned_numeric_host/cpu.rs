@@ -851,7 +851,7 @@ impl Session<'_, CpuGroupModel> {
 // The model is GNU/Linux-only by design: a fully static ELF driver
 // (`FLAGS_V2`), its `PT_INTERP` and loader listing, and the GNU driver's
 // collect2/as/ld identity. Elsewhere the model's `prepare` fails closed, so
-// these tests do not apply there (#203).
+// these tests do not apply there.
 #[cfg(all(test, target_os = "linux"))]
 #[path = "../../../tests/support/cuda_owned_numeric_host_cpu_model.rs"]
 mod tests;

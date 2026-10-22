@@ -46,7 +46,7 @@ Metal checks maxBufferLength, the recommended working set and pipeline lanes; CU
 device memory and launch dimensions. Resource refusals carry typed reasons.
 
 Source observers (gather, scatter, histogram and frontier) admit by byte budget
-(`ByteBudget`, #278): each computes the exact bytes of its candidate, plus the
+(`ByteBudget`, #57): each computes the exact bytes of its candidate, plus the
 host plans' staging bytes and visit limits, and refuses with a typed budget-exceeded error
 only when that exceeds the budget; the former 4,096-element and 16-vertex
 ceilings are gone. The language's per-array limit (2^24 elements, 2^28 live)
@@ -75,7 +75,7 @@ retained M4-05 CPU/source suites; a private device receipt alone is not source
 publication authority. Full ordinary-source dispatch and M5 performance gates
 remain separate acceptance work.
 
-Metal f32 is unavailable in this slice. PR #98 was open during qualification;
+Metal f32 is unavailable in this slice. The M4-01 strict-f32 contraction work was open during qualification;
 its strict-with-fallback path was neither copied nor bypassed. No owned f32,
 segmented/compaction, Python or robotics implementation files were edited.
 

@@ -390,7 +390,7 @@ pub const C1_INPUTS: [[[i32; 2]; 5]; 12] = [
 
 /// Two leaves that each run an `m`-iteration serial loop under one fork: with a
 /// small cascade poll limit, idle workers wait on them far longer than the
-/// limit (#207). The comparison join keeps the region residual, not flat.
+/// limit. The comparison join keeps the region residual, not flat.
 pub const LONG_LEAVES: &str = "fn t(n: i32, s: i32, m: i32) -> i32 {
     if n <= 0 { var x = s; var i = 0; while i < m { x = (x * 3 + 1) % 10007; i = i + 1; } return x; }
     let a = t(n - 1, (s * 7 + 3) % 1009, m);

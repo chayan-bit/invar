@@ -31,13 +31,13 @@ def edit(tree, path, old, new):
 
 # (description, edits, text the failure must name)
 CASES = [
-    ('#377: numeric_contract declares `pub mod fold;` and the host does not inline it',
+    ('numeric_contract declares `pub mod fold;` and the host does not inline it',
      [('src/native.rs', '("pub mod fold;", include_str!("numeric_contract/fold.rs")),', '')],
      'src/numeric_contract.rs:'),
     ('a new file module in an embedded source',
      [('src/numeric_contract.rs', 'mod ieee;', 'mod ieee;\nmod extra;')],
      '`mod extra;` is a file module'),
-    ('#377: fold.rs reaches crate::fsum_reference and the host lacks the module',
+    ('fold.rs reaches crate::fsum_reference and the host lacks the module',
      [('src/native.rs', 'mod fsum_reference {{ {} }}', 'mod fsum_ref_gone {{ {} }}')],
      'uses crate::fsum_reference'),
     ('the declaration changed, so the inline replacen no longer finds it',

@@ -291,7 +291,7 @@ fn run_auto_source_inner(
         // ponytail: unmeasured spatial families stay on CPU; admit devices only
         // after per-operation, revision-matched hardware/baseline qualification.
         let workers = selected_workers()?;
-        // #195: reached float reductions take the same auto choice as in a
+        // Reached float reductions take the same auto choice as in a
         // program without intrinsics; only a program with one calibrates.
         let calibration = if reductions::has_reduction(program) {
             auto_calibration(model, workers)?

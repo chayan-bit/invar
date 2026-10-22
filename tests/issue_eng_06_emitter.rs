@@ -1,4 +1,4 @@
-//! ENG-06 (#283) generic contraction emitter: the move sequence that
+//! ENG-06 (#61) generic contraction emitter: the move sequence that
 //! reproduces `invar-f32-gemm-tiled-v1` emits exactly the `gemm.rs` text for
 //! every corpus shape on every built-in GPU target. A CPU emulation of the
 //! emitted index math, for that sequence and for other verified sequences,

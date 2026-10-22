@@ -5,7 +5,7 @@ machine. It loads and calls generated `gnet_run`; the graph oracle is only an
 independent test comparator. It does not complete all general-net or v0.1 work.
 
 The runtime baseline is main `a0f4c96c13f3c25b496d2c33b47c20809e7387ea`.
-The separate ARM corpus repair is tracked in PR #91.
+The ARM corpus repair is separate: it keeps the numeric corpus portable across ARM and SSE hosts.
 The implementation's changed-file hashes and check scopes were recorded in a
 separate verification record. A local test snapshot is not a remote commit or a
 hardware qualification receipt.

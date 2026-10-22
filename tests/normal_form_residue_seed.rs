@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! #266: the Lemma B residue ring (L4/L5 `s = (a s + b) % P` on checked
+//! The Lemma B residue ring (L4/L5 `s = (a s + b) % P` on checked
 //! integers) must agree with the reference on seeds outside `[0, P)` and on
 //! coefficients whose product overflows, where `a s + b` itself traps.
 

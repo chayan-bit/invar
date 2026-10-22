@@ -1,5 +1,5 @@
 //! `invar build --target native`, and `--debug` for native builds and runs
-//! (#305): DWARF 5 in the executable, native-serial only.
+//! (DX-20): DWARF 5 in the executable, native-serial only.
 
 use std::{
     ffi::OsString,

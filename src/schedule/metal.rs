@@ -84,7 +84,7 @@ fn refused(e: crate::metal_aot::Error) -> Error {
 }
 
 /// A supplied compiled-ahead library must be the build of exactly `source`.
-/// Auto checks it before routes that never open the device (#273).
+/// Auto checks it before routes that never open the device.
 fn verify_prebuilt(source: &[u8], kernels: Kernels<'_>) -> Result<(), Error> {
     use sha2::Digest;
     if let Kernels::Prebuilt(image) = kernels {
@@ -335,7 +335,7 @@ fn run_auto_source_inner(
         // ponytail: unmeasured spatial families stay on CPU; admit devices only
         // after per-operation, revision-matched hardware/baseline qualification.
         let workers = selected_workers()?;
-        // #195: reached float reductions take the same auto choice as in a
+        // Reached float reductions take the same auto choice as in a
         // program without intrinsics; only a bound program with one calibrates.
         let (calibration, device) = match reductions::has_reduction(program) {
             true if crate::sorting::binds(source, program) => {
@@ -737,7 +737,7 @@ mod ai_01_fault_tests {
 
 #[cfg(test)]
 mod prebuilt_binding_tests {
-    //! #273: auto checks a supplied library against the program before its
+    //! Auto checks a supplied library against the program before its
     //! CPU-only sort and spatial branch, which never opens the device.
     use super::*;
     use crate::metal_aot::{self, Header, Library, Route, Toolchain};

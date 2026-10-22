@@ -1,4 +1,4 @@
-//! DWARF 5 for native debug builds (#305). The emitter writes LLVM IR as text,
+//! DWARF 5 for native debug builds (DX-20). The emitter writes LLVM IR as text,
 //! so debug info is textual metadata beside it: one compile unit and file, a
 //! subprogram per lowered function, a location per IR instruction from its MIR
 //! span, and a variable for every parameter and named local. LLVM lowers the
@@ -536,7 +536,7 @@ pub(super) fn publish_symbols(linked: &Path, output: &Path) -> Result<(), String
         .map_err(|failure| format!("native debug symbols publication failed: {failure}"))
 }
 
-/// Test hook for code neutrality (#305): `ir` parsed and printed again by
+/// Test hook for code neutrality (DX-20): `ir` parsed and printed again by
 /// LLVM, with all debug metadata stripped when `strip` is set.
 #[doc(hidden)]
 pub fn canonical_ir(ir: &str, strip: bool) -> Result<String, String> {

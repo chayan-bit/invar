@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
-//! P1 corpus classification: every GNET-05 program (#131) and every M5-01
-//! held-out candidate gets a normal form, compared loop by loop with the #133
+//! P1 corpus classification: every GNET-05 program and every M5-01
+//! held-out candidate gets a normal form, compared loop by loop with the net-laws
 //! prototype classification recorded in `tests/net_normal_form_fixtures/prototype.json`.
 //! The independent checker must accept every certificate and the completeness
 //! of every normal form.

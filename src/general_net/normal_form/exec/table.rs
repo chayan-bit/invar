@@ -1,4 +1,4 @@
-//! L8 lane elements (#281): an iteration's transition map over the states
+//! L8 lane elements (#59): an iteration's transition map over the states
 //! `[0, S)`, found by running the lane once from every state. A run that ends
 //! in an event maps its state to `None`; the lane replay from the scanned
 //! prefix then meets that event in source order if the prefix reaches it.

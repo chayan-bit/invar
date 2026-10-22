@@ -37,7 +37,7 @@ pub use speculation::{SpeculationLayout, SpeculationLimits};
 pub use speculation_analysis::{CallSite, Candidate, ForkPlan, Serialization, SerializationReason};
 
 impl SerializationReason {
-    /// Stable label for placement legality receipts (GNET-04, #196).
+    /// Stable label for placement legality receipts (GNET-04, #47).
     pub fn label(self) -> &'static str {
         match self {
             Self::AffineArgument => "affine_argument",

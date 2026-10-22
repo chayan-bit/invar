@@ -1,7 +1,7 @@
 # Explicit stable sorting
 
 Status: source surface frozen in `3af9743d`; CPU lowering in `686b6941`,
-CUDA/Metal lowering in `2fde7feb`. Draft PR #170.
+CUDA/Metal lowering in `2fde7feb`.
 Reference, MIR, native CPU, joined CPU workers and both physical GPUs have
 passing focused contracts. Extended acceptance is tracked in the sort test suites.
 

@@ -262,7 +262,7 @@ fn issue_m4_05_gather_scatter_frontier_runtime_maximum_and_over_limit_arrays() {
     let over = format!(
         "{GATHER} fn main() -> i32 {{ let a = filled_u32(4097u32,7u32); let ix: Array<u32> = [0u32]; let out = gather(a,ix); if out[0u32] != 7u32 {{ return 0; }} return 7; }}"
     );
-    // The 4096-element cap is gone (#278): 4097 values are admitted and publish; only the
+    // The 4096-element cap is gone (#57): 4097 values are admitted and publish; only the
     // staging byte limit refuses, here with 50_000 values (200 kB against the 160 KiB limit).
     assert!(prefixes_at(&over, Budget::default(), false).1 > 0);
     let heavy = over.replace("filled_u32(4097u32,7u32)", "filled_u32(50000u32,7u32)");

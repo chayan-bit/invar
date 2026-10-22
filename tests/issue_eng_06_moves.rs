@@ -1,4 +1,4 @@
-//! ENG-06 (#283) physical move set: every schedule of a generated grid over
+//! ENG-06 (#61) physical move set: every schedule of a generated grid over
 //! every built-in GPU target either verifies within the target's limits or is
 //! refused with a named reason before any emission; contract, guard and
 //! split-K forgeries are refused; and a target added only as a JSON file

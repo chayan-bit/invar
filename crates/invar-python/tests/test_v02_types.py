@@ -1,4 +1,4 @@
-"""The v0.2 types f64, Array<f64> and Array<Bool> at the Python boundary (#237, HA-1.4).
+"""The v0.2 types f64, Array<f64> and Array<Bool> at the Python boundary (#53, HA-1.4).
 
 `call_reference` takes an exact built-in `float` for f64, NumPy `float64` arrays and NumPy `bool_` arrays (every byte
 0 or 1), read or mut, and returns f64 as a `float` and arrays as new NumPy arrays. Every refusal is typed, raised before

@@ -67,7 +67,7 @@ pub fn cuda_map_source(f: MathFn, binary64: bool) -> String {
     source
 }
 
-/// The oldest NVRTC that compiles [`cuda_map_source`] of `f` (#225).
+/// The oldest NVRTC that compiles [`cuda_map_source`] of `f`.
 pub fn cuda_map_min_nvrtc(f: MathFn, binary64: bool) -> (u32, u32) {
     core_math(f).map_or(invar_math::CUDA_MIN_NVRTC, |c| {
         invar_math::cuda_min_nvrtc(&[(c, binary64)])
@@ -80,7 +80,7 @@ fn nvrtc_refusal(required: (u32, u32), loaded: (u32, u32)) -> Option<String> {
     (loaded < required).then(|| {
         format!(
             "{} CUDA kernels with anonymous-struct unions need NVRTC {}.{} or newer; \
-             the loaded NVRTC is {}.{} (#225)",
+             the loaded NVRTC is {}.{}",
             super::CONTRACT,
             required.0,
             required.1,

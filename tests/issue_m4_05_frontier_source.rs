@@ -430,7 +430,7 @@ fn issue_m4_05_gather_scatter_frontier_frozen_capacity_work_bounds_and_fallback(
         Error::Bounds
     );
     count += prefixes(&source(&f, &[0; 3], 0, 1), Some(7));
-    // The old 16-vertex and 16-round caps are gone (#278): 17 of either is admitted under the
+    // The old 16-vertex and 16-round caps are gone (#57): 17 of either is admitted under the
     // default byte budget and refused only by a budget too small for its footprint.
     for (n, r) in [(17u32, 0u32), (1, 17)] {
         let f = function(n, r);

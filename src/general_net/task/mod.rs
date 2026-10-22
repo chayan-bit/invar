@@ -1,4 +1,4 @@
-//! P4b: residual fork-join task region T (#133 L20, #132 section 5 "Fork-join T").
+//! P4b: residual fork-join task region T (law L20, region design section 5 "Fork-join T").
 //!
 //! A program whose certified normal form keeps a fork-join after every law
 //! (`NormalForm::is_flat() == false`) runs as one task region:

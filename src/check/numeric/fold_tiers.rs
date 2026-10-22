@@ -13,7 +13,7 @@
 //! refused, so no fold in such a function silently stays strict.
 //!
 //! A Relaxed fold, and a `reassoc_add` fold in a Strict function, takes the
-//! Tree lowering (#280 step 5'), which the Relaxed contract admits; a shape the
+//! Tree lowering (ENG-03 step 5'), which the Relaxed contract admits; a shape the
 //! lowering cannot take stays strict, which it admits too.
 
 use super::visit::{Visit, walk_block, walk_expr};

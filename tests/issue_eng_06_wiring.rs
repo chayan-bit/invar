@@ -1,4 +1,4 @@
-//! ENG-06 (#283) part C: the shipped `gemm` and `tc` schedules emit through
+//! ENG-06 (#61) part C: the shipped `gemm` and `tc` schedules emit through
 //! the generic contraction emitter, with the target chosen from live
 //! `Capabilities`. Every capability the device gate admits has a target file,
 //! and the emitted kernels for every admitted device and corpus shape are the

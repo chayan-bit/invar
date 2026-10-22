@@ -207,7 +207,7 @@ impl Ir<'_> {
     /// `name` lowered when it is a float intrinsic; `None` otherwise.
     fn float_intrinsic(&mut self, name: &str, args: &[String], arg_types: &[Option<Type>], at: Span) -> Result<Option<String>, String> {
         let first = float_format(arg_types.first().and_then(Option::as_ref));
-        // C4 interim (#173): f32 sin, cos and sqrt stay on the invar-trig-f32-v1
+        // C4 interim: f32 sin, cos and sqrt stay on the invar-trig-f32-v1
         // helpers lowered by the ordinary call arms.
         let trig = matches!(name, "sin" | "cos" | "sqrt") || crate::math::trig_f32_v1(name);
         if trig && matches!(arg_types.first(), Some(Some(Type::F32))) {
@@ -254,7 +254,7 @@ impl Ir<'_> {
         Ok(Some(converted))
     }
 
-    /// A store into a storage array (`check::storage`, #280): f16 and bf16
+    /// A store into a storage array (`check::storage`, ENG-03): f16 and bf16
     /// round once to nearest even (a NaN stays the NaN class), i8 and u8 trap
     /// INTEGER_OVERFLOW out of range.
     fn storage_store(&mut self, name: &str, args: &[String], at: Span) -> Result<String, String> {

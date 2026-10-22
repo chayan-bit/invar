@@ -15,7 +15,7 @@ pub fn hex(bytes: &[u8]) -> String {
     result
 }
 
-/// GNET entry storage ceiling from the #123 device caps policy.
+/// GNET entry storage ceiling from the 2^28 device caps policy.
 pub const MAX_GNET_STORAGE_BYTES: usize = 8 * 1024 * 1024 * 1024;
 /// Generated GNET source only; ordinary device source keeps its smaller cap.
 pub const MAX_GNET_SOURCE_BYTES: usize = 4 * 1024 * 1024;

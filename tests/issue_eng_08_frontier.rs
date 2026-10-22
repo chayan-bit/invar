@@ -1,4 +1,4 @@
-//! #278 ENG-08 part A: the dense-mask frontier observer admits by bytes, not by 16 vertices and
+//! #57 ENG-08 part A: the dense-mask frontier observer admits by bytes, not by 16 vertices and
 //! 16 rounds. Every test asserts a nonzero case count. Device rows above the old caps are pending
 //! until run on hardware.
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};

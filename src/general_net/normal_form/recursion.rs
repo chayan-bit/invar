@@ -1,4 +1,4 @@
-//! Function-level laws (#133 sections 6.3 and 6.4): L9 linear mod-P path sums,
+//! Function-level laws (normal-form design sections 6.3 and 6.4): L9 linear mod-P path sums,
 //! L10 range sums and L20 independent sibling calls.
 
 use std::collections::BTreeSet;
@@ -17,7 +17,7 @@ use crate::{
 };
 
 /// Static bound on `sum_j c_j (P - 1)`: the combine stays below `i32::MAX` with
-/// `2^20` of headroom for the runtime constant term (#133 L9).
+/// `2^20` of headroom for the runtime constant term (law L9).
 pub(super) const COMBINE_BOUND: i64 = (1 << 31) - (1 << 20);
 
 /// Self-call shape of a recursive function: the names bound by `let x = f(..)`

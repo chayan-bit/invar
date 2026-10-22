@@ -37,7 +37,7 @@ not change the language, MIR, Value layout or any ABI.
 - The public C ABI v1 is unchanged; element 3 is private and is never a public scalar or array tag.
 - Returned arrays remain on the explicitly copying reference path; `take` remains refused.
 
-**HA-1.4 (2026-10-21), decided under #237; reference path only:**
+**HA-1.4 (2026-10-21), decided under #53; reference path only:**
 - The admitted element types gain `f64` (IEEE binary64, 8 bytes) and `Bool` (NumPy `bool_`, 1 byte).
   Scalar `f64` is admitted at both host-call entry points.
 - `Array<Bool>` maps onto NumPy `bool_`, one byte per element.

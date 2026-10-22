@@ -91,7 +91,7 @@ fn prefixes(s: &str, is_trap: bool) -> u64 {
     observations(&p, &m, is_trap)
 }
 
-/// Array size the maximum-arrays test exercises; no longer a refusal bound (#278 byte budgets).
+/// Array size the maximum-arrays test exercises; no longer a refusal bound (#57 byte budgets).
 const MAX_ARRAY: usize = 4096;
 
 #[test]
@@ -283,7 +283,7 @@ fn issue_m4_05_gather_scatter_frontier_histogram_bounds_trap_order_and_budget_fa
         };
         assert_eq!(&s[span.start..span.end], trap_expression);
     }
-    // The old 4096-element and 128-contribution caps are gone (#278): sizes past them are
+    // The old 4096-element and 128-contribution caps are gone (#57): sizes past them are
     // admitted under the default byte budget and refused only when they need more bytes.
     for n in [MAX_ARRAY + 1, 100_000] {
         assert!(c.candidate(&vec![0; n], &[], 0).is_ok());

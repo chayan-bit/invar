@@ -1,4 +1,4 @@
-//! ENG-06 (#283) target descriptions: every file under `targets/` parses
+//! ENG-06 (#61) target descriptions: every file under `targets/` parses
 //! strictly and against `schema/invar-target-v1.schema.json`, malformed files
 //! are refused with the failing field, live capabilities select a file, and a
 //! new target (sm_87) is a new file with no Rust change.
@@ -103,7 +103,7 @@ fn issue_eng_06_builtin_targets_parse_and_match_the_files_on_disk() {
             Backend::Cpu => assert!(!t.cpu().unwrap().caches.is_empty()),
         }
     }
-    // Hopper facts requested in #283 (2026-10-21).
+    // Hopper facts requested in #61 (2026-10-21).
     let hopper = builtin.get("cuda-sm90").unwrap().gpu().unwrap();
     assert!(
         hopper
@@ -459,7 +459,7 @@ fn issue_eng_06_live_capabilities_select_a_target_or_refuse() {
 
 #[test]
 fn issue_eng_06_a_new_target_is_a_new_file_with_no_rust_change() {
-    // Jetson Orin (sm_87, #62) and the CPU targets: copy every other file,
+    // Jetson Orin (sm_87, #21) and the CPU targets: copy every other file,
     // confirm the device is unknown, add only its JSON file, and the same
     // compiled registry code now selects it.
     let files = files();

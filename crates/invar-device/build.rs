@@ -1,4 +1,4 @@
-//! Embed every `targets/*.json` file (ENG-06, #283), so a new target is a new
+//! Embed every `targets/*.json` file (ENG-06, #61), so a new target is a new
 //! file and needs no Rust change. `target::Registry::builtin` parses them.
 
 use std::path::Path;

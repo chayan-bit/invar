@@ -24,7 +24,7 @@ use crate::{
     laws::Law,
 };
 
-/// Matrix groups larger than this are outside the law set (#133 L5, #281).
+/// Matrix groups larger than this are outside the law set (law L5, #59).
 const MAX_MATRIX: usize = 16;
 
 pub(super) fn check(

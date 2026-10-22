@@ -1,4 +1,4 @@
-//! Law proof obligations for #281 (ENG-02): the formulas a law certificate
+//! Law proof obligations for #59 (ENG-02): the formulas a law certificate
 //! states, their SMT-LIB2 text, and the in-repo decision procedure that
 //! discharges them (no external solver is trusted; [`prove`] states the
 //! trust root, its fragment and why each rule is sound). A synthesizer only

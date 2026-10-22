@@ -193,7 +193,7 @@ impl LawRepr {
                 Rep::Counter(_) => 2,
                 Rep::Sealed(_) => 1,
                 Rep::Lifted(_) => {
-                    return Err(Error::Unsupported("no collective for a lifted law (#281)"));
+                    return Err(Error::Unsupported("no collective for a lifted law (#59)"));
                 }
             },
         };

@@ -1,4 +1,4 @@
-//! #195 on Metal: a program that also sorts (or runs a spatial query) runs its
+//! On Metal, a program that also sorts (or runs a spatial query) runs its
 //! float reductions where the program without the sort runs them, forced
 //! (`--engine metal`) and under auto's cost model, with the same receipts.
 #![cfg(all(feature = "metal", target_os = "macos"))]

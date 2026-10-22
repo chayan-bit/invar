@@ -1,8 +1,8 @@
 # M5-02 device qualification adapters
 
-Issue #34, stacked on M5-01 draft #121 with CPU draft #112 merged at
+Issue #9, stacked on the M5-01 manifest draft with the M5-02 CPU qualification draft merged at
 `fe2583e8`. Implementation: `38ac19f0`. This adds criterion (b) adapters;
-it does not close #34, criterion (c), or unblock M5-03.
+it does not close #9, criterion (c), or unblock M5-03.
 
 The harness prepares 379 bounded cases for each target across all ten manifest
 families. It reuses the read-only M4 and pair-reduction corpora and the existing
@@ -47,7 +47,7 @@ CPU checks run with bounded memory and runtime on a Linux host, and Metal
 hardware checks run on the Apple M4, one command at a time. CUDA hardware qualification runs only on the pinned RTX 5070 Ti;
 any other device is refused with `M5_PREFLIGHT_MISMATCH` before any work.
 
-The original device receipts (#125, 2026-10-14) are not retained in this repository.
+The original device receipts (2026-10-14) are not retained in this repository.
 Criterion (c), CUDA hardware, full frozen shapes, maximum-size physical sweeps,
 independent library coverage of every subtype and hardware sanitizers remain
 pending. Device-plan success does not establish reached-source publication

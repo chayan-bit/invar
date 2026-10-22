@@ -1,4 +1,4 @@
-//! ENG-06 target descriptions (#283): the hardware facts a schedule may use,
+//! ENG-06 target descriptions (#61): the hardware facts a schedule may use,
 //! as versioned JSON data under `targets/` instead of constants in emitters.
 //!
 //! A file names one device class (`cuda-sm90`, `metal-apple9`,

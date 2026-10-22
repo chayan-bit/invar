@@ -272,7 +272,7 @@ fn issue_l1_06_f32_native_decode_failure_and_panic_restore_bits() {
     }
 }
 
-/// #320: any thread-local in the generated image gives it a TLV on macOS, which
+/// Any thread-local in the generated image gives it a TLV on macOS, which
 /// dyld never unloads and which costs one of 512 pthread keys, so about 500
 /// libraries in one process abort the interpreter. The image must hold none.
 #[test]

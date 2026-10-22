@@ -15,7 +15,7 @@ const MAX_OUTPUT: u64 = 4 * 1024 * 1024;
 const MAX_LOG: u64 = 64 * 1024;
 const TIMEOUT: Duration = Duration::from_secs(30);
 // macOS SystemTime has only microsecond resolution, so concurrent runs in one
-// process also need a counter for distinct scratch roots (#255).
+// process also need a counter for distinct scratch roots.
 static NEXT_ROOT: AtomicU64 = AtomicU64::new(0);
 
 fn summary(samples: &Value) -> Result<Value, String> {

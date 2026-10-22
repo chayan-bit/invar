@@ -34,7 +34,7 @@
     {
       "start": "S1800",
       "end": "S1899",
-      "owner": "company-start acceptance"
+      "owner": "integration-start acceptance"
     },
     {
       "start": "S1900",
@@ -54,7 +54,7 @@
       "meaning": "retired: the loop region count is bounded by the analysis byte budget (RESOURCE_LIMIT)",
       "deprecated": true,
       "reachability": "external",
-      "justification": "Retired by the byte budget in #278; no source can raise it, and the code is kept so older documents stay readable.",
+      "justification": "Retired by the byte budget in #57; no source can raise it, and the code is kept so older documents stay readable.",
       "boundary_test": "issue_ai_01_machine_diagnostics_qualification_retired_code_stays_in_evidence"
     },
     {

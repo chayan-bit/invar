@@ -83,7 +83,7 @@ A variant takes its bulk inputs as host buffers and writes the seed program's ou
 `array::expand` replays the seed program's streams on the host in exact binary32, so for the same `(seed, sizes)` input the variant's output equals the seed program's output bit for bit (the point cloud: the returned prefix, zero after).
 The variants keep the seed programs' split, inputs and oracle discipline: on every oracle input the CPU net oracle equals the reference (returned value and the whole output buffer), and on every oracle and scored input the output prefix equals the seed program's frozen digest; `array/validation.json` freezes the results.
 Their held-out guard is the robotics one over the variants' sources (pinned digest `9e48b08a...e1b4`), disjoint from the seed guard.
-Host-array entry parameters landed in #134 (`feat/v01-gnet-f32-entry`, ABI13), so the manifest marks every variant `requires: abi13-host-arrays`: the files and held-out tests run on every stack, and the execution and device census tests are ignored here and run with `--ignored` on a stack that contains #134.
+Host-array entry parameters landed on `feat/v01-gnet-f32-entry` (ABI13), so the manifest marks every variant `requires: abi13-host-arrays`: the files and held-out tests run on every stack, and the execution and device census tests are ignored here and run with `--ignored` on a stack that contains that branch.
 
 ## Limitations
 
@@ -97,8 +97,8 @@ Host-array entry parameters landed in #134 (`feat/v01-gnet-f32-entry`, ABI13), s
 
 ## Compiler admission today
 
-On this branch's base (#131) device admission refuses all 48 seed programs (`unsupported_type`: f32 arrays).
-On the stack with f32 arrays, host-array entries and sine and cosine (#139, measured on a local merge):
+On this branch's base (the seeded GNET-05 corpus) device admission refuses all 48 seed programs (`unsupported_type`: f32 arrays).
+On the stack with f32 arrays, host-array entries and sine and cosine (the compiled GNET device path for `sin`, `cos` and `sqrt`, measured on a local merge):
 - the seed programs are refused as `owner_entry_result`, because a device entry may not return an owned `Array<f32>` (at the corpus limits 42 of them are refused earlier, as `compiler_structural_budget`);
 - the host-array variants are admitted for the 6 point-cloud programs at the corpus limits, and for 18 of 48 (12 of the 14 table-walk layouts of the other families, and every point cloud) at wide compiler limits, with or without speculation slots; the other 30 are refused as `compiler_structural_budget`.
 

@@ -91,7 +91,7 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
             for code in &emitted {
                 assert!(!invariants.contains(code), "{args:?}: {code}: {document}");
             }
-            // The region-count cap is retired (#278): the source that tripped it is kept as a
+            // The region-count cap is retired (#57): the source that tripped it is kept as a
             // historical negative and must never raise the retired code again.
             if file.file_name().and_then(|name| name.to_str()) == Some("region-limit.inv") {
                 assert!(
@@ -190,7 +190,7 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
     );
     assert_eq!(cpu_fallback["diagnostics"][0]["severity"], "note");
     document_codes(&cpu_fallback, &registered, &mut reached);
-    // `--debug` runs only on native-serial (#305).
+    // `--debug` runs only on native-serial (DX-20).
     let (status, debug_refusal) = cli(&[
         "run",
         path,

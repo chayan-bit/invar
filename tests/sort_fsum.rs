@@ -1,4 +1,4 @@
-//! #195: a program that also sorts (or runs a spatial query) runs its float
+//! A program that also sorts (or runs a spatial query) runs its float
 //! reductions through the fsum CPU engine, with the same receipts as the
 //! program without the sort.
 

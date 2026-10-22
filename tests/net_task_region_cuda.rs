@@ -74,7 +74,7 @@ fn c1_and_generated_fork_joins_agree_with_the_net_oracle_on_cuda() {
     });
 }
 
-/// Review finding (#207): idle cascade workers counted their own polls and
+/// Review finding (P4b cascade liveness): idle cascade workers counted their own polls and
 /// marked the call stalled while other lanes were still running long serial
 /// nodes. With a 1-poll limit and two long leaves, the call must still return
 /// the reference value.

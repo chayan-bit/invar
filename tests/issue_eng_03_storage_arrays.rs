@@ -1,4 +1,4 @@
-//! ENG-03 (#280): storage-only arrays `Array<f16|bf16|i8|u8>` on every CPU
+//! ENG-03: storage-only arrays `Array<f16|bf16|i8|u8>` on every CPU
 //! engine (reference, MIR, cpu-parallel, and native-serial with
 //! `--features native`). Loads widen exactly; a store rounds once to nearest
 //! even (f16, bf16) or traps `INTEGER_OVERFLOW` (i8, u8), as

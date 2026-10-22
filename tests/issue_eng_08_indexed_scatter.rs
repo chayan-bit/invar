@@ -1,4 +1,4 @@
-//! #278 ENG-08 part A: gather, injective scatter and affine scatter admit by bytes, not by a
+//! #57 ENG-08 part A: gather, injective scatter and affine scatter admit by bytes, not by a
 //! 4096-element cap. Every test asserts a nonzero case count. `native-serial` never consults these
 //! source modules, and device rows above the old caps are pending until run on hardware.
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};

@@ -1,4 +1,4 @@
-//! One dispatcher (#263): `run`, `auto`, `explain`, `calibrate` and `build`
+//! One dispatcher (#54): `run`, `auto`, `explain`, `calibrate` and `build`
 //! get regions only from the checked parallel normal form. The form is
 //! extracted from the run's own MIR, every certificate is re-checked
 //! (`regions::family::analyze` runs `certificate::check_all` first), and each
@@ -246,7 +246,7 @@ pub fn regions(
 #[cfg(test)]
 mod tests {
     #[test]
-    fn issue_263_a_plan_the_dispatcher_did_not_select_is_described_serial() {
+    fn issue_54_a_plan_the_dispatcher_did_not_select_is_described_serial() {
         let source = b"fn main() -> i32 { let a = filled_u32(4u32, 1u32); var out = filled_u32(4u32, 0u32); for i in 0u32..4u32 { out[i] = wrapping_add(a[i], 3u32); } return 0; }";
         let checked = crate::check::check(crate::front::parse(source).unwrap(), false).unwrap();
         let program = crate::mir::lower(&checked).unwrap();

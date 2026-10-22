@@ -1,4 +1,4 @@
-//! Validation of a certificate's lowering annotations (#140 items 1-3, 6).
+//! Validation of a certificate's lowering annotations (P4a profile items 1-3, 6).
 //!
 //! Every annotation must be legality evidence and well formed against the
 //! region: its target exists, bounds are ordered and agree with the target's

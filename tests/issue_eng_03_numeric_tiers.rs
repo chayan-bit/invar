@@ -1,4 +1,4 @@
-//! ENG-03 (#280): numeric policy v2 fold tiers and their oracle.
+//! ENG-03: numeric policy v2 fold tiers and their oracle.
 
 #[path = "support/normal_form.rs"]
 mod support;
@@ -373,7 +373,7 @@ fn issue_eng_03_numeric_attribute_declares_a_tier_and_refuses_the_rest() {
 }
 
 /// A Relaxed fold, and a `reassoc_add` fold in a Strict or Relaxed function,
-/// takes the Tree lowering (#280 step 5'): on the source evaluator and MIR it
+/// takes the Tree lowering (ENG-03 step 5'): on the source evaluator and MIR it
 /// has the Tree program's outcome and fuel at every fuel prefix, while a plain
 /// `+` fold in a Strict function stays strict.
 #[test]

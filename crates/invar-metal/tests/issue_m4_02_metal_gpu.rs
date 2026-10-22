@@ -58,7 +58,7 @@ fn issue_m4_02_metal_gpu_stencil_ping_pong() {
             }
         }
     }
-    println!("Metal f32 stencil unavailable: PR #98 strict-with-fallback path is not merged");
+    println!("Metal f32 stencil unavailable: the M4-01 strict-with-fallback path is not merged");
 }
 #[test]
 #[ignore = "requires a real Apple7 or newer Metal GPU"]

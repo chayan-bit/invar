@@ -4,7 +4,7 @@ use invar::scatter_proof;
 use invar::{check, eval, front, general_net, mir, mir_eval};
 use scatter_proof::{Contract, Error, RULE_REVISION};
 
-/// Domain size the boundary test exercises; no longer a refusal bound (#278 byte budgets).
+/// Domain size the boundary test exercises; no longer a refusal bound (#57 byte budgets).
 const MAX_ELEMENTS: u32 = 4096;
 
 fn checked(s: &str) -> check::CheckedProgram {

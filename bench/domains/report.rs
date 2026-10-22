@@ -1,4 +1,4 @@
-//! The domain-suite coverage report (#277): per-program results, the worst
+//! The domain-suite coverage report (#56): per-program results, the worst
 //! five held-out programs and how many programs reached a parallel lowering on
 //! the CPU, with the engine's own refusal reasons. It runs every program on
 //! the reference evaluator and on `cpu-parallel`; it times nothing, because
@@ -150,7 +150,7 @@ pub fn report(suite: &str) -> Result<Value, String> {
         "workers": WORKERS,
         "ranking": "worst held-out: fewest parallel regions first, then id; nothing is timed",
         "device_timings": "pending: not run on real hardware, never estimated",
-        "baselines": "pending: owned by #337 (ENG-26), reported separately",
+        "baselines": "pending: owned by #109 (ENG-26), reported separately",
         "suites": suites,
     }))
 }

@@ -1,5 +1,5 @@
-//! ENG-03 (#280) step 6 on CUDA: a Tree or Exact source fold lowers to a slot
-//! store and one `sum_tree` or `sum_exact` call (#368), and forced CUDA runs
+//! ENG-03 step 6 on CUDA: a Tree or Exact source fold lowers to a slot
+//! store and one `sum_tree` or `sum_exact` call, and forced CUDA runs
 //! that reduction on the device's fsum kernels with the reference's bits.
 #![cfg(feature = "cuda")]
 

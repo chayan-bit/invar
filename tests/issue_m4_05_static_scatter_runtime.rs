@@ -337,7 +337,7 @@ fn issue_m4_05_gather_scatter_frontier_scatter_runtime_maximum_and_over_limit_sh
     let s = format!(
         "{f} fn main() -> i32 {{let a=filled_u32(4097u32,7u32);let out=scatter(a);if out[0u32]!=7u32 {{return 0;}}return 7;}}"
     );
-    // The 4096-element cap is gone (#278): the 4097-element input is admitted and publishes.
+    // The 4096-element cap is gone (#57): the 4097-element input is admitted and publishes.
     assert_eq!(
         prefixes(&s, Budget::default(), true).result,
         Ok(eval::Value::I32(7))

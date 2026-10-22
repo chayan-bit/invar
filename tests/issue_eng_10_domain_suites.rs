@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! ENG-10 (#277): the held-out domain suites (`bench/domains`). Every program
+//! ENG-10 (#56): the held-out domain suites (`bench/domains`). Every program
 //! checks, runs on the reference evaluator, on `cpu-parallel` with 1, 2, 7 and
 //! 64 workers, and (with the `native` feature) on `native-serial`, and returns
 //! 0 only when its outputs equal the Rust oracle bit for bit.

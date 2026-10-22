@@ -1,4 +1,4 @@
-//! #210 C4 part B: under `--numeric-contract trig-f32-v1`, f32 `sin` and `cos`
+//! #48 C4 part B: under `--numeric-contract trig-f32-v1`, f32 `sin` and `cos`
 //! carry their `invar-trig-f32-v1` names after typing, and every device path
 //! still admits them: f32 source regions and the general net (oracle, CUDA
 //! and Metal emitters, run here on the CPU device model). The devices already

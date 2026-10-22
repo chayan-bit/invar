@@ -1,4 +1,4 @@
-"""#193: run_main(artifact=...) forwards a compiled-ahead Metal library as the CLI's --artifact does."""
+"""#46: run_main(artifact=...) forwards a compiled-ahead Metal library as the CLI's --artifact does."""
 import json
 import os
 import pathlib
@@ -81,7 +81,7 @@ CHILD = textwrap.dedent("""
         inv.compile_source(source, engine="metal").run_main()
     except inv.EngineError as error:
         report["missing"] = error.diagnostics
-    # #273: auto runs a sort on the CPU alone, and still refuses another program's library.
+    # Auto runs a sort on the CPU alone, and still refuses another program's library.
     sort = "fn main() -> i32 { var xs: Array<u32> = [2u32,1u32]; sort(xs); if xs[0u32] == 1u32 { return 42; } return 1; }"
     module = inv.compile_source(sort, engine="auto")
     report["sort"] = module.run_main()

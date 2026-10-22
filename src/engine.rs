@@ -356,7 +356,7 @@ fn run_cpu(
     .flatten()
     .and_then(|dispatched| dispatched.gaps.into_iter().next())
     {
-        // A certified loop no family lowers ran on this path (#263). Sort and
+        // A certified loop no family lowers ran on this path (#54). Sort and
         // spatial programs explain under v3/v4, which have no `normal_form`.
         receipt["normal_form"] = serde_json::json!({"status": "fallback", "reason": gap.reason});
     }
@@ -387,7 +387,7 @@ pub fn run_native(
     run_native_with(program, fuel, path, source, library, false)
 }
 
-/// [`run_native`], with DWARF in the executable when `debug` is set (#305).
+/// [`run_native`], with DWARF in the executable when `debug` is set (DX-20).
 #[cfg(feature = "native")]
 pub fn run_native_with(
     program: &crate::mir::Program,
@@ -398,7 +398,7 @@ pub fn run_native_with(
     debug: bool,
 ) -> Result<(i32, serde_json::Value), EvalError> {
     let ran = if debug {
-        // DWARF names the source by absolute path (#305).
+        // DWARF names the source by absolute path (DX-20).
         std::path::absolute(path)
             .map_err(|failure| failure.to_string())
             .and_then(|absolute| {

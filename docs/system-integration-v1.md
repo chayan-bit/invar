@@ -178,11 +178,11 @@ v0.1 is one implementation run, integration first:
 
 ```text
 REN-01 -> file splits -> AI-01 -> L1-01 -> L1-02 -> L1-03 -> R1-01 -> S1-11 -> S1-01 -> S1-03
-  -> L1-04 -> S1-02 -> S1-04 -> S1-05 -> S1-06 (company-start checkpoint) -> L1-06
+  -> L1-04 -> S1-02 -> S1-04 -> S1-05 -> S1-06 (integration-start checkpoint) -> L1-06
   -> M4-01 -> M5-01 -> M4-02 -> M4-03 -> M4-04 -> M4-05 -> M4-07 -> M4-06 -> M5-02 -> M5-03 -> AI-02
 ```
 
-The company-start target is reached at S1-06, a checkpoint that may be tagged `v0.1.0-alpha`.
+The integration-start target is reached at S1-06, a checkpoint that may be tagged `v0.1.0-alpha`.
 The GPU performance track follows, and AI-02 closes v0.1.
 
 ## 10. Real-time core
@@ -208,7 +208,7 @@ metadata, check finite unit transforms and refuse unsupported anchors/models.
 The endpoint harness's additive v2 runtime/golden/evidence formats bind the cell
 source and projection; legacy v1 retains its reference-frame meaning. IR v7/v8/v9,
 C/INVP/ROS layouts and metric limits do not change. This CPU-tested adapter does
-not establish live ROS/cuRobo, collision or complete company-start acceptance.
+not establish live ROS/cuRobo, collision or complete integration-start acceptance.
 
 The October 1 approved task binding uses the existing ordinary component syntax
 `impl extern invar::s1_06_reach_place_v1;`. This explicit version selects the safe
@@ -277,7 +277,7 @@ The task node logs a JSON line and publishes the label on its `phase` topic (`st
 Explicit object-relative `grasp pose ...;` uses additive IRv10 and checked binding
 v2. The source controls the cube-from-grasp pose and generated weld site. Grasp is
 initial cube pose times that pose; pregrasp adds 100 mm in world Z. External task
-pose candidates do not override these source-derived goals. The company cube
+pose candidates do not override these source-derived goals. The target cube
 declares +25 mm Z and Rx(pi), preserving its initial and final poses and the TCP.
 Legacy sources keep centred identity weld behavior. Source-certified geometry,
 collision-free trajectories, measured attachment and every original metric remain

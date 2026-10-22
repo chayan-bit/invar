@@ -10,7 +10,7 @@ Tests: `tests/issue_gnet_05_corpus.rs`.
 | File | Content |
 | --- | --- |
 | `generate.rs` | Seeded generator `gnet05-gen-v3` (SplitMix64, root seed `0x474e455430357631`), held-out split, normalized identity, large-input ladders, `calibrate`, per-input step budgets and the deep inputs (`DEEP_INPUTS`, `deepen`) |
-| `deep_select.py` | Record of how the deep inputs were selected with the #133 net-laws prototype |
+| `deep_select.py` | Record of how the deep inputs were selected with the net-laws prototype of the normal-form design (`docs/design/net-parallel-laws-v01.md`) |
 | `programs/*.inv` | 72 programs, each with entry `run(a, b) -> i32` and a `main` calling it on one recorded input |
 | `manifest.json` | Per-program provenance: family, ordinal, seed, drawn shape, inputs, negative inputs, large-input ladder, the calibrated large input and the deep input, the declared step budget of every input, split, source and normalized SHA-256; default and maximum budgets; pinned held-out digest |
 | `validation.json` | Per-input reference status, steps and oracle outcome; per-target device admission; counted denominators; the deep inputs' outcomes, counted apart (Release run) |
@@ -43,7 +43,7 @@ Serial and negative share:
 
 ## Large inputs
 
-The recorded inputs are small (median work 111 to 782 agents per family, #133), so no GPU gate can be about parallelism at those sizes.
+The recorded inputs are small (median work 111 to 782 agents per family, measured for the normal-form design), so no GPU gate can be about parallelism at those sizes.
 Every program whose work grows with its input carries a ladder of larger candidate inputs in `manifest.json`:
 - divide and compose (divide and conquer over branch trees): the range size grows by about the square root of two per rung (64, 90, 128, ... 65,536) at a fixed depth budget;
 - branch trees: the depth `n` from 6 to 48, one chain per recorded state (the state picks the tree's shape);
@@ -54,14 +54,14 @@ That is 90% of the 100,000-step fuel the reference evaluator, the net oracle and
 The choice is a function of the source and the reference step count only, so it is reproducible and checked by the files test.
 46 programs have a large input: median 73,296 steps, 48 to 204 times the median recorded input of their family (by reference steps).
 The remaining 26 cannot grow: the serial family (sequential by construction), and the recursive-discovery frontiers whose depth is capped by the generator (at most 6).
-Under the 100,000-step budget the largest average parallelism (#133 law model) at a large input is about 180; the deep inputs below reach about 1,000.
+Under the 100,000-step budget the largest average parallelism (the normal-form design's law model) at a large input is about 180; the deep inputs below reach about 1,000.
 
 ## Step budgets and deep inputs
 
 Every recorded input declares its reference and CPU-oracle step budget in `manifest.json` (`budgets`, one per input).
 The default is 100,000 steps (`DEFAULT_BUDGET`), the fuel every other GNET path runs with; the corpus caps a declared budget at 10,000,000 (`MAX_BUDGET`).
 Only the deep inputs declare more.
-`DEEP_INPUTS` gives 30 divide, compose and forkjoin programs one deep input each: the ladder rung `deep_select.py` selected with the #133 prototype, namely the first rung of each chain whose law-directed average parallelism W/S (model c) reaches 1,000, with the least work across chains.
+`DEEP_INPUTS` gives 30 divide, compose and forkjoin programs one deep input each: the ladder rung `deep_select.py` selected with the net-laws prototype, namely the first rung of each chain whose law-directed average parallelism W/S (model c) reaches 1,000, with the least work across chains.
 Its budget is the reference step count rounded up to a whole million (1 to 7 million).
 22 of the 30 reach W/S of 1,015 to 2,271; the other 8 (compose-03 and -06, forkjoin-02, -04, -05, -08, -09 and -11) stop below 1,000 within the cap, at 87 to 923, and are marked short in the evidence.
 Every deep input is a value the oracle reproduces (`deep oracle equal value`: 30), with the outcome frozen in `validation.json`.
@@ -73,7 +73,7 @@ The device configuration caps fuel at 1,000,000, so the device harness runs a de
 Every combine in the other recursive families is linear modulo a prime, so a path-sum law removes their fork-join; `forkjoin` is the tier that keeps it (D5's residual fork-join gate).
 Its 12 programs draw one of three non-linear combines and a divide-and-conquer or branch-tree shape; operands are reduced modulo 10007 first so products stay below 2^31.
 `issue_gnet_05_corpus_forkjoin_combines_are_not_linear` checks that every forkjoin program multiplies two child results or branches on them, and that no other program does.
-With the #133 prototype at the large input, none of the 12 is a path-sum, each keeps 129 to 2,021 fork-join tasks, and its average parallelism is 9 to 158.
+With the net-laws prototype at the large input, none of the 12 is a path-sum, each keeps 129 to 2,021 fork-join tasks, and its average parallelism is 9 to 158.
 9 of the 12 are admitted by device admission today.
 
 ## Held-out discipline
@@ -93,6 +93,6 @@ The tests prove it two ways:
 
 Version 2 (`gnet05-gen-v2`) is a reviewed manifest bump: the 60 version-1 sources and their first four inputs are unchanged; it adds the forkjoin family, the large inputs and a new pinned held-out digest.
 Version 3 (`gnet05-gen-v3`) changes no source, input or held-out digest; it adds the declared step budgets and the deep inputs.
-This corpus is separate from the M5-01 permanent freeze (#121) and needs no hold on it.
+This corpus is separate from the M5-01 permanent freeze and needs no hold on it.
 The M5-01 held-out set covers the M4 families; later families append through reviewed manifest bumps, and the performance acceptance treats general-net as a separate prerequisite.
 Freeze the GNET-05 held-out set (the pinned digest) before any GNET tuning, and keep it out of M5-01 calibration.
