@@ -1,4 +1,4 @@
-"""HA-1.4 native f64 and Bool arrays: exact bits, rollback and the copying reference oracle (#237)."""
+"""HA-1.4 native f64 and Bool arrays: exact bits, rollback and the copying reference oracle (#53)."""
 import invar_python as inv
 import numpy as np
 import pytest

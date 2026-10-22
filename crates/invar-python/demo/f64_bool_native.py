@@ -1,4 +1,4 @@
-"""#237 proof: f64 and Bool arrays through a native-serial export, zero-copy and exact bits, one rejected input."""
+"""#53 proof: f64 and Bool arrays through a native-serial export, zero-copy and exact bits, one rejected input."""
 import invar_python as inv
 import numpy as np
 

@@ -1,4 +1,4 @@
-# Python binding dependency survey (L1-06, #54)
+# Python binding dependency survey (L1-06, #14)
 
 Measured 2026-10-21.
 License and unsafe figures come from the locked crate sources; repository figures come from the GitHub API.
