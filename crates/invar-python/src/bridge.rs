@@ -7,7 +7,7 @@ pub(crate) const ELEMENT_BYTES: usize = 4;
 /// The HA-1 host-array protocol's live-element bound (HA-1.1 §5), checked on
 /// the original extents before any bridge exists. It is the foreign crate's
 /// own constant, so the binding cannot drift from the protocol. It is a
-/// separate tool bound, not the language limit, which #142 raised.
+/// separate tool bound, not the language limit, which was raised separately.
 pub(crate) const LIVE_ELEMENTS: usize = invar_foreign::host_array::MAX_LIVE_ELEMENTS;
 /// Bridges cover pairwise disjoint parts of the live union.
 pub(crate) const BRIDGE_LIMIT_BYTES: usize = LIVE_ELEMENTS * ELEMENT_BYTES;

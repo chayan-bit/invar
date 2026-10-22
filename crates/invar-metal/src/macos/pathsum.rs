@@ -1,6 +1,6 @@
 //! P4a path-sum launcher: ordered stages of one source in one command buffer,
 //! with `(args, part, out, stops)` bound at buffers 0..3 and 256-thread groups.
-//! Compiler-generated and handwritten (#140) kernels share it, so both sides of
+//! Compiler-generated and handwritten (P4a profile) kernels share it, so both sides of
 //! a gate comparison pay the same encode, submit, wait and read.
 use super::*;
 

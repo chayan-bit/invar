@@ -1,4 +1,4 @@
-//! DX-20 (#305): the gdb helper (`share/invar/invar_gdb.py`) in a live
+//! DX-20: the gdb helper (`share/invar/invar_gdb.py`) in a live
 //! session of a `--debug` build: typed handle pretty-printers through the
 //! host's render hook, the trap breakpoint and `invar-where`. Skips, by
 //! name, where gdb is not installed.

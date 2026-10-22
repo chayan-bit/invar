@@ -1,4 +1,4 @@
-//! P4a: path-sum and chain-recursion lowering (#133 L9 and L10, #140 A').
+//! P4a: path-sum and chain-recursion lowering (laws L9 and L10, P4a profile design A').
 //!
 //! [`lower`] turns a checked L9 (`(sum c_j r_j + k) % P`) or L10 (checked
 //! sum) recursion certificate into one program-specific device source with a

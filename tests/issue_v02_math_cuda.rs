@@ -37,7 +37,7 @@ const MUTATION: (&str, &str) = (
 
 fn open() -> CudaDevice {
     CudaDevice::open()
-        .expect("CUDA_UNAVAILABLE: requires CUDA GPU and NVRTC 12.4+ (12.9+ for binary64, #225)")
+        .expect("CUDA_UNAVAILABLE: requires CUDA GPU and NVRTC 12.4+ (12.9+ for binary64)")
 }
 
 /// Load `source`, which needs NVRTC `required`, refusing an older NVRTC first.
@@ -85,7 +85,7 @@ fn against_upstream(
 }
 
 #[test]
-#[ignore = "requires a CUDA GPU, NVRTC 12.9+ (#225) and INVAR_COREMATH_UPSTREAM"]
+#[ignore = "requires a CUDA GPU, NVRTC 12.9+ and INVAR_COREMATH_UPSTREAM"]
 fn v02_math_cuda_matches_upstream_core_math_bit_for_bit() {
     let directory = tempdir("cuda");
     let driver = build(&directory, None);
@@ -116,7 +116,7 @@ fn v02_math_cuda_matches_upstream_core_math_bit_for_bit() {
 }
 
 #[test]
-#[ignore = "requires a CUDA GPU, NVRTC 12.9+ (#225) and INVAR_COREMATH_UPSTREAM"]
+#[ignore = "requires a CUDA GPU, NVRTC 12.9+ and INVAR_COREMATH_UPSTREAM"]
 fn v02_math_cuda_differential_catches_a_mutated_polynomial_coefficient() {
     let directory = tempdir("cuda-mutation");
     let driver = build(&directory, None);
@@ -174,7 +174,7 @@ fn samples(binary64: bool, n: u64) -> Vec<u64> {
 }
 
 #[test]
-#[ignore = "requires a CUDA GPU and NVRTC 12.9+ (#225)"]
+#[ignore = "requires a CUDA GPU and NVRTC 12.9+"]
 fn v02_math_cuda_exact_functions_match_the_strict_oracles() {
     let mut device = open();
     for b in [false, true] {
@@ -228,7 +228,7 @@ fn v02_math_cuda_exact_functions_match_the_strict_oracles() {
 }
 
 #[test]
-#[ignore = "requires a CUDA GPU and NVRTC 12.9+ (#225)"]
+#[ignore = "requires a CUDA GPU and NVRTC 12.9+"]
 fn v02_math_cuda_every_function_shares_one_program() {
     let all: Vec<_> = [false, true]
         .into_iter()
@@ -259,7 +259,7 @@ fn v02_math_cuda_every_function_shares_one_program() {
 }
 
 #[test]
-#[ignore = "requires a CUDA GPU and NVRTC 12.9+ (#225)"]
+#[ignore = "requires a CUDA GPU and NVRTC 12.9+"]
 fn v02_math_cuda_every_function_compiles_alone() {
     let mut device = open();
     let mut failures = Vec::new();

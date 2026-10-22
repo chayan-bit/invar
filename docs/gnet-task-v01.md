@@ -1,7 +1,7 @@
 # GNET P4b: residual fork-join task region T (`gnet-task-v1`)
 
-This is the v0.1 lowering for programs whose certified parallel normal form keeps a fork-join after every law (#133 L20, `NormalForm::is_flat() == false`).
-It implements #132's fork-join T reduced to fixed-width expansion, nested forks, a compacted arena and source-ordered joins (#133 section 10, P4b row).
+This is the v0.1 lowering for programs whose certified parallel normal form keeps a fork-join after every law (law L20, `NormalForm::is_flat() == false`).
+It implements the [region design](design/gnet-parallel-v01.md)'s fork-join T reduced to fixed-width expansion, nested forks, a compacted arena and source-ordered joins ([normal-form design](design/net-parallel-laws-v01.md) section 10, P4b row).
 
 ## Admission (`src/general_net/task/mod.rs`)
 
@@ -27,7 +27,7 @@ The arena holds one node per spawned call: state, function, pc, parent, sibling 
 A node runs until it returns, fails or reaches a call, spawning one child per sibling (nested forks fork again).
 A node whose children are all done resumes: the first failing child in source order, then the pending argument failure, is its result; otherwise it binds the results and continues, and a continuation call spawns new children.
 The arena is compacted (children are allocated with one atomic add), so no lane is padded and no leaf runs twice.
-A full arena runs the node serially from its last commit point (`capacity_serialized` in #132), never failing the program.
+A full arena runs the node serially from its last commit point (`capacity_serialized` in the region design), never failing the program.
 The call depth limit (64 live frames) is checked at every call and reported as the oracle's `CALL_DEPTH_LIMIT`.
 A failing child sets the cancel flag of every later sibling; cancellation only stops work the oracle never does, because the join already takes the first failing child in source order, so a cancelled sibling's result is never read.
 Earlier siblings are never cancelled (mutation `CancelEarlier` must fail).
@@ -107,7 +107,7 @@ The gate is unchanged.
 Lowering the hop latency further (for example a register replay of the top levels like the B form, or per-call routing by input size) is open.
 ## Open
 
-- Source fuel and the speculative work budget of #132 section 6 belong to the host and device frames (P2, P5, P6); T runs every sibling of a successful join to completion and cancels only the siblings after a failure.
+- Source fuel and the speculative work budget of region design section 6 belong to the host and device frames (P2, P5, P6); T runs every sibling of a successful join to completion and cancels only the siblings after a failure.
 - Heartbeat promotion of idle lanes is not implemented (fixed-width expansion only).
 - The cost model refuses per region and device from the scored bench; a program outside the C1 family is admitted until a bench measures it.
 - Arrays, f32 values and mutual recursion are refused.

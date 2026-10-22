@@ -402,7 +402,7 @@ fn nonlinear_recursion(source: &str) -> bool {
 
 /// The forkjoin family is the residual fork-join tier: every program keeps a
 /// combine that is not linear in its child results. Every other recursive
-/// family combines children linearly modulo a prime (the bias #133 measured).
+/// family combines children linearly modulo a prime (the bias the normal-form design measured).
 #[test]
 fn issue_gnet_05_corpus_forkjoin_combines_are_not_linear() {
     for p in generate::generate() {

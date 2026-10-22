@@ -647,8 +647,8 @@ pub fn run(target: Target, compiler: Option<&Path>) -> Result<Value, Failure> {
         #[cfg(all(feature = "metal", target_os = "macos"))]
         Target::Metal => {
             // The qualification corpus is arbitrary generated source with no
-            // compiled-ahead library (#129), so it compiles MSL at run time,
-            // as main's Metal GPU tests do since #206.
+            // compiled-ahead library, so it compiles MSL at run time,
+            // as main's source-compiling Metal GPU tests do.
             let device = invar_metal::MetalDevice::open_runtime_source()
                 .map_err(|e| Failure::new("M5_DEVICE_UNAVAILABLE", format!("{e:?}")))?;
             metal::run(device, Path::new(""))

@@ -63,7 +63,7 @@ pub(crate) fn run(
         }
     };
     let mut reductions = Vec::new();
-    // #195: reached float reductions run on the device, as in `--engine metal`.
+    // Reached float reductions run on the device, as in `--engine metal`.
     let workers = schedule::metal::reduce::workers()?;
     let mut reducer = |call: &crate::mir_eval::ReduceCall<'_>| {
         schedule::metal::reduce::forced(call, &mut device.borrow_mut(), workers, &mut reductions)

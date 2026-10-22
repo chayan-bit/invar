@@ -133,7 +133,7 @@
       "minimum": 0
     },
     "normal_form": {
-      "description": "P6(a) normal-form route (#263): the laws the law executor applied with the checked certificate identity, or why the serial path ran.",
+      "description": "P6(a) normal-form route (#54): the laws the law executor applied with the checked certificate identity, or why the serial path ran.",
       "oneOf": [
         {
           "type": "object",
@@ -533,7 +533,7 @@
           "const": "invar-trig-f32-v1"
         },
         "fold": {
-          "description": "Each declared fold tier a lowered fold used, to the algorithm that ran (#280). A Strict function's reassoc_add folds record as relaxed.",
+          "description": "Each declared fold tier a lowered fold used, to the algorithm that ran. A Strict function's reassoc_add folds record as relaxed.",
           "type": "object",
           "additionalProperties": false,
           "minProperties": 1,

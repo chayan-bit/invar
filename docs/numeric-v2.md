@@ -1,6 +1,6 @@
 # Numeric contract v2: fold tiers
 
-This document is normative for ENG-03 (#280).
+This document is normative for ENG-03.
 It extends [numeric contract v1](numeric-v1.md) and does not change it.
 Every rule of v1 still holds, except that a function may now declare how its binary32 folds associate.
 
@@ -50,7 +50,7 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 
 ### Lowering on the CPU engines
 
-- In a Tree or Exact function, the checker rewrites each tiered fold before typing (`src/check/numeric/fold_tiers.rs`). A Relaxed function's folds, and the `reassoc_add` folds of a Strict function, take the Tree rewrite, a fixed deterministic choice that the Relaxed contract admits (#280 step 5'):
+- In a Tree or Exact function, the checker rewrites each tiered fold before typing (`src/check/numeric/fold_tiers.rs`). A Relaxed function's folds, and the `reassoc_add` folds of a Strict function, take the Tree rewrite, a fixed deterministic choice that the Relaxed contract admits (ENG-03 step 5'):
   - the bounds are evaluated once, in order;
   - an `f32` slot buffer `filled_f32(M, -0.0)` is allocated (M + 1 slots for Exact, slot 0 holding `init`);
   - the update becomes the slot write;
@@ -145,11 +145,11 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 - A streaming Tree lowering without the slot buffer. (The parallel normal form needs no float-sum law: a lowered fold reaches it as a slot store and one `sum_tree` or `sum_exact` call, and a Strict f32 fold keeps its refusal.)
 - Storage arrays across function boundaries, views of them, packed storage, and reductions (`sum_tree` and the folds) over them.
 
-#280 is complete without them. A Relaxed fold's cost-based choice between Tree and Exact is #285 (ENG-07), and fused kernels that honour the tiers are #327 (ENG-16). The other items have no issue yet.
+ENG-03 is complete without them. A Relaxed fold's cost-based choice between Tree and Exact is #63 (ENG-07), and fused kernels that honour the tiers are #99 (ENG-16). The other items have no issue yet.
 
-## Acceptance (#280)
+## Acceptance (ENG-03)
 
-| #280 acceptance | Where it is pinned |
+| ENG-03 acceptance | Where it is pinned |
 | --- | --- |
 | Policy: the four v2 tiers, `fast` and unknown versions and kinds refused, frozen receipt ids unchanged | `issue_eng_03_numeric_tiers` (including the unchanged v1 `Debug` text that the frozen receipt ids embed) |
 | Strict f32 fold stays PNF `Serial` with the same reason | `issue_eng_03_a_strict_f32_fold_stays_serial_in_the_normal_form` |
@@ -157,8 +157,8 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 | Relaxed within the bound on 10,000 seeded inputs (cancellation, subnormals, infinities, NaN class, signed zero) | `issue_eng_03_numeric_tiers` |
 | Storage: all 65,536 f16 and bf16 patterns, every rounding boundary, i8/u8 first trap in source order | `issue_eng_03_numeric_tiers`, `issue_eng_03_storage_arrays` |
 | Negative: `reassoc_add` on a product, a caller's Relaxed on a strict callee, an unknown tier string | `issue_eng_03_numeric_tiers` |
-| Negative: a forged certificate claiming Tree on a Strict function | Not expressible: tiered folds reach the normal form only as a slot store and one `sum_tree`/`sum_exact` call, so no certificate carries a fold tier (step 5 re-scope, comment on #280) |
-| Device rows: CUDA and Metal fsum lowering of source folds | `issue_eng_03_tier_cuda` (NVIDIA H100) and `issue_eng_03_tier_metal` (Apple M4), run for #383 |
+| Negative: a forged certificate claiming Tree on a Strict function | Not expressible: tiered folds reach the normal form only as a slot store and one `sum_tree`/`sum_exact` call, so no certificate carries a fold tier (step 5 re-scope) |
+| Device rows: CUDA and Metal fsum lowering of source folds | `issue_eng_03_tier_cuda` (NVIDIA H100) and `issue_eng_03_tier_metal` (Apple M4), run for ENG-03 step 6 |
 | Receipts record the lowering (Decision 4) | `issue_eng_03_fold_receipts` (explain-v5 and invar-diagnostics-v3, D12) |
 
 ## Tests

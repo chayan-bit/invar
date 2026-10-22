@@ -1,4 +1,4 @@
-//! Shared helpers for the #278 ENG-08 byte-budget tests: a per-thread counting allocator, source
+//! Shared helpers for the #57 ENG-08 byte-budget tests: a per-thread counting allocator, source
 //! assembly, and agreement of the reference, MIR and `cpu-parallel` engines.
 #![allow(dead_code)]
 use invar::{check, eval, front, mir, schedule};

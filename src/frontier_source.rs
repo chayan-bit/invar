@@ -14,7 +14,7 @@ use crate::{
 
 /// Observer resource limits, never a source duplicate/order policy. The default is unbounded:
 /// a frontier never holds more than the vertex count and the work is bounded by vertices and
-/// rounds, both of which the [`ByteBudget`] bounds through [`footprint`] (#278).
+/// rounds, both of which the [`ByteBudget`] bounds through [`footprint`] (#57).
 #[derive(Clone, Copy, Debug)]
 pub struct Budget {
     pub capacity: usize,

@@ -328,4 +328,4 @@ cells at kernel parity whose timings track swap on a shared Mac.
 The flat limits stay at 1.00 / 1.05 and no cell that did not pass is counted.
 Metal warm scoring on a swap-free machine, a run-time residency check before
 the native sum fold, CUDA warm-scan parity in an uncontended window and wiring
-`route` into P4a placement are deferred to v0.2 (#159).
+`route` into P4a placement are deferred to v0.2 (#35).

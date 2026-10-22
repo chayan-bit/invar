@@ -1,4 +1,4 @@
-//! #307 (DX-22): the fix engine and its generators. Every emitted fix is
+//! DX-22: the fix engine and its generators. Every emitted fix is
 //! validated by applying it, reparsing and rechecking.
 
 mod cli;

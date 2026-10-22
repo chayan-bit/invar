@@ -60,7 +60,7 @@ pub struct Object {
     pub names: Vec<String>,
     pub blobs: EmbeddedBlobs,
     pub foreign: Vec<Option<ForeignSpec>>,
-    /// Set by [`emit_mir_debug`]: DWARF to keep and the host's value layouts (#305).
+    /// Set by [`emit_mir_debug`]: DWARF to keep and the host's value layouts (DX-20).
     pub debug: Option<String>,
 }
 
@@ -109,7 +109,7 @@ pub fn emit_mir(program: &mir::Program) -> Result<Object, String> {
 }
 
 /// Lower like [`emit_mir`], plus DWARF 5 mapping the code back to `source`
-/// (#305). The code is the same as `emit_mir`'s; only debug metadata is added.
+/// (DX-20). The code is the same as `emit_mir`'s; only debug metadata is added.
 pub fn emit_mir_debug(program: &mir::Program, source: &DebugSource) -> Result<Object, String> {
     let mut object = object_from_ir(llvm_ir_debug(program, None, Some(source))?)?;
     object.debug = Some(debug::host_types(program));
@@ -439,7 +439,7 @@ pub fn link_with_library(
         let has_spatial = object.ir.contains("call i64 @invar_spatial_v1(");
         let host = if has_spatial {
             // The standalone host has no module files: inline numeric_contract's
-            // file submodules (#173, #280) where the file declares them.
+            // file submodules (f64 math, ENG-03) where the file declares them.
             let numeric = [
                 (
                     "mod binary64;",
@@ -462,7 +462,7 @@ pub fn link_with_library(
             );
             format!(
                 "{host}\n#[allow(dead_code)] mod invar_device {{ pub mod trig_f32 {{ {} }} }}\nmod numeric_contract {{ {} use crate::invar_device; }}\nmod fsum_reference {{ {} }}\nuse invar_sort_cpu as sort_cpu;\nmod spatial_cell {{ {} }}\nmod invar_spatial {{ {} }}\n{}",
-                // numeric_contract's f32 sin, cos and sqrt come from invar-trig-f32-v1 (#158).
+                // numeric_contract's f32 sin, cos and sqrt come from invar-trig-f32-v1.
                 include_str!("../crates/invar-device/src/trig_f32.rs"),
                 numeric,
                 // numeric_contract::fold reaches crate::fsum_reference.

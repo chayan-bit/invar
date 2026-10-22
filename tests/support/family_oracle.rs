@@ -1,4 +1,4 @@
-//! #263: the source/MIR recognizers as test oracles, and the program corpus
+//! #54: the source/MIR recognizers as test oracles, and the program corpus
 //! selection parity is measured on. A recognizer selects; the production
 //! dispatcher must make the same choice from the checked normal form, or name
 //! why it refused.

@@ -289,7 +289,7 @@ fn issue_gnet_02_aggregates_source_record_shell_counts_toward_oracle_budget() {
     let checked = checked(source);
     let net = Net::lower(&checked, Limits::default()).unwrap();
     let proof = net.verify().unwrap();
-    // #123 raised the language ceiling. This source is valid, but the default
+    // The 2^28 device caps raised the language ceiling. This source is valid, but the default
     // oracle budget still admits only the two arrays, not their record shell.
     let actual = oracle::observe(&net, &proof, oracle::Limits::default()).unwrap();
     assert_eq!(actual.failure, Some(oracle::ToolFailure::Allocation));

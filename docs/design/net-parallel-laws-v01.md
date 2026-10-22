@@ -1,13 +1,13 @@
 # Law-directed parallelism for the GNET net (design, v0.1)
 
-Status: adopted in part; P1b and P8 on main, P10 in #281 (ENG-02) and #279 (ENG-04).
-The design was adopted on 2026-10-15 as recorded in section 12, and it supersedes the P1, P3 and P4 plan of #132.
-The float contract of sections 0, 2, 4, 5, 7 and 9 to 12 was amended by the maintainer rulings of 2026-10-21 (#321), summarised in "Amendment A" below.
+Status: adopted in part; P1b and P8 on main, P10 in #59 (ENG-02) and #58 (ENG-04).
+The design was adopted on 2026-10-15 as recorded in section 12, and it supersedes the P1, P3 and P4 plan of `docs/design/gnet-parallel-v01.md`.
+The float contract of sections 0, 2, 4, 5, 7 and 9 to 12 was amended by the maintainer rulings of 2026-10-21 (#93), summarised in "Amendment A" below.
 The measurements in section 7 are a prototype's, not a performance claim of any shipped code.
-It extends `docs/design/gnet-parallel-v01.md` (#132, called "the region design" below) and changes no contract by itself; the contract changes it needs are listed as decisions in section 12.
+It extends `docs/design/gnet-parallel-v01.md` (called "the region design" below) and changes no contract by itself; the contract changes it needs are listed as decisions in section 12.
 Authority: `docs/general-gpu-v01.md`, `docs/cuda-parity-v01.md`, `src/general_net/CONTRACT.md` and the float contract of Amendment A govern.
 
-### Amendment A: the default float contract (maintainer rulings of 2026-10-21, #321)
+### Amendment A: the default float contract (maintainer rulings of 2026-10-21, #93)
 
 This document was written under strict-f32-v1, in which source-order f32 accumulation is the only legal order.
 The maintainers replaced that default; the rulings below win over any older sentence in this document, and each affected passage carries a pointer back here.
@@ -17,15 +17,15 @@ The maintainers replaced that default; the rulings below win over any older sent
   - Every backend and both reference interpreters (`eval`, `mir_eval`) compute exactly this tree, so results are bit-identical across CPU, CUDA and Metal.
   - `sum_tree` of section 2 (L17) is this tree; it is now the meaning of an ordinary f32 fold, not a separate opt-in operation.
 - **Multiply-add.** `a * b + c` lowers to IEEE fused multiply-add (one rounding) on every backend and in the reference interpreters.
-- **`fsum`.** The correctly rounded mode (`sum_exact`, L18; #173) stays, and is order-independent by construction.
+- **`fsum`.** The correctly rounded mode (`sum_exact`, L18, from invar-math-cr-v1) stays, and is order-independent by construction.
 - **`strict-sequential`.** An explicit opt-in tier for code that must bit-match scalar source order.
   Under it a parallel f32 reduction is refused, as strict-f32-v1 did.
 - **`unordered`.** The only non-deterministic tier and an explicit opt-in.
   It is required for float atomics and order-free reductions; float atomics are banned everywhere else.
-- **Reduced precision and approximate transcendentals** (TF32, BF16, FP8, approximate math) are explicit types or functions (#328), never silent rewrites.
+- **Reduced precision and approximate transcendentals** (TF32, BF16, FP8, approximate math) are explicit types or functions (#100), never silent rewrites.
 - **Fixtures and oracles** that encode sequential f32 order are migrated to the tree order (a semantics change; the oracle implements the new definition exactly).
-  The migration, the canonical tree shape and the cross-backend bit-identity test are tracked in #280.
-- **State on main.** `docs/numeric-v2.md` still defaults a function to strict until the #280 migration lands, so the code, not this document, is the record of what runs today.
+  The migration, the canonical tree shape and the cross-backend bit-identity test are part of ENG-03.
+- **State on main.** `docs/numeric-v2.md` still defaults a function to strict until the ENG-03 migration lands, so the code, not this document, is the record of what runs today.
 - **Not decided here.** The rulings define reductions.
   Scans over f32 affine, matrix and tropical updates (L4 to L6 over f32) have no ruling; they stay refused as laws until one defines a scan tree.
 
@@ -33,7 +33,7 @@ The maintainers replaced that default; the rulings below win over any older sent
 
 The span of a net is a property of the net, not of the scheduler: for a strongly confluent net every reduction performs the same interactions with the same causal order, so no runtime (HVM2-style or ours) can finish faster than the longest causal chain of the net as written.
 More parallelism therefore has to come from rewriting the net into an observationally equivalent net with a shorter chain, and the only rewrites that do that are **algebraic laws**: associativity and identity (a fold becomes a tree), closure of a function space under composition (a loop-carried update becomes a prefix scan over finitely represented functions: affine maps over a ring, tropical maps, small matrices, finite state maps), **lifting** (extra state that makes a non-homomorphism a homomorphism, including the state that locates the first checked-integer trap), linearity over a semiring (argument-determined recursion becomes a weighted sum over root-to-leaf paths), and order-insensitive writes (idempotent, monotone or last-writer scatters).
-The proposal is a **parallel normal form (PNF)**, a small algebra of map, tree reduce, prefix scan over a law representation, segmented operation, scatter-combine, frontier round, path-sum and residual fork-join, which the compiler derives from the verified net by checking each law's proof obligation, records as a certificate next to the region certificate of #132, and lowers to the existing family emitters or the two GNET kernels.
+The proposal is a **parallel normal form (PNF)**, a small algebra of map, tree reduce, prefix scan over a law representation, segmented operation, scatter-combine, frontier round, path-sum and residual fork-join, which the compiler derives from the verified net by checking each law's proof obligation, records as a certificate next to the region certificate of the region design, and lowers to the existing family emitters or the two GNET kernels.
 Every law is exact under the integer contract: checked arithmetic is reassociated only in a wider exact ring with an explicit search for the first source-order violation, so the trap index and value are unchanged.
 Strict f32 was the hard limit when this document was written: reassociating an f32 fold changed the result in 1,897 of 2,000 random arrays, so under strict-f32-v1 a source-order f32 accumulation keeps its order.
 Amendment A removes that limit as the default: an f32 reduction now means the fixed deterministic tree (a definition, so no law reassociates anything), f32 parallelism also comes from independent accumulators (batches) and from laws that are exact in f32 (min, max, argmin with NaN lifting, compare and select), and the correctly rounded `sum_exact` stays available.
@@ -77,7 +77,7 @@ For every schedule of `N` on any number of processors, the makespan is at least 
 The corollary is the design principle: once a runtime exposes all of `S_dep`, the only remaining lever is to change the net.
 HVM2 shows the other half of the cost: it reaches 74,000 million interactions per second on an RTX 4090 with near-ideal scaling (HVM2 paper abstract), but each interaction moves 64-bit nodes through global memory with atomic links, and the paper states that single-threaded HVM2 is about 5x slower than GHC and up to 100x slower on loops and mutable arrays (HVM2 paper, "Single Core Inefficiency").
 A flat GPU sum reads 4 bytes per element at memory bandwidth and does no allocation, so per element it does one to two orders of magnitude less memory traffic than a reduction that allocates a recursive stack of nodes.
-The region design's spike 1 measured the same gap inside Invar: a structure-preserving fork-join with path replay is 1.9x to 2.7x of the flat kernel resident, and 56x when level-synchronous (#132 §8).
+The region design's spike 1 measured the same gap inside Invar: a structure-preserving fork-join with path replay is 1.9x to 2.7x of the flat kernel resident, and 56x when level-synchronous (region design §8).
 The gap is in the **form** (frames, joins, dispatches per level), not only in the span.
 
 ### 1.3 Laws
@@ -85,7 +85,7 @@ The gap is in the **form** (frames, joins, dispatches per level), not only in th
 A **law** is a typed rewrite `N => N'` together with:
 - an algebraic statement over the values the rewritten agents compute;
 - a **proof obligation**, discharged either statically (from the net: types, literals, footprints, intervals) or by a **runtime guard** evaluated before any visible effect, with a compiled fallback to the unrewritten region;
-- a **certificate**: the law id, the representation it uses, the guard, and the facts it relied on, re-derived and checked by the region verifier against the current net fingerprint exactly as `RegionCertificate` in #132 §3;
+- a **certificate**: the law id, the representation it uses, the guard, and the facts it relied on, re-derived and checked by the region verifier against the current net fingerprint exactly as `RegionCertificate` in region design §3;
 - a span effect and a work effect.
 
 Seven algebraic shapes cover every law in section 2:
@@ -95,7 +95,7 @@ Seven algebraic shapes cover every law in section 2:
 4. **Linear recursion over a semiring.** If a recursive function's arguments to its self calls depend only on its own arguments, and its result is `(sum_j c_j * r_j + k) op P` in the self-call results `r_j`, the result equals the sum, over all root-to-node paths, of the product of edge coefficients times the node's constant or leaf value (a tree homomorphism; Morihata et al., POPL 2009, "The third homomorphism theorem on trees"; Miller and Reif 1985 tree contraction for the general case).
 5. **Order-insensitive writes.** A scatter whose combine is associative and commutative (sum, min, max, or), idempotent (set to a constant), or ordered last-writer (the right-projection semigroup `x . y = y`, implemented as a per-target maximum writer index) is a parallel scatter-combine.
 6. **Monotone frontier.** Writes that only set flags to one constant, with writers determined by round-start state, let every source-order read be reconstructed in parallel: a reader at iteration `u` sees the flag set iff the round-start flag is set or a writer `v <= u` was active this round.
-7. **First exit.** A loop that returns at the first iteration satisfying a predicate equals a min-index reduction over the predicate (the same rule #132 uses for the first trap).
+7. **First exit.** A loop that returns at the first iteration satisfying a predicate equals a min-index reduction over the predicate (the same rule the region design uses for the first trap).
 
 ### 1.4 Two exactness lemmas
 
@@ -136,7 +136,7 @@ The trap column says how source-order traps and the GNET observation contract v2
 
 | Law | Algebraic statement | Proof obligation and certificate | Net rewrite | Span effect | Traps / f32 | Cut |
 | --- | --- | --- | --- | --- | --- | --- |
-| L1 map | iterations with disjoint footprints commute | affine footprints: every store index iteration-injective (`i`, `a*i + r` with loop-invariant `a != 0`, or block ownership `i*K + r` with `0 <= r < K` from inner extents); reads of stored arrays stay in the iteration's block; no carried scalar | `ForNext` loop region to `map(i, body)` | `n c -> c + 1` | first trap = min failing index (#132 rule); f32 exact (no reassociation) | v0.1 (#132) |
+| L1 map | iterations with disjoint footprints commute | affine footprints: every store index iteration-injective (`i`, `a*i + r` with loop-invariant `a != 0`, or block ownership `i*K + r` with `0 <= r < K` from inner extents); reads of stored arrays stay in the iteration's block; no carried scalar | `ForNext` loop region to `map(i, body)` | `n c -> c + 1` | first trap = min failing index (region design rule); f32 exact (no reassociation) | v0.1 (the region design) |
 | L2 sealed wrapping fold | `(Z/2^32, +, 0)` and `(Z/2^32, *, 1)` are commutative monoids | static (op is `wrapping_add` / `wrapping_mul`, existing `laws::Law`) | fold to `reduce(law)` | `n -> log n` | no traps; not f32 | v0.1 (exists) |
 | L3 trap-lifted checked fold | checked `+`/`*` on `i32`/`u32` is the restriction of `Z`; lift to `(total, min prefix, max prefix)` in 64-bit (sum) or saturated magnitude with zero flag (product) | static op and type; Lemma A; certificate records the lifted representation | fold to `reduce(lift)`, then a rare-path `scan + min-index` | `n -> log n` (twice on the trap path) | exact value and first trap index (lawcheck: 3,000 cases each, 0 mismatches); not f32 | v0.1 |
 | L4 affine recurrence | `s -> a s + b` closed under composition over a ring | ring by op: wrapping `Z/2^32` (existing M2-04), checked via Lemma A, or residue `Z/P` via Lemma B (guard: non-negative seed and coefficients) | carried update to `scan(affine) ; map(apply)` | `n -> 2 log n` | exact trap index and value (Lemma A); f32 affine is **not** a law (rounding; no ruling defines an f32 scan, Amendment A) | v0.1 |
@@ -145,17 +145,17 @@ The trap column says how source-order traps and the GNET observation contract v2
 | L7 min / max / argmin | leftmost minimum under a strict weak order is associative; NaN elements are the identity; the seed is applied once on the left | static compare-and-select shape; companion variables assigned under the same guard become the argument | `reduce(argmin)` | `n -> log n` | integer exact; **f32 exact** with NaN lifting and signed-zero preservation (lawcheck: 3,000 cases, 0 mismatches) | v0.1 |
 | L8 finite-state map | functions `[S] -> [S]` compose; the update `s := T[s*k + c]` is such a function | guard: every table entry `< |S|` (one map over the table); `|S|` bound for work | `scan(fsm vector)` | `n -> 2 log n`, work `x |S|` | index traps checked by the guard; not f32 | later (cost model needed) |
 | L9 path-sum tree | for argument-determined recursion with combine `(sum_j c_j r_j + k) % P`, the result is the path-weighted sum of node constants and leaves | static: self-call arguments independent of self results, constant `c_j`, one modulus, no-overflow bound; guard: non-negative leaves and arguments (Lemma B); root-chain case returns the raw leaf | recursive function to `paths(prologue) ; map(leaf * weight) ; reduce(+ mod P)` | `d (c_pro + c_comb) -> d c_pro + log L`, no frames or joins; work grows by the replayed prologue (section 1.5) | exact (lawcheck: 3,000 random trees, data-dependent splits, 0 mismatches); trap order: the source combine cannot trap (static bound), prologue traps resolved by min path in source order | v0.1 |
-| L10 range-split sum (#132 D4) | special case of L9 with `c_j = 1`, no modulus, sealed or trap-lifted `+` | static | as L9 | as L9 | as L3 | v0.1 (D4) |
+| L10 range-split sum (region design D4) | special case of L9 with `c_j = 1`, no modulus, sealed or trap-lifted `+` | static | as L9 | as L9 | as L3 | v0.1 (D4) |
 | L11 scatter-combine | AC combine (`wrapping_add`, checked `+` via L3, min, max, or) commutes across writers | static update shape `A[k] = A[k] op e`; no other access | `scatter_reduce(op)` | conflicts `n -> log n` | checked `+` per target via L3; f32 `+` is a float atomic, allowed only under `unordered` (Amendment A) | v0.1 (histogram family) |
 | L12 ordered scatter | last writer in source order = maximum writer index per target | static: no reads of the target in the loop | `scatter_max_index ; gather` | `n -> log n` | exact; f32 values are moved, never combined | v0.1 |
 | L13 compaction | store index is a counter that increments exactly when the store happens | static (counter class, same guard) | `scan(+) ; scatter` | `n -> 2 log n` | counter cannot overflow (bounded by trip count) | v0.1 (M4-04) |
 | L14 monotone frontier | flags set to one constant, writers determined by round-start state: reader at `u` sees `old or (active(v) and v <= u)` | static: constant stores, writer predicate reads only round-start state | round to `map(active) ; map(reconstruct)` | per round `n -> log n` | reconstructs the exact `next` array and the source step count (lawcheck: 3,000 rounds, 0 mismatches) | v0.1 |
 | L15 first exit | early return at the first satisfying iteration = min index | static: body otherwise a map | `map(pred) ; reduce(min index)` | `n -> log n` | traps in iterations before the exit still win in index order | v0.1 |
 | L16 f32 integer-valued fold | f32 `+` is exact on integers while every partial sum is below `2^24` in magnitude | guard: all inputs integral with `n * max|x| < 2^24` | as L2 | `n -> log n` | exact, else fallback to source order; only meaningful under `strict-sequential`, since the default tier already gives the fold its tree meaning (Amendment A) | later |
-| L17 f32 deterministic tree | **not a law**: the default meaning of an f32 fold, the pairwise tree of `sum_tree` fixed over index order, with a shape that depends only on the length (Amendment A) | default tier; the oracle computes the same tree (`FoldTier::reference`, `docs/numeric-v2.md`) | `reduce(f32 +, pinned shape)` | `n -> log n` | bit-exact against the oracle on every backend; differs from a source-order loop, which `strict-sequential` keeps | decision F1 as amended (#321 ruling 1) |
-| L18 exact f32 sum | **not a law**: `sum_exact`, the correctly rounded mode of `fsum` (#173), which stays available (Amendment A) | user opts in (the `exact` tier or the call); superaccumulator or binned representation | `reduce(superacc)` | `n -> log n` | order-independent by construction (lawcheck: 2,000 shuffles, 0 changes) | decision F1 as amended |
+| L17 f32 deterministic tree | **not a law**: the default meaning of an f32 fold, the pairwise tree of `sum_tree` fixed over index order, with a shape that depends only on the length (Amendment A) | default tier; the oracle computes the same tree (`FoldTier::reference`, `docs/numeric-v2.md`) | `reduce(f32 +, pinned shape)` | `n -> log n` | bit-exact against the oracle on every backend; differs from a source-order loop, which `strict-sequential` keeps | decision F1 as amended (#93 ruling 1) |
+| L18 exact f32 sum | **not a law**: `sum_exact`, the correctly rounded mode of `fsum`, which stays available (Amendment A) | user opts in (the `exact` tier or the call); superaccumulator or binned representation | `reduce(superacc)` | `n -> log n` | order-independent by construction (lawcheck: 2,000 shuffles, 0 changes) | decision F1 as amended |
 | L19 map fusion | `map f . map g = map (f . g)` when footprints allow | static | fuse adjacent regions | removes one dispatch and one round trip of the intermediate | exact | v0.1 (M3-03 laws) |
-| L20 fork-join (residual) | independent pure calls commute | `speculation_analysis` facts | region T of #132 | `sum -> max` of siblings | ABI5 source-ordered commit | v0.1 (#132) |
+| L20 fork-join (residual) | independent pure calls commute | `speculation_analysis` facts | region T of the region design | `sum -> max` of siblings | ABI5 source-ordered commit | v0.1 (the region design) |
 
 What no law in the catalogue covers is listed in section 5.
 
@@ -180,18 +180,18 @@ R ::= a law representation: identity, combine on k words, apply, guard
 | PNF node | Lowering | Owner |
 | --- | --- | --- |
 | `map` with a body in a family op set | family map emitter | M4 families via stage "a" |
-| `map` with an arbitrary compiled body | body map **M** | GNET (#132 P2) |
+| `map` with an arbitrary compiled body | body map **M** | GNET (region design P2) |
 | `reduce`/`scan` with `R` a sealed u32 law | family collective | M4-02 |
 | `reduce`/`scan` with any other `R` | one generic block-reduce and decoupled look-back scan template, parameterised by `R`'s word count, combine and apply (Merrill and Garland 2016 single-pass scan) | new P8 (section 10) |
 | `segmented` | family segmented (M4-04) when `R` is sealed, else the generic template per segment | M4-04 / P8 |
 | `scatter` | family histogram / injective scatter; ordered scatter as a `max` writer-index scatter then a gather | M4-07 / P8 |
 | `frontier` | family frontier (M4-05) for the dense form, else two maps per round in the host frame | M4-05 / P2 |
-| `paths ; reduce` | one path-replay kernel (lane = digit string, as #132's path-replay T, but without the continuation machine; each lane replays its prologue, so work grows as in section 1.5) plus a generic reduction | new P4a |
+| `paths ; reduce` | one path-replay kernel (lane = digit string, as the region design's path-replay T, but without the continuation machine; each lane replays its prologue, so work grows as in section 1.5) plus a generic reduction | new P4a |
 | `first` | a map writing per-lane predicate status plus a min-index reduction (the existing trap-resolution kernel) | P2 |
-| `forkjoin` | task region **T** | #132 P4 (now P4b) |
-| `serial` | host frame (D2) or device frame | #132 P5 |
+| `forkjoin` | task region **T** | region design P4 (now P4b) |
+| `serial` | host frame (D2) or device frame | region design P5 |
 
-This replaces "one MIR-region recognizer per family" (#132 P3) with "one PNF extractor plus a per-family admission predicate on PNF nodes": a family declares which `(node, R, body op set)` it accepts.
+This replaces "one MIR-region recognizer per family" (region design P3) with "one PNF extractor plus a per-family admission predicate on PNF nodes": a family declares which `(node, R, body op set)` it accepts.
 
 ## 4. Soundness
 
@@ -199,13 +199,13 @@ This replaces "one MIR-region recognizer per family" (#132 P3) with "one PNF ext
 
 **Argument**, by induction over the PNF tree, with each node's obligation:
 1. *Value.* Each law's algebraic statement gives equality of the computed values for all inputs that satisfy its obligation (sections 1.3 and 1.4); guards make the obligation hold or route to the fallback, which is the unrewritten region.
-2. *First trap.* Laws that regroup checked operations (L3 to L6, L9 to L11) compute in a wider exact ring and search for the first violation in source index order (Lemma A), or prove statically that no violation exists (L9's combine bound, L13's counter bound); maps and paths resolve traps by the minimum source-ordered index, the same rule as #132 §3.
+2. *First trap.* Laws that regroup checked operations (L3 to L6, L9 to L11) compute in a wider exact ring and search for the first violation in source index order (Lemma A), or prove statically that no violation exists (L9's combine bound, L13's counter bound); maps and paths resolve traps by the minimum source-ordered index, the same rule as region design §3.
    Because the source evaluator stops at the first trap and the parallel form never publishes beyond the minimum failing index, the published prefix is the source prefix.
 3. *Source steps.* Source fuel is additive over iterations and paths; each lane records its own step count, and the region's step total is a sum reduction, exact in 64-bit.
    L14 reconstructs data-dependent branch outcomes (which `next` stores the source executed), so its step count is exact too, not an upper bound (lawcheck verifies steps, not only values).
-   Fuel cut inside a region follows #132: prefix sums locate the iteration where fuel ends, and only that iteration replays serially.
-4. *Cleanup and effects.* Laws apply only to regions whose certificate shows no `Host` effect and no owner escaping an iteration (the #132 region legality); cleanup happens in the frame at the region boundary in source order.
-5. *Demand/Complete sequence.* In verification mode every PNF node keeps the map from its parallel index to the source position (iteration index, or path digits in lexicographic order for L9 and L20), so the source-order event sequence is reconstructed after the fence, as #132 §7 requires; production runs are trace-off variants compared against traced ones.
+   Fuel cut inside a region follows the region design: prefix sums locate the iteration where fuel ends, and only that iteration replays serially.
+4. *Cleanup and effects.* Laws apply only to regions whose certificate shows no `Host` effect and no owner escaping an iteration (the region design's legality); cleanup happens in the frame at the region boundary in source order.
+5. *Demand/Complete sequence.* In verification mode every PNF node keeps the map from its parallel index to the source position (iteration index, or path digits in lexicographic order for L9 and L20), so the source-order event sequence is reconstructed after the fence, as region design §7 requires; production runs are trace-off variants compared against traced ones.
 6. *f32.* No law reassociates f32 arithmetic; L7 only selects among existing values; L16 is a guarded exactness fact under `strict-sequential`; L17 and L18 give f32 folds a defined meaning (the default tree and the correctly rounded sum) with their own oracle semantics, so a tree lowering is the program's meaning and not a rewrite of source order.
    `a * b + c` is one fused operation in the oracle and on every backend (Amendment A).
 
@@ -217,11 +217,11 @@ This is evidence for the algebra, not a proof of an implementation; section 10 a
 1. **Non-closed state updates.** If the carried update's function space is not closed under composition with a bounded representation, no scan exists: the Collatz-style `v := v even ? v/2 : 3v+1` (GNET-05 serial family), polynomial updates of degree above one (`s := s*s + x` doubles the representation per composition), and updates whose branch depends on the state.
    Only speculation can help those, and only when the reachable state set is small (Prabhu, Ramalingam and Vaswani, PLDI 2010; Mytkowicz et al. 2014 enumerate all states); otherwise they stay sequential, and P-completeness results for iterated function evaluation suggest no general escape.
 2. **Dependent call chains.** `f(g(h(x)))` with data flowing through every call has span equal to its work; this is the serial family's chain shape.
-3. **Recursion whose control reads child results**, or whose combine is non-linear in the children (`r1 * r2 % P`, `if r1 > r2 { recurse }`), has no path-sum; it keeps fork-join T, with its 2x to 3x form cost (#132 spike 1).
+3. **Recursion whose control reads child results**, or whose combine is non-linear in the children (`r1 * r2 % P`, `if r1 > r2 { recurse }`), has no path-sum; it keeps fork-join T, with its 2x to 3x form cost (region design spike 1).
 4. **`strict-sequential` f32 folds**: source-order accumulation has exactly one bit-exact order, so under that opt-in tier it parallelizes across independent accumulators only; the default tree tier has no such limit (Amendment A).
 5. **Algorithmic substitutions**: laws preserve the algorithm's operation multiset up to regrouping; they never turn a quadratic neighbour scan into a grid sort, a linear search into a BVH, or a dense frontier into a work-efficient sparse one.
    Handwritten baselines that use a different algorithm (allowed by `docs/cuda-parity-v01.md`) are reachable only through new families or user-level algorithms.
-6. **Effects and ownership**: regions with `Host` effects, owner escape or aliasing `mut` arguments are excluded by the region legality of #132 before any law is considered.
+6. **Effects and ownership**: regions with `Host` effects, owner escape or aliasing `mut` arguments are excluded by the region legality of the region design before any law is considered.
 7. **Work-inefficient laws**: L5 with large `k` and L8 with large `|S|` are legal but multiply work by `k^2` or `|S|`; they are only chosen when `W/p` is not the bottleneck, so some legal laws are deliberately not used.
 
 ## 6. Inference: how laws are found
@@ -261,10 +261,10 @@ The plan for later is an egglog program (Zhang et al., PLDI 2023) over PNF terms
 
 `cost = W/p + c_step * S + c_launch * L + B / bandwidth + c_frame * F`
 
-with `L` dependent dispatches, `B` bytes moved and `F` task frames, calibrated by M5-01 (#121) per target.
+with `L` dependent dispatches, `B` bytes moved and `F` task frames, calibrated by M5-01 per target.
 Equality saturation is bounded by node and iteration limits (the M4-06 compile budget), AC rules are applied as rewrites with a limit on reorderings rather than by AC matching, and proof certificates come from egg-style explanations (Flatt et al., "Small Proofs from Congruence Closure", FMCAD 2022), so each extracted form carries the chain of laws that justify it.
 Cranelift's acyclic e-graph mid-end shows the production pattern: e-graphs as a bounded optimisation layer, not the IR of record.
-The search is step 2 of #279: a bounded e-graph search beside the net (decisions E1 and M1), where the interaction net stays the IR of record and every extracted form is re-certified by the independent checker.
+The search is step 2 of #58: a bounded e-graph search beside the net (decisions E1 and M1), where the interaction net stays the IR of record and every extracted form is re-certified by the independent checker.
 
 ## 7. Empirical analysis
 
@@ -276,7 +276,7 @@ A throwaway prototype outside the repository (`$HOME/.cache/invar-net-laws/`, mo
 - The engine runs each program once and keeps one strand clock per model, so all models see identical semantics:
   - **ser**: source order, span = work.
   - **a, today's GNET**: serial root continuation, loops serial, independent same-block call siblings offered to 8 speculative slots (the test configuration; the CLI allows 2), children never fork.
-  - **b, the region design (#132)**: maps and nested maps, sealed wrapping folds, M2-04 wrapping affine scans, checked counters with constant increments (static guard), the families it lists (compaction, histogram, injective scatter with a runtime injectivity check, dense frontier, and the min/argmin reductions #132 §8 claims), fork-join T for independent calls, and the D4 range-split sum.
+  - **b, the region design**: maps and nested maps, sealed wrapping folds, M2-04 wrapping affine scans, checked counters with constant increments (static guard), the families it lists (compaction, histogram, injective scatter with a runtime injectivity check, dense frontier, and the min/argmin reductions region design §8 claims), fork-join T for independent calls, and the D4 range-split sum.
   - **c, this proposal**: b plus L3 to L15.
   - **ct**: c plus a pinned f32 tree (L17), to show what the f32 contract costs.
     After Amendment A, ct is the figure for the default float contract, and a, b and c are the figures under `strict-sequential`; nothing was re-measured.
@@ -291,7 +291,7 @@ Limits of the method: spans are unit-cost agent counts, not time; the a model ig
 
 Average parallelism `W/S` (geometric mean; higher is better):
 
-| family | inputs | median W | today (a) | #132 (b) | laws (c) | probe median W | probe a / b / c | path-sum (c) | needs T (b) |
+| family | inputs | median W | today (a) | region design (b) | laws (c) | probe median W | probe a / b / c | path-sum (c) | needs T (b) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | divide | 48 | 277 | 1.70 | 2.96 | 3.38 | 396,993 | 2.5 / 1,005 / 1,121 | 12/12 | 12/12 |
 | branch | 48 | 183 | 1.34 | 1.64 | 1.95 | 1,335 | 1.7 / 8.9 / 10.3 | 12/12 | 12/12 |
@@ -306,7 +306,7 @@ Findings:
 2. **The region design (b) already exposes most of the span** of divide, branch and compose: at the probe inputs it reaches parallelism 1,005 on divide against 2.5 for today's GNET.
    The law model (c) cuts span by a further 1.11x (divide), 1.15x (branch), 1.06x (frontier) and 1.24x (compose) in geometric mean, up to 2.07x on single programs.
 3. **The real difference is form, not span.** Under b, every divide, branch and compose program and 7 of 12 frontier programs need fork-join task frames and join continuations (median 14,842 task frames per probe run for divide, up to 27,586); under c, 44 programs (all divide, branch and compose, and the 8 recursive-discovery frontier programs) are **path-sum trees** with no frames and no joins, and the 4 BFS programs are monotone frontier rounds.
-   That is the form #132 spike 1 identified as the parity gap (path-replay T at 1.9x to 2.7x of a flat kernel, level-synchronous T at 3.4x to 56x).
+   That is the form region design spike 1 identified as the parity gap (path-replay T at 1.9x to 2.7x of a flat kernel, level-synchronous T at 3.4x to 56x).
    Every GNET-05 combine is linear modulo a literal prime (`(a*5 + b + c*2) % 100003`, `(v0*7 + v1 + v2) % 10007`, `(w + v) % 10007`), and every split point and branch selector depends only on arguments, so L9 applies to all of them.
 4. **Programs where only laws help** (c at least 20% below b on some input): 16 programs, all through L9 (path-sum trees whose combines dominate the path) or L4 over `Z/P` (the `while i < x % 17 { s = (s * 12 + i) % 10007; ... }` leaf loops of branch, compose and two serial programs).
    No GNET-05 program needs speculation.
@@ -361,7 +361,7 @@ Findings:
 3. The joint chain and the composite-inertia pass are f32 matrix and affine recurrences; reassociating them (ct) shortens span 3.5x to 5.4x but changes rounding, and with batches of thousands it would only add work.
    Handwritten FK kernels do not reassociate the chain either (cuRobo parallelizes across links of a batch element for the transforms, then multiplies in order).
    The Amendment A rulings define reductions, not these recurrences, so the chain and the backward pass stay serial per lane.
-4. The neighbourhood case stays quadratic: a grid or sort is an algorithmic substitution (completeness limit 5), consistent with #132's "at risk" rating.
+4. The neighbourhood case stays quadratic: a grid or sort is an algorithmic substitution (completeness limit 5), consistent with the region design's "at risk" rating.
 
 ### 7.5 Law probes (n = 4,096 and 65,536)
 
@@ -386,7 +386,7 @@ They are common in robotics streams (single long trajectories, sensor logs, cont
 ### 7.6 What the numbers do and do not say
 
 - For batched robotics and family-shaped kernels, b and c have the same span; the law pass is a generalisation of the family recognizers, not a speed-up.
-- For recursive divide-and-conquer and branch trees, b and c have similar span, but c removes all task frames and joins; whether that closes #132's measured 1.9x to 2.7x form gap is **not measured here**.
+- For recursive divide-and-conquer and branch trees, b and c have similar span, but c removes all task frames and joins; whether that closes the region design's measured 1.9x to 2.7x form gap is **not measured here**.
   The decisive measurement is a Metal and CUDA spike of the L9 lowering (one path-replay kernel plus a weighted reduction) against the flat handwritten kernel on GNET-05 divide and compose shapes at large inputs; it is the first gate of P4a (section 10) and was not run in this pass.
 - For single long sequences with carried state, c is the only model with logarithmic span.
 - Under strict-f32-v1, strict f32 folds bounded everything: no model parallelized P8 or P11 without a contract change.
@@ -409,10 +409,10 @@ Each row is judged on what it parallelizes automatically, the cost and decidabil
 | Semiring and tensor algebra (einsum; TACO, Kjolstad et al., OOPSLA 2017; MLIR linalg; TVM, Chen et al., OSDI 2018) | dense and sparse contractions, reductions over semirings, fusion, layout | decidable on index expressions; schedule search is the hard part | none (sparse formats cover irregular data, not control) | reassociates f32 by default; exact modes must be pinned | TVM and Ansor near vendor libraries on dense kernels; TACO GPU competitive on sparse kernels | **beside**, through the existing M4 GEMM and tensor families; L5 is its semiring core for recurrences |
 | Relational algebra and Datalog (semi-naive evaluation; Souffle, Jordan et al., CAV 2016; GPU Datalog work) | set-at-a-time joins, level-synchronous fixpoints | semi-naive evaluation is polynomial for Datalog | frontiers and graph closure natively; no general recursion over values | exact on sets; aggregates need laws | GPU Datalog engines report large speedups over CPU engines on graph analytics | **borrow the idea**: L14 is semi-naive evaluation of a monotone frontier; no Datalog IR |
 | Array and combinator calculi (APL; Futhark, Henriksen et al., PLDI 2017; Dex, Paszke et al., ICFP 2021; Lift, Steuwer et al., ICFP 2015; RISE and ELEVATE, Hagedorn et al., ICFP 2020) | map, reduce, scan, scatter with fusion and flattening; Lift explores rewrite rules to pick GPU-specific forms | type-directed, cheap; Lift's rewrite search is bounded exploration | Futhark and Dex refuse recursion; nested parallelism via flattening (incremental flattening, PPoPP 2019) | Futhark requires the user to promise associativity; reassociates f32 inside `reduce` | Lift reports performance on par with hand-tuned OpenCL on several kernels; Futhark is competitive on many benchmarks | **adopted as the PNF's target vocabulary**; Invar derives the SOACs from laws instead of requiring the user to write them |
-| Halide algorithm/schedule separation (Ragan-Kelley et al., PLDI 2013; autoschedulers) | any schedule the user or autoscheduler picks for a fixed algorithm | schedules are legal by construction for its stencil-like algebra | none | f32 order fixed by the algorithm except declared reductions | near hand-tuned image pipelines | **adopted as a principle**: certificates (algorithm) separate from placement and variant choice (schedule), already in #132 |
+| Halide algorithm/schedule separation (Ragan-Kelley et al., PLDI 2013; autoschedulers) | any schedule the user or autoscheduler picks for a fixed algorithm | schedules are legal by construction for its stencil-like algebra | none | f32 order fixed by the algorithm except declared reductions | near hand-tuned image pipelines | **adopted as a principle**: certificates (algorithm) separate from placement and variant choice (schedule), already in the region design |
 | Rewriting logic (Maude, Meseguer 1992) | concurrent rewriting, AC matching | AC matching is NP-complete in general | general | as the rules | none for GPUs | no: the e-graph covers search; AC is handled as bounded rewrites |
 | E-graphs as the IR (egg; egglog; Tensat, Yang et al., MLSys 2021; Cranelift's acyclic e-graph) | all law-equivalent forms at once, extraction by cost | saturation can blow up; bounded by node and iteration limits; extraction is NP-hard in general | as rich as the rules; e-graphs do not represent effects or control well | exact if rules are | Tensat improves tensor graphs; no general near-handwritten claim | **beside, as the search layer** (section 6.4), never the IR of record |
-| Heartbeat and lazy task creation (Acar et al., PLDI 2018; Rainey et al., PLDI 2021) | fork-join with bounded overhead by promoting only when needed | runtime technique | the best known technique for residual fork-join | exact (no reordering) | CPU results; GPUs lack the interrupt mechanism | **beside**: the later promotion step of #132's T |
+| Heartbeat and lazy task creation (Acar et al., PLDI 2018; Rainey et al., PLDI 2021) | fork-join with bounded overhead by promoting only when needed | runtime technique | the best known technique for residual fork-join | exact (no reordering) | CPU results; GPUs lack the interrupt mechanism | **beside**: the later promotion step of the region design's T |
 | Graph DSLs with schedule separation (GraphIt, Zhang et al., OOPSLA 2018; GPU backend, Brahmakshatriya et al., CGO 2021); Gunrock | frontier algorithms with direction, layout and load-balance schedules | schedule search | frontiers yes, general recursion no | exact on integers | near Gunrock and hand-tuned graph code | **borrow**: frontier schedules for M4-05 and L14 later |
 
 **Recommendation: a layered design, not a replacement.**
@@ -420,7 +420,7 @@ No single model covers Invar's language: polyhedral and tensor models are exact 
 Replacing the net would change the v0.1 contract (the CPU net oracle is its semantic reference) and would discard the one model that already encodes Invar's traps, fuel, ownership and source-ordered observations.
 The layered design gets each model's benefit without that change:
 1. the **net** for semantics, verification and the oracle (unchanged, contract v1, observations v2);
-2. **affine footprint analysis** (a polyhedral subset: injectivity, block ownership, affine dependence) for loop-nest legality, with full polyhedral scheduling as a later option inside family emitters (isl through a reviewed FFI boundary is approved in principle, #321 ruling 3, and needs its own PR with a license check and a review);
+2. **affine footprint analysis** (a polyhedral subset: injectivity, block ownership, affine dependence) for loop-nest legality, with full polyhedral scheduling as a later option inside family emitters (isl through a reviewed FFI boundary is approved in principle, #93 ruling 3, and needs its own PR with a license check and a review);
 3. **recursion schemes and homomorphisms** (the law catalogue, lifting, path-sum) for carried state, recursion and irregular control;
 4. **semi-naive frontier evaluation** for monotone frontiers (L14);
 5. a **bounded e-graph** to choose between law-equivalent PNF forms under the cost model, later than v0.1;
@@ -432,7 +432,7 @@ The empirical data supports this split: M5-01 is covered entirely by layer 2 plu
 **Checked integers.**
 Every integer law in the catalogue preserves the source value and the source-order first trap exactly.
 The price is a lifted representation (three 64-bit words for a sum instead of one 32-bit word, two for an affine map) and, only when a trap happens, a second pass to locate it; the input is still read once, so memory-bound reductions keep their traffic, and the extra cost is registers and arithmetic.
-Static no-overflow guards (#132's approach) remain the fast path when interval facts prove them; trap lifting removes the need for them, so checked folds over arbitrary data (P1, P10) parallelize without a guard that could fail.
+Static no-overflow guards (the region design's approach) remain the fast path when interval facts prove them; trap lifting removes the need for them, so checked folds over arbitrary data (P1, P10) parallelize without a guard that could fail.
 
 **Floating point (as amended by Amendment A).**
 Under strict-f32-v1 a source loop `acc = acc + x[i]` in f32 had exactly one bit-exact implementation: left-to-right per accumulator.
@@ -446,43 +446,43 @@ The ways to get parallel f32, in the order a program meets them:
 4. **The correctly rounded sum** (`sum_exact`, L18, the exact mode of `fsum`): order-independent by construction, so any parallel shape is bit-exact (0 changes under 2,000 shuffles in the prototype); cost on GPUs is reported as comparable to standard summation for large memory-bound sums (Collange, Defour, Graillat and Iakymchuk, Parallel Computing 2015, ExBLAS), while binned reproducible summation costs about 9n flops for a 6-word accumulator (Ahrens, Demmel and Nguyen, ACM TOMS 2020); both are cheap where bandwidth dominates and expensive inside compute-bound kernels such as GEMM.
 5. **`strict-sequential`**, an explicit opt-in: source order, so a parallel f32 reduction is refused, as strict-f32-v1 did.
 6. **`unordered`**, an explicit opt-in and the only non-deterministic tier: order-free reductions and float atomics, which are banned under every other tier.
-7. **Reduced precision and approximate math** (TF32, BF16, FP8, approximate transcendentals) are explicit types or functions (#328), never silent rewrites; `docs/cuda-parity-v01.md` already allows a non-exact mode only as a separately frozen approximate contract.
+7. **Reduced precision and approximate math** (TF32, BF16, FP8, approximate transcendentals) are explicit types or functions (#100), never silent rewrites; `docs/cuda-parity-v01.md` already allows a non-exact mode only as a separately frozen approximate contract.
 
 **What parity against a handwritten f32 kernel can honestly mean.**
 `docs/cuda-parity-v01.md` already says the baseline must preserve the operation's numerical contract and that a baseline implementing a different contract is informative only.
-The scored ML suites run under the default contract (#321 ruling 1), so the scored baseline implements the same pinned tree and fuses `a * b + c` as IEEE fused multiply-add; for `sum_exact` it implements the same correctly rounded sum; under `strict-sequential` it keeps the same per-accumulator order and may parallelize across accumulators.
+The scored ML suites run under the default contract (#93 ruling 1), so the scored baseline implements the same pinned tree and fuses `a * b + c` as IEEE fused multiply-add; for `sum_exact` it implements the same correctly rounded sum; under `strict-sequential` it keeps the same per-accumulator order and may parallelize across accumulators.
 A cuBLAS-style kernel that reassociates freely implements another contract and is reported as an informative comparison, never as the denominator.
 The FK spike reached bitwise-identical parity against unfused strict arithmetic, before the multiply-add ruling made fused `a * b + c` the contract on every backend.
 A handwritten kernel's freedom to reassociate is a different contract, not a faster implementation of the same one.
 
 ## 10. Revised plan
 
-### What changes in #132
+### What changes in the region design
 
 - **P1** (region partition and certificates) splits into P1a (unchanged: regions, footprints, `RegionCertificate`) and **P1b: PNF extraction and law certificates** (sections 2, 3, 6.1, 6.2), which produces the PNF for every legal region.
 - **P3** (family bridge) shrinks: instead of a MIR-region recognizer per family, each family declares an admission predicate over PNF nodes; the AST-agreement tests stay.
-- **P4** splits into **P4a: path-sum and chain recursion** (L9, L10: path-replay kernel plus generic reduction; its first gate is the Metal and CUDA spike of section 7.6) and **P4b: residual fork-join T** (#132's ABI6 scope, reduced to fixed-width expansion and nested forks, since laws remove most of its use).
+- **P4** splits into **P4a: path-sum and chain recursion** (L9, L10: path-replay kernel plus generic reduction; its first gate is the Metal and CUDA spike of section 7.6) and **P4b: residual fork-join T** (the region design's ABI6 scope, reduced to fixed-width expansion and nested forks, since laws remove most of its use).
 - **New P8: generic law-representation collectives**: one block-reduce and one single-pass decoupled look-back scan template, parameterised by a law representation (word count, combine, apply, identity, guard), on CUDA and Metal, plus the trap-lifting rare path.
-- **P9, the default float contract (amended 2026-10-21; tracked in #280)**: the fixed tree, fused multiply-add and `sum_exact` as the meaning of f32 folds, with oracle semantics and the fixture migration (decision F1 as amended).
-- **New P10: bounded e-graph search** over PNF terms (section 6.4, #279) and offline lifting synthesis (section 6.3, #281), both after the v0.1 cut.
+- **P9, the default float contract (amended 2026-10-21; part of ENG-03)**: the fixed tree, fused multiply-add and `sum_exact` as the meaning of f32 folds, with oracle semantics and the fixture migration (decision F1 as amended).
+- **New P10: bounded e-graph search** over PNF terms (section 6.4, #58) and offline lifting synthesis (section 6.3, #59), both after the v0.1 cut.
 
 ### Phases (estimated new or changed lines, code / tests)
 
 | Phase | Content | Code / tests | Depends on | Cut |
 | --- | --- | --- | --- | --- |
-| P0a, P0b | as #132 (trig and sqrt contract; f32 and array entry) | 1,800 / 1,400 | D6, HA-1 | v0.1 |
-| P1a | regions, footprints, region certificates | 1,200 / 900 | #99, #114 | v0.1 |
+| P0a, P0b | as the region design (trig and sqrt contract; f32 and array entry) | 1,800 / 1,400 | D6, HA-1 | v0.1 |
+| P1a | regions, footprints, region certificates | 1,200 / 900 | GNET-01/02, GNET-03 | v0.1 |
 | P1b | PNF extractor: counted regions, linear forms, class lattice, carried SCCs, footprint classes, recursion classifier; law certificates and verifier; sealed primitive law table (L1 to L7, L9 to L15) | 2,200 / 1,800 | P1a | v0.1 |
-| P2 | body map M and host frame (as #132), plus `first` and frontier rounds | 1,400 / 1,000 | P1a | v0.1 |
+| P2 | body map M and host frame (as the region design), plus `first` and frontier rounds | 1,400 / 1,000 | P1a | v0.1 |
 | P3 | family admission predicates on PNF nodes; AST-agreement differential tests | 1,100 / 900 | P1b, stage "a" | v0.1 |
 | P8 | generic law-representation reduce and scan templates (CUDA, Metal), trap-lifting rare path | 1,000 / 800 | P1b | v0.1 |
 | P4a | path-sum lowering: path-replay kernel, weighted reduction, raw-root case; gate: spike against the flat handwritten kernel | 900 / 800 | P1b, P8 | v0.1 |
 | P4b | residual fork-join T: nested forks, fixed-width expansion, arena, joins | 1,400 / 1,100 | P1a | v0.1 |
-| P5, P5b, P6, P7 | as #132 | 1,900 / 1,200 plus evidence | as #132 | v0.1 |
-| P9 | default float contract: tree folds, fused multiply-add, `sum_exact`; oracle, emitters and fixture migration (#280; the line estimate predates the ruling) | 900 / 800 | F1 | amended 2026-10-21: the default contract, tracked in #280 |
-| P10 | egglog search over PNF, offline lifting synthesis with SMT certificates, L8 FSM and large-`k` L5 under the cost model | 2,000 / 1,500 | P1b, M5-01 calibration | later; scheduled in #281 and #279 |
+| P5, P5b, P6, P7 | as the region design | 1,900 / 1,200 plus evidence | as the region design | v0.1 |
+| P9 | default float contract: tree folds, fused multiply-add, `sum_exact`; oracle, emitters and fixture migration (ENG-03; the line estimate predates the ruling) | 900 / 800 | F1 | amended 2026-10-21: the default contract, part of ENG-03 |
+| P10 | egglog search over PNF, offline lifting synthesis with SMT certificates, L8 FSM and large-`k` L5 under the cost model | 2,000 / 1,500 | P1b, M5-01 calibration | later; scheduled in #59 and #58 |
 
-v0.1 total: about 12,900 lines of code and 9,900 of tests (against 9,700 and 6,500 in #132), the increase being P1b, P8 and P4a.
+v0.1 total: about 12,900 lines of code and 9,900 of tests (against 9,700 and 6,500 in the region design), the increase being P1b, P8 and P4a.
 
 ### Risks
 
@@ -500,7 +500,7 @@ The tiered D5 gate below was adopted on 2026-10-15.
 D5 (accepted direction: amend the parity gate for general dynamic categories) needed a threshold; the data suggests the threshold should depend on the **normal form the compiler certifies**, not on the benchmark family name:
 1. **Law-reachable flat forms** (any PNF without `forkjoin`: maps, reductions, scans, path-sum, frontier rounds): **no amendment**; the standard gate applies (point estimate `R <= 1.00`, upper 95% bound `<= 1.05`, both scopes).
    On the current GNET-05 corpus this covers 48 of 60 programs under the law model.
-2. **Residual fork-join** (programs whose PNF still contains `forkjoin` after all laws, for a reason the explain output names: non-linear combine, control reading child results, guard failure): an amended gate of **`R <= 3.0` resident and `R <= 2.0` host-to-host** (point estimates, with upper 95% bounds at `3.15` and `2.10`), from #132 spike 1's path-replay T (1.9x to 2.7x resident, 1.1x to 2.1x host-to-host up to 2^24 elements), reviewed again with P4b data.
+2. **Residual fork-join** (programs whose PNF still contains `forkjoin` after all laws, for a reason the explain output names: non-linear combine, control reading child results, guard failure): an amended gate of **`R <= 3.0` resident and `R <= 2.0` host-to-host** (point estimates, with upper 95% bounds at `3.15` and `2.10`), from region design spike 1's path-replay T (1.9x to 2.7x resident, 1.1x to 2.1x host-to-host up to 2^24 elements), reviewed again with P4b data.
    Today GNET-05 contains no such program, so this tier needs new cases.
 3. **Sequential programs** (`W/S < 2` under the law model at the scored input, such as 10 of the 12 serial programs): not a GPU parity case; placement must choose the CPU, and the gate is CPU-native parity against a handwritten CPU baseline plus the existing dispatch-overhead gate.
 4. The tier is decided by the compiler's certificate and explain output, frozen before timing, never chosen after measurement, and a program cannot move to a looser tier by failing a guard on purpose: guard outcomes are part of the scored input set.
@@ -514,13 +514,13 @@ D5 (accepted direction: amend the parity gate for general dynamic categories) ne
 | L2 | Parallelize checked integer folds and recurrences by trap lifting (exact-then-check in a wider ring, Lemma A), not only under static no-overflow guards | Adopted |
 | L3 | Admit the residue-ring (L4 over `Z/P`) and path-sum (L9) laws in v0.1, with runtime non-negativity guards and serial or T fallback | Adopted; the P4a spike gates performance, not correctness |
 | L4 | Which laws are in v0.1: L1 to L7, L9 to L15 and L19, L20; L8 (FSM), large-`k` L5, L16 and synthesis later | Adopted |
-| F1 | Strict-f32 folds keep source order; add declared `sum_tree` (pinned pairwise tree) and `sum_exact` (correctly rounded) operations: in v0.1, later, or never | Original outcome: later (not v0.1); v0.1 parity for f32 compares against same-order baselines. **Superseded 2026-10-21 (#321 ruling 1, Amendment A):** the fixed tree is the default, `strict-sequential` is the opt-in, `sum_exact` stays as the exact mode, and parity compares against baselines of the same contract, as `docs/cuda-parity-v01.md` already requires |
-| F2 | Correct #132 §8: f32 cost sums across rollouts are not a family reduction under strict-f32-v1, and f32 min/argmin needs the NaN-lifted law | Adopted; applied to #132 sections 3 and 8. Under the default tree (Amendment A) an f32 cost sum across rollouts is a family reduction again; the NaN-lifted min and argmin law is unchanged |
+| F1 | Strict-f32 folds keep source order; add declared `sum_tree` (pinned pairwise tree) and `sum_exact` (correctly rounded) operations: in v0.1, later, or never | Original outcome: later (not v0.1); v0.1 parity for f32 compares against same-order baselines. **Superseded 2026-10-21 (#93 ruling 1, Amendment A):** the fixed tree is the default, `strict-sequential` is the opt-in, `sum_exact` stays as the exact mode, and parity compares against baselines of the same contract, as `docs/cuda-parity-v01.md` already requires |
+| F2 | Correct region design §8: f32 cost sums across rollouts are not a family reduction under strict-f32-v1, and f32 min/argmin needs the NaN-lifted law | Adopted; applied to region design sections 3 and 8. Under the default tree (Amendment A) an f32 cost sum across rollouts is a family reduction again; the NaN-lifted min and argmin law is unchanged |
 | D5 | Threshold by certified normal form: standard gate for flat forms; `R <= 3.0` resident and `<= 2.0` host-to-host for residual fork-join; CPU parity for sequential programs | Adopted as the tiered gate of section 11; thresholds revisited with P4b data |
 | C1 | Request tier-2 held-out cases (non-linear combines, child-dependent control, guard-failing inputs) and larger recorded inputs, through a reviewed manifest bump | Adopted |
-| E1 | E-graph search and lifting synthesis after v0.1; v0.1 uses deterministic rule order plus the cost model | Adopted; the search is scheduled as #279 step 2 and the synthesis as #281 |
+| E1 | E-graph search and lifting synthesis after v0.1; v0.1 uses deterministic rule order plus the cost model | Adopted; the search is scheduled as #58 step 2 and the synthesis as #59 |
 | M1 | Keep the interaction net as the semantic oracle and IR of record; add polyhedral-subset footprint analysis, recursion-scheme laws, semi-naive frontiers and a later e-graph beside it; do not replace the core model | Adopted |
-| D10 | Metal binary archives (#132 decision D10) | Yes, in v0.1, after kernel shrinking |
+| D10 | Metal binary archives (region design decision D10) | Yes, in v0.1, after kernel shrinking |
 
 ## Appendix A. Sources
 

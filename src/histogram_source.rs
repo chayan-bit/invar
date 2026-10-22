@@ -16,7 +16,7 @@ mod bounded;
 pub mod host;
 
 /// Staging-protocol limits of the optimized producer, shared with the indexed hosts; the
-/// element and contribution counts it used to carry are byte budgets now (#278).
+/// element and contribution counts it used to carry are byte budgets now (#57).
 pub const MAX_STAGING_BYTES: usize = 160 * 1024;
 pub const MAX_VISITS: usize = 65_536;
 

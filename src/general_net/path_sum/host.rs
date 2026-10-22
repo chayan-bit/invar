@@ -11,7 +11,7 @@ use crate::{
     general_net::{Net, Proof, oracle},
 };
 
-/// Kernel shape of one launch (#140 size-dependent fusion).
+/// Kernel shape of one launch (P4a profile size-dependent fusion).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Shape {
     /// One lane in one group: the root is a leaf, a chain or serial.
@@ -39,14 +39,14 @@ pub struct CostModel {
 }
 
 impl CostModel {
-    /// Apple M4 (10 GPU cores), from the #140 pilot (`policy.tsv`).
+    /// Apple M4 (10 GPU cores), from the P4a profile pilot (`policy.tsv`).
     pub const METAL: Self = Self {
         fused_launch_us: 13.75,
         parallel_launch_us: 20.25,
         node_us: 0.37,
         cores: 10,
         // Host-scope 256-lane cells missed by up to 0.32% in the exclusive
-        // runs (`tests/fixtures/archived-evidence/p4a-path-sum/metal-gate-*.txt`); 32 lanes passed.
+        // runs (`archived-evidence/p4a-path-sum/metal-gate-*.txt`); 32 lanes passed.
         host_refusal: &[(Shape::Fused, 33, MAX_LANES)],
     };
     /// RTX 5070 Ti (sm_120, 70 SMs), calibrated on a Linux CUDA host.
@@ -56,7 +56,7 @@ impl CostModel {
         node_us: 0.25,
         cores: 70,
         // Every host-scope cell missed on an idle GPU (two-speed launch
-        // latency, `tests/fixtures/archived-evidence/p4a-path-sum/cuda-gate-idle.txt`).
+        // latency, `archived-evidence/p4a-path-sum/cuda-gate-idle.txt`).
         host_refusal: &[
             (Shape::Root, 0, MAX_LANES),
             (Shape::Fused, 0, MAX_LANES),

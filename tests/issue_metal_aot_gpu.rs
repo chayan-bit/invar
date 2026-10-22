@@ -34,7 +34,7 @@ const ZIP_MAP: &str = "fn main() -> i32 { let xs: Array<u32> = [1u32,2u32,3u32];
     for i in 0u32 .. len(xs) { ys[i] = wrapping_mul(zs[i],xs[i]); } \
     if ys[2u32] != 4294967293u32 { return 1; } return 0; }";
 const SUM: &str = "fn main() -> i32 { let xs: Array<u32> = [1u32,2u32,3u32]; var acc: u32 = 7u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc,xs[i]); } if acc == 13u32 { return 0; } return 1; }";
-/// A sort: auto runs it on the CPU alone, without opening the device (#273).
+/// A sort: auto runs it on the CPU alone, without opening the device.
 const SORT: &str = "fn main() -> i32 { var xs: Array<u32> = [2u32,1u32]; sort(xs); if xs[0u32] == 1u32 { return 0; } return 1; }";
 const PRODUCT: &str = "fn main() -> i32 { let xs: Array<u32> = [2u32,3u32,5u32]; var acc: u32 = 3u32; for i in 0u32 .. len(xs) { acc = wrapping_mul(acc,xs[i]); } if acc == 90u32 { return 0; } return 1; }";
 const INCLUSIVE: &str = "fn main() -> i32 { let aa: Array<u32> = [2u32,3u32,5u32]; let bb: Array<u32> = [7u32,11u32,13u32]; var state: u32 = 17u32; var out: Array<u32> = filled_u32(len(aa),0u32); for i in 0u32 .. len(aa) { state = wrapping_add(wrapping_mul(aa[i],state),bb[i]); out[i] = state; } if out[2u32] == 683u32 { return 0; } return 1; }";
@@ -172,7 +172,7 @@ fn fresh_processes_run_built_libraries_with_the_source_tripwire_armed() {
     std::fs::remove_dir_all(&dir).unwrap();
 }
 
-/// Issue #190: the run library also holds the A1 family kernels, whose MSL
+/// The run library also holds the A1 family kernels, whose MSL
 /// depends on the dimensions the run reaches, so these programs run forced
 /// Metal from a built library without the developer source flag.
 #[test]
@@ -317,7 +317,7 @@ fn refusals_are_typed_and_never_compile_source() {
         report["diagnostics"][0]["code"], "DEVICE_TOOLCHAIN_MISMATCH",
         "{report}"
     );
-    // #273: also where auto runs on the CPU alone, never opening the device.
+    // Also where auto runs on the CPU alone, never opening the device.
     let sort = dir.join("sort.inv");
     std::fs::write(&sort, SORT).unwrap();
     let report = json(&armed(&[
@@ -668,7 +668,7 @@ fn pipelines_are_reused_bounded_and_keyed_by_exact_kernel() {
     assert!(hit);
     // Reuse preserves cumulative counters and records a memory hit rather
     // than repeating the prior archive lookup, its write refusal (a full cache
-    // refuses the first write) or its pipeline-creation timing (#221).
+    // refuses the first write) or its pipeline-creation timing.
     let mut expected = report;
     expected.archive.last = invar_metal::ArchiveState::MemoryHit;
     expected.archive.write_refusal = None;

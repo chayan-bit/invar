@@ -1,4 +1,4 @@
-//! #278 part B: admission is bounded by byte budgets (region storage, scheduler peak), not by region counts.
+//! #57 part B: admission is bounded by byte budgets (region storage, scheduler peak), not by region counts.
 
 use invar::{
     admission,

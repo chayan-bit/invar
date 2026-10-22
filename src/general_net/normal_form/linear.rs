@@ -1,4 +1,4 @@
-//! Syntactic linear-form extraction (#133 section 6.2 step 2): an expression
+//! Syntactic linear-form extraction (normal-form design section 6.2 step 2): an expression
 //! as `sum_v c_v * v + k` over a set of carried variables, with coefficient and
 //! constant expressions free of carried state. This is the extractor's view;
 //! the certificate checker re-derives the same facts with `poly`.

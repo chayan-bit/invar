@@ -1,5 +1,5 @@
-//! ENG-03 (#280) step 6 on Metal: a Tree or Exact source fold lowers to a slot
-//! store and one `sum_tree` or `sum_exact` call (#368), and forced Metal runs
+//! ENG-03 step 6 on Metal: a Tree or Exact source fold lowers to a slot
+//! store and one `sum_tree` or `sum_exact` call, and forced Metal runs
 //! that reduction on the device's fsum kernels with the reference's bits.
 #![cfg(all(feature = "metal", target_os = "macos"))]
 

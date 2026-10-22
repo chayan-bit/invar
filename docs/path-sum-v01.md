@@ -1,6 +1,6 @@
 # P4a path-sum lowering v1
 
-P4a lowers a checked L9 (`(sum c_j r_j + k) % P`) or L10 (checked `a + b`) recursion certificate into one program-specific kernel source (#133 section 10, design A' from #140).
+P4a lowers a checked L9 (`(sum c_j r_j + k) % P`) or L10 (checked `a + b`) recursion certificate into one program-specific kernel source (normal-form design section 10, design A' from the P4a kernel profile).
 The module is `invar::general_net::path_sum`.
 
 ## Pipeline
@@ -91,7 +91,7 @@ Consumed:
 ## Checks
 
 * `tests/gnet_p4a_path_sum.rs` runs a differential of every lowered program against the CPU net oracle.
-  The inputs come from trap-heavy generators plus the 96 scored #140 rows.
+  The inputs come from trap-heavy generators plus the 96 scored rows of the P4a kernel profile.
 * The CPU model compiles with `-DPROOF_CHECK` under UBSan.
   Every narrow operator aborts on an out-of-type result, so an unsound licence fails loudly.
 * Each `Mutation` must produce at least one mismatch.
@@ -99,7 +99,7 @@ Consumed:
   `DropLaneFlags` removes the device flag publication; the CPU model has no group reduction, so the Metal and CUDA differentials must catch it.
 * `the_partition_is_proven_statically_only_where_it_holds` pins the proof to the four gate programs, `l9-pathsum` and `l10-range`, and refuses it for the `geometry` fixture.
 * `metal_kernels_agree_with_the_net_oracle` and `cuda_kernels_agree_with_the_net_oracle` repeat the differential on hardware.
-* `src/bin/invar-pathsum-gate.rs` reruns the #140 protocol against the handwritten baselines in `bench/p4a-gate/handwritten/`.
+* `src/bin/invar-pathsum-gate.rs` reruns the P4a profile protocol against the handwritten baselines in `bench/p4a-gate/handwritten/`.
   Its `breakdown` subcommand times the host-only part of the guarded call (`plan`, `arg_bytes`, `finish`) that the baseline does not run.
 
 ## Known limits

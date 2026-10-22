@@ -59,7 +59,7 @@ pub struct Profile {
 
 impl Profile {
     /// Apple M4 class GPU, MSL 3.2 (cascade); lanes and width from the
-    /// scored pilot (`tests/fixtures/archived-evidence/gnet-p4b/bench-metal/pilot-metal.json`).
+    /// scored pilot (`archived-evidence/gnet-p4b/bench-metal/pilot-metal.json`).
     pub const METAL: Self = Self {
         schedule: Schedule::Cascade,
         lanes: 2048,
@@ -70,7 +70,7 @@ impl Profile {
         refused: METAL_REFUSED,
     };
     /// Apple7+ GPU, MSL 3.1 fallback (staged); width from the scored pilot
-    /// (`tests/fixtures/archived-evidence/gnet-p4b/bench-metal-staged/pilot-metal-staged.json`).
+    /// (`archived-evidence/gnet-p4b/bench-metal-staged/pilot-metal-staged.json`).
     pub const METAL_STAGED: Self = Self {
         schedule: Schedule::Staged,
         lanes: 1024,
@@ -81,7 +81,7 @@ impl Profile {
         refused: METAL_STAGED_REFUSED,
     };
     /// RTX 5070 Ti class (70 SMs), cascade; lanes and width from the scored
-    /// pilot (`tests/fixtures/archived-evidence/gnet-p4b/bench-cuda/pilot-cuda.json`). The inlined
+    /// pilot (`archived-evidence/gnet-p4b/bench-cuda/pilot-cuda.json`). The inlined
     /// step machines can use up to 255 registers per thread, so groups stay
     /// at 64 threads.
     pub const CUDA: Self = Self {
@@ -111,7 +111,7 @@ impl Profile {
     };
 }
 
-/// Fingerprints of the C1 fork-join family (#141); `C1[i]` is C1-i.
+/// Fingerprints of the C1 fork-join family (GNET-05 corpus request C1); `C1[i]` is C1-i.
 const C1: [&str; 12] = [
     "ab5862dc1292cfa056ebb4f726b67eb9b0a2b1ae424b720e3bda082166caa4f6",
     "8db40fd2892187423857f4077534aac90aaf71a352aac04cc29bde22bbd2bc1a",
@@ -126,12 +126,12 @@ const C1: [&str; 12] = [
     "8a087fcd9e2784c09532ceeb04b298cfd20efaede5955e81f0cda67cd0ad1959",
     "30828f24c7bbcfd1d3bbcf68fb21c6373904af35c4a813c4dddb3b67fc37b3ba",
 ];
-/// Apple M4, MSL 3.2 cascade (`tests/fixtures/archived-evidence/gnet-p4b/bench-metal`): every C1
+/// Apple M4, MSL 3.2 cascade (`archived-evidence/gnet-p4b/bench-metal`): every C1
 /// program has a medium input above 3.0x resident.
 const METAL_REFUSED: &[&str] = &C1;
-/// Apple7+, MSL 3.1 staged (`tests/fixtures/archived-evidence/gnet-p4b/bench-metal-staged`).
+/// Apple7+, MSL 3.1 staged (`archived-evidence/gnet-p4b/bench-metal-staged`).
 const METAL_STAGED_REFUSED: &[&str] = &C1;
-/// RTX 5070 Ti cascade (`tests/fixtures/archived-evidence/gnet-p4b/bench-cuda`): every C1 program
+/// RTX 5070 Ti cascade (`archived-evidence/gnet-p4b/bench-cuda`): every C1 program
 /// but C1-01 has an input above 3.0x resident or 2.0x host-to-host.
 const CUDA_REFUSED: &[&str] = &[
     C1[0], C1[2], C1[3], C1[4], C1[5], C1[6], C1[7], C1[8], C1[9], C1[10], C1[11],
@@ -214,7 +214,7 @@ pub fn route(program: &Program, profile: &Profile) -> Result<Plan, Refusal> {
 /// measured on (Apple M4, including Pro and Max). Metal has no occupancy query
 /// and no forward-progress guarantee for persistent threadgroups, and cascade
 /// workers spin on a device-wide claim list, so other devices take the staged
-/// MSL 3.1 schedule (#207).
+/// MSL 3.1 schedule (P4b cascade liveness).
 pub fn metal_cascade_measured(device_name: &str) -> bool {
     device_name == "Apple M4" || device_name.starts_with("Apple M4 ")
 }

@@ -25,7 +25,7 @@ fn spatial_explain_uses_registered_families_and_strict_v4() {
         assert!(output.status.success(), "{:?}", output);
         assert!(output.stderr.is_empty());
         let document: Value = serde_json::from_slice(&output.stdout).unwrap();
-        // #216: an auto explain is the unified v5, the same spatial sites as v4.
+        // #50: an auto explain is the unified v5, the same spatial sites as v4.
         let v4 = schema(if engine.is_some() {
             "explain-v5.schema.json"
         } else {

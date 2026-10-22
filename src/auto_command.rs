@@ -29,7 +29,7 @@ pub fn placement_requested(flags: &[OsString]) -> bool {
     }
 }
 
-/// The explain document version. Every `--engine auto` explain is v5 (#216),
+/// The explain document version. Every `--engine auto` explain is v5 (#50),
 /// so one reaching here records the established path; the others keep the
 /// version of the intrinsic sites they carry.
 pub fn explain_version(document: &mut serde_json::Value, engine: Option<&str>) -> u32 {
@@ -46,7 +46,7 @@ pub fn explain_version(document: &mut serde_json::Value, engine: Option<&str>) -
 }
 
 /// A scheduled run's JSON receipt. The established auto path's is the unified
-/// `invar-diagnostics-v3` recording `auto_path: "established"` (#216).
+/// `invar-diagnostics-v3` recording `auto_path: "established"` (#50).
 pub fn receipt(mut document: serde_json::Value, path: &OsString, engine: Engine) -> i32 {
     if engine == Engine::Auto {
         document["schema_version"] = json!(3);

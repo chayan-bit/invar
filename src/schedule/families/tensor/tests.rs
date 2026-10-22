@@ -520,7 +520,7 @@ fn a1_tensor_metal_output_words_match_serial_mir() {
     }
 }
 /// The production Metal device: compiled-ahead only, holding exactly the
-/// libraries `invar build --target metal` builds for `source` (#194). A
+/// libraries `invar build --target metal` builds for `source`. A
 /// kernel `step` loads that the build omits is refused, never compiled.
 #[cfg(all(feature = "metal", target_os = "macos"))]
 fn built_device(source: &[u8], p: &mir::Program) -> invar_metal::MetalDevice {

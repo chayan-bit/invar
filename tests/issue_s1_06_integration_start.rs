@@ -14,7 +14,7 @@ fn compile(source: &str) -> system::SystemIr {
 }
 
 #[test]
-fn issue_s1_06_company_start_one_robot_reference_switches_arms() {
+fn issue_s1_06_integration_start_one_robot_reference_switches_arms() {
     let differences = PANDA
         .lines()
         .zip(UR5E.lines())
@@ -71,7 +71,7 @@ fn issue_s1_06_company_start_one_robot_reference_switches_arms() {
 }
 
 #[test]
-fn issue_s1_06_company_start_imports_current_component_evidence() {
+fn issue_s1_06_integration_start_imports_current_component_evidence() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let directory = root.join("examples/cells/reach_place");
     let ir = system::compile_at(
@@ -121,7 +121,7 @@ fn issue_s1_06_company_start_imports_current_component_evidence() {
 }
 
 #[test]
-fn issue_s1_06_company_start_selects_one_robot_manifest() {
+fn issue_s1_06_integration_start_selects_one_robot_manifest() {
     let directory = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place");
     let ir = system::compile_at(
         parse_system(MANIFEST_SELECT.as_bytes()).unwrap(),
@@ -189,7 +189,7 @@ fn issue_s1_06_company_start_selects_one_robot_manifest() {
 }
 
 #[test]
-fn issue_s1_06_company_start_resolves_product_robot_dof() {
+fn issue_s1_06_integration_start_resolves_product_robot_dof() {
     let directory = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place");
     let source_path = directory.join("robot-dof.inv");
     let checked = Command::new(env!("CARGO_BIN_EXE_invar"))
@@ -232,7 +232,7 @@ fn issue_s1_06_company_start_resolves_product_robot_dof() {
 }
 
 #[test]
-fn issue_s1_06_company_start_generated_fk_uses_selected_joint_names() {
+fn issue_s1_06_integration_start_generated_fk_uses_selected_joint_names() {
     for (source, first_joint, count) in [(PANDA, "joint1", 7), (UR5E, "shoulder_pan_joint", 6)] {
         let ir = compile(source);
         assert!(ir.graph_issues().is_empty(), "{:?}", ir.graph_issues());
@@ -248,7 +248,7 @@ fn issue_s1_06_company_start_generated_fk_uses_selected_joint_names() {
 }
 
 #[test]
-fn issue_s1_06_company_start_rejects_unsafe_attachment_before_generation() {
+fn issue_s1_06_integration_start_rejects_unsafe_attachment_before_generation() {
     let directory = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place");
     for (source, code) in [
         (
@@ -279,7 +279,7 @@ fn issue_s1_06_company_start_rejects_unsafe_attachment_before_generation() {
 }
 
 #[test]
-fn issue_s1_06_company_start_cell_generates_deterministically() {
+fn issue_s1_06_integration_start_cell_generates_deterministically() {
     for (name, source) in [("panda", PANDA), ("ur5e", UR5E)] {
         let ir = compile(source);
         let first = system::generate_mjcf(&ir).unwrap();
@@ -342,7 +342,7 @@ fn issue_s1_06_company_start_cell_generates_deterministically() {
 }
 
 #[test]
-fn issue_s1_06_company_start_public_cli_emits_complete_ros_workspace() {
+fn issue_s1_06_integration_start_public_cli_emits_complete_ros_workspace() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     for (name, file, first_joint) in [
         ("panda", "cell.inv", "joint1"),
@@ -408,7 +408,7 @@ fn issue_s1_06_company_start_public_cli_emits_complete_ros_workspace() {
 }
 
 #[test]
-fn issue_s1_06_company_start_ros_tendon_projection_preserves_physics() {
+fn issue_s1_06_integration_start_ros_tendon_projection_preserves_physics() {
     let ir = compile(PANDA);
     let original = system::generate_mjcf(&ir).unwrap();
     let scene = std::str::from_utf8(&original["scene.xml"]).unwrap();
@@ -444,13 +444,13 @@ fn issue_s1_06_company_start_ros_tendon_projection_preserves_physics() {
 }
 
 #[test]
-fn issue_s1_06_company_start_ros_rejects_unbounded_joint_limits() {
+fn issue_s1_06_integration_start_ros_rejects_unbounded_joint_limits() {
     let ir = compile(&PANDA.replacen("velocity 2.175 rad/s;", "velocity unbounded;", 1));
     assert_eq!(system::ros2::generate(&ir).unwrap_err().code, "S1504");
 }
 
 #[test]
-fn issue_s1_06_company_start_ros_rejects_multiple_attachments() {
+fn issue_s1_06_integration_start_ros_rejects_multiple_attachments() {
     let source = PANDA.replacen(
         "    io attach: digital-out;",
         "    object second_cube { pose xyz (0.6 m, 0 m, 0.025 m) quat (1, 0, 0, 0); dynamic mass 0.1 kg attachable; collision box (0.025, 0.025, 0.025) m; }\n    io attach: digital-out;",
@@ -463,7 +463,7 @@ fn issue_s1_06_company_start_ros_rejects_multiple_attachments() {
 }
 
 #[test]
-fn issue_s1_06_company_start_rejects_policy_and_budget_failures_before_launch() {
+fn issue_s1_06_integration_start_rejects_policy_and_budget_failures_before_launch() {
     let directory = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place");
     for (source, code) in [
         (
@@ -500,7 +500,7 @@ fn issue_s1_06_company_start_rejects_policy_and_budget_failures_before_launch() 
 }
 
 #[test]
-fn issue_s1_06_company_start_rejects_unreachable_target_frame() {
+fn issue_s1_06_integration_start_rejects_unreachable_target_frame() {
     let invalid = PANDA.replacen(
         "frame place_target: world;",
         "frame place_target: missing;",
@@ -517,7 +517,7 @@ fn issue_s1_06_company_start_rejects_unreachable_target_frame() {
 /// replaces the vendored home key's tendon command, stays inside the control
 /// range, and a hold outside that range fails with a registered code.
 #[test]
-fn issue_s1_06_company_start_declares_the_gripper_home_hold() {
+fn issue_s1_06_integration_start_declares_the_gripper_home_hold() {
     let ir = compile(PANDA);
     let document: serde_json::Value = serde_json::from_str(&ir.canonical_json()).unwrap();
     let panda = document["robots"]

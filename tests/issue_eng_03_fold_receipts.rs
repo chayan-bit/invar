@@ -1,4 +1,4 @@
-//! #280 step 7 (D12): the newest documents that carry `numeric_contracts`
+//! ENG-03 step 7 (D12): the newest documents that carry `numeric_contracts`
 //! (explain-v5 and invar-diagnostics-v3) record each declared fold tier a
 //! lowered fold used and the algorithm that ran. Older versions never carry
 //! it, and a program without a lowered fold is unchanged.

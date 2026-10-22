@@ -14,7 +14,7 @@ const GATHER: &str = "fn gather(a: read Array<u32>, ix: read Array<u32>) -> Arra
 const BYTE_LIMIT: usize = 160 * 1024;
 const VISIT_LIMIT: usize = 65_536;
 const METADATA_LIMIT: usize = 4096;
-/// Array size the maximum-arrays test exercises; no longer a refusal bound (#278 byte budgets).
+/// Array size the maximum-arrays test exercises; no longer a refusal bound (#57 byte budgets).
 const MAX_ARRAY: usize = 4096;
 
 #[derive(Debug, PartialEq, Eq)]

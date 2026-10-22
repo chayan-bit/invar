@@ -1,5 +1,5 @@
 
-// Debugger hooks for `--debug` builds (#305), appended to the native host with
+// Debugger hooks for `--debug` builds (DX-20), appended to the native host with
 // a `DEBUG_TYPES` table of value layouts (`native::debug::host_source`).
 // share/invar/invar_gdb.py and invar_lldb.py break at `invar_debug_trap_v1`
 // and call `invar_debug_render_v1` in the live process.

@@ -1,8 +1,9 @@
-"""Select the GNET-05 deep inputs with the #133 net-laws prototype.
+"""Select the GNET-05 deep inputs with the net-laws prototype.
 
 Usage: python3 deep_select.py PROTOTYPE_DIR [CORPUS_DIR] > deep.json
 
-PROTOTYPE_DIR holds `engine.py` and `laws.py` from #133 Appendix C.
+PROTOTYPE_DIR holds `engine.py` and `laws.py` from Appendix C of the normal-form design
+(`docs/design/net-parallel-laws-v01.md`).
 For every program with a ladder (divide, compose divide-of-branch and
 forkjoin), each chain is walked in ascending order and the first rung whose
 law-directed average parallelism W/S (model c) reaches TARGET is a

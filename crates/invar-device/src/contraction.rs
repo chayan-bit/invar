@@ -1,4 +1,4 @@
-//! ENG-06 generic contraction emitter (#283): CUDA C++ and MSL for a strict
+//! ENG-06 generic contraction emitter (#61): CUDA C++ and MSL for a strict
 //! binary32 contraction from a move sequence verified against a target
 //! description, instead of one fixed template per schedule. The kernel shape
 //! follows the verified moves: the group tile, the cells per thread, each

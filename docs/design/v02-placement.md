@@ -3,7 +3,7 @@
 Status: the profile/selector/mincore foundation, explicit provisional calibration and ordinary-source auto/explain integration are implemented. Integration verification is in progress; full performance acceptance remains open. See [the implemented contract](../../spec/placement-v1.md).
 No acceptance criterion is closed by this document.
 
-Binding PR #169 section 4.4 (`a41b6c7f`) applies: C14 names the calibration
+Section 4.4 of the binding robotics-language roadmap (`a41b6c7f`) applies: C14 names the calibration
 probe `placement.wrapping_add1.u32` and registers emitted reasons in AI-01;
 C4 adds exact `numeric_contract_version` matching and receipt fields;
 C13 keeps large probes on LLVM host-array/device harnesses, never `invar run`.
@@ -18,10 +18,10 @@ Missing measurements, a missing profile, or an untrusted provisional profile ret
 Forced modes retain their coverage role and their existing legality checks.
 Placement must preserve values bit for bit, first source trap, cleanup, and fuel behavior.
 The workstream scope resolves D1 to CPU default before the freeze and D2 to LLVM native.
-This continuation wires the ordinary CLI here: missing or untrusted profiles use LLVM whole-program CPU execution when available. Matched wrapping maps use the existing LLVM host-array export, so the coefficients describe the implementation that actually executes. Unmeasured work retains checked serial CPU execution. No changes are made to the #120 branch.
+This continuation wires the ordinary CLI here: missing or untrusted profiles use LLVM whole-program CPU execution when available. Matched wrapping maps use the existing LLVM host-array export, so the coefficients describe the implementation that actually executes. Unmeasured work retains checked serial CPU execution. No changes are made to the GNET-04 fault-injection branch.
 
 The initial base is `main` at `85d38988`.
-The local prerequisite tips `ae70c26b` (M4-06, #153) and `4ba88400` (P8, #147) were merged normally, in that order.
+The local prerequisite tips `ae70c26b` (M4-06) and `4ba88400` (P8) were merged normally, in that order.
 Neither tip was an ancestor of the cached base.
 Imported historical evidence is evidence for its recorded revision only.
 
@@ -29,8 +29,8 @@ Imported historical evidence is evidence for its recorded revision only.
 
 | Candidate | License and maintenance | Decision |
 | --- | --- | --- |
-| P8 `general_net::law_collective::cost` and `tests/support/law_bench.rs` | Existing project code, maintained on #147 | Reuse the recorded-pass validation, best-of-five protocol, 5% band, and determinism tests; the v0.2 strict CPU tie rule remains authoritative. |
-| M4-06 `schedule::tuning` and `tuning_resident` | Existing project code, maintained on #153 | Reuse residency, verified-plan facts, transfer accounting, and completion/quiescence rules. |
+| P8 `general_net::law_collective::cost` and `tests/support/law_bench.rs` | Existing project code, maintained on the P8 branch | Reuse the recorded-pass validation, best-of-five protocol, 5% band, and determinism tests; the v0.2 strict CPU tie rule remains authoritative. |
+| M4-06 `schedule::tuning` and `tuning_resident` | Existing project code, maintained on the M4-06 branch | Reuse residency, verified-plan facts, transfer accounting, and completion/quiescence rules. |
 | `serde_json` 1.0.151 | MIT OR Apache-2.0; existing direct locked dependency | Reuse for bounded profile parsing and output; do not write another JSON parser. |
 | `inkwell` 0.8.0 with LLVM 21 | Apache-2.0; existing optional locked dependency | Reuse the actual LLVM CPU execution path; do not label a Rust fold or MIR interpreter as compiled Invar CPU. |
 | Rust `Instant` and `black_box` | Rust standard library, MIT OR Apache-2.0 | Use existing timing helpers for bounded probes; no timing dependency. |

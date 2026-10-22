@@ -350,7 +350,7 @@ fn spatial_cuda_c13_periodic_cloud_through_2_18() {
     c13_periodic_cloud(&[0, 1, 31, 129, 4097, 65536, 1 << 18]);
 }
 #[test]
-#[ignore = "physical CUDA; C13 raw harness through 2^22, nightly long list (#248)"]
+#[ignore = "physical CUDA; C13 raw harness through 2^22, nightly long list"]
 fn spatial_cuda_c13_large_periodic_cloud() {
     c13_periodic_cloud(&[0, 1, 31, 129, 4097, 65536, 1 << 18, 1 << 20, 1 << 22]);
 }

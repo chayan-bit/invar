@@ -1,6 +1,6 @@
 # M5-03 report preparation, no performance claims
 
-The following acceptance paragraphs are quoted verbatim from the local issue contract and issue #35, which has no comments.
+The following acceptance paragraphs are quoted verbatim from the local issue contract and issue #10, which has no comments.
 Each paragraph contains preparation and execution obligations; the classification identifies both without claiming completion.
 
 | Verbatim acceptance criterion | Classification |
@@ -30,12 +30,12 @@ The parity amendment supersedes aggregate CUDA acceptance with every scored resi
 A point estimate above 1.00 fails; uncertainty above 1.05 is pending.
 The historical geomean is reported as a diagnostic and cannot hide failed cases.
 Existing library, bandwidth, compute, held-out, dispatch, cold and resource gates remain required.
-The reviewed target amendment landed in PR #118: CUDA uses RTX 5070 Ti (sm_120), and Metal uses Apple M4. Thresholds are unchanged; the M5-01 freeze must bind these target facts before collection.
+The reviewed target amendment landed with the v0.1 performance gate measurements: CUDA uses RTX 5070 Ti (sm_120), and Metal uses Apple M4. Thresholds are unchanged; the M5-01 freeze must bind these target facts before collection.
 
 The report plan is a separate proposed interface, not an M5-01 freeze.
 The freeze owner must review and commit its digest, exact expected rows and session/bootstrap procedure before timing.
 Existing parameterized-plan and single-session bench results remain pending.
-M5-02 PR #112 has unavailable generated/library CUDA/Metal rows and is CPU preparation, not completed qualification.
+The M5-02 CPU qualification has unavailable generated/library CUDA/Metal rows and is CPU preparation, not completed qualification.
 
 ## Offline execution interface
 
@@ -103,7 +103,7 @@ Complete M4-06 and GNET prerequisites without exposing held-out configurations t
 Run exact full-output/numerical/safety qualification first, then the authorized frozen M5-01 `--features cuda --require-gpu` command with a new final report path.
 Collect resident, warm and cold packets on every frozen named target, with occupancy and independent sessions recorded, forced-engine crossover controls, bandwidth/peak calibration, held-out profiling and all compilation/resource costs.
 Retain incomplete or failed reports, diagnose by family, and use only the frozen bounded follow-up sampling policy.
-Target execution remains pending on the reviewed RTX 5070 Ti and Apple M4 targets; the timing runs are tracked in #214 and use only an exclusive GPU timing wrapper.
+Target execution remains pending on the reviewed RTX 5070 Ti and Apple M4 targets; the timing runs are listed in [remaining work](remaining-work.md) and use only an exclusive GPU timing wrapper.
 The timing wrapper records foreign GPU activity during each timed phase; a report prints that record next to every timing with its conditions (for example "shared GPU, max foreign util X%"), and calls a number exclusive-GPU only when the record shows no foreign activity.
 
 A fractional or ratio gate within 0.05 of its threshold also requires at least ten consecutive-run metrics under `acceptance_metrics.consecutive_runs[gate]`.

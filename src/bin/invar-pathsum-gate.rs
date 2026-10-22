@@ -1,10 +1,10 @@
-//! P4a gate: the #140 protocol with COMPILER-generated path-sum kernels.
+//! P4a gate: the P4a profile protocol with COMPILER-generated path-sum kernels.
 //!
 //! `invar-pathsum-gate sample <metal|cuda> <fixtures> <handwritten> <oracle.tsv> <session>`
 //! prints `sample,...` CSV rows: per scored input, scope (resident GPU
 //! interval, host-to-host wall) and 40 interleaved pairs in random order, the
 //! first 10 discarded. Variant 0 is the compiler's guarded A' launch; the
-//! other variant is the frozen #140 handwritten baseline (2 = C fused,
+//! other variant is the frozen P4a profile handwritten baseline (2 = C fused,
 //! 3 = C two-stage, 4 = C checked serial). Every sample is checked against the
 //! frozen oracle value before it is recorded.
 //!
@@ -20,7 +20,7 @@ use std::{collections::BTreeMap, env, fs, time::Instant};
 
 use invar::general_net::path_sum::{self, CostModel, Lowering, Plan, device};
 
-/// `(program, a, b, frozen baseline variant)` from #140 `plan.tsv`.
+/// `(program, a, b, frozen baseline variant)` from the P4a profile's `plan.tsv`.
 const PLAN: [(&str, i32, i32, usize); 16] = [
     ("divide-00", 0, 0, 4),
     ("divide-00", 32, 3, 2),
@@ -77,7 +77,7 @@ impl Kernels for invar_cuda::cuda::PathSum {
     }
 }
 
-/// Handwritten #140 entry points used by the baselines, in launcher order.
+/// Handwritten P4a profile entry points used by the baselines, in launcher order.
 const HANDWRITTEN: [&str; 4] = ["C1", "C2", "reduce", "C0"];
 
 /// Open `(compiler, handwritten)` kernels on `target`.
@@ -363,7 +363,7 @@ type Cell = (String, i32, i32, String);
 /// `(session, pair) -> (compiler ms, baseline ms)` per cell.
 type Pairs = BTreeMap<(usize, usize), (f64, f64)>;
 
-/// D5 flat verdicts from `session-*.csv` (the #140 `stats.rs` statistic).
+/// D5 flat verdicts from `session-*.csv` (the P4a profile's `stats.rs` statistic).
 fn stats(dir: &str) -> Result<(), String> {
     let mut cells: BTreeMap<Cell, Pairs> = BTreeMap::new();
     let mut sessions_seen = std::collections::BTreeSet::new();

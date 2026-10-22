@@ -177,7 +177,7 @@ pub(crate) fn splice(
 /// The oldest NVRTC every kernel of this library compiles under.
 pub const CUDA_MIN_NVRTC: (u32, u32) = (12, 4);
 /// The oldest NVRTC that accepts an anonymous struct inside a union, which
-/// several CORE-MATH sources declare; NVRTC 12.4 rejects it (#225).
+/// several CORE-MATH sources declare; NVRTC 12.4 rejects it.
 pub const CUDA_ANONYMOUS_STRUCT_NVRTC: (u32, u32) = (12, 9);
 
 /// The oldest NVRTC that compiles [`cuda_source`] of `functions`.
@@ -225,7 +225,7 @@ mod tests {
 
     #[test]
     fn anonymous_struct_unions_raise_the_nvrtc_floor() {
-        // The binary64 units NVRTC 12.4 rejected on an H100 test host (#225).
+        // The binary64 units NVRTC 12.4 rejected on an H100 test host.
         for f in [
             Function::Cos,
             Function::Tan,

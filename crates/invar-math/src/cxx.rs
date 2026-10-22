@@ -150,7 +150,7 @@ fn unions(lines: &[&str]) -> Vec<(usize, usize, Vec<Member>)> {
 }
 
 /// Whether `text` declares a union with an anonymous struct member on its
-/// little-endian path. NVRTC accepts that only from 12.9 (#225).
+/// little-endian path. NVRTC accepts that only from 12.9.
 pub(crate) fn has_anonymous_struct_union(text: &str) -> bool {
     let text = little_endian(text);
     let lines: Vec<&str> = text.lines().collect();

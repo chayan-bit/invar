@@ -43,7 +43,7 @@ pub const DEFAULT_BUDGET: u64 = 100_000;
 /// Corpus-level cap on a declared per-input step budget.
 pub const MAX_BUDGET: u64 = 10_000_000;
 /// Deep inputs: per program, the ladder rung `deep_select.py` selected with
-/// the #133 net-laws prototype (the first rung whose law-directed average
+/// the net-laws prototype (the first rung whose law-directed average
 /// parallelism W/S reaches about 1,000, least work across chains), and its
 /// declared step budget: the reference steps rounded up to a whole million.
 pub const DEEP_INPUTS: &[(&str, (i64, i64), u64)] = &[

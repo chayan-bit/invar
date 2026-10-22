@@ -1,4 +1,4 @@
-//! #278 ENG-08 part A follow-up: with the 4096-element caps gone, the language's per-array limit
+//! #57 ENG-08 part A follow-up: with the 4096-element caps gone, the language's per-array limit
 //! (`array_limits::MAX_ARRAY_LEN`) is still enforced by the indexed and affine scatter families, so
 //! a region the checked source would trap on (`ARRAY_SIZE_LIMIT`) is refused, not computed. Every
 //! test asserts a nonzero case count.

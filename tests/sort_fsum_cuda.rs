@@ -1,4 +1,4 @@
-//! #195 on CUDA: a program that also sorts (or runs a spatial query) runs its
+//! On CUDA, a program that also sorts (or runs a spatial query) runs its
 //! float reductions where the program without the sort runs them, forced
 //! (`--engine cuda`) and under auto's cost model, with the same receipts.
 #![cfg(feature = "cuda")]

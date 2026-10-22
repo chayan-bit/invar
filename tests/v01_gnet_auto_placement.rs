@@ -1,4 +1,4 @@
-//! GNET-04 D1(a)/D2(a) (#196): a placement run records the legal engine set of
+//! GNET-04 D1(a)/D2(a) (#47): a placement run records the legal engine set of
 //! its general net, keeps the CPU route and says why (`uncalibrated`), and labels
 //! which host ran: LLVM native, or the reference evaluator and why.
 use invar::placement::Route;

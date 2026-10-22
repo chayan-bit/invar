@@ -1,4 +1,4 @@
-//! ENG-10 (#277): held-out domain benchmark suites (ML, games, robotics).
+//! ENG-10 (#56): held-out domain benchmark suites (ML, games, robotics).
 //!
 //! Every program is ordinary Invar source: a leaf kernel written as loops over
 //! flat arrays, plus a generated `main` that fills its inputs from a seeded
@@ -8,7 +8,7 @@
 //! The split unit is the kernel: all instances (shape and seed variants) of
 //! one kernel share a split, so a tuning path never sees the loop structure of
 //! a held-out kernel. The split is a seeded 25% of the kernels per suite.
-//! Nothing here freezes a held-out set; the freeze is gated by #228.
+//! Nothing here freezes a held-out set; the freeze is gated by #52.
 #![allow(dead_code)] // shared by the bench binary and its tests; each uses part
 use super::hash::sha256;
 

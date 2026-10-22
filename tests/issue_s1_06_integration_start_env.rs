@@ -8,7 +8,7 @@ use invar::{front::parse_system, system};
 
 #[test]
 #[ignore = "requires source-bound MCAP metrics and task cells; tolerance repeat acceptance gate"]
-fn issue_s1_06_company_start_env_recorded_task_acceptance_both_arms() {
+fn issue_s1_06_integration_start_env_recorded_task_acceptance_both_arms() {
     let cells = std::env::var("INVAR_S1_06_TASK_CELL_ROOT").expect("set task-wired cell directory");
     let evidence =
         std::env::var("INVAR_S1_06_TASK_EVIDENCE_ROOT").expect("set archived metric directory");
@@ -34,19 +34,19 @@ fn issue_s1_06_company_start_env_recorded_task_acceptance_both_arms() {
 
 #[test]
 #[ignore = "requires the pinned S1-06 MuJoCo environment"]
-fn issue_s1_06_company_start_env_cell_physics_loads_and_steps() {
+fn issue_s1_06_integration_start_env_cell_physics_loads_and_steps() {
     cell_physics_smoke(false);
 }
 
 #[test]
 #[ignore = "requires pinned MuJoCo environment; strict S1-06 home-hold prerequisite"]
-fn issue_s1_06_company_start_env_home_hold_obeys_all_joint_and_contact_limits() {
+fn issue_s1_06_integration_start_env_home_hold_obeys_all_joint_and_contact_limits() {
     cell_physics_smoke(true);
 }
 
 #[test]
 #[ignore = "requires pinned MuJoCo environment; post-step contact regression"]
-fn issue_s1_06_company_start_env_contacts_match_final_integrated_state() {
+fn issue_s1_06_integration_start_env_contacts_match_final_integrated_state() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let result = Command::new("python3")
         .arg(root.join("tests/fixtures/s1_06/cell_contacts_regression.py"))
@@ -127,7 +127,7 @@ fn cell_physics_smoke(strict_hold: bool) {
 /// The S1-04 runtime smoke on this cell with `mujoco_ros2_control`, both arms.
 #[test]
 #[ignore = "requires the pinned S1-06 ROS 2 Lyrical environment (s104 image or Route 1)"]
-fn issue_s1_06_company_start_env_s1_04_mujoco_cell_smoke_both_arms() {
+fn issue_s1_06_integration_start_env_s1_04_mujoco_cell_smoke_both_arms() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let (image, image_id) = ros_environment();
     let run_dir = std::env::var("INVAR_S1_06_SMOKE_DIR").expect("set new evidence directory");
@@ -150,7 +150,7 @@ fn issue_s1_06_company_start_env_s1_04_mujoco_cell_smoke_both_arms() {
 
 #[test]
 #[ignore = "requires the pinned S1-06 ROS 2 Lyrical environment (s104 image or Route 1)"]
-fn issue_s1_06_company_start_env_ur5e_controller_motion() {
+fn issue_s1_06_integration_start_env_ur5e_controller_motion() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let (image, image_id) = ros_environment();
     let run_dir = std::env::var("INVAR_S1_06_RUN_DIR").expect("set new evidence directory");

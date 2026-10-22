@@ -118,7 +118,7 @@ pub(crate) fn observe_engine<'a>(
 }
 
 /// Run with every hook: bulk plans, explicit sorts (sort and spatial runs,
-/// which also pass the engine reducer for their float reductions, #195).
+/// which also pass the engine reducer for their float reductions).
 pub(crate) fn observe_all<'a>(
     program: &'a mir::Program,
     fuel_limit: u64,

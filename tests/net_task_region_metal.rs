@@ -78,7 +78,7 @@ fn c1_and_generated_fork_joins_agree_with_the_net_oracle_on_metal() {
     });
 }
 
-/// Review findings (#207): idle cascade workers wait while any
+/// Review findings (P4b cascade liveness): idle cascade workers wait while any
 /// node is pending (1-poll limit, two long leaves), and the
 /// measured device class (this Apple M4) still selects the cascade.
 #[test]

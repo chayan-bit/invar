@@ -1,5 +1,5 @@
 //! Shared helpers for the P1 normal-form tests: compile a source to a verified
-//! net and describe a normal form in the #133 prototype's vocabulary.
+//! net and describe a normal form in the net-laws prototype's vocabulary.
 #![allow(dead_code)]
 
 use invar::{

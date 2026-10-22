@@ -2,7 +2,7 @@
 
 This source form implements the frozen reduction-table requirement: "Modular sum and a noncommutative associative pair composition".
 M2-03 requires "left-then-right composition and identity for each sealed built-in law" and a "noncommutative affine-pair witness".
-PR #106 identifies the unavailable class as "ordered pair-reduction recognition".
+The all-family held-out generators identify the unavailable class as "ordered pair-reduction recognition".
 This follows the existing `laws::Affine` contract rather than inventing an argmin or floating policy.
 
 ## Law and source
@@ -53,7 +53,7 @@ The existing device collective limit is 67,108,864 elements.
 Larger or malformed device plans reject before allocation.
 These are correctness bounds, not a performance or full general-GPU acceptance claim.
 
-## Checks and #106 follow-up
+## Checks and held-out generator follow-up
 
 The default test target is `issue_v01_pair_reduction`.
 The `issue_v01_pair_reduction_gpu` and `issue_v01_pair_reduction_metal_gpu` targets require their backend features and are ignored unless explicitly selected.
@@ -62,7 +62,7 @@ Independent widened-integer host expectations compare complete raw pairs through
 Operator-order and non-associative-admission mutations must fail their relevant checks.
 Argmin tie-break and floating NaN mutations are inapplicable to this affine-only contract.
 
-After this merges, #106 should generate identity and nonidentity-seeded affine-pair sources, validate their full pair against an independent host oracle, and require `pair_reduction::extract` plus `Execution::PairReduction` admission on the merged revision.
+After this merges, the held-out generators should generate identity and nonidentity-seeded affine-pair sources, validate their full pair against an independent host oracle, and require `pair_reduction::extract` plus `Execution::PairReduction` admission on the merged revision.
 It should move only ordered pair reduction out of the unavailable list, retain the other three missing forms, and regenerate the proposal sources/counts/hash through review.
 Its frozen manifest and held-out entries must remain unchanged until the separate reviewed version bump.
-This branch does not edit #106 or authorize permanent freeze.
+This branch does not edit the held-out generators or authorize permanent freeze.

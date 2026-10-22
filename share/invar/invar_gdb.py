@@ -1,4 +1,4 @@
-"""gdb helpers for Invar native debug builds (#305).
+"""gdb helpers for Invar native debug builds (DX-20).
 
     invar build PROGRAM.inv --target native --output app --debug
     gdb -x share/invar/invar_gdb.py app

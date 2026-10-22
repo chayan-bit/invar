@@ -1,4 +1,4 @@
-"""lldb helpers for Invar native debug builds (#305).
+"""lldb helpers for Invar native debug builds (DX-20).
 
     invar build PROGRAM.inv --target native --output app --debug
     lldb -o 'command script import share/invar/invar_lldb.py' app

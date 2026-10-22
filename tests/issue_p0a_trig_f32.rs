@@ -435,7 +435,7 @@ fn p0a_trig_native_ir_embeds_the_helpers_without_fast_math() {
         assert!(!ir.contains(flag), "{flag}");
     }
     let plain = lower("fn main() -> i32 { let x = 3.0; if x * x > 0.0 { return 7; } return 0; }");
-    // The float header declares every intrinsic (#173); a plain program calls none.
+    // The float header declares every intrinsic; a plain program calls none.
     assert!(!plain.contains("invar_trig_f32_v1") && !plain.contains("call float @llvm.sqrt.f32"));
 }
 

@@ -1,7 +1,7 @@
 //! The standalone native host has no module files, so src/native.rs inlines
 //! each file submodule of src/numeric_contract.rs. A new `mod x;` there must
 //! join that list, or every native spatial link fails with E0583 (main went
-//! red when #349 and #350 added `fold` and `storage`).
+//! red when the fold tiers and storage conversions added `fold` and `storage`).
 
 #[test]
 fn issue_eng_03_native_host_inlines_every_numeric_contract_module() {

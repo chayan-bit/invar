@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! P7 (#263): the GNET-05 acceptance corpus (`bench/general-net-v01/gnet05`)
+//! P7 (#54): the GNET-05 acceptance corpus (`bench/general-net-v01/gnet05`)
 //! through `invar run`. Every program runs on every recorded input (the deep
 //! inputs in Release only, as `tests/issue_gnet_05_corpus.rs` does) through
 //! the CPU engine, which now reaches the checked normal form, and must equal

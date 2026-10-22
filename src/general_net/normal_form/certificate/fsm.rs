@@ -1,4 +1,4 @@
-//! L8 certificates (#281): a finite-state map re-derived on the checker's
+//! L8 certificates (#59): a finite-state map re-derived on the checker's
 //! view. The state is a `u32` carried scalar, every update reads one table the
 //! loop neither declares, assigns nor stores to, at an index whose polynomial
 //! normal form is `stride * s + rest` with `rest` free of `s`, and no guard of

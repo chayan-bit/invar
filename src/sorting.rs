@@ -265,7 +265,7 @@ pub(crate) fn binds(source: &[u8], program: &crate::mir::Program) -> bool {
 }
 
 /// [`run_cpu`] with the caller's float reducer (auto passes its cost-model
-/// choice, #195); the caller keeps the reduction receipts.
+/// choice); the caller keeps the reduction receipts.
 pub(crate) fn run_cpu_with(
     source: &[u8],
     program: &crate::mir::Program,
@@ -313,7 +313,7 @@ pub(crate) fn run_cpu_with(
     })
 }
 
-/// The fsum CPU engine's reducer for sort and spatial runs (#195): a reached
+/// The fsum CPU engine's reducer for sort and spatial runs: a reached
 /// float reduction runs on `workers` CPU workers with the receipt a sort-free
 /// program records; a worker failure is kept in `fault` for the run's error.
 pub(crate) fn cpu_reduce(
@@ -448,7 +448,7 @@ pub(crate) fn run_cuda(
     let mut failure = None;
     let device = RefCell::new(device);
     let mut reductions = Vec::new();
-    // #195: reached float reductions run on the device, as in `--engine cuda`.
+    // Reached float reductions run on the device, as in `--engine cuda`.
     let mut reducer = |call: &crate::mir_eval::ReduceCall<'_>| {
         crate::schedule::cuda::reduce::forced(
             call,
@@ -503,7 +503,7 @@ pub(crate) fn run_metal(
     let mut failure = None;
     let device = RefCell::new(device);
     let mut reductions = Vec::new();
-    // #195: reached float reductions run on the device, as in `--engine metal`.
+    // Reached float reductions run on the device, as in `--engine metal`.
     let workers = crate::schedule::metal::reduce::workers()?;
     let mut reducer = |call: &crate::mir_eval::ReduceCall<'_>| {
         crate::schedule::metal::reduce::forced(

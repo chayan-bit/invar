@@ -398,9 +398,9 @@ fn large_net() -> (String, Limits) {
     (source, limits)
 }
 
-/// Review findings (#154): the GNET source ceiling is
+/// Review findings (GNET kernel shrinking): the GNET source ceiling is
 /// `MAX_GNET_SOURCE_BYTES` wherever CUDA still compiles a source at run time.
-/// Since #122 that is the P2 region route behind `run_gnet_region`. Sources just
+/// Since the ahead-compiled CUDA route, that is the P2 region route behind `run_gnet_region`. Sources just
 /// past the old 1 MiB gate and exactly at the ceiling must reach the compiler
 /// (here `/bin/false`, so the failure is the compile, not the size), and one
 /// byte past the ceiling must still be refused by size, so any lower cap fails.

@@ -178,7 +178,7 @@ It has `status: proposal-pending-review` and no freeze interface.
 See [the contract quotes, sizes and remaining review gates](HELDOUT-PROPOSAL.md).
 Neither the v1 frozen-status field and held-out hash nor the pending v2 proposal changes.
 
-The candidate also generates the forms that became available after #106: ordered affine pair reduction (#115), per-segment map (#100) and the explicit Tensor Core `tc_mul_add` contract with its strict twin (M4-03).
+The candidate also generates the forms that became available after the all-family held-out generators: ordered affine pair reduction, per-segment map and the explicit Tensor Core `tc_mul_add` contract with its strict twin (M4-03).
 They use their own PRNG stream, so the earlier programs keep their bytes and order.
 `HeldOutIndex::from_programs` builds an exclusion index from the held-out programs, and `HeldOutIndex::admit` refuses a tuning or calibration source that is, or embeds, a held-out source exactly, after renaming or after reformatting, or that carries a held-out input array.
 Every tuning path must pass its candidate programs through `admit` before use.
@@ -203,4 +203,4 @@ nvcc -std=c++17 -O2 -arch=sm_XX bench/baselines/cuda-families.cu -o cuda-familie
 cargo run --locked --release --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./FIXTURE --baseline-family stencil --baseline-elements 65536 --report NEW_REPORT.json
 ```
 
-Timings from these fixtures are baseline samples only. Performance runs and their measurement conditions are tracked in #214.
+Timings from these fixtures are baseline samples only. Performance runs and their measurement conditions are listed in [remaining work](../docs/remaining-work.md).

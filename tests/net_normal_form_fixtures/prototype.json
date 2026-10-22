@@ -5261,12 +5261,12 @@
   }
  ],
  "provenance": {
-  "gnet05_corpus": "origin/feat/v01-gnet-05-corpus (#131) efd742387ab1d00da6cad9bb5862e4f0ac4d5fbf bench/general-net-v01/gnet05/programs",
+  "gnet05_corpus": "origin/feat/v01-gnet-05-corpus efd742387ab1d00da6cad9bb5862e4f0ac4d5fbf bench/general-net-v01/gnet05/programs",
   "gnet05_json_sha256": "e3aa62ae6a44806ce4831c224f21959a742a864934baa1184a86233b7a0bd3d4",
   "heldout_proposal_sha256": "18e92e678eeb81048c2b94667bbd1178937d772726707619d1bd31a2d0239ff2",
   "laws_py_sha256": "c4df6b40faf78640f3ceade400b4485e3c346465bceab2c4ec8262b0ea3315ae",
   "loop_order": "functions in source order, loops in source pre-order",
   "m501_json_sha256": "7a45205ee028fcbf38b466c9f18e7c1601d7a215c605a9997320ef21704f1376",
-  "prototype": "$HOME/.cache/invar-net-laws (issue #133 prototype: laws.py classify_loop / classify_function)"
+  "prototype": "$HOME/.cache/invar-net-laws (net-laws prototype: laws.py classify_loop / classify_function)"
  }
 }

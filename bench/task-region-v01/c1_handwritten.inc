@@ -1,4 +1,4 @@
-// Handwritten B-form baselines of the C1 fork-join family (#141), after the
+// Handwritten B-form baselines of the C1 fork-join family (GNET-05 corpus request C1), after the
 // P4a spike's B kernels: digit replay of the fork tree to a fixed depth D,
 // one lane per digit string (radix R = 2^RB), a checked serial frame machine
 // below depth D, in-group joins (kernel hw_b) and the remaining top joins

@@ -60,7 +60,7 @@ Finite coordinates can still produce an infinite squared distance; this is an or
 
 ## Binding cross-lane rulings
 
-The binding authority is PR #169 section 4.4 at `a41b6c7f` ([rulings](v02-robotics-language.md#44-rulings-2026-10-18)).
+The binding authority is section 4.4 of the robotics-language roadmap at `a41b6c7f` ([rulings](v02-robotics-language.md#44-rulings-2026-10-18)).
 These replace the provisional checker/oracle conventions in the earlier checkpoint.
 C1 replaces tuple query results with built-in affine records `Neighbors { counts: Array<u32>, idx: Array<u32> }` and `Knn { idx: Array<u32>, d2: Array<f32> }`.
 C2 renames the opaque owner to `VoxelGrid`; source code cannot construct it, project its fields, or redefine it.
@@ -75,7 +75,7 @@ The independent oracle uses existing `num-bigint` and `num-rational` dependencie
 Its small-fixture work/memory limits remain helper limits, not new language traps.
 Unused radius slots remain `u32::MAX` as the lane's deterministic padding convention.
 
-C13 requires large benchmarks through device harnesses or bench binaries until B2 (#162) lands, rather than `invar run`.
+C13 requires large benchmarks through device harnesses or bench binaries until B2 (#37) lands, rather than `invar run`.
 C14 requires calibration ids `spatial.<op>.f32`, including `spatial.voxel_grid_build.f32`, `spatial.radius_neighbors.f32`, and `spatial.knn.f32`.
 Any future explain reason must be registered in the AI-01 registry before it is emitted; this checker-only checkpoint emits no spatial placement reason and has no calibration record.
 No benchmark or registry entry is fabricated before executable paths exist.

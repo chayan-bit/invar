@@ -1,4 +1,4 @@
-//! Independent certificate checker (#133 section 6, decision L1).
+//! Independent certificate checker (normal-form design section 6, decision L1).
 //!
 //! A certificate is accepted only if every fact it states is re-derived from
 //! the current net: the compiled-MIR fingerprint, the region, the subject's

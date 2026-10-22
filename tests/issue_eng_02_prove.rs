@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! ENG-02 (#281): the in-repo decision procedure for law formulas. Ring
+//! ENG-02 (#59): the in-repo decision procedure for law formulas. Ring
 //! identities are proved by exact polynomial normal forms over `Z` or
 //! `Z/2^32`, and `max`/`min`/`ite` over `Z` by case splits refuted with
 //! Fourier-Motzkin; anything else is unproved. Where `z3` is on PATH, every verdict

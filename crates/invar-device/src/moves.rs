@@ -1,4 +1,4 @@
-//! ENG-06 physical move set (#283): a contraction schedule
+//! ENG-06 physical move set (#61): a contraction schedule
 //! `C[M,N] = sum_k A[M,K] * B[K,N]` is a sequence of moves over its
 //! iteration space, checked against a target description before any code is
 //! emitted. `verify` refuses a move the target cannot hold (shared-memory

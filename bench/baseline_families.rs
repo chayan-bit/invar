@@ -34,7 +34,7 @@ pub const FAMILIES: [&str; 11] = [
 ];
 const TIMEOUT: Duration = Duration::from_secs(60);
 // macOS SystemTime has only microsecond resolution, so concurrent runs in one
-// process also need a counter for distinct scratch roots (#255).
+// process also need a counter for distinct scratch roots.
 static NEXT_ROOT: AtomicU64 = AtomicU64::new(0);
 /// Every fixture family sweeps to 2^28 elements (frontier: adjacency cells).
 const MAX_ELEMENTS: usize = 1 << 28;
@@ -364,8 +364,8 @@ pub fn run(executable: &Path, family: &str, n: usize, backend: Backend) -> Resul
     result
 }
 
-// Fake fixtures are executed while other test threads fork; #119's writer never
-// leaves a writable descriptor for a sibling fork to inherit (ETXTBSY, #245).
+// Fake fixtures are executed while other test threads fork; the shared writer never
+// leaves a writable descriptor for a sibling fork to inherit (ETXTBSY).
 #[cfg(all(test, unix))]
 #[path = "../tests/support/executable.rs"]
 pub(crate) mod executable;
@@ -380,7 +380,7 @@ mod tests {
         fake_padded(dir, words, document, exit, 0)
     }
 
-    /// `padding` bytes of shell comment widen the write window, as in #119's stress test.
+    /// `padding` bytes of shell comment widen the write window, as in the writer's ETXTBSY stress test.
     fn fake_padded(
         dir: &Path,
         words: &[u32],
@@ -508,7 +508,7 @@ mod tests {
     fn family_baseline_fake_fixtures_survive_parallel_forks() {
         // Each worker writes and executes its own fixture while the others fork
         // children; a writable descriptor inherited by a sibling fork would make
-        // exec fail with ETXTBSY (#245).
+        // exec fail with ETXTBSY.
         let (family, n, backend) = ("transpose", 64, Backend::Cuda);
         let (want, _) = expected(family, n, backend).unwrap();
         let doc = document(family, n, backend, want.len() * 4);
@@ -537,7 +537,7 @@ mod tests {
     #[test]
     fn family_baseline_concurrent_runs_get_distinct_scratch_roots() {
         // Released together, these runs name their scratch roots within one
-        // clock tick; a time-only name collides on macOS (#255).
+        // clock tick; a time-only name collides on macOS.
         let (family, n, backend) = ("transpose", 64, Backend::Cuda);
         let (want, _) = expected(family, n, backend).unwrap();
         let dir = scratch("roots");

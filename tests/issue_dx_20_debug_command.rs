@@ -1,4 +1,4 @@
-//! DX-20 (#305): `invar debug PATH` builds with `--debug` in a private
+//! DX-20: `invar debug PATH` builds with `--debug` in a private
 //! directory and runs gdb or lldb with the Invar helpers loaded. The live
 //! sessions skip, by name, where the debugger is missing or may not attach.
 #![cfg(feature = "native")]
@@ -115,7 +115,7 @@ ls -ld \"$(dirname \"$last\")\"
 
 /// The session directory is the caller's alone, and lldb gets the helper
 /// path double-quoted, here under a temporary directory with a space, quotes,
-/// a backtick and a backslash (#386 review). Apple lldb-2103 imports such a
+/// a backtick and a backslash (debug command review). Apple lldb-2103 imports such a
 /// quoted path; an unquoted one splits at the space.
 #[test]
 #[cfg(unix)]

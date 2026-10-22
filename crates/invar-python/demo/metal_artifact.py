@@ -1,4 +1,4 @@
-"""#193 proof: run_main(artifact=...) runs a compiled-ahead Metal library, as `invar run --artifact` does."""
+"""#46 proof: run_main(artifact=...) runs a compiled-ahead Metal library, as `invar run --artifact` does."""
 import os
 import pathlib
 import subprocess

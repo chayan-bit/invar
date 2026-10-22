@@ -13,7 +13,7 @@ provides an accepted manifest. Provisional profiles influence placement only
 with `--trust-provisional`; D1=(a) therefore retains the CPU default.
 
 The only family placement prices is the single-input wrapping-u32 add-one map.
-Native calibration also records CPU rows for the nine other M5-01 table families (#215), under their own family IDs; no selection reads those rows, so they never change placement.
+Native calibration also records CPU rows for the nine other M5-01 table families (#49), under their own family IDs; no selection reads those rows, so they never change placement.
 Other laws, fused variants, float contracts and sizes outside the recorded interval
 have unknown costs and remain CPU. Matching CPU maps use the same compiled LLVM
 host-array export as calibration; the surrounding program uses checked MIR control
@@ -45,14 +45,14 @@ Existing paths, including symlinks, are never replaced. Publication links a full
 written and synced same-directory temporary file, then removes that temporary name.
 
 The JSON schema is `schema/invar-placement-v1.schema.json`. Files are limited to
-4 MiB (M5-01, #215; earlier builds capped them at 1 MiB), 128 measurement rows, 16 increasing sample sizes per row and exactly five
+4 MiB (M5-01, #49; earlier builds capped them at 1 MiB), 128 measurement rows, 16 increasing sample sizes per row and exactly five
 passes. Unknown schema/probe versions, nonfinite/negative figures, zero bandwidth,
 summaries inconsistent with the five passes are errors. Identity mismatches are typed loader refusals; ordinary auto retains CPU and records the refusal.
 Missing coefficients are unknown. Frozen profiles are refused until M5-01 provides
 a trusted freeze manifest. Absence of an implicit default is a CPU fallback;
 an explicitly supplied invalid/missing file is an error.
 
-A profile may declare the M5-01 measurement protocol (#215) with a top-level `statistics` block, which must equal the loader's (10 warmups, 30 samples, median of order statistics 15 and 16, 95% interval from order statistics 10 and 21, quartiles from 8 and 23), together with `coverage`.
+A profile may declare the M5-01 measurement protocol (#49) with a top-level `statistics` block, which must equal the loader's (10 warmups, 30 samples, median of order statistics 15 and 16, 95% interval from order statistics 10 and 21, quartiles from 8 and 23), together with `coverage`.
 Every row then carries `table_family` and `points`.
 Its table family must be the one registered for its probe family ID, numeric contract, engine boundary and family-level region.
 Its points are exactly one cold `first_call` (one sample, null elements) plus 30 integer-nanosecond samples for every row size.
@@ -63,7 +63,7 @@ Only a profile loaded against a committed SHA-256 (size, then digest, before JSO
 
 A coefficient row binds family, numeric contract and execution boundary; optional
 region rows additionally bind source identity, graph revision and region identity.
-Under C14 (PR #169, `a41b6c7f`, section 4.4), family IDs have exactly the form
+Under C14 (robotics-language roadmap section 4.4, `a41b6c7f`), family IDs have exactly the form
 `<lane>.<op>.<type>`; this lane's probe is `placement.wrapping_add1.u32`.
 The old `map` CLI filter and `map-wrapping-add1` profile ID are rejected.
 Under C4, every row and decision receipt records `numeric_contract_version`, and

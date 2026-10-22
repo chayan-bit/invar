@@ -1,11 +1,11 @@
-# S1-06 - Company-start acceptance: one Invar source, two arms, simulated reach-and-place
+# S1-06 - Integration-start acceptance: one Invar source, two arms, simulated reach-and-place
 
 Problem/result: prove the integration base end to end: one Invar source describes a simulated arm cell, is checked, generates ROS 2 and MuJoCo artifacts, and runs with Pinocchio and cuRobo behind foreign-component manifests on two dissimilar arms, with a generated evidence report.
-This issue is the company-start checkpoint; when it passes the repository may be tagged `v0.1.0-alpha`.
+This issue is the integration-start checkpoint; when it passes the repository may be tagged `v0.1.0-alpha`.
 
 Dependencies: S1-02, S1-04, S1-05.
 
-Release: v0.1 (milestone S1); company-start checkpoint.
+Release: v0.1 (milestone S1); integration-start checkpoint.
 
 Design: `docs/system-integration-v1.md` sections 3, 4, 6, 8 and 9.
 
@@ -31,7 +31,7 @@ Design: `docs/system-integration-v1.md` sections 3, 4, 6, 8 and 9.
 
 ## Acceptance tests
 
-Add `issue_s1_06_company_start` (default CI: the cell checks, both products generate deterministically, the one-line difference test, golden reports for the check-only part) and `issue_s1_06_company_start_env` (ignored by default, required for done; runs the simulation for both arms and asserts every success criterion).
+Add `issue_s1_06_integration_start` (default CI: the cell checks, both products generate deterministically, the one-line difference test, golden reports for the check-only part) and `issue_s1_06_integration_start_env` (ignored by default, required for done; runs the simulation for both arms and asserts every success criterion).
 Positive cases: both arms meet every success criterion in three consecutive runs with fixed seeds; repeat completion is accepted when every recorded tool waypoint is under 2 mm and 1 degree and final joint home error is at most 1e-6 rad. The report states the observed determinism class. Bit-exact final-state replay requires step-scheduled trajectory starts, attachment and initial-state barriers and belongs to v0.2. The S1-04 runtime smoke passes on this cell.
 
 ## Negative cases
@@ -52,5 +52,5 @@ Real hardware, grasp physics, perception, MoveIt 2, Invar-compiled kinematics re
 - Arm licenses: Panda Apache-2.0, UR5e BSD-3-Clause (see S1-05 sources).
 - cuRobo v0.8.0 (Apache-2.0) installs from source with `uv pip install .[cu12-torch]` or `.[cu13-torch]`, needs Python 3.10 to 3.13 and driver 580.65.06 or newer (https://github.com/NVlabs/curobo/blob/main/docs/getting-started/installation.rst).
 - `mujoco_ros2_control` 0.1.2-1 is released for Lyrical (https://github.com/ros/rosdistro/blob/master/lyrical/distribution.yaml).
-- nix-ros-overlay `lyrical` contains `mujoco-ros2-control`, `ros2-control`, `ros2-controllers`, `pinocchio`, `rmw-zenoh-cpp` and `rosbag2-storage-mcap` (https://github.com/lopsided98/nix-ros-overlay/tree/develop/distros/lyrical); whether it builds them reproducibly is recorded by this issue (company D8 open item).
+- nix-ros-overlay `lyrical` contains `mujoco-ros2-control`, `ros2-control`, `ros2-controllers`, `pinocchio`, `rmw-zenoh-cpp` and `rosbag2-storage-mcap` (https://github.com/lopsided98/nix-ros-overlay/tree/develop/distros/lyrical); whether it builds them reproducibly is recorded by this issue (an open item).
 - `ros:lyrical-ros-base` digest `sha256:0c19f326a339ed770ef1d4c0646a8b53bdb49dd5ff74b6de41ebdb8ac21e1806` (amd64 and arm64, 2026-09-16) is the pinned container fallback (https://hub.docker.com/_/ros).

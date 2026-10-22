@@ -1,4 +1,4 @@
-//! M5-01 calibration protocol in `invar-placement-v1` (#215): the loader
+//! M5-01 calibration protocol in `invar-placement-v1` (#49): the loader
 //! treats a profile as untrusted and refuses anything it cannot re-derive.
 use invar::placement::{self, Engine, Error, Profile};
 use serde_json::{Value, json};
@@ -471,7 +471,7 @@ fn v01_placement_calibration_cli_profile_declares_the_protocol() {
                         || p["reason"] == "calibration-probe-failed"))),
             }
         }
-        // Both devices admit these two kernels (H100 in #274, M4 here).
+        // Both devices admit these two kernels (H100 in the CUDA family probes, M4 here).
         let kind = if engine == "cuda" {
             Engine::Cuda
         } else {
