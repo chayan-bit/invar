@@ -65,7 +65,7 @@ pub struct Object {
     pub foreign: Vec<Option<ForeignSpec>>,
     /// Set by [`emit_mir_debug`]: DWARF to keep and the host's value layouts (DX-20).
     pub debug: Option<String>,
-    /// CPU, features and pipeline the code was generated for (#329).
+    /// CPU, features and pipeline the code was generated for (#101).
     pub machine: Machine,
     /// The facts behind every promise in `ir`, indexed by `!invar.fact` node.
     pub facts: Vec<Fact>,
@@ -127,7 +127,7 @@ pub fn emit_mir_for(program: &mir::Program, build: &Build) -> Result<Object, Str
 }
 
 /// Lower unoptimized ([`Build::UNOPTIMIZED`]), plus DWARF 5 mapping the code
-/// back to `source` (#305). The code is the same as `emit_mir_for(program,
+/// back to `source` (DX-20). The code is the same as `emit_mir_for(program,
 /// &Build::UNOPTIMIZED)`'s; only debug metadata is added.
 pub fn emit_mir_debug(program: &mir::Program, source: &DebugSource) -> Result<Object, String> {
     let mut object = object_from_ir(llvm_ir_debug(program, None, Some(source))?)?;

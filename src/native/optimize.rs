@@ -1,4 +1,4 @@
-//! ENG-18 (#329): which CPU an object is generated for, the LLVM optimization
+//! ENG-18 (#101): which CPU an object is generated for, the LLVM optimization
 //! pipeline, and the proof-carrying promise rule.
 //!
 //! Every promise the emitted IR gives LLVM (`noalias`, `inbounds`, `nsw`,
@@ -6,7 +6,7 @@
 //! with the IR that proves it. [`audit`] refuses the module before any pass
 //! runs otherwise. Promises with no fact form here (other poison-generating
 //! flags, fast-math flags, `mustprogress`, `llvm.assume`) are refused outright:
-//! fast-math needs a declared #328 contract, and strict never takes
+//! fast-math needs a declared #100 contract, and strict never takes
 //! `contract` or `reassoc`. Traps stay explicit branches before any use.
 
 use std::ops::RangeInclusive;
@@ -46,7 +46,7 @@ pub struct Build {
 
 impl Build {
     /// The pre-ENG-18 path: generic CPU, no middle-end passes. Debug and
-    /// export objects keep it (#305 variable locations, portable libraries).
+    /// export objects keep it (DX-20 variable locations, portable libraries).
     pub const UNOPTIMIZED: Self = Self {
         cpu: Cpu::Generic,
         optimize: false,
@@ -297,7 +297,7 @@ impl Fact {
 }
 
 /// Words that would give LLVM a promise no fact form covers. Fast-math flags
-/// wait for #328 contracts; `contract` and `reassoc` are never strict.
+/// wait for #100 contracts; `contract` and `reassoc` are never strict.
 const UNFACTED: &[&str] = &[
     "nusw",
     "exact",
@@ -620,7 +620,7 @@ pub(super) fn object(data: NativeIr, facts: Vec<Fact>, build: &Build) -> Result<
 }
 
 /// Test and evidence hook: compile hand-written IR with its facts, returning
-/// the object and the target assembly (vectorization evidence, #329).
+/// the object and the target assembly (vectorization evidence, #101).
 #[doc(hidden)]
 pub fn compile_ir(ir: &str, facts: Vec<Fact>, build: &Build) -> Result<(Object, String), String> {
     let object = object(

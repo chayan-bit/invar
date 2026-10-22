@@ -1,5 +1,5 @@
 #![cfg(feature = "native")]
-//! ENG-18 (#329): the O3 pipeline, CPU target selection and the
+//! ENG-18 (#101): the O3 pipeline, CPU target selection and the
 //! proof-carrying promise rule of the native backend.
 
 use invar::{

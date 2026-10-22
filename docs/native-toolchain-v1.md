@@ -67,7 +67,7 @@ These are typed tool/resource outcomes, never source traps or divergence
 proofs. A native resource limit can be reached before the source reference's
 limit; such a run is inconclusive for value equivalence.
 
-## Optimization, CPU targets and promises (ENG-18, #329)
+## Optimization, CPU targets and promises (ENG-18, #101)
 
 Objects from `emit_mir` run LLVM's new pass manager pipeline `default<O3>` with the loop and SLP vectorizers, interleaving and unrolling on, then generate code at `OptimizationLevel::Aggressive`.
 A `Build` names the CPU and whether the pipeline runs:
@@ -77,7 +77,7 @@ A `Build` names the CPU and whether the pipeline runs:
 | `Build::PORTABLE` | `generic`, no features | O3 | `emit_mir`, so `invar build` artifacts run on every CPU of the architecture |
 | `Build::HOST` | the live CPU (LLVM's host name and features) | O3 | `run_program`, `--engine native-serial`: the object runs here and now |
 | `Cpu::Described(name)` | a `targets/cpu-*.json` description: its model selects the LLVM CPU (`zen4` is `znver4`, `apple-m4` is `apple-m4`) and its `isa` list the features | O3 when asked | building for a described machine |
-| `Build::UNOPTIMIZED` | `generic` | none | debug builds (#305 keeps variable locations) and export libraries |
+| `Build::UNOPTIMIZED` | `generic` | none | debug builds (DX-20 keeps variable locations) and export libraries |
 
 An unknown live CPU (LLVM reports `generic`) uses the generic baseline.
 A described target whose architecture differs from the host triple, or whose `isa` entry has no LLVM feature here, is refused.
@@ -98,7 +98,7 @@ Each fact is bound to the site that carries it, so a stale or misplaced attachme
 | `nsw`, `nuw` | `Interval { op, bits, lhs, rhs }` | on `%r = op [flags] i<bits> lhs, rhs` with exactly these operand names; a constant operand lies in its own range; operands and the exact result of `op` on the interval box (checked i128 arithmetic) fit the signed or unsigned `bits`-wide range |
 
 Metadata attachments other than `!dbg` and `!invar.fact` (and debug records' `!DI...` nodes) are refused too, since `!nonnull`, `!range`, `!noundef` and loop access groups are promises.
-Other poison or UB promises have no fact form and are always refused: `nusw`, `exact`, `disjoint`, `nneg`, `samesign`, `nonnull`, `noundef`, `dereferenceable`, `mustprogress`, `willreturn`, `llvm.assume` and every fast-math flag (`contract` and `reassoc` are never strict; the others wait for #328 contracts).
+Other poison or UB promises have no fact form and are always refused: `nusw`, `exact`, `disjoint`, `nneg`, `samesign`, `nonnull`, `noundef`, `dereferenceable`, `mustprogress`, `willreturn`, `llvm.assume` and every fast-math flag (`contract` and `reassoc` are never strict; the others wait for #100 contracts).
 The MIR lowering itself emits no promise (arrays are host handles), so its objects carry no facts.
 
 Not yet measured: the R <= 1.10 (clang -O3) and R <= 1.15 (ISPC) timing gates; they need a quiet host under the M5-01 protocol.
@@ -116,4 +116,4 @@ real CLI `build` and `run` paths execute a linked object and reject an
 existing output. No Linux/Windows native run or Miri result is claimed;
 default Linux CI exercises the non-native path only.
 
-ENG-18 (#329), `tests/issue_eng_18_native_simd.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target.
+ENG-18 (#101), `tests/issue_eng_18_native_simd.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target.
