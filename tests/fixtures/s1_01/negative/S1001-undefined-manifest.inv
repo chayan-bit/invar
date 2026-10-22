@@ -1,0 +1,16 @@
+fn f() -> i32 { return 0; }
+component Source {
+    port out x: i32 @ 1 Hz;
+    license "MIT";
+    isolation in-process;
+    impl extern missing;
+}
+component Sink {
+    port in x: i32 @ 1 Hz;
+    license "MIT";
+    isolation in-process;
+    impl invar f;
+}
+connect source.x -> sink.x policy sample-and-hold;
+product P { distribution internal; commercial false; robot menagerie::franka_emika_panda; }
+system s for P { source: Source; sink: Sink; }

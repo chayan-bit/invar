@@ -1,0 +1,1 @@
+fn main() -> i32 { let bytes: Bytes = b"a"; if bytes[1u32] == 0u32 { return 1; } return 0; }

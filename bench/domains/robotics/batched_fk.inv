@@ -1,0 +1,17 @@
+fn batched_fk(q: read Array<f32>, n: u32, links: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(n * 3u32, 0.0);
+    for i in 0u32..n {
+        var x: f32 = 0.0;
+        var y: f32 = 0.0;
+        var a: f32 = 0.0;
+        for j in 0u32..links {
+            a = a + q[i * links + j];
+            x = x + 0.5 * cos(a);
+            y = y + 0.5 * sin(a);
+        }
+        out[i * 3u32] = x;
+        out[i * 3u32 + 1u32] = y;
+        out[i * 3u32 + 2u32] = a;
+    }
+    return move out;
+}

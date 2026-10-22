@@ -1,0 +1,40 @@
+fn leaf(x: i32) -> i32 {
+    var s = x % 101;
+    var i = 0;
+    while i < x % 13 {
+        s = (s * 4 + i) % 10007;
+        i = i + 1;
+    }
+    return s;
+}
+fn dc(lo: i32, hi: i32, d: i32) -> i32 {
+    if hi - lo <= 5 { return leaf(lo * 9 + hi); }
+    if d <= 0 { return leaf(hi - lo + 3); }
+    let m1 = lo + 1 + ((hi - lo - 2) * (5 + (lo % 3 + 3) % 3)) / 8;
+    let a = dc(lo, m1, d - 1);
+    let b = dc(m1, hi, d - 1);
+    return (a * 3 + b) % 100003;
+}
+fn visit(v: i32, n: i32, d: i32) -> i32 {
+    if d <= 0 { return dc(v % 17, v % 17 + 9, 2); }
+    let deg = (v * 11 + d) % 5;
+    if deg == 0 { return dc(v % 17, v % 17 + 9, 2); }
+    if deg == 1 {
+        let w1_0 = visit((v * 35 + 56) % n, n, d - 1);
+        return (w1_0 + v) % 10007;
+    }
+    if deg == 2 {
+        let w2_0 = visit((v * 30 + 54) % n, n, d - 1);
+        let w2_1 = visit((v * 22 + 83) % n, n, d - 1);
+        return (w2_0 + w2_1 + v) % 10007;
+    }
+    let w3_0 = visit((v * 8 + 33) % n, n, d - 1);
+    let w3_1 = visit((v * 4 + 86) % n, n, d - 1);
+    let w3_2 = visit((v * 16 + 53) % n, n, d - 1);
+    return (w3_0 + w3_1 + w3_2 + v) % 10007;
+}
+fn run(a: i32, b: i32) -> i32 {
+    let n = a + 17;
+    return visit(b % n, n, 1 + (a + b) % 3);
+}
+fn main() -> i32 { return run(38, 64); }

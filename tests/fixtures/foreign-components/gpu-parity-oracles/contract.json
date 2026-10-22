@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "status": "internal_cpu_oracle_contract_frozen_before_generation",
+  "source": {
+    "repository": "google-deepmind/mujoco_menagerie",
+    "tag": "v2026.9.2",
+    "commit": "c96a32d28fb5da84da38c1da4d749e7a13212855",
+    "source_facts_sha256": "7ae9fa413e6fdf02e1782c641861b8c3e8f5e9893be67d607a78c8c327f1ece3",
+    "prior_fk_goldens_sha256": "3f907af98ce3a9ceb550d06f10e709b8c48bd64d7ca4000bcb0a04d8140b8a39"
+  },
+  "libraries": {
+    "pinocchio": "4.1.0",
+    "mujoco": "3.12.0"
+  },
+  "models": [
+    {
+      "name": "panda",
+      "file": "franka_emika_panda/panda.xml",
+      "sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+      "license": "Apache-2.0",
+      "license_sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "base_body": "link0",
+      "tool_kind": "body_origin",
+      "tool_name": "hand",
+      "active_joints": ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "joint7"],
+      "active_limits_rad_text": ["-2.8973 2.8973", "-1.7628 1.7628", "-2.8973 2.8973", "-3.0718 -0.0698", "-2.8973 2.8973", "-0.0175 3.7525", "-2.8973 2.8973"],
+      "home_active_rad_text": ["0", "0", "0", "-1.57079", "0", "1.57079", "-0.7853"],
+      "fixed_inactive_joints": {"finger_joint1": "0.04", "finger_joint2": "0.04"},
+      "source_armature_diag_text": ["0.1", "0.1", "0.1", "0.1", "0.1", "0.1", "0.1"],
+      "candidate_seed": 20260928
+    },
+    {
+      "name": "ur5e",
+      "file": "universal_robots_ur5e/ur5e.xml",
+      "sha256": "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
+      "license": "BSD-3-Clause",
+      "license_sha256": "5ec71ccf66c8d03261448f2441a586765b97f2248c860a1ae19689fb1c45cee6",
+      "base_body": "base",
+      "tool_kind": "site_origin",
+      "tool_name": "attachment_site",
+      "active_joints": ["shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"],
+      "active_limits_rad_text": ["-6.28319 6.28319", "-6.28319 6.28319", "-3.1415 3.1415", "-6.28319 6.28319", "-6.28319 6.28319", "-6.28319 6.28319"],
+      "home_active_rad_text": ["-1.5708", "-1.5708", "1.5708", "-1.5708", "-1.5708", "0"],
+      "fixed_inactive_joints": {},
+      "source_armature_diag_text": ["0.1", "0.1", "0.1", "0.1", "0.1", "0.1"],
+      "candidate_seed": 20260929
+    }
+  ],
+  "inputs": {
+    "ordered_cases": ["source_home", "prior_fk_0", "prior_fk_1", "prior_fk_2", "prior_fk_3", "near_limit_low_high", "near_limit_high_low", "least_singular_seeded"],
+    "near_limit_fraction_of_span": 0.0001,
+    "near_limit_pattern": "alternate lower+fraction*span and upper-fraction*span by zero-based joint index; invert for second case",
+    "least_singular_selection": {
+      "candidate_count": 256,
+      "draw": "Python random.Random(candidate_seed).uniform(lo+0.1*span, hi-0.1*span) independently for each joint, candidates in draw order",
+      "score": "smallest singular value of Pinocchio base-expressed 6xN tool Jacobian",
+      "tie_break": "lowest candidate index"
+    },
+    "inactive_velocity": 0,
+    "no_invar_scores_used_for_selection": true
+  },
+  "tool_jacobian": {
+    "shape": "6xN",
+    "columns": "active_joints order",
+    "rows": ["linear_x_m_per_rad", "linear_y_m_per_rad", "linear_z_m_per_rad", "angular_x_rad_per_rad", "angular_y_rad_per_rad", "angular_z_rad_per_rad"],
+    "point": "named tool body/site origin",
+    "basis": "named base body axes, world-to-base rotation applied to both library world-aligned outputs",
+    "finite_difference_step_rad": 0.000001,
+    "analytic_element_abs_tolerance": 1e-9,
+    "analytic_element_relative_tolerance": 1e-9,
+    "finite_difference_element_abs_tolerance": 0.00002
+  },
+  "active_mass_matrix": {
+    "shape": "NxN",
+    "operation": "contact-free unconstrained generalized kinetic-energy Hessian of active joints at q with inactive Panda fingers fixed",
+    "gravity": "excluded from the mass matrix",
+    "contact_equality_actuator_forces": "excluded",
+    "source_reflected_armature": "included exactly once using source_armature_diag_text; inspect each library raw output and model armature before any normalization, never fit an offset",
+    "analytic_element_abs_tolerance": 1e-8,
+    "analytic_element_relative_tolerance": 1e-8,
+    "symmetry_abs_tolerance": 1e-11,
+    "require_positive_definite": true
+  },
+  "artifact": {
+    "file": "reference.json",
+    "float_encoding": "Python repr of binary64, stored as JSON strings; source decimals stay in contract/source facts",
+    "matrix_layout": "nested row arrays in declared row/column order",
+    "required_per_case": ["name", "q_rad", "jacobian_pinocchio", "jacobian_mujoco", "jacobian_finite_difference", "mass_pinocchio", "mass_mujoco", "jacobian_min_singular_value", "comparison"],
+    "required_provenance": ["contract_sha256", "source_model_sha256", "input_generator", "pinocchio_version", "mujoco_version", "numpy_version", "environment_image_id", "platform", "runtime_status"]
+  },
+  "failure_policy": "retain all inputs, raw full outputs, warnings, mismatches and environment provenance; do not relax tolerances to pass"
+}

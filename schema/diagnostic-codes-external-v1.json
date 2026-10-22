@@ -1,0 +1,14 @@
+{
+  "schema": "invar-diagnostic-codes-external-v1",
+  "extends": "invar-diagnostic-codes-v1",
+  "codes": [
+    {
+      "code": "S1701",
+      "meaning": "external ROS JointState cannot be converted to the declared joint vector",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Caller-supplied ROS names or numeric fields can be malformed even when every checked Invar source program is valid.",
+      "boundary_test": "issue_s1_11_robotics_vocabulary_joint_state_external_boundary"
+    }
+  ]
+}

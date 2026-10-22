@@ -1,0 +1,43 @@
+fn segmented_map(xs: read Array<u32>, offsets: read Array<u32>, count: u32) -> Array<u32> {
+    var out = filled_u32(len(xs), 0u32);
+    for s in 0u32..count {
+        for i in offsets[s]..offsets[s + 1u32] {
+            out[i] = wrapping_add(xs[i], s);
+        }
+    }
+    return move out;
+}
+fn segmented_sum(xs: read Array<u32>, offsets: read Array<u32>, count: u32) -> Array<u32> {
+    var out = filled_u32(count, 0u32);
+    for s in 0u32..count {
+        var acc = 0u32;
+        for i in offsets[s]..offsets[s + 1u32] {
+            acc = wrapping_add(acc, xs[i]);
+        }
+        out[s] = acc;
+    }
+    return move out;
+}
+fn stable_compact(xs: read Array<u32>, count: u32, cutoff: u32) -> Array<u32> {
+    var selected = 0u32;
+    for i in 0u32..count {
+        if xs[i] < cutoff { selected = selected + 1u32; }
+    }
+    var out = filled_u32(selected, 0u32);
+    var pos = 0u32;
+    for j in 0u32..count {
+        if xs[j] < cutoff { out[pos] = xs[j]; pos = pos + 1u32; }
+    }
+    return move out;
+}
+fn main() -> i32 {
+    let xs: Array<u32> = [4u32, 1u32, 3u32, 2u32];
+    let offsets: Array<u32> = [0u32, 2u32, 2u32, 4u32];
+    let mapped = segmented_map(xs, offsets, 3u32);
+    let sums = segmented_sum(xs, offsets, 3u32);
+    let compacted = stable_compact(xs, 4u32, 3u32);
+    if mapped[0u32] != 4u32 or mapped[1u32] != 1u32 or mapped[2u32] != 5u32 or mapped[3u32] != 4u32 { return 1; }
+    if sums[0u32] != 5u32 or sums[1u32] != 0u32 or sums[2u32] != 5u32 { return 2; }
+    if len(compacted) != 2u32 or compacted[0u32] != 1u32 or compacted[1u32] != 2u32 { return 3; }
+    return 0;
+}

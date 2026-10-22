@@ -1,0 +1,334 @@
+{
+  "schema": "invar-tool-frame-preparation-audit-v1",
+  "status": "panda_tcp_offset_only_ur5e_tool_at_attachment_site",
+  "scope": "CPU forward only; not live ROS/planner/task qualification",
+  "source_goldens_sha256": "3f907af98ce3a9ceb550d06f10e709b8c48bd64d7ca4000bcb0a04d8140b8a39",
+  "source_cells_sha256": {
+    "cell.inv": "a6ea8cebe4f84255337d1a510bdcf8a43da2fcf94ddc2550bf542c67324fdd75",
+    "cell-ur5e.inv": "6cf8eaa0aedf0080e744fe236af758c14f863e31008e40f1c0f6dc26bec9f83a"
+  },
+  "generated_scene_sha256": {
+    "panda": "d1dd553c05cb1ff090e9219777be8f8bd7cefab327a44005a6de340039936865",
+    "ur5e": "635a4b0deb2cb6e912683b13c6e4d33d1fbfc0de5f47a2169bd38e8c560b9b41"
+  },
+  "audit_source_sha256": "009a2bef4ec44a72379d3d0538ebdc22a6e687bb9e159665f5827f1a7c2683c2",
+  "mujoco": "3.12.0",
+  "numpy": "2.5.3",
+  "python": "3.14.8",
+  "rows": [
+    {
+      "arm": "panda",
+      "source_vector": 0,
+      "translation_error_m": 0.10340000000000027,
+      "orientation_error_rad": 5.049838411567266e-15,
+      "generated_site_base_translation_m": [
+        0.2959960345152629,
+        0.0,
+        0.5113976194881475
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        0.0,
+        0.9999733482868914,
+        -0.0073008709002594365,
+        0.0
+      ],
+      "reference_translation_m": [
+        0.29599603451526163,
+        -2.3376992599921635e-16,
+        0.6147976194881478
+      ],
+      "reference_quaternion_wxyz": [
+        1.5591168225248924e-16,
+        0.999973348286889,
+        -0.007300870900258871,
+        -2.556075957609104e-16
+      ],
+      "reference_from_generated_site_translation_m": [
+        1.3258298554283944e-15,
+        -2.850149744868275e-16,
+        0.10339999999999964
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        1.5777368499683995e-16,
+        2.5446249231663253e-16,
+        5.497684853587781e-16
+      ]
+    },
+    {
+      "arm": "panda",
+      "source_vector": 1,
+      "translation_error_m": 0.10340000000000188,
+      "orientation_error_rad": 4.4271665722039515e-15,
+      "generated_site_base_translation_m": [
+        -0.60338603123485,
+        0.010966891560483121,
+        0.3092744177015413
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        -0.27950543125145344,
+        -0.07645204577495583,
+        0.9561793578583916,
+        0.04186686283059755
+      ],
+      "reference_translation_m": [
+        -0.5474552897263615,
+        0.007107286379629637,
+        0.39615603602301913
+      ],
+      "reference_quaternion_wxyz": [
+        0.27950543125145266,
+        0.0764520457749562,
+        -0.9561793578583896,
+        -0.04186686283059795
+      ],
+      "reference_from_generated_site_translation_m": [
+        7.979727989493313e-16,
+        8.847089727481716e-17,
+        0.10340000000000135
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        2.9329877600099825e-16,
+        2.610937670715051e-16,
+        6.348520063457122e-16
+      ]
+    },
+    {
+      "arm": "panda",
+      "source_vector": 2,
+      "translation_error_m": 0.10340000000000028,
+      "orientation_error_rad": 7.656565574147094e-15,
+      "generated_site_base_translation_m": [
+        0.3134007304483207,
+        -0.0872915801849571,
+        0.890438161479508
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        0.8046555078109296,
+        0.5211904950133854,
+        0.0369231915165617,
+        -0.28200471553764406
+      ],
+      "reference_translation_m": [
+        0.33765169657130045,
+        0.0015892640779133216,
+        0.8434951517206364
+      ],
+      "reference_quaternion_wxyz": [
+        0.8046555078109277,
+        0.5211904950133822,
+        0.03692319151656127,
+        -0.2820047155376437
+      ],
+      "reference_from_generated_site_translation_m": [
+        1.4502288259166107e-15,
+        8.881784197001252e-16,
+        0.1033999999999995
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        1.6618198673216893e-15,
+        9.875251580954095e-16,
+        2.894135606290411e-17
+      ]
+    },
+    {
+      "arm": "panda",
+      "source_vector": 3,
+      "translation_error_m": 0.1034000000000011,
+      "orientation_error_rad": 6.97609766120948e-15,
+      "generated_site_base_translation_m": [
+        0.33292602155157924,
+        0.06129867863848023,
+        0.13798049189901912
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        0.2498848112874963,
+        0.9117517298293313,
+        -0.22721776159524446,
+        -0.23374869637429105
+      ],
+      "reference_translation_m": [
+        0.38874114421102535,
+        0.0974309924781837,
+        0.21716816757585905
+      ],
+      "reference_quaternion_wxyz": [
+        0.24988481128749498,
+        0.9117517298293288,
+        -0.2272177615952429,
+        -0.2337486963742896
+      ],
+      "reference_from_generated_site_translation_m": [
+        1.1345091532888318e-15,
+        -9.992007221626409e-16,
+        0.10340000000000035
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        -6.656413363230436e-16,
+        -8.694901101037845e-16,
+        8.887653352496706e-16
+      ]
+    },
+    {
+      "arm": "ur5e",
+      "source_vector": 0,
+      "translation_error_m": 1.1161055004029252e-15,
+      "orientation_error_rad": 2.0045598609095054e-15,
+      "generated_site_base_translation_m": [
+        0.7316790508747415,
+        0.22175825618903722,
+        0.5069372059676754
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        0.48199138953208914,
+        -0.1749410172812734,
+        0.517382160899393,
+        0.6851245437674766
+      ],
+      "reference_translation_m": [
+        0.7316790508747404,
+        0.2217582561890372,
+        0.5069372059676756
+      ],
+      "reference_quaternion_wxyz": [
+        0.48199138953208853,
+        -0.17494101728127312,
+        0.5173821608993924,
+        0.6851245437674762
+      ],
+      "reference_from_generated_site_translation_m": [
+        -4.311309276844526e-16,
+        -9.942060679110166e-16,
+        2.6715520910608517e-16
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        3.975697204999623e-16,
+        1.6259731233349847e-16,
+        -3.751420663425238e-16
+      ]
+    },
+    {
+      "arm": "ur5e",
+      "source_vector": 1,
+      "translation_error_m": 1.0393527340642352e-15,
+      "orientation_error_rad": 2.3818100772704465e-15,
+      "generated_site_base_translation_m": [
+        -0.0050483651733130575,
+        -0.590437294625042,
+        -0.5082253943525447
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        0.6658826656543937,
+        0.32048092191235805,
+        -0.6358436444546843,
+        -0.22269960502387112
+      ],
+      "reference_translation_m": [
+        -0.005048365173312877,
+        -0.5904372946250418,
+        -0.5082253943525437
+      ],
+      "reference_quaternion_wxyz": [
+        0.6658826656543935,
+        0.3204809219123574,
+        -0.6358436444546837,
+        -0.22269960502387043
+      ],
+      "reference_from_generated_site_translation_m": [
+        -5.637771437339756e-16,
+        -8.438307121372958e-16,
+        2.2440848304781017e-16
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        1.3483966281164645e-16,
+        -5.462109585127579e-16,
+        -6.89979397996142e-16
+      ]
+    },
+    {
+      "arm": "ur5e",
+      "source_vector": 2,
+      "translation_error_m": 5.319014089382401e-16,
+      "orientation_error_rad": 1.6411034197243982e-15,
+      "generated_site_base_translation_m": [
+        -0.20175031496619508,
+        0.03193914048958628,
+        0.7074287625063023
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        -0.08404186428093266,
+        0.9149742044900407,
+        0.14353746885227314,
+        -0.36763591391685974
+      ],
+      "reference_translation_m": [
+        -0.20175031496619505,
+        0.03193914048958657,
+        0.7074287625063018
+      ],
+      "reference_quaternion_wxyz": [
+        0.08404186428093285,
+        -0.9149742044900402,
+        -0.143537468852273,
+        0.3676359139168592
+      ],
+      "reference_from_generated_site_translation_m": [
+        -4.0171656036850787e-16,
+        1.5456633993655082e-16,
+        -3.1249345675517355e-16
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        0.9999999999999991,
+        -1.6731044324266178e-16,
+        -4.4010393850393853e-16,
+        5.887810594310651e-17
+      ]
+    },
+    {
+      "arm": "ur5e",
+      "source_vector": 3,
+      "translation_error_m": 5.013320832966251e-16,
+      "orientation_error_rad": 2.0411201962889095e-15,
+      "generated_site_base_translation_m": [
+        0.45708748233702934,
+        0.2309951906099023,
+        -0.033951479334641765
+      ],
+      "generated_site_base_quaternion_wxyz": [
+        0.37348466187099344,
+        -0.5832907651443441,
+        0.15824750615305347,
+        0.7037320636725128
+      ],
+      "reference_translation_m": [
+        0.45708748233702945,
+        0.23099519060990203,
+        -0.03395147933464136
+      ],
+      "reference_quaternion_wxyz": [
+        0.37348466187099294,
+        -0.5832907651443433,
+        0.15824750615305375,
+        0.7037320636725125
+      ],
+      "reference_from_generated_site_translation_m": [
+        4.771390132748245e-16,
+        -2.1653128266488448e-17,
+        1.52326497333638e-16
+      ],
+      "reference_from_generated_site_quaternion_wxyz": [
+        1.0,
+        -2.0413274622518354e-16,
+        3.9662867084735587e-16,
+        -6.468062351879742e-16
+      ]
+    }
+  ],
+  "wall_seconds": 0.26028633399982937,
+  "gpu_jobs": 0
+}

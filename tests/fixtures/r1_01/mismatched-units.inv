@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    let x: Quantity<i32, mm> = quantity::<mm>(1i32);
+    let y: Quantity<i32, m> = quantity::<m>(1i32);
+    let z: Quantity<i32, mm> = x + y;
+    return 0i32;
+}

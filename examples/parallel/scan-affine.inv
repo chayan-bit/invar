@@ -1,0 +1,14 @@
+// A prefix recurrence state = a * state + b over u32 wrapping arithmetic composes as an affine scan.
+fn main() -> i32 {
+    let xs: Array<u32> = [1u32, 2u32, 3u32, 4u32];
+    var ys: Array<u32> = filled_u32(len(xs), 0u32);
+    var state: u32 = 0u32;
+    for i in 0u32 .. len(xs) {
+        state = wrapping_add(wrapping_mul(state, 2u32), xs[i]);
+        ys[i] = state;
+    }
+    if ys[3u32] == 26u32 {
+        return 26;
+    }
+    return 0;
+}

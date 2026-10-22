@@ -1,0 +1,16 @@
+// Exact point-cloud radius query through the reference engine.
+fn main() -> i32 {
+    let xs: Array<f32> = [0.0, 1.0, -1.0];
+    let ys: Array<f32> = [0.0, 0.0, 0.0];
+    let zs: Array<f32> = [0.0, 0.0, 0.0];
+    let grid: VoxelGrid = voxel_grid_build(xs, ys, zs, 1.0);
+    let near: Neighbors = radius_neighbors(grid, xs, ys, zs, 1.0, 2u32);
+    let nearest: Knn = knn(grid, xs, ys, zs, 4u32);
+    let counts = move near.counts;
+    let idx = move nearest.idx;
+    let excluded: u32 = grid_excluded(grid);
+    if counts[0u32] == 3u32 and counts[1u32] == 2u32
+        and idx[0u32] == 0u32 and idx[1u32] == 1u32
+        and excluded == 0u32 { return 3; }
+    return 0;
+}

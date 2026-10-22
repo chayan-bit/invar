@@ -1,0 +1,31 @@
+struct Pair { left: i32, right: u32 }
+
+fn identity<T: Value>(x: T) -> T {
+    return x;
+}
+
+fn mix(a: i32, b: u32, c: f32, d: f64, flag: Bool, xs: read Array<i32>, pair: take Pair) -> i32 {
+    let acc: i32 = a + xs[0u32] + pair.left;
+    if flag and b == 8u32 and c == 1.5 and d == 2.5f64 {
+        return identity(acc);
+    }
+    return 0;
+}
+
+fn nested(n: i32) -> i32 {
+    var out: i32 = 0;
+    if n > 0 {
+        let inner: i32 = n * 2;
+        out = inner;
+    }
+    return out;
+}
+
+fn main() -> i32 {
+    let xs: Array<i32> = [1, 2, 3];
+    let pair: Pair = Pair { left: 4, right: 5u32 };
+    let scale: f32 = 1.5;
+    let wide: f64 = 2.5f64;
+    let result: i32 = mix(7, 8u32, scale, wide, true, xs, move pair);
+    return result + nested(0);
+}

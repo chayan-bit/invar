@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "internal_all_body_fk_contract_frozen_before_generation",
+  "source_contract_sha256": "85362985e3729e6f40eac401efc3772d27fb90f93238f3e0174a01517bd2b0b6",
+  "frozen_input_reference_sha256": "8a4cef46ff9aeec67ab51f5c426b219e0d467eb16d0921679586ebc6cceb64c4",
+  "prior_tool_fk_goldens_sha256": "3f907af98ce3a9ceb550d06f10e709b8c48bd64d7ca4000bcb0a04d8140b8a39",
+  "case_names": ["source_home", "prior_fk_0", "prior_fk_1", "prior_fk_2", "prior_fk_3", "near_limit_low_high", "near_limit_high_low", "least_singular_seeded"],
+  "models": [
+    {
+      "name": "panda",
+      "base_body": "link0",
+      "source_model_sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+      "ordered_bodies": [
+        ["link0", null], ["link1", "link0"], ["link2", "link1"], ["link3", "link2"],
+        ["link4", "link3"], ["link5", "link4"], ["link6", "link5"], ["link7", "link6"],
+        ["hand", "link7"], ["left_finger", "hand"], ["right_finger", "hand"]
+      ]
+    },
+    {
+      "name": "ur5e",
+      "base_body": "base",
+      "source_model_sha256": "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
+      "ordered_bodies": [
+        ["base", null], ["shoulder_link", "base"], ["upper_arm_link", "shoulder_link"],
+        ["forearm_link", "upper_arm_link"], ["wrist_1_link", "forearm_link"],
+        ["wrist_2_link", "wrist_1_link"], ["wrist_3_link", "wrist_2_link"]
+      ]
+    }
+  ],
+  "frame_mapping": {
+    "source": "each named MJCF body origin, including fixed hand and slide-joint finger bodies",
+    "pinocchio": "same-name BODY frame from buildModelFromMJCF; JOINT and FIXED_JOINT frames are not substitutes",
+    "mujoco": "same-name mjOBJ_BODY origin after mj_forward",
+    "basis": "T_base_body = inverse(T_world_base) * T_world_body; rotation maps body-local axes to base axes",
+    "translation_unit": "metre",
+    "rotation_layout": "3x3 row-major matrix; no quaternion sign ambiguity",
+    "panda_inactive_fingers": "finger_joint1=finger_joint2=0.04 metres; inactive velocities zero",
+    "ur5e_attachment_site": "separate named site already covered by prior tool FK, not a body in this all-body set"
+  },
+  "checks": {
+    "translation_element_abs_tolerance_m": 1e-12,
+    "rotation_element_abs_tolerance": 1e-12,
+    "rotation_orthogonality_abs_tolerance": 1e-12,
+    "rotation_determinant_abs_tolerance": 1e-12,
+    "parent_relative_element_abs_tolerance": 1e-12,
+    "parent_recomposition_element_abs_tolerance": 1e-12,
+    "panda_fixed_hand_source_relative_element_abs_tolerance": 1e-12
+  },
+  "artifact": {
+    "file": "all_link_reference.json",
+    "float_encoding": "Python repr of binary64 stored as JSON strings",
+    "frame_order": "ordered_bodies; case order case_names",
+    "required_per_body": ["name", "source_parent", "pinocchio_translation_m", "pinocchio_rotation_row_major", "mujoco_translation_m", "mujoco_rotation_row_major", "comparison"],
+    "required_provenance": ["all_link_contract_sha256", "source_contract_sha256", "frozen_input_reference_sha256", "source_model_sha256", "pinocchio_version", "mujoco_version", "environment_image_id", "runtime_status"]
+  },
+  "failure_policy": "preserve every frame/case output and mismatch; missing, duplicate, or wrong-type source/Pinocchio/MuJoCo frame is an explicit failure"
+}

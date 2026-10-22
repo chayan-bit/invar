@@ -1,0 +1,18 @@
+{
+  "schema": "invar-diagnostic-codes-system-v1",
+  "extends": "invar-diagnostic-codes-v1",
+  "codes": [
+    {"code": "S1000", "meaning": "malformed or duplicate system declaration, clause, value, or policy", "deprecated": false, "reachability": "source"},
+    {"code": "S1001", "meaning": "undefined component, port, product, robot, function, frame, or manifest", "deprecated": false, "reachability": "source"},
+    {"code": "S1002", "meaning": "system port types, units, or frames disagree or are invalid", "deprecated": false, "reachability": "source"},
+    {"code": "S1003", "meaning": "connection direction is not output to input", "deprecated": false, "reachability": "source"},
+    {"code": "S1004", "meaning": "input port has multiple producers", "deprecated": false, "reachability": "source"},
+    {"code": "S1005", "meaning": "system root does not name exactly one product", "deprecated": false, "reachability": "source"},
+    {"code": "S1006", "meaning": "exact quantity has the wrong or unsupported unit", "deprecated": false, "reachability": "source"},
+    {"code": "S1007", "meaning": "SPDX expression cannot be parsed", "deprecated": false, "reachability": "source"},
+    {"code": "S1008", "meaning": "floating arithmetic is unavailable before M4-01; retired when strict-f64-v1 made f64 executable (v0.2)", "deprecated": true, "reachability": "source"},
+    {"code": "S1009", "meaning": "system evaluation exceeds a declared size or fuel limit", "deprecated": false, "reachability": "source"},
+    {"code": "S1010", "meaning": "required input port has no producer", "deprecated": false, "reachability": "source"},
+    {"code": "S1011", "meaning": "output port has no consumer", "deprecated": false, "reachability": "source"}
+  ]
+}

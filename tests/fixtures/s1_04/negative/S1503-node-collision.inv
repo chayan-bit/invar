@@ -1,0 +1,19 @@
+frame world;
+fn run() -> i32 { return 0; }
+component Sensor {
+    port out data: Quantity<i32,m> @ 10 Hz;
+    param exposure: Quantity<dec,ms> = 3 ms range 1 ms .. 5 ms;
+    resource cpu_cores = 1, memory = 1 MiB;
+    wcet 1 ms;
+    deadline 100 ms;
+    license "MIT";
+    isolation in-process;
+    impl invar run;
+}
+product Cell {
+    distribution internal;
+    commercial false;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 2, memory = 2 MiB;
+}
+system cell for Cell { FooBar: Sensor; foo_bar: Sensor; }

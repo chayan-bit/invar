@@ -1,0 +1,16 @@
+[package]
+name = "invar-math"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+description = "Vendored CORE-MATH (invar-math-cr-v1) for the Invar CPU engines and device emitters"
+license = "Apache-2.0 AND MIT"
+build = "build.rs"
+links = "invar_coremath"
+
+[build-dependencies]
+cc = "=1.4.7"
+
+[dev-dependencies]
+sha2 = "=0.11.0"

@@ -1,0 +1,10 @@
+extern c fn c_add(left: i32, right: i32) -> Result<i32, ForeignError> oracle add_oracle;
+
+fn add_oracle(left: i32, right: i32) -> Result<i32, ForeignError> {
+  return Result::Ok(left + right);
+}
+
+fn main() -> i32 {
+  let answer: Result<i32, ForeignError> = c_add(3i32, 4i32);
+  return match move answer { Result::Ok(value) => value, Result::Err(error) => 0i32 };
+}

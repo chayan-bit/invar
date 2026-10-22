@@ -1,0 +1,6 @@
+frame world;
+
+fn main() -> i32 {
+    let v: Vector3<i32,m,missing> = vector3::<m,missing>(1, 0, 0);
+    return 0;
+}

@@ -1,0 +1,13 @@
+extern c fn c_round_upward(value: i32) -> Result<i32, ForeignError> oracle upward_oracle;
+
+fn upward_oracle(value: i32) -> Result<i32, ForeignError> {
+  return Result::Ok(value);
+}
+
+fn main() -> i32 {
+  let set: Result<i32, ForeignError> = c_round_upward(0i32);
+  let e = exp(1.0f64);
+  let status: i32 = match move set { Result::Ok(value) => value, Result::Err(error) => 100i32 };
+  if status == 0i32 and e == 2.718281828459045f64 { return 7; }
+  return 0;
+}

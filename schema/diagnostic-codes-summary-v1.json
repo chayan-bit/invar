@@ -1,0 +1,14 @@
+{
+  "schema": "invar-diagnostic-codes-summary-v1",
+  "extends": "invar-diagnostic-codes-v1",
+  "codes": [
+    {
+      "code": "SUMMARY_PLAN",
+      "meaning": "an internally prepared bounded scan failed typed extraction or private source binding",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "A source-checked private preparation must retain its verified typed plan and binding through publication; failure indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_summary_plan_fault"
+    }
+  ]
+}

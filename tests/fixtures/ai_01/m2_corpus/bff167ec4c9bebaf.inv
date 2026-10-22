@@ -1,0 +1,1 @@
+ fn work(xs: read Array<u32>) -> i32 { let pad: u32 = 3u32; var s: u32 = 65537u32; for i in 0u32 .. len(xs) { s = wrapping_mul(s, xs[i]); } if s == pad { return 1; } return 0; } fn main() -> i32 { let values: Array<u32> = []; return work(values); }

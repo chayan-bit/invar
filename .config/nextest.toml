@@ -1,0 +1,86 @@
+# cargo-nextest runs each test in its own process, so in-process locks no longer serialize tests.
+# The overrides below restore every such constraint the tests rely on.
+
+[test-groups]
+# tests/issue_m3_06_metal/main.rs serializes Metal GPU tests with GPU_LOCK.
+metal-gpu = { max-threads = 1 }
+
+[profile.ci]
+# Report every failure, not only the first.
+fail-fast = false
+failure-output = "immediate-final"
+# Name tests running longer than 2 min; never kill them.
+slow-timeout = "120s"
+
+# tests/issue_m5_01_build_lineage.rs takes its DEADLINES lock exclusively in these tests so other load cannot
+# eat their sub-second deadlines. Run them alone on the runner (keep in sync with `exclusive()` callers),
+# and first, so they never wait for a long test to drain.
+[[profile.default.overrides]]
+filter = 'binary(issue_m5_01_build_lineage) & (test(=issue_m5_01_build_lineage_concurrent_capped_streams_and_timeout_fail) | test(=issue_m5_01_build_lineage_descendant_pipe_timeout_kills_process_group))'
+threads-required = "num-test-threads"
+priority = 100
+
+[[profile.default.overrides]]
+filter = 'binary(issue_m3_06_metal)'
+test-group = 'metal-gpu'
+
+[[profile.default.overrides]]
+# #263 corpus passes spread the corpus over oracle::THREADS (8) threads.
+filter = 'binary(issue_263_family_lowerings) & test(/_on_the_corpus$|_at_1_2_7_64_workers$|_refused_before_any_step$/)'
+threads-required = 8
+
+[[profile.default.overrides]]
+# Four source groups retain per-source caches and original report ordering.
+filter = 'binary(issue_gnet_v01_corpus_expansion) & (test(=cpu_tests::child_extraction_full_denominator) | test(=cpu_tests::full_owned_and_resumable_denominator))'
+threads-required = 4
+priority = 95
+
+[[profile.default.overrides]]
+# Eight corpus shards, each compiling CPU device models, run at once.
+filter = 'binary(issue_gnet_03_device) & test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+threads-required = 8
+priority = 95
+
+# Each parallel-slice test compiles CPU models of about 19 CPU-s. Run them alone so
+# runner contention cannot push a compile past the 300 s wall backstop.
+[[profile.default.overrides]]
+filter = 'binary(issue_gnet_03_device) & (test(=issue_gnet_03_device_parallel_slice_cpu_model_cuda_agrees_with_oracle) | test(=issue_gnet_03_device_parallel_slice_cpu_model_metal_agrees_with_oracle))'
+threads-required = "num-test-threads"
+priority = 95
+
+# The longest tests (2-10 min each in CI) start first so they do not end up as the tail of the run.
+[[profile.default.overrides]]
+filter = 'test(/denominator$|every_fuel_prefix_matches_source_and_|every_epoch_and_oracle$|detects_device_mutations$|detects_device_lowering_mutations$|child_failure_prefixes_and_source_order$|across_quanta$|cell_projection_cpu_both_arms$|s2_status_corpus_reaches_every_device_status$|actual_facade_admission_and_reference_replay$|binding_source_graph_and_protocol_faults$|numeric_source_failure_fuel_and_admission$/)'
+priority = 90
+
+# The rest of the tests above 120 s in Debug or Release on main.
+# The split GNET-03 adversarial tests replace one test that took 1863 s in Debug and 210 s in Release.
+[[profile.default.overrides]]
+filter = '(binary(issue_gnet_03_device) & test(/^issue_gnet_03_device_adversarial_cpu_model_agrees_with_oracle::(cuda|metal)::/)) | test(=issue_m4_03_matrix_contraction_tensor_core_device_emitted_kernels_match_oracle_on_host) | test(=issue_m4_03_matrix_contraction_tensor_core_tc_reference_is_the_rounded_exact_sum) | test(=every_law_agrees_with_the_net_oracle)'
+priority = 90
+
+# Real 2^28-live-element fixtures retain about 1 GiB per engine. Give each the
+# runner so source/MIR/oracle comparisons cannot overlap other large fixtures.
+[[profile.default.overrides]]
+filter = 'test(=issue_gnet_02_aggregates_source_global_live_limit_counts_record_shell) | test(=issue_m2_02_fused_map_extraction_elides_unobservable_intermediate) | test(=issue_m4_04_segmented_flattening_compaction_library_caller_live_owners_refuse) | test(=issue_m4_05_gather_scatter_frontier_preflight_traps_and_language_limits) | test(=issue_m4_05_gather_scatter_frontier_runtime_refusal_trap_spans_and_limits) | test(=issue_m4_05_gather_scatter_frontier_scatter_runtime_source_limits_and_errors) | test(=live_array_elements_are_capped_in_aggregate) | test(=schedule::families::segmented::tests::compact_two_regions_preserve_all_predicates_and_source_fuel)'
+threads-required = "num-test-threads"
+
+[profile.default]
+# Add retries only as a per-test override with a linked flaky-test issue.
+retries = 0
+
+[profile.ci.junit]
+path = "junit.xml"
+store-success-output = false
+store-failure-output = false
+
+[profile.quick]
+# Fast source/MIR/library contracts; compiler/device/system matrices stay in ci.
+# The named suites total 183 passing cases in the base CI run.
+default-filter = '(kind(lib) & not test(/^(general_net|schedule|system)::/)) | binary(/^issue_m0_0[2-9]$/) | binary(/^issue_l1_0[1-3]/) | binary(=issue_gnet_01)'
+retries = 0
+
+[profile.quick.junit]
+path = "junit.xml"
+store-success-output = false
+store-failure-output = false

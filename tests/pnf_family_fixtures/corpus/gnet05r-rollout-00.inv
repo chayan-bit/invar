@@ -1,0 +1,158 @@
+// GNET-05 robotics corpus: rollout (panda, trigonometric, table).
+fn lcg(x: u32) -> u32 {
+    return wrapping_add(wrapping_mul(x, 1664525u32), 1013904223u32);
+}
+fn unit(x: u32) -> f32 {
+    return f32_from_u32(x / 256u32) * 0.000000059604645;
+}
+fn stream(seed: u32, i: u32) -> u32 {
+    return lcg(wrapping_add(wrapping_mul(i, 2654435761u32), seed));
+}
+fn sincos(x: f32, cs: mut Array<f32>, j: u32) -> Unit {
+    var k = 0.0;
+    var m = 0u32;
+    while x * 0.63661975 - k > 0.5 {
+        k = k + 1.0;
+        m = m + 1u32;
+    }
+    while x * 0.63661975 - k < (-0.5) {
+        k = k - 1.0;
+        m = m + 3u32;
+    }
+    let r = x - k * 1.5703125 - k * 0.0004837513 - k * 0.0000000754979;
+    let z = r * r;
+    let s = (((-0.00019515296) * z + 0.008332161) * z - 0.16666655) * z * r + r;
+    let c = ((0.000024433157 * z - 0.0013887316) * z + 0.041666646) * z * z - 0.5 * z + 1.0;
+    let q = m % 4u32;
+    var sn = s;
+    var cn = c;
+    if q == 1u32 {
+        sn = c;
+        cn = -s;
+    } else if q == 2u32 {
+        sn = -s;
+        cn = -c;
+    } else if q == 3u32 {
+        sn = -c;
+        cn = s;
+    }
+    cs[2u32 * j] = cn;
+    cs[2u32 * j + 1u32] = sn;
+}
+fn angles(cs: mut Array<f32>, seed: u32, b: u32, lo: read Array<f32>, span: read Array<f32>) -> Unit {
+    var x = stream(seed, b);
+    for j in 0u32..len(lo) {
+        x = lcg(x);
+        sincos(lo[j] + span[j] * unit(x), cs, j);
+    }
+}
+fn fk(w: mut Array<f32>, o: u32, cs: read Array<f32>, par: read Array<u32>, fix: read Array<f32>, ax: read Array<u32>, jt: read Array<u32>, jm: mut Array<f32>) -> Unit {
+    for e in 0u32..12u32 {
+        w[o + e] = fix[e];
+    }
+    for i in 1u32..len(par) {
+        let so = o + i * 12u32;
+        let po = o + par[i] * 12u32;
+        let ao = i * 12u32;
+        let a = ax[i];
+        let c = cs[2u32 * jt[i]];
+        let s = cs[2u32 * jt[i] + 1u32];
+        for k in 0u32..3u32 {
+            let f = ao + 3u32 * k;
+            let x = fix[f];
+            let y = fix[f + 1u32];
+            let z = fix[f + 2u32];
+            jm[3u32 * k] = x;
+            jm[3u32 * k + 1u32] = y;
+            jm[3u32 * k + 2u32] = z;
+            if a == 3u32 {
+                jm[3u32 * k] = c * x + s * y;
+                jm[3u32 * k + 1u32] = c * y - s * x;
+            } else if a == 2u32 {
+                jm[3u32 * k] = c * x - s * z;
+                jm[3u32 * k + 2u32] = s * x + c * z;
+            } else if a == 1u32 {
+                jm[3u32 * k + 1u32] = c * y + s * z;
+                jm[3u32 * k + 2u32] = c * z - s * y;
+            }
+        }
+        for r in 0u32..3u32 {
+            let pr = po + r * 3u32;
+            for col in 0u32..3u32 {
+                w[so + r * 3u32 + col] = w[pr] * jm[col] + w[pr + 1u32] * jm[3u32 + col] + w[pr + 2u32] * jm[6u32 + col];
+            }
+            w[so + 9u32 + r] = w[pr] * fix[ao + 9u32] + w[pr + 1u32] * fix[ao + 10u32] + w[pr + 2u32] * fix[ao + 11u32] + w[po + 9u32 + r];
+        }
+    }
+}
+fn tool(t: read Array<f32>, i: u32) -> f32 {
+    let r = 96u32 + 3u32 * i;
+    return t[r] * 0.0 + t[r + 1u32] * 0.0 + t[r + 2u32] * 0.0 + t[96u32 + 9u32 + i];
+}
+fn run(seed: u32, n: u32, h: u32) -> Array<f32> {
+    let lo: Array<f32> = [(-2.8973), (-1.7628), (-2.8973), (-3.0718), (-2.8973), (-0.0175), (-2.8973)];
+    let span: Array<f32> = [5.7946, 3.5256, 5.7946, 3.002, 5.7946, 3.77, 5.7946];
+    let par: Array<u32> = [0u32, 0u32, 1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32, 8u32];
+    let fix: Array<f32> = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.333, 1.0, (-0.0), 0.0, 0.0, 0.0000000000000002220446, 1.0, (-0.0), (-1.0), 0.0000000000000002220446, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0000000000000002220446, (-1.0), 0.0, 1.0, 0.0000000000000002220446, 0.0, (-0.316), 0.0, 1.0, 0.0, 0.0, 0.0, 0.0000000000000002220446, (-1.0), 0.0, 1.0, 0.0000000000000002220446, 0.0825, 0.0, 0.0, 1.0, (-0.0), 0.0, 0.0, 0.0000000000000002220446, 1.0, (-0.0), (-1.0), 0.0000000000000002220446, (-0.0825), 0.384, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0000000000000002220446, (-1.0), 0.0, 1.0, 0.0000000000000002220446, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0000000000000002220446, (-1.0), 0.0, 1.0, 0.0000000000000002220446, 0.088, 0.0, 0.0, 0.7071068, 0.70710677, 0.0, (-0.70710677), 0.7071068, (-0.0), (-0.0), 0.0, 1.0, 0.0, 0.0, 0.107, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.04, 0.0584, (-1.0), 0.0, 0.0, 0.0, (-1.0), 0.0, 0.0, 0.0, 1.0, 0.0, (-0.04), 0.0584];
+    let ax: Array<u32> = [0u32, 3u32, 3u32, 3u32, 3u32, 3u32, 3u32, 3u32, 0u32, 0u32, 0u32];
+    let jt: Array<u32> = [0u32, 0u32, 1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 0u32, 0u32, 0u32];
+    var jm = filled_f32(9u32, 0.0);
+    let hi: Array<f32> = [2.8973, 1.7628, 2.8973, (-0.0698), 2.8973, 3.7525, 2.8973];
+    var x = stream(wrapping_mul(seed, 747796405u32), 0u32);
+    x = lcg(x);
+    let tx = 1.2 * unit(x) - 0.6;
+    x = lcg(x);
+    let ty = 1.2 * unit(x) - 0.6;
+    x = lcg(x);
+    let tz = 0.8 * unit(x) + 0.1;
+    var out = filled_f32(n * h * 8u32, 0.0);
+    var q = filled_f32(7u32, 0.0);
+    var v = filled_f32(7u32, 0.0);
+    var cs = filled_f32(14u32, 0.0);
+    var t = filled_f32(132u32, 0.0);
+    for b in 0u32..n {
+        var y = stream(seed, b);
+        for j0 in 0u32..7u32 {
+            y = lcg(y);
+            q[j0] = lo[j0] + span[j0] * unit(y);
+            v[j0] = 0.0;
+        }
+        for k in 0u32..h {
+            var uu = 0.0;
+            for j in 0u32..7u32 {
+                y = lcg(y);
+                let u = (2.0 * unit(y) - 1.0) * 2.0;
+                uu = uu + u * u;
+                v[j] = v[j] + 0.01 * u;
+                var p = q[j] + 0.01 * v[j];
+                if p < lo[j] {
+                    p = lo[j];
+                    v[j] = 0.0;
+                }
+                if p > hi[j] {
+                    p = hi[j];
+                    v[j] = 0.0;
+                }
+                q[j] = p;
+                sincos(p, cs, j);
+            }
+            fk(t, 0u32, cs, par, fix, ax, jt, jm);
+            let ex = tool(t, 0u32) - tx;
+            let ey = tool(t, 1u32) - ty;
+            let ez = tool(t, 2u32) - tz;
+            let o = (b * h + k) * 8u32;
+            for j2 in 0u32..7u32 {
+                out[o + j2] = q[j2];
+            }
+            out[o + 7u32] = ex * ex + ey * ey + ez * ez + 0.001 * uu;
+        }
+    }
+    return out;
+}
+fn main() -> i32 {
+    let out = run(3802166675u32, 1u32, 2u32);
+    if len(out) > 0u32 {
+        return 1;
+    }
+    return 0;
+}

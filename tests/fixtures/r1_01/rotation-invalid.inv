@@ -1,0 +1,7 @@
+frame world;
+frame base: world;
+
+fn main() -> i32 {
+    let x: Transform<world,base> = transform::<world,base>(0,0,0, 1,0,0, 0,1,0, 0,0,-1);
+    return 0;
+}

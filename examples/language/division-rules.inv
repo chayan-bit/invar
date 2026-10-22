@@ -1,0 +1,8 @@
+// Signed division truncates toward zero and the remainder takes the dividend's sign; MIN % -1 is 0.
+fn main() -> i32 {
+    let minimum: i32 = -2147483648;
+    let q: i32 = -7 / 2;
+    let r: i32 = -7 % 2;
+    let edge: i32 = minimum % -1;
+    return q * 100 + r * 10 + edge;
+}

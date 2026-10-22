@@ -1,0 +1,15 @@
+// Only the selected branch and the needed operand of and/or are evaluated.
+fn boom() -> Bool {
+    let zero: i32 = 0;
+    return 1 / zero == 0;
+}
+
+fn main() -> i32 {
+    if false and boom() {
+        return 1;
+    }
+    if true or boom() {
+        return 2;
+    }
+    return 3;
+}

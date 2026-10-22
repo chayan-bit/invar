@@ -1,0 +1,5 @@
+// Division by zero is a source trap with its own category.
+fn main() -> i32 {
+    let zero: i32 = 0;
+    return 10 / zero;
+}

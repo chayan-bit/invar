@@ -1,0 +1,19 @@
+fn tree(values: read Array<i32>, modes: read Array<u32>, node: u32, depth: u32) -> i32 {
+    if node >= len(values) or depth == 0u32 { return 0; }
+    let left: u32 = wrapping_add(wrapping_mul(node, 2u32), 1u32);
+    let right: u32 = wrapping_add(left, 1u32);
+    let mode: u32 = modes[node] % 3u32;
+    if mode == 0u32 {
+        let a: i32 = tree(values, modes, left, depth - 1u32);
+        let b: i32 = tree(values, modes, right, depth - 1u32);
+        return values[node] + a + b;
+    }
+    if mode == 1u32 { return values[node] + tree(values, modes, left, depth - 1u32); }
+    return values[node] + tree(values, modes, right, depth - 1u32);
+}
+
+fn main() -> i32 {
+    let values: Array<i32> = [9, 2, 8, 1, 7, 3, 6, 4, 5, 11, 10];
+    let modes: Array<u32> = [2u32, 0u32, 0u32, 1u32, 2u32, 0u32, 1u32, 2u32, 0u32, 1u32, 2u32];
+    return tree(values, modes, 0u32, 5u32);
+}

@@ -1,0 +1,10 @@
+// Every path of a non-Unit function must return; a loop never establishes definite return.
+fn spin(n: i32) -> i32 {
+    while n < 0 {
+        return n;
+    }
+}
+
+fn main() -> i32 {
+    return spin(1);
+}

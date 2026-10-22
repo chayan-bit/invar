@@ -1,0 +1,46 @@
+fn leaf(ok: Bool) -> Result<i32, u32> {
+    if ok { return Result::Ok(7i32); }
+    return Result::Err(4u32);
+}
+
+fn wrap(ok: Bool) -> Result<i32, u32> {
+    let scratch: Array<i32> = [1i32, 2i32];
+    let value: i32 = leaf(ok)?;
+    return Result::Ok(value + 1i32);
+}
+
+fn nested(ok: Bool) -> Result<Result<i32, u32>, u32> {
+    let value: Result<i32, u32> = leaf(ok);
+    return Result::Ok(move value);
+}
+
+fn outer_error() -> Result<Result<i32, u32>, u32> {
+    return Result::Err(9u32);
+}
+
+fn inspect(ok: Bool) -> i32 {
+    let packet: Result<Result<i32, u32>, u32> = nested(ok);
+    return match move packet {
+        Result::Ok(inner) => match move inner { Result::Ok(number) => number, Result::Err(inner_error) => 0i32 },
+        Result::Err(outer_error_code) => 0i32,
+    };
+}
+
+fn inspect_outer_error() -> i32 {
+    let packet: Result<Result<i32, u32>, u32> = outer_error();
+    return match move packet {
+        Result::Ok(inner_unused) => 0i32,
+        Result::Err(code) => 9i32,
+    };
+}
+
+fn main() -> i32 {
+    let good: Result<i32, u32> = wrap(true);
+    let bad: Result<i32, u32> = wrap(false);
+    let inner_ok: Result<Result<i32, u32>, u32> = nested(true);
+    let inner_err: Result<Result<i32, u32>, u32> = nested(false);
+    let outer_err: Result<Result<i32, u32>, u32> = outer_error();
+    let value: i32 = match move good { Result::Ok(x) => x, Result::Err(e) => 0i32 };
+    let error: i32 = match move bad { Result::Ok(unused) => 0i32, Result::Err(error_code) => 4i32 };
+    return value + error + inspect(true) + inspect(false) + inspect_outer_error();
+}

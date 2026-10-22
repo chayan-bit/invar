@@ -1,0 +1,9 @@
+fn main() -> i32 {
+    let degrees: Quantity<i32, deg> = to::<deg>(quantity::<rad>(1i32));
+    let radians: Quantity<i32, rad> = to::<rad>(quantity::<deg>(180i32));
+    let negative: Quantity<i32, deg> = to::<deg>(quantity::<rad>(-1i32));
+    if degrees == quantity::<deg>(57i32) and radians == quantity::<rad>(3i32) and negative == quantity::<deg>(-57i32) {
+        return 1i32;
+    }
+    return 0i32;
+}

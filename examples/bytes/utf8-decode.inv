@@ -1,0 +1,7 @@
+fn main() -> i32 {
+  let raw: Bytes = b"caf\xC3\xA9";
+  let result = utf8_decode(raw);
+  let length: u32 = match move result { Result::Ok(text) => len(text), Result::Err(error) => 0u32 };
+  if length == 5u32 { return 7; }
+  return 0;
+}

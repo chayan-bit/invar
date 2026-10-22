@@ -1,0 +1,11 @@
+fn length(x: Quantity<i32, m>, y: Quantity<i32, m>) -> Quantity<i32, m> {
+    return x + y;
+}
+
+fn main() -> i32 {
+    let sum: Quantity<i32, m> = length(quantity::<m>(5i32), quantity::<m>(7i32));
+    if sum == quantity::<m>(12i32) {
+        return 1i32;
+    }
+    return 0i32;
+}

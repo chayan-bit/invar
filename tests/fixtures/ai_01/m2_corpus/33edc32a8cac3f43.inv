@@ -1,0 +1,1 @@
+ fn main() -> i32 { let xs: Array<u32> = filled_u32(0u32, 4294967293u32); let pad: u32 = 3u32; var ys: Array<u32> = filled_u32(len(xs), 0u32); for i in 0u32 .. len(xs) { ys[i] = wrapping_add(ys[i - 1u32], 1u32); } return 0; }

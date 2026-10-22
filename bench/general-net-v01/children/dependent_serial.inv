@@ -1,0 +1,4 @@
+fn first(n: i32) -> i32 { return n + 1; }
+fn second(n: i32) -> i32 { return n + 2; }
+fn run(n: i32) -> i32 { let a = first(n); return second(a); }
+fn main() -> i32 { return run(4); }

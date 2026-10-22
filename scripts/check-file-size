@@ -1,0 +1,139 @@
+#!/bin/sh
+# Ratchet on tracked .rs file length: a file over 800 lines must be on scripts/file-size-allowlist.txt and may not
+# grow past its recorded size; shrinking is always allowed. Reads the working tree with Python's standard library,
+# so it needs no build and no network. Lines are newline bytes, as `wc -l` counts them.
+#
+#   check-file-size               check (exit 0 ok, 1 violations, 2 unusable input)
+#   check-file-size --update      lower recorded sizes and drop entries that no longer need one; never raise or add
+#   check-file-size --regenerate  rewrite the allowlist to exactly the current tree (for a deliberate reset)
+set -eu
+exec python3 - "$@" <<'PY'
+import os
+import subprocess
+import sys
+
+LIMIT = 800
+ALLOWLIST = "scripts/file-size-allowlist.txt"
+HEADER = """\
+# Tracked .rs files over 800 lines, with the line count each may not exceed (scripts/check-file-size).
+# One `<lines> <path>` per line, sorted by path. Lower an entry in the PR that splits the file; drop it when the
+# file is back under 800 lines. Never raise one: split the file instead.
+"""
+
+
+class Unusable(Exception):
+    pass
+
+
+def git(*args):
+    return subprocess.check_output(["git", *args], stderr=subprocess.DEVNULL)
+
+
+def label(text):
+    # Paths come from the tree under check; keep control characters out of the log.
+    return text.encode("unicode_escape").decode("ascii")
+
+
+def tracked_sizes():
+    sizes = {}
+    for raw in filter(None, git("ls-files", "-z", "--", "*.rs").split(b"\0")):
+        path = os.fsdecode(raw)
+        try:
+            with open(path, "rb") as stream:
+                sizes[path] = stream.read().count(b"\n")
+        except OSError:
+            raise Unusable(f"{label(path)} is tracked but unreadable; check out every *.rs file (sparse checkouts "
+                           "must include them) or `git rm` it")
+    return sizes
+
+
+def read_allowlist():
+    entries = {}
+    try:
+        with open(ALLOWLIST, encoding="utf-8") as stream:
+            lines = stream.read().splitlines()
+    except OSError:
+        raise Unusable(f"{ALLOWLIST} is missing or unreadable")
+    for number, line in enumerate(lines, 1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        count, _, path = line.partition(" ")
+        if not count.isascii() or not count.isdigit() or not path or path != path.strip():
+            raise Unusable(f"{ALLOWLIST}:{number}: expected `<lines> <path>`")
+        if path in entries:
+            raise Unusable(f"{ALLOWLIST}:{number}: duplicate entry for {label(path)}")
+        if int(count) <= LIMIT:
+            raise Unusable(f"{ALLOWLIST}:{number}: {count} is not over {LIMIT}; drop the entry")
+        entries[path] = int(count)
+    return entries
+
+
+def write_allowlist(entries):
+    body = "".join(f"{count} {path}\n" for path, count in sorted(entries.items()))
+    with open(ALLOWLIST, "w", encoding="utf-8") as stream:
+        stream.write(HEADER + body)
+
+
+def check(sizes, entries):
+    failures = 0
+    for path in sorted(sizes):
+        count = sizes[path]
+        recorded = entries.get(path)
+        if count > LIMIT and recorded is None:
+            print(f"FAIL {label(path)}: {count} lines, over {LIMIT} and not on the allowlist; split it")
+            failures += 1
+        elif recorded is not None and count > recorded:
+            print(f"FAIL {label(path)}: grew from {recorded} to {count} lines; the allowlist only ratchets down")
+            failures += 1
+    for path in sorted(entries):
+        count = sizes.get(path)
+        if count is None:
+            print(f"note {label(path)}: allowlisted but no longer tracked; drop the entry")
+        elif count <= LIMIT:
+            print(f"note {label(path)}: now {count} lines; drop the entry")
+        elif count < entries[path]:
+            print(f"note {label(path)}: shrank from {entries[path]} to {count} lines; run --update to lower the entry")
+    over = sum(1 for count in sizes.values() if count > LIMIT)
+    print(f"file-size: {failures} violations; {over} files over {LIMIT} lines, {len(entries)} allowlisted")
+    return 1 if failures else 0
+
+
+def update(sizes, entries):
+    lowered = {}
+    refused = 0
+    for path, count in sorted(sizes.items()):
+        if count <= LIMIT:
+            continue
+        recorded = entries.get(path)
+        if recorded is None or count > recorded:
+            print(f"FAIL {label(path)}: {count} lines is not below its allowlisted size; not recording it")
+            refused += 1
+        else:
+            lowered[path] = count
+    if refused:
+        return 1
+    write_allowlist(lowered)
+    print(f"file-size: allowlist now has {len(lowered)} entries")
+    return 0
+
+
+try:
+    args = sys.argv[1:]
+    if args not in ([], ["--update"], ["--regenerate"]):
+        print("usage: check-file-size [--update | --regenerate]", file=sys.stderr)
+        sys.exit(2)
+    try:
+        os.chdir(git("rev-parse", "--show-toplevel").decode().rstrip("\n"))
+    except (OSError, subprocess.CalledProcessError):
+        raise Unusable("not inside a Git work tree")
+    sizes = tracked_sizes()
+    if args == ["--regenerate"]:
+        write_allowlist({path: count for path, count in sizes.items() if count > LIMIT})
+        print(f"file-size: allowlist regenerated with {sum(1 for c in sizes.values() if c > LIMIT)} entries")
+        sys.exit(0)
+    entries = read_allowlist()
+    sys.exit(update(sizes, entries) if args == ["--update"] else check(sizes, entries))
+except Unusable as problem:
+    print(f"file-size: {problem}", file=sys.stderr)
+    sys.exit(2)
+PY

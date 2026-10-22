@@ -1,0 +1,2 @@
+fn fair_root(mode: u32) -> i32 { if mode == 0u32 { while true {} } if mode == 1u32 { return 17; } if mode == 2u32 { if true { let done: Array<i32> = [7, 9]; } let failed: Array<i32> = [1]; return failed[1u32]; } let fresh: Array<i32> = [11, 12]; return fresh[0u32] + fresh[1u32]; }
+fn main() -> i32 { return fair_root(1u32); }

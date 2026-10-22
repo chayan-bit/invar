@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    let ys: Array<i32> = [1i32];
+    let c = closure [take ys: Array<i32>]() -> i32 { return ys[0u32]; };
+    let later: Array<i32> = ys;
+    return c();
+}

@@ -1,0 +1,20 @@
+fn softmax_rows(x: read Array<f32>, rows: u32, cols: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(rows * cols, 0.0);
+    for r in 0u32..rows {
+        let base: u32 = r * cols;
+        var peak: f32 = x[base];
+        for c in 1u32..cols {
+            if x[base + c] > peak { peak = x[base + c]; }
+        }
+        var denom: f32 = 0.0;
+        for c2 in 0u32..cols {
+            let e: f32 = exp(x[base + c2] - peak);
+            out[base + c2] = e;
+            denom = denom + e;
+        }
+        for c3 in 0u32..cols {
+            out[base + c3] = out[base + c3] / denom;
+        }
+    }
+    return move out;
+}

@@ -1,0 +1,59 @@
+// Standard robotics port records. Scalar values are type-only until M4-01.
+module std::robotics {
+    pub struct Point<T: Value, F: Frame> {
+        x: Quantity<T,um>, y: Quantity<T,um>, z: Quantity<T,um>
+    }
+    pub struct Vector3<T: Value, U: Unit, F: Frame> {
+        x: Quantity<T,U>, y: Quantity<T,U>, z: Quantity<T,U>
+    }
+    pub struct Quaternion<T: Value, F: Frame> {
+        x: T, y: T, z: T, w: T
+    }
+    pub struct Pose<T: Value, F: Frame, Child: Frame> {
+        translation: std::robotics::Vector3<T,m,F>,
+        rotation: std::robotics::Quaternion<T,F>
+    }
+    pub struct Twist<T: Value, F: Frame> {
+        linear: std::robotics::Vector3<T,Div<m,s>,F>,
+        angular: std::robotics::Vector3<T,Div<rad,s>,F>
+    }
+    pub struct Wrench<T: Value, F: Frame> {
+        force: std::robotics::Vector3<T,N,F>,
+        torque: std::robotics::Vector3<T,Nm,F>
+    }
+    pub struct JointPositions<T: Value, const N: u32> { values: FixedArray<T,N> }
+    pub struct JointVelocities<T: Value, const N: u32> { values: FixedArray<T,N> }
+    pub struct JointEfforts<T: Value, const N: u32> { values: FixedArray<T,N> }
+    pub struct JointState<T: Value, const N: u32> {
+        names: FixedArray<u32,N>,
+        positions: std::robotics::JointPositions<T,N>,
+        velocities: std::robotics::JointVelocities<T,N>,
+        efforts: std::robotics::JointEfforts<T,N>
+    }
+    pub struct JointWaypoint<T: Value, const N: u32> {
+        positions: std::robotics::JointPositions<T,N>,
+        velocities: std::robotics::JointVelocities<T,N>,
+        time_from_start: Quantity<i64,ns>
+    }
+    pub struct JointTrajectory<T: Value, const N: u32> {
+        waypoints: FixedArray<std::robotics::JointWaypoint<T,N>,64>,
+        count: u32
+    }
+    pub struct Distortion<T: Value> {
+        model: u32, k1: T, k2: T, p1: T, p2: T, k3: T
+    }
+    pub struct CameraIntrinsics<T: Value> {
+        width: Quantity<u32,px>, height: Quantity<u32,px>,
+        fx: Quantity<T,px>, fy: Quantity<T,px>,
+        cx: Quantity<T,px>, cy: Quantity<T,px>,
+        distortion: std::robotics::Distortion<T>
+    }
+    pub struct CameraExtrinsics<T: Value, Camera: Frame, Parent: Frame> {
+        pose: std::robotics::Pose<T,Parent,Camera>
+    }
+    pub struct Stamped<X: Value> {
+        stamp: Quantity<i64,ns>,
+        frame_id: u32,
+        value: X
+    }
+}

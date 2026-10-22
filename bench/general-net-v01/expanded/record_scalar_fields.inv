@@ -1,0 +1,2 @@
+struct Pair { left: i32, right: i32 }
+fn main() -> i32 { let p: Pair = Pair { left: 9, right: 4 }; return p.left * 3 + p.right; }

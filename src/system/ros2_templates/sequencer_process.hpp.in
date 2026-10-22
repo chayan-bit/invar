@@ -1,0 +1,97 @@
+#pragma once
+#include <array>
+#include <cerrno>
+#include <chrono>
+#include <cstdint>
+#include <cstring>
+#include <filesystem>
+#include <iostream>
+#include <limits>
+#include <poll.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdexcept>
+#include <string>
+#include <sys/wait.h>
+#include <thread>
+#include <unistd.h>
+#include <fcntl.h>
+#include <vector>
+extern char **environ;
+namespace invar_task_process_v1 {
+static_assert(sizeof(double)==8 && std::numeric_limits<double>::is_iec559, "IVSQ/2 requires IEEE binary64");
+using Bytes=std::vector<std::uint8_t>;
+inline void integer(Bytes &b,std::uint64_t n,std::size_t width){for(std::size_t i=0;i<width;++i)b.push_back(static_cast<std::uint8_t>(n>>(8*i)));}
+inline void number(Bytes &b,double x){std::uint64_t bits;static_assert(sizeof(bits)==sizeof(x));std::memcpy(&bits,&x,sizeof(bits));integer(b,bits,8);}
+struct Cursor {
+ const Bytes &b;std::size_t i=0;
+ std::uint64_t integer(std::size_t width){if(width>8||i>b.size()||width>b.size()-i)throw std::runtime_error("truncated task reply");std::uint64_t n=0;for(std::size_t k=0;k<width;++k)n|=std::uint64_t(b[i++])<<(8*k);return n;}
+ double number(){auto bits=integer(8);double out;std::memcpy(&out,&bits,8);return out;}
+ void end(){if(i!=b.size())throw std::runtime_error("trailing task reply");}
+};
+class Process {
+ int input_=-1,output_=-1;pid_t child_=-1;std::uint32_t exchange_=0;
+ using Clock=std::chrono::steady_clock;
+ void transfer(int fd,void *data,std::size_t size,bool writing,Clock::time_point deadline){
+  auto *p=static_cast<std::uint8_t*>(data);
+  while(size){auto now=Clock::now();if(now>=deadline)throw std::runtime_error("task RPC deadline");
+   auto ms=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-now).count();pollfd f{fd,static_cast<short>(writing?POLLOUT:POLLIN),0};
+   int result=::poll(&f,1,static_cast<int>(ms));if(result<0&&errno==EINTR)continue;
+   if(result<=0||!(f.revents&(writing?POLLOUT:POLLIN)))throw std::runtime_error("task stream failed/closed");
+   ssize_t count=writing ? ::write(fd,p,size) : ::read(fd,p,size);
+   if(count<0&&(errno==EINTR||errno==EAGAIN))continue;
+   if(count<=0)throw std::runtime_error("task partial/closed stream");
+   p+=count;size-=static_cast<std::size_t>(count);
+  }
+ }
+ public:
+ Process(const std::string &runtime,const std::string &binding,const std::string &binding_sha,const std::string &task,const std::string &task_sha){
+  for(const auto &s:{runtime,binding,task})if(!std::filesystem::path(s).is_absolute()||!std::filesystem::is_regular_file(s)||s.size()>4096||s.find('\0')!=std::string::npos)throw std::runtime_error("invalid task process path");
+  if(binding_sha.size()!=64||task_sha.size()!=64)throw std::runtime_error("invalid task process hash");
+  std::array<int,4> fds{-1,-1,-1,-1};posix_spawn_file_actions_t actions;bool initialized=false;
+  try {
+   if(::pipe(fds.data())||::pipe(fds.data()+2))throw std::runtime_error("task pipes");
+   for(int fd:fds)if(fd<=STDERR_FILENO)throw std::runtime_error("task requires open standard streams");
+   for(int fd:fds)if(::fcntl(fd,F_SETFD,FD_CLOEXEC)<0)throw std::runtime_error("task pipe inheritance");
+   if(posix_spawn_file_actions_init(&actions))throw std::runtime_error("task spawn actions");
+   initialized=true;
+   if(posix_spawn_file_actions_adddup2(&actions,fds[0],STDIN_FILENO)||posix_spawn_file_actions_adddup2(&actions,fds[3],STDOUT_FILENO))throw std::runtime_error("task pipe binding");
+   for(int fd:fds)if(posix_spawn_file_actions_addclose(&actions,fd))throw std::runtime_error("task pipe close action");
+   std::array<std::string,9> args{runtime,"--binding",binding,"--binding-sha256",binding_sha,"--task",task,"--task-sha256",task_sha};
+   std::array<char*,10> argv{};for(std::size_t i=0;i<args.size();++i)argv[i]=args[i].data();
+   pid_t spawned=-1;
+   if(posix_spawn(&spawned,runtime.c_str(),&actions,nullptr,argv.data(),environ))throw std::runtime_error("task spawn");
+   child_=spawned;
+   posix_spawn_file_actions_destroy(&actions);initialized=false;
+   ::close(fds[0]);fds[0]=-1;::close(fds[3]);fds[3]=-1;
+   input_=fds[1];fds[1]=-1;output_=fds[2];fds[2]=-1;
+   if(::fcntl(input_,F_SETFL,O_NONBLOCK)<0||::fcntl(output_,F_SETFL,O_NONBLOCK)<0)throw std::runtime_error("task nonblocking pipes");
+  } catch(...) {if(initialized)posix_spawn_file_actions_destroy(&actions);for(int fd:fds)if(fd>=0)::close(fd);stop();throw;}
+ }
+ Process(const Process&)=delete;Process &operator=(const Process&)=delete;
+ ~Process(){stop();}
+ std::pair<std::uint16_t,Bytes> call(std::uint16_t kind,const Bytes &payload){
+  if(child_<=0||payload.size()>65536||exchange_==UINT32_MAX)throw std::runtime_error("task exchange bound");
+  const auto id=++exchange_;Bytes header{'I','V','S','Q'};integer(header,2,2);integer(header,kind,2);integer(header,payload.size(),4);integer(header,id,4);
+  const auto deadline=Clock::now()+std::chrono::seconds(5);transfer(input_,header.data(),header.size(),true,deadline);
+  if(!payload.empty())transfer(input_,const_cast<std::uint8_t*>(payload.data()),payload.size(),true,deadline);
+  Bytes reply(16);transfer(output_,reply.data(),reply.size(),false,deadline);
+  if(std::memcmp(reply.data(),"IVSQ",4))throw std::runtime_error("task reply marker");
+  Cursor c{reply,4};if(c.integer(2)!=2)throw std::runtime_error("task reply version");
+  auto response=static_cast<std::uint16_t>(c.integer(2));auto size=c.integer(4);if(c.integer(4)!=id||size>65536)throw std::runtime_error("task reply identity/bound");
+  Bytes body(size);if(size)transfer(output_,body.data(),body.size(),false,deadline);return {response,std::move(body)};
+ }
+ void finish(){
+  if(input_>=0){::close(input_);input_=-1;}
+  for(int i=0;i<40;++i){int status=0;auto r=::waitpid(child_,&status,WNOHANG);if(r==child_){child_=-1;if(!WIFEXITED(status)||WEXITSTATUS(status)!=0)throw std::runtime_error("task completion process failed");return;}if(r<0&&errno!=EINTR)throw std::runtime_error("task completion reap");std::this_thread::sleep_for(std::chrono::milliseconds(50));}
+  throw std::runtime_error("task completion cleanup deadline");
+ }
+ void stop() noexcept {
+  if(input_>=0){::close(input_);input_=-1;}if(output_>=0){::close(output_);output_=-1;}
+  if(child_<=0)return;
+  ::kill(child_,SIGTERM);
+  for(int i=0;i<40;++i){int status=0;auto r=::waitpid(child_,&status,WNOHANG);if(r==child_||(r<0&&errno==ECHILD)){child_=-1;return;}if(i==5)::kill(child_,SIGKILL);std::this_thread::sleep_for(std::chrono::milliseconds(50));}
+  std::cerr<<"task cleanup completion unconfirmed\n";
+ }
+};
+}

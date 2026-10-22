@@ -1,0 +1,6 @@
+import math::triple;
+fn main() -> i32 { return triple(7); }
+module math {
+    pub fn triple(x: i32) -> i32 { return helper(x) + x; }
+    fn helper(x: i32) -> i32 { return x + x; }
+}

@@ -1,0 +1,8 @@
+extern c fn c_copy_take(data: take Bytes) -> Result<Bytes, ForeignError> oracle oracle_take;
+fn oracle_take(data: take Bytes) -> Result<Bytes, ForeignError> { return Result::Ok(move data); }
+fn main() -> i32 {
+  let data: Bytes = b"x";
+  let result = c_copy_take(move data);
+  if len(data) == 1u32 { return 1; }
+  return 0;
+}

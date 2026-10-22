@@ -1,0 +1,17 @@
+[package]
+name = "invar-cuda"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license.workspace = true
+
+[features]
+runtime = ["dep:cudarc"]
+
+[dependencies]
+invar-device = { path = "../invar-device" }
+cudarc = { version = "=0.19.9", default-features = false, features = ["std", "driver", "nvrtc", "dynamic-loading", "cuda-12040"], optional = true }
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.189"

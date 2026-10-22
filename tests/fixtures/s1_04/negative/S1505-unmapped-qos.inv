@@ -1,0 +1,21 @@
+frame world;
+fn run() -> i32 { return 0; }
+component Source {
+    port out data: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB;
+    wcet 1 ms; deadline 100 ms;
+    license "MIT" modified false; isolation in-process; impl invar run;
+}
+component Sink {
+    port in data: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB;
+    wcet 1 ms; deadline 100 ms;
+    license "MIT" modified false; isolation in-process; impl invar run;
+}
+connect source.data -> sink.data policy decimate(1);
+product Cell {
+    distribution internal; commercial false;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 2, memory = 2 MiB;
+}
+system cell for Cell { source: Source; sink: Sink; }

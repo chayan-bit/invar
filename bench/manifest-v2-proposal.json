@@ -1,0 +1,2087 @@
+{
+  "acceptance": {
+    "large_case_ratio_each_max": 1.5,
+    "large_case_ratio_geomean_max": 1.2,
+    "library_ratio_each_max": 1.25,
+    "samples": 30,
+    "warmups": 10
+  },
+  "baseline_fixture_sources": {
+    "cuda_cub_sha256": "e9c0a7c9752139d4c488977300fe514a3095fd7d61589a1a348ec98b440078a4",
+    "cuda_cublas_gemm_sha256": "4334b374028ed2ab0109bc58d3847bf8f3ed15f8c4bbf059994188431917e03c",
+    "metal_mps_gemm_sha256": "6f413059314463886d8909b098f5a3c51b9ddccdde2d1e4324b1fc8eec9e0ef3",
+    "metal_mps_image_sha256": "bef1eb44ff032e9679a449a7a7434f674b24c024657814a3ec420176faff4eeb",
+    "metal_mpsgraph_reduction_v2_sha256": "22083b0a2efa06da946b2fc630a309f636de8213f7ed3688abc136585f9c774e",
+    "metal_mpsgraph_u32_sha256": "2adc78428c22ddae92af8e818a47b5a661d8b94427e3aad61a56e339dca534ff"
+  },
+  "baselines": {
+    "cuda": {
+      "map": {
+        "independent": true,
+        "library": "CUB DeviceTransform on CUDA 12.9+; Thrust transform on older supported toolkit",
+        "status": "pending-pinned-toolkit-and-semantic-review"
+      },
+      "reduction": {
+        "independent": true,
+        "library": "CUB DeviceReduce",
+        "status": "pending-pinned-toolkit-and-measurement"
+      },
+      "scan": {
+        "independent": true,
+        "library": "CUB DeviceScan for modular sum; affine custom-op review pending",
+        "status": "pending-pinned-toolkit-and-measurement"
+      }
+    },
+    "metal": {
+      "map": {
+        "independent": true,
+        "library": "MPSGraph UInt32 elementwise",
+        "status": "pending-baseline-quality-and-build-review"
+      },
+      "reduction": {
+        "independent": true,
+        "library": "MPSGraph UInt32 reductionSum",
+        "status": "pending-baseline-quality-and-build-review"
+      },
+      "scan": {
+        "independent": true,
+        "library": "MPSGraph UInt32 affine-prefix graph composition; handwritten quality comparison pending",
+        "status": "pending-baseline-quality-and-build-review"
+      }
+    }
+  },
+  "byte_accounting": {
+    "ratio_status": "pending_review_and_regenerated_baselines",
+    "required_bytes": "bytes of source-observable required inputs plus outputs; reduction output is one u32 scalar; inclusive scan output is n u32 prefixes",
+    "transfer_bytes": "actual host/device input and output transfer including a non-source-observable terminal-state word when present",
+    "version": "source_required_u32_v2_proposal",
+    "workspace_bytes": "explicit backend temporary allocations; never credited to required bytes"
+  },
+  "cases": [
+    {
+      "elements": 0,
+      "family": "map",
+      "id": "map-n0",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 0,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1,
+      "family": "map",
+      "id": "map-n1",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 31,
+      "family": "map",
+      "id": "map-n31",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 372,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 32,
+      "family": "map",
+      "id": "map-n32",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 384,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 33,
+      "family": "map",
+      "id": "map-n33",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 396,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 255,
+      "family": "map",
+      "id": "map-n255",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3060,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 256,
+      "family": "map",
+      "id": "map-n256",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3072,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 257,
+      "family": "map",
+      "id": "map-n257",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3084,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1021,
+      "family": "map",
+      "id": "map-n1021",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12252,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1024,
+      "family": "map",
+      "id": "map-n1024",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12288,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1031,
+      "family": "map",
+      "id": "map-n1031",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12372,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4093,
+      "family": "map",
+      "id": "map-n4093",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 49116,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4096,
+      "family": "map",
+      "id": "map-n4096",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 49152,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4099,
+      "family": "map",
+      "id": "map-n4099",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 49188,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16381,
+      "family": "map",
+      "id": "map-n16381",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 196572,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16384,
+      "family": "map",
+      "id": "map-n16384",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 196608,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16411,
+      "family": "map",
+      "id": "map-n16411",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 196932,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65521,
+      "family": "map",
+      "id": "map-n65521",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 786252,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65536,
+      "family": "map",
+      "id": "map-n65536",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 786432,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65537,
+      "family": "map",
+      "id": "map-n65537",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 786444,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262139,
+      "family": "map",
+      "id": "map-n262139",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3145668,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262144,
+      "family": "map",
+      "id": "map-n262144",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3145728,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262147,
+      "family": "map",
+      "id": "map-n262147",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3145764,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048573,
+      "family": "map",
+      "id": "map-n1048573",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12582876,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048576,
+      "family": "map",
+      "id": "map-n1048576",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12582912,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048583,
+      "family": "map",
+      "id": "map-n1048583",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12582996,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194301,
+      "family": "map",
+      "id": "map-n4194301",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 50331612,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194304,
+      "family": "map",
+      "id": "map-n4194304",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 50331648,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194319,
+      "family": "map",
+      "id": "map-n4194319",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 50331828,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777213,
+      "family": "map",
+      "id": "map-n16777213",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 201326556,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777216,
+      "family": "map",
+      "id": "map-n16777216",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 201326592,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777259,
+      "family": "map",
+      "id": "map-n16777259",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 201327108,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108859,
+      "family": "map",
+      "id": "map-n67108859",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 805306308,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108864,
+      "family": "map",
+      "id": "map-n67108864",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 805306368,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108879,
+      "family": "map",
+      "id": "map-n67108879",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 805306548,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435399,
+      "family": "map",
+      "id": "map-n268435399",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3221224788,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435456,
+      "family": "map",
+      "id": "map-n268435456",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3221225472,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435459,
+      "family": "map",
+      "id": "map-n268435459",
+      "input_buffers": 2,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3221225508,
+      "stages": 3,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 0,
+      "family": "reduction",
+      "id": "reduction-n0",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1,
+      "family": "reduction",
+      "id": "reduction-n1",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 8,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 31,
+      "family": "reduction",
+      "id": "reduction-n31",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 128,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 32,
+      "family": "reduction",
+      "id": "reduction-n32",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 132,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 33,
+      "family": "reduction",
+      "id": "reduction-n33",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 136,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 255,
+      "family": "reduction",
+      "id": "reduction-n255",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1024,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 256,
+      "family": "reduction",
+      "id": "reduction-n256",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1028,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 257,
+      "family": "reduction",
+      "id": "reduction-n257",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1032,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1021,
+      "family": "reduction",
+      "id": "reduction-n1021",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4088,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1024,
+      "family": "reduction",
+      "id": "reduction-n1024",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4100,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1031,
+      "family": "reduction",
+      "id": "reduction-n1031",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4128,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4093,
+      "family": "reduction",
+      "id": "reduction-n4093",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 16376,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4096,
+      "family": "reduction",
+      "id": "reduction-n4096",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 16388,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4099,
+      "family": "reduction",
+      "id": "reduction-n4099",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 16400,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16381,
+      "family": "reduction",
+      "id": "reduction-n16381",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 65528,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16384,
+      "family": "reduction",
+      "id": "reduction-n16384",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 65540,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16411,
+      "family": "reduction",
+      "id": "reduction-n16411",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 65648,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65521,
+      "family": "reduction",
+      "id": "reduction-n65521",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 262088,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65536,
+      "family": "reduction",
+      "id": "reduction-n65536",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 262148,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65537,
+      "family": "reduction",
+      "id": "reduction-n65537",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 262152,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262139,
+      "family": "reduction",
+      "id": "reduction-n262139",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1048560,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262144,
+      "family": "reduction",
+      "id": "reduction-n262144",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1048580,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262147,
+      "family": "reduction",
+      "id": "reduction-n262147",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1048592,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048573,
+      "family": "reduction",
+      "id": "reduction-n1048573",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4194296,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048576,
+      "family": "reduction",
+      "id": "reduction-n1048576",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4194308,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048583,
+      "family": "reduction",
+      "id": "reduction-n1048583",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 4194336,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194301,
+      "family": "reduction",
+      "id": "reduction-n4194301",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 16777208,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194304,
+      "family": "reduction",
+      "id": "reduction-n4194304",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 16777220,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194319,
+      "family": "reduction",
+      "id": "reduction-n4194319",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 16777280,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777213,
+      "family": "reduction",
+      "id": "reduction-n16777213",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 67108856,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777216,
+      "family": "reduction",
+      "id": "reduction-n16777216",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 67108868,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777259,
+      "family": "reduction",
+      "id": "reduction-n16777259",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 67109040,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108859,
+      "family": "reduction",
+      "id": "reduction-n67108859",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 268435440,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108864,
+      "family": "reduction",
+      "id": "reduction-n67108864",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 268435460,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108879,
+      "family": "reduction",
+      "id": "reduction-n67108879",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 268435520,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435399,
+      "family": "reduction",
+      "id": "reduction-n268435399",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1073741600,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435456,
+      "family": "reduction",
+      "id": "reduction-n268435456",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1073741828,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435459,
+      "family": "reduction",
+      "id": "reduction-n268435459",
+      "input_buffers": 1,
+      "law": "wrapping_sum",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 1073741840,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 0,
+      "family": "scan",
+      "id": "scan-n0",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 0,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1,
+      "family": "scan",
+      "id": "scan-n1",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 31,
+      "family": "scan",
+      "id": "scan-n31",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 372,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 32,
+      "family": "scan",
+      "id": "scan-n32",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 384,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 33,
+      "family": "scan",
+      "id": "scan-n33",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 396,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 255,
+      "family": "scan",
+      "id": "scan-n255",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3060,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 256,
+      "family": "scan",
+      "id": "scan-n256",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3072,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 257,
+      "family": "scan",
+      "id": "scan-n257",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3084,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1021,
+      "family": "scan",
+      "id": "scan-n1021",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12252,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1024,
+      "family": "scan",
+      "id": "scan-n1024",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12288,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1031,
+      "family": "scan",
+      "id": "scan-n1031",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12372,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4093,
+      "family": "scan",
+      "id": "scan-n4093",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 49116,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4096,
+      "family": "scan",
+      "id": "scan-n4096",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 49152,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4099,
+      "family": "scan",
+      "id": "scan-n4099",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 49188,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16381,
+      "family": "scan",
+      "id": "scan-n16381",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 196572,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16384,
+      "family": "scan",
+      "id": "scan-n16384",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 196608,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16411,
+      "family": "scan",
+      "id": "scan-n16411",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 196932,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65521,
+      "family": "scan",
+      "id": "scan-n65521",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 786252,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65536,
+      "family": "scan",
+      "id": "scan-n65536",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 786432,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 65537,
+      "family": "scan",
+      "id": "scan-n65537",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 786444,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262139,
+      "family": "scan",
+      "id": "scan-n262139",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3145668,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262144,
+      "family": "scan",
+      "id": "scan-n262144",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3145728,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 262147,
+      "family": "scan",
+      "id": "scan-n262147",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3145764,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048573,
+      "family": "scan",
+      "id": "scan-n1048573",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12582876,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048576,
+      "family": "scan",
+      "id": "scan-n1048576",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12582912,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048583,
+      "family": "scan",
+      "id": "scan-n1048583",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 12582996,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194301,
+      "family": "scan",
+      "id": "scan-n4194301",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 50331612,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194304,
+      "family": "scan",
+      "id": "scan-n4194304",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 50331648,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4194319,
+      "family": "scan",
+      "id": "scan-n4194319",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 50331828,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777213,
+      "family": "scan",
+      "id": "scan-n16777213",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 201326556,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777216,
+      "family": "scan",
+      "id": "scan-n16777216",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 201326592,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 16777259,
+      "family": "scan",
+      "id": "scan-n16777259",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 201327108,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108859,
+      "family": "scan",
+      "id": "scan-n67108859",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 805306308,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108864,
+      "family": "scan",
+      "id": "scan-n67108864",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 805306368,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 67108879,
+      "family": "scan",
+      "id": "scan-n67108879",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 805306548,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435399,
+      "family": "scan",
+      "id": "scan-n268435399",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3221224788,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435456,
+      "family": "scan",
+      "id": "scan-n268435456",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3221225472,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 268435459,
+      "family": "scan",
+      "id": "scan-n268435459",
+      "input_buffers": 2,
+      "law": "affine_composition",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 1,
+      "required_bytes": 3221225508,
+      "stages": 1,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 33,
+      "family": "map",
+      "id": "map-long-chain-n33",
+      "input_buffers": 4,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 4,
+      "required_bytes": 1056,
+      "stages": 16,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 4093,
+      "family": "map",
+      "id": "map-long-chain-n4093",
+      "input_buffers": 4,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 4,
+      "required_bytes": 130976,
+      "stages": 16,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    },
+    {
+      "elements": 1048576,
+      "family": "map",
+      "id": "map-long-chain-n1048576",
+      "input_buffers": 4,
+      "law": "wrapping_map",
+      "memory_preflight": "required",
+      "numeric_policy": "u32-wrapping-v1",
+      "output_buffers": 4,
+      "required_bytes": 33554432,
+      "stages": 16,
+      "timing": [
+        "device_resident",
+        "host_to_host",
+        "cold_process"
+      ]
+    }
+  ],
+  "corpus_sha256": "06523c31875a58fb28a5c7c66224ef2c710ee5524fed388ca07f44b524973309",
+  "families": [
+    "map",
+    "reduction",
+    "scan"
+  ],
+  "freeze_status": "proposal_pending_m5_review",
+  "held_out_sha256": "abfdfa44acf8e62c7d55c63d1690668d52e5b8b8f604abe0a3d38d3c9a293c34",
+  "pending_families": [
+    "compaction",
+    "transpose",
+    "stencil",
+    "matrix",
+    "segmented",
+    "gather_scatter",
+    "frontier"
+  ],
+  "report_schema_version": 2,
+  "schema_version": 2,
+  "seed": 6491692735609765889,
+  "targets": [
+    {
+      "compute_capability": "sm_86",
+      "name": "RTX A6000",
+      "status": "pending-preflight"
+    },
+    {
+      "name": "local Apple GPU",
+      "status": "pending-preflight"
+    }
+  ],
+  "tracks": [
+    "generated",
+    "library-assisted",
+    "same-structure"
+  ]
+}

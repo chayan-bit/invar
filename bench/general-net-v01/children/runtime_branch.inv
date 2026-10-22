@@ -1,0 +1,4 @@
+fn slow(n: u32) -> i32 { for i in 0u32..n {} return 7; }
+fn leaf(seed: i32) -> i32 { return seed + 2; }
+fn run(n: u32, side: u32, seed: i32) -> i32 { if side == 0u32 { return slow(n) + leaf(seed); } return slow(n) + leaf(seed + 1); }
+fn main() -> i32 { return run(30u32, 1u32, 3); }

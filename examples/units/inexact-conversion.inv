@@ -1,0 +1,5 @@
+fn main() -> i32 {
+    let mm: Quantity<i32, mm> = quantity::<mm>(1i32);
+    let metres: Quantity<i32, m> = to::<m>(mm);
+    return 0i32;
+}

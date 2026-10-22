@@ -1,0 +1,23 @@
+// Header/checker fixture only; this is not passing real-cuRobo evidence.
+frame world;
+frame base: world;
+frame tool: base;
+frame cube: world;
+extern component curobo_planner {
+    abi c "invar_curobo_bridge_v1";
+    lifecycle init, configure, step, shutdown;
+    config c "inv_planner_config_v1";
+    port in request: std::robotics::PlannerRequest<f64,7,base,tool,cube> @ 0.2 Hz layout c "inv_planner_request7_f64_v2";
+    port out trajectory: std::robotics::PlannerTrajectory<f64,7> @ 0.2 Hz layout c "inv_planner_trajectory7_f64_v1";
+    resource cpu_cores = 1, memory = 1 GiB, gpu_memory = 2 GiB;
+    wcet 5 s;
+    deadline 5 s;
+    license "Apache-2.0";
+    isolation separate-process;
+    golden "golden.json" tolerance abs 0.000001 m, abs 0.000001 rad;
+    property "trajectory is finite";
+    shim "bridge.c";
+    input "planner_reference.c";
+    input "planner_reference.h";
+    input "planner_server.py";
+}

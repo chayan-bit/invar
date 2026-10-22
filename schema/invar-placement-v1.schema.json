@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "invar-placement-v1",
+  "title": "Invar provisional placement profile",
+  "type": "object",
+  "required": ["schema_version", "probe_version", "units", "identity", "provisional", "source_revision", "observations", "measurements", "refusals"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "probe_version": {"const": "placement-v1"},
+    "units": {"const": "ms,bytes,work"},
+    "identity": {
+      "type": "object",
+      "required": ["host_class", "cpu", "device", "driver", "toolchain"],
+      "properties": {
+        "host_class": {"$ref": "#/$defs/text"},
+        "cpu": {"$ref": "#/$defs/text"},
+        "device": {"$ref": "#/$defs/text"},
+        "driver": {"$ref": "#/$defs/text"},
+        "toolchain": {"$ref": "#/$defs/text"}
+      }
+    },
+    "provisional": {"const": true},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+    "observations": {
+      "type": "object", "required": ["before", "after"],
+      "properties": {"before": {"$ref": "#/$defs/observation"}, "after": {"$ref": "#/$defs/observation"}}
+    },
+    "measurements": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/measurement"}},
+    "refusals": {"type": "array", "maxItems": 128, "items": {
+      "type": "object", "required": ["engine", "reason"],
+      "properties": {"engine": {"$ref": "#/$defs/text"}, "reason": {"$ref": "#/$defs/text"}}
+    }},
+    "statistics": {"const": {"warmups": 10, "samples": 30,
+      "center": "median of 30 (mean of order statistics 15 and 16, 1-based)",
+      "interval": "two-sided exact binomial order-statistic interval for the median: order statistics 10 and 21 (1-based) of 30, coverage 95.72% for independent continuous samples; ties conservative",
+      "spread": "q1 and q3 are order statistics 8 and 23 (1-based) of 30",
+      "policy": "measurements only; GNET-04 chooses the cost model, margins and thresholds"}},
+    "coverage": {
+      "type": "object", "required": ["families", "pending"],
+      "properties": {
+        "families": {"const": ["map", "reduction", "scan", "compaction", "transpose", "stencil", "matrix", "segmented", "gather_scatter", "frontier"]},
+        "pending": {"type": "array", "maxItems": 30, "items": {
+          "type": "object", "required": ["engine", "family", "reason"],
+          "properties": {"engine": {"enum": ["cpu", "cuda", "metal"]}, "family": {"$ref": "#/$defs/table_family"}, "reason": {"$ref": "#/$defs/text"}}
+        }}
+      }
+    }
+  },
+  "dependentRequired": {"statistics": ["coverage"], "coverage": ["statistics"]},
+  "if": {"required": ["statistics"]},
+  "then": {"properties": {"measurements": {"items": {"required": ["table_family", "points"]}}}},
+  "else": {"properties": {"measurements": {"items": {"not": {"anyOf": [{"required": ["table_family"]}, {"required": ["points"]}]}}}}},
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "maxLength": 256, "pattern": "\\S"},
+    "nonnegative": {"type": "number", "minimum": 0},
+    "observation": {
+      "type": "object", "required": ["load", "swap_bytes"],
+      "properties": {"load": {"type": ["number", "null"], "minimum": 0}, "swap_bytes": {"type": ["integer", "null"], "minimum": 0}}
+    },
+    "coefficients": {
+      "type": "object", "required": ["fixed_ms", "per_work_ms", "link_bytes_per_ms", "link_latency_ms", "launch_floor_ms", "page_in_ms_per_byte"],
+      "properties": {
+        "fixed_ms": {"$ref": "#/$defs/nonnegative"}, "per_work_ms": {"$ref": "#/$defs/nonnegative"},
+        "link_bytes_per_ms": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "link_latency_ms": {"$ref": "#/$defs/nonnegative"}, "launch_floor_ms": {"$ref": "#/$defs/nonnegative"},
+        "page_in_ms_per_byte": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "table_family": {"enum": ["map", "reduction", "scan", "compaction", "transpose", "stencil", "matrix", "segmented", "gather_scatter", "frontier"]},
+    "point": {
+      "type": "object", "required": ["elements", "boundary", "samples_ns", "summary"],
+      "properties": {
+        "elements": {"type": ["integer", "null"], "minimum": 0, "maximum": 268435456},
+        "boundary": {"$ref": "#/$defs/text"},
+        "samples_ns": {"type": "array", "items": {"type": "integer", "minimum": 1},
+          "anyOf": [{"minItems": 1, "maxItems": 1}, {"minItems": 30, "maxItems": 30}]},
+        "summary": {
+          "type": "object", "required": ["n", "median_ns", "ci95_ns", "q1_ns", "q3_ns", "min_ns", "max_ns"],
+          "properties": {
+            "n": {"enum": [1, 30]}, "median_ns": {"type": "number", "exclusiveMinimum": 0},
+            "ci95_ns": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer", "minimum": 1}},
+            "q1_ns": {"type": "integer", "minimum": 1}, "q3_ns": {"type": "integer", "minimum": 1},
+            "min_ns": {"type": "integer", "minimum": 1}, "max_ns": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "region": {
+      "type": "object", "required": ["source_identity", "graph_revision", "region_identity"],
+      "properties": {"source_identity": {"type": "integer", "minimum": 1}, "graph_revision": {"type": "integer", "minimum": 0}, "region_identity": {"type": "integer", "minimum": 0}}
+    },
+    "measurement": {
+      "type": "object", "required": ["family", "numeric", "numeric_contract_version", "engine", "boundary", "region", "sizes", "passes", "best"],
+      "properties": {
+        "family": {"type": "string", "maxLength": 256, "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"},
+        "numeric": {"$ref": "#/$defs/text"}, "numeric_contract_version": {"$ref": "#/$defs/text"},
+        "engine": {"enum": ["cpu", "cuda", "metal"]}, "boundary": {"$ref": "#/$defs/text"},
+        "region": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/region"}]},
+        "sizes": {"type": "array", "minItems": 2, "maxItems": 16, "uniqueItems": true, "items": {"type": "integer", "minimum": 0, "maximum": 268435456}},
+        "passes": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/coefficients"}},
+        "best": {"$ref": "#/$defs/coefficients"},
+        "table_family": {"$ref": "#/$defs/table_family"},
+        "points": {"type": "array", "minItems": 1, "maxItems": 17, "items": {"$ref": "#/$defs/point"}}
+      }
+    }
+  }
+}

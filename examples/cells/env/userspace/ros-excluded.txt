@@ -1,0 +1,5 @@
+# GUI packages not needed for headless S1-06 runs.
+rviz2
+rviz_ogre_vendor
+rviz_common
+rviz_default_plugins

@@ -1,0 +1,28 @@
+{
+  "scope": "Captured Panda full-cell home-held MuJoCo3.12.0 data. Sealed table lookup replay only; no engine, moving-arm, ROS/JTC, attachment or host qualification. Native integration digests are witnesses, not reconstructed MjData.",
+  "generator": {
+    "name": "capture_panda_home.py",
+    "sha256": "e75414cb928e301fcee84abd0247259c4742f1673f3590c8fe306453e451c4f8",
+    "command": "capture_panda_home.py SCENE 1cc33d8ac212a4de749985c1c58c3167dc9a660bfc30dc72ed812dcda1d8bfc8 panda-home-diagnostic.json",
+    "scene": "invar system gen mjcf examples/cells/reach_place/cell.inv (scene.xml equals the qualified policy model_xml)",
+    "environment": "x86_64 Route 1 user-space environment (examples/cells/env/userspace, MuJoCo 3.12.0, NumPy 2.5.3)"
+  },
+  "decisions": "2026-10-13: principal Panda inertias and source-declared gripper hold 253; candidates step down from the hold. 2026-10-15 D1: generated gravity compensation (gravcomp=\"1\") on every robot body; the source hold 253 stays violation-free (select_panda_hold.py now also admits 254, margin 2.6e-7 m; 253 keeps 5.1e-7 m)",
+  "fixture": {
+    "name": "panda-home-diagnostic.json",
+    "bytes": 1649971,
+    "sha256": "129892a6b0a91248a638cc7f7f79eabbbb3acf97d505750fb1f3b511a71fa309"
+  },
+  "steps": 1000,
+  "states": 1001,
+  "predictions": 1000,
+  "rejections": 0,
+  "superseded": {
+    "sha256": "c2c90fd80e376fc938714e9a5d16953f20c6b5b856a049cf37472a7f29ad7ea0",
+    "model_xml_sha256": "d1dd553c05cb1ff090e9219777be8f8bd7cefab327a44005a6de340039936865",
+    "source_commit": "ba9263565276ea2b5a38ff4057227bd626499eb9",
+    "predictions": 1000,
+    "rejections": 0,
+    "note": "Capture of the model before D1 gravity compensation; retained in git history."
+  }
+}

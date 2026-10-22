@@ -1,0 +1,1 @@
+fn main() -> i32 { var acc = 0; for i in 4294967293u32..4294967295u32 { acc = acc + 1; } for j in 4u32..3u32 { acc = 99; } return acc; }

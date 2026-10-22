@@ -1,0 +1,6 @@
+fn pair(a: mut Array<i32>, b: read Array<i32>) -> Unit { return; }
+fn main() -> i32 {
+    var xs: Array<i32> = [1, 2];
+    pair(xs, xs);
+    return 0;
+}

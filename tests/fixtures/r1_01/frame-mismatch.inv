@@ -1,0 +1,9 @@
+frame world;
+frame base: world;
+
+fn main() -> i32 {
+    let a: Vector3<i32,m,world> = vector3::<m,world>(1, 0, 0);
+    let b: Vector3<i32,m,base> = vector3::<m,base>(1, 0, 0);
+    let c: Vector3<i32,m,world> = a + b;
+    return 0;
+}

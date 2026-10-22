@@ -1,0 +1,16 @@
+fn identity<T: Value>(x: T) -> T {
+    return x;
+}
+
+fn choose<T: Value, U: Value>(x: T, y: U) -> T {
+    return x;
+}
+
+fn main() -> i32 {
+    let u: u32 = identity(3u32);
+    if u == 3u32 {
+        return identity::<i32>(choose(7i32, true)) + identity(5i32);
+    } else {
+        return 0i32;
+    }
+}

@@ -1,0 +1,22 @@
+// Segmented wrapping sum over offsets: each segment is an independent ordered reduction.
+fn run(xs: read Array<u32>, offsets: read Array<u32>, count: u32) -> Array<u32> {
+    var out = filled_u32(count, 0u32);
+    for s in 0u32 .. count {
+        var acc = 0u32;
+        for i in offsets[s] .. offsets[s + 1u32] {
+            acc = wrapping_add(acc, xs[i]);
+        }
+        out[s] = acc;
+    }
+    return move out;
+}
+
+fn main() -> i32 {
+    let xs: Array<u32> = [1u32, 2u32, 3u32, 4u32, 5u32, 6u32];
+    let offsets: Array<u32> = [0u32, 2u32, 2u32, 6u32];
+    let sums = run(xs, offsets, 3u32);
+    if sums[0u32] == 3u32 and sums[1u32] == 0u32 and sums[2u32] == 18u32 {
+        return 7;
+    }
+    return 0;
+}

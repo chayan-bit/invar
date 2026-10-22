@@ -1,0 +1,2 @@
+fn quotient(x: i32, y: i32) -> i32 { return x / y; }
+fn main() -> i32 { return quotient(-2147483648, -1); }

@@ -1,0 +1,24 @@
+fn leaf(xs: read Array<i32>, lo: u32, hi: u32) -> i32 {
+    var score: i32 = 0;
+    for i in lo .. hi {
+        if xs[i] % 2 == 0 { score = score + xs[i]; }
+        else { score = score - xs[i]; }
+    }
+    return score;
+}
+
+fn split(xs: read Array<i32>, shape: read Array<u32>, lo: u32, hi: u32) -> i32 {
+    let width: u32 = hi - lo;
+    if width <= 2u32 { return leaf(xs, lo, hi); }
+    let pivot: u32 = lo + 1u32 + shape[lo] % (width - 1u32);
+    let a: i32 = split(xs, shape, lo, pivot);
+    let b: i32 = split(xs, shape, pivot, hi);
+    if shape[lo] % 2u32 == 0u32 { return a * 2 + b; }
+    return a + b * 2;
+}
+
+fn main() -> i32 {
+    let xs: Array<i32> = [3, 8, 2, 7, 4, 9, 6, 1];
+    let shape: Array<u32> = [2u32, 1u32, 0u32, 3u32, 2u32, 1u32, 4u32, 0u32];
+    return split(xs, shape, 0u32, len(xs));
+}

@@ -1,0 +1,26 @@
+fn particle_integrate(p0: read Array<f32>, v0: read Array<f32>, n: u32, steps: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(n * 3u32, 0.0);
+    for i in 0u32..n {
+        let b: u32 = i * 3u32;
+        var x: f32 = p0[b];
+        var y: f32 = p0[b + 1u32] + 1.0;
+        var z: f32 = p0[b + 2u32];
+        var vx: f32 = v0[b];
+        var vy: f32 = v0[b + 1u32];
+        var vz: f32 = v0[b + 2u32];
+        for s in 0u32..steps {
+            vy = vy - 0.0981;
+            x = x + vx * 0.01;
+            y = y + vy * 0.01;
+            z = z + vz * 0.01;
+            if y < 0.0 {
+                y = 0.0 - y;
+                vy = 0.0 - vy * 0.5;
+            }
+        }
+        out[b] = x;
+        out[b + 1u32] = y;
+        out[b + 2u32] = z;
+    }
+    return move out;
+}

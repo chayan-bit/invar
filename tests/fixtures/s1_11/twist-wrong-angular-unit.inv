@@ -1,0 +1,12 @@
+frame world;
+fn main() -> i32 {
+    let twist: std::robotics::Twist<i32,world> = std::robotics::Twist<i32,world> {
+        linear: std::robotics::Vector3<i32,Div<m,s>,world> {
+            x: quantity::<Div<m,s>>(1), y: quantity::<Div<m,s>>(0), z: quantity::<Div<m,s>>(0)
+        },
+        angular: std::robotics::Vector3<i32,m,world> {
+            x: quantity::<m>(1), y: quantity::<m>(0), z: quantity::<m>(0)
+        }
+    };
+    return 0;
+}

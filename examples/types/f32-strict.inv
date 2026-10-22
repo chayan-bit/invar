@@ -1,0 +1,6 @@
+fn nudge(x: f32) -> f32 { return x + 0.2; }
+
+fn main() -> i32 {
+    if nudge(0.1) == 0.3 { return 7; }
+    return 0;
+}

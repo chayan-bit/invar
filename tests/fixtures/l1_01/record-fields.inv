@@ -1,0 +1,6 @@
+struct Pair { left: i32, right: u32 }
+
+fn main() -> i32 {
+    let pair: Pair = Pair { right: 2u32, left: -7i32 };
+    return pair.left;
+}

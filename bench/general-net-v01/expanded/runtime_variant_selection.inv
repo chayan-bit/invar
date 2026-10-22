@@ -1,0 +1,3 @@
+enum Choice { Low, High(i32) }
+fn selection(n: u32, x: i32) -> i32 { if n == 0u32 { let c: Choice = Choice::Low(); return match move c { Choice::Low => 2, Choice::High(v) => v }; } let d: Choice = Choice::High(x); return match move d { Choice::Low => 2, Choice::High(w) => w }; }
+fn main() -> i32 { return selection(1u32, 8); }

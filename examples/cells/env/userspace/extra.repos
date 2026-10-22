@@ -1,0 +1,7 @@
+# System libraries the image gets from Ubuntu that conda-forge does not ship;
+# built from their upstream tags in the same workspace.
+repositories:
+  tl_expected:
+    type: git
+    url: https://github.com/TartanLlama/expected.git
+    version: 292eff8bd8ee230a7df1d6a1c00c4ea0eb2f0362  # v1.1.0, Ubuntu libexpected-dev 1.1.0

@@ -1,0 +1,122 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nix-ros-overlay": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "rosdistro": "rosdistro"
+      },
+      "locked": {
+        "lastModified": 1789934487,
+        "narHash": "sha256-4+5xM4FuLlUd9BaqOryHIoOLP3fFJqhFCAkdtgzAftk=",
+        "owner": "lopsided98",
+        "repo": "nix-ros-overlay",
+        "rev": "26787be7438dca718f12f4f1d10460214f59b72b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lopsided98",
+        "repo": "nix-ros-overlay",
+        "rev": "26787be7438dca718f12f4f1d10460214f59b72b",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1787736819,
+        "narHash": "sha256-cV5xEJJK3BvhU8rEd4mC9UsmDi5qscv/kzGPhBRC5WA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9fbb54b33e91ee4ca368e35a78e0613c720600b3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nix-ros-overlay": "nix-ros-overlay",
+        "nixpkgs": [
+          "nix-ros-overlay",
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      }
+    },
+    "rosdistro": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789691456,
+        "narHash": "sha256-cN+nrUBDp0VDftxTKL6PQetPvWIp1wv+zdcl2yL3x7k=",
+        "owner": "ros",
+        "repo": "rosdistro",
+        "rev": "8bc9618ed66325b4f0a63699369048427e104393",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ros",
+        "repo": "rosdistro",
+        "type": "github"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791882738,
+        "narHash": "sha256-7KXUW3FKbZAstFiK09LJ1sUnPN2dO5RX9ROCZgGbeZw=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "3100cf6ff140fb298f09192de610f4037d3bab0f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

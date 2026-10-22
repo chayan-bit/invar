@@ -1,0 +1,38 @@
+fn dls_ik_step(q: read Array<f32>, target: read Array<f32>, n: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(n * 3u32, 0.0);
+    for i in 0u32..n {
+        let a0: f32 = q[i * 3u32];
+        let a1: f32 = a0 + q[i * 3u32 + 1u32];
+        let a2: f32 = a1 + q[i * 3u32 + 2u32];
+        let s0: f32 = 0.5 * sin(a0);
+        let s1: f32 = 0.5 * sin(a1);
+        let s2: f32 = 0.5 * sin(a2);
+        let c0: f32 = 0.5 * cos(a0);
+        let c1: f32 = 0.5 * cos(a1);
+        let c2: f32 = 0.5 * cos(a2);
+        let ex: f32 = target[i * 2u32] - (c0 + c1 + c2);
+        let ey: f32 = target[i * 2u32 + 1u32] - (s0 + s1 + s2);
+        let sx2: f32 = s2;
+        let sx1: f32 = sx2 + s1;
+        let sx0: f32 = sx1 + s0;
+        let cx2: f32 = c2;
+        let cx1: f32 = cx2 + c1;
+        let cx0: f32 = cx1 + c0;
+        let j00: f32 = 0.0 - sx0;
+        let j01: f32 = 0.0 - sx1;
+        let j02: f32 = 0.0 - sx2;
+        let j10: f32 = cx0;
+        let j11: f32 = cx1;
+        let j12: f32 = cx2;
+        let m00: f32 = j00 * j00 + j01 * j01 + j02 * j02 + 0.01;
+        let m01: f32 = j00 * j10 + j01 * j11 + j02 * j12;
+        let m11: f32 = j10 * j10 + j11 * j11 + j12 * j12 + 0.01;
+        let det: f32 = m00 * m11 - m01 * m01;
+        let w0: f32 = (m11 * ex - m01 * ey) / det;
+        let w1: f32 = (m00 * ey - m01 * ex) / det;
+        out[i * 3u32] = q[i * 3u32] + (j00 * w0 + j10 * w1);
+        out[i * 3u32 + 1u32] = q[i * 3u32 + 1u32] + (j01 * w0 + j11 * w1);
+        out[i * 3u32 + 2u32] = q[i * 3u32 + 2u32] + (j02 * w0 + j12 * w1);
+    }
+    return move out;
+}

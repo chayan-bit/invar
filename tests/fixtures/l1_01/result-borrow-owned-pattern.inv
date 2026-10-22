@@ -1,0 +1,4 @@
+fn main() -> i32 {
+    let packet: Result<Result<i32, u32>, u32> = Result::Ok(Result::Ok(3i32));
+    return match packet { Result::Ok(inner) => 1i32, Result::Err(code) => 0i32 };
+}

@@ -1,0 +1,43 @@
+extern c fn c_copy_read(data: read Bytes) -> Result<u32, ForeignError> oracle oracle_read;
+extern c fn c_copy_take(data: take Bytes) -> Result<Bytes, ForeignError> oracle oracle_take;
+extern c fn c_status() -> Result<Bytes, ForeignError> oracle oracle_status;
+extern c fn c_bad_utf8() -> Result<String, ForeignError> oracle oracle_bad_utf8;
+extern c fn c_text() -> Result<String, ForeignError> oracle oracle_text;
+
+fn oracle_read(data: read Bytes) -> Result<u32, ForeignError> {
+  return Result::Ok(len(data));
+}
+
+fn oracle_take(data: take Bytes) -> Result<Bytes, ForeignError> {
+  let copied: Bytes = bytes_slice(data, 0u32, len(data));
+  return Result::Ok(move copied);
+}
+
+fn oracle_status() -> Result<Bytes, ForeignError> {
+  return Result::Err(ForeignError::Failure());
+}
+
+fn oracle_bad_utf8() -> Result<String, ForeignError> {
+  return Result::Err(ForeignError::Failure());
+}
+
+fn oracle_text() -> Result<String, ForeignError> {
+  return Result::Ok("é");
+}
+
+fn main() -> i32 {
+  let read_source: Bytes = b"abc";
+  let read_result: Result<u32, ForeignError> = c_copy_read(read_source);
+  let read_length: u32 = match move read_result { Result::Ok(value) => value, Result::Err(read_error) => 0u32 };
+  let take_source: Bytes = b"xy";
+  let take_result: Result<Bytes, ForeignError> = c_copy_take(move take_source);
+  let take_length: u32 = match move take_result { Result::Ok(bytes) => len(bytes), Result::Err(take_error) => 0u32 };
+  let status: Result<Bytes, ForeignError> = c_status();
+  let status_failed: Bool = match move status { Result::Ok(unexpected) => false, Result::Err(status_error) => true };
+  let invalid: Result<String, ForeignError> = c_bad_utf8();
+  let invalid_failed: Bool = match move invalid { Result::Ok(unexpected_text) => false, Result::Err(utf8_error) => true };
+  let valid: Result<String, ForeignError> = c_text();
+  let text_length: u32 = match move valid { Result::Ok(foreign_text) => len(foreign_text), Result::Err(text_error) => 0u32 };
+  if read_length == 3u32 and take_length == 2u32 and status_failed and invalid_failed and text_length == 2u32 { return 7; }
+  return 0;
+}

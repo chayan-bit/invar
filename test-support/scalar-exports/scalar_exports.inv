@@ -1,0 +1,38 @@
+// Scalar bridge acceptance corpus. UTF-8 source mapping witness: é.
+fn signed_add(x: i32, y: i32) -> i32 { return x + y; }
+fn signed_sub(x: i32, y: i32) -> i32 { return x - y; }
+fn signed_mul(x: i32, y: i32) -> i32 { return x * y; }
+fn signed_neg(x: i32) -> i32 { return -x; }
+fn signed_div(x: i32, y: i32) -> i32 { return x / y; }
+fn signed_rem(x: i32, y: i32) -> i32 { return x % y; }
+fn unsigned_add(x: u32, y: u32) -> u32 { return x + y; }
+fn unsigned_sub(x: u32, y: u32) -> u32 { return x - y; }
+fn unsigned_mul(x: u32, y: u32) -> u32 { return x * y; }
+fn unsigned_div(x: u32, y: u32) -> u32 { return x / y; }
+fn unsigned_rem(x: u32, y: u32) -> u32 { return x % y; }
+fn unsigned_wrap_add(x: u32, y: u32) -> u32 { return wrapping_add(x, y); }
+fn unsigned_wrap_mul(x: u32, y: u32) -> u32 { return wrapping_mul(x, y); }
+fn choose(x: i32, y: i32) -> i32 {
+  if x < 0 { return y; }
+  return signed_div(y, x);
+}
+fn triangular(n: u32) -> u32 {
+  var accumulator: u32 = 0u32;
+  for i in 0u32 .. n { accumulator = accumulator + i; }
+  return accumulator;
+}
+fn eight(a: i32, b: u32, c: i32, d: u32, e: i32, f: u32, g: i32, h: u32) -> i32 {
+  if b == d and d == f and f == h { return a + c + e + g; }
+  return 0;
+}
+fn zero() -> u32 { return 4294967295u32; }
+fn first_trap(x: i32) -> i32 { return signed_add(signed_div(x, 0), signed_neg(x)); }
+fn first_overflow(x: i32) -> i32 { return signed_add(signed_neg(x), signed_div(x, 0)); }
+fn short_and() -> i32 { if false and (signed_div(1, 0) == 0) { return 1; } return 7; }
+fn short_or() -> i32 { if true or (signed_div(1, 0) == 0) { return 8; } return 1; }
+fn nested_calls(x: i32, y: i32) -> i32 { return signed_add(signed_mul(x, y), signed_sub(x, y)); }
+fn two_ticks() -> i32 { return 42; }
+fn spin() -> i32 { while true {} return 0; }
+fn high_bound() -> i32 { for i in 4294967295u32 .. 4294967295u32 {} return 9; }
+fn first_div(x: i32) -> i32 { return signed_add(signed_div(x, 0), signed_rem(x, 0)); }
+fn first_rem(x: i32) -> i32 { return signed_add(signed_rem(x, 0), signed_div(x, 0)); }

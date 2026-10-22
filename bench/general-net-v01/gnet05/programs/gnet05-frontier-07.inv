@@ -1,0 +1,32 @@
+fn work(x: i32) -> i32 {
+    var s = x % 101;
+    var i = 0;
+    while i < x % 11 {
+        s = (s * 13 + i) % 10007;
+        i = i + 1;
+    }
+    return s;
+}
+fn visit(v: i32, n: i32, d: i32) -> i32 {
+    if d <= 0 { return work(v); }
+    let deg = (v * 4 + d) % 5;
+    if deg == 0 { return work(v); }
+    if deg == 1 {
+        let w1_0 = visit((v * 7 + 14) % n, n, d - 1);
+        return (w1_0 + v) % 10007;
+    }
+    if deg == 2 {
+        let w2_0 = visit((v * 29 + 15) % n, n, d - 1);
+        let w2_1 = visit((v * 29 + 2) % n, n, d - 1);
+        return (w2_0 + w2_1 + v) % 10007;
+    }
+    let w3_0 = visit((v * 35 + 53) % n, n, d - 1);
+    let w3_1 = visit((v * 2 + 44) % n, n, d - 1);
+    let w3_2 = visit((v * 22 + 84) % n, n, d - 1);
+    return (w3_0 + w3_1 + w3_2 + v) % 10007;
+}
+fn run(a: i32, b: i32) -> i32 {
+    let n = a + 37;
+    return visit(b % n, n, 1 + (a + b) % 6);
+}
+fn main() -> i32 { return run(0, 46); }

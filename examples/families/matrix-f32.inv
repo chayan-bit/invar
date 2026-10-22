@@ -1,0 +1,22 @@
+// Dense f32 matrix product with a source-ordered dot product per output cell (strict, no reassociation).
+fn mat(a: read Array<f32>, b: read Array<f32>, rows: u32, inner: u32, cols: u32) -> Array<f32> {
+    var c = filled_f32(rows * cols, 0.0);
+    for i in 0u32 .. rows {
+        for j in 0u32 .. cols {
+            for k in 0u32 .. inner {
+                c[i * cols + j] = c[i * cols + j] + a[i * inner + k] * b[k * cols + j];
+            }
+        }
+    }
+    return move c;
+}
+
+fn main() -> i32 {
+    let a: Array<f32> = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    let b: Array<f32> = [7.0, 8.0, 9.0, 10.0, 11.0, 12.0];
+    let c = mat(a, b, 2u32, 3u32, 2u32);
+    if c[0u32] == 58.0 and c[1u32] == 64.0 and c[2u32] == 139.0 and c[3u32] == 154.0 {
+        return 7;
+    }
+    return 0;
+}

@@ -1,0 +1,14 @@
+#pragma once
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
+namespace @NAMESPACE@ {
+class ComponentNode final : public rclcpp::Node {
+ public:
+  explicit ComponentNode(const rclcpp::NodeOptions & options);
+  ~ComponentNode() override;
+  void stop_planner();
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+};
+}

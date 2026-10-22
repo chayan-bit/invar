@@ -1,0 +1,81 @@
+# Shared test support
+
+Executable test helpers and fixture inputs belong here. The scalar-export and
+lineage inputs were moved here byte-for-byte during v0.09 consolidation. Their consumers are the
+scalar-export integration tests and named-evaluator unit tests.
+
+This directory is intentionally outside the source-corpus discovery roots:
+the fixtures already have explicit vector coverage, and helper source must not
+recursively discover itself. Historical result files remain at their original
+paths and are pinned to their original commits.
+
+The original inputs remain recoverable from commit
+`164dc101db77bbe6226de1a86f68cabfb425bc58`.
+
+## Child wall deadlines under shared-host load
+
+`child_deadline.rs` is test support, included by path, with no production API.
+`INVAR_TEST_TIMEOUT_SCALE` is an explicit integer multiplier in `1..=64`, default
+`1`. Invalid, zero, non-UTF-8 and overflowing values fail before spawning the
+child. CI selects `8` for the shared runners. For a loaded host, for example:
+
+```sh
+INVAR_TEST_TIMEOUT_SCALE=8 cargo test --locked --offline --test issue_gnet_v01_corpus_expansion
+```
+
+Run Cargo through the host's required resource wrapper. This setting adds
+scheduling allowance to **wall time**, including OS scheduling delay after
+spawn. It does not estimate load average or change semantic fuel, transition
+budgets, CPU-seconds limits, memory/log caps or any product watchdog. Wrapper
+queueing before the test starts is outside these timers. Compilation and
+execution have separate watchdog calls and budgets; a long test containing
+many compiles/runs is not one long child execution.
+
+`wall(Duration)` supports Rust poll loops, `seconds(u64)` supports nested
+watchdogs, and `command(u64)` builds GNU `timeout` with the scaled base budget
+and an unscaled two-second TERM-to-KILL grace. It supervises the child's process
+group. Timeout status is 124, forced kill is SIGKILL (shell status 137), and callers must retain
+their normal failure checks. Existing typed product timeout tests keep their
+exact injected short deadlines. The knob must never be read by product code.
+
+Sweep of compiled/process test deadlines:
+
+- `bench/general-net-v01/corpus_{cpu,owned,children,numeric}.rs`: each compiler,
+  generated program, capability/rejection probe, fair worklist and child fence.
+  The fence observer allows three extra seconds for the child watchdog's
+  two-second TERM/KILL grace and reaping.
+- `tests/issue_gnet_{04_device,05_provenance_owned,09_provenance,10_f32_arrays,11_numeric_owned_state}.rs`:
+  compiler/model/run watchdogs, including the asynchronous group child.
+- `tests/issue_gnet_{12_cuda_owned_numeric_model,f32_helpers_flag_independence,resume_device_model}.rs`:
+  the existing process-group poll runners. CPU limits remain unchanged.
+- `tests/issue_m4_02_{stencil_source,transpose_source}.rs`,
+  `tests/issue_m4_03_matrix_contraction_tensor_core.rs`,
+  `crates/invar-device/tests/m4_02_transpose.rs`: compiler and CPU-model runs.
+  Embedded `alarm()` wall timers now use the parent group watchdog instead;
+  stencil's independent CPU limit remains unchanged.
+- `crates/invar-cuda/src/cuda/{floating_tests,transpose_tests}.rs`: mock compiler
+  children expecting success/diagnostics/caps scale; exact 50 ms typed timeout
+  requests stay fixed.
+- `tests/support/cuda_owned_numeric_host_cpu_model.rs`: parent observation waits
+  scale; the backend's real compile/epoch resource contracts stay fixed.
+- `tests/support/owner_return_cpu.rs`: nested timeout and parent watchdog agree;
+  CPU/address-space/file/descriptor/core limits remain unchanged.
+- `src/general_net/owned_numeric_task.rs`: only its `cfg(test)` compiler/driver.
+- `src/native.rs`: only the `cfg(test)` elapsed-time assertions around child
+  output/draining and executable-writer checks; the real 30-second process
+  watchdog and 250 ms executable-writer retry budget remain unchanged.
+- `tests/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
+  and FIFO probes, and harness elapsed-time assertions. Deliberate 200/250 ms
+  timeout requests retain their exact durations and typed `Error::Timeout`.
+  Scaled non-timeout requests saturate at the product's existing 600-second
+  request maximum, including at scale 64.
+
+- `crates/invar-python/tests/{conftest,test_scalar_artifacts}.py`: existing C
+  fixture compile and fresh-process scalar-artifact checks consume the same knob.
+
+Product limits are intentionally unchanged: `src/native.rs`,
+`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_host,numeric_resume_host,numeric_owned_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
+`src/gnet_device_command.rs`, `bench/{baseline,build_lineage,general-net-v01/cli}.rs`,
+and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
+real contract; GPU completion polling and semantic timing fixtures are not
+compiled-child harness watchdogs.

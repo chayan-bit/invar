@@ -1,0 +1,50 @@
+{
+  "valid_owned_numeric/compile_owned_numeric/Cpu": {
+    "after": {
+      "abi": 10,
+      "source_bytes": 25372,
+      "target": "Cpu"
+    },
+    "before": {
+      "abi": 10,
+      "source_bytes": 25185,
+      "target": "Cpu"
+    }
+  },
+  "valid_owned_numeric/compile_resumable_owned_numeric/Cpu": {
+    "after": {
+      "abi": 11,
+      "source_bytes": 31623,
+      "target": "Cpu"
+    },
+    "before": {
+      "abi": 11,
+      "source_bytes": 31436,
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_owned_numeric/Cpu": {
+    "after": {
+      "abi": 10,
+      "source_bytes": 26281,
+      "target": "Cpu"
+    },
+    "before": {
+      "abi": 10,
+      "source_bytes": 26094,
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_resumable_owned_numeric/Cpu": {
+    "after": {
+      "abi": 11,
+      "source_bytes": 32110,
+      "target": "Cpu"
+    },
+    "before": {
+      "abi": 11,
+      "source_bytes": 31923,
+      "target": "Cpu"
+    }
+  }
+}

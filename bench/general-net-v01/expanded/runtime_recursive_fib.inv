@@ -1,0 +1,2 @@
+fn fib(n: u32) -> i32 { if n < 2u32 { return 1; } return fib(n - 1u32) + fib(n - 2u32); }
+fn main() -> i32 { return fib(8u32); }

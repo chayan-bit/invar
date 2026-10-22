@@ -1,0 +1,12 @@
+{
+  "schema": "invar-diagnostic-codes-fsum-v1",
+  "extends": "invar-diagnostic-codes-v1",
+  "codes": [
+    {
+      "code": "FLOAT_FOLD_HINT",
+      "meaning": "explain hint: a serial binary32 fold can state its order with sum_tree or sum_exact; never applied as a rewrite",
+      "deprecated": false,
+      "reachability": "source"
+    }
+  ]
+}

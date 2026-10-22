@@ -1,0 +1,21 @@
+fn leaf(x: i32) -> i32 {
+    var s = x % 101;
+    var i = 0;
+    while i < x % 6 {
+        s = (s * 6 + i) % 10007;
+        i = i + 1;
+    }
+    return s;
+}
+fn dc(lo: i32, hi: i32, d: i32) -> i32 {
+    if hi - lo <= 4 { return leaf(lo * 2 + hi); }
+    if d <= 0 { return leaf(hi - lo + 3); }
+    let m1 = lo + 1 + ((hi - lo - 2) * (4 + (lo % 2 + 2) % 2)) / 9;
+    let m2 = m1 + 1 + ((hi - m1 - 2) * 2) / 7;
+    let a = dc(lo, m1, d - 1);
+    let b = dc(m1, m2, d - 1);
+    let c = dc(m2, hi, d - 2);
+    return (a * 5 + b + c * 1) % 100003;
+}
+fn run(a: i32, b: i32) -> i32 { return dc(49, 49 + a, b); }
+fn main() -> i32 { return run(72, 2); }

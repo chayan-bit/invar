@@ -1,0 +1,4 @@
+    param physics_dt: Quantity<dec,s> = 0.002 s range 0.002 s .. 0.002 s;
+    param maximum_candidates: Quantity<dec,one> = 256 one range 256 one .. 256 one;
+    param reject_robot_environment: Quantity<dec,one> = 1 one range 1 one .. 1 one;
+    impl extern invar::mujoco_substep_admission_v1;

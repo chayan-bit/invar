@@ -1,0 +1,11 @@
+fn main() -> i32 {
+    let xs: Array<u32> = [1u32, 2u32, 3u32];
+    var ys: Array<u32> = filled_u32(len(xs), 0u32);
+    for i in 0u32 .. len(xs) {
+        ys[i] = wrapping_add(xs[i], 5u32);
+    }
+    if ys[2u32] == 8u32 {
+        return 0;
+    }
+    return 1;
+}

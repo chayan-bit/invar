@@ -1,0 +1,10 @@
+struct Pair { left: i32, right: u32 }
+
+fn peek_pair(p: read Pair) -> i32 { return p.left; }
+fn take_it(p: take Pair) -> i32 { return p.left; }
+
+fn main() -> i32 {
+    let p: Pair = Pair { left: 3i32, right: 4u32 };
+    let a: i32 = peek_pair(p);
+    return a + take_it(move p);
+}

@@ -1,0 +1,55 @@
+frame world;
+frame base: world;
+
+module demo {
+    extern component source_manifest {
+        abi c "source_";
+        lifecycle init, configure, step, shutdown;
+        port out vector: std::robotics::Vector3<f64,mm,world> @ 10 Hz layout c "invar_vector3";
+        resource cpu_cores = 1;
+        license "Apache-2.0" link process;
+        isolation separate-process;
+        golden "source-vector";
+        property "finite-vector";
+        shim "source_shim.c";
+    }
+
+    component Source {
+        port out vector: std::robotics::Vector3<f64,mm,world> @ 10 Hz latency 2 ms;
+        port out distance: Quantity<i32,m> @ 5 Hz;
+        param gain: Quantity<dec,one> = 1.5 one;
+        param max_velocity: Quantity<dec,rad/s> = 1.50 rad/s;
+        resource cpu_cores = 1, memory = 512 MiB, gpu_memory = 2 GiB;
+        license "Apache-2.0";
+        isolation separate-process;
+        wcet 3 ms;
+        deadline 100 ms;
+        impl extern source_manifest;
+    }
+
+    component Sink {
+        port in vector: std::robotics::Vector3<f64,mm,world> @ 10 Hz;
+        port in distance: Quantity<i32,m> @ 5 Hz;
+        resource cpu_cores = 1;
+        license "MIT";
+        isolation in-process;
+        wcet 2 ms;
+        deadline 100 ms;
+        impl invar consume;
+    }
+
+    fn consume(v: read std::robotics::Vector3<f64,mm,world>) -> i32 { return 0; }
+
+    connect source.vector -> sink.vector policy queue(4);
+    connect source.distance -> sink.distance policy sample-and-hold;
+    flow sensing: source.vector -> sink.vector within 120 ms;
+
+    product SimCell {
+        distribution proprietary-binary;
+        commercial true;
+        robot menagerie::franka_emika_panda;
+        capacity cpu_cores = 8, memory = 16 GiB, gpu_memory = 24 GiB, bus.ethercat = 100 Mbit/s;
+    }
+
+    system cell for SimCell { source: Source; sink: Sink; }
+}

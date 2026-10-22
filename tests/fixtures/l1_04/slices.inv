@@ -1,0 +1,11 @@
+fn main() -> i32 {
+  let text: String = "éx";
+  let good = utf8_slice(text, 0u32, 2u32);
+  let good_len: u32 = match move good { Result::Ok(part) => len(part), Result::Err(error) => 0u32 };
+  let bad = utf8_slice(text, 1u32, 2u32);
+  let bad_code: i32 = match move bad { Result::Ok(other) => 0i32, Result::Err(other_error) => 1i32 };
+  let encoded: Bytes = utf8_encode(text);
+  let prefix: Bytes = bytes_slice(encoded, 0u32, 2u32);
+  if good_len == 2u32 and bad_code == 1i32 and prefix[0u32] == 195u32 and prefix[1u32] == 169u32 { return 7; }
+  return 0;
+}

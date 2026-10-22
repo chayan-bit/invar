@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "id": "general-net-cuda-parity-v01",
+  "status": "proposed_unmeasured",
+  "authority": [
+    "design/general-gpu-v01.md@2026-09-28",
+    "design/cuda-parity-v01.md@2026-09-28",
+    "design/compiled-first-v01.md@2026-09-28"
+  ],
+  "source_corpus": "expanded-manifest.json",
+  "source_corpus_role": "reference_smoke_only_until_runtime_input_buffers_exist",
+  "scored_track": "automatic_generated",
+  "diagnostic_tracks": [
+    "same_algorithm",
+    "best_application",
+    "library_assisted"
+  ],
+  "automatic_generated_contract": {
+    "entry": "ordinary_invar_source",
+    "required_route": [
+      "checked_typed_executable_net_ir",
+      "verified_rewrites_and_dependence_analysis",
+      "program_specific_compiled_CPU_GPU_control_and_dataflow",
+      "native_CPU_plus_CUDA_Metal_kernels_and_compiled_orchestration",
+      "residency_aware_compiled_dispatch"
+    ],
+    "forbidden": [
+      "fixture_name_or_hash_dispatch",
+      "user_cuda",
+      "user_schedule",
+      "whole_operation_external_library_delegation",
+      "parameterized_plan_as_source_execution"
+    ],
+    "coverage_mode": "forced_compiled_device_coverage_with_real_dynamic_control_beyond_templates",
+    "semantic_oracle": "CPU_executable_net_reference_evaluator_and_source_reference_engine",
+    "dynamic_control": [
+      "compiled_runtime_branches",
+      "compiled_variable_loops",
+      "native_calls_or_checked_explicit_frames",
+      "compiled_bounded_worklists"
+    ],
+    "cpu_fallback_limit": "legitimate_auto_placement_but_not_device_coverage",
+    "placement_mode": "automatic_cost_selected_compiled_CPU_or_GPU_with_reason",
+    "default_artifacts": "AOT_native_CPU_and_program_specific_device_artifacts_for_declared_targets",
+    "runtime_compilation_policy": "report_driver_pipeline_creation_PTX_or_driver_JIT_if_present; no_hidden_runtime_language_compiler_required"
+  },
+  "gate": {
+    "unit": "each_scored_workload_size_device_scope",
+    "ratio": "median_invar_time_divided_by_median_reviewed_baseline_time",
+    "point_estimate_max_inclusive": 1.0,
+    "one_sided_95_upper_max_inclusive": 1.05,
+    "faster_requires_one_sided_95_upper_below": 1.0,
+    "pass_wording": "matched within the declared 5% uncertainty margin",
+    "aggregation_can_override_case_failure": false,
+    "unresolved_outcome": "pending",
+    "numeric_correctness_required_before_timing": true
+  },
+  "scored_scopes": [
+    {
+      "id": "device_resident_complete_operation",
+      "includes": [
+        "all_operation_kernels",
+        "required_temporary_buffers",
+        "output_completion"
+      ],
+      "excludes": [
+        "compilation",
+        "host_transfers"
+      ]
+    },
+    {
+      "id": "warm_host_input_to_host_output",
+      "includes": [
+        "required_allocations",
+        "graph_encoding",
+        "dispatch",
+        "transfers",
+        "all_operation_kernels",
+        "synchronization",
+        "host_output_completion"
+      ],
+      "excludes": [
+        "fresh_process_initialization",
+        "compilation"
+      ]
+    }
+  ],
+  "reported_unscored_scopes": [
+    "cold_process_first_result",
+    "jit_and_tuning_cost",
+    "amortization_count",
+    "p50_p95_p99",
+    "jitter",
+    "peak_host_and_device_memory",
+    "contention",
+    "deadline_observations_if_declared"
+  ],
+  "sampling": {
+    "warmups_per_series_per_session_min": 10,
+    "raw_samples_per_series_per_session_min": 30,
+    "independent_process_sessions_min": 3,
+    "design": "randomized_interleaved_paired_blocks",
+    "order_seed": 20260928,
+    "resampling": "hierarchical_session_then_paired_block_bootstrap",
+    "bootstrap_seed": 20260929,
+    "bootstrap_replicates": 10000,
+    "one_sided_upper_percentile": 95,
+    "follow_up_if_point_passes_but_upper_is_inconclusive": {
+      "max_batches": 2,
+      "new_pairs_per_series_per_session_per_batch": 10,
+      "retain_all_valid_samples": true
+    }
+  },
+  "selection": {
+    "gpu_profitable_band": "choose_from_reviewed_baseline_cpu_vs_gpu_crossover_without_invar_scores; freeze_before_invar_timing",
+    "no_profitable_band": "pending_not_a_parity_pass",
+    "small_and_serial_controls": "retain_and_check_correct_auto_placement",
+    "dispatch_max_ratio_to_faster_forced_engine": 1.1,
+    "dispatch_gate_applies_to": "eligible_small_and_serial_controls_with_frozen_exception_rules",
+    "dispatch_exception_rule": "typed_reason_recorded; excluded_from_parity_wins",
+    "holdout_rule": "never_tune_on_structural_holdouts; exposure_converts_to_training_and_requires_new_holdouts_while_preserving_failures"
+  },
+  "baseline_prerequisites": {
+    "status": "pending",
+    "required_before_scoring": [
+      "source_or_artifact_digest",
+      "upstream_revision_and_license",
+      "algorithm_and_complete_operation_boundary",
+      "compiler_flags_and_toolchain",
+      "numerical_and_output_contract",
+      "geometry_or_model_version",
+      "input_distribution_and_seed",
+      "independent_correctness_review",
+      "profile_or_quality_review",
+      "same_device_residency_reuse_and_precomputation_policy",
+      "cpu_gpu_crossover_evidence",
+      "strongest_compatible_baseline_selection"
+    ],
+    "new_author_written_baseline": "label_as_author_written_and_require_independent_review",
+    "stronger_compatible_baseline": "retain_both_and_score_against_stronger",
+    "different_contract": "unscored_informative_only"
+  },
+  "platforms": {
+    "cuda": "approved_nvidia_target_only_with_exact_job_authorization",
+    "metal": "separate_same_apple_hardware_comparison_to_reviewed_native_metal_or_mps",
+    "cross_vendor_absolute_latency_comparison": false
+  },
+  "robotics_reference_inventory": {
+    "source": "robotics CUDA parity reference@52c363f (not retained)",
+    "status": "candidate_lineage_not_oracle_acceptance",
+    "menagerie_manifest": "examples/cells/assets/menagerie/MANIFEST.tsv",
+    "menagerie_tag": "v2026.9.2",
+    "menagerie_commit": "c96a32d28fb5da84da38c1da4d749e7a13212855",
+    "fk_goldens": "tests/fixtures/foreign-components/pinocchio_goldens.json",
+    "fk_golden_generator": "tests/fixtures/foreign-components/generate_pinocchio_goldens.py",
+    "fk_oracle": "Pinocchio 4.1.0 CPU correctness only; four pinned poses per arm",
+    "mujoco_observation": "MuJoCo 3.12.0 original-scene model load and 1000 steps; no Jacobian, dynamics, signed-distance or planning golden",
+    "planner_application": "cuRobo v0.8.0 at 4ea77366ca48ee453e7df139e39fa6532af49f3b is library-assisted best-application track only; real GPU query pending",
+    "planner_wire": "examples/cells/reach_place/components/curobo_planner/planner_reference.h INVP v2 is a hand-authored S1-06 boundary, not approval of a new public API"
+  },
+  "kinematics_cpu_oracle_contract": {
+    "source": "tests/fixtures/foreign-components/gpu-parity-oracles/contract.json@65c75d7",
+    "sha256": "85362985e3729e6f40eac401efc3772d27fb90f93238f3e0174a01517bd2b0b6",
+    "status": "internal_cpu_oracle_contract_frozen_before_generation",
+    "outputs": [
+      "full_6_by_N_base_aligned_tool_Jacobian",
+      "full_N_by_N_contact_free_mass_with_source_armature_once"
+    ],
+    "cases_per_arm": 8,
+    "reference_result": {
+      "source": "tests/fixtures/foreign-components/gpu-parity-oracles/reference.json@d313d41",
+      "sha256": "8a4cef46ff9aeec67ab51f5c426b219e0d467eb16d0921679586ebc6cceb64c4",
+      "runtime_status": "failed",
+      "panda": "Jacobian_and_finite_difference_pass_8_of_8; active_mass_fail_6_of_8_at_frozen_tolerance",
+      "ur5e": "Jacobian_finite_difference_and_active_mass_pass_8_of_8",
+      "panda_mass_diagnosis": "MuJoCo_compiled_link1_inertia_differs_from_source_and_Pinocchio; not_an_agreed_mass_golden"
+    },
+    "scored_gpu_numeric_contract": "pending_review_after_independent_oracle_agreement"
+  },
+  "ablation_design": {
+    "status": "proposed_unmeasured",
+    "source": "design/compiled-first-v01.md@2026-09-28",
+    "variants": {
+      "A": "optional_generic_GPU_net_reducer_diagnostic",
+      "B": "ordinary_source_to_typed_net_IR_to_program_specific_compiled_CPU_GPU_control_worklists_and_kernels",
+      "C": "ordinary_source_to_direct_structured_lowering_with_B_schedule_where_expressible; diagnostic_only",
+      "D": "independently_reviewed_semantically_matched_handwritten_CUDA",
+      "CPU": "reviewed_semantically_matched_CPU_control_and_automatic_placement_reference"
+    },
+    "variant_status": {
+      "A": "not_built_optional",
+      "B": "pending_compiled_backend",
+      "C": "pending_optional_diagnostic",
+      "D": "pending_reviewed_baseline",
+      "CPU": "pending_runtime_input_control"
+    },
+    "release_required_variants": [
+      "B",
+      "D",
+      "CPU"
+    ],
+    "comparisons": [
+      {
+        "pair": "A/B",
+        "question": "optional_generic_reducer_vs_compiled_graph_overhead",
+        "role": "optional_diagnostic_if_A_built"
+      },
+      {
+        "pair": "B/C",
+        "question": "cost_of_required_typed_net_compilation_layer_at_matched_schedule",
+        "role": "diagnostic_if_C_available"
+      },
+      {
+        "pair": "B/D",
+        "question": "true_automatic_generated_code_parity",
+        "role": "scored_under_existing_gate"
+      },
+      {
+        "pair": "CPU/B",
+        "question": "correct_automatic_placement_after_baseline_only_CPU_GPU_crossover_selection",
+        "role": "control"
+      }
+    ],
+    "common_contract": "same_complete_operation_outputs_numeric_policy_residency_runtime_inputs_and_device; B_C_same_schedule_where_expressible; C_never_bypasses_production_net_IR_route",
+    "certified_static_region_assertions": [
+      "zero_interior_dynamic_net_allocation",
+      "zero_interior_scalar_tag_dispatch"
+    ],
+    "assertion_limit": "only_for_validated_extracted_interior; runtime_worklist_allocation_scratch_spills_and_register_cost_remain_measured",
+    "instrumentation": {
+      "separate_from_uninstrumented_scored_timing": true,
+      "counters": [
+        "compiler_net_IR_digest_and_bytes",
+        "optional_A_graph_bytes",
+        "interior_dynamic_net_allocations",
+        "interior_scalar_tag_dispatches",
+        "worklist_queue_bytes_and_allocations",
+        "frontier_tasks_and_width",
+        "atomics",
+        "kernel_launches",
+        "compiled_dispatch_count_and_cost",
+        "host_device_transfers",
+        "temporary_bytes",
+        "register_spills",
+        "occupancy",
+        "residual_dynamic_work_fraction_by_measured_cost",
+        "scheduling_and_compaction_cost",
+        "code_growth",
+        "compilation_and_tuning_time"
+      ],
+      "attribution": "measured_critical_path; do_not_sum_overlapping_host_and_device_intervals"
+    },
+    "controls": [
+      "generic_fixed_topology_strict_ordered_FK_like_composition",
+      "balanced_to_99_to_1_skewed_recursive_and_frontier_work",
+      "held_out_syntax_layout_and_runtime_inputs"
+    ],
+    "control_case_status": "pending_runtime_inputs_source_forms_and_backend",
+    "anti_special_case_rule": "no_robot_domain_name_fixture_hash_or_training_answer_dispatch; generic_guarded_source_facts_only",
+    "joint_angle_pipeline": "charge_runtime_sin_cos_and_geometry_math_under_frozen_numeric_policy_for_full_FK_to_collision_to_cost_operation",
+    "precomputed_transform_control": "separately_labeled_compute_island_with_identical_precomputed_inputs_on_both_sides; never_count_as_full_joint_angle_pipeline",
+    "external_runtime_comparison": "optional_only_with_pinned_common_contract; BendRT_paper_has_no_interaction_nets_and_its_CUDA_lane_was_unmeasured; no_Invar_speed_claim"
+  },
+  "common_pending_prerequisites": [
+    "runtime_input_buffers",
+    "source_derived_compiled_entry_points",
+    "complete_source_to_net_IR_lowering",
+    "compiled_CPU_lowering",
+    "forced_compiled_device_coverage_on_CUDA_and_Metal",
+    "residency_aware_compiled_dispatch",
+    "reviewed_baselines"
+  ],
+  "workloads": [
+    {
+      "id": "irregular_recursive_divide",
+      "domain": "general_dynamic",
+      "operation": "input_shaped_recursive_divide_and_combine",
+      "current_smoke_cases": [
+        "divide_irregular_a",
+        "divide_irregular_b",
+        "composed_split_leaf"
+      ],
+      "proposed_size_sweep": [
+        1,
+        7,
+        127,
+        4093,
+        65535
+      ],
+      "input_distributions": [
+        "balanced",
+        "skewed",
+        "alternating_pivots"
+      ],
+      "composition_variants": [
+        "skewed_pivot_then_leaf_combine",
+        "alternating_pivot_with_branch_and_leaf_loop"
+      ],
+      "output_contract": "future_large_source_uses_explicit_wrapping_arithmetic; current_small_smoke_checked_i32",
+      "reference_lineage": "bootstrap_reference_engine_plus_independent_host_oracle_pending",
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "runtime_shape_arrays",
+        "bounded_dynamic_recursion_or_explicit_worklist"
+      ],
+      "status": "pending_gpu_cases"
+    },
+    {
+      "id": "input_branch_tree",
+      "domain": "general_dynamic",
+      "operation": "data_selected_recursive_branch_tree",
+      "current_smoke_cases": [
+        "branch_tree_a",
+        "branch_tree_b"
+      ],
+      "proposed_size_sweep": [
+        1,
+        7,
+        127,
+        4093,
+        65535
+      ],
+      "input_distributions": [
+        "balanced",
+        "skewed",
+        "mixed_leaf_work"
+      ],
+      "composition_variants": [
+        "branch_only_selected_leaf",
+        "branch_with_nested_leaf_loop"
+      ],
+      "output_contract": "exact_ordered_observations_selected_branch_only_and_explicit_large_case_arithmetic_policy",
+      "reference_lineage": "bootstrap_reference_engine_plus_independent_host_oracle_pending",
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "runtime_branch_inputs",
+        "bounded_dynamic_recursion_or_explicit_worklist"
+      ],
+      "status": "pending_gpu_cases"
+    },
+    {
+      "id": "dynamic_graph_frontier",
+      "domain": "general_dynamic",
+      "operation": "level_synchronous_discovered_frontier",
+      "current_smoke_cases": [
+        "frontier_graph_a",
+        "frontier_graph_b"
+      ],
+      "proposed_size_sweep": [
+        5,
+        32,
+        1024,
+        16384
+      ],
+      "input_distributions": [
+        "chain",
+        "star",
+        "balanced",
+        "skewed_sparse"
+      ],
+      "composition_variants": [
+        "level_frontier_then_reachability",
+        "frontier_then_input_dependent_vertex_reduction"
+      ],
+      "output_contract": "exact_reachable_set_or_count; traversal_order_observable_only_if_source_exposes_it",
+      "reference_lineage": "bootstrap_reference_engine_plus_independent_host_oracle_pending",
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "runtime_sparse_graph_input",
+        "dynamic_frontier_worklist",
+        "approved_memory_budget"
+      ],
+      "status": "pending_gpu_cases"
+    },
+    {
+      "id": "panda_ur5e_fk_jacobian_dynamics",
+      "domain": "robotics_kinematics",
+      "operation": "batched_forward_transforms_full_tool_jacobians_and_full_CRBA_mass_matrices_for_each_named_robot",
+      "current_smoke_cases": [],
+      "proposed_size_sweep": [
+        1,
+        32,
+        256,
+        4096
+      ],
+      "input_distributions": [
+        "reachable_joint_uniform",
+        "joint_limit_edges",
+        "near_singular"
+      ],
+      "composition_variants": [
+        "fk_then_jacobian",
+        "fk_then_dynamics"
+      ],
+      "output_contract": "Panda_link0_to_hand_and_UR5e_base_to_attachment_site_FK_translation_plus_canonical_wxyz_quaternion; full_base_aligned_6_by_N_tool_Jacobian; full_symmetric_N_by_N_CRBA_mass_matrix; internal_CPU_oracle_contract_frozen_at_65c75d7; scored_GPU_numeric_contract_pending",
+      "reference_lineage": "original_Menagerie_Panda_UR5e_MJCF; Pinocchio_4.1.0_eight_tool_pose_goldens; MuJoCo_3.12.0_and_Pinocchio_4.1.0_full_CPU_Jacobian_and_active_mass_observations_at_d313d41; Panda_active_mass_failed_frozen_tolerance",
+      "reference_gaps": [
+        "Panda_active_mass_CPU_cross_library_failure_6_of_8",
+        "scored_GPU_floating_error_contract",
+        "reviewed_handwritten_CUDA_baseline"
+      ],
+      "all_body_fk_cpu_evidence": {
+        "scope": "historical_independent_cpu_reference_only",
+        "contract": "tests/fixtures/foreign-components/gpu-parity-oracles/all_link_contract.json",
+        "contract_sha256": "eb010c784434d8175c63001ac490ec7aa741f041f65400075419daa16159f7f5",
+        "reference": "tests/fixtures/foreign-components/gpu-parity-oracles/all_link_reference.json",
+        "reference_sha256": "1ef9a54634610e7939f63ac478b656a74bd77ab67495f67e7f7a278870019847",
+        "checked_transforms": 144,
+        "failures": 0,
+        "does_not_establish": [
+          "generated_code_agreement",
+          "device_coverage",
+          "GPU_performance",
+          "Panda_mass_acceptance"
+        ]
+      },
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "f32_or_f64_source_arithmetic",
+        "sin_cos_sqrt_source_math",
+        "record_or_structured_buffer_access",
+        "robot_model_and_frame_contract",
+        "batched_runtime_numeric_buffers"
+      ],
+      "status": "pending_source_primitives_and_reference"
+    },
+    {
+      "id": "collision_distance_sparse_geometry",
+      "domain": "robotics_geometry",
+      "operation": "batched_distance_collision_query_with_sparse_candidate_traversal",
+      "current_smoke_cases": [],
+      "proposed_size_sweep": [
+        1,
+        64,
+        1024
+      ],
+      "input_distributions": [
+        "empty",
+        "sparse",
+        "dense",
+        "grazing_contact"
+      ],
+      "composition_variants": [
+        "sparse_candidate_distance",
+        "candidate_traversal_then_collision_classification"
+      ],
+      "output_contract": "pinned_geometry_and_tolerance; no_false_negatives; exact_query_outputs_pending_reference_review",
+      "reference_lineage": "original_Menagerie_MJCF_collision_geometry; candidate_MuJoCo_mj_geomDistance_requires_contract_review",
+      "reference_gaps": [
+        "exact_distance_or_conservative_classification_contract",
+        "Panda_vendor_spheres_under_cover_original_meshes",
+        "UR5e_48_sphere_envelope_not_exact_distance",
+        "MuJoCo_distmax_and_convex_positive_distance_policy",
+        "real_cuRobo_queries_unexecuted",
+        "reviewed_handwritten_CUDA_baseline"
+      ],
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "f32_or_f64_source_arithmetic",
+        "sqrt_source_math",
+        "record_or_structured_buffer_access",
+        "geometry_buffers",
+        "sparse_dynamic_traversal"
+      ],
+      "status": "pending_source_primitives_and_reference"
+    },
+    {
+      "id": "trajectory_rollout_cost_bounded_search",
+      "domain": "robotics_planning",
+      "operation": "trajectory_rollout_cost_and_separately_bounded_search_frontier",
+      "current_smoke_cases": [],
+      "proposed_size_sweep": [
+        {
+          "trajectories": 1,
+          "horizon": 64
+        },
+        {
+          "trajectories": 32,
+          "horizon": 64
+        },
+        {
+          "trajectories": 256,
+          "horizon": 256
+        }
+      ],
+      "input_distributions": [
+        "nominal",
+        "obstacle_heavy",
+        "narrow_passage",
+        "unsuccessful_within_budget"
+      ],
+      "composition_variants": [
+        "rollout_then_cost",
+        "rollout_cost_then_bounded_search_frontier"
+      ],
+      "output_contract": "same_seed_stopping_budget_success_rate_solution_quality_and_cost_precision_pending_reference_review",
+      "reference_lineage": "S1-06_50mm_cube_table_acceptance_task; INVP_v2_2_to_256_waypoint_hand_authored_wire; cuRobo_library_application_candidate_only",
+      "reference_gaps": [
+        "source_written_rollout_and_cost_fixture",
+        "complete_per_step_and_frontier_oracle",
+        "discretization_seed_stream_stopping_quality_success_policy",
+        "real_cuRobo_execution",
+        "reviewed_handwritten_CUDA_baseline"
+      ],
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "f32_or_f64_source_arithmetic",
+        "runtime_trajectory_buffers",
+        "bounded_search_and_frontier",
+        "random_seed_contract_if_stochastic"
+      ],
+      "status": "pending_source_primitives_and_reference"
+    },
+    {
+      "id": "point_cloud_composition",
+      "domain": "robotics_perception",
+      "operation": "transform_filter_stable_compaction_and_neighborhood_or_reduction",
+      "current_smoke_cases": [],
+      "proposed_size_sweep": [
+        1024,
+        65536
+      ],
+      "input_distributions": [
+        "low_selectivity",
+        "half_selectivity",
+        "high_selectivity",
+        "clustered_neighborhoods"
+      ],
+      "composition_variants": [
+        "transform_filter_compact",
+        "transform_filter_compact_then_neighborhood_reduction"
+      ],
+      "output_contract": "full_output_order_geometry_precision_and_neighbor_definition_pending_reference_review",
+      "reference_lineage": "no_existing_point_cloud_fixture; S1-11_standard_vocabulary_explicitly_excludes_point_clouds_and_images",
+      "reference_gaps": [
+        "public_licensed_dataset_or_fixture",
+        "layout_ordering_tie_and_neighbor_contract",
+        "independent_complete_output_oracle",
+        "reviewed_handwritten_CUDA_baseline"
+      ],
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "f32_or_f64_source_arithmetic",
+        "runtime_point_buffers",
+        "stable_compaction",
+        "neighborhood_access"
+      ],
+      "status": "pending_source_primitives_and_reference"
+    },
+    {
+      "id": "kinematics_collision_rollout_pipeline",
+      "domain": "robotics_pipeline",
+      "operation": "source_written_kinematics_to_collision_to_rollout_and_cost",
+      "current_smoke_cases": [],
+      "proposed_size_sweep": [
+        {
+          "trajectories": 1,
+          "horizon": 64
+        },
+        {
+          "trajectories": 32,
+          "horizon": 64
+        },
+        {
+          "trajectories": 256,
+          "horizon": 256
+        }
+      ],
+      "input_distributions": [
+        "nominal",
+        "obstacle_heavy",
+        "near_collision"
+      ],
+      "composition_variants": [
+        "panda_fk_collision_rollout_cost",
+        "ur5e_fk_collision_rollout_cost"
+      ],
+      "output_contract": "same_model_geometry_precision_success_and_observable_host_boundaries_pending_reference_review",
+      "reference_lineage": "original_Menagerie_models_plus_Pinocchio_FK_goldens_only; no_complete_kinematics_collision_rollout_reference",
+      "reference_gaps": [
+        "geometry_equivalence_for_both_arms",
+        "source_written_composed_operation",
+        "full_output_pipeline_oracle",
+        "host_boundary_and_residency_contract",
+        "reviewed_handwritten_CUDA_baseline"
+      ],
+      "baseline_status": "pending_review",
+      "extra_prerequisites": [
+        "f32_or_f64_source_arithmetic",
+        "sin_cos_sqrt_source_math",
+        "runtime_robot_buffers",
+        "composed_device_residency",
+        "checked_host_boundaries"
+      ],
+      "status": "pending_source_primitives_and_reference"
+    }
+  ],
+  "structural_holdouts": {
+    "status": "pending_runtime_input_generator",
+    "general_rule": "new_shapes_and_compositions_absent_from_tuning",
+    "robotics_rule": "different_valid_model_configurations_geometry_and_input_distributions_absent_from_tuning",
+    "exposure_rule": "retain_exposed_failures_and_replace_holdout_before_scoring"
+  },
+  "measurement_status": "none"
+}

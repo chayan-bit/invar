@@ -1,0 +1,12 @@
+// A zero-based counted loop with one injective fresh-output store is a wrapping u32 map candidate.
+fn main() -> i32 {
+    let xs: Array<u32> = [10u32, 20u32, 30u32, 40u32];
+    var ys: Array<u32> = filled_u32(len(xs), 0u32);
+    for i in 0u32 .. len(xs) {
+        ys[i] = wrapping_mul(xs[i], 3u32);
+    }
+    if ys[3u32] == 120u32 {
+        return 120;
+    }
+    return 0;
+}

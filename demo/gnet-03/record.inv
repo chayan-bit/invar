@@ -1,0 +1,2 @@
+struct P { x: i32 }
+fn run(n: i32) -> i32 { let p = P { x: n }; return p.x; }

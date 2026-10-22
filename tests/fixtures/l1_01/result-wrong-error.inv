@@ -1,0 +1,6 @@
+fn other() -> Result<i32, i32> { return Result::Err(2i32); }
+fn broken() -> Result<i32, u32> {
+    let value: i32 = other()?;
+    return Result::Ok(value);
+}
+fn main() -> i32 { return 0i32; }

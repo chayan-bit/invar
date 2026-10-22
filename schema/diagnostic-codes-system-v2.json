@@ -1,0 +1,102 @@
+{
+  "schema": "invar-diagnostic-codes-system-v2",
+  "extends": "invar-diagnostic-codes-system-v1",
+  "codes": [
+    {
+      "code": "S1100",
+      "meaning": "connection policy has incompatible rates or unbounded capacity",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1101",
+      "meaning": "component WCET or deadline exceeds its declared bound",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1102",
+      "meaning": "flow exceeds its declared latency budget",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1200",
+      "meaning": "frame tree is not closed at one reachable root",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1201",
+      "meaning": "transform tree edge has no declared source",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1202",
+      "meaning": "transform tree edge has multiple declared sources",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1203",
+      "meaning": "identity transform constant is not a direct checked child-to-parent edge",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1250",
+      "meaning": "resource or modeled bus bandwidth exceeds product capacity",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1251",
+      "meaning": "component uses an undeclared bus or invalid bus capacity",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1252",
+      "meaning": "bus port has no checked canonical C layout or rate",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1300",
+      "meaning": "GPL or AGPL component violates process isolation",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1301",
+      "meaning": "AGPL component is network exposed or lacks that declaration",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1302",
+      "meaning": "LGPL component is not dynamically replaceable in process",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1303",
+      "meaning": "MPL component files are modified or not declared unmodified",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1304",
+      "meaning": "non-commercial license conflicts with commercial product",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "S1305",
+      "meaning": "license or grant is outside the declared lattice",
+      "deprecated": false,
+      "reachability": "source"
+    }
+  ]
+}

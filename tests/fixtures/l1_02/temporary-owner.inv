@@ -1,0 +1,4 @@
+fn main() -> i32 {
+    let part = view(filled_i32(1u32, 1i32), 0u32, 1u32);
+    return part[0u32];
+}

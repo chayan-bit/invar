@@ -1,0 +1,25 @@
+// Versioned, wire-only planner records. The existing vocabulary remains unchanged.
+// Four groups of 64 preserve the general FixedArray bound while representing
+// the approved 256-waypoint capacity as a contiguous C layout.
+module std::robotics {
+    pub struct PlannerRequest<T: Value, const N: u32, Base: Frame, Tool: Frame, Object: Frame> {
+        start: std::robotics::JointPositions<T,N>,
+        target: std::robotics::Pose<T,Base,Tool>,
+        object_pose: std::robotics::Pose<T,Base,Object>,
+        attachment_pose: std::robotics::Pose<T,Tool,Object>,
+        attached: u32
+    }
+    pub struct PlannerWaypoint<T: Value, const N: u32> {
+        time_from_start: Quantity<T,s>,
+        positions: std::robotics::JointPositions<T,N>,
+        velocities: std::robotics::JointVelocities<T,N>
+    }
+    pub struct PlannerSegment<T: Value, const N: u32> {
+        waypoints: FixedArray<std::robotics::PlannerWaypoint<T,N>,64>
+    }
+    pub struct PlannerTrajectory<T: Value, const N: u32> {
+        dt: Quantity<T,s>,
+        count: u32,
+        segments: FixedArray<std::robotics::PlannerSegment<T,N>,4>
+    }
+}

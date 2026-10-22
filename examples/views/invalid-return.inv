@@ -1,0 +1,8 @@
+fn bad(xs: read Array<i32>) -> View<i32> from xs {
+    let local: Array<i32> = [1i32];
+    return view(local, 0u32, 1u32);
+}
+
+fn main() -> i32 {
+    return 0i32;
+}

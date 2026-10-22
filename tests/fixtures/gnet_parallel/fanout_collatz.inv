@@ -1,0 +1,22 @@
+// Eight independent calls with data-dependent trip counts in one block.
+fn collatz(x: i32) -> i32 {
+    var n = x;
+    var steps = 0;
+    while n != 1 {
+        if n % 2 == 0 { n = n / 2; } else { n = 3 * n + 1; }
+        steps = steps + 1;
+    }
+    return steps;
+}
+fn run(n: i32, seed: i32) -> i32 {
+    let a = collatz(n + 1);
+    let b = collatz(n + 2);
+    let c = collatz(seed + 3);
+    let d = collatz(seed + 4);
+    let e = collatz(n + seed);
+    let f = collatz(n * 2 + 1);
+    let g = collatz(seed * 2 + 1);
+    let h = collatz(n + seed + 7);
+    return a + b + c + d + e + f + g + h;
+}
+fn main() -> i32 { return run(27, 97); }

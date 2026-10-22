@@ -1,0 +1,506 @@
+{
+  "valid_int_loop/compile/Cpu": {
+    "before": {
+      "abi": 1,
+      "normalized_id": "dddb81d31ab8dd1a1178277c06c36e150bc0a3cfbce4df8b677f60b8386e7efb",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 1,
+      "normalized_id": "41129859100959e0fad3052111a803cd763b7bd69a952acd3b2bb3908609bfa5",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile/Cuda": {
+    "before": {
+      "abi": 1,
+      "normalized_id": "8062b9411860cfb6e5cc160433183586edbc5931e7a893fc99c391f7720a7d36",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 1,
+      "normalized_id": "dc4bf672700da0151d7fbcad70e877d2e6319d8738c586287b1a0ae0ad2b888b",
+      "target": "Cuda"
+    }
+  },
+  "valid_int_loop/compile/Metal": {
+    "before": {
+      "abi": 1,
+      "normalized_id": "24ad45da57ae0f939a14a91a0dbb40adc79ef0fc78517a85c914d36ea05c1c54",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 1,
+      "normalized_id": "b5ca538546ce4073fae776d32ec98cea5b07fdc52d5dc26c709af9f10d807e49",
+      "target": "Metal"
+    }
+  },
+  "valid_int_loop/compile_device_speculative/Cuda": {
+    "before": {
+      "abi": 5,
+      "normalized_id": "46fa2df95fc195a97e222574a2a6fe271a83060b78f4fb15a2524b335174491f",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 5,
+      "normalized_id": "fccf09740c8065dc680100c997b24659dc03fb49c8fe49c31d52c0b55508f256",
+      "target": "Cuda"
+    }
+  },
+  "valid_int_loop/compile_device_speculative/Metal": {
+    "before": {
+      "abi": 5,
+      "normalized_id": "58a387c2151de5b97fda09ac4b020e3ecefc6bb7cd07a933b74e9a8d180f84e0",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 5,
+      "normalized_id": "27202d24f6dae69530286fc11654cdf1c28efd388a7928bf4e8f346bdea503e7",
+      "target": "Metal"
+    }
+  },
+  "valid_int_loop/compile_numeric/Cpu": {
+    "before": {
+      "abi": 8,
+      "normalized_id": "753e6ba7beb442fb59c12139cb6d3a8203254f301a3a26cea4aa4805135b738e",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 8,
+      "normalized_id": "d4b61e218b3434e216f46b75c4db8b4805fddad44c0ca1012336370bf6dde5f2",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile_owned/Cpu": {
+    "before": {
+      "abi": 2,
+      "normalized_id": "133a1bbd8d7636991e1ad8526977570c5aca5c836186f89ae4751058af522434",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 2,
+      "normalized_id": "49d5b2968ea1d8578385c8551501a5e9ca76b79321117978f147b033700ee2d7",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile_owned/Cuda": {
+    "before": {
+      "abi": 2,
+      "normalized_id": "d53ce8a0cd7d4bb8f674fb0ed7a27ecb19a61bfc622c17a8942631c7b731c8a3",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 2,
+      "normalized_id": "c8d8f94b2d4866a72595acbb0193d5b8f6c8e4fdc278d5c706afd1467bec44e3",
+      "target": "Cuda"
+    }
+  },
+  "valid_int_loop/compile_owned/Metal": {
+    "before": {
+      "abi": 2,
+      "normalized_id": "dfb3bcf5f29d8e13e72874f012971560873e619e8372a97d1a3395a6c4ce0e43",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 2,
+      "normalized_id": "6347e5b623dfc31d56ffcd4f2076801292a914a7e8f3504cc2384c2a5a503de5",
+      "target": "Metal"
+    }
+  },
+  "valid_int_loop/compile_owned_numeric/Cpu": {
+    "before": {
+      "abi": 10,
+      "normalized_id": "9b214585ba8e546b7f3520092adeef70dae253bc433e4ae27e2d79f38c60ba2b",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 10,
+      "normalized_id": "433420f1ca367500b663967591a933de285bb621028baeab8be703d5579e71ed",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile_resumable/Cpu": {
+    "before": {
+      "abi": 3,
+      "normalized_id": "633d03ea3fbb7fa7bfa6eb010e1729fc3a6a3084dd94cef7b4398715b40b1ff7",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 3,
+      "normalized_id": "fd7d64faf46aef5a0833f4c9f9a9b42acc2a6f65c0314d224690bbe40e55165f",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile_resumable/Cuda": {
+    "before": {
+      "abi": 3,
+      "normalized_id": "8190d8f2167b1dd8dbfe2374030fc32b4421ebd147eede19b59006c4ea46bba6",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 3,
+      "normalized_id": "86cbf316dc66a218cb522cd729a221b6c1dcb7c1d106ec4183e4cce1ce8abdef",
+      "target": "Cuda"
+    }
+  },
+  "valid_int_loop/compile_resumable/Metal": {
+    "before": {
+      "abi": 3,
+      "normalized_id": "3dae3121890fa18d20e91c2e0de24cf56b402b59592cdf79f8fe74becc0db344",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 3,
+      "normalized_id": "07e9fc4299e7716d3037d634853d9fb4db5bce3791450f057353dd798f3f9023",
+      "target": "Metal"
+    }
+  },
+  "valid_int_loop/compile_resumable_numeric/Cpu": {
+    "before": {
+      "abi": 9,
+      "normalized_id": "c0aa2a7851ac4d582a0ade90bb15e2ebf711a94750007b625664f7bb99e77e98",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 9,
+      "normalized_id": "477a264c1f01bfb6d34945be91bb30bc32d02bd864babfdebdc89a11fd3d1fe8",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile_resumable_owned_numeric/Cpu": {
+    "before": {
+      "abi": 11,
+      "normalized_id": "b497a87c196ffef82afc49d2bf3b841a10576406a2432892db227a64d901c274",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 11,
+      "normalized_id": "83880437de6d65967f1d3f0dd478fe8d6c6691d5d88aa426feb0ba8f69fde6bf",
+      "target": "Cpu"
+    }
+  },
+  "valid_int_loop/compile_speculative/Cpu": {
+    "before": {
+      "abi": 4,
+      "normalized_id": "88b761b82a278e4d0d03cfc3b84dbdd9edf144f876f727ce55521cae2f23e229",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 4,
+      "normalized_id": "17b08e30eb58a97df170fead96f8eeded03052aedce5f607d2f548883b9ae91e",
+      "target": "Cpu"
+    }
+  },
+  "valid_numeric/compile_device_speculative/Cuda": {
+    "before": {
+      "abi": 13,
+      "normalized_id": "0d3ebd6161a76c1fc3080d8450d15a9b56e4ba10b6e5efa0a7887d3a4efc783c",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 13,
+      "normalized_id": "21b98c19de03528dad236a2aa2ddefe76170ecb60db38b0ea028f94a76850036",
+      "target": "Cuda"
+    }
+  },
+  "valid_numeric/compile_device_speculative/Metal": {
+    "before": {
+      "abi": 13,
+      "normalized_id": "a955637ddea144f76420eae26d39d810a392055fdd2b8e426311b15d1704e45f",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 13,
+      "normalized_id": "b55dc05af2675c4f9daf7659cdd46175975a6cc935f9f7520399182266aebc4b",
+      "target": "Metal"
+    }
+  },
+  "valid_numeric/compile_numeric/Cpu": {
+    "before": {
+      "abi": 8,
+      "normalized_id": "42b9c05d4e703b0eee2da4d4094ad44f357d44706200cfd6b6ea55c61f157890",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 8,
+      "normalized_id": "ed710d433b24c73b580529669646685c179e4d6fc9f999c5354bc810aacaf7c0",
+      "target": "Cpu"
+    }
+  },
+  "valid_numeric/compile_owned_numeric/Cpu": {
+    "before": {
+      "abi": 10,
+      "normalized_id": "5efac12170119b5e76422d595b03fbd590792f24be86fd8a2719f9241093102d",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 10,
+      "normalized_id": "4399ccaf1d2f455c042a087171c6d5f917d94b9bb1394fd47339f3941186f628",
+      "target": "Cpu"
+    }
+  },
+  "valid_numeric/compile_resumable_numeric/Cpu": {
+    "before": {
+      "abi": 9,
+      "normalized_id": "d284c2e44100dd786b72a821fa071c0c2ccb5a4918c7c7489629fd2bd5f61348",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 9,
+      "normalized_id": "989aa7104125ee477af7d145df26bcdb8724988d70496c47072289cf7e47aefa",
+      "target": "Cpu"
+    }
+  },
+  "valid_numeric/compile_resumable_owned_numeric/Cpu": {
+    "before": {
+      "abi": 11,
+      "normalized_id": "b42a477160597bedf4f541381c18e2de29e42a16bce9f946f8c845d7b2acdf94",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 11,
+      "normalized_id": "506ea166f6be7d8c208a3ba6f14bf636e59db15dee8a6ce88c86eec647e10232",
+      "target": "Cpu"
+    }
+  },
+  "valid_owned_numeric/compile_device_speculative/Cuda": {
+    "before": {
+      "abi": 13,
+      "normalized_id": "2e1c51df9d3e2c2fb374c84ce71883cbf940bec16fce72e26a55476b558e5f21",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 13,
+      "normalized_id": "d18fa5cbaf4494893fb22277efc8621d616c47a323b446188e7df9cbfe7bc5a1",
+      "target": "Cuda"
+    }
+  },
+  "valid_owned_numeric/compile_device_speculative/Metal": {
+    "before": {
+      "abi": 13,
+      "normalized_id": "14d3c46fed1ae236624f26793536ab368fe3e3057be91b58c00d3fd5ba5b9622",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 13,
+      "normalized_id": "0c10ad3541e2ae430dfdd61d07e30da4fa7caafb2260bd1ebe2f2092a4d33f3f",
+      "target": "Metal"
+    }
+  },
+  "valid_owned_numeric/compile_owned_numeric/Cpu": {
+    "before": {
+      "abi": 10,
+      "normalized_id": "f4474488e0b1c2b1ccd947ee4fd69750aa7caebce0084f3712827dc7ea8e4a3b",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 10,
+      "normalized_id": "72e15896830dc9b73319865dd2bf46eeb6112c6fed1c4f99b83116c543a74c8e",
+      "target": "Cpu"
+    }
+  },
+  "valid_owned_numeric/compile_resumable_owned_numeric/Cpu": {
+    "before": {
+      "abi": 11,
+      "normalized_id": "0c46a9d4e43c36011e7b6bb5476b5988d6713888a719220f9a2dac1a765a2360",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 11,
+      "normalized_id": "ae78cc313c0f91fe90684b38f7dfba555824c90eaeddb79a6b0648c49993612a",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile/Cpu": {
+    "before": {
+      "abi": 1,
+      "normalized_id": "5b12dc989b68675121d34e221c302da48ac763abf7381a4868ec07cdd3fb8026",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 1,
+      "normalized_id": "fc2745554af47428086fcee029126fbb4262cb82d54e0401117d665fffb3433d",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile/Cuda": {
+    "before": {
+      "abi": 1,
+      "normalized_id": "a006845e8ad8b48d1266a3535345452396ff87206850c1ee5ac878cf748c34dc",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 1,
+      "normalized_id": "6d54fa6ef7abf08f19de7cc66beb02c91ce657cc5f00a48a7881f0b4c7138e18",
+      "target": "Cuda"
+    }
+  },
+  "valid_scalar/compile/Metal": {
+    "before": {
+      "abi": 1,
+      "normalized_id": "fe2b805c029aa2e2118e03c777b61cddd3463a9eb289badc93744599a490ebf2",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 1,
+      "normalized_id": "e2e75219fff6e2f653710eb19471fda01c66e1e6c6791a9c2f52cb3d3c2f55f6",
+      "target": "Metal"
+    }
+  },
+  "valid_scalar/compile_device_speculative/Cuda": {
+    "before": {
+      "abi": 5,
+      "normalized_id": "6ff2d94fe6f020cefb8b8e7895ad2fc10ca1c017fc484ed474e4457978dc615f",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 5,
+      "normalized_id": "f44c3ef3ee47fc8f01cd01f281e45e2742e6600b8f696c156d88bf61829456a6",
+      "target": "Cuda"
+    }
+  },
+  "valid_scalar/compile_device_speculative/Metal": {
+    "before": {
+      "abi": 5,
+      "normalized_id": "dd4e60eb4feb3dbd1844b91aecd5ce9acc2a5c32085f4d6d9458cc4e4420e748",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 5,
+      "normalized_id": "613303863f6cbcfc957a3a0b0d7d8c4c45c42810ac5435c703a427eec7238786",
+      "target": "Metal"
+    }
+  },
+  "valid_scalar/compile_numeric/Cpu": {
+    "before": {
+      "abi": 8,
+      "normalized_id": "97d8c1aaebbee8677693415b59ee96b911f22a66372624cc24a52a2a19b6931e",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 8,
+      "normalized_id": "168a1f1ad3972b1567f9e706e296d816b9efe68f3c1f2d9be9b506d3391b2662",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_owned/Cpu": {
+    "before": {
+      "abi": 2,
+      "normalized_id": "da2f47454c83eef1be69bb644b1581be468e69977ad071e0613305aad09e9f1b",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 2,
+      "normalized_id": "b92ddf767ddafaaa021dd1dbded99ac1c495c56d04454d92d28054120ef6c98a",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_owned/Cuda": {
+    "before": {
+      "abi": 2,
+      "normalized_id": "958c5c7d4e95f2d1231513ce0e66daf8d9ca1a4ce5d6b537be03a88ab54a6b92",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 2,
+      "normalized_id": "e9bfaf90c64809846e93d54fdf4090ffc3f46c299f81411a0d070944e4e3f4c8",
+      "target": "Cuda"
+    }
+  },
+  "valid_scalar/compile_owned/Metal": {
+    "before": {
+      "abi": 2,
+      "normalized_id": "a3f6c4086d9d10e31c15a5341796785fe80edbcc3f01f4e54da5a01d94576a83",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 2,
+      "normalized_id": "291d10837897ad2dc306e069b88f719d05cbd4f541fbda6b84232eda4d1c09d6",
+      "target": "Metal"
+    }
+  },
+  "valid_scalar/compile_owned_numeric/Cpu": {
+    "before": {
+      "abi": 10,
+      "normalized_id": "b98e7b0947ece26ac5386826baec17b4976b8d66cb643c892be031d920dfc667",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 10,
+      "normalized_id": "5dd9087867c76c9169fa3974eaa1e32c93429b5a160cca8702c4316ba385388e",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_resumable/Cpu": {
+    "before": {
+      "abi": 3,
+      "normalized_id": "e905780363f6606401527cc466188118b786ec09d77a7327a97426b0c5aa40af",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 3,
+      "normalized_id": "45ce4c25f5185d7a1fbd7a3462fc4c5b3b44a9846008cf24bfb03ba5985df0fd",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_resumable/Cuda": {
+    "before": {
+      "abi": 3,
+      "normalized_id": "62b769ab703334dcb9a7c753b75e25489689ad521050a3d67887362df51793be",
+      "target": "Cuda"
+    },
+    "after": {
+      "abi": 3,
+      "normalized_id": "310cb9d2307fe163a24586bd55b68d4f93db657babb48251cdd7ea5945bc2958",
+      "target": "Cuda"
+    }
+  },
+  "valid_scalar/compile_resumable/Metal": {
+    "before": {
+      "abi": 3,
+      "normalized_id": "bce43f09f43ffe553900c7fa4db9a1a4b7bb3eab4badef6f22e2fdf1fdc05c73",
+      "target": "Metal"
+    },
+    "after": {
+      "abi": 3,
+      "normalized_id": "7ac9b396ac565780d02d216da6b5d9fb42177b15a8aa81df1bf8cecd7474b347",
+      "target": "Metal"
+    }
+  },
+  "valid_scalar/compile_resumable_numeric/Cpu": {
+    "before": {
+      "abi": 9,
+      "normalized_id": "bc04147e3aa27c5cd559b111920b8f9990d680abb3ae785ea3738de07b06469c",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 9,
+      "normalized_id": "ab847eb021834848a470dada92545d67d556614faeee2a10aa18464a622b0446",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_resumable_owned_numeric/Cpu": {
+    "before": {
+      "abi": 11,
+      "normalized_id": "996da819cefd693ee834f9cf2c784aeb8973b48490a5561d9b7c5ca360c9db4b",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 11,
+      "normalized_id": "6b2136ce94a45b5f9e51a772397089f5740f293ec5a32c5576c49f6b03d20951",
+      "target": "Cpu"
+    }
+  },
+  "valid_scalar/compile_speculative/Cpu": {
+    "before": {
+      "abi": 4,
+      "normalized_id": "422391ac43fdf4c0203620469b4667b39332c5229fbae6e5aa8b790517d5139f",
+      "target": "Cpu"
+    },
+    "after": {
+      "abi": 4,
+      "normalized_id": "acc6d752caa3d36ddbd3626b4dd6a6dfcdf13b6dc60dc7650071c530803afc49",
+      "target": "Cpu"
+    }
+  }
+}

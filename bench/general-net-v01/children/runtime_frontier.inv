@@ -1,0 +1,3 @@
+fn frontier(depth: u32, seed: u32) -> u32 { if depth == 0u32 { return seed; } return wrapping_add(frontier(depth - 1u32, wrapping_add(seed, 1u32)), frontier(depth - 1u32, wrapping_add(seed, 3u32))); }
+fn main() -> i32 { let result = frontier(2u32, 1u32); if result == 20u32 { return 20; } return 0; }
+fn fanout(depth: u32, seed: u32) -> u32 { return wrapping_add(wrapping_add(frontier(depth, seed), frontier(depth, wrapping_add(seed, 1u32))), frontier(depth, wrapping_add(seed, 2u32))); }

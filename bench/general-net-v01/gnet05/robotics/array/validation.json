@@ -1,0 +1,3558 @@
+{
+  "programs": [
+    {
+      "id": "gnet05ra-fk-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            4169699743,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "16ded66cef6f6cecc82660bb72ccaa062fc37d38d80e1923f67ccb2da1b8dd04",
+          "steps": 9057
+        },
+        {
+          "buffer_words": 264,
+          "input": [
+            2171784052,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 264,
+          "sha256": "584a3583378b37037823907c40a7c3e0c55f14b3d2b63444bbec98a5e9b1928d",
+          "steps": 17873
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            4017237213,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "495f3c139929ce064f7c1d72f0f1a099283bd3ea6fa64ab98fc1827b83544134",
+          "steps": 8992
+        },
+        {
+          "buffer_words": 4224,
+          "input": [
+            3980646413,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 4224,
+          "sha256": "270b13d8cb8dcd80179976d3e4eb22a9db5f510b74f64020a936ab26938f6f83",
+          "steps": 281835
+        },
+        {
+          "buffer_words": 33792,
+          "input": [
+            315591597,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 33792,
+          "sha256": "89b4273106181291056db270ca4dafa38448a367ff17301f06fe9b358da7fa6f",
+          "steps": 2253185
+        },
+        {
+          "buffer_words": 540672,
+          "input": [
+            3932396520,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 540672,
+          "sha256": "a110a563f5e49d04d4c60319d18d4cd8b6283938d318e6d51b62b94944e8b90a",
+          "steps": 36047134
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-fk-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            2182515878,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "d002676f284d99a4a8c22cfca6e168f0dce36b105898667a7c47359a5d1d271a",
+          "steps": 4964
+        },
+        {
+          "buffer_words": 264,
+          "input": [
+            3066899613,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 264,
+          "sha256": "ab41a24af1819866868d7fe68a1cc1f909e1a170d69184b0c90338b829b9a32c",
+          "steps": 9830
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            897198933,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "d8bf8712cdfae8fde4a883efcfb21ec32c9c3ab1d08e6ffc1d57acd7aeedfd29",
+          "steps": 4917
+        },
+        {
+          "buffer_words": 4224,
+          "input": [
+            2138088865,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 4224,
+          "sha256": "1cf9dfac8643bde3de7017d9fcd8fc875e4217ea0e0b19128eb891a8ac5b6a38",
+          "steps": 157088
+        },
+        {
+          "buffer_words": 33792,
+          "input": [
+            743824879,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 33792,
+          "sha256": "30a4e62102ee8b7f64d565e534f54cde3b53d6e0e5c91792da20de5184ae2427",
+          "steps": 1257020
+        },
+        {
+          "buffer_words": 540672,
+          "input": [
+            1270913031,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 540672,
+          "sha256": "2a30a259f0ab888d2f88db06d9c85b8e30a01463278d04cb89b78b7c5a7cb7ff",
+          "steps": 20113335
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-fk-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            50574050,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "014463d989fbd76b34040a78a9c220a851564e80badde583a1646958415560c0",
+          "steps": 5008
+        },
+        {
+          "buffer_words": 264,
+          "input": [
+            2539577600,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 264,
+          "sha256": "91a6838c4d9d47a37d6b9f33d3ccde63a78b93d81d3c1459f1e2fc10ca334148",
+          "steps": 9768
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            1412763234,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "944da2996f3a720b195e40e968904a89a33bfcc016667cc2d260bae7042ddfeb",
+          "steps": 4936
+        },
+        {
+          "buffer_words": 4224,
+          "input": [
+            2940994658,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 4224,
+          "sha256": "17dc293ceaa77e64f486823f9cb191a66b8b5ed52237e7a45474b828d96688a7",
+          "steps": 157872
+        },
+        {
+          "buffer_words": 33792,
+          "input": [
+            3766485435,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 33792,
+          "sha256": "14e85d1e15e36f7f8dd00c4bea4ff77e91f9d9c9ecf2dfb4ccb99600aefd4e40",
+          "steps": 1263766
+        },
+        {
+          "buffer_words": 540672,
+          "input": [
+            3732214280,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 540672,
+          "sha256": "dd04a6c700f45e2442195ee515e04e8ae78e6317ef7a409b25bd5aa6d231befb",
+          "steps": 20220213
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-fk-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            4007826198,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "85934e03753b8068ea8f595b767b1a3bf1759f16f5de828ccaa75c9c40a3544c",
+          "steps": 5860
+        },
+        {
+          "buffer_words": 168,
+          "input": [
+            1984995410,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 168,
+          "sha256": "540ad9614b9ac10b0bc8bb3ecfe87de37069e14e51a779f011d18f27961790f6",
+          "steps": 11737
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            615306560,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "e55b9516e1405ad9f909c534b85fb90ab1cace7e73b4dec258fd52a891b32902",
+          "steps": 5940
+        },
+        {
+          "buffer_words": 2688,
+          "input": [
+            618241471,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 2688,
+          "sha256": "ba9fb04ff877c423e13d45fe7b527ed94c16aa7bfe39cca0adca1ffc99dbe288",
+          "steps": 185596
+        },
+        {
+          "buffer_words": 21504,
+          "input": [
+            705087172,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 21504,
+          "sha256": "7504150a72b0be6521603cee8f2a6cf892d0d5d21b240229a4cc50137d3f2711",
+          "steps": 1482842
+        },
+        {
+          "buffer_words": 344064,
+          "input": [
+            1456621575,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 344064,
+          "sha256": "0da234ed3196ed9f71a431c5e69965559875122c19904c45d074e225a03e5c20",
+          "steps": 23721847
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-fk-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            1326936225,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "1ec178722ced9d93d17e24ffa64c86d126ae6ecf51cad3a430d0aee772de6afc",
+          "steps": 3452
+        },
+        {
+          "buffer_words": 168,
+          "input": [
+            1006902554,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 168,
+          "sha256": "c5d465ebe9db1fc2777bde1b0f1b3a323378b5494f73e6ad6b5643cd590e11ad",
+          "steps": 6886
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            3576410322,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "7904b2037e6c601d6e8ccae10b59e1495ba258986326496f0c024a8c15139156",
+          "steps": 3376
+        },
+        {
+          "buffer_words": 2688,
+          "input": [
+            3524676361,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 2688,
+          "sha256": "bc6963b4af939cdd06036a81bd2464873f6069f5d4b182f02e268801bfa7dac0",
+          "steps": 108687
+        },
+        {
+          "buffer_words": 21504,
+          "input": [
+            2302642669,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 21504,
+          "sha256": "f8375aced8a6a333faf91658f4c6e1c7f8b4a85b030075b02ced852132040ce7",
+          "steps": 870050
+        },
+        {
+          "buffer_words": 344064,
+          "input": [
+            3462174998,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 344064,
+          "sha256": "087e759fb6379c34eecd47f3e4e326e4f782e9700c85d92fb2b3268360308de4",
+          "steps": 13919926
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-fk-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            1814738548,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "b2a03cfc56d1ec91d34f9003fdf5c252e9d95090694c5b7235fd5f415e1fec5b",
+          "steps": 3418
+        },
+        {
+          "buffer_words": 168,
+          "input": [
+            3171360635,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 168,
+          "sha256": "e86f9d0c44fb0247e9acbed367a57bf271696d72a28821ab8a073384a3d036d4",
+          "steps": 6830
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            2780464448,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "08acd429cca3a24de7233624c1ba535f5984ae7e984c477c22760a021706cc41",
+          "steps": 3459
+        },
+        {
+          "buffer_words": 2688,
+          "input": [
+            1211967924,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 2688,
+          "sha256": "4e16b2beaf4247538292673db8764f86f9613bbea778c94c8da6fffb06cd2814",
+          "steps": 109267
+        },
+        {
+          "buffer_words": 21504,
+          "input": [
+            2362039090,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 21504,
+          "sha256": "4428468d5984596e9e8654e3e905430892ae0abffeeda5aa64b7bf71f852ab5b",
+          "steps": 873140
+        },
+        {
+          "buffer_words": 344064,
+          "input": [
+            1403376582,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 344064,
+          "sha256": "672651499e544962eba52b25a7d6c9579b7988326ff3c19ec04434b8ed13b04e",
+          "steps": 13968795
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-fkpre-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            1415356752,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "10e642925f8324d414e5640504a33e1d3958c1c3263cac8624573ab894b6aa76",
+          "steps": 8204
+        },
+        {
+          "buffer_words": 264,
+          "input": [
+            349832755,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 264,
+          "sha256": "4b6b3e25b3c708966eebc297ad842828ed9d31f0307823b0a7af376626f3fb8b",
+          "steps": 16199
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            2560935110,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "181eeb77c4fee40ed679cb0b7c125e4b7d403e7ba4765e9c081f2cff208e3bbc",
+          "steps": 8204
+        },
+        {
+          "buffer_words": 4224,
+          "input": [
+            3240495274,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 4224,
+          "sha256": "7c920686b1ef2300f2c53ee8f01904e66bee7b86d81d92b9fbb46c1e959f1c92",
+          "steps": 256049
+        },
+        {
+          "buffer_words": 33792,
+          "input": [
+            1045553236,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 33792,
+          "sha256": "e8b06cb5d853687239e800dee9d21082481e3eee973620414ec630dbed7e796e",
+          "steps": 2046929
+        },
+        {
+          "buffer_words": 540672,
+          "input": [
+            3530203829,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 540672,
+          "sha256": "2d0ea6299a2c77c8698cbd5cd12c25d6a1c1af95e9726de5edd7ec3153647263",
+          "steps": 32747729
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-fkpre-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            609170046,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "8ecdc9c35e7ede1cda595959a9b7f873a6c59e83c296e9fb1ba5431dc1668b03",
+          "steps": 4119
+        },
+        {
+          "buffer_words": 264,
+          "input": [
+            140025855,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 264,
+          "sha256": "19e7b5052c9cc5d56de62abe8ed81457f32464bbbcdc55c818caa464de0a3e38",
+          "steps": 8224
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            3939156573,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "4d73185799ec757c2ab9c4791ba6717dcec64de7c79f6ded481b2b49d0eb2add",
+          "steps": 4119
+        },
+        {
+          "buffer_words": 4224,
+          "input": [
+            338320643,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 4224,
+          "sha256": "648fb51ad7d5be7ee96dcee90fbc539510398d2bd08a97b2847e511e93cf8f8d",
+          "steps": 131374
+        },
+        {
+          "buffer_words": 33792,
+          "input": [
+            2157157998,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 33792,
+          "sha256": "83a1f77e34c74e3faa5ae6a0ac77021294f0b010069f8e235bce2c8e97f4ee4d",
+          "steps": 1050894
+        },
+        {
+          "buffer_words": 540672,
+          "input": [
+            3431914487,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 540672,
+          "sha256": "5d59820710666812edbdf7d131ae2f41ba2bcb3b56e58b7e3d8e4ade0d715c65",
+          "steps": 16814094
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-fkpre-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            4037895548,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "43cf15418a4e69b1879401def5e11316b5aa56d5b3b4b639da366509409e47e6",
+          "steps": 4145
+        },
+        {
+          "buffer_words": 264,
+          "input": [
+            2534188876,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 264,
+          "sha256": "75fd0fd6675257994407c109ac73c25400f346ad71b36347e54f2fd1c7ee592d",
+          "steps": 8276
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 132,
+          "input": [
+            2347307117,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 132,
+          "sha256": "d96ffc5c81094ea23b75f8dec65907c48eee947d430912bab8a98082cbba36f9",
+          "steps": 4145
+        },
+        {
+          "buffer_words": 4224,
+          "input": [
+            1227587829,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 4224,
+          "sha256": "b3715a17951944f63936ff58d605264197c90cda262a23e0312381fef521d67e",
+          "steps": 132206
+        },
+        {
+          "buffer_words": 33792,
+          "input": [
+            569550577,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 33792,
+          "sha256": "4cc45b6250e7b2fbcbc8bddb1ce65c73e1ec80c43376698cfaddcd17e47ead9a",
+          "steps": 1057550
+        },
+        {
+          "buffer_words": 540672,
+          "input": [
+            3264527378,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 540672,
+          "sha256": "662169df754124857b5fa743ee0c4b8043b00d7b75d5e55d83b928a6eae216d2",
+          "steps": 16920590
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-fkpre-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            3999058896,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "2249dc4745251329bf31baa0f7069e05051bd6b03de3cb7479140a8b79092de2",
+          "steps": 5149
+        },
+        {
+          "buffer_words": 168,
+          "input": [
+            3103687837,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 168,
+          "sha256": "c7d6ed7f6b7c63d88ee40a3bcd142caf8e1e7415e359c2dcb0e1728dc6850388",
+          "steps": 10164
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            3353138658,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "6d973e0580bbf319c3243d519c0e9e0c3fbc5a531640719dea62f162f92ae4b7",
+          "steps": 5149
+        },
+        {
+          "buffer_words": 2688,
+          "input": [
+            701132790,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 2688,
+          "sha256": "d93369b584258783ef56ca3b25ec0440544e5b6ef389fb8ae169d08abb71db06",
+          "steps": 160614
+        },
+        {
+          "buffer_words": 21504,
+          "input": [
+            938900882,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 21504,
+          "sha256": "c7a9b387ba8751fdd7197f798f79bb45b394a9b3d2f771b8a42b6addb1a514b6",
+          "steps": 1283974
+        },
+        {
+          "buffer_words": 344064,
+          "input": [
+            1909589069,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 344064,
+          "sha256": "ad3dcf320b68150acb6c03cbfdbe6788ebfe7bcfd9f07446cec201d7dcb04ebb",
+          "steps": 20541574
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-fkpre-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            814824954,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "e81b62c24aeaf7b9c3e6a0add8d41c0cdfe795265a883941faa36b7931ddf2de",
+          "steps": 2636
+        },
+        {
+          "buffer_words": 168,
+          "input": [
+            2546537121,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 168,
+          "sha256": "0d98eb09fcb814fba32a281a01dfd9b0149c2e7518a6eeca849c4c0f73fc6675",
+          "steps": 5258
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            2970221065,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "80f89deeaa32624e6e6345f0452705431b409966a728ce6cc7f869e46afce49b",
+          "steps": 2636
+        },
+        {
+          "buffer_words": 2688,
+          "input": [
+            1558224861,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 2688,
+          "sha256": "34804f7cc7d3371bc9cc7da6daa850649a986d47a2465a830bc2d9f08014d8ea",
+          "steps": 83918
+        },
+        {
+          "buffer_words": 21504,
+          "input": [
+            3641569985,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 21504,
+          "sha256": "a5872ae4d804f9f219b9da11fdfbbdfe3c9c419fdc24bf9b785ee584565e9e77",
+          "steps": 671246
+        },
+        {
+          "buffer_words": 344064,
+          "input": [
+            331813142,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 344064,
+          "sha256": "409459a7efab06e02402a36c996dce2395b791559920c21067e2e4aca7c0b76e",
+          "steps": 10739726
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-fkpre-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            3495884297,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "c1a175e69738250e410d2e9eecd61e3797868d9098a10ac9938a218ef5a50b77",
+          "steps": 2648
+        },
+        {
+          "buffer_words": 168,
+          "input": [
+            88803765,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 168,
+          "sha256": "0a03370726d27b2b5630c19864e35d43c68ad3e8bde0dc6fc5e2f316b5b8f222",
+          "steps": 5282
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 84,
+          "input": [
+            2466375758,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 84,
+          "sha256": "f951798ebff3f29bbe2d88e51df2f47cf9b39dcd5923ae8cdcbd548afadd03ca",
+          "steps": 2648
+        },
+        {
+          "buffer_words": 2688,
+          "input": [
+            3946639226,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 2688,
+          "sha256": "8cd9ad851b7b09c7871dd743f962d32b14f95551b3daeca910cef54b9be4dd4e",
+          "steps": 84302
+        },
+        {
+          "buffer_words": 21504,
+          "input": [
+            777212767,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 21504,
+          "sha256": "0a28c702300f94ff8738d250421a942f51c5b496268e7a4499f3afa8e367cac5",
+          "steps": 674318
+        },
+        {
+          "buffer_words": 344064,
+          "input": [
+            3041443539,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 344064,
+          "sha256": "ea4a55769d4edd56722fd6043a44bcd5db514e4cc4af3b92b2f17ebf73210693",
+          "steps": 10788878
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-jacobian-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 42,
+          "input": [
+            765504835,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 42,
+          "sha256": "4a56c772e3e5747001e3f5050f5812ad4312a48f4c24bfab1382f23a0478621c",
+          "steps": 10079
+        },
+        {
+          "buffer_words": 84,
+          "input": [
+            2071175834,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 84,
+          "sha256": "110a1b2dda45f4c74db212cd9147bbf638cabe7ad9f4080f94dc5fac620ed020",
+          "steps": 19909
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 42,
+          "input": [
+            1645720980,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 42,
+          "sha256": "59f6bbad59cfc9e5448b7f1dee38f94ea0232db8bbb28346145ac1bff87e2870",
+          "steps": 10044
+        },
+        {
+          "buffer_words": 1344,
+          "input": [
+            1052970216,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1344,
+          "sha256": "b3d5e97c8514dac3d28c6f7c4fcc9880724a873eae6510c4174abcc123fc4348",
+          "steps": 315548
+        },
+        {
+          "buffer_words": 10752,
+          "input": [
+            4259327323,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 10752,
+          "sha256": "889a8bc7ec48de3580242f3fcdf6246a601066e071ce2b1952862a861e8e23ab",
+          "steps": 2522229
+        },
+        {
+          "buffer_words": 172032,
+          "input": [
+            3772855847,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 172032,
+          "sha256": "92562d19dd65b859b5e245565de7a12a0bfe11e3fe68aaca2ff75432b2ef2047",
+          "steps": 40352292
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-jacobian-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 42,
+          "input": [
+            2213051996,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 42,
+          "sha256": "48e6e588179b5a9a56c264d78e8b8cd54d5b9cfc82f9ce1fe931fe7c51ce2ebb",
+          "steps": 5997
+        },
+        {
+          "buffer_words": 84,
+          "input": [
+            1669843957,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 84,
+          "sha256": "59fb2740bcb82f6841bfaf07325c8881aea1d48c047cb554e2d057060f460681",
+          "steps": 11953
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 42,
+          "input": [
+            1758619582,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 42,
+          "sha256": "b04a7bee057c72525b2e134d11ebdb91218ca9a5ef3dba6b1f8596859f9a3374",
+          "steps": 6010
+        },
+        {
+          "buffer_words": 1344,
+          "input": [
+            2598926992,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1344,
+          "sha256": "92a4dfefa56758943246384928d2d73060e28b00c288e4c5d69ded87fd1171b6",
+          "steps": 190811
+        },
+        {
+          "buffer_words": 10752,
+          "input": [
+            3641379771,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 10752,
+          "sha256": "d2befb3542739861e059f7e34b69270ede23f2df00f752c7e5d398ce7ca26ce6",
+          "steps": 1526086
+        },
+        {
+          "buffer_words": 172032,
+          "input": [
+            1575570499,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 172032,
+          "sha256": "46d08f046460bfcecf5eb83bd44dcb0581680e2e394b7c73e43cc9ccb6e1cd2f",
+          "steps": 24418593
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-jacobian-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 42,
+          "input": [
+            1385288131,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 42,
+          "sha256": "8236ac10d09989f68acee26663209347e357cfac62477952dfaa13051db2c4cc",
+          "steps": 5983
+        },
+        {
+          "buffer_words": 84,
+          "input": [
+            851805559,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 84,
+          "sha256": "149eab870362123fdc0474e629a62e69abbe7c4790daa6e34fb57b7333d06e65",
+          "steps": 11974
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 42,
+          "input": [
+            587575578,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 42,
+          "sha256": "87fe9369c0df808d6ff45bc6f053300cc084a2bbebb82f740942a02e183ffeeb",
+          "steps": 6015
+        },
+        {
+          "buffer_words": 1344,
+          "input": [
+            1085197094,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1344,
+          "sha256": "0876b500429a002fcf28ab8319fd3c9d6e2471bf3ab0cd32fb3aec1f5c1acc1c",
+          "steps": 191721
+        },
+        {
+          "buffer_words": 10752,
+          "input": [
+            3965003673,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 10752,
+          "sha256": "c70d7798fe9aeb6113fc1b94856f7a2833ee500252c4e5e90f54fce5231540ab",
+          "steps": 1532786
+        },
+        {
+          "buffer_words": 172032,
+          "input": [
+            1753285472,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 172032,
+          "sha256": "8adfeb41521494447e9d78d80163059f3ec1fe0d70e8ad8946ca223665be0093",
+          "steps": 24524943
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-jacobian-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            4094883038,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "8c1add533b37ce9df40b4eb5d24cb79c1c665dc740c9bb3ed4b39d1999f36023",
+          "steps": 6809
+        },
+        {
+          "buffer_words": 72,
+          "input": [
+            804024818,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 72,
+          "sha256": "cd84bf6f89e3dd24fd8aa19d92f83462111fb50e6f0879cef9a56331ccf5e765",
+          "steps": 13553
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            3086559267,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "61d0508a5a3d1bc777210500a31902a3af66ab13b07691f9a367d6aae4cfab32",
+          "steps": 6849
+        },
+        {
+          "buffer_words": 1152,
+          "input": [
+            4164745936,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1152,
+          "sha256": "1dcc754d084d04cefc02c56e032271bb24e1875c99789cad3af77c6511197a4f",
+          "steps": 214963
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            3155274769,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 9216,
+          "sha256": "11f470a7178d6d6fa96ddd66c8addad0e30a7224920ceb172172f756befb41da",
+          "steps": 1717940
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            2394176531,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 147456,
+          "sha256": "014a93435177ebc36b6fa2d42b422f14435d20477b55dd3d13d513c478fad6a0",
+          "steps": 27490177
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-jacobian-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            248161617,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "c5f0e07a6587a69e8485a4c62f99870fbbec988b0e440055ceabeb31f88f9bac",
+          "steps": 4336
+        },
+        {
+          "buffer_words": 72,
+          "input": [
+            2518356587,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 72,
+          "sha256": "b51dfbdf87259f206ca8ebc3242c0d8b3e0a55d5ea53c9727d278b8759833f3c",
+          "steps": 8593
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            477782462,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "8afdc48ee3be7e8829795d81a709c0d02c53b1444473a3f2b8904f8c687415db",
+          "steps": 4370
+        },
+        {
+          "buffer_words": 1152,
+          "input": [
+            24545389,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1152,
+          "sha256": "6870a2de80a1646c66ce5a7a808acf2f26f837e57bc94145967c0abc588b8579",
+          "steps": 138070
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            503313491,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 9216,
+          "sha256": "afca4e0ef590f639e2dfa03deedccbb5e207b94adf12248a97acb0bf27665eb2",
+          "steps": 1105270
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            2496768879,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 147456,
+          "sha256": "4ef04992c4e3e40bcb29e6c23f8483b7872c447a7bda4d441883ba922079f59f",
+          "steps": 17689082
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-jacobian-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            2959305266,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "c6ec8ee0633f9b7f583c4223e443911cf6f5e960808cb869a7ca7691ed8c7ffc",
+          "steps": 4410
+        },
+        {
+          "buffer_words": 72,
+          "input": [
+            2871363664,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 72,
+          "sha256": "fcb290cb7bf31ce8db722008597e4d8ddde7b384ef2c05103389cfcc9a3b2c8d",
+          "steps": 8569
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            2000433140,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "e5c2d13085f15dddfe1df532e9a4115b6461d126d678842882cbd528ed44030c",
+          "steps": 4439
+        },
+        {
+          "buffer_words": 1152,
+          "input": [
+            4172101692,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1152,
+          "sha256": "683d14b42c827088b6420e51ac900bb1abf8326d6d9dec82b005d0b2976eb3f6",
+          "steps": 138699
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            2622020824,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 9216,
+          "sha256": "722b37f5f6ae2723c460959f051e374bc24fc9b88286687b868239053a7c853b",
+          "steps": 1108881
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            3615739954,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 147456,
+          "sha256": "b5334ac7cccca3702ccf9ca3b8f8c1fffc4862515d84b81d2cd527b516533304",
+          "steps": 17737952
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-mass-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 49,
+          "input": [
+            692686222,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 49,
+          "sha256": "3c411fc52fa0b6e502d6b2d91a9e49ab716f72e9addbf9c51636f67db35d3f64",
+          "steps": 73867
+        },
+        {
+          "buffer_words": 98,
+          "input": [
+            1275117157,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 98,
+          "sha256": "fcdd26b701c46b9719c8da425d128f2e7d9e82bf6f8dbdab9a5fd29fc33084d2",
+          "steps": 147205
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 49,
+          "input": [
+            3531747826,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 49,
+          "sha256": "2cb57b8f47877c5a8b8ed04fd97dd1987b5ac23c4ce36ff6ee16f5f2c04350f2",
+          "steps": 73837
+        },
+        {
+          "buffer_words": 1568,
+          "input": [
+            993759331,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1568,
+          "sha256": "5a4258c063877d7e35c0df485a051c4d15d49457fb8e0e41fbbfa3fa098d88c1",
+          "steps": 2347496
+        },
+        {
+          "buffer_words": 12544,
+          "input": [
+            3536939643,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 12544,
+          "sha256": "98e42da1f1a891f1c0b33164de91c5b299c8eb70b56a7430f8dad4e0e8d97c5f",
+          "steps": 18776070
+        },
+        {
+          "buffer_words": 200704,
+          "input": [
+            1680316474,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 200704,
+          "sha256": "0f47caf4803d2c6cceb726b5d7d5586396479efec0669d780de2242035130478",
+          "steps": 300407177
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-mass-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 49,
+          "input": [
+            1621719888,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 49,
+          "sha256": "62e121790e3c5ab0fcfcac22f4676517d73e22f1a0ec3b4459a3a1152db6c3c1",
+          "steps": 69738
+        },
+        {
+          "buffer_words": 98,
+          "input": [
+            3154802341,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 98,
+          "sha256": "5c686790ee770a7d4446a170f6a2dc17495aa4ae0e17f578a77b51eefd78a3c6",
+          "steps": 139236
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 49,
+          "input": [
+            1724232833,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 49,
+          "sha256": "450cc89c73c62e0cc88218c1c62bef85d59df3fd557744044d4fbc5a9771fd75",
+          "steps": 69804
+        },
+        {
+          "buffer_words": 1568,
+          "input": [
+            1960196584,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1568,
+          "sha256": "1c99d0ec7f209f02581330fe49db3ab7b35fb9dc7b83f691f7c7a8c116081dc1",
+          "steps": 2222878
+        },
+        {
+          "buffer_words": 12544,
+          "input": [
+            1946821264,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 12544,
+          "sha256": "b32edcfa3437ab95722f7d4e63f35850d38f6f409b4bacc2ef5185d6fca16dd9",
+          "steps": 17779921
+        },
+        {
+          "buffer_words": 200704,
+          "input": [
+            3204282877,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 200704,
+          "sha256": "fe52736f0e44f9360bc0d2653459a7f240c084db79776b4a058406b12a199947",
+          "steps": 284473490
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-mass-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 49,
+          "input": [
+            180374783,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 49,
+          "sha256": "c722fcc8a2cc9a4d9cb1e20c343bd1e8dbff7e837fba1a73ee1988fa640d326a",
+          "steps": 69826
+        },
+        {
+          "buffer_words": 98,
+          "input": [
+            2713170353,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 98,
+          "sha256": "a67ae3b0af88f9c40da3c68df3a51af1c2b94205c9181b8cecf8e5b51b3d8202",
+          "steps": 139245
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 49,
+          "input": [
+            4264010305,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 49,
+          "sha256": "41339e907ef7d828edaae015f0a692e8f0a2e8388789b8bd91a1f1831568dbe7",
+          "steps": 69824
+        },
+        {
+          "buffer_words": 1568,
+          "input": [
+            3347297017,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1568,
+          "sha256": "148b4ec9af73d9eb8115a72b743542c5c729ead947b039e6b0383a9f11c5eb14",
+          "steps": 2223642
+        },
+        {
+          "buffer_words": 12544,
+          "input": [
+            2972164475,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 12544,
+          "sha256": "8fc3e29da6f069d7cf61e37657ae5f4054c7b01dcf9785c95e8baad700a4705d",
+          "steps": 17786491
+        },
+        {
+          "buffer_words": 200704,
+          "input": [
+            1662167237,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 200704,
+          "sha256": "3ab0ed20ec7e4de65efa282ea28b835e4990902fef79738b6c97fb8fadc63508",
+          "steps": 284580012
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-mass-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            1073326760,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "fbc9efaff52e58db7e8ddfe1f8a3f9af1d9044f00c8205a845a856571a82276c",
+          "steps": 35170
+        },
+        {
+          "buffer_words": 72,
+          "input": [
+            2438165614,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 72,
+          "sha256": "454682473a18d9206843b02d34afa18fb5afbf197592f84f8cdc408e2ca9d7c1",
+          "steps": 70155
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            83263683,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "4ae365664e9afa165f8a1872067f0a221d96cb5bf8e785cb3f09d1f81d721be2",
+          "steps": 35211
+        },
+        {
+          "buffer_words": 1152,
+          "input": [
+            1706682971,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1152,
+          "sha256": "f719f3f8a1eaf9d8133eaeda5bc2d3ebdfb2e4c2be03c2dde5b6032547faa152",
+          "steps": 1118009
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            1912870716,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 9216,
+          "sha256": "c256aa9682d7830aca5ded63df401a154977b7c0649f09be14cff0bd6641cae8",
+          "steps": 8941080
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            2448936502,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 147456,
+          "sha256": "eb1d1b2485e1e9d18c8a294232b8ddd67cbc78b474d74adbb21b80dd157a51a4",
+          "steps": 143051355
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-mass-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            2293476564,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "37fc1978644795af74fdb75c346409fec9ee662ed5ea5ed8b40d8f84896bd459",
+          "steps": 32758
+        },
+        {
+          "buffer_words": 72,
+          "input": [
+            3510231532,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 72,
+          "sha256": "8f93b351a60b4f9d672ff3fbcd012e4beb47435363341ad9295496945c20472d",
+          "steps": 65129
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            4026140050,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "da493c816ca4507ec57578e4b098023ada62d26411b7e739364beff7693a2930",
+          "steps": 32747
+        },
+        {
+          "buffer_words": 1152,
+          "input": [
+            3275088091,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1152,
+          "sha256": "e871b8699df7801ac5d9e013410f7609d0b16ce169ad5ebf7b2fc9b5971eb649",
+          "steps": 1041229
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            2880727636,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 9216,
+          "sha256": "57383f5d873b58ef526415a71f6f9a783e2e4ad1222a5145ad036c153949b181",
+          "steps": 8328310
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            1786969504,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 147456,
+          "sha256": "f83c2e5c486ce0ea6cff6af51c8bfae360a1d45dd5cbcdbb1ee1da2d0a271eb8",
+          "steps": 133248510
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-mass-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            3954519430,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "f4e182edd01a087c09a0b44390b754011820f1c7b7809d4fd5e95df92216755a",
+          "steps": 32697
+        },
+        {
+          "buffer_words": 72,
+          "input": [
+            1632535477,
+            2
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 72,
+          "sha256": "a49b2a944b7e9cd6c5e32379a823ed95fb7c4de626b926051a397a6b9dbc9abb",
+          "steps": 65188
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 36,
+          "input": [
+            3106525893,
+            1
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 36,
+          "sha256": "f9ea726b61abd1b83f68dc94483e838e69d3194241cae455c645cf186f22dca9",
+          "steps": 32793
+        },
+        {
+          "buffer_words": 1152,
+          "input": [
+            2850430460,
+            32
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 1152,
+          "sha256": "05160a0df08c061b36c71dccdecbb04fc2bae5ae5a4008207705a401804199fb",
+          "steps": 1041456
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            901655495,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 9216,
+          "sha256": "a282a49a532e6418375ee48789ff4872fc5bd77ee328a5160e2e57d9be7b7571",
+          "steps": 8331312
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            901233506,
+            4096
+          ],
+          "result": "Ok(U32(4096))",
+          "seed_words": 147456,
+          "sha256": "f4a69edfeb7aadadffd15a4d3ba76d0909e7182257c0e2ec72e4666268f225eb",
+          "steps": 133298825
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-collision-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 18,
+          "input": [
+            985988882,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 18,
+          "sha256": "4b51e6f57ec8b651b0886efb1ef1807acb936c8a4f81a2e259c4330ff00868f4",
+          "steps": 14974
+        },
+        {
+          "buffer_words": 54,
+          "input": [
+            2051393333,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 54,
+          "sha256": "a16208b90705b3e4af2359f529c1288d2361bc53965428831efa423867b5aff4",
+          "steps": 35457
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 144,
+          "input": [
+            3924131418,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 144,
+          "sha256": "ee944867b87be02a843d7ebd1e8982ae2ed354955d69b22cb9919b673f0d9759",
+          "steps": 57964
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            2098687021,
+            64,
+            16
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 9216,
+          "sha256": "8e7762d0ef04cad415d3710438ac5980c28091544bb32b6f15de44a289353a71",
+          "steps": 3664708
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            1622463167,
+            1024,
+            16
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 147456,
+          "sha256": "5bc5d33b6e7fb4e998fb01f3c843e28d8ffcbb2aed03bb1f3c694a7371417ade",
+          "steps": 58172300
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-collision-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 18,
+          "input": [
+            1901246420,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 18,
+          "sha256": "b0f34eed613c16eac45cc4bf0e572ca2c75bf7aa20bc3768deb437e5a51f5db7",
+          "steps": 12393
+        },
+        {
+          "buffer_words": 54,
+          "input": [
+            391054925,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 54,
+          "sha256": "e14d850a73fc1c2f7d4819cd4afae4f0654630ca409eb63e5acbc941ad5c5d30",
+          "steps": 30775
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 144,
+          "input": [
+            467290354,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 144,
+          "sha256": "ae7194d2cae24c5ae419e97031960afe1581a02bd0aaec58147deaccaa22c4b2",
+          "steps": 54891
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            3061724729,
+            64,
+            16
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 9216,
+          "sha256": "0759082a5752bb9458348716e7ebabe8a4903ddf148d6bf424caa4cf49ca5888",
+          "steps": 3476877
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            4100302610,
+            1024,
+            16
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 147456,
+          "sha256": "483e41ce63f44ddde1b649992168c5b75fa05b6ab3cf55f06fc5a05a4febbab1",
+          "steps": 55846458
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-collision-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 18,
+          "input": [
+            4162351033,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 18,
+          "sha256": "2bdfa826e3daea0c85831c4e08b4b770fa26ffebdca7fbe1948819f616f7809d",
+          "steps": 12325
+        },
+        {
+          "buffer_words": 54,
+          "input": [
+            2782895139,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 54,
+          "sha256": "08b424fba5d96d506e299d7b374b0b0dec5e20461af64fe4d23ca3e3e19604b7",
+          "steps": 30467
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 144,
+          "input": [
+            594694942,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 144,
+          "sha256": "c7756506201670b4b5f31ec3b28e0e28166ed2f9d5ee29a4d5ca4fa29c5606f2",
+          "steps": 54185
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            2124074389,
+            64,
+            16
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 9216,
+          "sha256": "35b23b03ed6020a5063e100c55022d8b5b69b23c02f7e74ce8bf82986a1abd41",
+          "steps": 3509118
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            3316838933,
+            1024,
+            16
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 147456,
+          "sha256": "1026ad269f265660fb64b98b699c081bb3046db151d7f39f73946c4e5a5fc944",
+          "steps": 55866364
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-collision-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 18,
+          "input": [
+            3206282213,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 18,
+          "sha256": "3dcabf83f02aa7be453e9c7ac78de85b88638de4e2fc98595e4b767ae96df1e2",
+          "steps": 14211
+        },
+        {
+          "buffer_words": 54,
+          "input": [
+            3935642406,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 54,
+          "sha256": "8ea1681a2dda54a7d30977279f35deff83786b0ad2cc3a2bafdc0f622fe4cfdb",
+          "steps": 33798
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 144,
+          "input": [
+            4247704814,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 144,
+          "sha256": "7d70667d3a287069a495d22bed88a0dddb7e65b10a457b81ed53e6cf2a44fac9",
+          "steps": 56522
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            3139120457,
+            64,
+            16
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 9216,
+          "sha256": "289632d820cbcd0fd77c785808a2ae5f33deca1b98b58e410b84fa2a424bc3df",
+          "steps": 3581257
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            1150517840,
+            1024,
+            16
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 147456,
+          "sha256": "72a6266b096cc706a676bd07488b2125fa9a9494f0eb933b1daeff7f486ee1fd",
+          "steps": 57043375
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-collision-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 18,
+          "input": [
+            694284661,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 18,
+          "sha256": "5211dc4d322b612a78654397f9ed05b60a65fbfbe7003d416ef4148dcafe9a1c",
+          "steps": 11416
+        },
+        {
+          "buffer_words": 54,
+          "input": [
+            4099860861,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 54,
+          "sha256": "3c9caa56827a8d28a3040240b1944b73b886c09e856586655084139791af2072",
+          "steps": 28831
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 144,
+          "input": [
+            1087178733,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 144,
+          "sha256": "3a9afd2b1c062746f3f28afa1cb82a76199606026beaffb49452467ce79b1119",
+          "steps": 53482
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            1327588013,
+            64,
+            16
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 9216,
+          "sha256": "1334c50a44c3789a0450350278276824382aa88589ab1da916222360609b65d1",
+          "steps": 3423750
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            2239275977,
+            1024,
+            16
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 147456,
+          "sha256": "1687d0de05c664eadf8356aabb39d5d52da62b6a22883d0fde99bb80119b766d",
+          "steps": 54949097
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-collision-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 18,
+          "input": [
+            3734213376,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 18,
+          "sha256": "dec310b9dd83cf360ca281bd0df8f42a5b6de970385e8ea8619f7a33d150ae84",
+          "steps": 11592
+        },
+        {
+          "buffer_words": 54,
+          "input": [
+            2152521056,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 54,
+          "sha256": "c7bc19dfe172432fd6ea4c9ec8539328b9865e9977952fa3b06c2fc9df04d98f",
+          "steps": 29150
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 144,
+          "input": [
+            3715722520,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 144,
+          "sha256": "8bd583d6a4891eda92b9ce6a1dfd908eb7c27942f7bd4ca1a66fc610af650a06",
+          "steps": 53310
+        },
+        {
+          "buffer_words": 9216,
+          "input": [
+            3274305570,
+            64,
+            16
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 9216,
+          "sha256": "6a646690a6bdc1cc6b04b7917092580878d34405b5ef8f7b54fdb5e5bada79d7",
+          "steps": 3415760
+        },
+        {
+          "buffer_words": 147456,
+          "input": [
+            1956751564,
+            1024,
+            16
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 147456,
+          "sha256": "1fd6887df6ab35e5854ed12d20419f7e0184bb4ea9c5a72a8fb44a98ffa93d87",
+          "steps": 54825700
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-rollout-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 16,
+          "input": [
+            3802166675,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 16,
+          "sha256": "2870860e70ceab0f7eab7b339d67f8bb2860ca54eb6969c288ac8f294d7deaef",
+          "steps": 19016
+        },
+        {
+          "buffer_words": 48,
+          "input": [
+            2549433116,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 48,
+          "sha256": "551ea21efea4c1bf95b1c0f9fed1dce02f8574c4920cb55746bbd5f7a3330530",
+          "steps": 56653
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 512,
+          "input": [
+            967278386,
+            1,
+            64
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 512,
+          "sha256": "cabd9850a3e1eae848809cd1f0b8ed0289d2c835ac0c406dffc2a583cc296e42",
+          "steps": 597732
+        },
+        {
+          "buffer_words": 16384,
+          "input": [
+            3573556095,
+            32,
+            64
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 16384,
+          "sha256": "cba4df1d67f47b37de88234195adf7e720787d1a5882e85fdb672b2a5743c2eb",
+          "steps": 19128932
+        },
+        {
+          "buffer_words": 131072,
+          "input": [
+            546760995,
+            256,
+            64
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 131072,
+          "sha256": "dcb77d046862eeff73fbcc19fdd2bbd0c8614e27c04585a114043eb53525fc0f",
+          "steps": 153056273
+        },
+        {
+          "buffer_words": 2048,
+          "input": [
+            1766119085,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 2048,
+          "sha256": "4062147ebfb8b7cfc81a3433c87a7ba45615c514b8a4f03d91f5e14efac95776",
+          "steps": 2408504
+        },
+        {
+          "buffer_words": 65536,
+          "input": [
+            2622038981,
+            32,
+            256
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 65536,
+          "sha256": "d77608a06821ee6f13fde06c6d175d12f8726ff6d9c3bb1fcfa1419b915cd828",
+          "steps": 76522653
+        },
+        {
+          "buffer_words": 524288,
+          "input": [
+            4010902892,
+            256,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 524288,
+          "sha256": "d8f2e4dda5801c15ca0863939266b18dc0c8aadf943571f531a8f1813bf2365b",
+          "steps": 612136113
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-rollout-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 16,
+          "input": [
+            1890228921,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 16,
+          "sha256": "254b71ad462058760fb09fa114cd978a4efee9038a2a44b1eb955090ee285002",
+          "steps": 11135
+        },
+        {
+          "buffer_words": 48,
+          "input": [
+            1939324005,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 48,
+          "sha256": "c9c65202619028a60e99569ec3b9832c6ae5ff7f010a8b13a2ae5a77df9f30d8",
+          "steps": 33052
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 512,
+          "input": [
+            2045648436,
+            1,
+            64
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 512,
+          "sha256": "602d18afe0aaf19f219630c9c7cd19f80faf3dc61fe8358aab86eb1e9da9c34e",
+          "steps": 349473
+        },
+        {
+          "buffer_words": 16384,
+          "input": [
+            563250920,
+            32,
+            64
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 16384,
+          "sha256": "aee5dc891ca0a9a1fc4ba81e89220b0fa3c5475701234d77eeda6e70a753734b",
+          "steps": 11164338
+        },
+        {
+          "buffer_words": 131072,
+          "input": [
+            911803115,
+            256,
+            64
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 131072,
+          "sha256": "dee2581d8f093133cb58df50448e0d14ef2c70d534a867652f52fb8146af85d8",
+          "steps": 89328868
+        },
+        {
+          "buffer_words": 2048,
+          "input": [
+            2464999434,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 2048,
+          "sha256": "f26783be5c1a911d412e7fcd834d1194316a712c677c7ecee808187b0f4c1e3f",
+          "steps": 1400409
+        },
+        {
+          "buffer_words": 65536,
+          "input": [
+            832945250,
+            32,
+            256
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 65536,
+          "sha256": "bb1e6a62d26104df387ebc48378238f76595bcbb7aecb1f808302eb536f7bffe",
+          "steps": 44643132
+        },
+        {
+          "buffer_words": 524288,
+          "input": [
+            2797386,
+            256,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 524288,
+          "sha256": "4985e799e55680f7b844d038e401201e2953369cf82ec4eb9a0f62020cc428d4",
+          "steps": 357233429
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-rollout-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 16,
+          "input": [
+            2553455368,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 16,
+          "sha256": "f000ee03cf4bd971a44658606697535af301a2b2c555429886326b0245a95617",
+          "steps": 11041
+        },
+        {
+          "buffer_words": 48,
+          "input": [
+            1303336680,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 48,
+          "sha256": "04003fb763967d15e23edf37d02fcada2c131335b38e2fb9e71a090cf495229d",
+          "steps": 33295
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 512,
+          "input": [
+            4218779798,
+            1,
+            64
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 512,
+          "sha256": "05da8c46bf3131ca2c9c24d8ccc3ba06d162021c947f1fbe83a689500ee75d4b",
+          "steps": 348675
+        },
+        {
+          "buffer_words": 16384,
+          "input": [
+            68103974,
+            32,
+            64
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 16384,
+          "sha256": "ebdcbf6555162065e59063ab391035591f81f7549fb1b97f5c097866f2087c38",
+          "steps": 11228309
+        },
+        {
+          "buffer_words": 131072,
+          "input": [
+            520816958,
+            256,
+            64
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 131072,
+          "sha256": "593ad29cfd457b423f634991331666074a7fe1c86cec0f2248799feb856fd079",
+          "steps": 89756290
+        },
+        {
+          "buffer_words": 2048,
+          "input": [
+            2711694006,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 2048,
+          "sha256": "6f4757cff5e5a390a19e5e5f06a89505c3a43970229aa13807a23fc6f77ec12b",
+          "steps": 1392138
+        },
+        {
+          "buffer_words": 65536,
+          "input": [
+            3325361273,
+            32,
+            256
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 65536,
+          "sha256": "d97cc1ee6f84b9e2d3b5fb464a9b14ac1751a5d5f08218eeae242255bc5d5294",
+          "steps": 44857522
+        },
+        {
+          "buffer_words": 524288,
+          "input": [
+            1710987066,
+            256,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 524288,
+          "sha256": "093d7f352c4256e96dc0e03790567ef458418643e8549f49cf4492f92a743a2e",
+          "steps": 358909923
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-rollout-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 14,
+          "input": [
+            3119089798,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 14,
+          "sha256": "e7d43b8ebb6dee1fbd115acd64ea392d1353e7ca60dd2f74e30cf7b3f3944862",
+          "steps": 12914
+        },
+        {
+          "buffer_words": 42,
+          "input": [
+            3008525851,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 42,
+          "sha256": "dab91b9636a2d9797034033de616e8d1bb2ecfaf76d8250b96db540f7a7644f1",
+          "steps": 37492
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 448,
+          "input": [
+            3692065645,
+            1,
+            64
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 448,
+          "sha256": "a0766f77047a438509fe94cf7a03b653c987dbce22ed8559395c6df8e063a457",
+          "steps": 401928
+        },
+        {
+          "buffer_words": 14336,
+          "input": [
+            1239242953,
+            32,
+            64
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 14336,
+          "sha256": "128c9ba29e04c98d90c18fd1d25e835ad177ee4ec41f9fd10835e4867100bd8a",
+          "steps": 12874787
+        },
+        {
+          "buffer_words": 114688,
+          "input": [
+            4018072848,
+            256,
+            64
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 114688,
+          "sha256": "0e1898d998be46b952271172e74149ce4b56b1a4a52ca7cbda83d8e5ebe4ce1c",
+          "steps": 102864662
+        },
+        {
+          "buffer_words": 1792,
+          "input": [
+            1306891456,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 1792,
+          "sha256": "91a47d9e6d020f6d729e892615425a59542a0f99651efb0cf24865173b59a43a",
+          "steps": 1619156
+        },
+        {
+          "buffer_words": 57344,
+          "input": [
+            1729502389,
+            32,
+            256
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 57344,
+          "sha256": "30626da26d882c9bb33186d353c78c40df10b8a71b83735a597823d9ce9c2338",
+          "steps": 51395014
+        },
+        {
+          "buffer_words": 458752,
+          "input": [
+            3827928056,
+            256,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 458752,
+          "sha256": "1415b9d1f8d65b23209969182e7b10c02d17d409d63a712ee2cd90aea0674670",
+          "steps": 411376517
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-rollout-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 14,
+          "input": [
+            3462746578,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 14,
+          "sha256": "8322457976500aae9bfc82d89c091c081f9c88662bfa35228cad00ffff84b04f",
+          "steps": 8076
+        },
+        {
+          "buffer_words": 42,
+          "input": [
+            3894883786,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 42,
+          "sha256": "9bc9733a5f7c0bd0aa70e84c4f1083b901cef6205dead52baff27d1441552c30",
+          "steps": 23224
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 448,
+          "input": [
+            2883258300,
+            1,
+            64
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 448,
+          "sha256": "1570379b1fd6a5aafef5d25f64056b93ac89839b1926accff07c75c1d3ce144a",
+          "steps": 253584
+        },
+        {
+          "buffer_words": 14336,
+          "input": [
+            1846092665,
+            32,
+            64
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 14336,
+          "sha256": "387378dbd4575dfc8bbd069bd58e5593a696711b1a8d5f4fe5d7064c6cdf55c6",
+          "steps": 7963639
+        },
+        {
+          "buffer_words": 114688,
+          "input": [
+            3142752760,
+            256,
+            64
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 114688,
+          "sha256": "511b9395d3232fbbb30ab63dd7ad8d109582ccd7c9acf60cfd443eff570c92ce",
+          "steps": 63643046
+        },
+        {
+          "buffer_words": 1792,
+          "input": [
+            2325586606,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 1792,
+          "sha256": "1ec8d4ff279bd16982cbdbb914269758c4aca1c2a25813cfce46592245ac46b1",
+          "steps": 993424
+        },
+        {
+          "buffer_words": 57344,
+          "input": [
+            3737418240,
+            32,
+            256
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 57344,
+          "sha256": "9479be383631f1ba81dc6cccc484f25404492e4f48091579ffa2df258b351e70",
+          "steps": 31817030
+        },
+        {
+          "buffer_words": 458752,
+          "input": [
+            3264801002,
+            256,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 458752,
+          "sha256": "265d00b73c524787249c6013a41ec46e39db57317a286a4d07863bb4f568b2d2",
+          "steps": 254596480
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-rollout-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 14,
+          "input": [
+            2885381713,
+            1,
+            2
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 14,
+          "sha256": "3cd3b2f022e52d223f83e889fe2987494d39896f7b1cc9029cdfea37fd4b7062",
+          "steps": 7986
+        },
+        {
+          "buffer_words": 42,
+          "input": [
+            1734991065,
+            2,
+            3
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 42,
+          "sha256": "da1046a9bd0eb4c5d23260d37e77f39012a0fdc59e4e18c6b4f58c6b1f912249",
+          "steps": 23662
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 448,
+          "input": [
+            3785344436,
+            1,
+            64
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 448,
+          "sha256": "ed6d7d3818953e2167ddf07ea3550494fee418d2eaffd414a2285a56a555c94b",
+          "steps": 252304
+        },
+        {
+          "buffer_words": 14336,
+          "input": [
+            1717050297,
+            32,
+            64
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 14336,
+          "sha256": "befd2bcbe2fb796ad03d0884ba0c1ca7e0dd6c4c2b7de13205c8d9898f09e216",
+          "steps": 7991188
+        },
+        {
+          "buffer_words": 114688,
+          "input": [
+            269044961,
+            256,
+            64
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 114688,
+          "sha256": "f152d9109dc8278d3e146fc898744f439a8324ee974b80dd83e8ac387e28443c",
+          "steps": 63871589
+        },
+        {
+          "buffer_words": 1792,
+          "input": [
+            3075027194,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 1792,
+          "sha256": "9d8acc8b5fbf0f6244a8647da7f4db18afea428972d3a3f058bddb0418a53d76",
+          "steps": 1002384
+        },
+        {
+          "buffer_words": 57344,
+          "input": [
+            3019105441,
+            32,
+            256
+          ],
+          "result": "Ok(U32(32))",
+          "seed_words": 57344,
+          "sha256": "f753f89f579448fd35adb81df0895a09224411232077e2858862f0250325ed79",
+          "steps": 31961067
+        },
+        {
+          "buffer_words": 458752,
+          "input": [
+            2099763740,
+            256,
+            256
+          ],
+          "result": "Ok(U32(256))",
+          "seed_words": 458752,
+          "sha256": "63a463f51a0c97695a9374f4cc0d135d17f3d5fe8089df6b30e93fa4f7bc4aa1",
+          "steps": 255362082
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pointcloud-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 53,
+          "input": [
+            3391873062,
+            16,
+            4
+          ],
+          "result": "Ok(U32(8))",
+          "seed_words": 29,
+          "sha256": "b89a9d6d9b278f4711b229969d960f566a91356406f70c73c15337212b17a0bd",
+          "steps": 4794
+        },
+        {
+          "buffer_words": 201,
+          "input": [
+            4265434947,
+            64,
+            8
+          ],
+          "result": "Ok(U32(25))",
+          "seed_words": 84,
+          "sha256": "21b99899bb03c8283e4fd8ea0d701b1131e12d2fb0ef8206062b78319c7c0a6d",
+          "steps": 20790
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 3137,
+          "input": [
+            457250184,
+            1024,
+            64
+          ],
+          "result": "Ok(U32(392))",
+          "seed_words": 1241,
+          "sha256": "5aa269db550b0688cfb94ba12afa5d47398893327f22047c58b44d038ff21d12",
+          "steps": 1311208
+        },
+        {
+          "buffer_words": 196865,
+          "input": [
+            3780335702,
+            65536,
+            256
+          ],
+          "result": "Ok(U32(27070))",
+          "seed_words": 81467,
+          "sha256": "7eb9e4549b68aa8eac874860bed1f3631cef755dc06c238c6ef885c9b06d89a4",
+          "steps": 323479398
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pointcloud-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 53,
+          "input": [
+            4066073769,
+            16,
+            4
+          ],
+          "result": "Ok(U32(5))",
+          "seed_words": 20,
+          "sha256": "11b4d806860f005618cfbef486eb8235a603647109ad5ca0f26618ecf6fadf27",
+          "steps": 4063
+        },
+        {
+          "buffer_words": 201,
+          "input": [
+            2131127921,
+            64,
+            8
+          ],
+          "result": "Ok(U32(22))",
+          "seed_words": 75,
+          "sha256": "64f0b6e1f2e5f64fb4867d21c4d953fd1bca34f21d1fcdc5eb6cb8e2f63ee39b",
+          "steps": 19695
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 3137,
+          "input": [
+            3506331260,
+            1024,
+            64
+          ],
+          "result": "Ok(U32(404))",
+          "seed_words": 1277,
+          "sha256": "44bb6d2ecd142d0ba8a291eebf277596e27214262521a5e6f0c54d80953f98c4",
+          "steps": 1347384
+        },
+        {
+          "buffer_words": 196865,
+          "input": [
+            3956722200,
+            65536,
+            256
+          ],
+          "result": "Ok(U32(26921))",
+          "seed_words": 81020,
+          "sha256": "f2f9a6d831caadfd91836a54808517409e8a42e82031bdb19f074eac7f9819e9",
+          "steps": 321767154
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-pointcloud-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 53,
+          "input": [
+            3688327000,
+            16,
+            4
+          ],
+          "result": "Ok(U32(6))",
+          "seed_words": 23,
+          "sha256": "72879e906064674f5d68fefb3a243184b465814f59c3e65c44589921d29340ab",
+          "steps": 4485
+        },
+        {
+          "buffer_words": 201,
+          "input": [
+            4225914657,
+            64,
+            8
+          ],
+          "result": "Ok(U32(28))",
+          "seed_words": 93,
+          "sha256": "0162edd5fa9bcb598de40b2f270849f02b3a61b528a1031443c9b517c099b5a9",
+          "steps": 22906
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 3137,
+          "input": [
+            3464789557,
+            1024,
+            64
+          ],
+          "result": "Ok(U32(386))",
+          "seed_words": 1223,
+          "sha256": "91a2cc858b199bf635d24f34afd22071925c3989847ed2914f504d45f3fc874c",
+          "steps": 1307093
+        },
+        {
+          "buffer_words": 196865,
+          "input": [
+            679546093,
+            65536,
+            256
+          ],
+          "result": "Ok(U32(26310))",
+          "seed_words": 79187,
+          "sha256": "b236181bd7bdb94a34595fc75cba21d5c8735b9b063830fbd5c939a0b2a7cac1",
+          "steps": 315532248
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-pointcloud-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 53,
+          "input": [
+            2958683563,
+            16,
+            4
+          ],
+          "result": "Ok(U32(8))",
+          "seed_words": 29,
+          "sha256": "890a415a50bdacc7b7f8e43ecb2f02493c2f4bb5f7e9840569e54c9321b072eb",
+          "steps": 4647
+        },
+        {
+          "buffer_words": 201,
+          "input": [
+            3013497292,
+            64,
+            8
+          ],
+          "result": "Ok(U32(23))",
+          "seed_words": 78,
+          "sha256": "1755d47f7f51eb483b1c7c60bf60d4a4c022c9a0d7799bc671f77c6f201beac3",
+          "steps": 19809
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 3137,
+          "input": [
+            1447052790,
+            1024,
+            64
+          ],
+          "result": "Ok(U32(396))",
+          "seed_words": 1253,
+          "sha256": "f26a15393e41f80458b439a10db22a6ce6c43e7d9dcd725ce326dbd55cf12f00",
+          "steps": 1323139
+        },
+        {
+          "buffer_words": 196865,
+          "input": [
+            2208428541,
+            65536,
+            256
+          ],
+          "result": "Ok(U32(26969))",
+          "seed_words": 81164,
+          "sha256": "5c017c8e8b0cfdd4686bab3f5b5648aca7ce37c7aed68d55a9d06ed16773e7d5",
+          "steps": 322320727
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pointcloud-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 53,
+          "input": [
+            3115383008,
+            16,
+            4
+          ],
+          "result": "Ok(U32(8))",
+          "seed_words": 29,
+          "sha256": "587d35e2aedb0b67488bb57e61418225031d477078b4ef8042fee200f77e64c7",
+          "steps": 4669
+        },
+        {
+          "buffer_words": 201,
+          "input": [
+            760777262,
+            64,
+            8
+          ],
+          "result": "Ok(U32(26))",
+          "seed_words": 87,
+          "sha256": "52ecf357127abbea3be3a8aac289f95d396a3c6367670d69ceb8e28f4a59394e",
+          "steps": 21227
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 3137,
+          "input": [
+            1873135092,
+            1024,
+            64
+          ],
+          "result": "Ok(U32(403))",
+          "seed_words": 1274,
+          "sha256": "aa350873d572e0f96af182c6bcb13f7dc443878421e37689f4c8fe985a4de7b9",
+          "steps": 1344625
+        },
+        {
+          "buffer_words": 196865,
+          "input": [
+            1193394667,
+            65536,
+            256
+          ],
+          "result": "Ok(U32(24643))",
+          "seed_words": 74186,
+          "sha256": "e9927c52ff3494fefa5dcca49de47b03700ec6a4ca2ba7b4e5f81c45d0b61bb9",
+          "steps": 295437223
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-pointcloud-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 53,
+          "input": [
+            3257461903,
+            16,
+            4
+          ],
+          "result": "Ok(U32(8))",
+          "seed_words": 29,
+          "sha256": "67da0c642a04c541115da640d39d11a7279337cabe1662522f72178356fd303a",
+          "steps": 4870
+        },
+        {
+          "buffer_words": 201,
+          "input": [
+            960242053,
+            64,
+            8
+          ],
+          "result": "Ok(U32(26))",
+          "seed_words": 87,
+          "sha256": "74813d1643a924db84ba1203e25766b8c3ad46cc583d6dae020ba314494f2e2c",
+          "steps": 21964
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 3137,
+          "input": [
+            2812469364,
+            1024,
+            64
+          ],
+          "result": "Ok(U32(420))",
+          "seed_words": 1325,
+          "sha256": "a01502ec8756aaf7b0d98e81bd5f6f77bf7c9c1e0731225be8b5f1ee107ddc02",
+          "steps": 1407020
+        },
+        {
+          "buffer_words": 196865,
+          "input": [
+            1085151621,
+            65536,
+            256
+          ],
+          "result": "Ok(U32(26946))",
+          "seed_words": 81095,
+          "sha256": "27ac71d7371a72bda5091078313c2f136339ed9a5f848e8d9d86802f6891734c",
+          "steps": 322883794
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pipeline-00",
+      "oracle_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3474637662,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "b8e5da812afdc8b315d7197a806c45e5b8714f131580d370672205767476aefc",
+          "steps": 43048
+        },
+        {
+          "buffer_words": 20,
+          "input": [
+            369938304,
+            2,
+            24
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 20,
+          "sha256": "3854d38e87067fcfa83c9522e9bdf50874748fad3a56011814c2a642f85713a9",
+          "steps": 126579
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3880058100,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "1657b699d5f8dcef47b11f928f7ae19fad77bde99afb88063cae0b4a2fc9af8c",
+          "steps": 563913
+        },
+        {
+          "buffer_words": 640,
+          "input": [
+            2083150841,
+            64,
+            256
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 640,
+          "sha256": "b01c2eb57eb7ca7133ab3713baa74807f4f9616876e5ddb3cd0479939517f0d8",
+          "steps": 26066127
+        },
+        {
+          "buffer_words": 10240,
+          "input": [
+            3177797295,
+            1024,
+            256
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 10240,
+          "sha256": "88d6236e4413b659837f15b4e87de0ad4b16616ed36252c1a871ace311cd9fe8",
+          "steps": 549153888
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-pipeline-01",
+      "oracle_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3404586089,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "7b20052620c2ddbd0f113366288a7959c872a1ca146e567c95ac1cb77f1469b9",
+          "steps": 41001
+        },
+        {
+          "buffer_words": 20,
+          "input": [
+            316715639,
+            2,
+            24
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 20,
+          "sha256": "00888067e835909f229e00d973ee5b23273db65907079041eaf45077e76841f9",
+          "steps": 97904
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            2883838977,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "7289503ea848824196a4abadac57cebf6b423320f5e7612f35d62f6a4ade1768",
+          "steps": 526728
+        },
+        {
+          "buffer_words": 640,
+          "input": [
+            11162916,
+            64,
+            256
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 640,
+          "sha256": "8117cbeb41e5b9c3f7c4b55d541457f3ffe63e43a2b56555bc259265b0fe493d",
+          "steps": 30062336
+        },
+        {
+          "buffer_words": 10240,
+          "input": [
+            2817320640,
+            1024,
+            256
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 10240,
+          "sha256": "4c81a84ef362b0fe783194c56bf84fa0e90b4bc766764785eb5d44c93d8e6cac",
+          "steps": 527921718
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "id": "gnet05ra-pipeline-02",
+      "oracle_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3818290699,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "fe8d450cebbe922a55ca0a8c2acfd4827ffcd769e14bda682a21965e300da46a",
+          "steps": 34323
+        },
+        {
+          "buffer_words": 20,
+          "input": [
+            1238820298,
+            2,
+            24
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 20,
+          "sha256": "51b286710803ea3d07866171c6fd92a537a591dbbf37287af0b0b153e47e9b16",
+          "steps": 103167
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            2683174094,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "7d723e5d1db4ecf57bf6478bc068cf5e5de06b499dc0d57d17568d54db217ab9",
+          "steps": 488471
+        },
+        {
+          "buffer_words": 640,
+          "input": [
+            563652494,
+            64,
+            256
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 640,
+          "sha256": "8e8c222c8c78fb088c25e272a108d9ba6a7775f6cdeedfdb94d858a9500896ec",
+          "steps": 28880115
+        },
+        {
+          "buffer_words": 10240,
+          "input": [
+            3523431080,
+            1024,
+            256
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 10240,
+          "sha256": "217a07363a8ca648294f470e63fac41e3e8b1cb9052fda2118d76192bfa19ce8",
+          "steps": 472322310
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pipeline-03",
+      "oracle_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            498083181,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "3873ac5290f552ff665bc58cf5d8090935a348fced186124701fc538914fb6ba",
+          "steps": 41881
+        },
+        {
+          "buffer_words": 20,
+          "input": [
+            3352597843,
+            2,
+            24
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 20,
+          "sha256": "3f2df33d2d03bdc5c0473b3f68df7975ea495cc16cdbff9e420516925a22ec7e",
+          "steps": 99823
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3902952508,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "c3d706e4464922f816223fee74fe6a54aa1323f2f303d046394915fc783e0576",
+          "steps": 533053
+        },
+        {
+          "buffer_words": 640,
+          "input": [
+            3901496156,
+            64,
+            256
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 640,
+          "sha256": "a77a0687e7c40244dce288e4dd0b5500fbef9e297e94adf50e426c7982d56d13",
+          "steps": 28595960
+        },
+        {
+          "buffer_words": 10240,
+          "input": [
+            456615705,
+            1024,
+            256
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 10240,
+          "sha256": "0d09ed1ab2199ea8dbe52e98e618cc652bf31343d37226453a71cd359b90d3e1",
+          "steps": 474850619
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pipeline-04",
+      "oracle_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3964238332,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "7bf0f7dab66e38ac611eb3522dbe86bfa6a6272bb3c54b60e8fd6c0303122d12",
+          "steps": 42717
+        },
+        {
+          "buffer_words": 20,
+          "input": [
+            128673970,
+            2,
+            24
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 20,
+          "sha256": "b01d21225bf0d8f7fb718503f7be0182496736d44b23f91ed52a09dff3a1eee5",
+          "steps": 101873
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            325393198,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "0313fc00ba205a841b0406cb29e23c693ca26fdd1e6f5337f03fbe6a6ce60090",
+          "steps": 496275
+        },
+        {
+          "buffer_words": 640,
+          "input": [
+            995840879,
+            64,
+            256
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 640,
+          "sha256": "b508f519500112b5f8c5617e506eb62cd1da353c5395606af875a41ff5032596",
+          "steps": 30108272
+        },
+        {
+          "buffer_words": 10240,
+          "input": [
+            561239869,
+            1024,
+            256
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 10240,
+          "sha256": "a02541c7d0efa0624e39b2162aa6b200504613fca2acda07443b7deadb106106",
+          "steps": 502961912
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "gnet05ra-pipeline-05",
+      "oracle_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            3369413744,
+            1,
+            16
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "2558ffea2207c408c0f8ba67f7bd0a7cb57a6a0ba59077df461221fe052ba64a",
+          "steps": 39073
+        },
+        {
+          "buffer_words": 20,
+          "input": [
+            4228642488,
+            2,
+            24
+          ],
+          "result": "Ok(U32(2))",
+          "seed_words": 20,
+          "sha256": "244e17deeff81ba96f8aa0a6192c5f22ac74442965212e34acde4eaf3593e13b",
+          "steps": 102504
+        }
+      ],
+      "scored_inputs": [
+        {
+          "buffer_words": 10,
+          "input": [
+            1135803604,
+            1,
+            256
+          ],
+          "result": "Ok(U32(1))",
+          "seed_words": 10,
+          "sha256": "114a6f20c1b37e697dab5644f334e5fc6905da74f2c8e8ff32e21681cfd22769",
+          "steps": 443337
+        },
+        {
+          "buffer_words": 640,
+          "input": [
+            3011950697,
+            64,
+            256
+          ],
+          "result": "Ok(U32(64))",
+          "seed_words": 640,
+          "sha256": "57f92e87ce4852b2740a28c117dfb172219ff36ff5fc7d93ff367801e9260ede",
+          "steps": 29933155
+        },
+        {
+          "buffer_words": 10240,
+          "input": [
+            1894522932,
+            1024,
+            256
+          ],
+          "result": "Ok(U32(1024))",
+          "seed_words": 10240,
+          "sha256": "7971c3a8a48c6465408ef6dbf20ae04ff4d496ffcf8e1c3b02b72d8c56118d52",
+          "steps": 475945497
+        }
+      ],
+      "split": "tuning"
+    }
+  ],
+  "requires": "abi13-host-arrays",
+  "schema": "invar-gnet05-robotics-array-validation-v1"
+}

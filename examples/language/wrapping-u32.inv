@@ -1,0 +1,9 @@
+// u32 arithmetic is checked, but wrapping_add and wrapping_mul are explicit modular operations.
+fn main() -> i32 {
+    let top: u32 = 4294967295u32;
+    let wrapped: u32 = wrapping_add(top, 2u32);
+    if wrapped == 1u32 {
+        return 5;
+    }
+    return 0;
+}

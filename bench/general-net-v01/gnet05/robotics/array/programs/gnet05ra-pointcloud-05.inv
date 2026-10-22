@@ -1,0 +1,73 @@
+// GNET-05 robotics corpus, host-array inputs: pointcloud (none, precomputed transforms, scanned).
+fn pose(f: mut Array<f32>, fr: read Array<f32>) -> Unit {
+    for e in 0u32..5u32 {
+        f[e] = fr[e];
+    }
+}
+fn sample(pts: mut Array<f32>, raw: read Array<f32>, i: u32, fr: read Array<f32>) -> Unit {
+    let px = raw[3u32 * i];
+    let py = raw[3u32 * i + 1u32];
+    let pz = raw[3u32 * i + 2u32];
+    pts[3u32 * i] = fr[0u32] * px - fr[1u32] * py + fr[2u32];
+    pts[3u32 * i + 1u32] = fr[1u32] * px + fr[0u32] * py + fr[3u32];
+    pts[3u32 * i + 2u32] = pz + fr[4u32];
+}
+fn keep(pts: read Array<f32>, i: u32) -> Bool {
+    let wx = pts[3u32 * i];
+    let wy = pts[3u32 * i + 1u32];
+    let wz = pts[3u32 * i + 2u32];
+    let r2 = wx * wx + wy * wy + wz * wz;
+    return wx >= (-1.5) and wx <= 1.5 and wy >= (-1.5) and wy <= 1.5 and wz >= 0.05 and wz <= 1.8 and r2 >= 0.04 and r2 <= 4.0;
+}
+fn neighbours(out: read Array<f32>, kept: u32, a: u32) -> f32 {
+    let ax = out[1u32 + 3u32 * a];
+    let ay = out[2u32 + 3u32 * a];
+    let az = out[3u32 + 3u32 * a];
+    var count = 0u32;
+    for k in 0u32..kept {
+        let dx = out[1u32 + 3u32 * k] - ax;
+        let dy = out[2u32 + 3u32 * k] - ay;
+        let dz = out[3u32 + 3u32 * k] - az;
+        if dx * dx + dy * dy + dz * dz <= 0.0225 {
+            count = count + 1u32;
+        }
+    }
+    return f32_from_u32(count);
+}
+fn run(fr: read Array<f32>, raw: read Array<f32>, m: u32, out: mut Array<f32>) -> u32 {
+    var fw = filled_f32(5u32, 0.0);
+    pose(fw, fr);
+    let n = len(raw) / 3u32;
+    var pts = filled_f32(3u32 * n, 0.0);
+    var pos = filled_u32(n + 1u32, 0u32);
+    for i in 0u32..n {
+        sample(pts, raw, i, fw);
+        var f = 0u32;
+        if keep(pts, i) {
+            f = 1u32;
+        }
+        pos[i + 1u32] = pos[i] + f;
+    }
+    let kept = pos[n];
+    out[0u32] = f32_from_u32(kept);
+    for i2 in 0u32..n {
+        if pos[i2 + 1u32] != pos[i2] {
+            let w = pos[i2];
+            for c in 0u32..3u32 {
+                out[1u32 + 3u32 * w + c] = pts[3u32 * i2 + c];
+            }
+        }
+    }
+    var q = m;
+    if kept < q {
+        q = kept;
+    }
+    for a in 0u32..q {
+        let count = neighbours(out, kept, a);
+        out[1u32 + 3u32 * kept + a] = count;
+    }
+    return kept;
+}
+fn main() -> i32 {
+    return 0;
+}

@@ -1,0 +1,2 @@
+fn make() -> Array<i32> { let xs: Array<i32> = [3, 5]; return xs; }
+fn main() -> i32 { let a = make(); return a[1u32]; }

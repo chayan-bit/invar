@@ -1,0 +1,5 @@
+fn choose(flag: u32) -> i32 {
+    if flag == 0u32 { return 7; }
+    else { while true {} return 1 / 0; }
+}
+fn main() -> i32 { return choose(0u32); }

@@ -1,0 +1,19 @@
+// Row-major u32 transpose: a counted nest with a bijective permuted store into a fresh output.
+fn transpose(a: read Array<u32>, rows: u32, cols: u32) -> Array<u32> {
+    var b = filled_u32(rows * cols, 0u32);
+    for r in 0u32 .. rows {
+        for c in 0u32 .. cols {
+            b[c * rows + r] = a[r * cols + c];
+        }
+    }
+    return b;
+}
+
+fn main() -> i32 {
+    let a: Array<u32> = [3u32, 7u32, 11u32, 13u32, 17u32, 19u32];
+    let b = transpose(a, 2u32, 3u32);
+    if b[0u32] == 3u32 and b[1u32] == 13u32 and b[2u32] == 7u32 and b[3u32] == 17u32 and b[4u32] == 11u32 and b[5u32] == 19u32 {
+        return 7;
+    }
+    return 0;
+}

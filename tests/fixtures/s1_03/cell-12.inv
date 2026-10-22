@@ -1,0 +1,171 @@
+frame world;
+frame base: world;
+fn run() -> i32 { return 0; }
+
+component Camera {
+    port in input: Quantity<i32,m> @ 10 Hz optional;
+    port out output: Quantity<i32,m> @ 10 Hz bus ethercat;
+    port in tf: Transform<base,world> @ 10 Hz optional;
+    param camera_mount: Transform<base,world> = identity;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT" modified false;
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Perception {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Planner {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Controller {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Hardware {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Logger {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Safety {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component State {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Telemetry {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Recorder {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Command {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+component Supervisor {
+    port in input: Quantity<i32,m> @ 10 Hz;
+    port out output: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+
+connect camera.output -> perception.input policy queue(4);
+connect perception.output -> planner.input policy queue(4);
+connect planner.output -> controller.input policy queue(4);
+connect controller.output -> hardware.input policy queue(4);
+connect hardware.output -> logger.input policy queue(4);
+connect logger.output -> safety.input policy queue(4);
+connect safety.output -> state.input policy queue(4);
+connect state.output -> telemetry.input policy queue(4);
+connect telemetry.output -> recorder.input policy queue(4);
+connect recorder.output -> command.input policy queue(4);
+connect command.output -> supervisor.input policy queue(4);
+flow process: camera.output -> perception.input -> perception.output -> planner.input -> planner.output -> controller.input -> controller.output -> hardware.input -> hardware.output -> logger.input -> logger.output -> safety.input -> safety.output -> state.input -> state.output -> telemetry.input -> telemetry.output -> recorder.input -> recorder.output -> command.input -> command.output -> supervisor.input within 12 ms;
+
+product Cell {
+    distribution proprietary-binary;
+    commercial true;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 12, memory = 12 MiB, gpu_memory = 12 MiB, bus.ethercat = 0.00032 Mbit/s;
+}
+system cell for Cell {
+    camera: Camera;
+    perception: Perception;
+    planner: Planner;
+    controller: Controller;
+    hardware: Hardware;
+    logger: Logger;
+    safety: Safety;
+    state: State;
+    telemetry: Telemetry;
+    recorder: Recorder;
+    command: Command;
+    supervisor: Supervisor;
+}

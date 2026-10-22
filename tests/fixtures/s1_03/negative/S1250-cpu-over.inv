@@ -1,0 +1,31 @@
+frame world;
+frame base: world;
+fn run() -> i32 { return 0; }
+component Source {
+    port out data: Quantity<i32,m> @ 10 Hz bus ethercat;
+    port out tf: Transform<base,world> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT" modified false;
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+component Sink {
+    port in data: Quantity<i32,m> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB, gpu_memory = 1 MiB;
+    license "MIT";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+connect source.data -> sink.data policy queue(4);
+flow path: source.data -> sink.data within 2 ms;
+product P {
+    distribution proprietary-binary;
+    commercial true;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 1, memory = 2 MiB, gpu_memory = 2 MiB, bus.ethercat = 0.00032 Mbit/s;
+}
+system s for P { source: Source; sink: Sink; }

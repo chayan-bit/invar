@@ -1,0 +1,1216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chayan-bit/invar/blob/main/schema/explain-v5.schema.json",
+  "title": "invar-explain-v5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "status",
+    "diagnostics",
+    "source_identity",
+    "regions",
+    "auto_path"
+  ],
+  "properties": {
+    "schema": {
+      "const": "invar-explain-v5"
+    },
+    "schema_version": {
+      "const": 5
+    },
+    "status": {
+      "const": "ok"
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "source_identity": {
+      "type": "string"
+    },
+    "regions": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string"
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "candidate_identity": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "admitted",
+              "rejected"
+            ]
+          },
+          "first_rejected_obligation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rule_revision": {
+            "type": "string"
+          },
+          "rule_identities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "numeric_policy": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "chosen_plan": {
+            "type": "string"
+          },
+          "fallback_plan": {
+            "type": "string"
+          },
+          "execution": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "partner": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "start": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "end": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "law": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "prefix": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "intermediate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "partner",
+              "law",
+              "prefix",
+              "intermediate"
+            ]
+          },
+          "runtime_guard": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "upper": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "constant": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "constant"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "length": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "length"
+                        ]
+                      }
+                    ]
+                  },
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "output": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "upper",
+                  "inputs",
+                  "output"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "facts": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "reads": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "owner": {
+                          "type": "string"
+                        },
+                        "element_type": {
+                          "type": "string"
+                        },
+                        "offset": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "owner",
+                        "element_type",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "writes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "owner": {
+                          "type": "string"
+                        },
+                        "element_type": {
+                          "type": "string"
+                        },
+                        "offset": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "owner",
+                        "element_type",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "ownership": {
+                    "type": "string"
+                  },
+                  "loan_state": {
+                    "type": "string"
+                  },
+                  "effect_order": {
+                    "type": "string"
+                  },
+                  "trap_summary": {
+                    "type": "string"
+                  },
+                  "termination": {
+                    "type": "string"
+                  },
+                  "physical_alias": {
+                    "type": "string"
+                  },
+                  "cleanup": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reads",
+                  "writes",
+                  "ownership",
+                  "loan_state",
+                  "effect_order",
+                  "trap_summary",
+                  "termination",
+                  "physical_alias",
+                  "cleanup"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "obligations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "evidence",
+                "detail"
+              ]
+            }
+          }
+        },
+        "required": [
+          "function",
+          "span",
+          "candidate_identity",
+          "status",
+          "first_rejected_obligation",
+          "rule_revision",
+          "rule_identities",
+          "numeric_policy",
+          "target",
+          "chosen_plan",
+          "fallback_plan",
+          "execution",
+          "runtime_guard",
+          "facts",
+          "obligations"
+        ]
+      }
+    },
+    "device_schema": {
+      "const": "invar-explain-device-v5"
+    },
+    "device_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requested_engine": {
+          "enum": [
+            "cuda",
+            "metal",
+            "auto"
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "function": {
+                "type": "string"
+              },
+              "span": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              },
+              "backend": {
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "cuda-failed-before-publication",
+                  "cuda-feature-unavailable",
+                  "device-plan-ineligible",
+                  "device-unavailable",
+                  "forced-device",
+                  "live-guard-false",
+                  "measured-cpu-cost",
+                  "measured-device-cost",
+                  "metal-buffer-slot-limit",
+                  "metal-failed-before-publication",
+                  "metal-no-f64",
+                  "publication-guard-false",
+                  "sort-cost-unmeasured",
+                  "spatial-cost-unmeasured",
+                  "spatial-host-work",
+                  "staged-consumer",
+                  "toolchain-unavailable"
+                ]
+              },
+              "kind": {
+                "type": "string"
+              },
+              "cost_ms": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpu": {
+                        "type": "number"
+                      },
+                      "device": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "cpu",
+                      "device"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "implementation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "family_id": {
+                "enum": [
+                  "spatial.voxel_grid_build.f32",
+                  "spatial.radius_neighbors.f32",
+                  "spatial.knn.f32",
+                  "spatial.grid_excluded.f32"
+                ]
+              }
+            },
+            "required": [
+              "function",
+              "span",
+              "backend",
+              "reason"
+            ]
+          }
+        },
+        "result": {
+          "type": "integer"
+        },
+        "module_cache_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schedule_hint_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schedule_hint_invalids": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "normal_form": {
+          "description": "P6(a) normal-form route (#263): the laws the law executor applied with the checked certificate identity, or why the serial path ran.",
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "laws",
+                "certificates",
+                "fingerprint",
+                "certificate_digest",
+                "lanes"
+              ],
+              "properties": {
+                "status": {
+                  "const": "routed"
+                },
+                "laws": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^L[0-9]+$"
+                  }
+                },
+                "certificates": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "fingerprint": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "certificate_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "lanes": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "reason"
+              ],
+              "properties": {
+                "status": {
+                  "const": "fallback"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "recursion-law-not-routed",
+                        "certificate-rejected",
+                        "residue-law-not-routed",
+                        "executor-refused",
+                        "no-law-applied",
+                        "law-state-violation",
+                        "call-depth-unproven",
+                        "fuel-unproven",
+                        "live-elements-unproven",
+                        "executor-tool-limit"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^no-lowering:[a-z]+/[a-z]+(-[a-z]+)*$"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "requested_engine",
+        "choices",
+        "result",
+        "module_cache_hits",
+        "schedule_hint_hits",
+        "schedule_hint_invalids"
+      ]
+    },
+    "explicit_sorts": {
+      "type": "array",
+      "maxItems": 65536,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "sort",
+              "sort_by_key",
+              "argsort",
+              "segmented_sort"
+            ]
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "default_implementation": {
+            "const": "cpu-lsd-radix-4x8"
+          },
+          "reason": {
+            "const": "sort-cost-unmeasured"
+          },
+          "rule": {
+            "const": "explicit-stable-sort-v1"
+          },
+          "calibration_id": {
+            "type": "string",
+            "pattern": "^sort\\.(sort|sort_by_key|argsort|segmented_sort)\\.(u32|i32|f32)$"
+          }
+        },
+        "required": [
+          "function",
+          "operation",
+          "span",
+          "default_implementation",
+          "reason",
+          "rule",
+          "calibration_id"
+        ]
+      }
+    },
+    "explicit_spatial": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operation": {
+            "enum": [
+              "voxel_grid_build",
+              "radius_neighbors",
+              "knn",
+              "grid_excluded"
+            ]
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "default_implementation": {
+            "const": "cpu-sorted-grid"
+          },
+          "reason": {
+            "const": "spatial-cost-unmeasured"
+          },
+          "rule": {
+            "const": "explicit-spatial-v1"
+          },
+          "family_id": {
+            "enum": [
+              "spatial.voxel_grid_build.f32",
+              "spatial.radius_neighbors.f32",
+              "spatial.knn.f32",
+              "spatial.grid_excluded.f32"
+            ]
+          }
+        },
+        "required": [
+          "function",
+          "operation",
+          "span",
+          "default_implementation",
+          "reason",
+          "rule",
+          "family_id"
+        ],
+        "oneOf": [
+          {
+            "properties": {
+              "operation": {
+                "const": "voxel_grid_build"
+              },
+              "family_id": {
+                "const": "spatial.voxel_grid_build.f32"
+              }
+            }
+          },
+          {
+            "properties": {
+              "operation": {
+                "const": "radius_neighbors"
+              },
+              "family_id": {
+                "const": "spatial.radius_neighbors.f32"
+              }
+            }
+          },
+          {
+            "properties": {
+              "operation": {
+                "const": "knn"
+              },
+              "family_id": {
+                "const": "spatial.knn.f32"
+              }
+            }
+          },
+          {
+            "properties": {
+              "operation": {
+                "const": "grid_excluded"
+              },
+              "family_id": {
+                "const": "spatial.grid_excluded.f32"
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    },
+    "numeric_contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "binary64": {
+          "const": "strict-f64-v1"
+        },
+        "math": {
+          "const": "invar-math-cr-v1"
+        },
+        "trig": {
+          "const": "invar-trig-f32-v1"
+        },
+        "fold": {
+          "description": "Each declared fold tier a lowered fold used, to the algorithm that ran (#280). A Strict function's reassoc_add folds record as relaxed.",
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "tree": {
+              "const": "tree"
+            },
+            "exact": {
+              "const": "exact"
+            },
+            "relaxed": {
+              "enum": [
+                "tree",
+                "exact"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "profile_schema_version",
+        "resource_identity",
+        "trust_provisional",
+        "engine",
+        "choices"
+      ],
+      "properties": {
+        "profile_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "profile_schema_version": {
+          "enum": [
+            1,
+            null
+          ]
+        },
+        "profile_identity": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "resource_identity": {
+          "type": "object"
+        },
+        "trust_provisional": {
+          "type": "boolean"
+        },
+        "engine": {
+          "enum": [
+            "cpu",
+            "cuda",
+            "metal",
+            "none"
+          ]
+        },
+        "refusal_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cpu_cost": {
+          "type": "object"
+        },
+        "variants": {
+          "type": "array"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "profile_id",
+              "profile_schema_version",
+              "engine",
+              "family",
+              "numeric_contract_version",
+              "cpu_ms",
+              "variants",
+              "published"
+            ],
+            "properties": {
+              "engine": {
+                "enum": [
+                  "cpu",
+                  "cuda",
+                  "metal"
+                ]
+              },
+              "published": {
+                "type": "boolean"
+              },
+              "cpu_ms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "legality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy",
+            "reason",
+            "engines"
+          ],
+          "properties": {
+            "policy": {
+              "const": "legal-set-cpu"
+            },
+            "reason": {
+              "const": "uncalibrated"
+            },
+            "engines": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "prefixItems": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "engine",
+                    "legal",
+                    "compiled",
+                    "reason"
+                  ],
+                  "properties": {
+                    "engine": {
+                      "const": "cpu"
+                    },
+                    "legal": {
+                      "const": true
+                    },
+                    "compiled": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "enum": [
+                        null,
+                        "native-feature-unavailable"
+                      ]
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "compiled": {
+                        "const": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "reason": {
+                        "const": null
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "reason": {
+                        "const": "native-feature-unavailable"
+                      }
+                    }
+                  }
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/device_legality"
+                    },
+                    {
+                      "properties": {
+                        "engine": {
+                          "const": "cuda"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/device_legality"
+                    },
+                    {
+                      "properties": {
+                        "engine": {
+                          "const": "metal"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "route": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "host",
+            "reason"
+          ],
+          "properties": {
+            "host": {
+              "enum": [
+                "native",
+                "reference"
+              ]
+            },
+            "reason": {
+              "enum": [
+                null,
+                "native-feature-unavailable",
+                "profiled-regions"
+              ]
+            }
+          },
+          "if": {
+            "properties": {
+              "host": {
+                "const": "native"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": null
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "route",
+              "legality"
+            ]
+          },
+          "then": {
+            "if": {
+              "properties": {
+                "route": {
+                  "properties": {
+                    "reason": {
+                      "const": "native-feature-unavailable"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "legality": {
+                  "properties": {
+                    "engines": {
+                      "prefixItems": [
+                        {
+                          "properties": {
+                            "compiled": {
+                              "const": false
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "legality": {
+                  "properties": {
+                    "engines": {
+                      "prefixItems": [
+                        {
+                          "properties": {
+                            "compiled": {
+                              "const": true
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "execution": {
+      "type": "object"
+    },
+    "auto_path": {
+      "enum": [
+        "established",
+        "placement"
+      ]
+    }
+  },
+  "$defs": {
+    "device_legality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "legal",
+        "refusal",
+        "forks",
+        "serialized"
+      ],
+      "properties": {
+        "engine": {
+          "enum": [
+            "cuda",
+            "metal"
+          ]
+        },
+        "legal": {
+          "type": "boolean"
+        },
+        "refusal": {
+          "enum": [
+            "net_structural_budget",
+            "net_boundary",
+            "source",
+            "admission_budget",
+            "input",
+            "oversize",
+            "alias",
+            "wrong_layout",
+            "unsupported_type",
+            "borrowed",
+            "backend",
+            "image",
+            "fence",
+            "host_protocol",
+            "unsupported_rule",
+            "unsupported_call",
+            "owner_entry_result",
+            "compiler_structural_budget",
+            "entry",
+            "compiler_boundary",
+            null
+          ]
+        },
+        "forks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "serialized": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "affine_argument",
+              "owner_result",
+              "dependent_argument",
+              "ordered_prelude",
+              "projection_limit"
+            ]
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "legal": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "refusal": {
+            "const": null
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "refusal": {
+            "type": "string"
+          },
+          "forks": {
+            "const": 0
+          },
+          "serialized": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "auto_path": {
+        "const": "placement"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "placement",
+      "execution"
+    ]
+  },
+  "else": {
+    "not": {
+      "anyOf": [
+        {
+          "required": [
+            "placement"
+          ]
+        },
+        {
+          "required": [
+            "execution"
+          ]
+        }
+      ]
+    }
+  }
+}

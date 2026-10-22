@@ -1,0 +1,22 @@
+frame world;
+frame base: world;
+frame tool: base;
+
+extern component process_fk {
+    abi c "invar_process_bridge_v1";
+    lifecycle init, configure, step, shutdown;
+    config c "inv_fk_config_v1";
+    port in q: std::robotics::JointPositions<f64,7> @ 100 Hz layout c "inv_joint7_f64";
+    port out pose: std::robotics::Pose<f64,base,tool> @ 100 Hz layout c "inv_pose_f64";
+    resource cpu_cores = 1, memory = 64 MiB;
+    license "BSD-2-Clause" link dynamic;
+    isolation separate-process;
+    golden "golden/process_fk.json" tolerance abs 0.000000000001 m, abs 0.000000000001 rad;
+    property "pose.rotation is unit norm within 0.000000000001";
+    shim "bridge.c";
+    input "process_reference.c";
+    input "process_reference.h";
+    input "abi_exports.map";
+    input "../pinocchio_fk/abi_reference.h";
+    input "../../../../../tests/fixtures/foreign-components/process/fixture_server.py";
+}

@@ -1,0 +1,130 @@
+// GNET-05 robotics corpus: pointcloud (none, trigonometric, fused).
+fn lcg(x: u32) -> u32 {
+    return wrapping_add(wrapping_mul(x, 1664525u32), 1013904223u32);
+}
+fn unit(x: u32) -> f32 {
+    return f32_from_u32(x / 256u32) * 0.000000059604645;
+}
+fn stream(seed: u32, i: u32) -> u32 {
+    return lcg(wrapping_add(wrapping_mul(i, 2654435761u32), seed));
+}
+fn sincos(x: f32, cs: mut Array<f32>, j: u32) -> Unit {
+    var k = 0.0;
+    var m = 0u32;
+    while x * 0.63661975 - k > 0.5 {
+        k = k + 1.0;
+        m = m + 1u32;
+    }
+    while x * 0.63661975 - k < (-0.5) {
+        k = k - 1.0;
+        m = m + 3u32;
+    }
+    let r = x - k * 1.5703125 - k * 0.0004837513 - k * 0.0000000754979;
+    let z = r * r;
+    let s = (((-0.00019515296) * z + 0.008332161) * z - 0.16666655) * z * r + r;
+    let c = ((0.000024433157 * z - 0.0013887316) * z + 0.041666646) * z * z - 0.5 * z + 1.0;
+    let q = m % 4u32;
+    var sn = s;
+    var cn = c;
+    if q == 1u32 {
+        sn = c;
+        cn = -s;
+    } else if q == 2u32 {
+        sn = -s;
+        cn = -c;
+    } else if q == 3u32 {
+        sn = -c;
+        cn = s;
+    }
+    cs[2u32 * j] = cn;
+    cs[2u32 * j + 1u32] = sn;
+}
+fn sensor(fr: mut Array<f32>, seed: u32) -> Unit {
+    var x = stream(wrapping_mul(seed, 747796405u32), 0u32);
+    x = lcg(x);
+    var cs = filled_f32(2u32, 0.0);
+    sincos(6.2831855 * unit(x) - 3.1415927, cs, 0u32);
+    fr[0u32] = cs[0u32];
+    fr[1u32] = cs[1u32];
+    x = lcg(x);
+    fr[2u32] = 0.5 * unit(x) - 0.25;
+    x = lcg(x);
+    fr[3u32] = 0.5 * unit(x) - 0.25;
+    x = lcg(x);
+    fr[4u32] = 0.2 * unit(x);
+}
+fn sample(pts: mut Array<f32>, seed: u32, i: u32, fr: read Array<f32>) -> Unit {
+    var y = stream(seed, i);
+    y = lcg(y);
+    let px = 4.0 * unit(y) - 2.0;
+    y = lcg(y);
+    let py = 4.0 * unit(y) - 2.0;
+    y = lcg(y);
+    let pz = 2.0 * unit(y);
+    pts[3u32 * i] = fr[0u32] * px - fr[1u32] * py + fr[2u32];
+    pts[3u32 * i + 1u32] = fr[1u32] * px + fr[0u32] * py + fr[3u32];
+    pts[3u32 * i + 2u32] = pz + fr[4u32];
+}
+fn keep(pts: read Array<f32>, i: u32) -> Bool {
+    let wx = pts[3u32 * i];
+    let wy = pts[3u32 * i + 1u32];
+    let wz = pts[3u32 * i + 2u32];
+    let r2 = wx * wx + wy * wy + wz * wz;
+    return wx >= (-1.5) and wx <= 1.5 and wy >= (-1.5) and wy <= 1.5 and wz >= 0.05 and wz <= 1.8 and r2 >= 0.04 and r2 <= 4.0;
+}
+fn neighbours(out: read Array<f32>, kept: u32, a: u32) -> f32 {
+    let ax = out[1u32 + 3u32 * a];
+    let ay = out[2u32 + 3u32 * a];
+    let az = out[3u32 + 3u32 * a];
+    var count = 0u32;
+    for k in 0u32..kept {
+        let dx = out[1u32 + 3u32 * k] - ax;
+        let dy = out[2u32 + 3u32 * k] - ay;
+        let dz = out[3u32 + 3u32 * k] - az;
+        if dx * dx + dy * dy + dz * dz <= 0.0225 {
+            count = count + 1u32;
+        }
+    }
+    return f32_from_u32(count);
+}
+fn run(seed: u32, n: u32, m: u32) -> Array<f32> {
+    var fr = filled_f32(5u32, 0.0);
+    sensor(fr, seed);
+    var pts = filled_f32(3u32 * n, 0.0);
+    var flag = filled_u32(n, 0u32);
+    var kept = 0u32;
+    for i in 0u32..n {
+        sample(pts, seed, i, fr);
+        if keep(pts, i) {
+            flag[i] = 1u32;
+            kept = kept + 1u32;
+        }
+    }
+    var out = filled_f32(1u32 + 3u32 * kept + m, 0.0);
+    out[0u32] = f32_from_u32(kept);
+    var w = 0u32;
+    for i2 in 0u32..n {
+        if flag[i2] == 1u32 {
+            for c in 0u32..3u32 {
+                out[1u32 + 3u32 * w + c] = pts[3u32 * i2 + c];
+            }
+            w = w + 1u32;
+        }
+    }
+    var q = m;
+    if kept < q {
+        q = kept;
+    }
+    for a in 0u32..q {
+        let count = neighbours(out, kept, a);
+        out[1u32 + 3u32 * kept + a] = count;
+    }
+    return out;
+}
+fn main() -> i32 {
+    let out = run(3391873062u32, 16u32, 4u32);
+    if len(out) > 0u32 {
+        return 1;
+    }
+    return 0;
+}

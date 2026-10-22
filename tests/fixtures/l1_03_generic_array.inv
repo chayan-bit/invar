@@ -1,0 +1,6 @@
+fn first<T: Value>(xs: read Array<T>) -> T { return xs[0u32]; }
+
+fn main() -> i32 {
+    let xs: Array<i32> = [17i32, 18i32];
+    return first(xs);
+}

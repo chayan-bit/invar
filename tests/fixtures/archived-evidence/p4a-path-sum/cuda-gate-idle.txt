@@ -1,0 +1,167 @@
+# CUDA sm_120 D5 rescore on an idle GPU, code at ac813a8c (flag vote, vector prologue).
+# Session 1 of 3 was scored on an idle GPU; sessions 2 and 3 are still waiting for an idle window (see README).
+# Idle guard: utilization at most 5% over 10 one-second samples before the session; nvidia-smi records below.
+
+## nvidia-smi before / after session 1 (idle.log.1)
+before 2026-10-17T18:13:12Z util_max=1 resident=[sunshine 229 MiB;python 2324 MiB] sm=[sway:- sunshine:- Xwayland:- steam:- steamwebhelper:- Xorg:- python:- ksecretd:- kwin_wayland:- Xwayland:- ksmserver:- kded6:- plasmashell:- kaccess:- polkit-kde-auth:- DiscoverNotifie:- warp-taskbar:- xdg-desktop-por:- dolphin:- konsole:- steamwebhelper:- kwalletd6:-]
+after 2026-10-17T18:13:23Z util_max=18 resident=[sunshine 229 MiB;python 2324 MiB] sm=[sway:8 sunshine:- Xwayland:- steam:- steamwebhelper:- Xorg:- python:- ksecretd:- kwin_wayland:- Xwayland:- ksmserver:- kded6:- plasmashell:- kaccess:- polkit-kde-auth:- DiscoverNotifie:- warp-taskbar:- xdg-desktop-por:- dolphin:- konsole:- steamwebhelper:8 kwalletd6:-]
+
+## session 1 stderr
+device=NVIDIA GeForce RTX 5070 Ti caps=Cuda { major: 12, minor: 9, sm: 120 }
+divide-00: licence [RangeGuard { var: "lo", low: -143165576, high: 143165576 }, RangeGuard { var: "hi", low: -143165576, high: 143165576 }, RangeGuard { var: "d", low: -2147483648, high: 2147483647 }], max depth 61, source 9870 bytes
+divide-00 0 0: A' shape Root, baseline 4
+divide-00 32 3: A' shape Fused, baseline 2
+divide-00 256 8: A' shape Fused, baseline 2
+divide-00 20000 30: A' shape Parallel, baseline 3
+divide-02: licence [RangeGuard { var: "lo", low: -102261126, high: 102261126 }, RangeGuard { var: "hi", low: -102261126, high: 102261126 }, RangeGuard { var: "d", low: -2147483648, high: 2147483647 }], max depth 61, source 9390 bytes
+divide-02 0 0: A' shape Root, baseline 4
+divide-02 32 3: A' shape Fused, baseline 2
+divide-02 256 8: A' shape Fused, baseline 2
+divide-02 20000 30: A' shape Parallel, baseline 3
+compose-00: licence [RangeGuard { var: "lo", low: -238609294, high: 238609294 }, RangeGuard { var: "hi", low: -238609294, high: 238609294 }, RangeGuard { var: "d", low: -2147483648, high: 2147483647 }], max depth 59, source 12680 bytes
+compose-00 0 0: A' shape Root, baseline 2
+compose-00 32 3: A' shape Fused, baseline 2
+compose-00 256 8: A' shape Fused, baseline 2
+compose-00 3000 14: A' shape Parallel, baseline 3
+compose-02: licence [RangeGuard { var: "lo", low: -238609294, high: 238609294 }, RangeGuard { var: "hi", low: -238609294, high: 238609294 }, RangeGuard { var: "d", low: -2147483648, high: 2147483647 }], max depth 59, source 12008 bytes
+compose-02 0 0: A' shape Root, baseline 4
+compose-02 32 3: A' shape Fused, baseline 2
+compose-02 256 8: A' shape Fused, baseline 2
+compose-02 3000 14: A' shape Parallel, baseline 3
+exit 0
+
+## stats (single session; the sessions column equals the point)
+program	a	b	scope	point	upper95	gen_ms	C_ms	sessions	gate
+compose-00	0	0	host	1.225989	1.251291	0.035719500	0.028000500	1.225989	miss
+compose-00	0	0	resident	0.746752	0.923016	0.005120000	0.008352000	0.746752	pass
+compose-00	32	3	host	1.167987	1.266910	0.037782000	0.029653000	1.167987	miss
+compose-00	32	3	resident	0.922001	0.991071	0.007248000	0.008720000	0.922001	pass
+compose-00	256	8	host	1.068919	1.221092	0.037700000	0.031070500	1.068919	miss
+compose-00	256	8	resident	0.714919	0.966032	0.007184000	0.010480000	0.714919	pass
+compose-00	3000	14	host	1.177896	1.204367	0.040443500	0.034348500	1.177896	miss
+compose-00	3000	14	resident	0.979817	1.009104	0.009376000	0.011744000	0.979817	pass
+compose-02	0	0	host	1.008606	1.029610	0.035919500	0.035191500	1.008606	miss
+compose-02	0	0	resident	0.974895	0.992248	0.005184000	0.005424000	0.974895	pass
+compose-02	32	3	host	0.968653	1.063116	0.035831000	0.037566500	0.968653	miss
+compose-02	32	3	resident	0.664369	0.705607	0.005088000	0.007312000	0.664369	pass
+compose-02	256	8	host	1.203095	1.272990	0.037649000	0.030765500	1.203095	miss
+compose-02	256	8	resident	0.686315	0.876596	0.006992000	0.010544000	0.686315	pass
+compose-02	3000	14	host	1.138360	1.189523	0.039802000	0.034310500	1.138360	miss
+compose-02	3000	14	resident	0.936542	0.978022	0.008928000	0.009360000	0.936542	pass
+divide-00	0	0	host	1.186466	1.289540	0.035821000	0.028084500	1.186466	miss
+divide-00	0	0	resident	0.947600	1.019608	0.005040000	0.006736000	0.947600	pass
+divide-00	32	3	host	1.066018	1.251964	0.035918500	0.028293000	1.066018	miss
+divide-00	32	3	resident	0.854175	0.969697	0.005024000	0.007776000	0.854175	pass
+divide-00	256	8	host	1.066213	1.152312	0.035345500	0.029042500	1.066213	miss
+divide-00	256	8	resident	0.645989	0.760171	0.005168000	0.008256000	0.645989	pass
+divide-00	20000	30	host	1.012781	1.034555	0.039758500	0.039490000	1.012781	miss
+divide-00	20000	30	resident	0.962066	0.993151	0.008944000	0.009296000	0.962066	pass
+divide-02	0	0	host	1.010296	1.065274	0.029562500	0.027916000	1.010296	miss
+divide-02	0	0	resident	0.873562	0.967890	0.007088000	0.008496000	0.873562	pass
+divide-02	32	3	host	1.009706	1.029339	0.029697000	0.028736500	1.009706	miss
+divide-02	32	3	resident	0.989975	1.025514	0.008544000	0.008704000	0.989975	pass
+divide-02	256	8	host	1.084813	1.230896	0.035465000	0.028047000	1.084813	miss
+divide-02	256	8	resident	0.909396	0.956416	0.008528000	0.008768000	0.909396	pass
+divide-02	20000	30	host	1.021568	1.189469	0.039515000	0.033177000	1.021568	miss
+divide-02	20000	30	resident	0.906739	0.967028	0.008848000	0.013456000	0.906739	pass
+D5 flat: 16/32 cells pass (median <= 1.00, U95 <= 1.05)
+
+## host-scope wall-clock modes per cell (slow = wall above 32 us; 30 samples each)
+compose-00 0 0 C slow=5/30 fast_mean_us=28.2 slow_mean_us=35.7
+compose-00 0 0 gen slow=21/30 fast_mean_us=28.1 slow_mean_us=35.7
+compose-00 256 8 C slow=12/30 fast_mean_us=30.2 slow_mean_us=37.1
+compose-00 256 8 gen slow=21/30 fast_mean_us=30.6 slow_mean_us=37.9
+compose-00 3000 14 C slow=30/30 fast_mean_us=0.0 slow_mean_us=36.2
+compose-00 3000 14 gen slow=29/30 fast_mean_us=31.1 slow_mean_us=40.4
+compose-00 32 3 C slow=8/30 fast_mean_us=29.1 slow_mean_us=36.9
+compose-00 32 3 gen slow=23/30 fast_mean_us=30.2 slow_mean_us=37.8
+compose-02 0 0 C slow=18/30 fast_mean_us=28.3 slow_mean_us=37.2
+compose-02 0 0 gen slow=24/30 fast_mean_us=27.4 slow_mean_us=36.1
+compose-02 256 8 C slow=11/30 fast_mean_us=30.1 slow_mean_us=37.5
+compose-02 256 8 gen slow=28/30 fast_mean_us=31.7 slow_mean_us=38.5
+compose-02 3000 14 C slow=29/30 fast_mean_us=31.4 slow_mean_us=36.1
+compose-02 3000 14 gen slow=30/30 fast_mean_us=0.0 slow_mean_us=38.9
+compose-02 32 3 C slow=20/30 fast_mean_us=29.4 slow_mean_us=38.5
+compose-02 32 3 gen slow=28/30 fast_mean_us=27.5 slow_mean_us=36.2
+divide-00 0 0 C slow=4/30 fast_mean_us=28.0 slow_mean_us=36.2
+divide-00 0 0 gen slow=18/30 fast_mean_us=29.2 slow_mean_us=36.6
+divide-00 20000 30 C slow=30/30 fast_mean_us=0.0 slow_mean_us=38.6
+divide-00 20000 30 gen slow=29/30 fast_mean_us=31.3 slow_mean_us=39.7
+divide-00 256 8 C slow=7/30 fast_mean_us=28.7 slow_mean_us=34.4
+divide-00 256 8 gen slow=17/30 fast_mean_us=28.6 slow_mean_us=36.0
+divide-00 32 3 C slow=11/30 fast_mean_us=28.0 slow_mean_us=36.0
+divide-00 32 3 gen slow=22/30 fast_mean_us=28.7 slow_mean_us=36.5
+divide-02 0 0 C slow=6/30 fast_mean_us=27.6 slow_mean_us=36.0
+divide-02 0 0 gen slow=9/30 fast_mean_us=28.2 slow_mean_us=35.6
+divide-02 20000 30 C slow=30/30 fast_mean_us=0.0 slow_mean_us=35.6
+divide-02 20000 30 gen slow=29/30 fast_mean_us=31.5 slow_mean_us=38.2
+divide-02 256 8 C slow=3/30 fast_mean_us=28.3 slow_mean_us=35.7
+divide-02 256 8 gen slow=17/30 fast_mean_us=28.2 slow_mean_us=36.5
+divide-02 32 3 C slow=10/30 fast_mean_us=28.6 slow_mean_us=35.5
+divide-02 32 3 gen slow=14/30 fast_mean_us=28.6 slow_mean_us=36.8
+
+## mean GPU event interval and wall per cell and variant (us)
+compose-00 0 0 host C gpu=7.32 wall=29.45
+compose-00 0 0 host gen gpu=5.88 wall=33.43
+compose-00 0 0 resident C gpu=7.30 wall=29.64
+compose-00 0 0 resident gen gpu=5.53 wall=34.04
+compose-00 256 8 host C gpu=8.94 wall=32.96
+compose-00 256 8 host gen gpu=7.70 wall=35.74
+compose-00 256 8 resident C gpu=9.53 wall=31.82
+compose-00 256 8 resident gen gpu=7.49 wall=37.50
+compose-00 3000 14 host C gpu=11.08 wall=36.17
+compose-00 3000 14 host gen gpu=9.83 wall=40.12
+compose-00 3000 14 resident C gpu=11.62 wall=35.12
+compose-00 3000 14 resident gen gpu=10.52 wall=37.74
+compose-00 32 3 host C gpu=8.74 wall=31.17
+compose-00 32 3 host gen gpu=7.36 wall=36.01
+compose-00 32 3 resident C gpu=8.66 wall=32.38
+compose-00 32 3 resident gen gpu=7.65 wall=35.49
+compose-02 0 0 host C gpu=7.55 wall=33.61
+compose-02 0 0 host gen gpu=5.45 wall=34.32
+compose-02 0 0 resident C gpu=6.46 wall=31.92
+compose-02 0 0 resident gen gpu=5.65 wall=34.22
+compose-02 256 8 host C gpu=8.82 wall=32.78
+compose-02 256 8 host gen gpu=6.99 wall=38.08
+compose-02 256 8 resident C gpu=9.70 wall=31.47
+compose-02 256 8 resident gen gpu=7.21 wall=36.57
+compose-02 3000 14 host C gpu=11.19 wall=35.93
+compose-02 3000 14 host gen gpu=9.03 wall=38.93
+compose-02 3000 14 resident C gpu=10.78 wall=36.12
+compose-02 3000 14 resident gen gpu=9.03 wall=39.41
+compose-02 32 3 host C gpu=7.46 wall=35.46
+compose-02 32 3 host gen gpu=5.52 wall=35.65
+compose-02 32 3 resident C gpu=8.16 wall=32.88
+compose-02 32 3 resident gen gpu=5.19 wall=36.62
+divide-00 0 0 host C gpu=6.90 wall=29.09
+divide-00 0 0 host gen gpu=5.83 wall=33.61
+divide-00 0 0 resident C gpu=6.68 wall=29.24
+divide-00 0 0 resident gen gpu=5.50 wall=34.09
+divide-00 20000 30 host C gpu=10.19 wall=38.57
+divide-00 20000 30 host gen gpu=9.26 wall=39.42
+divide-00 20000 30 resident C gpu=11.24 wall=36.11
+divide-00 20000 30 resident gen gpu=9.21 wall=40.09
+divide-00 256 8 host C gpu=7.88 wall=30.01
+divide-00 256 8 host gen gpu=6.08 wall=32.82
+divide-00 256 8 resident C gpu=7.43 wall=29.05
+divide-00 256 8 resident gen gpu=5.39 wall=34.26
+divide-00 32 3 host C gpu=6.97 wall=30.91
+divide-00 32 3 host gen gpu=5.59 wall=34.43
+divide-00 32 3 resident C gpu=6.94 wall=30.71
+divide-00 32 3 resident gen gpu=5.45 wall=33.98
+divide-02 0 0 host C gpu=7.49 wall=29.25
+divide-02 0 0 host gen gpu=6.78 wall=30.39
+divide-02 0 0 resident C gpu=7.65 wall=28.39
+divide-02 0 0 resident gen gpu=6.46 wall=30.47
+divide-02 20000 30 host C gpu=11.43 wall=35.57
+divide-02 20000 30 host gen gpu=10.23 wall=37.94
+divide-02 20000 30 resident C gpu=11.63 wall=34.37
+divide-02 20000 30 resident gen gpu=9.54 wall=38.99
+divide-02 256 8 host C gpu=8.56 wall=29.08
+divide-02 256 8 host gen gpu=6.40 wall=32.91
+divide-02 256 8 resident C gpu=8.76 wall=30.36
+divide-02 256 8 resident gen gpu=7.53 wall=31.06
+divide-02 32 3 host C gpu=7.46 wall=30.94
+divide-02 32 3 host gen gpu=7.06 wall=32.46
+divide-02 32 3 resident C gpu=8.11 wall=28.49
+divide-02 32 3 resident gen gpu=7.76 wall=30.56

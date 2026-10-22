@@ -1,0 +1,11 @@
+enum Choice { Low, High(i32) }
+
+fn take_it(value: take Choice) -> i32 { return 0i32; }
+
+fn main() -> i32 {
+    let choice: Choice = Choice::Low();
+    return match choice {
+        Choice::Low => take_it(move choice),
+        Choice::High(number) => number,
+    };
+}

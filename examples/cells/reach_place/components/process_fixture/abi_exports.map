@@ -1,0 +1,9 @@
+{
+  global:
+    invar_process_v1_version;
+    invar_process_v1_init;
+    invar_process_v1_configure;
+    invar_process_v1_step;
+    invar_process_v1_shutdown;
+  local: *;
+};

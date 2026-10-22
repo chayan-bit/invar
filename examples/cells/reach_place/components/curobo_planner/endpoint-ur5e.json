@@ -1,0 +1,257 @@
+{
+  "joint_count": 6,
+  "joint_mapping": [
+    [
+      "shoulder_pan_joint",
+      "shoulder_pan_joint"
+    ],
+    [
+      "shoulder_lift_joint",
+      "shoulder_lift_joint"
+    ],
+    [
+      "elbow_joint",
+      "elbow_joint"
+    ],
+    [
+      "wrist_1_joint",
+      "wrist_1_joint"
+    ],
+    [
+      "wrist_2_joint",
+      "wrist_2_joint"
+    ],
+    [
+      "wrist_3_joint",
+      "wrist_3_joint"
+    ]
+  ],
+  "metrics": {
+    "orientation": "sign-invariant-geodesic-rad",
+    "orientation_max_rad": 0.017453292519943295,
+    "start_max_rad": 1e-6,
+    "translation": "euclidean-m",
+    "translation_max_m": 0.002
+  },
+  "qualification": "unexecuted_fixed_requests_not_task_acceptance",
+  "schema": "invar-planner-endpoint-goldens-v2",
+  "seed": 123,
+  "source_reference": {
+    "arm": "ur5e",
+    "path": "../../../../../tests/fixtures/foreign-components/pinocchio_goldens.json",
+    "sha256": "3f907af98ce3a9ceb550d06f10e709b8c48bd64d7ca4000bcb0a04d8140b8a39"
+  },
+  "tool_projection": {
+    "anchor_body": "wrist_3_link",
+    "cell_tool": {
+      "link": "wrist_3_link",
+      "pose": {
+        "quat": [
+          "-1",
+          "1",
+          "0",
+          "0"
+        ],
+        "xyz": [
+          {
+            "unit": "m",
+            "value": "0"
+          },
+          {
+            "unit": "m",
+            "value": "0.1"
+          },
+          {
+            "unit": "m",
+            "value": "0"
+          }
+        ]
+      }
+    },
+    "planner_reference_frame": "tool0",
+    "reference_frame": "attachment_site",
+    "reference_from_cell": {
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        0.9999999999999998
+      ],
+      "translation_m": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "reference_implementation_sha256": "20d3f960b14212c09eace96bc98500272c1296c013db3600d2b81f1eba172142",
+    "reference_model_sha256": "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
+    "schema": "invar-tool-projection-v1",
+    "source_scene_sha256": "e877852d40095926ff7db9cfb85e595b550e03da398bd6f6f58885d39038d1b6"
+  },
+  "vectors": [
+    {
+      "attached": 0,
+      "cube_base_pose": [
+        0.3,
+        0,
+        0.025,
+        0,
+        0,
+        0,
+        1
+      ],
+      "id": "ur5e-0-to-1-attached-0",
+      "source_goal_vector": 1,
+      "source_start_vector": 0,
+      "start_q_rad": [
+        0.0,
+        -1.0,
+        1.0,
+        -1.0,
+        0.5,
+        0.0
+      ],
+      "target_base_from_tool": [
+        -0.005048365173312877,
+        -0.5904372946250418,
+        -0.5082253943525437,
+        0.32048092191235733,
+        -0.6358436444546836,
+        -0.22269960502387037,
+        0.6658826656543934
+      ],
+      "tool_from_cube": [
+        0.4542597919934832,
+        0.10285361239252125,
+        -0.5008554416634532,
+        0.1749410172812731,
+        -0.5173821608993923,
+        -0.6851245437674761,
+        0.4819913895320884
+      ]
+    },
+    {
+      "attached": 1,
+      "cube_base_pose": [
+        0.3,
+        0,
+        0.025,
+        0,
+        0,
+        0,
+        1
+      ],
+      "id": "ur5e-0-to-1-attached-1",
+      "source_goal_vector": 1,
+      "source_start_vector": 0,
+      "start_q_rad": [
+        0.0,
+        -1.0,
+        1.0,
+        -1.0,
+        0.5,
+        0.0
+      ],
+      "target_base_from_tool": [
+        -0.005048365173312877,
+        -0.5904372946250418,
+        -0.5082253943525437,
+        0.32048092191235733,
+        -0.6358436444546836,
+        -0.22269960502387037,
+        0.6658826656543934
+      ],
+      "tool_from_cube": [
+        0.4542597919934832,
+        0.10285361239252125,
+        -0.5008554416634532,
+        0.1749410172812731,
+        -0.5173821608993923,
+        -0.6851245437674761,
+        0.4819913895320884
+      ]
+    },
+    {
+      "attached": 0,
+      "cube_base_pose": [
+        0.3,
+        0,
+        0.025,
+        0,
+        0,
+        0,
+        1
+      ],
+      "id": "ur5e-1-to-0-attached-0",
+      "source_goal_vector": 0,
+      "source_start_vector": 1,
+      "start_q_rad": [
+        -1.6408530315231609,
+        0.9120835676897263,
+        -0.2725334847090779,
+        -0.573719329511853,
+        -3.356213684567415,
+        0.8455100773641853
+      ],
+      "target_base_from_tool": [
+        0.7316790508747404,
+        0.2217582561890372,
+        0.5069372059676756,
+        -0.1749410172812731,
+        0.5173821608993923,
+        0.6851245437674761,
+        0.4819913895320884
+      ],
+      "tool_from_cube": [
+        -0.012198744571493884,
+        0.7553309845249693,
+        -0.3941146021259451,
+        -0.32048092191235733,
+        0.6358436444546836,
+        0.22269960502387037,
+        0.6658826656543934
+      ]
+    },
+    {
+      "attached": 1,
+      "cube_base_pose": [
+        0.3,
+        0,
+        0.025,
+        0,
+        0,
+        0,
+        1
+      ],
+      "id": "ur5e-1-to-0-attached-1",
+      "source_goal_vector": 0,
+      "source_start_vector": 1,
+      "start_q_rad": [
+        -1.6408530315231609,
+        0.9120835676897263,
+        -0.2725334847090779,
+        -0.573719329511853,
+        -3.356213684567415,
+        0.8455100773641853
+      ],
+      "target_base_from_tool": [
+        0.7316790508747404,
+        0.2217582561890372,
+        0.5069372059676756,
+        -0.1749410172812731,
+        0.5173821608993923,
+        0.6851245437674761,
+        0.4819913895320884
+      ],
+      "tool_from_cube": [
+        -0.012198744571493884,
+        0.7553309845249693,
+        -0.3941146021259451,
+        -0.32048092191235733,
+        0.6358436444546836,
+        0.22269960502387037,
+        0.6658826656543934
+      ]
+    }
+  ]
+}

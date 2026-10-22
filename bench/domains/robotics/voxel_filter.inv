@@ -1,0 +1,28 @@
+fn voxel_of(v: f32, g: u32) -> u32 {
+    let c: u32 = u32_from_f32((v + 1.0) * 0.5 * f32_from_u32(g));
+    if c >= g { return g - 1u32; }
+    return c;
+}
+
+fn voxel_filter(points: read Array<f32>, n: u32, g: u32) -> Array<f32> {
+    let cells: u32 = g * g * g;
+    var sums: Array<f32> = filled_f32(cells * 3u32, 0.0);
+    var counts: Array<u32> = filled_u32(cells, 0u32);
+    for i in 0u32..n {
+        let cell: u32 = (voxel_of(points[i * 3u32 + 2u32], g) * g + voxel_of(points[i * 3u32 + 1u32], g)) * g + voxel_of(points[i * 3u32], g);
+        for d in 0u32..3u32 {
+            sums[cell * 3u32 + d] = sums[cell * 3u32 + d] + points[i * 3u32 + d];
+        }
+        counts[cell] = counts[cell] + 1u32;
+    }
+    var out: Array<f32> = filled_f32(cells * 3u32, 0.0);
+    for c in 0u32..cells {
+        if counts[c] > 0u32 {
+            let inv: f32 = 1.0 / f32_from_u32(counts[c]);
+            for d2 in 0u32..3u32 {
+                out[c * 3u32 + d2] = sums[c * 3u32 + d2] * inv;
+            }
+        }
+    }
+    return move out;
+}

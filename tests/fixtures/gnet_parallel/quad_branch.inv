@@ -1,0 +1,12 @@
+// Input-dependent four-way branch tree: some nodes are serial chains.
+fn q(n: i32, s: i32) -> i32 {
+    if n <= 0 { return s % 17; }
+    if s % 5 == 0 { return q(n - 1, s + 3); }
+    let a = q(n - 1, (s * 3 + 1) % 1009);
+    let b = q(n - 1, (s * 7 + 2) % 1009);
+    let c = q(n - 2, (s * 11 + 5) % 1009);
+    let d = q(n - 2, (s + 13) % 1009);
+    return (a + b + c + d) % 100003;
+}
+fn run(n: i32, seed: i32) -> i32 { return q(n, seed); }
+fn main() -> i32 { return run(5, 2); }

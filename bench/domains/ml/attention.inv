@@ -1,0 +1,38 @@
+fn attention(q: read Array<f32>, k: read Array<f32>, v: read Array<f32>, seq: u32, dim: u32) -> Array<f32> {
+    let scale: f32 = 1.0 / sqrt(f32_from_u32(dim));
+    var weights: Array<f32> = filled_f32(seq * seq, 0.0);
+    for i in 0u32..seq {
+        let row: u32 = i * seq;
+        for j in 0u32..seq {
+            var acc: f32 = 0.0;
+            for d in 0u32..dim {
+                acc = acc + q[i * dim + d] * k[j * dim + d];
+            }
+            weights[row + j] = acc * scale;
+        }
+        var peak: f32 = weights[row];
+        for j2 in 1u32..seq {
+            if weights[row + j2] > peak { peak = weights[row + j2]; }
+        }
+        var denom: f32 = 0.0;
+        for j3 in 0u32..seq {
+            let e: f32 = exp(weights[row + j3] - peak);
+            weights[row + j3] = e;
+            denom = denom + e;
+        }
+        for j4 in 0u32..seq {
+            weights[row + j4] = weights[row + j4] / denom;
+        }
+    }
+    var out: Array<f32> = filled_f32(seq * dim, 0.0);
+    for i2 in 0u32..seq {
+        for d2 in 0u32..dim {
+            var acc2: f32 = 0.0;
+            for j5 in 0u32..seq {
+                acc2 = acc2 + weights[i2 * seq + j5] * v[j5 * dim + d2];
+            }
+            out[i2 * dim + d2] = acc2;
+        }
+    }
+    return move out;
+}

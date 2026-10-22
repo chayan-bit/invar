@@ -1,0 +1,19 @@
+// A tree discovered while it is explored: each node's fan-out (0 to 3)
+// depends on its runtime value.
+fn visit(node: i32, depth: i32) -> i32 {
+    if depth == 0 { return 1; }
+    let fan = node % 4;
+    if fan == 0 { return 1; }
+    if fan == 1 { return 1 + visit((node * 3 + 2) % 997, depth - 1); }
+    if fan == 2 {
+        let a = visit((node * 3 + 2) % 997, depth - 1);
+        let b = visit((node * 7 + 5) % 997, depth - 1);
+        return 1 + a + b;
+    }
+    let x = visit((node * 3 + 2) % 997, depth - 1);
+    let y = visit((node * 7 + 5) % 997, depth - 1);
+    let z = visit((node * 11 + 1) % 997, depth - 1);
+    return 1 + x + y + z;
+}
+fn run(n: i32, seed: i32) -> i32 { return visit(seed, n); }
+fn main() -> i32 { return run(6, 7); }

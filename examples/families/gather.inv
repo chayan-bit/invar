@@ -1,0 +1,18 @@
+// Gather: out[i] = a[ix[i]] with a bounds-checked data-dependent load.
+fn gather(a: read Array<u32>, ix: read Array<u32>) -> Array<u32> {
+    var out = filled_u32(len(ix), 0u32);
+    for i in 0u32 .. len(ix) {
+        out[i] = a[ix[i]];
+    }
+    return out;
+}
+
+fn main() -> i32 {
+    let a: Array<u32> = [10u32, 20u32, 30u32, 40u32];
+    let ix: Array<u32> = [3u32, 0u32, 3u32];
+    let out = gather(a, ix);
+    if out[0u32] == 40u32 and out[1u32] == 10u32 and out[2u32] == 40u32 {
+        return 7;
+    }
+    return 0;
+}

@@ -1,0 +1,17 @@
+# ROS 2 Lyrical packages the S1-06 generated workspaces and tests use.
+ros_base
+ros2launch
+ros2bag
+rosbag2_storage_mcap
+rmw_zenoh_cpp
+controller_manager
+ros2controlcli
+hardware_interface
+joint_trajectory_controller
+joint_state_broadcaster
+mujoco_ros2_control
+generate_parameter_library
+control_msgs
+std_srvs
+pinocchio
+xacro

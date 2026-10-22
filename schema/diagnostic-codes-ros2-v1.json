@@ -1,0 +1,12 @@
+{
+  "schema": "invar-diagnostic-codes-ros2-v1",
+  "extends": "invar-diagnostic-codes-foreign-v1",
+  "codes": [
+    {"code":"S1500","meaning":"invalid ROS 2 parameter range or unsupported generated target input","deprecated":false,"reachability":"source"},
+    {"code":"S1501","meaning":"port type has no bounded ROS 2 representation","deprecated":false,"reachability":"source"},
+    {"code":"S1502","meaning":"source name has no valid ROS 2 mapping","deprecated":false,"reachability":"source"},
+    {"code":"S1503","meaning":"mapped ROS 2 node or generated file name collides","deprecated":false,"reachability":"source"},
+    {"code":"S1504","meaning":"controller lacks a compatible hardware interface or rate","deprecated":false,"reachability":"source"},
+    {"code":"S1505","meaning":"connection policy has no ROS 2 QoS mapping","deprecated":false,"reachability":"source"}
+  ]
+}

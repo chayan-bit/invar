@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    var xs: Array<i32> = [1i32, 2i32, 3i32];
+    let a = view_mut(xs, 0u32, 2u32);
+    let b = view_mut(xs, 1u32, 3u32);
+    return a[0u32];
+}

@@ -1,0 +1,17 @@
+// One input, three deterministic answers: the serial fold, the fixed-shape
+// tree (`sum_tree`) and the correctly rounded sum (`sum_exact`).
+fn serial_sum(xs: read Array<f32>) -> f32 {
+    var acc: f32 = 0.0;
+    for i in 0 .. len(xs) {
+        acc = acc + xs[i];
+    }
+    return acc;
+}
+
+fn main() -> i32 {
+    let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    if serial_sum(xs) != 16777216.0 { return 1; }
+    if sum_tree(xs) != 16777218.0 { return 2; }
+    if sum_exact(xs) != 16777224.0 { return 3; }
+    return 0;
+}

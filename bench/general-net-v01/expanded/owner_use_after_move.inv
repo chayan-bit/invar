@@ -1,0 +1,1 @@
+fn main() -> i32 { let a: Array<i32> = [1]; let b = move a; return a[0u32]; }

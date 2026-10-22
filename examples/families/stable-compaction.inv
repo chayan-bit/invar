@@ -1,0 +1,25 @@
+// Stable stream compaction: count the survivors, allocate exactly, then copy in source order.
+fn run(xs: read Array<u32>, count: u32, cutoff: u32) -> Array<u32> {
+    var selected = 0u32;
+    for i in 0u32 .. count {
+        if xs[i] > cutoff { selected = selected + 1u32; }
+    }
+    var out = filled_u32(selected, 0u32);
+    var pos = 0u32;
+    for j in 0u32 .. count {
+        if xs[j] > cutoff {
+            out[pos] = xs[j];
+            pos = pos + 1u32;
+        }
+    }
+    return move out;
+}
+
+fn main() -> i32 {
+    let xs: Array<u32> = [5u32, 1u32, 9u32, 2u32, 8u32];
+    let kept = run(xs, 5u32, 4u32);
+    if len(kept) == 3u32 and kept[0u32] == 5u32 and kept[1u32] == 9u32 and kept[2u32] == 8u32 {
+        return 7;
+    }
+    return 0;
+}

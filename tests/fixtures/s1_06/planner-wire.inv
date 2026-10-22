@@ -1,0 +1,45 @@
+frame world;
+frame base: world;
+frame tool: base;
+frame object: base;
+fn run() -> i32 { return 0; }
+component Sequencer {
+    port out request: std::robotics::PlannerRequest<f64,robot_dof,base,tool,object> @ 10 Hz;
+    port in trajectory: std::robotics::PlannerTrajectory<f64,robot_dof> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB;
+    license "Apache-2.0";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+component PlannerBoundaryProbe {
+    port in request: std::robotics::PlannerRequest<f64,6,base,tool,object> @ 10 Hz;
+    port out trajectory: std::robotics::PlannerTrajectory<f64,6> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB;
+    license "Apache-2.0";
+    isolation separate-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+// Generation-only measured-port stand-in, not runtime FK/object telemetry.
+component MeasuredFrameProbe {
+    port out tool_pose: std::robotics::Pose<f64,base,tool> @ 10 Hz;
+    port out object_pose: std::robotics::Pose<f64,base,object> @ 10 Hz;
+    resource cpu_cores = 1, memory = 1 MiB;
+    license "Apache-2.0";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 100 ms;
+    impl invar run;
+}
+connect sequencer.request -> planner.request policy queue(1);
+connect planner.trajectory -> sequencer.trajectory policy queue(1);
+product P {
+    distribution proprietary-binary;
+    commercial true;
+    robot menagerie::universal_robots_ur5e;
+    capacity cpu_cores = 3, memory = 3 MiB;
+}
+system planner_wire_probe for P { sequencer: Sequencer; planner: PlannerBoundaryProbe; measured: MeasuredFrameProbe; }

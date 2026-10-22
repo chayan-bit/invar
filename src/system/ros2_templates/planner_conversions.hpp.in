@@ -1,0 +1,147 @@
+#pragma once
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <string>
+#include <utility>
+#include <vector>
+#include "planner@JOINTS@_wire.h"
+
+namespace invar_planner@JOINTS@_ros_v1 {
+using Limits = std::array<std::array<double, 2>, @JOINTS@>;
+using Speeds = std::array<double, @JOINTS@>;
+
+inline bool valid_limits(const Limits & limits) {
+  for (const auto & limit : limits)
+    if (!std::isfinite(limit[0]) || !std::isfinite(limit[1]) || limit[0] >= limit[1]) return false;
+  return true;
+}
+
+template <typename Values>
+bool pose_from_ros(const Values & source, inv_planner_pose_wire_v1 & target) {
+  if (source.size() != 7) return false;
+  double norm = 0.0;
+  for (std::size_t i = 0; i < 7; ++i) {
+    if (!std::isfinite(source[i])) return false;
+    if (i >= 3) norm += source[i] * source[i];
+  }
+  if (!std::isfinite(norm) || std::abs(std::sqrt(norm) - 1.0) > 1e-12) return false;
+  inv_planner_pose_wire_v1 candidate{};
+  for (std::size_t i = 0; i < 3; ++i) candidate.xyz_m[i] = source[i];
+  for (std::size_t i = 0; i < 4; ++i) candidate.quaternion_xyzw[i] = source[i + 3];
+  target = candidate;
+  return true;
+}
+
+template <typename RequestMessage>
+bool request_from_ros(const RequestMessage & source, const Limits & limits,
+                      inv_planner_request@JOINTS@_f64_v2 & target) {
+  if (source.start_q_rad.size() != @JOINTS@ || source.goal_q_rad.size() != @JOINTS@ ||
+      source.phase > 4 || !valid_limits(limits)) return false;
+  inv_planner_request@JOINTS@_f64_v2 candidate{};
+  if (!pose_from_ros(source.target_base_from_tool, candidate.target_base_from_tool) ||
+      !pose_from_ros(source.cube_base_pose, candidate.cube_base_pose) ||
+      !pose_from_ros(source.tool_from_cube, candidate.tool_from_cube)) return false;
+  for (std::size_t i = 0; i < @JOINTS@; ++i) {
+    const double q = source.start_q_rad[i];
+    if (!std::isfinite(q) || q < limits[i][0] || q > limits[i][1]) return false;
+    candidate.start_q_rad[i] = q;
+    const double goal = source.goal_q_rad[i];
+    if (!std::isfinite(goal) || goal < limits[i][0] || goal > limits[i][1]) return false;
+    // Only the home phase (4) carries a joint goal; every other phase repeats the start.
+    if (source.phase != 4 && std::memcmp(&goal, &q, sizeof q) != 0) return false;
+    candidate.goal_q_rad[i] = goal;
+  }
+  candidate.phase = source.phase;
+  target = candidate;
+  return true;
+}
+
+template <typename TrajectoryMessage>
+bool trajectory_to_ros(const inv_planner_trajectory@JOINTS@_f64_v1 & source,
+                       const Limits & limits, const Speeds & speeds,
+                       TrajectoryMessage & target) {
+  if (!valid_limits(limits) || source.count < 2 || source.count > 256 ||
+      !std::isfinite(source.dt_s) || source.dt_s <= 0.0) return false;
+  for (const double speed : speeds)
+    if (!std::isfinite(speed) || speed <= 0.0) return false;
+  double previous = -1.0;
+  for (std::size_t k = 0; k < source.count; ++k) {
+    const auto & point = source.waypoints[k];
+    if (!std::isfinite(point.time_from_start_s) || point.time_from_start_s < 0.0 ||
+        point.time_from_start_s <= previous) return false;
+    previous = point.time_from_start_s;
+    for (std::size_t i = 0; i < @JOINTS@; ++i) {
+      if (!std::isfinite(point.q_rad[i]) || point.q_rad[i] < limits[i][0] ||
+          point.q_rad[i] > limits[i][1] || !std::isfinite(point.dq_rad_s[i]) ||
+          std::abs(point.dq_rad_s[i]) > speeds[i]) return false;
+    }
+  }
+  TrajectoryMessage candidate;
+  candidate.dt_s = source.dt_s;
+  candidate.waypoints.resize(source.count);
+  for (std::size_t k = 0; k < source.count; ++k) {
+    auto & point = candidate.waypoints[k];
+    point.time_from_start_s = source.waypoints[k].time_from_start_s;
+    for (std::size_t i = 0; i < @JOINTS@; ++i) {
+      point.q_rad[i] = source.waypoints[k].q_rad[i];
+      point.dq_rad_s[i] = source.waypoints[k].dq_rad_s[i];
+    }
+  }
+  target = std::move(candidate);
+  return true;
+}
+template <typename PlannerMessage, typename ControllerMessage>
+bool controller_trajectory_from_ros(const PlannerMessage & source,
+                                    const std::vector<std::string> & joint_names,
+                                    const Limits & limits, const Speeds & speeds,
+                                    ControllerMessage & target) {
+  if (joint_names.size() != @JOINTS@ || !valid_limits(limits) ||
+      source.waypoints.size() < 2 || source.waypoints.size() > 256 ||
+      !std::isfinite(source.dt_s) || source.dt_s <= 0.0) return false;
+  for (std::size_t i = 0; i < @JOINTS@; ++i) {
+    if (joint_names[i].empty() || joint_names[i].size() > 64 ||
+        joint_names[i].find('\0') != std::string::npos ||
+        !std::isfinite(speeds[i]) || speeds[i] <= 0.0) return false;
+    for (std::size_t j = 0; j < i; ++j)
+      if (joint_names[i] == joint_names[j]) return false;
+  }
+  ControllerMessage candidate;
+  candidate.joint_names = joint_names;
+  candidate.points.resize(source.waypoints.size());
+  std::int64_t previous_ns = -1;
+  double previous_time = -1.0;
+  for (std::size_t k = 0; k < source.waypoints.size(); ++k) {
+    const auto & point = source.waypoints[k];
+    const double time = point.time_from_start_s;
+    if (point.q_rad.size() != @JOINTS@ || point.dq_rad_s.size() != @JOINTS@ ||
+        !std::isfinite(time) || time < 0.0 || time <= previous_time ||
+        time >= static_cast<double>(std::numeric_limits<std::int32_t>::max()) + 1.0) return false;
+    auto seconds = static_cast<std::int64_t>(std::floor(time));
+    auto nanos = static_cast<std::int64_t>(std::llround((time - static_cast<double>(seconds)) * 1e9));
+    if (nanos == 1000000000) { ++seconds; nanos = 0; }
+    if (seconds > std::numeric_limits<std::int32_t>::max()) return false;
+    const std::int64_t total_ns = seconds * 1000000000 + nanos;
+    if (total_ns <= previous_ns) return false;
+    previous_time = time;
+    previous_ns = total_ns;
+    auto & converted = candidate.points[k];
+    converted.positions.resize(@JOINTS@);
+    converted.velocities.resize(@JOINTS@);
+    for (std::size_t i = 0; i < @JOINTS@; ++i) {
+      const double q = point.q_rad[i], speed = point.dq_rad_s[i];
+      if (!std::isfinite(q) || q < limits[i][0] || q > limits[i][1] ||
+          !std::isfinite(speed) || std::abs(speed) > speeds[i]) return false;
+      converted.positions[i] = q;
+      converted.velocities[i] = speed;
+    }
+    converted.time_from_start.sec = static_cast<std::int32_t>(seconds);
+    converted.time_from_start.nanosec = static_cast<std::uint32_t>(nanos);
+  }
+  target = std::move(candidate);
+  return true;
+}
+}  // namespace invar_planner@JOINTS@_ros_v1

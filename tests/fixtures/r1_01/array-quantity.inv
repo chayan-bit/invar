@@ -1,0 +1,4 @@
+fn main() -> i32 {
+    let values: Array<i32> = [quantity::<m>(1)];
+    return 0;
+}

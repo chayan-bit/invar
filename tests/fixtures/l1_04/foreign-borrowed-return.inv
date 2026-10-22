@@ -1,0 +1,2 @@
+extern c fn bad() -> Result<View<u32>, ForeignError> oracle missing;
+fn main() -> i32 { return 0; }

@@ -1,0 +1,85 @@
+#pragma once
+#include <invar_cell_interfaces/planner@JOINTS@_conversions.hpp>
+#include <filesystem>
+#include <string>
+#include <vector>
+
+namespace invar_planner@JOINTS@_ros_v1 {
+struct ConfigValues {
+  std::string model_sha256, robot_config_sha256, scene_sha256;
+  std::string base_frame, tool_frame, robot_config_path, scene_config_path;
+  std::vector<std::string> joint_names;
+  std::vector<double> joint_limits_rad, velocity_limits_rad_s, table_pose, table_half_extents_m;
+  double cube_edge_m = 0.05;
+};
+inline bool hash_bytes(const std::string & text, uint8_t (&target)[32]) {
+  if (text.size() != 64) return false;
+  const auto digit = [](char c) -> int {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+  };
+  for (std::size_t i = 0; i < 32; ++i) {
+    const int high = digit(text[2 * i]), low = digit(text[2 * i + 1]);
+    if (high < 0 || low < 0) return false;
+    target[i] = static_cast<uint8_t>(16 * high + low);
+  }
+  return true;
+}
+inline bool borrowed_text(const std::string & text, std::size_t bound,
+                          inv_planner_text_wire_v1 & target) {
+  if (text.empty() || text.size() > bound || text.size() > UINT16_MAX ||
+      text.find('\0') != std::string::npos) return false;
+  target = {reinterpret_cast<const uint8_t *>(text.data()), static_cast<uint16_t>(text.size())};
+  return true;
+}
+inline bool local_file(const std::string & path) {
+  if (path.empty() || path.size() > 4096 || path.find('\0') != std::string::npos ||
+      !std::filesystem::path(path).is_absolute()) return false;
+  std::error_code error;
+  return std::filesystem::is_regular_file(path, error) && !error;
+}
+// Wire text pointers borrow values for the immediate configure call only.
+inline bool configure_values(const ConfigValues & values, inv_planner_config_wire_v1 & target,
+                             Limits & limits, Speeds & speeds) {
+  if (values.joint_names.size() != @JOINTS@ || values.joint_limits_rad.size() != 2 * @JOINTS@ ||
+      values.velocity_limits_rad_s.size() != @JOINTS@ || values.table_half_extents_m.size() != 3 ||
+      values.cube_edge_m != 0.05 || !local_file(values.robot_config_path) ||
+      !local_file(values.scene_config_path)) return false;
+  inv_planner_config_wire_v1 wire{};
+  Limits checked_limits{};
+  Speeds checked_speeds{};
+  wire.robot_kind = @JOINTS@;
+  wire.joint_count = @JOINTS@;
+  wire.cube_edge_m = values.cube_edge_m;
+  if (!hash_bytes(values.model_sha256, wire.model_sha256) ||
+      !hash_bytes(values.robot_config_sha256, wire.robot_config_sha256) ||
+      !hash_bytes(values.scene_sha256, wire.scene_sha256) ||
+      !pose_from_ros(values.table_pose, wire.table_pose) ||
+      !borrowed_text(values.base_frame, 64, wire.base_frame) ||
+      !borrowed_text(values.tool_frame, 64, wire.tool_frame) ||
+      !borrowed_text(values.robot_config_path, 4096, wire.robot_config_path) ||
+      !borrowed_text(values.scene_config_path, 4096, wire.scene_config_path)) return false;
+  for (std::size_t i = 0; i < 3; ++i) {
+    const double extent = values.table_half_extents_m[i];
+    if (!std::isfinite(extent) || extent <= 0.0) return false;
+    wire.table_half_extents_m[i] = extent;
+  }
+  for (std::size_t i = 0; i < @JOINTS@; ++i) {
+    for (std::size_t j = 0; j < i; ++j)
+      if (values.joint_names[i] == values.joint_names[j]) return false;
+    if (!borrowed_text(values.joint_names[i], 64, wire.joint_names[i])) return false;
+    checked_limits[i] = {values.joint_limits_rad[2 * i], values.joint_limits_rad[2 * i + 1]};
+    checked_speeds[i] = values.velocity_limits_rad_s[i];
+    if (!std::isfinite(checked_speeds[i]) || checked_speeds[i] <= 0.0) return false;
+    wire.joint_limits_rad[i][0] = checked_limits[i][0];
+    wire.joint_limits_rad[i][1] = checked_limits[i][1];
+  }
+  if (!valid_limits(checked_limits)) return false;
+  target = wire;
+  limits = checked_limits;
+  speeds = checked_speeds;
+  return true;
+}
+}  // namespace invar_planner@JOINTS@_ros_v1

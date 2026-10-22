@@ -1,0 +1,44 @@
+#include <invar_cell_interfaces/msg/planner_trajectory@JOINTS@_v1.hpp>
+#include <invar_cell_interfaces/planner@JOINTS@_conversions.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+
+namespace binding = invar_planner@JOINTS@_ros_v1;
+using Plan = invar_cell_interfaces::msg::PlannerTrajectory@JOINTS@V1;
+using Command = trajectory_msgs::msg::JointTrajectory;
+class ControllerBridge final : public rclcpp::Node {
+ public:
+  ControllerBridge() : rclcpp::Node("invar_controller_bridge") {
+    publisher_ = create_publisher<Command>("/joint_trajectory_controller/joint_trajectory",
+                                           rclcpp::QoS(rclcpp::KeepLast(1)).reliable());
+    subscription_ = create_subscription<Plan>("trajectory",
+        rclcpp::QoS(rclcpp::KeepLast(@DEPTH@)).reliable(), [this](Plan::ConstSharedPtr message) {
+          Command command;
+          if (failed_ || !binding::controller_trajectory_from_ros(*message, names_, limits_, speeds_, command)) {
+            failed_ = true;
+            std::cerr << "{\"component\":\"controller_bridge\",\"success\":false,\"code\":\"S1404\"}\n";
+            throw std::runtime_error("controller trajectory rejected");
+          }
+          // Default zero header stamp asks ros2_control to start on receipt.
+          publisher_->publish(command);
+        });
+  }
+ private:
+  const std::vector<std::string> names_{@NAMES@};
+  const binding::Limits limits_{{@LIMITS@}};
+  const binding::Speeds speeds_{{@SPEEDS@}};
+  bool failed_ = false;
+  rclcpp::Publisher<Command>::SharedPtr publisher_;
+  rclcpp::Subscription<Plan>::SharedPtr subscription_;
+};
+int main(int argc, char ** argv) {
+  rclcpp::init(argc, argv);
+  int result = 0;
+  try { rclcpp::spin(std::make_shared<ControllerBridge>()); }
+  catch (const std::exception &) { std::cerr << "controller bridge failed\n"; result = 1; }
+  rclcpp::shutdown();
+  return result;
+}

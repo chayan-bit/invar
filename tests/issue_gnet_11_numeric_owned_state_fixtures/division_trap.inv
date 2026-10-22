@@ -1,0 +1,1 @@
+fn main()->i32 {var xs=filled_i32(2u32,0);xs=filled_i32(1u32,5);let ys:Array<f32> = [0.0/0.0];let q=xs[0u32]/xs[0u32]-1;return 7/q;}

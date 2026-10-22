@@ -1,0 +1,50 @@
+fn cell_of(v: f32, g: u32) -> u32 {
+    let c: u32 = u32_from_f32((v + 1.0) * 0.5 * f32_from_u32(g));
+    if c >= g { return g - 1u32; }
+    return c;
+}
+
+fn grid_broadphase(pos: read Array<f32>, n: u32, g: u32, r2: f32) -> Array<u32> {
+    var counts: Array<u32> = filled_u32(g * g + 1u32, 0u32);
+    for i in 0u32..n {
+        let cell: u32 = cell_of(pos[i * 2u32 + 1u32], g) * g + cell_of(pos[i * 2u32], g);
+        counts[cell + 1u32] = counts[cell + 1u32] + 1u32;
+    }
+    for c in 0u32..g * g {
+        counts[c + 1u32] = counts[c + 1u32] + counts[c];
+    }
+    var cursor: Array<u32> = filled_u32(g * g, 0u32);
+    var order: Array<u32> = filled_u32(n, 0u32);
+    for i2 in 0u32..n {
+        let cell2: u32 = cell_of(pos[i2 * 2u32 + 1u32], g) * g + cell_of(pos[i2 * 2u32], g);
+        order[counts[cell2] + cursor[cell2]] = i2;
+        cursor[cell2] = cursor[cell2] + 1u32;
+    }
+    var hits: Array<u32> = filled_u32(n, 0u32);
+    for i3 in 0u32..n {
+        let cx: u32 = cell_of(pos[i3 * 2u32], g);
+        let cy: u32 = cell_of(pos[i3 * 2u32 + 1u32], g);
+        var y0: u32 = 0u32;
+        if cy > 0u32 { y0 = cy - 1u32; }
+        var x0: u32 = 0u32;
+        if cx > 0u32 { x0 = cx - 1u32; }
+        for y in y0..cy + 2u32 {
+            for x in x0..cx + 2u32 {
+                if y < g {
+                    if x < g {
+                        let cell3: u32 = y * g + x;
+                        for t in counts[cell3]..counts[cell3 + 1u32] {
+                            let j: u32 = order[t];
+                            if j != i3 {
+                                let dx: f32 = pos[j * 2u32] - pos[i3 * 2u32];
+                                let dy: f32 = pos[j * 2u32 + 1u32] - pos[i3 * 2u32 + 1u32];
+                                if dx * dx + dy * dy < r2 { hits[i3] = hits[i3] + 1u32; }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return move hits;
+}

@@ -1,0 +1,5 @@
+fn main() -> i32 {
+    let radians: Quantity<i32, rad> = quantity::<rad>(1000000000i32);
+    let degrees: Quantity<i32, deg> = to::<deg>(radians);
+    return 0i32;
+}

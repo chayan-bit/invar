@@ -1,0 +1,5 @@
+fn main() -> i32 {
+  let raw: Bytes = b"\xFF";
+  let result = utf8_decode(raw);
+  return match move result { Result::Ok(text) => 0i32, Result::Err(error) => 1i32 };
+}

@@ -1,0 +1,1 @@
+fn step(x: u32) -> u32 { return x + 4294967295u32; } fn main() -> i32 { let xs: Array<u32> = filled_u32(63u32, 4294967293u32); let pad: u32 = 3u32; var ys: Array<u32> = filled_u32(len(xs), 0u32); for i in 0u32 .. len(xs) { ys[i] = step(xs[i]); } return 0; }

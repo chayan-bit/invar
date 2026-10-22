@@ -1,0 +1,14 @@
+struct Model { scale: f32, bias: f32 }
+fn joint(x: f32, q: f32, model: f32) -> f32 { return (x + q) * model; }
+fn fk(q: read Array<f32>, model: read Array<f32>, out: mut Array<f32>, constants: read Model, fail: Bool) -> f32 {
+    var last: f32 = -0.0;
+    for i in 0u32..len(out) {
+        var x: f32 = 0.0;
+        for j in 0u32..6u32 { x = joint(x, q[i * 6u32 + j], model[j]); }
+        last = x * constants.scale + constants.bias;
+        out[i] = last;
+    }
+    if fail { return out[len(out)]; }
+    return last;
+}
+fn main() -> i32 { return 0; }

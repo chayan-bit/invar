@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chayan-bit/invar/blob/main/schema/invar-explain-device-v1.schema.json",
+  "title": "invar-explain-device-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "requested_engine": {
+      "enum": [
+        "cuda",
+        "metal",
+        "auto"
+      ]
+    },
+    "choices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string"
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "backend": {
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "cuda-failed-before-publication",
+              "cuda-feature-unavailable",
+              "device-plan-ineligible",
+              "device-unavailable",
+              "forced-device",
+              "live-guard-false",
+              "measured-cpu-cost",
+              "measured-device-cost",
+              "metal-buffer-slot-limit",
+              "metal-failed-before-publication",
+              "metal-no-f64",
+              "publication-guard-false",
+              "staged-consumer",
+              "toolchain-unavailable"
+            ]
+          },
+          "kind": {
+            "type": "string"
+          },
+          "cost_ms": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "cpu": {
+                    "type": "number"
+                  },
+                  "device": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "cpu",
+                  "device"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "function",
+          "span",
+          "backend",
+          "reason"
+        ]
+      }
+    },
+    "result": {
+      "type": "integer"
+    },
+    "module_cache_hits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schedule_hint_hits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schedule_hint_invalids": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "normal_form": {
+      "description": "P6(a) normal-form route (#263): the laws the law executor applied with the checked certificate identity, or why the serial path ran.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "laws",
+            "certificates",
+            "fingerprint",
+            "certificate_digest",
+            "lanes"
+          ],
+          "properties": {
+            "status": {
+              "const": "routed"
+            },
+            "laws": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^L[0-9]+$"
+              }
+            },
+            "certificates": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "certificate_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "lanes": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "const": "fallback"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "recursion-law-not-routed",
+                    "certificate-rejected",
+                    "residue-law-not-routed",
+                    "executor-refused",
+                    "no-law-applied",
+                    "law-state-violation",
+                    "call-depth-unproven",
+                    "fuel-unproven",
+                    "live-elements-unproven",
+                    "executor-tool-limit"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^no-lowering:[a-z]+/[a-z]+(-[a-z]+)*$"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "requested_engine",
+    "choices",
+    "result",
+    "module_cache_hits",
+    "schedule_hint_hits",
+    "schedule_hint_invalids"
+  ]
+}

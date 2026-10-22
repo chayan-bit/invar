@@ -1,0 +1,40 @@
+fn grid_bfs(walls: read Array<f32>, n: u32) -> Array<u32> {
+    let unreached: u32 = 4294967295u32;
+    var dist: Array<u32> = filled_u32(n * n, unreached);
+    var frontier: Array<u32> = filled_u32(n * n, 0u32);
+    var next: Array<u32> = filled_u32(n * n, 0u32);
+    var fcount: u32 = 1u32;
+    dist[0u32] = 0u32;
+    var level: u32 = 0u32;
+    while fcount > 0u32 {
+        var ncount: u32 = 0u32;
+        for f in 0u32..fcount {
+            let cell: u32 = frontier[f];
+            let cx: u32 = cell % n;
+            let cy: u32 = cell / n;
+            for d in 0u32..4u32 {
+                var nx: u32 = cx;
+                var ny: u32 = cy;
+                var ok: u32 = 1u32;
+                if d == 0u32 { if cx + 1u32 < n { nx = cx + 1u32; } else { ok = 0u32; } }
+                if d == 1u32 { if cx > 0u32 { nx = cx - 1u32; } else { ok = 0u32; } }
+                if d == 2u32 { if cy + 1u32 < n { ny = cy + 1u32; } else { ok = 0u32; } }
+                if d == 3u32 { if cy > 0u32 { ny = cy - 1u32; } else { ok = 0u32; } }
+                if ok == 1u32 {
+                    let at: u32 = ny * n + nx;
+                    if walls[at] <= 0.4 {
+                        if dist[at] == unreached {
+                            dist[at] = level + 1u32;
+                            next[ncount] = at;
+                            ncount = ncount + 1u32;
+                        }
+                    }
+                }
+            }
+        }
+        for f2 in 0u32..ncount { frontier[f2] = next[f2]; }
+        fcount = ncount;
+        level = level + 1u32;
+    }
+    return move dist;
+}

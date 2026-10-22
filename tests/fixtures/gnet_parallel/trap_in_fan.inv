@@ -1,0 +1,12 @@
+// A later independent call traps; it may only surface after every older
+// sibling has completed in source order.
+fn slow(n: i32) -> i32 { var s = 0; var i = 0; while i < n { s = s + i % 7; i = i + 1; } return s; }
+fn risky(n: i32, d: i32) -> i32 { return slow(n) / d; }
+fn run(n: i32, d: i32) -> i32 {
+    let a = slow(n);
+    let b = slow(n + 10);
+    let c = risky(n, d);
+    let e = slow(n + 20);
+    return a + b + c + e;
+}
+fn main() -> i32 { return run(40, 3); }

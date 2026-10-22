@@ -1,0 +1,17 @@
+{
+  "schema": "invar-target-v1",
+  "name": "cpu-aarch64-apple-m4",
+  "source": "sysctl hw.perflevel0/1 and hw.optional.arm on an Apple M4 (2026-10-21)",
+  "device": {"backend": "cpu", "arch": "aarch64", "model": "apple-m4"},
+  "cpu": {
+    "simd_width_bits": 128,
+    "isa": ["neon", "fp16", "dotprod", "i8mm", "bf16", "sme", "sme2"],
+    "caches": [
+      {"level": 1, "bytes": 131072, "line_bytes": 128, "shared_by_cores": 1, "core_class": "performance"},
+      {"level": 2, "bytes": 16777216, "line_bytes": 128, "shared_by_cores": 4, "core_class": "performance"},
+      {"level": 1, "bytes": 65536, "line_bytes": 128, "shared_by_cores": 1, "core_class": "efficiency"},
+      {"level": 2, "bytes": 4194304, "line_bytes": 128, "shared_by_cores": 6, "core_class": "efficiency"}
+    ],
+    "numa_nodes": 1
+  }
+}

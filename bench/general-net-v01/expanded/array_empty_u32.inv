@@ -1,0 +1,1 @@
+fn main() -> i32 { let xs: Array<u32> = []; if len(xs) == 0u32 { return 17; } return 1 / 0; }

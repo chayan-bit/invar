@@ -1,0 +1,16 @@
+// Balanced divide and conquer over a runtime range with a serial leaf loop.
+fn mix(i: i32) -> i32 { return (i * 7 + 3) % 101; }
+fn dc(lo: i32, hi: i32) -> i32 {
+    if hi - lo <= 8 {
+        var s = 0;
+        var i = lo;
+        while i < hi { s = s + mix(i); i = i + 1; }
+        return s;
+    }
+    let mid = lo + (hi - lo) / 2;
+    let a = dc(lo, mid);
+    let b = dc(mid, hi);
+    return a + b;
+}
+fn run(n: i32, seed: i32) -> i32 { return dc(seed, seed + n); }
+fn main() -> i32 { return run(256, 3); }

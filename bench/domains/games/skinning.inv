@@ -1,0 +1,18 @@
+fn skinning(verts: read Array<f32>, weights: read Array<f32>, bones: read Array<f32>, n: u32, nb: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(n * 3u32, 0.0);
+    for i in 0u32..n {
+        let x: f32 = verts[i * 3u32];
+        let y: f32 = verts[i * 3u32 + 1u32];
+        let z: f32 = verts[i * 3u32 + 2u32];
+        for r in 0u32..3u32 {
+            var acc: f32 = 0.0;
+            for k in 0u32..4u32 {
+                let m: u32 = ((i + k) % nb) * 12u32 + r * 4u32;
+                let t: f32 = bones[m] * x + bones[m + 1u32] * y + bones[m + 2u32] * z + bones[m + 3u32];
+                acc = acc + weights[i * 4u32 + k] * t;
+            }
+            out[i * 3u32 + r] = acc;
+        }
+    }
+    return move out;
+}

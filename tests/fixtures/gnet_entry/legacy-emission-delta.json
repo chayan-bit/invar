@@ -1,0 +1,898 @@
+{
+  "aggregate/emit_aggregates/Cpu": {
+    "after": {
+      "abi": 6,
+      "frame_bytes": 9728,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 22730,
+      "source_sha256": "0b994a91554cc069267a511d3cee458b953c07a087c1cb8df15f41afd2c26b11",
+      "states": 12,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 6,
+      "frame_bytes": 9728,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 22709,
+      "source_sha256": "92761e6840461dd1e12244b9ac415a758b321047d6945d670a85e0391567fb52",
+      "states": 12,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "aggregate/emit_resumable_aggregates/Cpu": {
+    "after": {
+      "abi": 7,
+      "frame_bytes": 9728,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 29309,
+      "source_sha256": "6ffa429c92885dcee489908a646f61a112bb897ae836a423be349b6b4e51b009",
+      "states": 51,
+      "target": "Cpu",
+      "task_bytes": 9872
+    },
+    "before": {
+      "abi": 7,
+      "frame_bytes": 9728,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 29288,
+      "source_sha256": "cc98d0d8717d46908c2370ad02b85f603c031ce402eba6421c2fac7e42057a05",
+      "states": 51,
+      "target": "Cpu",
+      "task_bytes": 9872
+    }
+  },
+  "numeric/emit_device_speculative/Cpu": {
+    "after": {
+      "error": "SpeculationTarget"
+    },
+    "before": {
+      "error": "UnsupportedType"
+    }
+  },
+  "numeric/emit_device_speculative/Cuda": {
+    "after": {
+      "abi": 13,
+      "frame_bytes": 6144,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 30333,
+      "source_sha256": "83a82e760233a02a287ece9a6392e90e5f55172b595b8a4b7bef6299a0791434",
+      "states": 18,
+      "target": "Cuda",
+      "task_bytes": 6288
+    },
+    "before": {
+      "error": "UnsupportedType"
+    }
+  },
+  "numeric/emit_device_speculative/Metal": {
+    "after": {
+      "abi": 13,
+      "frame_bytes": 6144,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 30829,
+      "source_sha256": "12843dfac3b76a963727446a37fb8cc8805ce100e6e7d848b804b67194b5ba8c",
+      "states": 18,
+      "target": "Metal",
+      "task_bytes": 6288
+    },
+    "before": {
+      "error": "UnsupportedType"
+    }
+  },
+  "numeric/emit_numeric/Cpu": {
+    "after": {
+      "abi": 8,
+      "frame_bytes": 6144,
+      "heap_words": null,
+      "kernel": null,
+      "source_bytes": 13297,
+      "source_sha256": "abfa75d6f62ddc3d3f2477dd1994c88a95a737da9e982559c3aa1858d39c310a",
+      "states": 2,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 8,
+      "frame_bytes": 6144,
+      "heap_words": null,
+      "kernel": null,
+      "source_bytes": 13128,
+      "source_sha256": "b9b7746033e6f3e71cbd34392ab33067e4b8b1c24172bea9c29de3d2fe6276b3",
+      "states": 2,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "numeric/emit_owned_numeric/Cpu": {
+    "after": {
+      "abi": 10,
+      "frame_bytes": 6144,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 18910,
+      "source_sha256": "89788a530530b2869f1c50ed77209e2d2962cb8c82cef6f018923e4f2bb738e5",
+      "states": 2,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 10,
+      "frame_bytes": 6144,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 18723,
+      "source_sha256": "5689e5dfea7dd83dad0c4ce3897226db4f83dddbe540cbeb39cd38444c0607b3",
+      "states": 2,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "numeric/emit_resumable_numeric/Cpu": {
+    "after": {
+      "abi": 9,
+      "frame_bytes": 6144,
+      "heap_words": null,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 17398,
+      "source_sha256": "4ddf18ac17a8d3e689c1af94ed78e2da0eb1f8560dc3cfcb5364259719e8aa67",
+      "states": 18,
+      "target": "Cpu",
+      "task_bytes": 6288
+    },
+    "before": {
+      "abi": 9,
+      "frame_bytes": 6144,
+      "heap_words": null,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 17229,
+      "source_sha256": "3f641478f4445b28d35343633b33b2a40bdd876332efbb86b64650fdbd2cc2bb",
+      "states": 18,
+      "target": "Cpu",
+      "task_bytes": 6288
+    }
+  },
+  "numeric/emit_resumable_owned_numeric/Cpu": {
+    "after": {
+      "abi": 11,
+      "frame_bytes": 6144,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 23070,
+      "source_sha256": "96488cbe46ec5f54517fc8ceecf1d2cb20f4f622c8361bdf24ac6ee8ed6d9acf",
+      "states": 18,
+      "target": "Cpu",
+      "task_bytes": 6288
+    },
+    "before": {
+      "abi": 11,
+      "frame_bytes": 6144,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22883,
+      "source_sha256": "062db0fe42a85da12ee079e6d0ba85e67fb6a36afa83f9d0ba72815a91c6f204",
+      "states": 18,
+      "target": "Cpu",
+      "task_bytes": 6288
+    }
+  },
+  "numeric_owned/emit_device_speculative/Cpu": {
+    "after": {
+      "error": "SpeculationTarget"
+    },
+    "before": {
+      "error": "UnsupportedType"
+    }
+  },
+  "numeric_owned/emit_device_speculative/Cuda": {
+    "after": {
+      "abi": 13,
+      "frame_bytes": 11776,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 38888,
+      "source_sha256": "63315275a87b756b668756a4e17039d90f1915828239f31d14b51600d27515ad",
+      "states": 42,
+      "target": "Cuda",
+      "task_bytes": 11920
+    },
+    "before": {
+      "error": "UnsupportedType"
+    }
+  },
+  "numeric_owned/emit_device_speculative/Metal": {
+    "after": {
+      "abi": 13,
+      "frame_bytes": 11776,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 39384,
+      "source_sha256": "f0e2ee97b2cbc3a7157a674f41b263ad9f6ba35b92e9fc616d8a7963526fd6e3",
+      "states": 42,
+      "target": "Metal",
+      "task_bytes": 11920
+    },
+    "before": {
+      "error": "UnsupportedType"
+    }
+  },
+  "numeric_owned/emit_owned_numeric/Cpu": {
+    "after": {
+      "abi": 10,
+      "frame_bytes": 11776,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 25372,
+      "source_sha256": "018ea34e11130cd6200fed91a1d6a3737cfa66673ef21093e607e4e71e21e144",
+      "states": 2,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 10,
+      "frame_bytes": 11776,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 25185,
+      "source_sha256": "cbc5762d1fdb7d73aa9104122e910b77fa940061e350e2821514c620a3fbc2c3",
+      "states": 2,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "numeric_owned/emit_resumable_owned_numeric/Cpu": {
+    "after": {
+      "abi": 11,
+      "frame_bytes": 11776,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31623,
+      "source_sha256": "28997b1a8cb8c16ddbf287bb341ba695bf476935b9e297a7639d9084aa694df7",
+      "states": 42,
+      "target": "Cpu",
+      "task_bytes": 11920
+    },
+    "before": {
+      "abi": 11,
+      "frame_bytes": 11776,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31436,
+      "source_sha256": "45fea2df80132226b39b1edeaf40bb0b71e5a6073939af10398016c5c2b0fdd9",
+      "states": 42,
+      "target": "Cpu",
+      "task_bytes": 11920
+    }
+  },
+  "owned/emit_aggregates/Cpu": {
+    "after": {
+      "abi": 6,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16850,
+      "source_sha256": "556340706d0a37a5ee3c224b4c3b0ce582cf14d8e173065a6b55060a15cb58ea",
+      "states": 3,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 6,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16829,
+      "source_sha256": "d48e07c774fae6826e184a38ef2c75bfd7b9ec345ba12d104da0f8fd32eade72",
+      "states": 3,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "owned/emit_owned/Cpu": {
+    "after": {
+      "abi": 2,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16037,
+      "source_sha256": "074f296c83934532b5b57b2a6c45fa02dee44ed2b01ab2fc955cd9b0087c2c60",
+      "states": 3,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 2,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16016,
+      "source_sha256": "8ff56fd646d76d8df8a9c2c054ffbae603eb3a4ac7e9a10b963748197e39a236",
+      "states": 3,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "owned/emit_owned/Cuda": {
+    "after": {
+      "abi": 2,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16447,
+      "source_sha256": "82955dbf47d696ecd745234c47957d26164c6b44878f0be504cca1fa3adf4ccd",
+      "states": 3,
+      "target": "Cuda",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 2,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16426,
+      "source_sha256": "5b42f0c30fdc74f798e126880b2ce2704497a0609368664aec356ef371c77570",
+      "states": 3,
+      "target": "Cuda",
+      "task_bytes": null
+    }
+  },
+  "owned/emit_owned/Metal": {
+    "after": {
+      "abi": 2,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16572,
+      "source_sha256": "a942546937928e4294c537ed1bcb57602dc3ac714cb809dba1165680d6cba3dc",
+      "states": 3,
+      "target": "Metal",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 2,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16551,
+      "source_sha256": "66a4f215a5a67d4bfa1574b0bfbaf77071e4ae464dd6c9e02b66a1299eb9a248",
+      "states": 3,
+      "target": "Metal",
+      "task_bytes": null
+    }
+  },
+  "owned/emit_owned_numeric/Cpu": {
+    "after": {
+      "abi": 10,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 25874,
+      "source_sha256": "c17ae4972fd0e3e5847821621d28ec72fc421ac44b0c0114ffc4f7c0f10752c2",
+      "states": 3,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 10,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 25687,
+      "source_sha256": "e5cc0721ce738212363889202e7b46f1870535777423e6d7d492fee3dba821bc",
+      "states": 3,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "owned/emit_resumable/Cpu": {
+    "after": {
+      "abi": 3,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21911,
+      "source_sha256": "b29047158a769ac5ec8d814f5cb8a2bb3cdb160c8afbcddee44e2c9c979eff16",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    },
+    "before": {
+      "abi": 3,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21890,
+      "source_sha256": "fee4ace7c72c2af0d71f2dcfc3557c04fa3c51f28e479548b330912a9288e1a6",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    }
+  },
+  "owned/emit_resumable/Cuda": {
+    "after": {
+      "abi": 3,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21245,
+      "source_sha256": "ff251f987613c300f2acd88e2a6a180126b7d0144c625cda19a8d0f569a9b5c2",
+      "states": 40,
+      "target": "Cuda",
+      "task_bytes": 10384
+    },
+    "before": {
+      "abi": 3,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21224,
+      "source_sha256": "b84d201ce1485cbaff12392702274e635439995db4f0de19cfb27fd1f4a1bd54",
+      "states": 40,
+      "target": "Cuda",
+      "task_bytes": 10384
+    }
+  },
+  "owned/emit_resumable/Metal": {
+    "after": {
+      "abi": 3,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21406,
+      "source_sha256": "82e9a8bfad0291e3eb9edee08cc9571c39098a5cd08f2a43caaf3f64fa1cab3a",
+      "states": 40,
+      "target": "Metal",
+      "task_bytes": 10384
+    },
+    "before": {
+      "abi": 3,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21385,
+      "source_sha256": "7eeeb6b1aace6b2b446f316a925406dd1192ee047d4a8ff460729ab60ba34ccb",
+      "states": 40,
+      "target": "Metal",
+      "task_bytes": 10384
+    }
+  },
+  "owned/emit_resumable_aggregates/Cpu": {
+    "after": {
+      "abi": 7,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22724,
+      "source_sha256": "d115b128d9534f14212ace1fc88d4f29380320e88c5204a67cd1d7e199d19fee",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    },
+    "before": {
+      "abi": 7,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22703,
+      "source_sha256": "9c57e380af108fdf6691b25933306ae2c781fcd0818c5cb04f0a29a1ea2e5287",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    }
+  },
+  "owned/emit_resumable_owned_numeric/Cpu": {
+    "after": {
+      "abi": 11,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31925,
+      "source_sha256": "b7d9d6f624dd099f65f6d3845dfc241d9fc9215b0f5c4b768994680ad8a71e81",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    },
+    "before": {
+      "abi": 11,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31738,
+      "source_sha256": "93b2495ebae9962948b134a4bab96b16e17dc809747f42dc4a91c997dbff8c1c",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    }
+  },
+  "owned/emit_speculative/Cpu": {
+    "after": {
+      "abi": 4,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 28909,
+      "source_sha256": "05ef4b1207c92a4902a1c6957b1205a8ed5e5940715514b5808976470fda10c5",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    },
+    "before": {
+      "abi": 4,
+      "frame_bytes": 10240,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 28888,
+      "source_sha256": "ceab89201faccf9de3ce0972cecd51ba8f00f5ccf45302867b0b2b5fa38441cb",
+      "states": 40,
+      "target": "Cpu",
+      "task_bytes": 10384
+    }
+  },
+  "scalar/emit_aggregates/Cpu": {
+    "after": {
+      "abi": 6,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 17257,
+      "source_sha256": "084c1e5672e1f17a986497ccb9d9a88734b29cecbb1ddd4c1bdedb94b1355a63",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 6,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 17236,
+      "source_sha256": "a320c23b28dddb01233b025e13da1a12c3ddc3857f33bc94a0c35d753d832637",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "scalar/emit_device_speculative/Cuda": {
+    "after": {
+      "abi": 5,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 32393,
+      "source_sha256": "bad1aa3ef9a669519a70f510c9aa513e192333b0eca08a9b284e37a052bdd097",
+      "states": 39,
+      "target": "Cuda",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 5,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 32372,
+      "source_sha256": "f1dd6f0e79dec840d80763f93e1f09a2f0ff7686256551b7c2f472da01717f27",
+      "states": 39,
+      "target": "Cuda",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_device_speculative/Metal": {
+    "after": {
+      "abi": 5,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 32858,
+      "source_sha256": "fe0dd2e1db905b5de37d9b172495c6a5da070ecf8eb5253881ac677441dfaa94",
+      "states": 39,
+      "target": "Metal",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 5,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 32837,
+      "source_sha256": "483baf0ed6a7b9390dca048f0c34ea2e2b7cb08366d68df30912d7f5cdf9f059",
+      "states": 39,
+      "target": "Metal",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_numeric/Cpu": {
+    "after": {
+      "abi": 8,
+      "frame_bytes": 9216,
+      "heap_words": null,
+      "kernel": null,
+      "source_bytes": 20668,
+      "source_sha256": "f3289c6db122f43fd4bb8de1414005ab9d458cdcaf81828ce175d22d24e45bb3",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 8,
+      "frame_bytes": 9216,
+      "heap_words": null,
+      "kernel": null,
+      "source_bytes": 20499,
+      "source_sha256": "6ae2cb1bf8e0c27ccf5fe646195532d0a5869d7d1d188750f4d960c6710ea8aa",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "scalar/emit_owned/Cpu": {
+    "after": {
+      "abi": 2,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16444,
+      "source_sha256": "a767371361c9f9584c726d6dcc36a742312e24db8119af29cde650c52d6f765a",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 2,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16423,
+      "source_sha256": "e37ea675efe2ae44bbb7aae3919812682d48e556997a4aa3e5d5d02af620e1d6",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "scalar/emit_owned/Cuda": {
+    "after": {
+      "abi": 2,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16854,
+      "source_sha256": "93fa8d6f18444ade8ce56f0d4d3cff1c823ce3c788430abd2cb1c9451beb75d9",
+      "states": 8,
+      "target": "Cuda",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 2,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16833,
+      "source_sha256": "f0b7e1179ecf539a505b87529033d37bc5fee045d7a5b5994c57d792b99ce12f",
+      "states": 8,
+      "target": "Cuda",
+      "task_bytes": null
+    }
+  },
+  "scalar/emit_owned/Metal": {
+    "after": {
+      "abi": 2,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16979,
+      "source_sha256": "36ba891f71ea6208129abeb58d3abcab9f52a841beaf79ff4553ae6375b57ddc",
+      "states": 8,
+      "target": "Metal",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 2,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 16958,
+      "source_sha256": "3f8eb1ef4f74e0f4a014f09453384934c91178eeafd5190b6f92f1c1417bc1f7",
+      "states": 8,
+      "target": "Metal",
+      "task_bytes": null
+    }
+  },
+  "scalar/emit_owned_numeric/Cpu": {
+    "after": {
+      "abi": 10,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 26281,
+      "source_sha256": "62f7d0d14989fea05ae0048c1187aa1c8df1728a8d56cef64427def364ba6b54",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    },
+    "before": {
+      "abi": 10,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": null,
+      "source_bytes": 26094,
+      "source_sha256": "48eab42d14922f6734d2bc8c3bc9e92f8a6c90bc9019627c9ad8b7675e69627b",
+      "states": 8,
+      "target": "Cpu",
+      "task_bytes": null
+    }
+  },
+  "scalar/emit_resumable/Cpu": {
+    "after": {
+      "abi": 3,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22097,
+      "source_sha256": "899993fe56a4a21d71cac845c804a2079b2e71d9c4ae90d2391590480bbca5ce",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 3,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22076,
+      "source_sha256": "f3d41abc39bce54f1fa2351b7a05c4d66ad92bde44e9d1dacaacb7aabd11c8d8",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_resumable/Cuda": {
+    "after": {
+      "abi": 3,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21431,
+      "source_sha256": "3fd579273fd38615b97992d34faf2bc661571f06ba750f9cbaec87bc97b34449",
+      "states": 39,
+      "target": "Cuda",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 3,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21410,
+      "source_sha256": "0292fe608f8a4c489265e96a8688e0d1a63d3f35c682b1f89bec4b4cc395142c",
+      "states": 39,
+      "target": "Cuda",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_resumable/Metal": {
+    "after": {
+      "abi": 3,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21592,
+      "source_sha256": "e70ea77700fd6f4ce5fa30b28ddd9e280f97383f4a8bd4fc962be4c254e70d77",
+      "states": 39,
+      "target": "Metal",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 3,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 21571,
+      "source_sha256": "d8cd3e3b7e844056209dc0fba8083180e826e52ffa7bc4d91fed14fe89bf9d67",
+      "states": 39,
+      "target": "Metal",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_resumable_aggregates/Cpu": {
+    "after": {
+      "abi": 7,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22910,
+      "source_sha256": "63d4e9b084c99e9a13f108111eefbccc76364cf6872da418cb30f1b0b3a7f315",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 7,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 22889,
+      "source_sha256": "69d6af4a343173a15a9b64c0f54277fe7377ef89a94919e5d33a71bb506802a2",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_resumable_numeric/Cpu": {
+    "after": {
+      "abi": 9,
+      "frame_bytes": 9216,
+      "heap_words": null,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 26437,
+      "source_sha256": "7a6397b61653924051603c0c4c06ae1fed8db001d8403dbe9a04004d8d3baec8",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 9,
+      "frame_bytes": 9216,
+      "heap_words": null,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 26268,
+      "source_sha256": "b968f18b06863684c000e6b2a53e6d905999d1ae458a3c7e5b5d77576223c394",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_resumable_owned_numeric/Cpu": {
+    "after": {
+      "abi": 11,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 32110,
+      "source_sha256": "1311924a7ce66cd8afd8676fff6a4adc39c97b15d5b3638a9397a97b844e12d4",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 11,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31923,
+      "source_sha256": "9305d54bb81c7134b88f398e575728899d5ea89d3daaf5925f10ff50ae7d811c",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    }
+  },
+  "scalar/emit_speculative/Cpu": {
+    "after": {
+      "abi": 4,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31912,
+      "source_sha256": "728cc47afcd0f3fa2933d21b936dcf0fd0fbbde898ce46193d31fd6d1894bb2c",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    },
+    "before": {
+      "abi": 4,
+      "frame_bytes": 9216,
+      "heap_words": 128,
+      "kernel": "invar_gnet_resume_v3",
+      "source_bytes": 31891,
+      "source_sha256": "da61b56d21c5553b6fc6ce56645f9eee2deacc15ce1b5abf833a5c514266510b",
+      "states": 39,
+      "target": "Cpu",
+      "task_bytes": 9360
+    }
+  }
+}

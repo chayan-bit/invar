@@ -1,0 +1,5 @@
+frame world;
+frame base: world;
+frame tool: base;
+
+fn main() -> i32 { return 0i32; }

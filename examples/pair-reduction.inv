@@ -1,0 +1,20 @@
+// Left-then-right affine composition modulo 2^32, identity (1, 0).
+fn pair(aa: read Array<u32>, bb: read Array<u32>) -> Array<u32> {
+    var a: u32 = 1u32;
+    var b: u32 = 0u32;
+    for i in 0u32 .. len(aa) {
+        a = wrapping_mul(aa[i], a);
+        b = wrapping_add(wrapping_mul(aa[i], b), bb[i]);
+    }
+    return [a, b];
+}
+
+fn main() -> i32 {
+    let aa: Array<u32> = [2u32, 5u32];
+    let bb: Array<u32> = [3u32, 7u32];
+    let result = pair(aa, bb);
+    if result[0u32] == 10u32 and result[1u32] == 22u32 {
+        return 0;
+    }
+    return 1;
+}

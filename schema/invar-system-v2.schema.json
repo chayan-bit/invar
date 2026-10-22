@@ -1,0 +1,584 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invar.dev/schema/invar-system-v2.schema.json",
+  "title": "Invar checked system IR v2",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "system",
+    "frames",
+    "components",
+    "extern_components",
+    "connections",
+    "flows",
+    "products"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "invar-system-v2"
+    },
+    "version": {
+      "const": 2
+    },
+    "system": {
+      "$ref": "#/$defs/system"
+    },
+    "frames": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/frame"
+      }
+    },
+    "components": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "extern_components": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "connections": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/connection"
+      }
+    },
+    "flows": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/flow"
+      }
+    },
+    "products": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/product"
+      }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "decimal": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]*[1-9])?$"
+    },
+    "quantity": {
+      "type": "object",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/decimal"
+        },
+        "unit": {
+          "$ref": "#/$defs/name"
+        }
+      }
+    },
+    "quantities": {
+      "type": "object",
+      "maxProperties": 64,
+      "additionalProperties": {
+        "$ref": "#/$defs/quantity"
+      }
+    },
+    "frame": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "parent"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "parent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "port": {
+      "type": "object",
+      "required": [
+        "name",
+        "direction",
+        "type",
+        "rate",
+        "latency",
+        "optional",
+        "layout",
+        "bus"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "direction": {
+          "enum": [
+            "in",
+            "out"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/name"
+        },
+        "rate": {
+          "$ref": "#/$defs/quantity"
+        },
+        "latency": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/quantity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "optional": {
+          "type": "boolean"
+        },
+        "layout": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bus": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "license": {
+      "type": "object",
+      "required": [
+        "expression",
+        "link",
+        "modified",
+        "replaceable",
+        "network_exposed",
+        "grant"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "$ref": "#/$defs/name"
+        },
+        "link": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modified": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "replaceable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "network_exposed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "grant": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "required": [
+        "kind",
+        "target",
+        "link"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "extern",
+            "invar"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/name"
+        },
+        "link": {
+          "$ref": "#/$defs/name"
+        }
+      }
+    },
+    "abi": {
+      "type": "object",
+      "required": [
+        "kind",
+        "prefix"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "c"
+        },
+        "prefix": {
+          "$ref": "#/$defs/name"
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "external",
+        "ports",
+        "params",
+        "resources",
+        "license",
+        "isolation",
+        "wcet",
+        "deadline",
+        "implementation",
+        "abi",
+        "lifecycle",
+        "golden",
+        "properties",
+        "shim"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "external": {
+          "type": "boolean"
+        },
+        "ports": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/port"
+          }
+        },
+        "params": {
+          "$ref": "#/$defs/parameters"
+        },
+        "resources": {
+          "$ref": "#/$defs/quantities"
+        },
+        "license": {
+          "$ref": "#/$defs/license"
+        },
+        "isolation": {
+          "enum": [
+            "in-process",
+            "separate-process",
+            "separate-partition"
+          ]
+        },
+        "wcet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/quantity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/quantity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "implementation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/implementation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "abi": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/abi"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lifecycle": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/name"
+          }
+        },
+        "golden": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          }
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          }
+        },
+        "shim": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "required": [
+        "id",
+        "source",
+        "target",
+        "policy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "source": {
+          "$ref": "#/$defs/name"
+        },
+        "target": {
+          "$ref": "#/$defs/name"
+        },
+        "policy": {
+          "$ref": "#/$defs/name"
+        }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "ports",
+        "within"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "ports": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/name"
+          }
+        },
+        "within": {
+          "$ref": "#/$defs/quantity"
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "distribution",
+        "commercial",
+        "robot",
+        "capacity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "distribution": {
+          "enum": [
+            "internal",
+            "proprietary-binary",
+            "open"
+          ]
+        },
+        "commercial": {
+          "type": "boolean"
+        },
+        "robot": {
+          "$ref": "#/$defs/name"
+        },
+        "capacity": {
+          "$ref": "#/$defs/quantities"
+        }
+      }
+    },
+    "system": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "product",
+        "instances"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "product": {
+          "$ref": "#/$defs/name"
+        },
+        "instances": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "component"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/name"
+              },
+              "name": {
+                "$ref": "#/$defs/name"
+              },
+              "component": {
+                "$ref": "#/$defs/name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "identity_transform": {
+      "type": "object",
+      "required": [
+        "kind",
+        "type",
+        "from",
+        "to",
+        "translation",
+        "rotation_wxyz"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "identity-transform"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^Transform<[^,<>]+,[^,<>]+>$"
+        },
+        "from": {
+          "$ref": "#/$defs/name"
+        },
+        "to": {
+          "$ref": "#/$defs/name"
+        },
+        "translation": {
+          "const": [
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        "rotation_wxyz": {
+          "const": [
+            "1",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "maxProperties": 64,
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/quantity"
+          },
+          {
+            "$ref": "#/$defs/identity_transform"
+          }
+        ]
+      }
+    }
+  }
+}

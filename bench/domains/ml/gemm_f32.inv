@@ -1,0 +1,13 @@
+fn gemm_f32(a: read Array<f32>, b: read Array<f32>, m: u32, k: u32, n: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(m * n, 0.0);
+    for i in 0u32..m {
+        for j in 0u32..n {
+            var acc: f32 = 0.0;
+            for p in 0u32..k {
+                acc = acc + a[i * k + p] * b[p * n + j];
+            }
+            out[i * n + j] = acc;
+        }
+    }
+    return move out;
+}

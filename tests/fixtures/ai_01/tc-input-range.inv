@@ -1,0 +1,2 @@
+fn mat(a:read Array<f32>,b:read Array<f32>,rows:u32,inner:u32,cols:u32)->Array<f32>{var c=filled_f32(rows*cols,0.0);for i in 0u32..rows{for j in 0u32..cols{for k in 0u32..inner{c[i*cols+j]=tc_mul_add(a[i*inner+k],b[k*cols+j],c[i*cols+j]);}}}return c;}
+fn main()->i32{let a:Array<f32> = [65520.0];let b:Array<f32> = [1.0];let out=mat(a,b,1u32,1u32,1u32);if out[0u32]==1.0{return 42;}return 99;}

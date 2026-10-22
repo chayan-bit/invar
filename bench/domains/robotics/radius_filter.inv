@@ -1,0 +1,14 @@
+fn radius_filter(points: read Array<f32>, n: u32, r2: f32) -> Array<u32> {
+    var neighbours: Array<u32> = filled_u32(n, 0u32);
+    for i in 0u32..n {
+        for j in 0u32..n {
+            if j != i {
+                let dx: f32 = points[i * 3u32] - points[j * 3u32];
+                let dy: f32 = points[i * 3u32 + 1u32] - points[j * 3u32 + 1u32];
+                let dz: f32 = points[i * 3u32 + 2u32] - points[j * 3u32 + 2u32];
+                if dx * dx + dy * dy + dz * dz < r2 { neighbours[i] = neighbours[i] + 1u32; }
+            }
+        }
+    }
+    return move neighbours;
+}

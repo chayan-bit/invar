@@ -1,0 +1,14 @@
+#[numeric(fold = "exact")]
+fn fold_sum(xs: read Array<f32>) -> f32 {
+    var acc: f32 = 0.0;
+    for i in 0u32..len(xs) { acc = acc + xs[i]; }
+    return acc;
+}
+
+fn main() -> i32 {
+    let xs: Array<f32> = [100000000.0, 1.0, -100000000.0, 0.5];
+    let r = fold_sum(xs);
+    if r == 1.5 { return 15; }
+    if r == 0.5 { return 5; }
+    return 0;
+}

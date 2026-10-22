@@ -1,0 +1,1 @@
+fn copy_elements(xs:read Array<f32>)->Array<f32> {var b=filled_f32(len(xs),0.0);for i in 0u32..len(xs) {b[i]=xs[i];}return b;} fn main()->i32 {let a:Array<f32> = [-0.0,0.0/0.0,1.0];let b=copy_elements(a);if 1.0/b[0u32]<0.0 and b[1u32]!=b[1u32] and b[2u32]==1.0 {return 7;}return 0;}

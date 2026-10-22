@@ -1,0 +1,8 @@
+// A diverging loop is stopped by evaluator fuel and reported as a limit, not as proved divergence.
+fn main() -> i32 {
+    var n: i32 = 0;
+    while true {
+        n = 1;
+    }
+    return n;
+}

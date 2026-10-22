@@ -1,0 +1,6 @@
+fn first() -> i32 { return 7; }
+fn later() -> i32 {
+    let xs: Array<i32> = [1];
+    return xs[2u32];
+}
+fn main() -> i32 { return first() + later(); }

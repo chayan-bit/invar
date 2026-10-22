@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chayan-bit/invar/blob/main/schema/invar-explain-device-v4.schema.json",
+  "title": "invar-explain-device-v4",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "requested_engine": {
+      "enum": [
+        "cuda",
+        "metal",
+        "auto"
+      ]
+    },
+    "choices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string"
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "backend": {
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "cuda-failed-before-publication",
+              "cuda-feature-unavailable",
+              "device-plan-ineligible",
+              "device-unavailable",
+              "forced-device",
+              "live-guard-false",
+              "measured-cpu-cost",
+              "measured-device-cost",
+              "metal-buffer-slot-limit",
+              "metal-failed-before-publication",
+              "metal-no-f64",
+              "publication-guard-false",
+              "sort-cost-unmeasured",
+              "spatial-cost-unmeasured",
+              "spatial-host-work",
+              "staged-consumer",
+              "toolchain-unavailable"
+            ]
+          },
+          "kind": {
+            "type": "string"
+          },
+          "cost_ms": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "cpu": {
+                    "type": "number"
+                  },
+                  "device": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "cpu",
+                  "device"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "implementation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "family_id": {
+            "enum": [
+              "spatial.voxel_grid_build.f32",
+              "spatial.radius_neighbors.f32",
+              "spatial.knn.f32",
+              "spatial.grid_excluded.f32"
+            ]
+          }
+        },
+        "required": [
+          "function",
+          "span",
+          "backend",
+          "reason"
+        ]
+      }
+    },
+    "result": {
+      "type": "integer"
+    },
+    "module_cache_hits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schedule_hint_hits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schedule_hint_invalids": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "requested_engine",
+    "choices",
+    "result",
+    "module_cache_hits",
+    "schedule_hint_hits",
+    "schedule_hint_invalids"
+  ]
+}

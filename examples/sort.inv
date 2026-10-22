@@ -1,0 +1,22 @@
+// Explicit stable sorts; equal keys retain the original payload order.
+fn main() -> i32 {
+    var keys: Array<u32> = [3u32,1u32,3u32,0u32];
+    var payload: Array<u32> = [0u32,1u32,2u32,3u32];
+    sort_by_key(keys,payload);
+    let order = argsort(keys);
+    var signed: Array<i32> = [3i32,-2i32,1i32,0i32];
+    let boundaries: Array<u32> = [0u32,2u32,2u32,4u32];
+    segmented_sort(signed,boundaries);
+    let nan = 0.0 / 0.0;
+    var floats: Array<f32> = [nan,0.0,-0.0,-1.0];
+    sort(floats);
+    if payload[0u32] == 3u32 and payload[1u32] == 1u32
+        and payload[2u32] == 0u32 and payload[3u32] == 2u32
+        and order[2u32] == 2u32 and order[3u32] == 3u32
+        and signed[0u32] == -2i32 and signed[2u32] == 0i32
+        and floats[0u32] == -1.0 and 1.0 / floats[1u32] < 0.0
+        and 1.0 / floats[2u32] > 0.0 and floats[3u32] != floats[3u32] {
+        return 7;
+    }
+    return 0;
+}

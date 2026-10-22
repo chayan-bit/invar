@@ -1,0 +1,2269 @@
+{
+  "schema": "invar-examples-index-v1",
+  "spec": "docs/spec/invar-v0.1.md",
+  "pending_families": [],
+  "examples": [
+    {
+      "path": "examples/bytes/byte-index-trap.inv",
+      "intent": "Indexing Bytes out of range traps with INDEX_OUT_OF_BOUNDS.",
+      "family": "bytes-text",
+      "tags": [
+        "bytes",
+        "trap"
+      ],
+      "spec_section": "7.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "INDEX_OUT_OF_BOUNDS"
+      }
+    },
+    {
+      "path": "examples/bytes/bytes-and-text.inv",
+      "intent": "Byte and string literals with escapes and byte lengths.",
+      "family": "bytes-text",
+      "tags": [
+        "bytes"
+      ],
+      "spec_section": "7.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/bytes/foreign-buffers.inv",
+      "intent": "Foreign declaration passing read and take buffers.",
+      "family": "c-abi",
+      "tags": [
+        "buffers",
+        "foreign"
+      ],
+      "spec_section": "7.3",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/bytes/foreign-callback.inv",
+      "intent": "Callbacks in a foreign signature are rejected.",
+      "family": "c-abi",
+      "tags": [
+        "foreign",
+        "negative"
+      ],
+      "spec_section": "7.3",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "TYPE_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/bytes/foreign-oracle.inv",
+      "intent": "A foreign declaration whose Invar oracle runs on the reference engine.",
+      "family": "c-abi",
+      "tags": [
+        "foreign"
+      ],
+      "spec_section": "7.3",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/bytes/foreign-use-after-take.inv",
+      "intent": "A take argument is consumed so a later use is OWN_USE_AFTER_MOVE.",
+      "family": "c-abi",
+      "tags": [
+        "foreign",
+        "negative"
+      ],
+      "spec_section": "7.3",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_USE_AFTER_MOVE"
+      }
+    },
+    {
+      "path": "examples/bytes/utf8-decode-error.inv",
+      "intent": "Malformed UTF-8 is an ordinary Err value and not a trap.",
+      "family": "bytes-text",
+      "tags": [
+        "result",
+        "utf8"
+      ],
+      "spec_section": "7.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 1
+      }
+    },
+    {
+      "path": "examples/bytes/utf8-decode.inv",
+      "intent": "utf8_decode accepts valid UTF-8 and returns a String.",
+      "family": "bytes-text",
+      "tags": [
+        "utf8"
+      ],
+      "spec_section": "7.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/bytes/utf8-slices.inv",
+      "intent": "bytes_slice and utf8_slice borrow a named owner and copy a range.",
+      "family": "bytes-text",
+      "tags": [
+        "utf8"
+      ],
+      "spec_section": "7.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/cells/menagerie-panda.inv",
+      "intent": "A cell selecting the Franka Panda robot model.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "robot"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "21253dfc2fc2c115acc0950e2eaa7137b90eaea8e1f8d952855d0ff7a78c1da2"
+      }
+    },
+    {
+      "path": "examples/cells/menagerie-ur5e.inv",
+      "intent": "A cell selecting the UR5e robot model.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "robot"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "37eb3e96894bebc738ad1fbdd7ea7bb1b845ce952651c08c16dedd464c6f6c25"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/cell-ur5e.inv",
+      "intent": "The reach and place cell for the UR5e with ROS 2 generation.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "generate"
+      ],
+      "spec_section": "10.3",
+      "engines": [
+        "system",
+        "generate"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [
+          "S1011:warning"
+        ],
+        "ir_sha256": "b76a11dbe1fc4ab53db43f8d7aac4d9bde316b4c585defda7d4d9c2f3d76d1ff",
+        "generate": [
+          {
+            "target": "ros2",
+            "files": 55,
+            "tree_sha256": "696ce00a3a2a6a28e32653351b98ddb95038e29d77179fb2e5196adc76d01f45"
+          },
+          {
+            "target": "mjcf",
+            "files": 22,
+            "tree_sha256": "0cf35b41bdb7f7009709d1c9e6bfbaf247c1274ede0ebdd1004f57bae4660157"
+          }
+        ]
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/cell.inv",
+      "intent": "A reach and place cell importing recorded foreign components, with ROS 2 and MJCF generation.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "generate"
+      ],
+      "spec_section": "10.3",
+      "engines": [
+        "system",
+        "generate"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [
+          "S1011:warning"
+        ],
+        "ir_sha256": "4553671b008c5fc61e56e632b5f70bf07115e482cbc89b87656c4684061ca3a8",
+        "generate": [
+          {
+            "target": "ros2",
+            "files": 102,
+            "tree_sha256": "bbcc9e6119c7a9281837f5d96263f415282b93025cb3e62b77b2afc47faa96d5"
+          },
+          {
+            "target": "mjcf",
+            "files": 69,
+            "tree_sha256": "1749e9480686d6c125dfa2b32c8efcfbca36be00d02ff2ac712eb1a09c8f16ba"
+          }
+        ]
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/curobo_planner/manifest-source-panda-v3.inv",
+      "intent": "Foreign component manifest curobo_planner manifest-source-panda-v3 that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/curobo_planner/manifest-source-ur5e-v3.inv",
+      "intent": "Foreign component manifest curobo_planner manifest-source-ur5e-v3 that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/curobo_planner/manifest-ur5e.inv",
+      "intent": "Foreign component manifest curobo_planner manifest-ur5e that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/curobo_planner/manifest.inv",
+      "intent": "Foreign component manifest curobo_planner manifest that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/manifest-unrecorded.inv",
+      "intent": "Foreign component manifest pinocchio_fk manifest-unrecorded that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/manifest-ur5e.inv",
+      "intent": "Foreign component manifest pinocchio_fk manifest-ur5e that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/manifest.inv",
+      "intent": "Foreign component manifest pinocchio_fk manifest that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/manifest.inv",
+      "intent": "Foreign component manifest process_fixture manifest that checks standalone.",
+      "family": "foreign-manifest",
+      "tags": [
+        "manifest"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "ok"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/manifest-import-unrecorded.inv",
+      "intent": "Importing a manifest with no passing contract-test record is S1405.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "import",
+        "negative"
+      ],
+      "spec_section": "10.3",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1405:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/manifest-import.inv",
+      "intent": "import component of a recorded manifest.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "import"
+      ],
+      "spec_section": "10.3",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "42ac2df7d58992e46db3e9485e506f534d039c872cccbb500d4864716761875a"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/manifest-select.inv",
+      "intent": "import component with a robot selection.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "import"
+      ],
+      "spec_section": "10.3",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "42ac2df7d58992e46db3e9485e506f534d039c872cccbb500d4864716761875a"
+      }
+    },
+    {
+      "path": "examples/cells/reach_place/robot-dof.inv",
+      "intent": "A joint vector typed by the selected robot's degrees of freedom.",
+      "family": "cell",
+      "tags": [
+        "cell",
+        "robot"
+      ],
+      "spec_section": "10.3",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "48d7f6a95eda1feac2a1f280807af1ba107d7fae06cba56f8c20eb38239d0399"
+      }
+    },
+    {
+      "path": "examples/families/frontier-reach.inv",
+      "intent": "Bounded dense-mask frontier reachability.",
+      "family": "frontier",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 5,
+        "recognize": {
+          "module": "frontier_source",
+          "entry": "reach"
+        }
+      }
+    },
+    {
+      "path": "examples/families/gather.inv",
+      "intent": "Gather by an index array.",
+      "family": "gather-scatter",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "indexed_source",
+          "entry": "gather"
+        }
+      }
+    },
+    {
+      "path": "examples/families/histogram-scatter.inv",
+      "intent": "Histogram by scatter-add.",
+      "family": "gather-scatter",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "histogram_source",
+          "entry": "hist"
+        }
+      }
+    },
+    {
+      "path": "examples/families/matrix-f32.inv",
+      "intent": "f32 matrix contraction with a fixed accumulation order.",
+      "family": "matrix",
+      "tags": [
+        "f32",
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "contraction_source",
+          "entry": "mat"
+        }
+      }
+    },
+    {
+      "path": "examples/families/segmented-sum.inv",
+      "intent": "Segmented sums over offsets.",
+      "family": "segmented",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "segmented_source",
+          "entry": "run"
+        }
+      }
+    },
+    {
+      "path": "examples/families/stable-compaction.inv",
+      "intent": "Stable compaction against a cutoff.",
+      "family": "gather-scatter",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "compaction_source",
+          "entry": "run"
+        }
+      }
+    },
+    {
+      "path": "examples/families/stencil-f32.inv",
+      "intent": "Five-point f32 stencil in the recognized source form.",
+      "family": "stencil",
+      "tags": [
+        "f32",
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "stencil_source",
+          "entry": "step"
+        }
+      }
+    },
+    {
+      "path": "examples/families/summary-table.inv",
+      "intent": "Bounded summary over a coefficient table.",
+      "family": "summaries",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "summary_source",
+          "entry": "run"
+        }
+      }
+    },
+    {
+      "path": "examples/families/transpose.inv",
+      "intent": "Row-major transpose in the recognized source form.",
+      "family": "transpose",
+      "tags": [
+        "m4"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "recognize"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "recognize": {
+          "module": "transpose_source",
+          "entry": "transpose"
+        }
+      }
+    },
+    {
+      "path": "examples/fk_panda.inv",
+      "intent": "Franka Panda forward kinematics in strict binary64; returns how many of four Pinocchio golden poses it reproduces within 1e-12.",
+      "family": "f64",
+      "tags": [
+        "v02",
+        "robotics"
+      ],
+      "spec_section": "B.4",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 4
+      }
+    },
+    {
+      "path": "examples/fsum.inv",
+      "intent": "One float array, three deterministic answers: the serial fold, the fixed-shape sum_tree and the correctly rounded sum_exact.",
+      "family": "float-reductions",
+      "tags": [
+        "v02"
+      ],
+      "spec_section": "B.1",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 0
+      }
+    },
+    {
+      "path": "examples/generated-map.inv",
+      "intent": "Generated zero-based counted map shape used by the reference and parallel engines.",
+      "family": "map",
+      "tags": [
+        "generated"
+      ],
+      "spec_section": "11.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "cpu-parallel",
+        "explain"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 0,
+        "explain": {
+          "regions": [
+            {
+              "function": "main",
+              "status": "admitted",
+              "kind": "map"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "examples/generics/closure-double-move.inv",
+      "intent": "Using a taken capture after the closure took it is OWN_USE_AFTER_MOVE.",
+      "family": "closures",
+      "tags": [
+        "closures",
+        "negative"
+      ],
+      "spec_section": "5.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_USE_AFTER_MOVE"
+      }
+    },
+    {
+      "path": "examples/generics/closure-escape.inv",
+      "intent": "Returning a closure is UNSUPPORTED_FEATURE.",
+      "family": "closures",
+      "tags": [
+        "closures",
+        "negative"
+      ],
+      "spec_section": "5.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "UNSUPPORTED_FEATURE"
+      }
+    },
+    {
+      "path": "examples/generics/closures.inv",
+      "intent": "A local closure capturing by copy, read and take.",
+      "family": "closures",
+      "tags": [
+        "closures"
+      ],
+      "spec_section": "5.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 10
+      }
+    },
+    {
+      "path": "examples/generics/generic-array.inv",
+      "intent": "A generic function instantiated at an array type.",
+      "family": "generics",
+      "tags": [
+        "arrays",
+        "generics"
+      ],
+      "spec_section": "5.6",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 17
+      }
+    },
+    {
+      "path": "examples/generics/generic-conflict.inv",
+      "intent": "Two arguments of different types for one type parameter is TYPE_MISMATCH.",
+      "family": "generics",
+      "tags": [
+        "generics",
+        "negative"
+      ],
+      "spec_section": "5.6",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "TYPE_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/generics/generics.inv",
+      "intent": "Inferred and explicit type arguments for bounded generic functions.",
+      "family": "generics",
+      "tags": [
+        "generics"
+      ],
+      "spec_section": "5.6",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 12
+      }
+    },
+    {
+      "path": "examples/generics/recursive-instantiation.inv",
+      "intent": "Recursive generic instantiation is UNSUPPORTED_FEATURE.",
+      "family": "generics",
+      "tags": [
+        "generics",
+        "negative"
+      ],
+      "spec_section": "5.6",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "UNSUPPORTED_FEATURE"
+      }
+    },
+    {
+      "path": "examples/language/checked-overflow.inv",
+      "intent": "Adding one to the largest i32 traps with INTEGER_OVERFLOW.",
+      "family": "core",
+      "tags": [
+        "trap"
+      ],
+      "spec_section": "3.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "INTEGER_OVERFLOW"
+      }
+    },
+    {
+      "path": "examples/language/division-by-zero.inv",
+      "intent": "Division by a zero i32 traps with DIVISION_BY_ZERO.",
+      "family": "core",
+      "tags": [
+        "trap"
+      ],
+      "spec_section": "3.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "DIVISION_BY_ZERO"
+      }
+    },
+    {
+      "path": "examples/language/division-rules.inv",
+      "intent": "Signed division truncates toward zero and MIN % -1 is zero.",
+      "family": "core",
+      "tags": [
+        "division"
+      ],
+      "spec_section": "3.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": -310
+      }
+    },
+    {
+      "path": "examples/language/fuel-limit.inv",
+      "intent": "A non-terminating loop ends with evaluation_limit and not with a trap.",
+      "family": "core",
+      "tags": [
+        "fuel"
+      ],
+      "spec_section": "3.6",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "evaluation_limit"
+      }
+    },
+    {
+      "path": "examples/language/index-trap.inv",
+      "intent": "Indexing one past the end of an array traps with INDEX_OUT_OF_BOUNDS.",
+      "family": "core",
+      "tags": [
+        "arrays",
+        "trap"
+      ],
+      "spec_section": "3.5",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "INDEX_OUT_OF_BOUNDS"
+      }
+    },
+    {
+      "path": "examples/language/loan-conflict.inv",
+      "intent": "Passing one array as mut and read in the same call is OWN_BORROW_CONFLICT.",
+      "family": "ownership",
+      "tags": [
+        "loans",
+        "negative"
+      ],
+      "spec_section": "4.2",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_BORROW_CONFLICT"
+      }
+    },
+    {
+      "path": "examples/language/missing-return.inv",
+      "intent": "A loop does not establish definite return so the function is RETURN_MISSING.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "3.2",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "RETURN_MISSING"
+      }
+    },
+    {
+      "path": "examples/language/module-cycle.inv",
+      "intent": "Two modules importing each other is MODULE_IMPORT_CYCLE.",
+      "family": "modules",
+      "tags": [
+        "modules",
+        "negative"
+      ],
+      "spec_section": "5.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "MODULE_IMPORT_CYCLE"
+      }
+    },
+    {
+      "path": "examples/language/modules-forward.inv",
+      "intent": "Forward import of a public module function that calls a private helper.",
+      "family": "modules",
+      "tags": [
+        "modules"
+      ],
+      "spec_section": "5.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 21
+      }
+    },
+    {
+      "path": "examples/language/recursion.inv",
+      "intent": "Direct recursion computes a Fibonacci number.",
+      "family": "core",
+      "tags": [
+        "recursion"
+      ],
+      "spec_section": "3.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 55
+      }
+    },
+    {
+      "path": "examples/language/short-circuit.inv",
+      "intent": "and and or short-circuit so the trapping operand is never evaluated.",
+      "family": "core",
+      "tags": [
+        "evaluation-order"
+      ],
+      "spec_section": "3.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 2
+      }
+    },
+    {
+      "path": "examples/language/type-mismatch.inv",
+      "intent": "Adding an i32 and a u32 is TYPE_MISMATCH because there is no promotion.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "3.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "TYPE_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/language/use-after-move.inv",
+      "intent": "Reading an array after move is OWN_USE_AFTER_MOVE.",
+      "family": "ownership",
+      "tags": [
+        "moves",
+        "negative"
+      ],
+      "spec_section": "4.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_USE_AFTER_MOVE"
+      }
+    },
+    {
+      "path": "examples/language/while-loop.inv",
+      "intent": "A while loop and a half-open for range with an immutable induction variable.",
+      "family": "core",
+      "tags": [
+        "loops"
+      ],
+      "spec_section": "3.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 43
+      }
+    },
+    {
+      "path": "examples/language/wrapping-u32.inv",
+      "intent": "wrapping_add computes modulo 2^32 on u32 operands.",
+      "family": "core",
+      "tags": [
+        "wrapping"
+      ],
+      "spec_section": "3.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 5
+      }
+    },
+    {
+      "path": "examples/metal-tensor-two-shapes.inv",
+      "intent": "Strict f32 matrix contraction at two shapes from ordinary source, the input of the Metal ahead-of-time tests.",
+      "family": "matrix",
+      "tags": [
+        "f32"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/ownership.inv",
+      "intent": "Mutable and take call loans: an in-place increment and a consuming call.",
+      "family": "ownership",
+      "tags": [
+        "bootstrap",
+        "loans"
+      ],
+      "spec_section": "4.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 41
+      }
+    },
+    {
+      "path": "examples/pair-reduction.inv",
+      "intent": "Ordered affine pair reduction: left-then-right composition modulo 2^32 with identity (1, 0).",
+      "family": "reduction",
+      "tags": [
+        "pair"
+      ],
+      "spec_section": "11.4",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 0
+      }
+    },
+    {
+      "path": "examples/parallel/map-wrapping.inv",
+      "intent": "A counted wrapping u32 map admitted by the planner.",
+      "family": "map",
+      "tags": [
+        "parallel"
+      ],
+      "spec_section": "11.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "cpu-parallel",
+        "explain"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 120,
+        "explain": {
+          "regions": [
+            {
+              "function": "main",
+              "status": "admitted",
+              "kind": "map"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "examples/parallel/reduction-checked-sum.inv",
+      "intent": "A checked sum that overflows; the planner rejects the region and the run traps.",
+      "family": "reduction",
+      "tags": [
+        "parallel",
+        "trap"
+      ],
+      "spec_section": "11.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "cpu-parallel",
+        "explain"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "INTEGER_OVERFLOW",
+        "explain": {
+          "regions": [
+            {
+              "function": "main",
+              "status": "rejected",
+              "kind": "serial"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "examples/parallel/reduction-wrapping-sum.inv",
+      "intent": "A lawful modular reduction admitted by the planner.",
+      "family": "reduction",
+      "tags": [
+        "parallel"
+      ],
+      "spec_section": "11.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "cpu-parallel",
+        "explain"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7,
+        "explain": {
+          "regions": [
+            {
+              "function": "main",
+              "status": "admitted",
+              "kind": "reduction"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "examples/parallel/scan-affine.inv",
+      "intent": "A prefix scan of an affine wrapping recurrence admitted by the planner.",
+      "family": "scan",
+      "tags": [
+        "parallel"
+      ],
+      "spec_section": "11.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "cpu-parallel",
+        "explain"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 26,
+        "explain": {
+          "regions": [
+            {
+              "function": "main",
+              "status": "admitted",
+              "kind": "scan"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "examples/sort.inv",
+      "intent": "Explicit stable sort intrinsics: sort_by_key keeps payload order for equal keys, argsort, segmented_sort and float totalOrder.",
+      "family": "sort",
+      "tags": [
+        "v02"
+      ],
+      "spec_section": "B.2",
+      "engines": [
+        "reference",
+        "mir"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/sum.inv",
+      "intent": "Checked i32 sum over a read-borrowed array; the planner rejects it because checked addition is not reassociated.",
+      "family": "reduction",
+      "tags": [
+        "bootstrap",
+        "checked-arithmetic"
+      ],
+      "spec_section": "11.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial",
+        "cpu-parallel",
+        "explain"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 10,
+        "explain": {
+          "regions": [
+            {
+              "function": "sum",
+              "status": "rejected",
+              "kind": "serial"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "examples/system/budget-wcet-over-deadline.inv",
+      "intent": "A WCET above the declared deadline is S1101.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1101:error",
+          "S1102:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/connection-unit-mismatch.inv",
+      "intent": "Connecting ports of different units is S1002.",
+      "family": "system",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1002:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/flow-over-budget.inv",
+      "intent": "A flow whose summed latency exceeds its budget is S1102.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.2",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1102:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/foreign-manifest-unknown-config.inv",
+      "intent": "An unregistered config layout is S1400.",
+      "family": "foreign-manifest",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1400:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/foreign-manifest.inv",
+      "intent": "A system that includes a foreign component manifest.",
+      "family": "foreign-manifest",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "10.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": []
+      }
+    },
+    {
+      "path": "examples/system/frame-missing-transform-source.inv",
+      "intent": "A tree edge with no transform source is S1201.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.3",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1201:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/frame-unreachable.inv",
+      "intent": "A frame not reachable from the single root is S1200.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.3",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1200:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/license-gpl-in-process.inv",
+      "intent": "GPL in process in a proprietary binary is S1300.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.5",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1300:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/license-gpl-separate-process.inv",
+      "intent": "GPL as an unmodified separate process passes.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.5",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [
+          "S1011:warning"
+        ],
+        "ir_sha256": "044fb77c4baf72d2f0a4fc49bc69dd3278f7d051231f6b83cf0660965fe2a54c"
+      }
+    },
+    {
+      "path": "examples/system/license-mpl-unmodified.inv",
+      "intent": "MPL-2.0 unmodified in process passes.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.5",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [
+          "S1011:warning"
+        ],
+        "ir_sha256": "e738b888dfdac70606ada6d16bcf9bd8640ba72cf8541d0e46f8e85bbf795b19"
+      }
+    },
+    {
+      "path": "examples/system/license-noncommercial.inv",
+      "intent": "Non-commercial terms in a commercial product is S1304.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.5",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1304:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/module-cell.inv",
+      "intent": "A system description split across modules.",
+      "family": "system",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "f4b098403e0c13462ae033744dde25b28abe248fc525aae1292e888dbb010434"
+      }
+    },
+    {
+      "path": "examples/system/optional-port.inv",
+      "intent": "An optional unconnected input is the warning S1011.",
+      "family": "system",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [
+          "S1011:warning"
+        ],
+        "ir_sha256": "002e8cce6d8ec079898401667159b4c6fcd51713a34c40e9bbab23035e19797e"
+      }
+    },
+    {
+      "path": "examples/system/rate-decimate-ratio.inv",
+      "intent": "decimate with a non-integral ratio.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1101:error",
+          "S1101:error",
+          "S1100:error",
+          "S1102:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/rate-queue-overrun.inv",
+      "intent": "A queue whose producer outruns its consumer.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1101:error",
+          "S1100:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/resource-bus-over.inv",
+      "intent": "Declared bus bandwidth exceeding the product capacity is S1250.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.4",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1250:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/resource-cpu-over.inv",
+      "intent": "Declared CPU cores exceeding the product capacity is S1250.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9.4",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1250:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/system/twelve-components.inv",
+      "intent": "A twelve component cell that passes every graph check.",
+      "family": "graph-checks",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "9",
+      "engines": [
+        "system",
+        "generate"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [
+          "S1011:warning"
+        ],
+        "ir_sha256": "6718b92fda2dfdb5921039f7bccd068064a5ea4637e17d62126a96a70433cc42",
+        "generate": [
+          {
+            "target": "ros2",
+            "files": 26,
+            "tree_sha256": "8e1883d3df188c9ea4356c912dd76e30e02457b599088fdac39230bddb822bba"
+          }
+        ]
+      }
+    },
+    {
+      "path": "examples/system/two-components.inv",
+      "intent": "Two components joined by a queue connection with a product and a system.",
+      "family": "system",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "ok",
+        "diagnostics": [],
+        "ir_sha256": "a7dd04834d3f22d094ca9c889d6ebcc586aa097b80b93753b25a4dc2dfd93953"
+      }
+    },
+    {
+      "path": "examples/system/two-producers.inv",
+      "intent": "Two producers on one input is S1004.",
+      "family": "system",
+      "tags": [
+        "system"
+      ],
+      "spec_section": "8.1",
+      "engines": [
+        "system"
+      ],
+      "expect": {
+        "command": "system",
+        "status": "source_error",
+        "diagnostics": [
+          "S1004:error"
+        ]
+      }
+    },
+    {
+      "path": "examples/types/f32-strict.inv",
+      "intent": "strict-f32-v1 arithmetic: 0.1 + 0.2 equals 0.3 once rounded to binary32.",
+      "family": "f32",
+      "tags": [
+        "f32"
+      ],
+      "spec_section": "5.8",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7
+      }
+    },
+    {
+      "path": "examples/types/record-fields.inv",
+      "intent": "Record construction in source order and scalar field reads.",
+      "family": "records",
+      "tags": [
+        "records"
+      ],
+      "spec_section": "5.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": -7
+      }
+    },
+    {
+      "path": "examples/types/record-moved-array.inv",
+      "intent": "move owner.field takes an array field out of a record once.",
+      "family": "records",
+      "tags": [
+        "moves",
+        "records"
+      ],
+      "spec_section": "5.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 9
+      }
+    },
+    {
+      "path": "examples/types/record-use-after-move.inv",
+      "intent": "Using a record after it moved is OWN_USE_AFTER_MOVE.",
+      "family": "records",
+      "tags": [
+        "negative",
+        "records"
+      ],
+      "spec_section": "5.2",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_USE_AFTER_MOVE"
+      }
+    },
+    {
+      "path": "examples/types/result-propagation.inv",
+      "intent": "Nested Result values and postfix ? propagation with cleanup.",
+      "family": "result",
+      "tags": [
+        "result"
+      ],
+      "spec_section": "5.4",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 28
+      }
+    },
+    {
+      "path": "examples/types/variant-match.inv",
+      "intent": "An exhaustive match over an enum with a scalar payload.",
+      "family": "variants",
+      "tags": [
+        "variants"
+      ],
+      "spec_section": "5.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 11
+      }
+    },
+    {
+      "path": "examples/types/variant-nonexhaustive.inv",
+      "intent": "A match that omits an arm is MATCH_NONEXHAUSTIVE.",
+      "family": "variants",
+      "tags": [
+        "negative",
+        "variants"
+      ],
+      "spec_section": "5.3",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "MATCH_NONEXHAUSTIVE"
+      }
+    },
+    {
+      "path": "examples/types/variant-owned-pattern.inv",
+      "intent": "match move consumes the owner and gives the payload to the selected arm.",
+      "family": "variants",
+      "tags": [
+        "moves",
+        "variants"
+      ],
+      "spec_section": "5.3",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 8
+      }
+    },
+    {
+      "path": "examples/units/angles.inv",
+      "intent": "Certified rad and deg conversion.",
+      "family": "units-frames",
+      "tags": [
+        "angle",
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 1
+      }
+    },
+    {
+      "path": "examples/units/camera-wrong-focal-unit.inv",
+      "intent": "A focal length in metres is UNIT_MISMATCH.",
+      "family": "units-frames",
+      "tags": [
+        "negative",
+        "robotics"
+      ],
+      "spec_section": "6.3",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "UNIT_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/units/conversion.inv",
+      "intent": "Exact scale conversion with to::<unit>.",
+      "family": "units-frames",
+      "tags": [
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 1
+      }
+    },
+    {
+      "path": "examples/units/dimension-algebra.inv",
+      "intent": "Dimension product, quotient and power in the type.",
+      "family": "units-frames",
+      "tags": [
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 1
+      }
+    },
+    {
+      "path": "examples/units/frame-cycle.inv",
+      "intent": "A cyclic frame tree is FRAME_CYCLE.",
+      "family": "units-frames",
+      "tags": [
+        "frames",
+        "negative"
+      ],
+      "spec_section": "6.2",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "FRAME_CYCLE"
+      }
+    },
+    {
+      "path": "examples/units/frame-mismatch.inv",
+      "intent": "Adding vectors of different frames is FRAME_MISMATCH.",
+      "family": "units-frames",
+      "tags": [
+        "frames",
+        "negative"
+      ],
+      "spec_section": "6.2",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "FRAME_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/units/frame-transforms.inv",
+      "intent": "A transform chain over a frame tree applied to a point and a vector.",
+      "family": "units-frames",
+      "tags": [
+        "frames"
+      ],
+      "spec_section": "6.2",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 1
+      }
+    },
+    {
+      "path": "examples/units/inexact-conversion.inv",
+      "intent": "An inexact scale conversion traps with UNIT_CONVERSION_INEXACT.",
+      "family": "units-frames",
+      "tags": [
+        "trap",
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "UNIT_CONVERSION_INEXACT"
+      }
+    },
+    {
+      "path": "examples/units/mismatched-units.inv",
+      "intent": "Adding millimetres to metres is UNIT_MISMATCH.",
+      "family": "units-frames",
+      "tags": [
+        "negative",
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "UNIT_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/units/quantity.inv",
+      "intent": "Quantity arithmetic with dimension products and the Hz rate.",
+      "family": "units-frames",
+      "tags": [
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 1
+      }
+    },
+    {
+      "path": "examples/units/record-quantity.inv",
+      "intent": "A record whose fields are quantities.",
+      "family": "units-frames",
+      "tags": [
+        "records",
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 2
+      }
+    },
+    {
+      "path": "examples/units/transform-composition-mismatch.inv",
+      "intent": "Composing transforms whose frames do not chain is FRAME_MISMATCH.",
+      "family": "units-frames",
+      "tags": [
+        "frames",
+        "negative"
+      ],
+      "spec_section": "6.2",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "FRAME_MISMATCH"
+      }
+    },
+    {
+      "path": "examples/units/unit-as-value.inv",
+      "intent": "Using a unit name as a value is UNIT_AS_VALUE.",
+      "family": "units-frames",
+      "tags": [
+        "negative",
+        "units"
+      ],
+      "spec_section": "6.1",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "UNIT_AS_VALUE"
+      }
+    },
+    {
+      "path": "examples/views/invalid-return.inv",
+      "intent": "Returning a view of a local owner is OWN_RETURN_BORROW.",
+      "family": "views",
+      "tags": [
+        "negative",
+        "views"
+      ],
+      "spec_section": "5.5",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_RETURN_BORROW"
+      }
+    },
+    {
+      "path": "examples/views/overlap.inv",
+      "intent": "Two overlapping mutable views of one owner are OWN_BORROW_CONFLICT.",
+      "family": "views",
+      "tags": [
+        "negative",
+        "views"
+      ],
+      "spec_section": "5.5",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_BORROW_CONFLICT"
+      }
+    },
+    {
+      "path": "examples/views/owner-move.inv",
+      "intent": "Moving an owner while a view of it is live is OWN_BORROW_CONFLICT.",
+      "family": "views",
+      "tags": [
+        "negative",
+        "views"
+      ],
+      "spec_section": "5.5",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "OWN_BORROW_CONFLICT"
+      }
+    },
+    {
+      "path": "examples/views/views.inv",
+      "intent": "Strided and nested mutable views over disjoint intervals and a returned read view.",
+      "family": "views",
+      "tags": [
+        "views"
+      ],
+      "spec_section": "5.5",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 65
+      }
+    }
+  ]
+}

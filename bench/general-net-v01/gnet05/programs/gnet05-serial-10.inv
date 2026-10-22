@@ -1,0 +1,22 @@
+fn f(x: i32) -> i32 {
+    var s = x % 101;
+    var i = 0;
+    while i < x % 7 {
+        s = (s * 5 + i) % 10007;
+        i = i + 1;
+    }
+    return s;
+}
+fn g(x: i32, k: i32) -> i32 { return (f(x) * 10 + k) % 10007; }
+fn down(n: i32) -> i32 {
+    if n <= 0 { return 0; }
+    return 1 + down(n - 1);
+}
+fn run(a: i32, b: i32) -> i32 {
+    let s1 = f(a);
+    let s2 = g(s1 + b, 83);
+    let s3 = f(s2 + 47);
+    let e = down(s3 % 3 + b);
+    return (s3 + e) % 10007;
+}
+fn main() -> i32 { return run(280, 5); }

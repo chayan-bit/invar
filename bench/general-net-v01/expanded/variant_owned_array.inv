@@ -1,0 +1,2 @@
+enum Choice { Empty, Items(Array<i32>) }
+fn main() -> i32 { let c: Choice = Choice::Items([2, 6]); return match move c { Choice::Empty => 0, Choice::Items(xs) => xs[1u32] }; }

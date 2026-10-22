@@ -1,0 +1,1 @@
+fn modify(xs:mut Array<f32>)->Unit {xs[0u32]=-0.0;} fn see(xs:read Array<f32>)->Bool {return xs[0u32]==0.0;} fn consume(xs:take Array<f32>)->i32 {if xs[0u32]==0.0 {return 7;}return 0;} fn main()->i32 {var xs:Array<f32> = [1.0];modify(xs);if see(xs) {let moved=move xs;return consume(move moved);}return 0;}

@@ -1,0 +1,39 @@
+#ifndef INVAR_ROBOTICS_LAYOUT_V1_H
+#define INVAR_ROBOTICS_LAYOUT_V1_H
+#include <stdint.h>
+
+typedef struct { @SCALAR@ x, y, z; } invar_point;
+typedef struct { @SCALAR@ x, y, z; } invar_vector3;
+typedef struct { @SCALAR@ x, y, z, w; } invar_quaternion;
+typedef struct { invar_vector3 translation; invar_quaternion rotation; } invar_pose;
+typedef struct { invar_vector3 linear, angular; } invar_twist;
+typedef struct { invar_vector3 force, torque; } invar_wrench;
+typedef struct { @SCALAR@ values[@JOINTS@]; } invar_joint_positions;
+typedef struct { @SCALAR@ values[@JOINTS@]; } invar_joint_velocities;
+typedef struct { @SCALAR@ values[@JOINTS@]; } invar_joint_efforts;
+typedef struct {
+    uint32_t name_ids[@JOINTS@];
+    invar_joint_positions positions;
+    invar_joint_velocities velocities;
+    invar_joint_efforts efforts;
+} invar_joint_state;
+typedef struct {
+    invar_joint_positions positions;
+    invar_joint_velocities velocities;
+    int64_t time_from_start_ns;
+} invar_joint_waypoint;
+typedef struct {
+    invar_joint_waypoint waypoints[64];
+    uint32_t count;
+} invar_joint_trajectory;
+typedef struct { uint32_t model; @SCALAR@ k1, k2, p1, p2, k3; } invar_distortion;
+typedef struct {
+    uint32_t width, height;
+    @SCALAR@ fx, fy, cx, cy;
+    invar_distortion distortion;
+} invar_camera_intrinsics;
+typedef struct { invar_pose pose; } invar_camera_extrinsics;
+#define INVAR_STAMPED(PAYLOAD, NAME) typedef struct { int64_t stamp_ns; uint32_t frame_id; PAYLOAD value; } NAME
+INVAR_STAMPED(invar_pose, invar_stamped_pose);
+
+#endif

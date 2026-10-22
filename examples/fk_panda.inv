@@ -1,0 +1,86 @@
+// Franka Panda forward kinematics in strict binary64.
+// Chain: MuJoCo Menagerie franka_emika_panda/panda.xml (revision c96a32d2),
+// tool frame `hand` expressed in `link0`.
+// A pose is Array<f64> of 12: row-major rotation, then translation.
+// `main` returns how many of the four Pinocchio 4.1.0 golden poses in
+// examples/cells/reach_place/components/pinocchio_fk/golden/panda_fk.json
+// it reproduces with every rotation and translation entry within 1e-12.
+
+// Rigid placement from an (unnormalized) MuJoCo quaternion wxyz and a position.
+fn placement(w: f64, x: f64, y: f64, z: f64, px: f64, py: f64, pz: f64) -> Array<f64> {
+    let n = sqrt(w * w + x * x + y * y + z * z);
+    let a = w / n;
+    let b = x / n;
+    let c = y / n;
+    let d = z / n;
+    return [
+        1.0 - 2.0 * (c * c + d * d), 2.0 * (b * c - a * d), 2.0 * (b * d + a * c),
+        2.0 * (b * c + a * d), 1.0 - 2.0 * (b * b + d * d), 2.0 * (c * d - a * b),
+        2.0 * (b * d - a * c), 2.0 * (c * d + a * b), 1.0 - 2.0 * (b * b + c * c),
+        px, py, pz
+    ];
+}
+
+// Revolute joint about the local z axis.
+fn revolute(q: f64) -> Array<f64> {
+    let c = cos(q);
+    let s = sin(q);
+    return [c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0];
+}
+
+// Composition a * b of two rigid poses.
+fn compose(a: read Array<f64>, b: read Array<f64>) -> Array<f64> {
+    var out = filled_f64(12u32, 0.0);
+    for i in 0u32..3u32 {
+        for j in 0u32..3u32 {
+            out[i * 3u32 + j] = a[i * 3u32] * b[j] + a[i * 3u32 + 1u32] * b[3u32 + j] + a[i * 3u32 + 2u32] * b[6u32 + j];
+        }
+        out[9u32 + i] = a[i * 3u32] * b[9u32] + a[i * 3u32 + 1u32] * b[10u32] + a[i * 3u32 + 2u32] * b[11u32] + a[9u32 + i];
+    }
+    return out;
+}
+
+// Parent pose, then the body placement, then its joint rotation.
+fn link(parent: read Array<f64>, w: f64, x: f64, px: f64, py: f64, pz: f64, q: f64) -> Array<f64> {
+    let body = placement(w, x, 0.0, 0.0, px, py, pz);
+    let placed = compose(parent, body);
+    let joint = revolute(q);
+    return compose(placed, joint);
+}
+
+fn hand(q: read Array<f64>) -> Array<f64> {
+    let base = placement(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    let l1 = link(base, 1.0, 0.0, 0.0, 0.0, 0.333, q[0u32]);
+    let l2 = link(l1, 1.0, -1.0, 0.0, 0.0, 0.0, q[1u32]);
+    let l3 = link(l2, 1.0, 1.0, 0.0, -0.316, 0.0, q[2u32]);
+    let l4 = link(l3, 1.0, 1.0, 0.0825, 0.0, 0.0, q[3u32]);
+    let l5 = link(l4, 1.0, -1.0, -0.0825, 0.384, 0.0, q[4u32]);
+    let l6 = link(l5, 1.0, 1.0, 0.0, 0.0, 0.0, q[5u32]);
+    let l7 = link(l6, 1.0, 1.0, 0.088, 0.0, 0.0, q[6u32]);
+    let tool = placement(0.9238795, 0.0, 0.0, -0.3826834, 0.0, 0.0, 0.107);
+    return compose(l7, tool);
+}
+
+// `golden` is translation xyz then quaternion wxyz.
+fn matches(q: read Array<f64>, golden: read Array<f64>) -> i32 {
+    let pose = hand(q);
+    let expected = placement(golden[3u32], golden[4u32], golden[5u32], golden[6u32], golden[0u32], golden[1u32], golden[2u32]);
+    for i in 0u32..12u32 {
+        if abs(pose[i] - expected[i]) > 0.000000000001 {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+fn main() -> i32 {
+    let q0: Array<f64> = [0.0, -0.8, 0.0, -2.3, 0.0, 1.5, 0.8];
+    let g0: Array<f64> = [0.29599603451526163, -0.00000000000000023376992599921635, 0.6147976194881478, 0.00000000000000015591168225248924, 0.999973348286889, -0.007300870900258871, -0.0000000000000002556075957609104];
+    let q1: Array<f64> = [1.4119394065309139, -0.02853109263466802, 1.711423958702191, -2.342980303579393, -0.016987987552368855, 2.919180441911343, 0.6314318823123355];
+    let g1: Array<f64> = [-0.5474552897263615, 0.007107286379629637, 0.39615603602301913, 0.27950543125145266, 0.0764520457749562, -0.9561793578583896, -0.04186686283059795];
+    let q2: Array<f64> = [-0.6571699475678572, -0.6662547722588972, 0.5713488767183346, -1.9445566787272646, -1.7138368208946273, 1.5310057402650945, 0.1336609609698114];
+    let g2: Array<f64> = [0.33765169657130045, 0.0015892640779133216, 0.8434951517206364, 0.8046555078109277, 0.5211904950133822, 0.03692319151656127, -0.2820047155376437];
+    let q3: Array<f64> = [1.3516616649453168, 0.26926025027951694, -1.0559746031459296, -2.449406174865353, 0.015629964876236135, 1.9144042268457615, 1.4934542775991486];
+    let g3: Array<f64> = [0.38874114421102535, 0.0974309924781837, 0.21716816757585905, 0.24988481128749498, 0.9117517298293288, -0.2272177615952429, -0.2337486963742896];
+    return matches(q0, g0) + matches(q1, g1) + matches(q2, g2) + matches(q3, g3);
+}

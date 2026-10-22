@@ -1,0 +1,4 @@
+fn even(n: u32) -> Bool { if n == 0u32 { return true; } return odd(n - 1u32); }
+fn odd(n: u32) -> Bool { if n == 0u32 { return false; } return even(n - 1u32); }
+fn choose(n: u32, x: i32) -> i32 { if even(n) { return x; } return -x; }
+fn main() -> i32 { return choose(3u32, 9); }

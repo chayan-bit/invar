@@ -1,0 +1,10 @@
+// A moved array cannot be read again; there is no implicit clone.
+fn take_it(xs: take Array<i32>) -> i32 {
+    return xs[0u32];
+}
+
+fn main() -> i32 {
+    var xs: Array<i32> = [4, 5];
+    let first: i32 = take_it(move xs);
+    return first + xs[1u32];
+}

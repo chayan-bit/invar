@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    for idx in 0u32 .. 600u32 {
+        let xs: Array<i32> = [1];
+    }
+    return 0;
+}

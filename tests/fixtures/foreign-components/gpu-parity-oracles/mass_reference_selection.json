@@ -1,0 +1,45 @@
+{
+  "schema": "invar-panda-mass-reference-selection-v1",
+  "scope": "historical_cpu_reference_selection_only",
+  "authority": "approved source-exact Pinocchio reference with kinetic-energy check; compiled MuJoCo separately labelled",
+  "model": "panda",
+  "joint_count": 7,
+  "inputs": {
+    "contract.json": "85362985e3729e6f40eac401efc3772d27fb90f93238f3e0174a01517bd2b0b6",
+    "reference.json": "8a4cef46ff9aeec67ab51f5c426b219e0d467eb16d0921679586ebc6cceb64c4",
+    "attribution.json": "3350f84ca3fb3f0f30d322a76c06a6d978a8cf140e57afb5244f6d1ccb0c5a91"
+  },
+  "source_model_sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+  "case_order": "contract.json#/inputs/ordered_cases",
+  "active_joints": "contract.json#/models/0/active_joints",
+  "q": "reference.json#/models/0/cases/*/q_rad",
+  "operation": "contact-free unconstrained active-joint kinetic-energy Hessian with fixed inactive finger joints",
+  "source_armature": "included once; no fitted offsets",
+  "source_fidelity": {
+    "matrix": "mass_pinocchio",
+    "witness": "source_kinetic_mass",
+    "representation": "source MJCF COM inertia; source armature included once"
+  },
+  "compiled_runtime": {
+    "matrix": "mass_mujoco",
+    "witness": "compiled_kinetic_mass",
+    "representation": "MuJoCo compiled principal inertia/quaternion; source armature included once"
+  },
+  "witness_check": {
+    "abs_residual_exclusive": 1e-10,
+    "origin": "existing attribute_mass.py status criterion; not a scored GPU tolerance"
+  },
+  "original_cross_library_comparison": {
+    "status": "failed",
+    "failed_cases": 6,
+    "cases": 8,
+    "tolerances": "unchanged contract.json active_mass_matrix"
+  },
+  "environment": "historical reference.json provenance; no new Pinocchio/MuJoCo execution",
+  "qualification": "no GPU, benchmark, S1 or v0.1 completion claim",
+  "remaining": [
+    "UR5e source kinetic-energy witness not present in attribution.json",
+    "fresh pinned environment reproduction",
+    "scored GPU floating-point contract and execution"
+  ]
+}

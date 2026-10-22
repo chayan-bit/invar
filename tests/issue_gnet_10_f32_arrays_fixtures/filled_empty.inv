@@ -1,0 +1,1 @@
+fn main()->i32 {let a=filled_f32(0u32,-0.0);let b=filled_f32(3u32,1.0);if len(a)==0u32 and len(b)==3u32 and b[2u32]==1.0 {return 7;}return 0;}

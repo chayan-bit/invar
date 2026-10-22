@@ -1,0 +1,13 @@
+# Typed MIR v1
+
+Status: internal M1-01 boundary, landed on `main`. `src/mir.rs` defines `SCHEMA_VERSION = 1`. This is an in-memory schema, not a serialized format or native ABI. A future serialized form needs a separate bounded decoder and versioned contract.
+
+Each function has typed places, an entry block, and explicit basic blocks. A block has typed value parameters, ordered instructions, and exactly one `Goto`, `Branch`, or `Return` terminator. `Goto` supplies one typed argument per successor parameter. Values have unique IDs and definitions must dominate every use. Names identify function-local places; `Bind`, `Read`, `Move`, `Store`, and `StoreIndex` express access separately from Rust ownership.
+
+`Tick` records the bootstrap source evaluator's fuel charge. Operators carry original source spans; checked arithmetic and index operations trap at those spans. `ArrayRef` with `read` or `mut` mode starts an immediate call loan, and the consuming `Call` ends it. Borrowed array values cannot be stored, returned, reused by another call, or passed to `take`. `Drop` and `Return.cleanup` list normal cleanup actions in reverse declaration order. Traps and tool failures do not execute language cleanup. `ForNext` is a non-charging control operation; `for` charges its statement, bound expressions, and one loop-control tick per iteration.
+
+`mir::lower` accepts only a `CheckedProgram` and runs `mir::verify` before returning. `mir_eval::observe` verifies again at its public boundary. Verification rejects unknown schema, duplicate definitions, missing or malformed blocks, successor arity/type mismatch, bad source spans, non-dominating uses, wrong operation types, uninitialized or moved places, incompatible active loans, escaping loan values, duplicated owned-value consumption, and omitted or misordered cleanup. An unknown call is an error, not an unmodeled effect. The evaluator is a separate block interpreter; it shares public result types with M0 but does not call M0 evaluation logic.
+
+The fixed [M1-01 corpus](../tests/issue_m1_01.rs) uses no random seed. It compares completed values, trap categories/spans, fuel counts, and cleanup traces against M0 for scalar/array calls, recursion, control flow, short circuiting, nested loans, boundary arithmetic, failure order, and the committed examples. It also mutates MIR structure and an accepted arithmetic operation to test verifier rejection and differential detection. Divergent runs are bounded by fuel and reported as limits, never as equivalence proofs.
+
+MIR v1 remains an internal reference boundary. M1-02 must separately freeze and validate the native target ABI, trap reporting, and LLVM lowering; neither this schema nor a passing MIR corpus establishes native or GPU correctness.

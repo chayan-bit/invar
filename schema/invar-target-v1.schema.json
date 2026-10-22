@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "invar-target-v1",
+  "title": "Invar target description (ENG-06): hardware facts a schedule may use",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "name", "source", "device"],
+  "properties": {
+    "schema": {"const": "invar-target-v1"},
+    "name": {"type": "string", "pattern": "^(cuda-sm[0-9]+|metal-apple[0-9]+|cpu-[a-z0-9_]+-[a-z0-9_-]+)$"},
+    "source": {"type": "string", "minLength": 1},
+    "device": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["backend", "sm"],
+         "properties": {"backend": {"const": "cuda"}, "sm": {"type": "integer", "minimum": 50, "maximum": 199}}},
+        {"type": "object", "additionalProperties": false, "required": ["backend", "apple_family"],
+         "properties": {"backend": {"const": "metal"}, "apple_family": {"type": "integer", "minimum": 1, "maximum": 99}}},
+        {"type": "object", "additionalProperties": false, "required": ["backend", "arch", "model"],
+         "properties": {"backend": {"const": "cpu"}, "arch": {"$ref": "#/$defs/word"}, "model": {"$ref": "#/$defs/ident"}}}
+      ]
+    },
+    "gpu": {"$ref": "#/$defs/gpu"},
+    "cpu": {"$ref": "#/$defs/cpu"}
+  },
+  "oneOf": [
+    {"required": ["gpu"], "not": {"required": ["cpu"]}, "properties": {"device": {"properties": {"backend": {"enum": ["cuda", "metal"]}}}}},
+    {"required": ["cpu"], "not": {"required": ["gpu"]}, "properties": {"device": {"properties": {"backend": {"const": "cpu"}}}}}
+  ],
+  "$defs": {
+    "word": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "ident": {"type": "string", "pattern": "^[a-z0-9_]+(-[a-z0-9_]+)*$"},
+    "pow2": {"type": "integer", "enum": [1, 2, 4, 8, 16, 32, 64, 128, 256]},
+    "level": {"enum": ["global", "shared", "registers"]},
+    "element": {"enum": ["f32", "tf32", "f16", "bf16", "e4m3", "e5m2"]},
+    "gpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subgroup_width", "max_threads_per_group", "shared_bytes_per_group", "shared_bytes_per_group_optin",
+                   "registers_per_thread", "memory_levels", "copy_atoms", "mma_atoms"],
+      "properties": {
+        "subgroup_width": {"enum": [4, 8, 16, 32, 64, 128]},
+        "max_threads_per_group": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "shared_bytes_per_group": {"type": "integer", "minimum": 1, "maximum": 1048576},
+        "shared_bytes_per_group_optin": {"type": "integer", "minimum": 1, "maximum": 1048576},
+        "registers_per_thread": {"type": ["integer", "null"], "minimum": 16, "maximum": 1024},
+        "memory_levels": {
+          "type": "array", "minItems": 3, "maxItems": 3,
+          "items": {"type": "object", "additionalProperties": false, "required": ["level", "alignment_bytes"],
+                    "properties": {"level": {"$ref": "#/$defs/level"}, "alignment_bytes": {"$ref": "#/$defs/pow2"}}}
+        },
+        "copy_atoms": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["name", "kind", "from", "to", "bytes", "alignment_bytes"],
+            "properties": {
+              "name": {"$ref": "#/$defs/ident"},
+              "kind": {"enum": ["plain", "cp-async", "tma"]},
+              "from": {"$ref": "#/$defs/level"},
+              "to": {"$ref": "#/$defs/level"},
+              "bytes": {"enum": [1, 2, 4, 8, 16, 32, 64, 128]},
+              "alignment_bytes": {"enum": [1, 2, 4, 8, 16, 32, 64, 128]},
+              "max_box_extent": {"type": "integer", "minimum": 1, "maximum": 256}
+            }
+          }
+        },
+        "mma_atoms": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["name", "instruction", "m", "n", "k", "threads", "a_type", "b_type", "acc_type", "contract", "reference"],
+            "properties": {
+              "name": {"$ref": "#/$defs/ident"},
+              "instruction": {"type": "string", "minLength": 1},
+              "m": {"type": "integer", "minimum": 1, "maximum": 256},
+              "n": {"type": "integer", "minimum": 1, "maximum": 256},
+              "k": {"type": "integer", "minimum": 1, "maximum": 256},
+              "threads": {"type": "integer", "minimum": 1, "maximum": 4096},
+              "a_type": {"$ref": "#/$defs/element"},
+              "b_type": {"$ref": "#/$defs/element"},
+              "acc_type": {"$ref": "#/$defs/element"},
+              "contract": {"type": "string", "pattern": "^[a-z0-9_]+(-[a-z0-9_]+)*-v[0-9]+$"},
+              "reference": {"type": ["string", "null"], "pattern": "^[a-z_]+(::[a-z_]+)*$"}
+            }
+          }
+        },
+        "warp_specialization": {
+          "type": "object", "additionalProperties": false,
+          "required": ["min_registers", "max_registers", "register_step"],
+          "properties": {
+            "min_registers": {"type": "integer", "minimum": 1, "maximum": 1024},
+            "max_registers": {"type": "integer", "minimum": 1, "maximum": 1024},
+            "register_step": {"enum": [1, 2, 4, 8, 16, 32, 64]}
+          }
+        }
+      }
+    },
+    "cpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["simd_width_bits", "isa", "caches", "numa_nodes"],
+      "properties": {
+        "simd_width_bits": {"enum": [64, 128, 256, 512, 1024, 2048]},
+        "isa": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/ident"}},
+        "caches": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["level", "bytes", "line_bytes", "shared_by_cores", "core_class"],
+            "properties": {
+              "level": {"type": "integer", "minimum": 1, "maximum": 4},
+              "bytes": {"type": "integer", "minimum": 16},
+              "line_bytes": {"enum": [16, 32, 64, 128, 256]},
+              "shared_by_cores": {"type": "integer", "minimum": 1, "maximum": 1024},
+              "core_class": {"enum": ["performance", "efficiency", null]}
+            }
+          }
+        },
+        "numa_nodes": {"type": ["integer", "null"], "minimum": 1, "maximum": 64}
+      }
+    }
+  }
+}

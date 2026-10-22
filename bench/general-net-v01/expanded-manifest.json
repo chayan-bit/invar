@@ -1,0 +1,1255 @@
+{
+  "case_count": 52,
+  "cases": [
+    {
+      "expected_check": {
+        "diagnostic_codes": [
+          "OWN_BORROW_CONFLICT"
+        ],
+        "exit": 1,
+        "status": "source_error"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "OWN_BORROW_CONFLICT"
+        ],
+        "exit": 1,
+        "status": "source_error"
+      },
+      "family": "ownership",
+      "fuel": 100000,
+      "id": "alias_conflict",
+      "input_binding": "source_literals_current_cli",
+      "role": "source_rejection",
+      "source": "current/alias_conflict.inv",
+      "source_bytes": 153,
+      "source_sha256": "9fb85841af8a7ded653063d6c5a808d90566cea27692a1d6c891caa215c04b45",
+      "variant": "alias"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 33
+        },
+        "status": "ok"
+      },
+      "family": "input_branch_tree",
+      "fuel": 100000,
+      "id": "branch_tree_a",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/branch_tree_a.inv",
+      "source_bytes": 875,
+      "source_sha256": "981efe79cb00d53580cff7c150d190e2fd4f30205870afa1fffbbe449514eb25",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 26
+        },
+        "status": "ok"
+      },
+      "family": "input_branch_tree",
+      "fuel": 100000,
+      "id": "branch_tree_b",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/branch_tree_b.inv",
+      "source_bytes": 875,
+      "source_sha256": "eb3c907d5f375744d570bc046d42daaa93ccfb2998774ff3f5c0b9743211869a",
+      "variant": "B"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 9
+        },
+        "status": "ok"
+      },
+      "family": "composed_recursive_loop_branch",
+      "fuel": 100000,
+      "id": "composed_split_leaf",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/composed_split_leaf.inv",
+      "source_bytes": 811,
+      "source_sha256": "4949974d97e2b20878d924133c563907f47bb5d87823bf01de2cceb4c37b071d",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "EVALUATION_LIMIT"
+        ],
+        "exit": 4,
+        "fuel_limit": 200,
+        "status": "evaluation_limit",
+        "steps_used": 200
+      },
+      "family": "divergence_prefix",
+      "fuel": 200,
+      "id": "divergent_prefix",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/divergent_prefix.inv",
+      "source_bytes": 133,
+      "source_sha256": "03f025ba7f86283c765c223d67c41f72f45e2a8d3c07596fb11e0115a2faec18",
+      "variant": "earlier_nontermination"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 67
+        },
+        "status": "ok"
+      },
+      "family": "irregular_divide",
+      "fuel": 100000,
+      "id": "divide_irregular_a",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/divide_irregular_a.inv",
+      "source_bytes": 532,
+      "source_sha256": "17b84ee81d9d70e3fa9627c451992e0c6b7da0d9f24b1d745f61f6df6f85ee17",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 84
+        },
+        "status": "ok"
+      },
+      "family": "irregular_divide",
+      "fuel": 100000,
+      "id": "divide_irregular_b",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/divide_irregular_b.inv",
+      "source_bytes": 532,
+      "source_sha256": "dd3a178e3ad710a385f41a9f1f3263d31e8b1ceafe15076cb9d15b71566b60e7",
+      "variant": "B"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 5
+        },
+        "status": "ok"
+      },
+      "family": "dynamic_graph_frontier",
+      "fuel": 100000,
+      "id": "frontier_graph_a",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/frontier_graph_a.inv",
+      "source_bytes": 1081,
+      "source_sha256": "a4aa0ae4c05f31ff8473bc2f4b6511a947454f7a212f1c7b2a3b54ef8c14eb0a",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 3
+        },
+        "status": "ok"
+      },
+      "family": "dynamic_graph_frontier",
+      "fuel": 100000,
+      "id": "frontier_graph_b",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/frontier_graph_b.inv",
+      "source_bytes": 1081,
+      "source_sha256": "bb92bc1bcb72734da4735a03b0c0099345de9b54364ef9a56055b465d13d64b9",
+      "variant": "B"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "DIVISION_BY_ZERO"
+        ],
+        "exit": 3,
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "end": 30,
+            "start": 29
+          }
+        }
+      },
+      "family": "ordered_traps",
+      "fuel": 100000,
+      "id": "ordered_trap_first",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/ordered_trap_first.inv",
+      "source_bytes": 156,
+      "source_sha256": "aa622189a01b5382c3ac818c59cab7e5bcb9ae0eccf4d56dd9f3e492f30d7fcc",
+      "variant": "first"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "INDEX_OUT_OF_BOUNDS"
+        ],
+        "exit": 3,
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "end": 101,
+            "start": 93
+          }
+        }
+      },
+      "family": "ordered_traps",
+      "fuel": 100000,
+      "id": "ordered_trap_later",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/ordered_trap_later.inv",
+      "source_bytes": 152,
+      "source_sha256": "139ec3a4b19ad714d1aa670e4fa93da47d232f0731b712434d65132b5b5dd502",
+      "variant": "later"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 22
+        },
+        "status": "ok"
+      },
+      "family": "ordered_memory",
+      "fuel": 100000,
+      "id": "ordered_write",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/ordered_write.inv",
+      "source_bytes": 300,
+      "source_sha256": "5f317c6c7ed0fde46698d8dac6ea905d9abff19f44f0f6a138f17cb4217d129b",
+      "variant": "write_then_read"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 13
+        },
+        "status": "ok"
+      },
+      "family": "serial_control",
+      "fuel": 100000,
+      "id": "serial_chain",
+      "input_binding": "source_literals_current_cli",
+      "role": "control",
+      "source": "current/serial_chain.inv",
+      "source_bytes": 124,
+      "source_sha256": "c9d20ef29f04662d48a82c63da15b78520e6530943f8549d71b205953e751e96",
+      "variant": "chain"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 5
+        },
+        "status": "ok"
+      },
+      "family": "tiny_control",
+      "fuel": 100000,
+      "id": "tiny_control",
+      "input_binding": "source_literals_current_cli",
+      "role": "control",
+      "source": "current/tiny_control.inv",
+      "source_bytes": 157,
+      "source_sha256": "e09e0d7ecc82f0d9096a0c2913ba0387b5ed4a3c303d97fef688a57aa0cc584f",
+      "variant": "one_element"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 7
+        },
+        "status": "ok"
+      },
+      "family": "demand",
+      "fuel": 100000,
+      "id": "unselected_trap_diverge",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/unselected_trap_diverge.inv",
+      "source_bytes": 149,
+      "source_sha256": "c2749cb72f8f9bf0fbc0c4d8cffd17f21584180b593912e55d9b1e4c132cba69",
+      "variant": "untaken"
+    },
+    {
+      "id": "array_mutation",
+      "family": "array_owner",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_mutation.inv",
+      "source_bytes": 103,
+      "source_sha256": "9db478ad270f4ed21fb89d94822b0eba5c8245a5f3406fd60a6bd15479daba4a",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        }
+      }
+    },
+    {
+      "id": "array_owner_implicit_return",
+      "family": "array_owner_return",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_owner_implicit_return.inv",
+      "source_bytes": 121,
+      "source_sha256": "f557917f7586db2070252eb44c2d336a596bc5b6d752ba9fdf7ce1a46928ae84",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 5
+        }
+      }
+    },
+    {
+      "id": "array_owner_explicit_return",
+      "family": "array_owner_return",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_owner_explicit_return.inv",
+      "source_bytes": 126,
+      "source_sha256": "fdc406ffc074907c70dcaac7d6b0a0db91329bbc3995a8079de938821ffa4dab",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 5
+        }
+      }
+    },
+    {
+      "id": "array_take_reborrow",
+      "family": "array_owner_modes",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_take_reborrow.inv",
+      "source_bytes": 281,
+      "source_sha256": "f7354405345541eede97867347af0ba429c110e1b81ff82b36effeaeac826dc3",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      }
+    },
+    {
+      "id": "array_replacement",
+      "family": "array_owner_cleanup",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_replacement.inv",
+      "source_bytes": 94,
+      "source_sha256": "b97aa4c7171a8f4cee4381c0d8e164ff7791aa0f9890bd71c37a134a96c4ae03",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      }
+    },
+    {
+      "id": "array_loop_cleanup",
+      "family": "array_owner_cleanup",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_loop_cleanup.inv",
+      "source_bytes": 122,
+      "source_sha256": "055c190270c0f9ca0f2cb4e11a43b199f89fcdd8ed2c4b25c0e9439bc9ee3bbc",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 18
+        }
+      }
+    },
+    {
+      "id": "array_empty_u32",
+      "family": "array_owner",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_empty_u32.inv",
+      "source_bytes": 94,
+      "source_sha256": "1a3cfe4479e20cdbe90afd4c283854062c472a0d7a11040133c15a69fbd7957f",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        }
+      }
+    },
+    {
+      "id": "array_trap_cleanup_prefix",
+      "family": "array_owner_trap",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_trap_cleanup_prefix.inv",
+      "source_bytes": 107,
+      "source_sha256": "5ba7d0d5359763ac6819f4487aeb053157361082effc33e6698fd58fea7a20a5",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 3,
+        "status": "trap",
+        "diagnostic_codes": [
+          "INDEX_OUT_OF_BOUNDS"
+        ],
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "start": 95,
+            "end": 103
+          }
+        }
+      }
+    },
+    {
+      "id": "array_rhs_before_bad_index",
+      "family": "source_order",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_rhs_before_bad_index.inv",
+      "source_bytes": 75,
+      "source_sha256": "c63111f442a5aa5fb3f6b474120b3af84ad5c0525bc090463e34c4008bee4023",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 3,
+        "status": "trap",
+        "diagnostic_codes": [
+          "DIVISION_BY_ZERO"
+        ],
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "start": 58,
+            "end": 59
+          }
+        }
+      }
+    },
+    {
+      "id": "array_size_limit",
+      "family": "array_owner_limit",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/array_size_limit.inv",
+      "source_bytes": 68,
+      "source_sha256": "327a6c92f04c2d47ecf09696c415525318d4288ca483d801dbb6b67567b281dc",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 2,
+        "status": "tool_error",
+        "diagnostic_codes": [
+          "ARRAY_SIZE_LIMIT"
+        ]
+      }
+    },
+    {
+      "id": "view_stride_mutation",
+      "family": "view",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/view_stride_mutation.inv",
+      "source_bytes": 201,
+      "source_sha256": "cc558f299ed2d88674104c23910852fa917d6bf20b72491c8dc69da32d993715",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 38
+        }
+      }
+    },
+    {
+      "id": "view_borrowed_return",
+      "family": "view_return",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/view_borrowed_return.inv",
+      "source_bytes": 199,
+      "source_sha256": "0bb25577686a74c39f6c4ac9100d2c5d55f585db6c00a49f8afbe0039df142c4",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 40
+        }
+      }
+    },
+    {
+      "id": "record_scalar_fields",
+      "family": "record",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/record_scalar_fields.inv",
+      "source_bytes": 130,
+      "source_sha256": "5b1bbb2792a5549281ea0d08b288a24ab0e1c16c97d12d782fc7cdf77763b0d8",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 31
+        }
+      }
+    },
+    {
+      "id": "record_moved_owner",
+      "family": "record_owner",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/record_moved_owner.inv",
+      "source_bytes": 180,
+      "source_sha256": "9e40cf6cda9bacca0bcfabc14a1d5bb63725eee6194f2e4a5c761ea7ca1cfc42",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      }
+    },
+    {
+      "id": "variant_owned_scalar",
+      "family": "variant",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/variant_owned_scalar.inv",
+      "source_bytes": 149,
+      "source_sha256": "ffd580891735b7fb467416db1d68b8aafd7bc92333f08ce5a9b64324f3a2b999",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 8
+        }
+      }
+    },
+    {
+      "id": "variant_owned_array",
+      "family": "variant_owner",
+      "variant": "expanded",
+      "role": "source_rejection",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/variant_owned_array.inv",
+      "source_bytes": 176,
+      "source_sha256": "9aee74bd8f59094b8d8be8c40106c8dee75ec80e8f226bfda5df867742e9db1c",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 1,
+        "status": "source_error",
+        "diagnostic_codes": [
+          "UNSUPPORTED_FEATURE"
+        ]
+      },
+      "expected_reference_run": {
+        "exit": 1,
+        "status": "source_error",
+        "diagnostic_codes": [
+          "UNSUPPORTED_FEATURE"
+        ]
+      }
+    },
+    {
+      "id": "blob_utf8_bytes",
+      "family": "blob",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/blob_utf8_bytes.inv",
+      "source_bytes": 191,
+      "source_sha256": "772a26a06fc104177e05b96f32f6b757f9b4a5968b593c262c4ca906e944c01c",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      }
+    },
+    {
+      "id": "while_triangle",
+      "family": "loop",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/while_triangle.inv",
+      "source_bytes": 159,
+      "source_sha256": "89e61a2b3087179a2fd3389943701bf4b3775caa5e7e4d110026e76cd35035c1",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 21
+        }
+      }
+    },
+    {
+      "id": "for_u32_edge",
+      "family": "loop",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/for_u32_edge.inv",
+      "source_bytes": 137,
+      "source_sha256": "2556384f446222cd745675d8269379f4419f08a5222f9460f5efef4f151dc81e",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2
+        }
+      }
+    },
+    {
+      "id": "runtime_recursive_fib",
+      "family": "recursive_runtime",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "source_bytes": 129,
+      "source_sha256": "56793b3960663104bead8401d60003df83f96571cb6aa336b22c329e6b457012",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 34
+        }
+      }
+    },
+    {
+      "id": "runtime_mutual_choice",
+      "family": "recursive_runtime",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "source_bytes": 279,
+      "source_sha256": "29b203ebbe01b643f4ce2881280c4fb957340b3decc4335faa5fad8d370a4837",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -9
+        }
+      }
+    },
+    {
+      "id": "checked_add_overflow",
+      "family": "integer_trap",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/checked_add_overflow.inv",
+      "source_bytes": 96,
+      "source_sha256": "b7d717ac9bdf86988769a4708a65a44419044fc7562eff65a7b430974cdfbc88",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 3,
+        "status": "trap",
+        "diagnostic_codes": [
+          "INTEGER_OVERFLOW"
+        ],
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 41,
+            "end": 42
+          }
+        }
+      }
+    },
+    {
+      "id": "checked_min_division",
+      "family": "integer_trap",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/checked_min_division.inv",
+      "source_bytes": 108,
+      "source_sha256": "8e07ba8501f09f8d4f96e945cde6a48e7e4c604098310a0b58aabeeea347d562",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 3,
+        "status": "trap",
+        "diagnostic_codes": [
+          "INTEGER_OVERFLOW"
+        ],
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 46,
+            "end": 47
+          }
+        }
+      }
+    },
+    {
+      "id": "wrapping_unsigned_product",
+      "family": "integer_wrapping",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/wrapping_unsigned_product.inv",
+      "source_bytes": 161,
+      "source_sha256": "aa63e41c67a5da1b4374482269ec5a74fcdae15f75294c1b43f8025a2685adba",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "constant_fuel_prefix",
+      "family": "source_fuel",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/constant_fuel_prefix.inv",
+      "source_bytes": 68,
+      "source_sha256": "2b0a00811daa013debac599cd42deb996dc197b52aa91028165910d81efb945e",
+      "fuel": 1,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 4,
+        "status": "evaluation_limit",
+        "fuel_limit": 1,
+        "steps_used": 1,
+        "diagnostic_codes": [
+          "EVALUATION_LIMIT"
+        ]
+      }
+    },
+    {
+      "id": "oldest_loop_before_trap",
+      "family": "source_order",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/oldest_loop_before_trap.inv",
+      "source_bytes": 127,
+      "source_sha256": "301f8af53de4793815b2392aca28168547edbe8d186b9f692daf93fe95a379f1",
+      "fuel": 73,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 4,
+        "status": "evaluation_limit",
+        "fuel_limit": 73,
+        "steps_used": 73,
+        "diagnostic_codes": [
+          "EVALUATION_LIMIT"
+        ]
+      }
+    },
+    {
+      "id": "recursive_frame_limit",
+      "family": "call_depth",
+      "variant": "expanded",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/recursive_frame_limit.inv",
+      "source_bytes": 121,
+      "source_sha256": "85e33e24087bd6b52a30a697cf654a1d39610c76aafbff830db87005cc531bfb",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 2,
+        "status": "tool_error",
+        "diagnostic_codes": [
+          "CALL_DEPTH_LIMIT"
+        ]
+      }
+    },
+    {
+      "id": "owner_use_after_move",
+      "family": "ownership_rejection",
+      "variant": "expanded",
+      "role": "source_rejection",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/owner_use_after_move.inv",
+      "source_bytes": 78,
+      "source_sha256": "99bf8432e5cf0c8249f3993b2b1d0760f9158a27dc803e044dc753974350555c",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 1,
+        "status": "source_error",
+        "diagnostic_codes": [
+          "OWN_USE_AFTER_MOVE"
+        ]
+      },
+      "expected_reference_run": {
+        "exit": 1,
+        "status": "source_error",
+        "diagnostic_codes": [
+          "OWN_USE_AFTER_MOVE"
+        ]
+      }
+    },
+    {
+      "id": "runtime_array_loop",
+      "family": "array_runtime",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/runtime_array_loop.inv",
+      "source_bytes": 188,
+      "source_sha256": "b802efc8a1ab6f4e7b402b5802a0d367389a4560149d35e753fd322ee9d8482d",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 15
+        }
+      }
+    },
+    {
+      "id": "runtime_record_fields",
+      "family": "record_runtime",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/runtime_record_fields.inv",
+      "source_bytes": 177,
+      "source_sha256": "f77aacf1e8c730a54d3f409a9ad7443244671ccd8c3267507642268dd983c775",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 22
+        }
+      }
+    },
+    {
+      "id": "runtime_variant_selection",
+      "family": "variant_runtime",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/runtime_variant_selection.inv",
+      "source_bytes": 328,
+      "source_sha256": "0f96268d741c37bf46295034f67b8ef449c714e400d192c9f5d2ba60aea2886e",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 8
+        }
+      }
+    },
+    {
+      "id": "result_owned_propagation",
+      "family": "variant_owner_result_propagation",
+      "variant": "expanded",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/result_owned_propagation.inv",
+      "source_bytes": 697,
+      "source_sha256": "f726f34791683bf545dbfaeab20be39b6b5b39bc633f89929974b02c70d6302f",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      }
+    },
+    {
+      "id": "owner_recursive_transfer",
+      "family": "owner_recursive",
+      "variant": "sprint03",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/owner_recursive_transfer.inv",
+      "source_bytes": 257,
+      "source_sha256": "92885d6f8ad8f05c2c8d56f4b61b9a7e285d92cc1eac24429bf3302f94e36fca",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        },
+        "exit": 0
+      }
+    },
+    {
+      "id": "owner_compaction_mut_loan",
+      "family": "owner_loan_compaction",
+      "variant": "sprint03",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/owner_compaction_mut_loan.inv",
+      "source_bytes": 312,
+      "source_sha256": "29b00d110e6d73dfa57009d347e548ecee9cc02f043d786b6933af6775257b5b",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 13
+        },
+        "exit": 0
+      }
+    },
+    {
+      "id": "worklist_fair_roots",
+      "family": "resumable_independent_roots",
+      "variant": "sprint03",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/worklist_fair_roots.inv",
+      "source_bytes": 327,
+      "source_sha256": "5168713a373c185a114c8d08b68d523055f7ce03583972854d2d4edf18fa41d0",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        },
+        "exit": 0
+      }
+    },
+    {
+      "id": "worklist_ordered_runtime",
+      "family": "resumable_source_order",
+      "variant": "sprint03",
+      "role": "semantic_negative",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/worklist_ordered_runtime.inv",
+      "source_bytes": 238,
+      "source_sha256": "0ee5bf6bfddbdeba5fb47baa2268ea06246c20760cfc3d98b07067c29a19ca35",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "start": 124,
+            "end": 132
+          }
+        },
+        "exit": 3,
+        "diagnostic_codes": [
+          "INDEX_OUT_OF_BOUNDS"
+        ]
+      }
+    },
+    {
+      "id": "owner_return_unsigned",
+      "family": "owner_return_result",
+      "variant": "sprint03",
+      "role": "held_out_dynamic",
+      "input_binding": "source_literals_current_cli",
+      "source": "expanded/owner_return_unsigned.inv",
+      "source_bytes": 197,
+      "source_sha256": "6f22bd7fc4c774da357bca1e8f6c697ea1e980d70b00c929f18c55b632ec5428",
+      "fuel": 100000,
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        },
+        "exit": 0
+      }
+    }
+  ],
+  "schema_version": 1,
+  "parity_spec": "expanded-parity-spec.json",
+  "seed": null,
+  "source_language": "bootstrap_v01_supported_syntax",
+  "status": "proposed_v01_general_net_acceptance_prep"
+}

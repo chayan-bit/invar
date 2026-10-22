@@ -1,0 +1,793 @@
+{
+  "aggregate/emit/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit/Metal": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_aggregates/Cpu": {
+    "abi": 6,
+    "frame_bytes": 9728,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 22709,
+    "source_sha256": "92761e6840461dd1e12244b9ac415a758b321047d6945d670a85e0391567fb52",
+    "states": 12,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "aggregate/emit_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "aggregate/emit_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "aggregate/emit_device_speculative/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_device_speculative/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_device_speculative/Metal": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_owned/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_owned/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_owned/Metal": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_owned_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_resumable/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_resumable/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_resumable/Metal": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_resumable_aggregates/Cpu": {
+    "abi": 7,
+    "frame_bytes": 9728,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 29288,
+    "source_sha256": "cc98d0d8717d46908c2370ad02b85f603c031ce402eba6421c2fac7e42057a05",
+    "states": 51,
+    "target": "Cpu",
+    "task_bytes": 9872
+  },
+  "aggregate/emit_resumable_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "aggregate/emit_resumable_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "aggregate/emit_resumable_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_resumable_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_resumable_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_resumable_owned_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_resumable_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_resumable_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "aggregate/emit_speculative/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_speculative/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "aggregate/emit_speculative/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_aggregates/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "numeric/emit_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "numeric/emit_device_speculative/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_device_speculative/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_device_speculative/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_numeric/Cpu": {
+    "abi": 8,
+    "frame_bytes": 6144,
+    "heap_words": null,
+    "kernel": null,
+    "source_bytes": 13128,
+    "source_sha256": "b9b7746033e6f3e71cbd34392ab33067e4b8b1c24172bea9c29de3d2fe6276b3",
+    "states": 2,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "numeric/emit_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_owned/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_owned/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_owned/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_owned_numeric/Cpu": {
+    "abi": 10,
+    "frame_bytes": 6144,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 18723,
+    "source_sha256": "5689e5dfea7dd83dad0c4ce3897226db4f83dddbe540cbeb39cd38444c0607b3",
+    "states": 2,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "numeric/emit_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_resumable/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_resumable/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_resumable/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_resumable_aggregates/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_resumable_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "numeric/emit_resumable_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "numeric/emit_resumable_numeric/Cpu": {
+    "abi": 9,
+    "frame_bytes": 6144,
+    "heap_words": null,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 17229,
+    "source_sha256": "3f641478f4445b28d35343633b33b2a40bdd876332efbb86b64650fdbd2cc2bb",
+    "states": 18,
+    "target": "Cpu",
+    "task_bytes": 6288
+  },
+  "numeric/emit_resumable_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_resumable_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "frame_bytes": 6144,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 22883,
+    "source_sha256": "062db0fe42a85da12ee079e6d0ba85e67fb6a36afa83f9d0ba72815a91c6f204",
+    "states": 18,
+    "target": "Cpu",
+    "task_bytes": 6288
+  },
+  "numeric/emit_resumable_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_resumable_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric/emit_speculative/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_speculative/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric/emit_speculative/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_aggregates/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "numeric_owned/emit_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "numeric_owned/emit_device_speculative/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_device_speculative/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_device_speculative/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_owned/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_owned/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_owned/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_owned_numeric/Cpu": {
+    "abi": 10,
+    "frame_bytes": 11776,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 25185,
+    "source_sha256": "cbc5762d1fdb7d73aa9104122e910b77fa940061e350e2821514c620a3fbc2c3",
+    "states": 2,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "numeric_owned/emit_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_resumable/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_resumable/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_resumable/Metal": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_resumable_aggregates/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_resumable_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "numeric_owned/emit_resumable_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "numeric_owned/emit_resumable_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_resumable_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_resumable_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "frame_bytes": 11776,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 31436,
+    "source_sha256": "45fea2df80132226b39b1edeaf40bb0b71e5a6073939af10398016c5c2b0fdd9",
+    "states": 42,
+    "target": "Cpu",
+    "task_bytes": 11920
+  },
+  "numeric_owned/emit_resumable_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_resumable_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "numeric_owned/emit_speculative/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_speculative/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "numeric_owned/emit_speculative/Metal": {
+    "error": "UnsupportedType"
+  },
+  "owned/emit/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "owned/emit/Cuda": {
+    "error": "UnsupportedType"
+  },
+  "owned/emit/Metal": {
+    "error": "UnsupportedType"
+  },
+  "owned/emit_aggregates/Cpu": {
+    "abi": 6,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16829,
+    "source_sha256": "d48e07c774fae6826e184a38ef2c75bfd7b9ec345ba12d104da0f8fd32eade72",
+    "states": 3,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "owned/emit_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "owned/emit_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "owned/emit_device_speculative/Cpu": {
+    "error": "SpeculationTarget"
+  },
+  "owned/emit_device_speculative/Cuda": {
+    "error": "DeviceSpeculationOwner"
+  },
+  "owned/emit_device_speculative/Metal": {
+    "error": "DeviceSpeculationOwner"
+  },
+  "owned/emit_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "owned/emit_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_owned/Cpu": {
+    "abi": 2,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16016,
+    "source_sha256": "8ff56fd646d76d8df8a9c2c054ffbae603eb3a4ac7e9a10b963748197e39a236",
+    "states": 3,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "owned/emit_owned/Cuda": {
+    "abi": 2,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16426,
+    "source_sha256": "5b42f0c30fdc74f798e126880b2ce2704497a0609368664aec356ef371c77570",
+    "states": 3,
+    "target": "Cuda",
+    "task_bytes": null
+  },
+  "owned/emit_owned/Metal": {
+    "abi": 2,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16551,
+    "source_sha256": "66a4f215a5a67d4bfa1574b0bfbaf77071e4ae464dd6c9e02b66a1299eb9a248",
+    "states": 3,
+    "target": "Metal",
+    "task_bytes": null
+  },
+  "owned/emit_owned_numeric/Cpu": {
+    "abi": 10,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 25687,
+    "source_sha256": "e5cc0721ce738212363889202e7b46f1870535777423e6d7d492fee3dba821bc",
+    "states": 3,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "owned/emit_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_resumable/Cpu": {
+    "abi": 3,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 21890,
+    "source_sha256": "fee4ace7c72c2af0d71f2dcfc3557c04fa3c51f28e479548b330912a9288e1a6",
+    "states": 40,
+    "target": "Cpu",
+    "task_bytes": 10384
+  },
+  "owned/emit_resumable/Cuda": {
+    "abi": 3,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 21224,
+    "source_sha256": "b84d201ce1485cbaff12392702274e635439995db4f0de19cfb27fd1f4a1bd54",
+    "states": 40,
+    "target": "Cuda",
+    "task_bytes": 10384
+  },
+  "owned/emit_resumable/Metal": {
+    "abi": 3,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 21385,
+    "source_sha256": "7eeeb6b1aace6b2b446f316a925406dd1192ee047d4a8ff460729ab60ba34ccb",
+    "states": 40,
+    "target": "Metal",
+    "task_bytes": 10384
+  },
+  "owned/emit_resumable_aggregates/Cpu": {
+    "abi": 7,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 22703,
+    "source_sha256": "9c57e380af108fdf6691b25933306ae2c781fcd0818c5cb04f0a29a1ea2e5287",
+    "states": 40,
+    "target": "Cpu",
+    "task_bytes": 10384
+  },
+  "owned/emit_resumable_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "owned/emit_resumable_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "owned/emit_resumable_numeric/Cpu": {
+    "error": "UnsupportedType"
+  },
+  "owned/emit_resumable_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_resumable_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 31738,
+    "source_sha256": "93b2495ebae9962948b134a4bab96b16e17dc809747f42dc4a91c997dbff8c1c",
+    "states": 40,
+    "target": "Cpu",
+    "task_bytes": 10384
+  },
+  "owned/emit_resumable_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_resumable_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "owned/emit_speculative/Cpu": {
+    "abi": 4,
+    "frame_bytes": 10240,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 28888,
+    "source_sha256": "ceab89201faccf9de3ce0972cecd51ba8f00f5ccf45302867b0b2b5fa38441cb",
+    "states": 40,
+    "target": "Cpu",
+    "task_bytes": 10384
+  },
+  "owned/emit_speculative/Cuda": {
+    "error": "SpeculationTarget"
+  },
+  "owned/emit_speculative/Metal": {
+    "error": "SpeculationTarget"
+  },
+  "scalar/emit/Cpu": {
+    "abi": 1,
+    "frame_bytes": 9216,
+    "heap_words": null,
+    "kernel": null,
+    "source_bytes": 14288,
+    "source_sha256": "414c677289b92c795f40f53c7c4d6daebbce1ef00cb9d237df1faedb3cdf99d0",
+    "states": 8,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "scalar/emit/Cuda": {
+    "abi": 1,
+    "frame_bytes": 9216,
+    "heap_words": null,
+    "kernel": null,
+    "source_bytes": 14609,
+    "source_sha256": "0ab6f4082d599fd8ecfa99fee5ab77bfe912260f8b70c3f87e20129a56c29bcf",
+    "states": 8,
+    "target": "Cuda",
+    "task_bytes": null
+  },
+  "scalar/emit/Metal": {
+    "abi": 1,
+    "frame_bytes": 9216,
+    "heap_words": null,
+    "kernel": null,
+    "source_bytes": 14710,
+    "source_sha256": "c15b3821bb751e5294ad31d22fc26eea713009d6a2069b2ce93519069ae5e863",
+    "states": 8,
+    "target": "Metal",
+    "task_bytes": null
+  },
+  "scalar/emit_aggregates/Cpu": {
+    "abi": 6,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 17236,
+    "source_sha256": "a320c23b28dddb01233b025e13da1a12c3ddc3857f33bc94a0c35d753d832637",
+    "states": 8,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "scalar/emit_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "scalar/emit_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "scalar/emit_device_speculative/Cpu": {
+    "error": "SpeculationTarget"
+  },
+  "scalar/emit_device_speculative/Cuda": {
+    "abi": 5,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 32372,
+    "source_sha256": "f1dd6f0e79dec840d80763f93e1f09a2f0ff7686256551b7c2f472da01717f27",
+    "states": 39,
+    "target": "Cuda",
+    "task_bytes": 9360
+  },
+  "scalar/emit_device_speculative/Metal": {
+    "abi": 5,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 32837,
+    "source_sha256": "483baf0ed6a7b9390dca048f0c34ea2e2b7cb08366d68df30912d7f5cdf9f059",
+    "states": 39,
+    "target": "Metal",
+    "task_bytes": 9360
+  },
+  "scalar/emit_numeric/Cpu": {
+    "abi": 8,
+    "frame_bytes": 9216,
+    "heap_words": null,
+    "kernel": null,
+    "source_bytes": 20499,
+    "source_sha256": "6ae2cb1bf8e0c27ccf5fe646195532d0a5869d7d1d188750f4d960c6710ea8aa",
+    "states": 8,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "scalar/emit_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_owned/Cpu": {
+    "abi": 2,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16423,
+    "source_sha256": "e37ea675efe2ae44bbb7aae3919812682d48e556997a4aa3e5d5d02af620e1d6",
+    "states": 8,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "scalar/emit_owned/Cuda": {
+    "abi": 2,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16833,
+    "source_sha256": "f0b7e1179ecf539a505b87529033d37bc5fee045d7a5b5994c57d792b99ce12f",
+    "states": 8,
+    "target": "Cuda",
+    "task_bytes": null
+  },
+  "scalar/emit_owned/Metal": {
+    "abi": 2,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 16958,
+    "source_sha256": "3f8eb1ef4f74e0f4a014f09453384934c91178eeafd5190b6f92f1c1417bc1f7",
+    "states": 8,
+    "target": "Metal",
+    "task_bytes": null
+  },
+  "scalar/emit_owned_numeric/Cpu": {
+    "abi": 10,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": null,
+    "source_bytes": 26094,
+    "source_sha256": "48eab42d14922f6734d2bc8c3bc9e92f8a6c90bc9019627c9ad8b7675e69627b",
+    "states": 8,
+    "target": "Cpu",
+    "task_bytes": null
+  },
+  "scalar/emit_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_resumable/Cpu": {
+    "abi": 3,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 22076,
+    "source_sha256": "f3d41abc39bce54f1fa2351b7a05c4d66ad92bde44e9d1dacaacb7aabd11c8d8",
+    "states": 39,
+    "target": "Cpu",
+    "task_bytes": 9360
+  },
+  "scalar/emit_resumable/Cuda": {
+    "abi": 3,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 21410,
+    "source_sha256": "0292fe608f8a4c489265e96a8688e0d1a63d3f35c682b1f89bec4b4cc395142c",
+    "states": 39,
+    "target": "Cuda",
+    "task_bytes": 9360
+  },
+  "scalar/emit_resumable/Metal": {
+    "abi": 3,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 21571,
+    "source_sha256": "d8cd3e3b7e844056209dc0fba8083180e826e52ffa7bc4d91fed14fe89bf9d67",
+    "states": 39,
+    "target": "Metal",
+    "task_bytes": 9360
+  },
+  "scalar/emit_resumable_aggregates/Cpu": {
+    "abi": 7,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 22889,
+    "source_sha256": "69d6af4a343173a15a9b64c0f54277fe7377ef89a94919e5d33a71bb506802a2",
+    "states": 39,
+    "target": "Cpu",
+    "task_bytes": 9360
+  },
+  "scalar/emit_resumable_aggregates/Cuda": {
+    "error": "AggregateTarget"
+  },
+  "scalar/emit_resumable_aggregates/Metal": {
+    "error": "AggregateTarget"
+  },
+  "scalar/emit_resumable_numeric/Cpu": {
+    "abi": 9,
+    "frame_bytes": 9216,
+    "heap_words": null,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 26268,
+    "source_sha256": "b968f18b06863684c000e6b2a53e6d905999d1ae458a3c7e5b5d77576223c394",
+    "states": 39,
+    "target": "Cpu",
+    "task_bytes": 9360
+  },
+  "scalar/emit_resumable_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_resumable_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 31923,
+    "source_sha256": "9305d54bb81c7134b88f398e575728899d5ea89d3daaf5925f10ff50ae7d811c",
+    "states": 39,
+    "target": "Cpu",
+    "task_bytes": 9360
+  },
+  "scalar/emit_resumable_owned_numeric/Cuda": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_resumable_owned_numeric/Metal": {
+    "error": "NumericTarget"
+  },
+  "scalar/emit_speculative/Cpu": {
+    "abi": 4,
+    "frame_bytes": 9216,
+    "heap_words": 128,
+    "kernel": "invar_gnet_resume_v3",
+    "source_bytes": 31891,
+    "source_sha256": "da61b56d21c5553b6fc6ce56645f9eee2deacc15ce1b5abf833a5c514266510b",
+    "states": 39,
+    "target": "Cpu",
+    "task_bytes": 9360
+  },
+  "scalar/emit_speculative/Cuda": {
+    "error": "SpeculationTarget"
+  },
+  "scalar/emit_speculative/Metal": {
+    "error": "SpeculationTarget"
+  }
+}

@@ -1,0 +1,30 @@
+[package]
+name = "invar-metal"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license.workspace = true
+
+[dependencies]
+invar-device = { path = "../invar-device" }
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.189"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "=0.6.3"
+sha2 = "=0.11.0"
+objc2-foundation = { version = "=0.3.2", default-features = false, features = ["NSString", "NSError", "NSArray", "NSURL", "NSProcessInfo"] }
+block2 = "=0.6.2"
+dispatch2 = { version = "=0.3.1", default-features = false }
+objc2-metal = { version = "=0.3.2", default-features = false, features = ["MTLBinaryArchive", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLCommandEncoder", "MTLComputeCommandEncoder", "MTLComputePipeline", "MTLLibrary", "MTLBuffer", "MTLResource", "MTLTypes", "MTLAllocation", "MTLBlitCommandEncoder", "objc2-core-foundation", "dispatch2", "block2"] }
+
+[dev-dependencies]
+invar = { path = "../.." }
+serde_json = "1.0"
+sha2 = "=0.11.0"
+
+[[example]]
+name = "sort-baseline"
+path = "../../bench/sort-baselines/metal.rs"

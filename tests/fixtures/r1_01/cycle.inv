@@ -1,0 +1,4 @@
+frame world;
+frame a: b;
+frame b: a;
+fn main() -> i32 { return 0i32; }

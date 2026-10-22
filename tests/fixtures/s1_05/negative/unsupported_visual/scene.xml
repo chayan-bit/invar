@@ -1,0 +1,18 @@
+<mujoco model="planar">
+  <visual><glow strength="0.5"/></visual>
+  <worldbody>
+    <body name="base">
+      <inertial mass="1" diaginertia="0.01 0.01 0.01"/>
+      <geom type="box" size="0.1 0.1 0.1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.1 0.1 0.1"/>
+      <body name="arm" pos="0 0 0.2">
+        <inertial mass="0.5" pos="0 0 0.1" diaginertia="0.001 0.001 0.001"/>
+        <joint name="shoulder" type="hinge" axis="0 0 1" range="-1 1"/>
+        <geom type="capsule" size="0.02 0.1" contype="0" conaffinity="0"/>
+        <geom type="capsule" size="0.02 0.1"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator><position name="shoulder_drive" joint="shoulder" gear="1" ctrlrange="-1 1"/></actuator>
+  <sensor><jointpos name="encoder" joint="shoulder"/></sensor>
+</mujoco>

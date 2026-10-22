@@ -1,0 +1,16 @@
+fn rmsnorm_rows(x: read Array<f32>, w: read Array<f32>, rows: u32, cols: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(rows * cols, 0.0);
+    let inv_n: f32 = 1.0 / f32_from_u32(cols);
+    for r in 0u32..rows {
+        let base: u32 = r * cols;
+        var ss: f32 = 0.0;
+        for c in 0u32..cols {
+            ss = ss + x[base + c] * x[base + c];
+        }
+        let scale: f32 = 1.0 / sqrt(ss * inv_n + 0.00001);
+        for c2 in 0u32..cols {
+            out[base + c2] = x[base + c2] * scale * w[c2];
+        }
+    }
+    return move out;
+}

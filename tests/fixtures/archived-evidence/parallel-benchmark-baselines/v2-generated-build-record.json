@@ -1,0 +1,17 @@
+{
+  "build_command": [
+    "cargo",
+    "build",
+    "--features",
+    "metal",
+    "--bin",
+    "invar-bench"
+  ],
+  "cargo_version": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+  "review_status": "unreviewed_dirty_build",
+  "runner_executable_sha256": "9e9ea49f3d784d358907e6f6458cb279b822c3d344bebe8220928e81cd3f6078",
+  "rustc_version": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "schema_version": 1,
+  "source_head": "28f63429a0a46f8b79c72a39645e6d26d5995eb0",
+  "worktree_at_invocation": "dirty"
+}

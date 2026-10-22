@@ -1,0 +1,23 @@
+// Independent calls that mix scalar work with callees owning arrays; owner
+// children replay at their source turn, scalar children may commit.
+fn sumsq(n: u32) -> i32 {
+    let xs = filled_i32(n, 2);
+    var s = 0;
+    for i in 0u32..n { s = s + xs[i] * xs[i]; }
+    return s;
+}
+fn poly(x: i32) -> i32 {
+    var acc = 0;
+    var i = 0;
+    while i < x { acc = acc + i * i; i = i + 1; }
+    return acc;
+}
+fn run(n: u32, seed: i32) -> i32 {
+    let a = poly(seed);
+    let b = sumsq(n);
+    let c = poly(seed + 3);
+    let d = sumsq(n + 2u32);
+    let e = poly(seed + 5);
+    return a + b + c + d + e;
+}
+fn main() -> i32 { return run(12u32, 30); }

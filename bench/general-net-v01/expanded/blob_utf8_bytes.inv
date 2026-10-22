@@ -1,0 +1,1 @@
+fn main() -> i32 { let text: String = "éx"; let encoded: Bytes = utf8_encode(text); if len(encoded) == 3u32 and encoded[0u32] == 195u32 and encoded[1u32] == 169u32 { return 7; } return 0; }

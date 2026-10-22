@@ -1,0 +1,50 @@
+fn vec3_i32(x: i32, y: i32, z: i32) -> Array<i32> { return [x, y, z]; }
+fn vec3_u32(x: u32, y: u32, z: u32) -> Array<u32> { return [x, y, z]; }
+fn vec_add_i32(a: read Array<i32>, b: read Array<i32>) -> Array<i32> {
+    return [a[0u32] + b[0u32], a[1u32] + b[1u32], a[2u32] + b[2u32]];
+}
+fn vec_sub_i32(a: read Array<i32>, b: read Array<i32>) -> Array<i32> {
+    return [a[0u32] - b[0u32], a[1u32] - b[1u32], a[2u32] - b[2u32]];
+}
+fn vec_add_u32(a: read Array<u32>, b: read Array<u32>) -> Array<u32> {
+    return [a[0u32] + b[0u32], a[1u32] + b[1u32], a[2u32] + b[2u32]];
+}
+fn vec_sub_u32(a: read Array<u32>, b: read Array<u32>) -> Array<u32> {
+    return [a[0u32] - b[0u32], a[1u32] - b[1u32], a[2u32] - b[2u32]];
+}
+fn xf_make(tx: i32, ty: i32, tz: i32,
+           r00: i32, r01: i32, r02: i32,
+           r10: i32, r11: i32, r12: i32,
+           r20: i32, r21: i32, r22: i32) -> Array<i32> {
+    return [tx, ty, tz, r00, r01, r02, r10, r11, r12, r20, r21, r22];
+}
+fn xf_compose(a: read Array<i32>, b: read Array<i32>) -> Array<i32> {
+    return [
+        b[3u32]*a[0u32]+b[4u32]*a[1u32]+b[5u32]*a[2u32]+b[0u32],
+        b[6u32]*a[0u32]+b[7u32]*a[1u32]+b[8u32]*a[2u32]+b[1u32],
+        b[9u32]*a[0u32]+b[10u32]*a[1u32]+b[11u32]*a[2u32]+b[2u32],
+        b[3u32]*a[3u32]+b[4u32]*a[6u32]+b[5u32]*a[9u32],
+        b[3u32]*a[4u32]+b[4u32]*a[7u32]+b[5u32]*a[10u32],
+        b[3u32]*a[5u32]+b[4u32]*a[8u32]+b[5u32]*a[11u32],
+        b[6u32]*a[3u32]+b[7u32]*a[6u32]+b[8u32]*a[9u32],
+        b[6u32]*a[4u32]+b[7u32]*a[7u32]+b[8u32]*a[10u32],
+        b[6u32]*a[5u32]+b[7u32]*a[8u32]+b[8u32]*a[11u32],
+        b[9u32]*a[3u32]+b[10u32]*a[6u32]+b[11u32]*a[9u32],
+        b[9u32]*a[4u32]+b[10u32]*a[7u32]+b[11u32]*a[10u32],
+        b[9u32]*a[5u32]+b[10u32]*a[8u32]+b[11u32]*a[11u32]
+    ];
+}
+fn xf_point(xf: read Array<i32>, point: read Array<i32>) -> Array<i32> {
+    return [
+        xf[3u32]*point[0u32]+xf[4u32]*point[1u32]+xf[5u32]*point[2u32]+xf[0u32],
+        xf[6u32]*point[0u32]+xf[7u32]*point[1u32]+xf[8u32]*point[2u32]+xf[1u32],
+        xf[9u32]*point[0u32]+xf[10u32]*point[1u32]+xf[11u32]*point[2u32]+xf[2u32]
+    ];
+}
+fn xf_vec(xf: read Array<i32>, vec: read Array<i32>) -> Array<i32> {
+    return [
+        xf[3u32]*vec[0u32]+xf[4u32]*vec[1u32]+xf[5u32]*vec[2u32],
+        xf[6u32]*vec[0u32]+xf[7u32]*vec[1u32]+xf[8u32]*vec[2u32],
+        xf[9u32]*vec[0u32]+xf[10u32]*vec[1u32]+xf[11u32]*vec[2u32]
+    ];
+}

@@ -1,0 +1,9 @@
+// A mutable loan excludes every other access to the same array within one call.
+fn both(a: mut Array<i32>, b: read Array<i32>) -> i32 {
+    return a[0u32] + b[0u32];
+}
+
+fn main() -> i32 {
+    var xs: Array<i32> = [1, 2];
+    return both(xs, xs);
+}

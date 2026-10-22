@@ -1,0 +1,5 @@
+enum Choice { Low, High(i32) }
+fn main() -> i32 {
+    let choice: Choice = Choice::Low();
+    return match choice { Choice::Low => 1i32 };
+}

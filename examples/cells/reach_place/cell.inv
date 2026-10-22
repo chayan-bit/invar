@@ -1,0 +1,550 @@
+frame world;
+frame table: world;
+frame robot_base: world;
+frame base: robot_base;
+frame tool: base;
+frame cube: world;
+frame place_target: world;
+
+import component "components/pinocchio_fk/manifest.inv" for robot menagerie::franka_emika_panda;
+import component "components/pinocchio_fk/manifest-ur5e.inv" for robot menagerie::universal_robots_ur5e;
+
+module menagerie {
+    robot franka_emika_panda {
+        license "Apache-2.0";
+        asset mjcf "assets/menagerie/franka_emika_panda/scene.xml" sha256 "4b08c2e5108f0ed67fa689e096e58850210130c3e6ef889b1e22822d369fd8c3";
+        link link0 {
+            parent world;
+            origin xyz (0 m, 0 m, 0 m) quat (1, 0, 0, 0);
+            mass 0.629769 kg;
+            inertial_origin xyz (-0.041018 m, -0.00014 m, 0.049974 m) quat (0.9978667617244626, -0.009703265111178036, 0.06455349025904997, 0.0007870114938915947);
+            inertia (0.0031305107846664603, 0.003879839091902542, 0.004304650123430997, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link0_0.obj" sha256 "6b9f41a4c203540daaeb7a33cc3d0d6c6a32dc8bba187074eeaf97b3e36b3f9c";
+            visual mesh "assets/link0_1.obj" sha256 "57673d2ee2a9db2e10c8986ae57c56a7c39c012b60fd26d7d8549553b664a5ed";
+            visual mesh "assets/link0_2.obj" sha256 "1ca435a2a87a9608a146a47955724d43dd7ce10fc3dd3018800aa98f8ba86e05";
+            visual mesh "assets/link0_3.obj" sha256 "3e9c6334d2b3b47944af3458ee5f20519abc20fe7ee23063bb53405ccab28046";
+            visual mesh "assets/link0_4.obj" sha256 "215d25789704936120f119c0bc1cc7f68516dd3f8f1df61457b71acac3873f26";
+            visual mesh "assets/link0_5.obj" sha256 "9361b104e93743045107aa5b15fb1a0835ba9c1f355aae71f56403cf6a9c33f6";
+            visual mesh "assets/link0_7.obj" sha256 "2dc0b8ebbbc80e4c065d71e195adbc384f673438641fac82b07b801b4d2837cb";
+            visual mesh "assets/link0_8.obj" sha256 "3b8c436999db5586b8eb47bed2b0aa7de6993868b2681b4c04246eeac42fdb7a";
+            visual mesh "assets/link0_9.obj" sha256 "45178f97d2b5da6bce11f610212c4ef7d08c73db33a4fc38e1b7f66b93d023f5";
+            visual mesh "assets/link0_10.obj" sha256 "c9198b9d8534d628d097b0f2b239bb30343353182df098ce0d9db6bc13326848";
+            visual mesh "assets/link0_11.obj" sha256 "f0adec78d6677b7799d25121981270e8bfe119b5c18d08a91ee37a54ad75f65c";
+            collision mesh "assets/link0.stl" sha256 "dfc6d94330de8ddb005b311bfdba9f3b8e1aa7c256b71592ee7ff32cb9a9a5aa";
+        }
+        link link1 {
+            parent link0;
+            origin xyz (0 m, 0 m, 0.333 m) quat (1, 0, 0, 0);
+            mass 4.970684 kg;
+            inertial_origin xyz (0.003875 m, 0.002081 m, -0.04762 m) quat (0.49224657463339233, 0.5124129327531678, 0.5012176923422679, -0.49386953843305764);
+            inertia (0.008524556277543014, 0.7034354292338563, 0.7071370144886007, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link1.obj" sha256 "51091e776b16babdbe2f3849b5c041f921d1f11dd94ac19a0f1c81abf496fbae";
+            collision mesh "assets/link1.stl" sha256 "e41a39a94108fcf56aacff603fc91ec80541f4c1af17b51a0de5617f5566e6d2";
+        }
+        joint joint1 {
+            kind revolute;
+            parent link0;
+            child link1;
+            axis (0, 0, 1);
+            position -2.8973 rad .. 2.8973 rad;
+            velocity 2.175 rad/s;
+            effort 87 N*m;
+        }
+        link link2 {
+            parent link1;
+            origin xyz (0 m, 0 m, 0 m) quat (1, -1, 0, 0);
+            mass 0.646926 kg;
+            inertial_origin xyz (-0.003141 m, -0.02872 m, 0.003495 m) quat (0.20580509425502821, -0.9534579047211899, -0.032029992774809765, 0.21802836206834017);
+            inertia (0.0027342504979895143, 0.02830010693683386, 0.031032642565176634, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link2.obj" sha256 "5c9f8e715de52c3eb71b475de35993b3b96081e02abea9f28c414768877fc59b";
+            collision mesh "assets/link2.stl" sha256 "370f7605a0fae3529db169ded50f52f171024aa792d4d773bc84197301f6a039";
+        }
+        joint joint2 {
+            kind revolute;
+            parent link1;
+            child link2;
+            axis (0, 0, 1);
+            position -1.7628 rad .. 1.7628 rad;
+            velocity 2.175 rad/s;
+            effort 87 N*m;
+        }
+        link link3 {
+            parent link2;
+            origin xyz (0 m, -0.316 m, 0 m) quat (1, 1, 0, 0);
+            mass 3.228604 kg;
+            inertial_origin xyz (0.027518 m, 0.039252 m, -0.066502 m) quat (0.4937817809967536, -0.6468768286300057, -0.5033748604449929, -0.2904198188988559);
+            inertia (0.0012463544407238334, 0.04147925727066559, 0.041501388288610566, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link3_0.obj" sha256 "ce2da87f51708e11b189249d41401065dabe89a06e251185a06cef4d5ff27178";
+            visual mesh "assets/link3_1.obj" sha256 "2880b7753a7173f38fa87ee21da4dfc7fa7be46fbe07bac5aef9e128513cb118";
+            visual mesh "assets/link3_2.obj" sha256 "670cff81ae84693769ca4ae658c154cf909d81167e7c8d22b70ea977f2504efa";
+            visual mesh "assets/link3_3.obj" sha256 "30ede0c812efd0e0b767d134a4eae0b84e0fa407bb6325a5a555e0569b3a3ffd";
+            collision mesh "assets/link3.stl" sha256 "0a8d638b9349c6c0eefc4e888636ac4838c4b27170f18a51699321118af709c1";
+        }
+        joint joint3 {
+            kind revolute;
+            parent link2;
+            child link3;
+            axis (0, 0, 1);
+            position -2.8973 rad .. 2.8973 rad;
+            velocity 2.175 rad/s;
+            effort 87 N*m;
+        }
+        link link4 {
+            parent link3;
+            origin xyz (0.0825 m, 0 m, 0 m) quat (1, 1, 0, 0);
+            mass 3.587895 kg;
+            inertial_origin xyz (-0.05317 m, 0.104419 m, 0.027454 m) quat (0.753308644323255, -0.39200371233842196, -0.004027581007482057, -0.5280558251662261);
+            inertia (0.010620083333833179, 0.028148276242039763, 0.03495964042412704, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link4_0.obj" sha256 "443bf6d178177cf347951ecf107ccd10ca444e605e375b67304579e5f948806f";
+            visual mesh "assets/link4_1.obj" sha256 "ca935ec7cc8b3f0e86aa079c76b0b3bf593b1e9830bab0fa7131ac51577c74f0";
+            visual mesh "assets/link4_2.obj" sha256 "c89caf26d379c35bb9e191ee2d91d09ab29ecc792b48d8bc10b39e5b38222175";
+            visual mesh "assets/link4_3.obj" sha256 "1495d17f45bdb230cf58b0beef9da4e8c9cfe76a3d2d38da89017efe5e093136";
+            collision mesh "assets/link4.stl" sha256 "0180ebb5772ec9840cb049750cffb29a9ddc90311752a16ea34757782ef9e48d";
+        }
+        joint joint4 {
+            kind revolute;
+            parent link3;
+            child link4;
+            axis (0, 0, 1);
+            position -3.0718 rad .. -0.0698 rad;
+            velocity 2.175 rad/s;
+            effort 87 N*m;
+        }
+        link link5 {
+            parent link4;
+            origin xyz (-0.0825 m, 0.384 m, 0 m) quat (1, -1, 0, 0);
+            mass 1.225946 kg;
+            inertial_origin xyz (-0.011953 m, 0.041065 m, -0.038437 m) quat (0.09110497342440438, -0.6472817253524107, 0.10835180238847321, 0.7489900792142138);
+            inertia (0.008034370472607986, 0.028853091260661556, 0.036762538266730434, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link5_0.obj" sha256 "a3238b8f2af0f2eb66d9fe63dc5d41ac52d5d38507241b5ed10e3cb019ab3e71";
+            visual mesh "assets/link5_1.obj" sha256 "9d994bbf83ec241e301b5197a6846da13f2a4a0582edb2c0f76962c5549649d6";
+            visual mesh "assets/link5_2.obj" sha256 "83b4ffe9f772cd7fe182e98640650eebc899aaf01842656574b0416c90dd40a4";
+            collision mesh "assets/link5_collision_0.obj" sha256 "3e5aa75fb13f193555c3dfb999df91d81df25006a5c3af5338297d78137c129b";
+            collision mesh "assets/link5_collision_1.obj" sha256 "87cd8f621071df010f774cbde789282b8463840dfe704f8bdfa2e29be0142e15";
+            collision mesh "assets/link5_collision_2.obj" sha256 "823ab6c8f7b1d79e0844fa071d82a03499ff68e34fddb1ba3451032c22736040";
+        }
+        joint joint5 {
+            kind revolute;
+            parent link4;
+            child link5;
+            axis (0, 0, 1);
+            position -2.8973 rad .. 2.8973 rad;
+            velocity 2.61 rad/s;
+            effort 12 N*m;
+        }
+        link link6 {
+            parent link5;
+            origin xyz (0 m, 0 m, 0 m) quat (1, 1, 0, 0);
+            mass 1.666555 kg;
+            inertial_origin xyz (0.060149 m, -0.014117 m, -0.010517 m) quat (0.9838676776503132, -0.09178110174688703, -0.14478662523995423, -0.051161072982611105);
+            inertia (0.0015978650692349983, 0.004310373704197246, 0.005842761226567755, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link6_0.obj" sha256 "0504c70ebf1b284ee8faae7dcb896b8830bc672a6552015dd5dbd121fa031fb9";
+            visual mesh "assets/link6_1.obj" sha256 "45f7ca77695198b6d86ec2417ad4e42e6275044f0f96266699ee8e1057757ac1";
+            visual mesh "assets/link6_2.obj" sha256 "e54eee4d8232947ee8af65afd5a067e09dac2da6e7e585cb1dccb65496457da0";
+            visual mesh "assets/link6_3.obj" sha256 "d4f6a25ef32fa1fa4734146981994ee760232cb077c80fea6487d78a077c7f27";
+            visual mesh "assets/link6_4.obj" sha256 "be353480fe71d46f7a96f0a3cbb7e112caaf8d88368826f321a36a253c8749b2";
+            visual mesh "assets/link6_5.obj" sha256 "7c87664623c3e1a6cb330db273227a69626dc5e53b4caff1d4ee7911eb3340c6";
+            visual mesh "assets/link6_6.obj" sha256 "8fbc031e0d07b795ebf99115c75223141caaba317cab569159f3d477a7821681";
+            visual mesh "assets/link6_7.obj" sha256 "7dc5ebb799fe281aab27d6e84e7a4efa0a8e42da2369ec83de3ea3f206f62d73";
+            visual mesh "assets/link6_8.obj" sha256 "e3f77381817a341030f9dcc4c4aa7c559f80411b453fd87eb0fefecca82151bf";
+            visual mesh "assets/link6_9.obj" sha256 "25a56ea9b02a03b6cb5a81f31c54f54d0185e1a0b3937c37e4289d896e50215a";
+            visual mesh "assets/link6_10.obj" sha256 "365f26c21d10332cab8d8704645cb46930c30b3085956f2d097498c793f24db4";
+            visual mesh "assets/link6_11.obj" sha256 "8ae61e08b3ad064f25bbf03b22e59cc15d65883b5a7ce92711aff29df2493901";
+            visual mesh "assets/link6_12.obj" sha256 "f28d1bfd62b0244ffd19fb35fe9edefdf583d3c9167db944e87185d919e1d021";
+            visual mesh "assets/link6_13.obj" sha256 "0a55fa92dccb261d07200e6565fca4c850fd17f0c1ecf38821c0b97d51796c7d";
+            visual mesh "assets/link6_14.obj" sha256 "750ae3ee4781e62e3a045c662195247b03f6642b05aa93104f08258e5f6eba26";
+            visual mesh "assets/link6_15.obj" sha256 "5999c1c2497a004a7c4bbe034cdf13744f839d85ae7a11b1bc386c48a3e642e6";
+            visual mesh "assets/link6_16.obj" sha256 "551d7a8b37c53e7a152d008b4e36992e5b5abe74a4be18b57ee6319c27def09f";
+            collision mesh "assets/link6.stl" sha256 "20b768e99a0e0440b5754dcca108016434e57937cc356acd9c352ccd3cb27f77";
+        }
+        joint joint6 {
+            kind revolute;
+            parent link5;
+            child link6;
+            axis (0, 0, 1);
+            position -0.0175 rad .. 3.7525 rad;
+            velocity 2.61 rad/s;
+            effort 12 N*m;
+        }
+        link link7 {
+            parent link6;
+            origin xyz (0.088 m, 0 m, 0 m) quat (1, 1, 0, 0);
+            mass 0.735522 kg;
+            inertial_origin xyz (0.010517 m, -0.004252 m, 0.061597 m) quat (0.015908110650689762, 0.6502405492065816, -0.09186079019795595, -0.7539865750842356);
+            inertia (0.00451802998091931, 0.010105477144356218, 0.012734492874724472, 0, 0, 0) kg*m*m;
+            visual mesh "assets/link7_0.obj" sha256 "04586b0bde011715cfc22072ac72fe0717eb4d4817bcf665987ce6cd88eb2b93";
+            visual mesh "assets/link7_1.obj" sha256 "c3f72289f394c9d6749a4a327fb11f05b203c37c95032c92f28019b40ebe7e00";
+            visual mesh "assets/link7_2.obj" sha256 "d2faecedb304d0989040d082410378dc949dbbda23bd18c05134f08aae984db5";
+            visual mesh "assets/link7_3.obj" sha256 "b62d87c4d4bdb7b281ed341d347c39dad0e50bf36aed8ac11d050073701d5f70";
+            visual mesh "assets/link7_4.obj" sha256 "cb78ccb61fd4ad6c7bff4c4d2e6cb41e1964a5a3e1a28e67c0c6202371cfc018";
+            visual mesh "assets/link7_5.obj" sha256 "099071d3090b51471ba52f4f90814fd3089f4975d196e4d488117073d0bfe491";
+            visual mesh "assets/link7_6.obj" sha256 "99469e2d95ab74ce0292f2f16954c87a8a7dc16652e62e970fe37c94330a81bb";
+            visual mesh "assets/link7_7.obj" sha256 "426c3db8a19373f3dc73d4bec672e948121b2914c10e2e7b9c7ea80643a19e54";
+            collision mesh "assets/link7.stl" sha256 "92ac6afcf7574c034d3170d8a68e95ac9048ab9d0dd5bbd8311b86e551b9ab1c";
+        }
+        joint joint7 {
+            kind revolute;
+            parent link6;
+            child link7;
+            axis (0, 0, 1);
+            position -2.8973 rad .. 2.8973 rad;
+            velocity 2.61 rad/s;
+            effort 12 N*m;
+        }
+        link hand {
+            parent link7;
+            origin xyz (0 m, 0 m, 0.107 m) quat (0.9238795, 0, 0, -0.3826834);
+            mass 0.73 kg;
+            inertial_origin xyz (-0.01 m, 0 m, 0.03 m) quat (1, 0, 0, 0);
+            inertia (0.001, 0.0025, 0.0017, 0, 0, 0) kg*m*m;
+            visual mesh "assets/hand_0.obj" sha256 "b94aab901086f85df04c019b30f43bf9aa23a7ad0443ec80a8c14662a41cabd2";
+            visual mesh "assets/hand_1.obj" sha256 "cd76f7494bb314406a1819c46eb826ee254894f87235714f604a470653d9badb";
+            visual mesh "assets/hand_2.obj" sha256 "e0f44a71712afa5b98eb20355eff17763d3e2e19f459b2bef19abed3727e64b3";
+            visual mesh "assets/hand_3.obj" sha256 "a431a06d99e88a1b322b3122a01424ee7704daeaad0bc343b90b9604f014ad0c";
+            visual mesh "assets/hand_4.obj" sha256 "21f96ef6a8de082e41b1ea9834f1043de359e5d60305541bcb63539581f53bff";
+            collision mesh "assets/hand.stl" sha256 "94493e94f30fe940f2c8ca2f155c3bbe67bbff406d3edf5e261670d2f0f6e2ed";
+        }
+        link left_finger {
+            parent hand;
+            origin xyz (0 m, 0 m, 0.0584 m) quat (1, 0, 0, 0);
+            mass 0.015 kg;
+            inertial_origin xyz (0 m, 0 m, 0 m) quat (1, 0, 0, 0);
+            inertia (0.000002375, 0.000002375, 0.00000075, 0, 0, 0) kg*m*m;
+            visual mesh "assets/finger_0.obj" sha256 "215098c0fcdf7192f6c503a37cf49e3efecf8a9e1320f02b17c5584d89cc5b2c";
+            visual mesh "assets/finger_1.obj" sha256 "cf239e9aca26bba09dbbf1c544c47d87cfc9a2f0637c8bb786af750b6d4eca44";
+            collision mesh "assets/finger_0.obj" sha256 "215098c0fcdf7192f6c503a37cf49e3efecf8a9e1320f02b17c5584d89cc5b2c";
+            collision box (0.0085, 0.004, 0.0085) m;
+            collision box (0.003, 0.002, 0.003) m;
+            collision box (0.003, 0.002, 0.003) m;
+            collision box (0.003, 0.002, 0.0035) m;
+            collision box (0.003, 0.002, 0.0035) m;
+        }
+        joint finger_joint1 {
+            kind prismatic;
+            parent hand;
+            child left_finger;
+            axis (0, 1, 0);
+            position 0 m .. 0.04 m;
+            velocity 0.05 m/s;
+            effort 70 N;
+        }
+        link right_finger {
+            parent hand;
+            origin xyz (0 m, 0 m, 0.0584 m) quat (0, 0, 0, 1);
+            mass 0.015 kg;
+            inertial_origin xyz (0 m, 0 m, 0 m) quat (1, 0, 0, 0);
+            inertia (0.000002375, 0.000002375, 0.00000075, 0, 0, 0) kg*m*m;
+            visual mesh "assets/finger_0.obj" sha256 "215098c0fcdf7192f6c503a37cf49e3efecf8a9e1320f02b17c5584d89cc5b2c";
+            visual mesh "assets/finger_1.obj" sha256 "cf239e9aca26bba09dbbf1c544c47d87cfc9a2f0637c8bb786af750b6d4eca44";
+            collision mesh "assets/finger_0.obj" sha256 "215098c0fcdf7192f6c503a37cf49e3efecf8a9e1320f02b17c5584d89cc5b2c";
+            collision box (0.0085, 0.004, 0.0085) m;
+            collision box (0.003, 0.002, 0.003) m;
+            collision box (0.003, 0.002, 0.003) m;
+            collision box (0.003, 0.002, 0.0035) m;
+            collision box (0.003, 0.002, 0.0035) m;
+        }
+        joint finger_joint2 {
+            kind prismatic;
+            parent hand;
+            child right_finger;
+            axis (0, 1, 0);
+            position 0 m .. 0.04 m;
+            velocity 0.05 m/s;
+            effort 70 N;
+        }
+        actuator actuator1 {
+            mode position;
+            joint joint1;
+            gear 1;
+            control -2.8973 rad .. 2.8973 rad;
+        }
+        actuator actuator2 {
+            mode position;
+            joint joint2;
+            gear 1;
+            control -1.7628 rad .. 1.7628 rad;
+        }
+        actuator actuator3 {
+            mode position;
+            joint joint3;
+            gear 1;
+            control -2.8973 rad .. 2.8973 rad;
+        }
+        actuator actuator4 {
+            mode position;
+            joint joint4;
+            gear 1;
+            control -3.0718 rad .. -0.0698 rad;
+        }
+        actuator actuator5 {
+            mode position;
+            joint joint5;
+            gear 1;
+            control -2.8973 rad .. 2.8973 rad;
+        }
+        actuator actuator6 {
+            mode position;
+            joint joint6;
+            gear 1;
+            control -0.0175 rad .. 3.7525 rad;
+        }
+        actuator actuator7 {
+            mode position;
+            joint joint7;
+            gear 1;
+            control -2.8973 rad .. 2.8973 rad;
+        }
+        actuator actuator8 {
+            mode position;
+            tendon split;
+            gear 1;
+            control 0 one .. 255 one;
+            hold 253 one;
+        }
+        tool hand pose xyz (0 m, 0 m, 0.1034 m) quat (1, 0, 0, 0);
+    }
+
+    robot universal_robots_ur5e {
+        license "BSD-3-Clause";
+        asset mjcf "assets/menagerie/universal_robots_ur5e/scene.xml" sha256 "e877852d40095926ff7db9cfb85e595b550e03da398bd6f6f58885d39038d1b6";
+        link base {
+            parent world;
+            origin xyz (0 m, 0 m, 0 m) quat (0, 0, 0, -1);
+            mass 4 kg;
+            inertial_origin xyz (0 m, 0 m, 0 m) quat (1, 0, 0, 0);
+            inertia (0.00443333156, 0.00443333156, 0.0072, 0, 0, 0) kg*m*m;
+            visual mesh "assets/base_0.obj" sha256 "9a3b21f1524baef6af8a52d7af90b6e94b79f7e3c2b04a0f6581f74d22291b0b";
+            visual mesh "assets/base_1.obj" sha256 "cf7d54691a2c1eeda280955ebd6bd83c2dbecfc46fb53c10198f05d107511b50";
+        }
+        link shoulder_link {
+            parent base;
+            origin xyz (0 m, 0 m, 0.163 m) quat (1, 0, 0, 0);
+            mass 3.7 kg;
+            inertial_origin xyz (0 m, 0 m, 0 m) quat (1, 0, 0, 0);
+            inertia (0.0102675, 0.0102675, 0.00666, 0, 0, 0) kg*m*m;
+            visual mesh "assets/shoulder_0.obj" sha256 "477387a7e7312782a6040484a3c2c2fcee33f40109f419076e31b6f6e1692c68";
+            visual mesh "assets/shoulder_1.obj" sha256 "8537bba02804640ddf6e260f79fe66e895b3229ed3d44298a95e8e027eb5d435";
+            visual mesh "assets/shoulder_2.obj" sha256 "291714518416bb8f0bafbf123867db011ecbf5146a05245ca5893ee8c57d4e21";
+            collision capsule (0.06, 0.06) m;
+        }
+        joint shoulder_pan_joint {
+            kind revolute;
+            parent base;
+            child shoulder_link;
+            axis (0, 0, 1);
+            position -6.28319 rad .. 6.28319 rad;
+            velocity 3.14159 rad/s;
+            effort 150 N*m;
+        }
+        link upper_arm_link {
+            parent shoulder_link;
+            origin xyz (0 m, 0.138 m, 0 m) quat (1, 0, 1, 0);
+            mass 8.393 kg;
+            inertial_origin xyz (0 m, 0 m, 0.2125 m) quat (1, 0, 0, 0);
+            inertia (0.133886, 0.133886, 0.0151074, 0, 0, 0) kg*m*m;
+            visual mesh "assets/upperarm_0.obj" sha256 "14143d4f1175a7dbacc8e2f2f98f1cac5a2b2e238cd46cd03654d31f2610eb53";
+            visual mesh "assets/upperarm_1.obj" sha256 "272899e927f4a32b7c25e34560ec70654c0346cc8ed1c616c0555f3f53b32d14";
+            visual mesh "assets/upperarm_2.obj" sha256 "86c05350d60eb0e7e28a81b544267478b7db997baba41cef19088ebbeffecfa1";
+            visual mesh "assets/upperarm_3.obj" sha256 "b257dab441e6fab64ea03b4b87029d8a96554ad1a513cce944d56acba0ad948a";
+            collision capsule (0.06, 0.06) m;
+            collision capsule (0.05, 0.2) m;
+        }
+        joint shoulder_lift_joint {
+            kind revolute;
+            parent shoulder_link;
+            child upper_arm_link;
+            axis (0, 1, 0);
+            position -6.28319 rad .. 6.28319 rad;
+            velocity 3.14159 rad/s;
+            effort 150 N*m;
+        }
+        link forearm_link {
+            parent upper_arm_link;
+            origin xyz (0 m, -0.131 m, 0.425 m) quat (1, 0, 0, 0);
+            mass 2.275 kg;
+            inertial_origin xyz (0 m, 0 m, 0.196 m) quat (1, 0, 0, 0);
+            inertia (0.0311796, 0.0311796, 0.004095, 0, 0, 0) kg*m*m;
+            visual mesh "assets/forearm_0.obj" sha256 "64c049a55149c2ab355594d52302b53d3e34da3677ceaa1917c427cde7743146";
+            visual mesh "assets/forearm_1.obj" sha256 "a96fe203015cf532b193f414cd01268c7c36795e51a837dd33afd122334f81f2";
+            visual mesh "assets/forearm_2.obj" sha256 "05b436505fc595aeab26675590c2b56b88a65b2d52d6352096fed9f07cb4c4ca";
+            visual mesh "assets/forearm_3.obj" sha256 "fa31af19cfad7a765b62e8a2d5931cb014b88de84195a7850b4e5ee902112e9a";
+            collision capsule (0.055, 0.06) m;
+            collision capsule (0.038, 0.19) m;
+        }
+        joint elbow_joint {
+            kind revolute;
+            parent upper_arm_link;
+            child forearm_link;
+            axis (0, 1, 0);
+            position -3.1415 rad .. 3.1415 rad;
+            velocity 3.14159 rad/s;
+            effort 150 N*m;
+        }
+        link wrist_1_link {
+            parent forearm_link;
+            origin xyz (0 m, 0 m, 0.392 m) quat (1, 0, 1, 0);
+            mass 1.219 kg;
+            inertial_origin xyz (0 m, 0.127 m, 0 m) quat (1, 0, 0, 0);
+            inertia (0.0025599, 0.0025599, 0.0021942, 0, 0, 0) kg*m*m;
+            visual mesh "assets/wrist1_0.obj" sha256 "7ef0c59b5c5d56a9902435c9a058b27d2a38c85fe2bae02d00a9284dd1f4d519";
+            visual mesh "assets/wrist1_1.obj" sha256 "ee6d5c562e6becef94109b0543329080d285d1aef521a01ed98e18a5bf1e8684";
+            visual mesh "assets/wrist1_2.obj" sha256 "88c66dc64f15391287147d50add37729a3f41dadd80b1f859cf2cb6d45daf32a";
+            collision capsule (0.04, 0.07) m;
+        }
+        joint wrist_1_joint {
+            kind revolute;
+            parent forearm_link;
+            child wrist_1_link;
+            axis (0, 1, 0);
+            position -6.28319 rad .. 6.28319 rad;
+            velocity 3.14159 rad/s;
+            effort 28 N*m;
+        }
+        link wrist_2_link {
+            parent wrist_1_link;
+            origin xyz (0 m, 0.127 m, 0 m) quat (1, 0, 0, 0);
+            mass 1.219 kg;
+            inertial_origin xyz (0 m, 0 m, 0.1 m) quat (1, 0, 0, 0);
+            inertia (0.0025599, 0.0025599, 0.0021942, 0, 0, 0) kg*m*m;
+            visual mesh "assets/wrist2_0.obj" sha256 "2ac2e2e39d8f7005bc3b3ab26cd61634be2e14930074615da5318b9ee7c569a8";
+            visual mesh "assets/wrist2_1.obj" sha256 "a721d06dc61d3b3a8ec58c035c9e3358ed30d6991a72e077d8abf3c3c203b633";
+            visual mesh "assets/wrist2_2.obj" sha256 "6df4335c8bd5e881fda2c224f770115ffe9ddd0cd321ebe3c0a4a310796f0987";
+            collision capsule (0.04, 0.06) m;
+            collision capsule (0.04, 0.04) m;
+        }
+        joint wrist_2_joint {
+            kind revolute;
+            parent wrist_1_link;
+            child wrist_2_link;
+            axis (0, 0, 1);
+            position -6.28319 rad .. 6.28319 rad;
+            velocity 3.14159 rad/s;
+            effort 28 N*m;
+        }
+        link wrist_3_link {
+            parent wrist_2_link;
+            origin xyz (0 m, 0 m, 0.1 m) quat (1, 0, 0, 0);
+            mass 0.1889 kg;
+            inertial_origin xyz (0 m, 0.0771683 m, 0 m) quat (1, 0, 0, 1);
+            inertia (0.000132134, 0.0000990863, 0.0000990863, 0, 0, 0) kg*m*m;
+            visual mesh "assets/wrist3.obj" sha256 "0e51748f9c93bd66604360a5cf7e2e8a6e754550be64076333ff4fc19ec90c61";
+            collision cylinder (0.04, 0.02) m;
+        }
+        joint wrist_3_joint {
+            kind revolute;
+            parent wrist_2_link;
+            child wrist_3_link;
+            axis (0, 1, 0);
+            position -6.28319 rad .. 6.28319 rad;
+            velocity 3.14159 rad/s;
+            effort 28 N*m;
+        }
+        actuator shoulder_pan {
+            mode position;
+            joint shoulder_pan_joint;
+            gear 1;
+            control -6.2831 rad .. 6.2831 rad;
+        }
+        actuator shoulder_lift {
+            mode position;
+            joint shoulder_lift_joint;
+            gear 1;
+            control -6.2831 rad .. 6.2831 rad;
+        }
+        actuator elbow {
+            mode position;
+            joint elbow_joint;
+            gear 1;
+            control -3.1415 rad .. 3.1415 rad;
+        }
+        actuator wrist_1 {
+            mode position;
+            joint wrist_1_joint;
+            gear 1;
+            control -6.2831 rad .. 6.2831 rad;
+        }
+        actuator wrist_2 {
+            mode position;
+            joint wrist_2_joint;
+            gear 1;
+            control -6.2831 rad .. 6.2831 rad;
+        }
+        actuator wrist_3 {
+            mode position;
+            joint wrist_3_joint;
+            gear 1;
+            control -6.2831 rad .. 6.2831 rad;
+        }
+        tool wrist_3_link pose xyz (0 m, 0.1 m, 0 m) quat (-1, 1, 0, 0);
+    }
+}
+
+fn run() -> i32 { return 0; }
+
+component joint_state_broadcaster {
+    port out q: std::robotics::JointPositions<f64,robot_dof> @ 100 Hz;
+    param base_mount: Transform<base,robot_base> = identity;
+    resource cpu_cores = 1, memory = 32 MiB;
+    license "Apache-2.0";
+    isolation in-process;
+    wcet 1 ms;
+    deadline 10 ms;
+    impl invar run;
+}
+
+component joint_trajectory_controller {
+    port out cmd: Quantity<i32,one> @ 100 Hz;
+    resource cpu_cores = 1, memory = 32 MiB;
+    license "Apache-2.0";
+    isolation separate-process;
+    wcet 1 ms;
+    deadline 10 ms;
+    impl invar run;
+}
+component mujoco_sim {
+    port in cmd: Quantity<i32,one> @ 100 Hz;
+    resource cpu_cores = 1, memory = 512 MiB;
+    license "Apache-2.0";
+    isolation separate-process;
+    wcet 1 ms;
+    deadline 10 ms;
+    impl invar run;
+}
+connect controller.cmd -> hardware.cmd policy sample-and-hold;
+connect joint_states.q -> fk.q policy sample-and-hold;
+
+cell ReachPlaceCell {
+    robot menagerie::franka_emika_panda;
+    mount xyz (0 m, 0 m, 0 m) quat (1, 0, 0, 0) on table
+        exclude (menagerie::universal_robots_ur5e::base, menagerie::universal_robots_ur5e::shoulder_link);
+    fixture table {
+        pose xyz (0.4 m, 0 m, -0.05 m) quat (1, 0, 0, 0);
+        collision box (0.5, 0.5, 0.05) m;
+    }
+    object cube {
+        pose xyz (0.3 m, 0 m, 0.025 m) quat (1, 0, 0, 0);
+        dynamic mass 0.1 kg attachable;
+        grasp pose xyz(0 m, 0 m, 0.025 m) quat(0, 1, 0, 0);
+        visual box (0.025, 0.025, 0.025) m;
+        collision box (0.025, 0.025, 0.025) m;
+    }
+    fixture place_target {
+        pose xyz (0.5 m, 0.2 m, 0.025 m) quat (1, 0, 0, 0);
+        visual sphere 0.0125 m;
+    }
+    io attach: digital-out;
+    io release: digital-out;
+}
+
+product ReachPlace {
+    distribution proprietary-binary;
+    commercial true;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 6, memory = 2 GiB, gpu_memory = 4 GiB;
+}
+system reach_place for ReachPlace {
+    controller: joint_trajectory_controller;
+    hardware: mujoco_sim;
+    joint_states: joint_state_broadcaster;
+    fk: pinocchio_fk;
+}

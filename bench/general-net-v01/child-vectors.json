@@ -1,0 +1,1106 @@
+{
+  "schema_version": 1,
+  "basis": "Independently derived scalar source results, wrapping frontier sum 2^depth*(seed+2*depth) modulo2^32, source byte trap spans; no generated-output golden. All old119 rows remain a separate complete denominator.",
+  "case_count": 39,
+  "cases": [
+    {
+      "id": "runtime_branch_main",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 13
+        }
+      }
+    },
+    {
+      "id": "runtime_frontier_main",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 20
+        }
+      }
+    },
+    {
+      "id": "ordered_runtime_main",
+      "source": "children/ordered_runtime.inv",
+      "source_sha256": "7909e393561ccb39d082cf303d3503951cbb20ad9b9bf5d1a09a80de3233bf20",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 11
+        }
+      }
+    },
+    {
+      "id": "dependent_serial_main",
+      "source": "children/dependent_serial.inv",
+      "source_sha256": "a4415dcd79fcd12921382616bf1ae42897c9a51c6aec4019ee92b97a103f1f69",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      }
+    },
+    {
+      "id": "affine_serial_main",
+      "source": "children/affine_serial.inv",
+      "source_sha256": "dd6a01e976927d2b5febd2093330f0443735e8a7039967be7694666325e224fd",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      }
+    },
+    {
+      "id": "owner_replay_main",
+      "source": "children/owner_replay.inv",
+      "source_sha256": "7d72ef37d0c7e6ba5d3206689edefc7b5f810538bbae8b1fa03cc05b7ff94ed8",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 12
+        }
+      }
+    },
+    {
+      "id": "branch_0_-7",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": -7
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2
+        }
+      }
+    },
+    {
+      "id": "branch_0_0",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      }
+    },
+    {
+      "id": "branch_0_13",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 13
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 22
+        }
+      }
+    },
+    {
+      "id": "branch_1_-7",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": -7
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 3
+        }
+      }
+    },
+    {
+      "id": "branch_1_0",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      }
+    },
+    {
+      "id": "branch_1_13",
+      "source": "children/runtime_branch.inv",
+      "source_sha256": "873fdce1d51e45d14deeef0ba3f8a62afebe87cf32fcef983afc0066a3d58183",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 13
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 23
+        }
+      }
+    },
+    {
+      "id": "frontier_0_1",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "frontier_0_4294967295",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 4294967295
+        }
+      }
+    },
+    {
+      "id": "frontier_1_1",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 6
+        }
+      }
+    },
+    {
+      "id": "frontier_1_4294967295",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 2
+        }
+      }
+    },
+    {
+      "id": "frontier_2_1",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 20
+        }
+      }
+    },
+    {
+      "id": "frontier_2_4294967295",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 12
+        }
+      }
+    },
+    {
+      "id": "frontier_3_1",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 3
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 56
+        }
+      }
+    },
+    {
+      "id": "frontier_3_4294967295",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 3
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 40
+        }
+      }
+    },
+    {
+      "id": "frontier_4_1",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 144
+        }
+      }
+    },
+    {
+      "id": "frontier_4_4294967295",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "frontier",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 112
+        }
+      }
+    },
+    {
+      "id": "ordered_0_0_3",
+      "source": "children/ordered_runtime.inv",
+      "source_sha256": "7909e393561ccb39d082cf303d3503951cbb20ad9b9bf5d1a09a80de3233bf20",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 3
+        }
+      ],
+      "fuel": 200,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 200,
+        "steps_used": 200
+      }
+    },
+    {
+      "id": "ordered_0_1_2147483647",
+      "source": "children/ordered_runtime.inv",
+      "source_sha256": "7909e393561ccb39d082cf303d3503951cbb20ad9b9bf5d1a09a80de3233bf20",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 2147483647
+        }
+      ],
+      "fuel": 200,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 200,
+        "steps_used": 200
+      }
+    },
+    {
+      "id": "ordered_1_0_3",
+      "source": "children/ordered_runtime.inv",
+      "source_sha256": "7909e393561ccb39d082cf303d3503951cbb20ad9b9bf5d1a09a80de3233bf20",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 3
+        }
+      ],
+      "fuel": 200,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "start": 171,
+            "end": 172
+          }
+        }
+      }
+    },
+    {
+      "id": "ordered_1_1_2147483647",
+      "source": "children/ordered_runtime.inv",
+      "source_sha256": "7909e393561ccb39d082cf303d3503951cbb20ad9b9bf5d1a09a80de3233bf20",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 2147483647
+        }
+      ],
+      "fuel": 200,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 191,
+            "end": 192
+          }
+        }
+      }
+    },
+    {
+      "id": "ordered_1_1_3",
+      "source": "children/ordered_runtime.inv",
+      "source_sha256": "7909e393561ccb39d082cf303d3503951cbb20ad9b9bf5d1a09a80de3233bf20",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 3
+        }
+      ],
+      "fuel": 200,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 11
+        }
+      }
+    },
+    {
+      "id": "dependent_-7",
+      "source": "children/dependent_serial.inv",
+      "source_sha256": "a4415dcd79fcd12921382616bf1ae42897c9a51c6aec4019ee92b97a103f1f69",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -7
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -4
+        }
+      }
+    },
+    {
+      "id": "dependent_0",
+      "source": "children/dependent_serial.inv",
+      "source_sha256": "a4415dcd79fcd12921382616bf1ae42897c9a51c6aec4019ee92b97a103f1f69",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 3
+        }
+      }
+    },
+    {
+      "id": "dependent_100",
+      "source": "children/dependent_serial.inv",
+      "source_sha256": "a4415dcd79fcd12921382616bf1ae42897c9a51c6aec4019ee92b97a103f1f69",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 100
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 103
+        }
+      }
+    },
+    {
+      "id": "affine_-7",
+      "source": "children/affine_serial.inv",
+      "source_sha256": "dd6a01e976927d2b5febd2093330f0443735e8a7039967be7694666325e224fd",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -7
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      }
+    },
+    {
+      "id": "affine_0",
+      "source": "children/affine_serial.inv",
+      "source_sha256": "dd6a01e976927d2b5febd2093330f0443735e8a7039967be7694666325e224fd",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      }
+    },
+    {
+      "id": "affine_100",
+      "source": "children/affine_serial.inv",
+      "source_sha256": "dd6a01e976927d2b5febd2093330f0443735e8a7039967be7694666325e224fd",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 100
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      }
+    },
+    {
+      "id": "owner_-7",
+      "source": "children/owner_replay.inv",
+      "source_sha256": "7d72ef37d0c7e6ba5d3206689edefc7b5f810538bbae8b1fa03cc05b7ff94ed8",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "i32",
+          "value": -7
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2
+        }
+      }
+    },
+    {
+      "id": "owner_0",
+      "source": "children/owner_replay.inv",
+      "source_sha256": "7d72ef37d0c7e6ba5d3206689edefc7b5f810538bbae8b1fa03cc05b7ff94ed8",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      }
+    },
+    {
+      "id": "owner_100",
+      "source": "children/owner_replay.inv",
+      "source_sha256": "7d72ef37d0c7e6ba5d3206689edefc7b5f810538bbae8b1fa03cc05b7ff94ed8",
+      "entry": "run",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 30
+        },
+        {
+          "type": "i32",
+          "value": 100
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 109
+        }
+      }
+    },
+    {
+      "id": "frontier_fanout_1",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "fanout",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 5000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 24
+        }
+      }
+    },
+    {
+      "id": "frontier_fanout_3",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "fanout",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 3
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 5000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 192
+        }
+      }
+    },
+    {
+      "id": "frontier_fanout_4",
+      "source": "children/runtime_frontier.inv",
+      "source_sha256": "121beef494814b000488b49c65887bc96f4b524191452ea09a7506814d170db0",
+      "entry": "fanout",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 5000,
+      "limits": {
+        "transitions": 100000,
+        "trace_events": 10000,
+        "array_elements": 128
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 480
+        }
+      }
+    }
+  ]
+}

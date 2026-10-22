@@ -1,0 +1,28 @@
+fn w(x: i32) -> i32 {
+    var s = x % 101;
+    var i = 0;
+    while i < x % 17 {
+        s = (s * 12 + i) % 10007;
+        i = i + 1;
+    }
+    return s;
+}
+fn t(n: i32, s: i32) -> i32 {
+    if n <= 0 { return w(s); }
+    let sel = (s * 5 + n * 5) % 4;
+    if sel == 0 {
+        let v0_0 = t(n - 2, (s * 20 + 53) % 1009);
+        let v0_1 = t(n - 1, (s * 25 + 97) % 1009);
+        let v0_2 = t(n - 2, (s * 20 + 37) % 1009);
+        return (v0_0 * 7 + v0_1 + v0_2) % 10007;
+    }
+    if sel == 1 {
+        return t(n - 1, (s * 2 + 0) % 1009);
+    }
+    if sel == 2 {
+        return (w(s) + n) % 10007;
+    }
+    return t(n - 1, (s * 14 + 31) % 1009);
+}
+fn run(a: i32, b: i32) -> i32 { return t(a, b % 1009); }
+fn main() -> i32 { return run(3, 519); }

@@ -1,0 +1,34 @@
+[package]
+name = "invar-python"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license = "Apache-2.0"
+
+# Built as its own workspace, outside the root workspace.
+[workspace]
+
+[lib]
+name = "invar_python"
+crate-type = ["cdylib", "rlib"]
+
+[[test]]
+name = "issue_l1_06_python_binding"
+path = "../../tests/issue_l1_06_python_binding.rs"
+
+[features]
+extension-module = ["pyo3/extension-module"]
+native = ["invar/native"]
+cuda = ["invar/cuda"]
+metal = ["invar/metal"]
+
+[dependencies]
+invar = { path = "../.." }
+invar-foreign = { path = "../invar-foreign" }
+pyo3 = { version = "=0.29.2", features = ["auto-initialize"] }
+numpy = "=0.29.0"
+serde_json = "1.0"
+
+[dev-dependencies]
+jsonschema = { version = "=0.57.0", default-features = false }

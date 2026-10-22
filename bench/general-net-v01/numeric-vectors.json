@@ -1,0 +1,2260 @@
+{
+  "schema_version": 1,
+  "numeric_contract": "strict-f32-v1",
+  "expectation_provenance": "hand-derived IEEE binary32 encodings, integer conversion ties and source operator offsets; not generated from compiler output",
+  "cases": [
+    {
+      "id": "arithmetic_main_main",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_main_main",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_main_main",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_main_main",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "ordered_failure_main_main",
+      "source": "numeric/ordered_failure.inv",
+      "source_sha256": "d670af8ee56ff5d62119b9fb16f91d1dbe3d0e9f0136064e17aa39d4fae5335e",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "owner_excluded_main_main",
+      "source": "numeric/owner_excluded.inv",
+      "source_sha256": "6333c996f1ea7bdbf91430349f3e42f1d33e72a17dfd73b6008853669f2e5a06",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "array_f32_excluded_main_main",
+      "source": "numeric/array_f32_excluded.inv",
+      "source_sha256": "771a02bf58556c06ef38ca33d89daee05102730e0fca5ba9ec354a4aa8899dc7",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "nominal_f32_excluded_main_main",
+      "source": "numeric/nominal_f32_excluded.inv",
+      "source_sha256": "c7ca015c09896233eaaddbf3303ffb9be287c0453b876e438b60f56691980d28",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "variant_f32_array_source_rejected",
+      "source": "numeric/variant_f32_array_rejected.inv",
+      "source_sha256": "71eb699dc34b15d9aa19b15871053ea714b886eabf010e0707c256ea3c144f9a",
+      "entry": "main",
+      "arguments": [],
+      "expected_check": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "id": "arithmetic_add_9",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 864026624
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_10",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353217
+        },
+        {
+          "type": "f32",
+          "bits": 864026624
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353218
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_11",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_12",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_13",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 8388607
+        },
+        {
+          "type": "f32",
+          "bits": 1
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 8388608
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_14",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2139095039
+        },
+        {
+          "type": "f32",
+          "bits": 2139095039
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_sub_15",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "sub",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_sub_16",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "sub",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 8388608
+        },
+        {
+          "type": "f32",
+          "bits": 1
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 8388607
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_sub_17",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "sub",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        },
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_mul_18",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "mul",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1
+        },
+        {
+          "type": "f32",
+          "bits": 1056964608
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_mul_19",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "mul",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 3
+        },
+        {
+          "type": "f32",
+          "bits": 1056964608
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_mul_20",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "mul",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483649
+        },
+        {
+          "type": "f32",
+          "bits": 1056964608
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_mul_21",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "mul",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 3212836864
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_mul_22",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "mul",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2139095039
+        },
+        {
+          "type": "f32",
+          "bits": 1073741824
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_23",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_24",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 4286578688
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_25",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 3212836864
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_26",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        },
+        {
+          "type": "f32",
+          "bits": 3212836864
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_27",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 1077936128
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1051372203
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_28",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1
+        },
+        {
+          "type": "f32",
+          "bits": 1073741824
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_29",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 3
+        },
+        {
+          "type": "f32",
+          "bits": 1073741824
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_30",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_31",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 3212836864
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_32",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2139095040
+        },
+        {
+          "type": "f32",
+          "bits": 4286578688
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "nan": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_mul_33",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "mul",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "nan": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_34",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "nan": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_div_35",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "div",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2139095040
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "nan": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_add_36",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "nan": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_fused_37",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "fused",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353217
+        },
+        {
+          "type": "f32",
+          "bits": 1065353214
+        },
+        {
+          "type": "f32",
+          "bits": 3212836864
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2826960896
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_separate_38",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "separate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353217
+        },
+        {
+          "type": "f32",
+          "bits": 1065353214
+        },
+        {
+          "type": "f32",
+          "bits": 3212836864
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_fused_39",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "fused",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2139095039
+        },
+        {
+          "type": "f32",
+          "bits": 1073741824
+        },
+        {
+          "type": "f32",
+          "bits": 4286578687
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2139095039
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_separate_40",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "separate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2139095039
+        },
+        {
+          "type": "f32",
+          "bits": 1073741824
+        },
+        {
+          "type": "f32",
+          "bits": 4286578687
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_fused_41",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "fused",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "arithmetic_echo_42",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "echo",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_negate_43",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "negate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_echo_44",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "echo",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_negate_45",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "negate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_echo_46",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "echo",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_negate_47",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "negate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483649
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_echo_48",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "echo",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2141192193
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_negate_49",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "negate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 4288675841
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_echo_50",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "echo",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4290847557
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 4290847557
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "arithmetic_negate_51",
+      "source": "numeric/arithmetic.inv",
+      "source_sha256": "4fb093605e698533d479d7492fe3db71609ea180ddc3f3beff2fbde4fbeeae9f",
+      "entry": "negate",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4290847557
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2143363909
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "conversions_signed_52",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "signed",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_signed_53",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "signed",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 3472883712
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_signed_54",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "signed",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 2147483647
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1325400064
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_signed_55",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "signed",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 16777217
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1266679808
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_signed_56",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "signed",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 16777219
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1266679810
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_signed_57",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "signed",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -16777217
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 3414163456
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_unsigned_58",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "unsigned",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 0
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_unsigned_59",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "unsigned",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1333788672
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_unsigned_60",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "unsigned",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1325400064
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_unsigned_61",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "unsigned",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 16777217
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1266679808
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "conversions_unsigned_62",
+      "source": "numeric/conversions.inv",
+      "source_sha256": "1309553a8241d1b431d68e2e99c6b9aed4f01ba4f841eace818f816f58a998d3",
+      "entry": "unsigned",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 16777219
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1266679810
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_eq_zeros",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "eq",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_eq_nan",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "eq",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_eq_infinities",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "eq",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4286578688
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_ne_zeros",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "ne",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_ne_nan",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "ne",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_ne_infinities",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "ne",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4286578688
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_lt_zeros",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "lt",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_lt_nan",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "lt",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_lt_infinities",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "lt",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4286578688
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_le_zeros",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "le",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_le_nan",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "le",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_le_infinities",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "le",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4286578688
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_gt_zeros",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "gt",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_gt_nan",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "gt",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_gt_infinities",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "gt",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4286578688
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_ge_zeros",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "ge",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_ge_nan",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "ge",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "predicates_ge_infinities",
+      "source": "numeric/predicates.inv",
+      "source_sha256": "d87a29b1a56fb6d0978eebd445599f8b2fb889788f68b22803b42de5548f5355",
+      "entry": "ge",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 4286578688
+        },
+        {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "bool",
+          "value": false
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_recurse_81",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "recurse",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_recurse_82",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "recurse",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_recurse_83",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "recurse",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 4
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_recurse_84",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "recurse",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 12
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_loop_85",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "loop",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_loop_86",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "loop",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_loop_87",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "loop",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 4
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_loop_88",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "loop",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "u32",
+          "value": 12
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 1065353216
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "control_selected_89",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "selected",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        },
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "bool",
+          "value": true
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2147483648
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "control_selected_90",
+      "source": "numeric/control.inv",
+      "source_sha256": "471272643ef0660bcfa54b6bcb99eb7b011f0efefc9c700ea7d459debf206692",
+      "entry": "selected",
+      "arguments": [
+        {
+          "type": "f32",
+          "bits": 2147483648
+        },
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "bool",
+          "value": false
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2141192193
+        }
+      },
+      "exact_nan_bits": true
+    },
+    {
+      "id": "ordered_failure_ordered_float_zero_no_trap",
+      "source": "numeric/ordered_failure.inv",
+      "source_sha256": "d670af8ee56ff5d62119b9fb16f91d1dbe3d0e9f0136064e17aa39d4fae5335e",
+      "entry": "ordered",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 1
+        },
+        {
+          "type": "f32",
+          "bits": 1065353216
+        },
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "f32",
+          "bits": 2139095040
+        }
+      },
+      "exact_nan_bits": false
+    },
+    {
+      "id": "older_ordered_trap",
+      "source": "numeric/ordered_failure.inv",
+      "source_sha256": "d670af8ee56ff5d62119b9fb16f91d1dbe3d0e9f0136064e17aa39d4fae5335e",
+      "entry": "ordered",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 0
+        },
+        {
+          "type": "f32",
+          "bits": 2141192193
+        },
+        {
+          "type": "f32",
+          "bits": 0
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "start": 50,
+            "end": 51
+          }
+        }
+      }
+    },
+    {
+      "id": "older_checked_trap",
+      "source": "numeric/ordered_failure.inv",
+      "source_sha256": "d670af8ee56ff5d62119b9fb16f91d1dbe3d0e9f0136064e17aa39d4fae5335e",
+      "entry": "checked",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 1
+        },
+        {
+          "type": "f32",
+          "bits": 2141192193
+        }
+      ],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 122,
+            "end": 123
+          }
+        }
+      }
+    },
+    {
+      "id": "earlier_division_main",
+      "source": "numeric/earlier_division.inv",
+      "source_sha256": "4dbaafd76abdce63788e0835910970c888474123b88f3f5454b8bb6cf7fec80e",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "start": 27,
+            "end": 28
+          }
+        }
+      }
+    },
+    {
+      "id": "earlier_overflow_main",
+      "source": "numeric/earlier_overflow.inv",
+      "source_sha256": "d823a66782600008550016d9dd6b16caccd248a9e38a8953dca4373fade6a698",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 1000,
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 36,
+            "end": 37
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+struct Distance { value: Quantity<i32,m> }
+
+fn distance() -> Quantity<i32,mm> {
+    let measured: Distance = Distance { value: quantity::<m>(2) };
+    let metres: Quantity<i32,m> = measured.value;
+    return to::<mm>(metres);
+}
+
+fn main() -> i32 {
+    if distance() == quantity::<mm>(2000) { return 2; }
+    return 0;
+}

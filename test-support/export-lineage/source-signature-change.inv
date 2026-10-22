@@ -1,0 +1,11 @@
+fn shared_symbol(x: u32) -> u32 {
+    return wrapping_add(x, 41u32);
+}
+
+fn peer_symbol(x: i32) -> i32 {
+    return x * 5;
+}
+
+fn hidden_marker() -> i32 {
+    return 101;
+}

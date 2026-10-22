@@ -1,0 +1,6 @@
+// There are no implicit numeric conversions between i32 and u32.
+fn main() -> i32 {
+    let a: i32 = 1;
+    let b: u32 = 2u32;
+    return a + b;
+}

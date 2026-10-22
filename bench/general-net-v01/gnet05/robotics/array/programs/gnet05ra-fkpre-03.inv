@@ -1,0 +1,63 @@
+// GNET-05 robotics corpus, host-array inputs: fkpre (ur5e, precomputed transforms, table).
+fn fk(w: mut Array<f32>, o: u32, cs: read Array<f32>, par: read Array<u32>, fix: read Array<f32>, ax: read Array<u32>, jt: read Array<u32>, jm: mut Array<f32>) -> Unit {
+    for e in 0u32..12u32 {
+        w[o + e] = fix[e];
+    }
+    for i in 1u32..len(par) {
+        let so = o + i * 12u32;
+        let po = o + par[i] * 12u32;
+        let ao = i * 12u32;
+        let a = ax[i];
+        let c = cs[2u32 * jt[i]];
+        let s = cs[2u32 * jt[i] + 1u32];
+        for k in 0u32..3u32 {
+            let f = ao + 3u32 * k;
+            let x = fix[f];
+            let y = fix[f + 1u32];
+            let z = fix[f + 2u32];
+            jm[3u32 * k] = x;
+            jm[3u32 * k + 1u32] = y;
+            jm[3u32 * k + 2u32] = z;
+            if a == 3u32 {
+                jm[3u32 * k] = c * x + s * y;
+                jm[3u32 * k + 1u32] = c * y - s * x;
+            } else if a == 2u32 {
+                jm[3u32 * k] = c * x - s * z;
+                jm[3u32 * k + 2u32] = s * x + c * z;
+            } else if a == 1u32 {
+                jm[3u32 * k + 1u32] = c * y + s * z;
+                jm[3u32 * k + 2u32] = c * z - s * y;
+            }
+        }
+        for r in 0u32..3u32 {
+            let pr = po + r * 3u32;
+            for col in 0u32..3u32 {
+                w[so + r * 3u32 + col] = w[pr] * jm[col] + w[pr + 1u32] * jm[3u32 + col] + w[pr + 2u32] * jm[6u32 + col];
+            }
+            w[so + 9u32 + r] = w[pr] * fix[ao + 9u32] + w[pr + 1u32] * fix[ao + 10u32] + w[pr + 2u32] * fix[ao + 11u32] + w[po + 9u32 + r];
+        }
+    }
+}
+fn tool(t: read Array<f32>, i: u32) -> f32 {
+    let r = 72u32 + 3u32 * i;
+    return t[r] * 0.0 + t[r + 1u32] * 0.1 + t[r + 2u32] * 0.0 + t[72u32 + 9u32 + i];
+}
+fn run(a: read Array<f32>, out: mut Array<f32>) -> u32 {
+    let par: Array<u32> = [0u32, 0u32, 1u32, 2u32, 3u32, 4u32, 5u32];
+    let fix: Array<f32> = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.163, 0.0000000000000002220446, 0.0, 1.0, 0.0, 1.0, 0.0, (-1.0), 0.0, 0.0000000000000002220446, 0.0, 0.138, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, (-0.131), 0.425, 0.0000000000000002220446, 0.0, 1.0, 0.0, 1.0, 0.0, (-1.0), 0.0, 0.0000000000000002220446, 0.0, 0.0, 0.392, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.127, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.1];
+    let ax: Array<u32> = [0u32, 3u32, 2u32, 2u32, 2u32, 3u32, 2u32];
+    let jt: Array<u32> = [0u32, 0u32, 1u32, 2u32, 3u32, 4u32, 5u32];
+    var jm = filled_f32(9u32, 0.0);
+    let n = len(a) / 12u32;
+    var cs = filled_f32(12u32, 0.0);
+    for b in 0u32..n {
+        for jf in 0u32..12u32 {
+            cs[jf] = a[b * 12u32 + jf];
+        }
+        fk(out, b * 84u32, cs, par, fix, ax, jt, jm);
+    }
+    return n;
+}
+fn main() -> i32 {
+    return 0;
+}

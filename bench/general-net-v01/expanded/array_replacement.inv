@@ -1,0 +1,1 @@
+fn main() -> i32 { var xs = filled_i32(2u32, 3); xs = filled_i32(1u32, 9); return xs[0u32]; }

@@ -1,0 +1,30 @@
+{
+  "schema": "invar-fsum-calibration-v1",
+  "status": "provisional",
+  "rule": "cpu-parallel splits a call over W workers only when spawn_ns_per_worker * W + ns_per_term * n / W < ns_per_term * n; auto places a call on Metal only from metal_min_terms (null: never). Any choice gives the same bits.",
+  "families": {
+    "fsum.sum_tree.f32": {"ns_per_term": 0.653, "spawn_ns_per_worker": 8930.0, "metal_min_terms": null},
+    "fsum.dot_tree.f32": {"ns_per_term": 0.493, "spawn_ns_per_worker": 8930.0, "metal_min_terms": null},
+    "fsum.sum_exact.f32": {"ns_per_term": 3.109, "spawn_ns_per_worker": 8930.0, "metal_min_terms": null},
+    "fsum.dot_exact.f32": {"ns_per_term": 2.287, "spawn_ns_per_worker": 8930.0, "metal_min_terms": null}
+  },
+  "measurements": [
+    {
+      "host_class": "apple-m4",
+      "workers": 10,
+      "load_average_1m": 4.1,
+      "harness": "tests/v02_fsum_metal.rs v02_fsum_metal_crossover (median of 15 after 5 warmups)",
+      "one_worker_ms_at_2^26": {"fsum.sum_tree.f32": 43.79, "fsum.dot_tree.f32": 33.08, "fsum.sum_exact.f32": 208.64, "fsum.dot_exact.f32": 153.49},
+      "ten_workers_ms_at_2^10_to_2^12_max": 0.0893,
+      "cpu_crossover_measured": {"fsum.sum_tree.f32": "2^18", "fsum.dot_tree.f32": "2^18", "fsum.sum_exact.f32": "2^16", "fsum.dot_exact.f32": "2^16"},
+      "cpu_crossover_model": {"fsum.sum_tree.f32": "2^18", "fsum.dot_tree.f32": "2^18", "fsum.sum_exact.f32": "2^15", "fsum.dot_exact.f32": "2^16"},
+      "metal_end_to_end_ms_at_2^26": {"fsum.sum_tree.f32": 34.95, "fsum.dot_tree.f32": 57.95, "fsum.sum_exact.f32": 46.15, "fsum.dot_exact.f32": 66.92},
+      "best_cpu_ms_at_2^26": {"fsum.sum_tree.f32": 6.09, "fsum.dot_tree.f32": 6.82, "fsum.sum_exact.f32": 15.04, "fsum.dot_exact.f32": 30.87},
+      "metal_wins_from": null
+    },
+    {
+      "host_class": "linux-x86_64-32-core",
+      "status": "pending quiet window: the shared host's load average stayed between 12 and 28 (32 cores) on 2026-10-18; bench/fsum-cpu calibrate runs once it is under 8"
+    }
+  ]
+}

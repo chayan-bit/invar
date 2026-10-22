@@ -1,0 +1,2 @@
+extern c fn bad(callback: read Callback) -> Result<i32, ForeignError> oracle missing;
+fn main() -> i32 { return 0; }

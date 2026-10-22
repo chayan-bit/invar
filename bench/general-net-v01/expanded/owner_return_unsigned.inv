@@ -1,0 +1,2 @@
+fn unsigned_owner(n: u32) -> Array<u32> { let xs = filled_u32(n, 4294967295u32); return xs; }
+fn main() -> i32 { let a = unsigned_owner(3u32); if a[2u32] == 4294967295u32 { return 1; } return 0; }

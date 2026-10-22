@@ -1,0 +1,18 @@
+[package]
+name = "invar-foreign"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license.workspace = true
+
+[dependencies]
+libloading = "=0.9.0"
+sha2 = "=0.11.0"
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.189"
+
+[lints.rust]
+# Set only by the host-array compile-check harness for its isolated stand-in crate.
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(host_array_isolated)"] }

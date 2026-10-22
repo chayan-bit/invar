@@ -1,0 +1,8 @@
+struct Bundle { items: Array<i32>, code: i32 }
+
+fn main() -> i32 {
+    let bundle: Bundle = Bundle { items: [3i32, 4i32], code: 5i32 };
+    let moved: Array<i32> = move bundle.items;
+    let again: Array<i32> = move bundle.items;
+    return moved[1u32] + bundle.code;
+}

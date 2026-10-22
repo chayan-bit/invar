@@ -1,0 +1,35 @@
+/* CPU lifecycle double: no collision planning, FK, ROS, physics or GPU. */
+#include "wire.h"
+#include <stdlib.h>
+#include <string.h>
+const char *probe_version(void) { return "invar-planner-component-v2/@N@/sequencer-cpu-double"; }
+int probe_init(void **context, const unsigned char *child, unsigned int size) {
+    (void)child; (void)size; *context = calloc(1, 1); return *context ? 0 : 3;
+}
+int probe_configure(void *context, const void *config) { return context && config ? 0 : 2; }
+int probe_step(void *context, const void *input, void *output) {
+    if (!context) return 2;
+    const inv_planner_request@N@_f64_v2 *request = input;
+    inv_planner_trajectory@N@_f64_v1 *result = output;
+    memset(result, 0, sizeof(*result));
+    result->count = request->target_base_from_tool.xyz_m[2] == 0.1 ? 256 : 2;
+    result->dt_s = 0.1 / (result->count - 1);
+    for (unsigned i = 0; i < result->count; ++i) {
+        double fraction = (double)i / (result->count - 1);
+        result->waypoints[i].time_from_start_s = 0.1 * fraction;
+        memcpy(result->waypoints[i].q_rad, request->start_q_rad, sizeof(request->start_q_rad));
+        if (request->phase == 4) {
+            /* Home: joint-space line to the exact goal joints. */
+            for (unsigned j = 0; j < @N@; ++j)
+                result->waypoints[i].q_rad[j] += fraction *
+                    (request->goal_q_rad[j] - request->start_q_rad[j]);
+            if (i + 1 == result->count)
+                memcpy(result->waypoints[i].q_rad, request->goal_q_rad, sizeof(request->goal_q_rad));
+        } else {
+            result->waypoints[i].q_rad[0] += fraction *
+                (request->target_base_from_tool.xyz_m[0] - request->start_q_rad[0]);
+        }
+    }
+    return 0;
+}
+int probe_shutdown(void **context) { free(*context); *context = NULL; return 0; }

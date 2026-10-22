@@ -1,0 +1,69 @@
+{
+  "child_sha256": "25e41b22d25fd80c65f9143878ade44a4beb8d4451a7a71f6bfe7b499222eb83",
+  "component": "process_fk",
+  "host": {
+    "arch": "aarch64",
+    "os": "linux"
+  },
+  "inputs": [
+    {
+      "path": "<generated>",
+      "role": "generated-header",
+      "sha256": "b607383490b46bc4d8b50aaa0d967214a762997cf99f73db6b30418c0795ec01"
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/golden/process_fk.json",
+      "role": "golden",
+      "sha256": "efbc14d61cb61473ac08df9c04c2f718d1d428490742355078ab3343f886bc38"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/abi_reference.h",
+      "role": "input",
+      "sha256": "79bd51c5d97b2f139b2a6b91bb874309845ed4e7d747db200e424ef6d3939001"
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/abi_exports.map",
+      "role": "input",
+      "sha256": "2912a4c8dda0f96771acf86a5620e8ee13ec7c61fc012ef34b56eca2b22fef22"
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/process_reference.c",
+      "role": "input",
+      "sha256": "fefeb78692a184bdd569c9a9d3ad1851168992ae373991845eabbf26d35f73ee"
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/process_reference.h",
+      "role": "input",
+      "sha256": "9d676d39b65815409ae12a2ec2ddb12297d8711cefbf3cf1707420e801deb40f"
+    },
+    {
+      "path": "tests/fixtures/foreign-components/process/fixture_server.py",
+      "role": "input",
+      "sha256": "25e41b22d25fd80c65f9143878ade44a4beb8d4451a7a71f6bfe7b499222eb83"
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/manifest.inv",
+      "role": "manifest",
+      "sha256": "5fa98ca3b6887e014180362354ecd1f099089ee20363135f0d1b6dbf12289a34"
+    },
+    {
+      "path": "examples/cells/reach_place/components/process_fixture/bridge.c",
+      "role": "shim",
+      "sha256": "8261937c44f6f1e51b204199b6a91c0aa5ab8f4125827cafe675bc6c0d41840a"
+    }
+  ],
+  "library_sha256": "6ecb54073cda4d6514d69cbd18172e8908cbc05e0319dd2aba0e46721e8f07aa",
+  "library_version": "invar-component-v1/invar-process-reference-abi-1",
+  "manifest_hash": "cb9c33759500f51f7dfe99eb6f55deff0e066f6febca15104c74a80492e08aaa",
+  "model_sha256": "5fa98ca3b6887e014180362354ecd1f099089ee20363135f0d1b6dbf12289a34",
+  "results": {
+    "golden_vectors": 3,
+    "invalid_inputs": "pass",
+    "layout": "pass",
+    "lifecycle": "pass",
+    "process": "pass",
+    "property_samples": 16
+  },
+  "schema": "invar-component-evidence-v1",
+  "status": "pass"
+}

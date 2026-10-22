@@ -1,0 +1,3 @@
+fn consume(xs: take Array<i32>, n: u32) -> i32 { if n == 0u32 { return xs[0u32]; } return consume(move xs, n - 1u32); }
+fn transfer(n: u32) -> i32 { let xs: Array<i32> = [7, 11, 13]; return consume(move xs, n); }
+fn main() -> i32 { return transfer(4u32); }

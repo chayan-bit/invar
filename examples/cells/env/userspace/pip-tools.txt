@@ -1,0 +1,8 @@
+rosinstall-generator==0.1.23 \
+    --hash=sha256:d3f39370ccf58088a94d4fca48d17e687555ffefad9a86ccb2814133fa59193d
+rosdistro==1.1.0 \
+    --hash=sha256:a10d0852fcef15b2b9c92a7b4d553481f660e4e672eaeb1138ad077ffe9a2a38
+rospkg==1.6.3 \
+    --hash=sha256:162dd71eccdd7ead29f5607e635b3e0793ced84952e5cf217e38b9a905855323
+distro==1.9.0 \
+    --hash=sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2

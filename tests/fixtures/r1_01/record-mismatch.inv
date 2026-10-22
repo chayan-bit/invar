@@ -1,0 +1,6 @@
+struct Distance { value: Quantity<i32,m> }
+
+fn main() -> i32 {
+    let distance: Distance = Distance { value: quantity::<mm>(2) };
+    return 0;
+}

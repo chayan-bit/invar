@@ -1,0 +1,1 @@
+fn down(xs:read Array<f32>,n:u32)->u32 {if n==0u32 {return 0u32;}return down(xs,n-1u32)+1u32;} fn main()->i32 {let xs:Array<f32> = [1.0];let d=down(xs,100u32);return 7;}

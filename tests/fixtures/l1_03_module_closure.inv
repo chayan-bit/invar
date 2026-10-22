@@ -1,0 +1,9 @@
+fn main() -> i32 { return math::apply(); }
+
+module math {
+    pub fn apply() -> i32 {
+        let n: i32 = 6i32;
+        let c = closure [copy n: i32]() -> i32 { return n; };
+        return c();
+    }
+}

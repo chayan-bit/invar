@@ -1,0 +1,124 @@
+#include "node.hpp"
+#include "@PREFIX@.h"
+#include "planner_config.hpp"
+#include "tool_projection.hpp"
+#include <invar_cell_interfaces/msg/planner_request@JOINTS@_v2.hpp>
+#include <invar_cell_interfaces/msg/planner_trajectory@JOINTS@_v1.hpp>
+#include <cstring>
+#include <dlfcn.h>
+#include <iostream>
+#include <stdexcept>
+#include <rclcpp_components/register_node_macro.hpp>
+#include <rcl_interfaces/msg/parameter_descriptor.hpp>
+
+namespace @NAMESPACE@ {
+namespace binding = invar_planner@JOINTS@_ros_v1;
+using Request = invar_cell_interfaces::msg::PlannerRequest@JOINTS@V2;
+using Trajectory = invar_cell_interfaces::msg::PlannerTrajectory@JOINTS@V1;
+namespace {
+[[noreturn]] void failure(int status, const char * reason) {
+  const char * code = status == 1 ? "S1404" : status == 2 ? "S1402" :
+                     status == 4 || status == 5 ? "S1406" : status == 6 ? "S1407" : "S1401";
+  std::cerr << "{\"component\":\"@NODE@\",\"success\":false,\"code\":\"" << code
+            << "\",\"foreign_status\":" << status << "}\n";
+  throw std::runtime_error(reason);
+}
+template <typename Function>
+Function symbol(void * library, const char * name) {
+  auto * value = dlsym(library, name);
+  if (value == nullptr) failure(3, "missing planner library symbol");
+  return reinterpret_cast<Function>(value);
+}
+}
+struct ComponentNode::Impl {
+  void * library = nullptr;
+  @PREFIX@_context * context = nullptr;
+  decltype(&@PREFIX@_shutdown) shutdown = nullptr;
+  decltype(&@PREFIX@_step) step = nullptr;
+  binding::Limits limits{};
+  binding::Speeds speeds{};
+  bool failed = false;
+  rclcpp::Subscription<Request>::SharedPtr subscription;
+  rclcpp::Publisher<Trajectory>::SharedPtr publisher;
+  ~Impl() {
+    if (context != nullptr && shutdown != nullptr) shutdown(&context);
+    if (library != nullptr) dlclose(library);
+  }
+};
+ComponentNode::ComponentNode(const rclcpp::NodeOptions & options)
+    : rclcpp::Node("@NODE@", options), impl_(std::make_unique<Impl>()) {
+  rcl_interfaces::msg::ParameterDescriptor descriptor;
+  descriptor.read_only = true;
+  binding::ConfigValues values;
+  values.model_sha256 = declare_parameter<std::string>("model_sha256", "", descriptor);
+  values.robot_config_sha256 = declare_parameter<std::string>("robot_config_sha256", "", descriptor);
+  values.scene_sha256 = declare_parameter<std::string>("scene_sha256", "", descriptor);
+  values.base_frame = declare_parameter<std::string>("base_frame", "", descriptor);
+  values.tool_frame = declare_parameter<std::string>("tool_frame", "", descriptor);
+  values.robot_config_path = declare_parameter<std::string>("robot_config_path", "", descriptor);
+  values.scene_config_path = declare_parameter<std::string>("scene_config_path", "", descriptor);
+  values.joint_names = declare_parameter<std::vector<std::string>>("joint_names", std::vector<std::string>{}, descriptor);
+  values.joint_limits_rad = declare_parameter<std::vector<double>>("joint_limits_rad", std::vector<double>{}, descriptor);
+  values.velocity_limits_rad_s = declare_parameter<std::vector<double>>("velocity_limits_rad_s", std::vector<double>{}, descriptor);
+  values.table_pose = declare_parameter<std::vector<double>>("table_pose", std::vector<double>{}, descriptor);
+  values.table_half_extents_m = declare_parameter<std::vector<double>>("table_half_extents_m", std::vector<double>{}, descriptor);
+  values.cube_edge_m = declare_parameter<double>("cube_edge_m", 0.05, descriptor);
+  @REFERENCE_FRAME_CHECK@
+  const auto library_path = declare_parameter<std::string>("library_path", "", descriptor);
+  const auto child_path = declare_parameter<std::string>("child_path", "", descriptor);
+  @PREFIX@_config config{};
+  if (!binding::configure_values(values, config, impl_->limits, impl_->speeds) ||
+      !binding::local_file(library_path) || !binding::local_file(child_path))
+    failure(1, "planner configuration rejected");
+  impl_->library = dlopen(library_path.c_str(), RTLD_NOW | RTLD_LOCAL);
+  if (impl_->library == nullptr) failure(3, "cannot load planner library");
+  const auto version = symbol<decltype(&@PREFIX@_version)>(impl_->library, "@PREFIX@_version");
+  const char * text = version();
+  constexpr char marker[] = "invar-planner-component-v2/@JOINTS@/";
+  if (text == nullptr || std::strncmp(text, marker, sizeof(marker) - 1) != 0 ||
+      text[sizeof(marker) - 1] == '\0') failure(3, "planner ABI version mismatch");
+  const auto init = symbol<decltype(&@PREFIX@_init)>(impl_->library, "@PREFIX@_init");
+  const auto configure = symbol<decltype(&@PREFIX@_configure)>(impl_->library, "@PREFIX@_configure");
+  impl_->step = symbol<decltype(&@PREFIX@_step)>(impl_->library, "@PREFIX@_step");
+  impl_->shutdown = symbol<decltype(&@PREFIX@_shutdown)>(impl_->library, "@PREFIX@_shutdown");
+  const int initialized = init(&impl_->context, reinterpret_cast<const uint8_t *>(child_path.data()),
+                               static_cast<uint32_t>(child_path.size()));
+  if (initialized != 0 || impl_->context == nullptr)
+    failure(initialized == 0 ? 3 : initialized, "planner init failed");
+  const int configured = configure(impl_->context, &config);
+  if (configured != 0) failure(configured, "planner configure failed");
+  impl_->publisher = create_publisher<Trajectory>("@OUTPUT@", rclcpp::QoS(rclcpp::KeepLast(@OUTPUT_DEPTH@)).reliable());
+  impl_->subscription = create_subscription<Request>("@INPUT@", rclcpp::QoS(rclcpp::KeepLast(@INPUT_DEPTH@)).reliable(),
+      [this](Request::ConstSharedPtr message) {
+        if (impl_->failed) failure(2, "planner session already failed");
+        @PREFIX@_inputs input{};
+        if (!binding::request_from_ros(*message, impl_->limits, input.port_@INPUT@)) {
+          impl_->failed = true;
+          failure(1, "planner request rejected");
+        }
+        if (!invar_tool_projection_v1::request_to_reference(input.port_@INPUT@)) {
+          impl_->failed = true;
+          failure(1, "invalid cell-to-reference planner transform");
+        }
+        @PREFIX@_outputs output{};
+        const int status = impl_->step(impl_->context, &input, &output);
+        if (status != 0) { impl_->failed = true; failure(status, "planner step failed"); }
+        Trajectory trajectory;
+        if (!binding::trajectory_to_ros(output.port_@OUTPUT@, impl_->limits, impl_->speeds, trajectory)) {
+          impl_->failed = true;
+          failure(6, "planner output rejected");
+        }
+        impl_->publisher->publish(trajectory);
+      });
+}
+ComponentNode::~ComponentNode() = default;
+void ComponentNode::stop_planner() {
+  impl_->failed = true;
+  if (impl_->context == nullptr || impl_->shutdown == nullptr)
+    failure(2, "planner shutdown without a live context");
+  const int status = impl_->shutdown(&impl_->context);
+  if (status != 0) failure(status, "planner shutdown failed");
+  if (impl_->context != nullptr) failure(6, "planner shutdown retained context");
+}
+}  // namespace @NAMESPACE@
+RCLCPP_COMPONENTS_REGISTER_NODE(@NAMESPACE@::ComponentNode)

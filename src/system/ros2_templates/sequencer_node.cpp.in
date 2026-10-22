@@ -1,0 +1,116 @@
+#include "process.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <rcl_interfaces/msg/parameter_descriptor.hpp>
+#include <invar_cell_interfaces/msg/cell_snapshot@JOINTS@_v1.hpp>
+#include <invar_cell_interfaces/msg/planner_request@JOINTS@_v2.hpp>
+#include <invar_cell_interfaces/msg/planner_trajectory@JOINTS@_v1.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <std_srvs/srv/set_bool.hpp>
+#include <cmath>
+#include <memory>
+#include <csignal>
+namespace wire=invar_task_process_v1;
+using Snapshot=invar_cell_interfaces::msg::CellSnapshot@JOINTS@V1;
+using Request=invar_cell_interfaces::msg::PlannerRequest@JOINTS@V2;
+using Trajectory=invar_cell_interfaces::msg::PlannerTrajectory@JOINTS@V1;
+class TaskNode final:public rclcpp::Node {
+ using Clock=std::chrono::steady_clock;
+ std::unique_ptr<wire::Process> process_;
+ rclcpp::Subscription<Snapshot>::SharedPtr telemetry_;
+ rclcpp::Subscription<Trajectory>::SharedPtr planned_;
+ rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr tool_diagnostic_;
+ rclcpp::Publisher<Request>::SharedPtr requests_;
+ rclcpp::Publisher<Trajectory>::SharedPtr approved_;
+ rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr cubes_;
+ rclcpp::Publisher<std_msgs::msg::String>::SharedPtr phases_;std::string phase_;
+ rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr attachment_;
+ rclcpp::TimerBase::SharedPtr watchdog_;
+ std::uint64_t last_ns_=0,last_cube_ns_=0;bool measured_=false,cube_published_=false,waiting_plan_=false,waiting_attachment_=false,complete_=false;
+ Clock::time_point last_telemetry_=Clock::now(),pending_since_=Clock::now();
+ [[noreturn]] void fail(const char *reason){std::cerr<<"{\"component\":\"@NODE@\",\"success\":false,\"code\":\"S1406\"}\n";throw std::runtime_error(reason);}
+ void empty_reply(std::uint16_t kind,const wire::Bytes &data){auto r=process_->call(kind,data);if(r.first!=0||!r.second.empty())fail("unexpected task reply");}
+ // Every topic also has the recorder's subscription; only the planner's own one counts.
+ bool planner_live()const{for(const auto &e:get_subscriptions_info_by_topic("/@NODE@/request"))if(e.node_name()=="@PLANNER@"&&e.node_namespace()=="/@PLANNER@")return true;return false;}
+ public:
+ TaskNode():rclcpp::Node("@NODE@") {
+  rcl_interfaces::msg::ParameterDescriptor d;d.read_only=true;
+  auto runtime=declare_parameter<std::string>("runtime_path","",d);auto binding=declare_parameter<std::string>("binding_path","",d);
+  auto task=declare_parameter<std::string>("task_path","",d);auto task_sha=declare_parameter<std::string>("task_sha256","",d);
+  process_=std::make_unique<wire::Process>(runtime,binding,"@BINDING_SHA@",task,task_sha);
+  requests_=create_publisher<Request>("request",rclcpp::QoS(1).reliable());approved_=create_publisher<Trajectory>("approved",rclcpp::QoS(1).reliable());
+  cubes_=create_publisher<geometry_msgs::msg::Pose>("measured_cube",rclcpp::QoS(1).reliable());
+  // Every task phase change is logged and published, so the recording carries it.
+  phases_=create_publisher<std_msgs::msg::String>("phase",rclcpp::QoS(64).reliable());
+  attachment_=create_client<std_srvs::srv::SetBool>("/invar/set_attachment");
+  // The source edge selects the checked FK manifest. This unstamped diagnostic
+  // topic is consumed/recorded, but never mixed into the coherent task snapshot.
+  tool_diagnostic_=create_subscription<geometry_msgs::msg::Pose>("@TOOL_TOPIC@",rclcpp::QoS(1).reliable(),[this](geometry_msgs::msg::Pose::ConstSharedPtr p){
+   const double fields[]={p->position.x,p->position.y,p->position.z,p->orientation.x,p->orientation.y,p->orientation.z,p->orientation.w};
+   for(double x:fields)if(!std::isfinite(x))fail("invalid diagnostic FK pose");
+   const double norm=std::sqrt(fields[3]*fields[3]+fields[4]*fields[4]+fields[5]*fields[5]+fields[6]*fields[6]);
+   if(!std::isfinite(norm)||std::abs(norm-1.0)>1e-12)fail("invalid diagnostic FK quaternion");
+  });
+  telemetry_=create_subscription<Snapshot>("/invar/cell_snapshot",rclcpp::QoS(256).reliable(),[this](Snapshot::ConstSharedPtr s){
+   if(complete_)fail("telemetry after task completion");
+   // The task starts only once its peers are live: the planner subscribes to requests
+   // after its configure succeeds, so an earlier request would be lost. Until then
+   // snapshots are not admitted; the 30 s first-telemetry watchdog bounds the wait.
+   if(!measured_&&(!planner_live()||!attachment_->service_is_ready()))return;
+   if(s->geom_classes.size()>4096||s->contact_geom_ids.size()>2048||s->robot_q_si.size()>64||s->robot_q_si.size()!=s->robot_dq_si_per_s.size())fail("telemetry capacity");
+   wire::Bytes b;wire::integer(b,s->simulation_ns,8);wire::integer(b,s->step_index,8);
+   b.insert(b.end(),s->source_ir_sha256.begin(),s->source_ir_sha256.end());b.insert(b.end(),s->joint_order_sha256.begin(),s->joint_order_sha256.end());
+   for(double x:s->q_rad)wire::number(b,x);
+   for(double x:s->dq_rad_s)wire::number(b,x);
+   for(double x:s->world_from_tool)wire::number(b,x);
+   for(double x:s->world_from_cube)wire::number(b,x);
+   wire::integer(b,s->attached,4);wire::integer(b,s->geom_classes.size(),4);b.insert(b.end(),s->geom_classes.begin(),s->geom_classes.end());
+   wire::integer(b,s->contact_geom_ids.size(),4);for(auto id:s->contact_geom_ids)wire::integer(b,static_cast<std::uint32_t>(id),4);
+   b.insert(b.end(),s->robot_joint_order_sha256.begin(),s->robot_joint_order_sha256.end());
+   wire::integer(b,s->robot_q_si.size(),4);
+   for(double x:s->robot_q_si)wire::number(b,x);
+   for(double x:s->robot_dq_si_per_s)wire::number(b,x);
+   auto reply=process_->call(1,b);last_ns_=s->simulation_ns;last_telemetry_=Clock::now();measured_=true;
+   // Publish measured object data only after the complete snapshot is admitted.
+   geometry_msgs::msg::Pose cube;cube.position.x=s->world_from_cube[0];cube.position.y=s->world_from_cube[1];cube.position.z=s->world_from_cube[2];
+   cube.orientation.x=s->world_from_cube[3];cube.orientation.y=s->world_from_cube[4];cube.orientation.z=s->world_from_cube[5];cube.orientation.w=s->world_from_cube[6];
+   if(!cube_published_ || s->simulation_ns-last_cube_ns_>=10000000){cubes_->publish(cube);last_cube_ns_=s->simulation_ns;cube_published_=true;}
+   wire::Cursor c{reply.second};
+   std::string phase;for(auto n=c.integer(1);n>0;--n){auto ch=static_cast<char>(c.integer(1));if(ch<0x21||ch>0x7e||ch=='"'||ch=='\\')fail("invalid task phase label");phase.push_back(ch);}
+   if(phase.empty())fail("empty task phase label");
+   if(phase!=phase_){phase_=phase;std_msgs::msg::String m;m.data=phase;phases_->publish(m);
+    std::cout<<"{\"component\":\"@NODE@\",\"phase\":\""<<phase<<"\",\"simulation_ns\":"<<s->simulation_ns<<"}"<<std::endl;}
+   if(reply.first==0){c.end();return;}
+   if(reply.first==11){if(waiting_plan_||waiting_attachment_)fail("duplicate task plan");Request r;
+    for(auto &x:r.start_q_rad)x=c.number();
+    for(auto &x:r.goal_q_rad)x=c.number();
+    for(auto &x:r.target_base_from_tool)x=c.number();
+    for(auto &x:r.cube_base_pose)x=c.number();
+    for(auto &x:r.tool_from_cube)x=c.number();
+    r.phase=c.integer(4);c.end();
+    waiting_plan_=true;pending_since_=Clock::now();requests_->publish(r);
+   }else if(reply.first==12){const auto state=c.integer(1);c.end();if(waiting_attachment_||waiting_plan_||state>1||!attachment_->service_is_ready())fail("attachment service unavailable/duplicate");
+    waiting_attachment_=true;pending_since_=Clock::now();auto request=std::make_shared<std_srvs::srv::SetBool::Request>();request->data=state!=0;
+    attachment_->async_send_request(request,[this](rclcpp::Client<std_srvs::srv::SetBool>::SharedFuture future){if(!waiting_attachment_)fail("unsolicited attachment reply");auto result=future.get();
+      wire::Bytes b;wire::integer(b,last_ns_,8);wire::integer(b,result->success?1:0,4);empty_reply(3,b);waiting_attachment_=false;});
+   }else if(reply.first==13){c.end();if(waiting_plan_||waiting_attachment_)fail("completion with outstanding work");process_->finish();complete_=true;std::cout<<"{\"component\":\"@NODE@\",\"task_complete\":true,\"qualification\":\"requires_recorded_acceptance\"}\n";rclcpp::shutdown();
+   }else fail("unknown task action");
+  });
+  planned_=create_subscription<Trajectory>("@PLANNED_TOPIC@",rclcpp::QoS(1).reliable(),[this](Trajectory::ConstSharedPtr t){
+   if(!measured_||!waiting_plan_||waiting_attachment_||complete_||t->waypoints.size()<2||t->waypoints.size()>256)fail("unsolicited/oversized planner output");
+   wire::Bytes b;wire::integer(b,last_ns_,8);wire::number(b,t->dt_s);wire::integer(b,t->waypoints.size(),4);
+   for(const auto &p:t->waypoints){wire::number(b,p.time_from_start_s);for(double x:p.q_rad)wire::number(b,x);for(double x:p.dq_rad_s)wire::number(b,x);}
+   auto reply=process_->call(2,b);if(reply.first!=21||reply.second!=b)fail("accepted trajectory byte identity");
+   waiting_plan_=false;approved_->publish(*t);
+  });
+  watchdog_=create_wall_timer(std::chrono::milliseconds(100),[this]{if(complete_)return;auto now=Clock::now();
+   if(now-last_telemetry_>(measured_?std::chrono::seconds(5):std::chrono::seconds(30)))fail(measured_?"coherent telemetry watchdog":"planner/attachment readiness or first telemetry watchdog");
+   if((waiting_plan_||waiting_attachment_)&&now-pending_since_>std::chrono::seconds(5)){if(waiting_plan_)empty_reply(4,{});fail("planner/service watchdog");}
+ });
+ }
+ bool completed() const {return complete_;}
+};
+int main(int argc,char **argv){std::signal(SIGPIPE,SIG_IGN);rclcpp::init(argc,argv);int status=0;
+ try{auto node=std::make_shared<TaskNode>();rclcpp::spin(node);if(!node->completed()){std::cerr<<"task shutdown before completion\n";status=1;}}catch(const std::exception &){std::cerr<<"{\"component\":\"@NODE@\",\"success\":false,\"code\":\"S1406\"}\n";status=1;}
+ rclcpp::shutdown();return status;
+}

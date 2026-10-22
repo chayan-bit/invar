@@ -1,0 +1,15 @@
+fn sphere_collision(a: read Array<f32>, b: read Array<f32>, na: u32, nb: u32) -> Array<u32> {
+    var hits: Array<u32> = filled_u32(na, 0u32);
+    for i in 0u32..na {
+        let ra: f32 = (a[i * 4u32 + 3u32] + 1.0) * 0.15;
+        for j in 0u32..nb {
+            let rb: f32 = (b[j * 4u32 + 3u32] + 1.0) * 0.15;
+            let dx: f32 = a[i * 4u32] - b[j * 4u32];
+            let dy: f32 = a[i * 4u32 + 1u32] - b[j * 4u32 + 1u32];
+            let dz: f32 = a[i * 4u32 + 2u32] - b[j * 4u32 + 2u32];
+            let reach: f32 = ra + rb;
+            if dx * dx + dy * dy + dz * dz < reach * reach { hits[i] = hits[i] + 1u32; }
+        }
+    }
+    return move hits;
+}

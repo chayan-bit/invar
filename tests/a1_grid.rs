@@ -1,0 +1,644 @@
+//! Ordinary run-path evidence for grid adapters. CPU boundary tests live beside
+//! the adapter; these tests exercise real Metal and CUDA runtimes when selected.
+use invar::{check, eval, front, mir, mir_eval, schedule};
+#[path = "support/a1_grid_source.rs"]
+mod fixtures;
+const FUEL: u64 = 10_000_000;
+fn program(source: &str) -> mir::Program {
+    mir::lower(&check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap()).unwrap()
+}
+fn parity(actual: &eval::Observation, serial: &eval::Observation) {
+    assert_eq!(actual.result, serial.result);
+    assert_eq!(actual.steps_used, serial.steps_used);
+    assert_eq!(actual.cleanup_trace, serial.cleanup_trace);
+}
+fn sources() -> Vec<String> {
+    let mut sources = vec![
+        fixtures::transpose(false, 17, 31, false, true),
+        fixtures::transpose(true, 17, 31, false, true),
+    ];
+    for clamp in [false, true] {
+        for steps in [1, 2, 3] {
+            sources.push(fixtures::stencil(clamp, false, 3, 5, steps));
+        }
+    }
+    sources
+}
+#[test]
+fn a1_grid_cpu_retains_serial_and_cli_forced_refusals() {
+    for source in sources() {
+        let program = program(&source);
+        let cpu = schedule::run_source(source.as_bytes(), &program, FUEL, 2).unwrap();
+        parity(&cpu.observation, &mir_eval::observe(&program, FUEL));
+        assert!(cpu.executed.is_empty());
+    }
+    // Unsupported f32 stencils retain typed refusals on either build.
+    let directory = std::env::temp_dir().join(format!("a1-grid-cli-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let path = directory.join("grid.inv");
+    std::fs::write(&path, fixtures::stencil(false, true, 3, 5, 1)).unwrap();
+    for engine in ["metal", "cuda"] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_invar"))
+            .env("INVAR_METAL_RUNTIME_SOURCE", "1")
+            .arg("run")
+            .arg(&path)
+            .args(["--engine", engine, "--format", "json"])
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(2));
+        let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(
+            json["diagnostics"][0]["code"],
+            format!("{}_UNAVAILABLE", engine.to_uppercase()),
+            "{json}"
+        );
+        println!("forced-{engine}-f32-stencil {json}");
+    }
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[cfg(all(feature = "metal", target_os = "macos"))]
+#[test]
+fn a1_grid_metal_completed_equality_faults_cost_guards_and_cli() {
+    use invar::{plan::DeviceCostModel, schedule::metal};
+    use std::time::Instant;
+    let cheap = DeviceCostModel {
+        cpu_bytes_per_ms: 1.0,
+        device_bytes_per_ms: 1e12,
+        device_fixed_ms: 0.0,
+    };
+    let expensive = DeviceCostModel {
+        cpu_bytes_per_ms: 1e12,
+        device_bytes_per_ms: 1.0,
+        device_fixed_ms: 10.0,
+    };
+    let mut device = invar_metal::MetalDevice::open_runtime_source().unwrap();
+    for source in sources() {
+        let program = program(&source);
+        let start = Instant::now();
+        let serial = mir_eval::observe(&program, FUEL);
+        let serial_ms = start.elapsed().as_secs_f64() * 1000.0;
+        let start = Instant::now();
+        let run =
+            metal::run_source_with_device(source.as_bytes(), &program, FUEL, &mut device).unwrap();
+        let metal_ms = start.elapsed().as_secs_f64() * 1000.0;
+        parity(&run.observation, &serial);
+        assert_eq!(run.observation.result, Ok(eval::Value::I32(7)));
+        assert!(!run.executed.is_empty());
+        println!(
+            "metal-grid kind={:?} regions={} serial_mir_ms={serial_ms:.3} ordinary_metal_ms={metal_ms:.3}",
+            run.executed[0].kind,
+            run.executed.len()
+        );
+        let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
+        let started = Instant::now();
+        let direct = if source.starts_with("fn flip") {
+            let contract =
+                invar::transpose_source::Contract::from_checked(&checked, "flip").unwrap();
+            let plan = contract
+                .device_plan([17, 31], 17 * 31, device.capabilities())
+                .unwrap();
+            let input = (0..17u32 * 31)
+                .map(|i| {
+                    if contract.element() == front::Type::F32 {
+                        invar::numeric_contract::F32Bits::from_decimal(&format!("{}.25", i % 97))
+                            .unwrap()
+                            .to_bits()
+                    } else {
+                        i.wrapping_mul(2654435761)
+                    }
+                })
+                .collect::<Vec<_>>();
+            let result = device.run_transpose(&plan, &input).unwrap();
+            assert_eq!(
+                result.output,
+                (0..17usize * 31)
+                    .map(|i| input[(i % 17) * 31 + i / 17])
+                    .collect::<Vec<_>>()
+            );
+            result
+        } else {
+            let contract = invar::stencil_source::Contract::from_checked(&checked, "step").unwrap();
+            let plan = contract
+                .device_u32([3, 5], run.executed.len() as u32, device.capabilities())
+                .unwrap();
+            let mut expected = (1..=15).collect::<Vec<u32>>();
+            let result = device.run_stencil_u32(&plan, &expected).unwrap();
+            for _ in 0..run.executed.len() {
+                expected = (0..15u32)
+                    .map(|i| {
+                        plan.reads([i / 5, i % 5])
+                            .unwrap()
+                            .into_iter()
+                            .flatten()
+                            .fold(0u32, |sum, at| sum.wrapping_add(expected[at as usize]))
+                    })
+                    .collect();
+            }
+            assert_eq!(result.output, expected);
+            assert_eq!(result.phases, run.executed.len() as u32);
+            assert_eq!(result.final_buffer, run.executed.len() % 2);
+            result
+        };
+        println!(
+            "existing-family-metal-host-ms={:.3} phases={} words={}",
+            started.elapsed().as_secs_f64() * 1000.0,
+            direct.phases,
+            direct.output.len()
+        );
+        if source.starts_with("fn flip") {
+            let mut runtime = invar_cuda::Runtime::new(invar::transpose_source::host::CpuDevice, 2);
+            let start = Instant::now();
+            let host = invar::transpose_source::host::run_source(
+                source.as_bytes(),
+                FUEL,
+                &mut runtime,
+                invar_device::Capabilities::cuda_12_9_sm89(),
+            )
+            .unwrap();
+            parity(&host.observation, &serial);
+            println!(
+                "existing-transpose-host-cpu-ms={:.3}",
+                start.elapsed().as_secs_f64() * 1000.0
+            );
+        }
+        for (model, want_device) in [(cheap, true), (expensive, false)] {
+            let auto = metal::run_auto_source_with_fault(
+                source.as_bytes(),
+                &program,
+                FUEL,
+                metal::Kernels::RuntimeSource,
+                model,
+                metal::Fault::None,
+            )
+            .unwrap();
+            parity(&auto.observation, &serial);
+            assert_eq!(
+                auto.choices.iter().any(|c| c.backend == "metal"),
+                want_device
+            );
+        }
+        let completed_regions = run.executed.len();
+        for fault in [metal::Fault::OutOfMemory, metal::Fault::LaunchFailure] {
+            let run = metal::run_source_with_device_fault(
+                source.as_bytes(),
+                &program,
+                FUEL,
+                &mut device,
+                fault,
+            )
+            .unwrap();
+            assert!(run.executed.is_empty());
+            assert!(matches!(
+                run.observation.result,
+                Err(eval::EvalError::Tool {
+                    code: "METAL_UNAVAILABLE",
+                    ..
+                })
+            ));
+            assert!(!device.is_poisoned(), "test fault is confirmed quiescent");
+            let auto = metal::run_auto_source_with_fault(
+                source.as_bytes(),
+                &program,
+                FUEL,
+                metal::Kernels::RuntimeSource,
+                cheap,
+                fault,
+            )
+            .unwrap();
+            parity(&auto.observation, &serial);
+            assert_eq!(auto.choices.first().unwrap().backend, "mir-serial");
+            assert_eq!(auto.executed.len(), completed_regions - 1);
+        }
+    }
+    for source in [
+        fixtures::transpose(false, 3, 5, false, true),
+        fixtures::stencil(false, false, 3, 5, 1),
+    ] {
+        let program = program(&source);
+        let pending = metal::run_source_with_device_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            &mut device,
+            metal::Fault::PartialCompletion,
+        )
+        .unwrap();
+        assert!(pending.executed.is_empty());
+        assert!(matches!(
+            pending.observation.result,
+            Err(eval::EvalError::Tool {
+                code: "METAL_PENDING",
+                ..
+            })
+        ));
+        assert!(device.is_poisoned());
+        let deadline = Instant::now() + std::time::Duration::from_secs(10);
+        while device.is_poisoned() {
+            assert!(Instant::now() < deadline);
+            device.reap();
+            std::thread::yield_now();
+        }
+        let auto = metal::run_auto_source_with_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            metal::Kernels::RuntimeSource,
+            cheap,
+            metal::Fault::PartialCompletion,
+        )
+        .unwrap();
+        assert!(auto.executed.is_empty());
+        assert!(matches!(
+            auto.observation.result,
+            Err(eval::EvalError::Tool {
+                code: "METAL_PENDING",
+                ..
+            })
+        ));
+    }
+    for source in [
+        fixtures::transpose(false, 3, 5, true, true),
+        fixtures::transpose(false, 3, 5, false, false),
+        fixtures::transpose(false, 0, 5, false, true),
+        fixtures::transpose(false, 5, 0, false, true),
+        fixtures::stencil(true, true, 3, 5, 1),
+    ] {
+        let program = program(&source);
+        let auto = metal::run_auto_source_with_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            metal::Kernels::RuntimeSource,
+            cheap,
+            metal::Fault::None,
+        )
+        .unwrap();
+        parity(&auto.observation, &mir_eval::observe(&program, FUEL));
+        assert!(auto.executed.is_empty());
+        match metal::run_source_with_device(source.as_bytes(), &program, FUEL, &mut device) {
+            Err(e) => assert_eq!(e.code, "METAL_UNAVAILABLE"),
+            Ok(run) => {
+                assert!(run.executed.is_empty());
+                assert!(matches!(
+                    run.observation.result,
+                    Err(eval::EvalError::Tool {
+                        code: "METAL_UNAVAILABLE",
+                        ..
+                    })
+                ));
+            }
+        }
+    }
+    let path = std::path::Path::new("demo/a1-grid.inv");
+    for engine in ["metal", "auto", "cuda"] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_invar"))
+            .env("INVAR_METAL_RUNTIME_SOURCE", "1")
+            .current_dir(env!("CARGO_MANIFEST_DIR"))
+            .arg("run")
+            .arg(path)
+            .args(["--engine", engine, "--format", "json"])
+            .output()
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        if engine == "cuda" {
+            assert_eq!(json["diagnostics"][0]["code"], "CUDA_UNAVAILABLE");
+        } else {
+            assert!(output.status.success(), "{json}");
+            assert_eq!(json["result"]["value"], 7);
+        }
+        println!("invar run demo/a1-grid.inv --engine {engine} --format json => {json}");
+    }
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_invar"))
+        .env("INVAR_METAL_RUNTIME_SOURCE", "1")
+        .current_dir(env!("CARGO_MANIFEST_DIR"))
+        .arg("explain")
+        .arg(path)
+        .args(["--engine", "metal", "--format", "json"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    println!("metal routing {}", json["device_execution"]);
+}
+
+#[cfg(feature = "cuda")]
+#[test]
+#[ignore = "requires an exclusively locked CUDA device and INVAR_NVRTC_COMPILER"]
+fn a1_grid_cuda_completed_equality() {
+    use invar::{plan::DeviceCostModel, schedule::cuda};
+    use std::time::Instant;
+    let cheap = DeviceCostModel {
+        cpu_bytes_per_ms: 1.0,
+        device_bytes_per_ms: 1e12,
+        device_fixed_ms: 0.0,
+    };
+    let expensive = DeviceCostModel {
+        cpu_bytes_per_ms: 1e12,
+        device_bytes_per_ms: 1.0,
+        device_fixed_ms: 10.0,
+    };
+    let mut device = invar_cuda::cuda::CudaDevice::open().unwrap();
+    println!(
+        "cuda-device name={} caps={:?}",
+        device.name(),
+        device.capabilities()
+    );
+    let compiler = std::env::var_os("INVAR_NVRTC_COMPILER").expect("INVAR_NVRTC_COMPILER");
+    let compiler = std::path::Path::new(&compiler);
+    for source in sources() {
+        let program = program(&source);
+        let started = Instant::now();
+        let serial = mir_eval::observe(&program, FUEL);
+        let serial_ms = started.elapsed().as_secs_f64() * 1000.0;
+        let started = Instant::now();
+        let run =
+            cuda::run_source_with_device(source.as_bytes(), &program, FUEL, &mut device, compiler)
+                .unwrap();
+        let ordinary_ms = started.elapsed().as_secs_f64() * 1000.0;
+        parity(&run.observation, &serial);
+        assert_eq!(run.observation.result, Ok(eval::Value::I32(7)));
+        assert!(!run.executed.is_empty());
+        println!(
+            "cuda-grid kind={:?} regions={} serial_mir_ms={serial_ms:.3} ordinary_cuda_ms={ordinary_ms:.3}",
+            run.executed[0].kind,
+            run.executed.len()
+        );
+        let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
+        let started = Instant::now();
+        if source.starts_with("fn flip") {
+            let contract =
+                invar::transpose_source::Contract::from_checked(&checked, "flip").unwrap();
+            let plan = contract
+                .device_plan([17, 31], 17 * 31, device.capabilities())
+                .unwrap();
+            let input = (0..17u32 * 31)
+                .map(|i| {
+                    if contract.element() == front::Type::F32 {
+                        invar::numeric_contract::F32Bits::from_decimal(&format!("{}.25", i % 97))
+                            .unwrap()
+                            .to_bits()
+                    } else {
+                        i.wrapping_mul(2654435761)
+                    }
+                })
+                .collect::<Vec<_>>();
+            let result = device.run_transpose(&plan, &input, compiler).unwrap();
+            assert_eq!(
+                result.output,
+                (0..17usize * 31)
+                    .map(|i| input[(i % 17) * 31 + i / 17])
+                    .collect::<Vec<_>>()
+            );
+            println!(
+                "existing-family-cuda-host-ms={:.3} words={} cubin_bytes={}",
+                started.elapsed().as_secs_f64() * 1000.0,
+                result.output.len(),
+                result.cubin_bytes
+            );
+            if let Some(path) = std::env::var_os("INVAR_GRID_CUDA_SOURCE") {
+                std::fs::write(path, invar_device::transpose::emit_cuda(&plan).unwrap()).unwrap();
+            }
+        } else {
+            let contract = invar::stencil_source::Contract::from_checked(&checked, "step").unwrap();
+            let plan = contract
+                .device_u32([3, 5], run.executed.len() as u32, device.capabilities())
+                .unwrap();
+            let mut expected = (1..=15).collect::<Vec<u32>>();
+            let result = device.run_stencil_u32(&plan, &expected, compiler).unwrap();
+            for _ in 0..run.executed.len() {
+                expected = (0..15u32)
+                    .map(|i| {
+                        plan.reads([i / 5, i % 5])
+                            .unwrap()
+                            .into_iter()
+                            .flatten()
+                            .fold(0u32, |sum, at| sum.wrapping_add(expected[at as usize]))
+                    })
+                    .collect();
+            }
+            assert_eq!(result.output, expected);
+            assert_eq!(result.phases, run.executed.len() as u32);
+            assert_eq!(result.final_buffer, run.executed.len() % 2);
+            println!(
+                "existing-family-cuda-host-ms={:.3} phases={} words={}",
+                started.elapsed().as_secs_f64() * 1000.0,
+                result.phases,
+                result.output.len()
+            );
+        }
+        for (model, want_device) in [(cheap, true), (expensive, false)] {
+            let auto = cuda::run_auto_source_with_fault(
+                source.as_bytes(),
+                &program,
+                FUEL,
+                compiler,
+                model,
+                cuda::Fault::None,
+            )
+            .unwrap();
+            parity(&auto.observation, &serial);
+            assert_eq!(
+                auto.choices.iter().any(|c| c.backend == "cuda"),
+                want_device
+            );
+        }
+        for fault in [cuda::Fault::OutOfMemory, cuda::Fault::LaunchFailure] {
+            let failed = cuda::run_source_with_device_fault(
+                source.as_bytes(),
+                &program,
+                FUEL,
+                &mut device,
+                compiler,
+                fault,
+            )
+            .unwrap();
+            assert!(failed.executed.is_empty());
+            assert!(matches!(
+                failed.observation.result,
+                Err(eval::EvalError::Tool {
+                    code: "CUDA_UNAVAILABLE",
+                    ..
+                })
+            ));
+            assert!(!device.is_poisoned());
+            let auto = cuda::run_auto_source_with_fault(
+                source.as_bytes(),
+                &program,
+                FUEL,
+                compiler,
+                cheap,
+                fault,
+            )
+            .unwrap();
+            parity(&auto.observation, &serial);
+            assert_eq!(auto.choices.first().unwrap().backend, "mir-serial");
+            assert_eq!(auto.executed.len(), run.executed.len() - 1);
+        }
+    }
+    for source in [
+        fixtures::transpose(false, 3, 5, false, true),
+        fixtures::stencil(false, false, 3, 5, 1),
+    ] {
+        let program = program(&source);
+        // A compiler failure retains the shared toolchain-mismatch diagnostic,
+        // publishes nothing, and permits fallback before submission.
+        let bad_compiler = std::path::Path::new("/bin/false");
+        let failed = cuda::run_source_with_device(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            &mut device,
+            bad_compiler,
+        )
+        .unwrap();
+        assert!(failed.executed.is_empty());
+        assert!(
+            matches!(
+                &failed.observation.result,
+                Err(eval::EvalError::Tool {
+                    code: "DEVICE_TOOLCHAIN_MISMATCH",
+                    ..
+                })
+            ),
+            "{:?}",
+            failed.observation.result
+        );
+        let auto = cuda::run_auto_source_with_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            bad_compiler,
+            cheap,
+            cuda::Fault::None,
+        )
+        .unwrap();
+        parity(&auto.observation, &mir_eval::observe(&program, FUEL));
+        assert!(auto.executed.is_empty());
+        let pending = cuda::run_source_with_device_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            &mut device,
+            compiler,
+            cuda::Fault::PartialCompletion,
+        )
+        .unwrap();
+        assert!(pending.executed.is_empty());
+        assert!(matches!(
+            pending.observation.result,
+            Err(eval::EvalError::Tool {
+                code: "CUDA_PENDING",
+                ..
+            })
+        ));
+        assert!(device.is_poisoned());
+        let deadline = Instant::now() + std::time::Duration::from_secs(10);
+        while device.is_poisoned() {
+            assert!(Instant::now() < deadline);
+            device.reap();
+            std::thread::yield_now();
+        }
+        let auto = cuda::run_auto_source_with_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            compiler,
+            cheap,
+            cuda::Fault::PartialCompletion,
+        )
+        .unwrap();
+        assert!(auto.executed.is_empty());
+        assert!(matches!(
+            auto.observation.result,
+            Err(eval::EvalError::Tool {
+                code: "CUDA_PENDING",
+                ..
+            })
+        ));
+    }
+    for source in [
+        fixtures::transpose(false, 3, 5, true, true),
+        fixtures::transpose(false, 3, 5, false, false),
+        fixtures::transpose(false, 0, 5, false, true),
+        fixtures::transpose(false, 5, 0, false, true),
+        fixtures::stencil(true, true, 3, 5, 1),
+    ] {
+        let program = program(&source);
+        let auto = cuda::run_auto_source_with_fault(
+            source.as_bytes(),
+            &program,
+            FUEL,
+            compiler,
+            cheap,
+            cuda::Fault::None,
+        )
+        .unwrap();
+        parity(&auto.observation, &mir_eval::observe(&program, FUEL));
+        assert!(auto.executed.is_empty());
+        match cuda::run_source_with_device(source.as_bytes(), &program, FUEL, &mut device, compiler)
+        {
+            Err(e) => assert_eq!(e.code, "CUDA_UNAVAILABLE"),
+            Ok(run) => {
+                assert!(run.executed.is_empty());
+                assert!(matches!(
+                    run.observation.result,
+                    Err(eval::EvalError::Tool {
+                        code: "CUDA_UNAVAILABLE",
+                        ..
+                    })
+                ));
+            }
+        }
+    }
+    for engine in ["cuda", "auto"] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_invar"))
+            .env("INVAR_METAL_RUNTIME_SOURCE", "1")
+            .current_dir(env!("CARGO_MANIFEST_DIR"))
+            .args([
+                "run",
+                "demo/a1-grid.inv",
+                "--engine",
+                engine,
+                "--format",
+                "json",
+            ])
+            .output()
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert!(output.status.success(), "{json}");
+        assert_eq!(json["result"]["value"], 7);
+        println!("invar run demo/a1-grid.inv --engine {engine} --format json => {json}");
+    }
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_invar"))
+        .env("INVAR_METAL_RUNTIME_SOURCE", "1")
+        .current_dir(env!("CARGO_MANIFEST_DIR"))
+        .args([
+            "explain",
+            "demo/a1-grid.inv",
+            "--engine",
+            "cuda",
+            "--format",
+            "json",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        json["device_execution"]["choices"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|r| r["backend"] == "cuda" && r["kind"] == "Transpose")
+    );
+    println!("cuda routing {}", json["device_execution"]);
+}

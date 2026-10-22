@@ -1,0 +1,7 @@
+struct Pair { left: i32 }
+
+fn main() -> i32 {
+    let p: Pair = Pair { left: 3i32 };
+    let q: Pair = move p;
+    return p.left;
+}

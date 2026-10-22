@@ -1,0 +1,17 @@
+// A two-state table recurrence state = coeff[i * 2 + state] composes as a finite-state summary.
+fn run(coeff: read Array<u32>, seed: u32, count: u32) -> u32 {
+    var state = seed;
+    for i in 0u32 .. count {
+        state = coeff[i * 2u32 + state];
+    }
+    return state;
+}
+
+fn main() -> i32 {
+    let coeff: Array<u32> = [1u32, 0u32, 0u32, 1u32, 1u32, 1u32];
+    let end = run(coeff, 0u32, 3u32);
+    if end == 1u32 {
+        return 7;
+    }
+    return 0;
+}

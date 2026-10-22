@@ -1,0 +1,22 @@
+frame world;
+frame base: world;
+frame camera: base;
+fn ports(
+    p: read std::robotics::Point<f64,world>,
+    v: read std::robotics::Vector3<f64,mm,world>,
+    q: read std::robotics::Quaternion<f64,world>,
+    pose: read std::robotics::Pose<f64,world,base>,
+    twist: read std::robotics::Twist<f64,world>,
+    wrench: read std::robotics::Wrench<f64,world>,
+    jp: read std::robotics::JointPositions<f64,7>,
+    jv: read std::robotics::JointVelocities<f64,7>,
+    je: read std::robotics::JointEfforts<f64,7>,
+    state: read std::robotics::JointState<f64,7>,
+    waypoint: read std::robotics::JointWaypoint<f64,7>,
+    trajectory: read std::robotics::JointTrajectory<f64,7>,
+    distortion: read std::robotics::Distortion<f64>,
+    intrinsics: read std::robotics::CameraIntrinsics<f64>,
+    extrinsics: read std::robotics::CameraExtrinsics<f64,camera,world>,
+    stamped: read std::robotics::Stamped<std::robotics::Pose<f64,world,base>>
+) -> i32 { return 0; }
+fn main() -> i32 { return 0; }

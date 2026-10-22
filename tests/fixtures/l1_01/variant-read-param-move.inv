@@ -1,0 +1,10 @@
+enum Choice { Low, High(i32) }
+
+fn inspect(choice: read Choice) -> i32 {
+    return match move choice { Choice::Low => 0i32, Choice::High(number) => number };
+}
+
+fn main() -> i32 {
+    let value: Choice = Choice::High(8i32);
+    return inspect(value);
+}

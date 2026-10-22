@@ -1,0 +1,2 @@
+fn triangle(n: u32) -> i32 { var i = 0u32; var acc = 0; while i < n { acc = acc + 3; i = i + 1u32; } return acc; }
+fn main() -> i32 { return triangle(7u32); }

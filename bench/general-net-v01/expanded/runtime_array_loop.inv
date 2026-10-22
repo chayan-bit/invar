@@ -1,0 +1,2 @@
+fn fill_fold(n: u32) -> i32 { var xs = filled_i32(n, 2); var acc = 0; for i in 0u32..n { xs[i] = xs[i] + 1; acc = acc + xs[i]; } return acc; }
+fn main() -> i32 { return fill_fold(5u32); }

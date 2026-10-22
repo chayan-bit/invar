@@ -1,0 +1,2459 @@
+{
+  "entry": "run",
+  "families": [
+    "fk",
+    "fkpre",
+    "jacobian",
+    "mass",
+    "collision",
+    "rollout",
+    "pointcloud",
+    "pipeline"
+  ],
+  "generator": {
+    "held_out_per_family": 3,
+    "name": "gnet05-robotics-gen-v1",
+    "per_family": 6,
+    "rng": "splitmix64",
+    "root_seed": "0x474e455430355242"
+  },
+  "held_out": {
+    "count": 24,
+    "normalized_identity_sha256": "d6694b52c603a88349e99f6b3aa031e6c5c2e3bd29a345d87a937f7dd162c07a"
+  },
+  "limitations": [
+    "Panda collision geometry is meshes and fingertip pads; the vendor sphere sets are not in the repo and under-cover the meshes, so collision and pipeline cases use the UR5e only, on its nine exact original capsule/cylinder primitives (no sphere envelopes).",
+    "The reference and oracle entry ABI admits scalar inputs only, so bulk inputs (angles, obstacles, controls, points) are expanded in source from a seed by a frozen 32-bit LCG; that expansion is charged to every compared path.",
+    "The point cloud is a synthetic seeded cloud, not a public dataset; frame, crop box, range band and neighbour radius are frozen here.",
+    "Rollout is a cost-only joint double integrator with clamped limits and a tool-target cost; it has no collision term and is not a planner.",
+    "Precomputed-transform controls draw (cos, sin) by the rational half-angle map of u in [-1, 1), i.e. angles in [-pi/2, pi/2), independent of joint limits.",
+    "The mass matrix is the Jacobian-sum form accumulated body by body in binary32; it is compared with Pinocchio CRBA within a frozen tolerance, never bitwise.",
+    "Panda finger slides are fixed at 0.04 m and folded into the finger frames (contract fixed_inactive_joints)."
+  ],
+  "math": {
+    "constants": [
+      {
+        "decimal": "0.000000059604644775390625",
+        "f32_bits": "0x33800000",
+        "name": "unit"
+      },
+      {
+        "decimal": "0.636619772367581343",
+        "f32_bits": "0x3f22f983",
+        "name": "two_pi"
+      },
+      {
+        "decimal": "1.5703125",
+        "f32_bits": "0x3fc90000",
+        "name": "dp1"
+      },
+      {
+        "decimal": "0.0004837512969970703125",
+        "f32_bits": "0x39fda000",
+        "name": "dp2"
+      },
+      {
+        "decimal": "0.0000000754978995489188216",
+        "f32_bits": "0x33a22169",
+        "name": "dp3"
+      },
+      {
+        "decimal": "-0.00019515295891",
+        "f32_bits": "0xb94ca1f9",
+        "name": "s0"
+      },
+      {
+        "decimal": "0.0083321608736",
+        "f32_bits": "0x3c08839e",
+        "name": "s1"
+      },
+      {
+        "decimal": "0.16666654611",
+        "f32_bits": "0x3e2aaaa3",
+        "name": "s2"
+      },
+      {
+        "decimal": "0.00002443315711809948",
+        "f32_bits": "0x37ccf5ce",
+        "name": "c0"
+      },
+      {
+        "decimal": "0.001388731625493765",
+        "f32_bits": "0x3ab6061a",
+        "name": "c1"
+      },
+      {
+        "decimal": "0.04166664568298827",
+        "f32_bits": "0x3d2aaaa5",
+        "name": "c2"
+      },
+      {
+        "decimal": "1.16666666666666667",
+        "f32_bits": "0x3f955555",
+        "name": "y0"
+      },
+      {
+        "decimal": "0.16666666666666667",
+        "f32_bits": "0x3e2aaaab",
+        "name": "y1"
+      }
+    ],
+    "neighbour_radius_squared": 0.02250000089406967,
+    "pipeline_clearance": 0.05000000074505806,
+    "rollout": {
+      "control_weight": 0.0010000000474974513,
+      "dt": 0.009999999776482582,
+      "umax": 2.0
+    },
+    "sqrt": "scale into [1, 4) by powers of 4, 5 Newton reciprocal-root steps, no division",
+    "stream": "lcg(x) = x * 1664525 + 1013904223 mod 2^32; stream(seed, i) = lcg(i * 2654435761 + seed); unit(x) = (x / 256) * 2^-24",
+    "trig": "Cephes sinf/cosf polynomials after Cody-Waite reduction by pi/2 (three-part split)"
+  },
+  "models": {
+    "panda": {
+      "bodies": 11,
+      "collision_geoms": [],
+      "file": "tests/fixtures/foreign-components/models/franka_emika_panda/panda.xml",
+      "joints": 7,
+      "sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+      "tool": "hand origin"
+    },
+    "ur5e": {
+      "bodies": 7,
+      "collision_geoms": [
+        "shoulder_link#0",
+        "upper_arm_link#1",
+        "upper_arm_link#2",
+        "forearm_link#3",
+        "forearm_link#4",
+        "wrist_1_link#5",
+        "wrist_2_link#6",
+        "wrist_2_link#7",
+        "wrist_3_link#8"
+      ],
+      "file": "examples/cells/assets/menagerie/universal_robots_ur5e/ur5e.xml",
+      "joints": 6,
+      "sha256": "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
+      "tool": "attachment_site"
+    }
+  },
+  "programs": [
+    {
+      "arm": "panda",
+      "family": "fk",
+      "file": "programs/gnet05r-fk-00.inv",
+      "id": "gnet05r-fk-00",
+      "layout": "n x 11 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "32eb04223a6d798793d78889616128379effced6abc2c15b718dc5a8fb72cffe",
+      "oracle_inputs": [
+        [
+          4169699743,
+          1
+        ],
+        [
+          2171784052,
+          2
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          4017237213,
+          1
+        ],
+        [
+          3980646413,
+          32
+        ],
+        [
+          315591597,
+          256
+        ],
+        [
+          3932396520,
+          4096
+        ]
+      ],
+      "seed": "0x64afe31aa48cf8dd",
+      "source_sha256": "459b581aa8663d8d8d6d778febfe4c72bf39e0028cc59f20a636bc19aad15f88",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "panda",
+      "family": "fk",
+      "file": "programs/gnet05r-fk-01.inv",
+      "id": "gnet05r-fk-01",
+      "layout": "n x 11 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "58df3d04756d14000a30aae92dda57ce6ca44a9ce0c34651bfcd3f83aaeefdcf",
+      "oracle_inputs": [
+        [
+          2182515878,
+          1
+        ],
+        [
+          3066899613,
+          2
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          897198933,
+          1
+        ],
+        [
+          2138088865,
+          32
+        ],
+        [
+          743824879,
+          256
+        ],
+        [
+          1270913031,
+          4096
+        ]
+      ],
+      "seed": "0x95c0921f431cb739",
+      "source_sha256": "cf4f13dca195eb2560149362f06742ebf6f097522986a9d466796a5a89581622",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "panda",
+      "family": "fk",
+      "file": "programs/gnet05r-fk-02.inv",
+      "id": "gnet05r-fk-02",
+      "layout": "n x 11 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "02404459563ab1fa4864348f09bbd385bb9bdb4ee428aa053ee1f976327996ef",
+      "oracle_inputs": [
+        [
+          50574050,
+          1
+        ],
+        [
+          2539577600,
+          2
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          1412763234,
+          1
+        ],
+        [
+          2940994658,
+          32
+        ],
+        [
+          3766485435,
+          256
+        ],
+        [
+          3732214280,
+          4096
+        ]
+      ],
+      "seed": "0xf31b54c74d1487bb",
+      "source_sha256": "d85e82805449d1d04fa9abd829a6254b37fa9603ef0c701fa5752aa182cfc9b6",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "fk",
+      "file": "programs/gnet05r-fk-03.inv",
+      "id": "gnet05r-fk-03",
+      "layout": "n x 7 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "c0d92c0bac2f346f4fdaeabfcf463a8605856208dd20c5cbf56b75ed9a255ec8",
+      "oracle_inputs": [
+        [
+          4007826198,
+          1
+        ],
+        [
+          1984995410,
+          2
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          615306560,
+          1
+        ],
+        [
+          618241471,
+          32
+        ],
+        [
+          705087172,
+          256
+        ],
+        [
+          1456621575,
+          4096
+        ]
+      ],
+      "seed": "0x53d958c97f7d5559",
+      "source_sha256": "7afa5331170dc8d9b5bc4e3559d7650281aefa2828838fa8892cbbc14f510fba",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "fk",
+      "file": "programs/gnet05r-fk-04.inv",
+      "id": "gnet05r-fk-04",
+      "layout": "n x 7 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "a45c6891f9dc50b92249140f374dfc9c7f6b9138a45f61ac49ca2513302872c6",
+      "oracle_inputs": [
+        [
+          1326936225,
+          1
+        ],
+        [
+          1006902554,
+          2
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          3576410322,
+          1
+        ],
+        [
+          3524676361,
+          32
+        ],
+        [
+          2302642669,
+          256
+        ],
+        [
+          3462174998,
+          4096
+        ]
+      ],
+      "seed": "0x1018f77feea7dc67",
+      "source_sha256": "0e8b51cf5b5b9711b20f1ebd2b9349115ad8ec14f4f7d9268403de1bdcc3bc5f",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "fk",
+      "file": "programs/gnet05r-fk-05.inv",
+      "id": "gnet05r-fk-05",
+      "layout": "n x 7 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "bf20311311122c836a212eb266898062aca0bd7563b2b3965690c3e8abe6aa6b",
+      "oracle_inputs": [
+        [
+          1814738548,
+          1
+        ],
+        [
+          3171360635,
+          2
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          2780464448,
+          1
+        ],
+        [
+          1211967924,
+          32
+        ],
+        [
+          2362039090,
+          256
+        ],
+        [
+          1403376582,
+          4096
+        ]
+      ],
+      "seed": "0x74bc79bd4b2da693",
+      "source_sha256": "2d1287931ec3d35f0baccb9e728ffb71b7e1d8cd46fc64153f4f02a789e5ca87",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "panda",
+      "family": "fkpre",
+      "file": "programs/gnet05r-fkpre-00.inv",
+      "id": "gnet05r-fkpre-00",
+      "layout": "n x 11 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "461c183e626960d7bad0ec1b284b6fe966191f3ccd0a01a2548137c16060bdbb",
+      "oracle_inputs": [
+        [
+          1415356752,
+          1
+        ],
+        [
+          349832755,
+          2
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          2560935110,
+          1
+        ],
+        [
+          3240495274,
+          32
+        ],
+        [
+          1045553236,
+          256
+        ],
+        [
+          3530203829,
+          4096
+        ]
+      ],
+      "seed": "0x53487142a373d53c",
+      "source_sha256": "1b6792fdfee5dcd3f3d0c7aed38d78c90e446c8c50d05292fb01427052fd0894",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "table"
+    },
+    {
+      "arm": "panda",
+      "family": "fkpre",
+      "file": "programs/gnet05r-fkpre-01.inv",
+      "id": "gnet05r-fkpre-01",
+      "layout": "n x 11 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "572547f018627abfb8b10e366516a202590a07e99d5e4d1aa1106799bd1cfb43",
+      "oracle_inputs": [
+        [
+          609170046,
+          1
+        ],
+        [
+          140025855,
+          2
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          3939156573,
+          1
+        ],
+        [
+          338320643,
+          32
+        ],
+        [
+          2157157998,
+          256
+        ],
+        [
+          3431914487,
+          4096
+        ]
+      ],
+      "seed": "0xa2f1dac77f1624f1",
+      "source_sha256": "75929d2e81d400b62b4753b5c2ddc7bae5c1e4d93feb27da04b1d4f701511b40",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "panda",
+      "family": "fkpre",
+      "file": "programs/gnet05r-fkpre-02.inv",
+      "id": "gnet05r-fkpre-02",
+      "layout": "n x 11 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "435a58dd2ebd93662584fca3355251d8e7b353631e7821fcd38051a95173440e",
+      "oracle_inputs": [
+        [
+          4037895548,
+          1
+        ],
+        [
+          2534188876,
+          2
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          2347307117,
+          1
+        ],
+        [
+          1227587829,
+          32
+        ],
+        [
+          569550577,
+          256
+        ],
+        [
+          3264527378,
+          4096
+        ]
+      ],
+      "seed": "0x394ba53dc8c93aba",
+      "source_sha256": "b54735724b4b4e4134b17c1b911e45e73f33441a57cb8d4d46944921bc408cfc",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "fkpre",
+      "file": "programs/gnet05r-fkpre-03.inv",
+      "id": "gnet05r-fkpre-03",
+      "layout": "n x 7 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "18df9e25b1aac7064396089bdf2271130d72491148b863b1379f958fe573f90b",
+      "oracle_inputs": [
+        [
+          3999058896,
+          1
+        ],
+        [
+          3103687837,
+          2
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          3353138658,
+          1
+        ],
+        [
+          701132790,
+          32
+        ],
+        [
+          938900882,
+          256
+        ],
+        [
+          1909589069,
+          4096
+        ]
+      ],
+      "seed": "0x1360761643d6f57b",
+      "source_sha256": "60d337a61965fc35582e0c51377470ca74ad06c011c88778fc2603cf77eb0655",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "fkpre",
+      "file": "programs/gnet05r-fkpre-04.inv",
+      "id": "gnet05r-fkpre-04",
+      "layout": "n x 7 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "636649e6d6641573d95e142e76be4eefb39be9308c276a140ec72fddee91a66d",
+      "oracle_inputs": [
+        [
+          814824954,
+          1
+        ],
+        [
+          2546537121,
+          2
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          2970221065,
+          1
+        ],
+        [
+          1558224861,
+          32
+        ],
+        [
+          3641569985,
+          256
+        ],
+        [
+          331813142,
+          4096
+        ]
+      ],
+      "seed": "0xa37bafe781dc2144",
+      "source_sha256": "f87ba09f17dbec565e96461c00c704f73b695cd8c5b172392a3a2e3408e7748e",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "fkpre",
+      "file": "programs/gnet05r-fkpre-05.inv",
+      "id": "gnet05r-fkpre-05",
+      "layout": "n x 7 bodies x [R row-major 9, p 3], base frame, bodies in source order",
+      "normalized_sha256": "35f000887e5ea050a91a756c36e8fe3e39fe0b439c55264308d37bdac82e368f",
+      "oracle_inputs": [
+        [
+          3495884297,
+          1
+        ],
+        [
+          88803765,
+          2
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          2466375758,
+          1
+        ],
+        [
+          3946639226,
+          32
+        ],
+        [
+          777212767,
+          256
+        ],
+        [
+          3041443539,
+          4096
+        ]
+      ],
+      "seed": "0xed86d9f2eb7beff0",
+      "source_sha256": "0e375fae5f71ea8b85b9db3d1cc13729dd7ba2c0f29fd48b57c03e6176567bc5",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "segments"
+    },
+    {
+      "arm": "panda",
+      "family": "jacobian",
+      "file": "programs/gnet05r-jacobian-00.inv",
+      "id": "gnet05r-jacobian-00",
+      "layout": "n x 6 x 7 row-major [vx vy vz wx wy wz] tool Jacobian in base axes at the tool point",
+      "normalized_sha256": "75eed6b35862712f381a1ddc008faae4283bbf804d4b1bbf1f546b3a4040b457",
+      "oracle_inputs": [
+        [
+          765504835,
+          1
+        ],
+        [
+          2071175834,
+          2
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          1645720980,
+          1
+        ],
+        [
+          1052970216,
+          32
+        ],
+        [
+          4259327323,
+          256
+        ],
+        [
+          3772855847,
+          4096
+        ]
+      ],
+      "seed": "0xa4f2ce1ca4afa0f1",
+      "source_sha256": "acf55a2aeeea6c14cb0530bb556be041e28e577c73afc048eb4d1a0b1b9fbec1",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "panda",
+      "family": "jacobian",
+      "file": "programs/gnet05r-jacobian-01.inv",
+      "id": "gnet05r-jacobian-01",
+      "layout": "n x 6 x 7 row-major [vx vy vz wx wy wz] tool Jacobian in base axes at the tool point",
+      "normalized_sha256": "21d79926620058224ed2fa10f8860e3357ed3a8e3b0d14f6359aeb6ebce50847",
+      "oracle_inputs": [
+        [
+          2213051996,
+          1
+        ],
+        [
+          1669843957,
+          2
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          1758619582,
+          1
+        ],
+        [
+          2598926992,
+          32
+        ],
+        [
+          3641379771,
+          256
+        ],
+        [
+          1575570499,
+          4096
+        ]
+      ],
+      "seed": "0x0a08c5d0545449d6",
+      "source_sha256": "2a9ed18a0bd66939c3c83e0efbf375f7ef49b29af5073cec888e456faff35a8f",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "panda",
+      "family": "jacobian",
+      "file": "programs/gnet05r-jacobian-02.inv",
+      "id": "gnet05r-jacobian-02",
+      "layout": "n x 6 x 7 row-major [vx vy vz wx wy wz] tool Jacobian in base axes at the tool point",
+      "normalized_sha256": "8c9007ba4b49ba816afafdead3d66280ceb449bc0eaf3f2f895959df223b3418",
+      "oracle_inputs": [
+        [
+          1385288131,
+          1
+        ],
+        [
+          851805559,
+          2
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          587575578,
+          1
+        ],
+        [
+          1085197094,
+          32
+        ],
+        [
+          3965003673,
+          256
+        ],
+        [
+          1753285472,
+          4096
+        ]
+      ],
+      "seed": "0xd2b27497c68479ab",
+      "source_sha256": "9c23a1ae18ec5e9c98dfaf37fbfceddbdbbea3f749d272b01b63ce4165b81ddb",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "jacobian",
+      "file": "programs/gnet05r-jacobian-03.inv",
+      "id": "gnet05r-jacobian-03",
+      "layout": "n x 6 x 6 row-major [vx vy vz wx wy wz] tool Jacobian in base axes at the tool point",
+      "normalized_sha256": "0a11f6bfa8a90ae25ab955bcf28070c90fd7e9824281234f663b5c646cf4867f",
+      "oracle_inputs": [
+        [
+          4094883038,
+          1
+        ],
+        [
+          804024818,
+          2
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          3086559267,
+          1
+        ],
+        [
+          4164745936,
+          32
+        ],
+        [
+          3155274769,
+          256
+        ],
+        [
+          2394176531,
+          4096
+        ]
+      ],
+      "seed": "0x3d2119a7fd7f941e",
+      "source_sha256": "7c5bbb52d3d2bcb175c1f9418be05e88031fc0d469b65ff2a8172137cda9c1cc",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "jacobian",
+      "file": "programs/gnet05r-jacobian-04.inv",
+      "id": "gnet05r-jacobian-04",
+      "layout": "n x 6 x 6 row-major [vx vy vz wx wy wz] tool Jacobian in base axes at the tool point",
+      "normalized_sha256": "0bee15bbf6a1d849d7c480e58fc984c8d5b551efb081a3967ea381f67c0bca9f",
+      "oracle_inputs": [
+        [
+          248161617,
+          1
+        ],
+        [
+          2518356587,
+          2
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          477782462,
+          1
+        ],
+        [
+          24545389,
+          32
+        ],
+        [
+          503313491,
+          256
+        ],
+        [
+          2496768879,
+          4096
+        ]
+      ],
+      "seed": "0x74e0423c69de2cd6",
+      "source_sha256": "9a80e721b476fd03c75d640b3ac1116f2eed8424ce435e86da91539697e15fb5",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "jacobian",
+      "file": "programs/gnet05r-jacobian-05.inv",
+      "id": "gnet05r-jacobian-05",
+      "layout": "n x 6 x 6 row-major [vx vy vz wx wy wz] tool Jacobian in base axes at the tool point",
+      "normalized_sha256": "d121314a8d73824fc6fe993ec75b4989af23c5a7ed26cd96e78be4d2bf23efe8",
+      "oracle_inputs": [
+        [
+          2959305266,
+          1
+        ],
+        [
+          2871363664,
+          2
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          2000433140,
+          1
+        ],
+        [
+          4172101692,
+          32
+        ],
+        [
+          2622020824,
+          256
+        ],
+        [
+          3615739954,
+          4096
+        ]
+      ],
+      "seed": "0x1042f167d78e55d2",
+      "source_sha256": "6fd1201958ef80a7cadd2757ab955f2380325841f6066ef964f707114e179275",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "panda",
+      "family": "mass",
+      "file": "programs/gnet05r-mass-00.inv",
+      "id": "gnet05r-mass-00",
+      "layout": "n x 7 x 7 joint-space mass matrix including source armature",
+      "normalized_sha256": "07c460150da472f9374b806992c4a1a21342f9595a15e10df9dd370cc5807d0f",
+      "oracle_inputs": [
+        [
+          692686222,
+          1
+        ],
+        [
+          1275117157,
+          2
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          3531747826,
+          1
+        ],
+        [
+          993759331,
+          32
+        ],
+        [
+          3536939643,
+          256
+        ],
+        [
+          1680316474,
+          4096
+        ]
+      ],
+      "seed": "0xbc1920fe3a439868",
+      "source_sha256": "69b719963f5b46380a41804bf693561115050d52e27f74ef3c38198e9539f55d",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "panda",
+      "family": "mass",
+      "file": "programs/gnet05r-mass-01.inv",
+      "id": "gnet05r-mass-01",
+      "layout": "n x 7 x 7 joint-space mass matrix including source armature",
+      "normalized_sha256": "28c9f8d080fed1fa824201894395ba985b5ac98f720fd2208ea1bda8fd075cce",
+      "oracle_inputs": [
+        [
+          1621719888,
+          1
+        ],
+        [
+          3154802341,
+          2
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          1724232833,
+          1
+        ],
+        [
+          1960196584,
+          32
+        ],
+        [
+          1946821264,
+          256
+        ],
+        [
+          3204282877,
+          4096
+        ]
+      ],
+      "seed": "0xe7cbb09d3935d100",
+      "source_sha256": "bf19c8d4803eb5ae7762c08d82e3e263df25c082521d767c6e558f5db6627cdb",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "panda",
+      "family": "mass",
+      "file": "programs/gnet05r-mass-02.inv",
+      "id": "gnet05r-mass-02",
+      "layout": "n x 7 x 7 joint-space mass matrix including source armature",
+      "normalized_sha256": "8370c0097358001a4f4515820c7147352832727b20baed754b52f4c19a65f070",
+      "oracle_inputs": [
+        [
+          180374783,
+          1
+        ],
+        [
+          2713170353,
+          2
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          4264010305,
+          1
+        ],
+        [
+          3347297017,
+          32
+        ],
+        [
+          2972164475,
+          256
+        ],
+        [
+          1662167237,
+          4096
+        ]
+      ],
+      "seed": "0xd4c9f22906511bf2",
+      "source_sha256": "64afb525c857d288ad112c7cd009230329abe2ffb81bb71a87dcf4bc04f57788",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "mass",
+      "file": "programs/gnet05r-mass-03.inv",
+      "id": "gnet05r-mass-03",
+      "layout": "n x 6 x 6 joint-space mass matrix including source armature",
+      "normalized_sha256": "6f37738a453cff22307e59e9d89b6a3a37c5ec2973c263d95c21c810d4b22195",
+      "oracle_inputs": [
+        [
+          1073326760,
+          1
+        ],
+        [
+          2438165614,
+          2
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          83263683,
+          1
+        ],
+        [
+          1706682971,
+          32
+        ],
+        [
+          1912870716,
+          256
+        ],
+        [
+          2448936502,
+          4096
+        ]
+      ],
+      "seed": "0x4901cf712fadbd0b",
+      "source_sha256": "d6886fabb1d672c6e95e0eb494a1c4dcc55764333a80431e1b809c4cffb6ef70",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "mass",
+      "file": "programs/gnet05r-mass-04.inv",
+      "id": "gnet05r-mass-04",
+      "layout": "n x 6 x 6 joint-space mass matrix including source armature",
+      "normalized_sha256": "ec2960cd5e16431bfe771f3168bd1c65640690b0529c8474d8f45dd79d145fc7",
+      "oracle_inputs": [
+        [
+          2293476564,
+          1
+        ],
+        [
+          3510231532,
+          2
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          4026140050,
+          1
+        ],
+        [
+          3275088091,
+          32
+        ],
+        [
+          2880727636,
+          256
+        ],
+        [
+          1786969504,
+          4096
+        ]
+      ],
+      "seed": "0xa3724d522099b0c3",
+      "source_sha256": "0669cb1a5f728908a532bd9ef4563c0b673f6b43b459700c291ec8f2b384df8b",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "mass",
+      "file": "programs/gnet05r-mass-05.inv",
+      "id": "gnet05r-mass-05",
+      "layout": "n x 6 x 6 joint-space mass matrix including source armature",
+      "normalized_sha256": "58608306df4550bb44a6224c567cab2309a4a92d341853fa6e9c49842bd91922",
+      "oracle_inputs": [
+        [
+          3954519430,
+          1
+        ],
+        [
+          1632535477,
+          2
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n"
+      ],
+      "scored_inputs": [
+        [
+          3106525893,
+          1
+        ],
+        [
+          2850430460,
+          32
+        ],
+        [
+          901655495,
+          256
+        ],
+        [
+          901233506,
+          4096
+        ]
+      ],
+      "seed": "0xeae4260b20ce041f",
+      "source_sha256": "88664538d5c6414ae5b5cc566f73589c6e65b053ddd4b837b3f898a3965716aa",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "collision",
+      "file": "programs/gnet05r-collision-00.inv",
+      "id": "gnet05r-collision-00",
+      "layout": "n x 9 geoms x m obstacles signed distance (m), geoms in source order",
+      "normalized_sha256": "875ac0498a0b26a4116ddaecaf28849c92d44e4f1a92c481b800de584c58c0aa",
+      "oracle_inputs": [
+        [
+          985988882,
+          1,
+          2
+        ],
+        [
+          2051393333,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          3924131418,
+          1,
+          16
+        ],
+        [
+          2098687021,
+          64,
+          16
+        ],
+        [
+          1622463167,
+          1024,
+          16
+        ]
+      ],
+      "seed": "0x483582a595ed262c",
+      "source_sha256": "68884d02f03b5c8ef1e74f01db70e95ab0c11f4944b7843abbea5d2991922b5e",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "collision",
+      "file": "programs/gnet05r-collision-01.inv",
+      "id": "gnet05r-collision-01",
+      "layout": "n x 9 geoms x m obstacles signed distance (m), geoms in source order",
+      "normalized_sha256": "1a323a64f0127e6d9d44d57b12f7ff91688a5184797a72e0f191d59ee2de40ed",
+      "oracle_inputs": [
+        [
+          1901246420,
+          1,
+          2
+        ],
+        [
+          391054925,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          467290354,
+          1,
+          16
+        ],
+        [
+          3061724729,
+          64,
+          16
+        ],
+        [
+          4100302610,
+          1024,
+          16
+        ]
+      ],
+      "seed": "0x8955f07392b8bf29",
+      "source_sha256": "e2e05ebd6c64d17064cdee434c59d1a4e29afb7a6163ba968bec354eaff98495",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "collision",
+      "file": "programs/gnet05r-collision-02.inv",
+      "id": "gnet05r-collision-02",
+      "layout": "n x 9 geoms x m obstacles signed distance (m), geoms in source order",
+      "normalized_sha256": "eee9ba290b91d11339ed29b609009b2ebebb61aa0be9e55a3264a51392f5e271",
+      "oracle_inputs": [
+        [
+          4162351033,
+          1,
+          2
+        ],
+        [
+          2782895139,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          594694942,
+          1,
+          16
+        ],
+        [
+          2124074389,
+          64,
+          16
+        ],
+        [
+          3316838933,
+          1024,
+          16
+        ]
+      ],
+      "seed": "0x9d56caa6961ebc67",
+      "source_sha256": "b565035a72662eb4b9b0fcf1a630025467250074d77ee11e31de5fe01a8ae923",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "collision",
+      "file": "programs/gnet05r-collision-03.inv",
+      "id": "gnet05r-collision-03",
+      "layout": "n x 9 geoms x m obstacles signed distance (m), geoms in source order",
+      "normalized_sha256": "5a0b54ad4ba33f59e18d107fb82125434430005627a01a98c37c6c88b5a06a65",
+      "oracle_inputs": [
+        [
+          3206282213,
+          1,
+          2
+        ],
+        [
+          3935642406,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          4247704814,
+          1,
+          16
+        ],
+        [
+          3139120457,
+          64,
+          16
+        ],
+        [
+          1150517840,
+          1024,
+          16
+        ]
+      ],
+      "seed": "0x22a76a768d1d4235",
+      "source_sha256": "a0bb90928f86ad465d1361744eee2f56f2e468af4c3bf749e535c2409a73cad1",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "collision",
+      "file": "programs/gnet05r-collision-04.inv",
+      "id": "gnet05r-collision-04",
+      "layout": "n x 9 geoms x m obstacles signed distance (m), geoms in source order",
+      "normalized_sha256": "7c02d9720ecf745d8a3411ea631b9b2771c17a85db7a8818bbb6ff7ee9f261ad",
+      "oracle_inputs": [
+        [
+          694284661,
+          1,
+          2
+        ],
+        [
+          4099860861,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          1087178733,
+          1,
+          16
+        ],
+        [
+          1327588013,
+          64,
+          16
+        ],
+        [
+          2239275977,
+          1024,
+          16
+        ]
+      ],
+      "seed": "0x261fb4cc01dbd99e",
+      "source_sha256": "461f10e5b1ad72e3f2a3fca8a9281624b8602a36376155f9ae27c022be61231d",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "collision",
+      "file": "programs/gnet05r-collision-05.inv",
+      "id": "gnet05r-collision-05",
+      "layout": "n x 9 geoms x m obstacles signed distance (m), geoms in source order",
+      "normalized_sha256": "93f2c2fbf961cf3f810ec2c9f8cd133f561b9d035b91ffbeaf1fe0109e6e8f7e",
+      "oracle_inputs": [
+        [
+          3734213376,
+          1,
+          2
+        ],
+        [
+          2152521056,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          3715722520,
+          1,
+          16
+        ],
+        [
+          3274305570,
+          64,
+          16
+        ],
+        [
+          1956751564,
+          1024,
+          16
+        ]
+      ],
+      "seed": "0xe144e8e353fba617",
+      "source_sha256": "63e1bd30350004070930ccf87cecdde1eb358871c4eb3ae2a68e5f9fbfe048e5",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "segments"
+    },
+    {
+      "arm": "panda",
+      "family": "rollout",
+      "file": "programs/gnet05r-rollout-00.inv",
+      "id": "gnet05r-rollout-00",
+      "layout": "n x h x [7 joint positions, step cost]",
+      "normalized_sha256": "3312296e0722431d605cfb274515fcdeebc5f0e931d404fde8fb863cdf39c1eb",
+      "oracle_inputs": [
+        [
+          3802166675,
+          1,
+          2
+        ],
+        [
+          2549433116,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n",
+        "h"
+      ],
+      "scored_inputs": [
+        [
+          967278386,
+          1,
+          64
+        ],
+        [
+          3573556095,
+          32,
+          64
+        ],
+        [
+          546760995,
+          256,
+          64
+        ],
+        [
+          1766119085,
+          1,
+          256
+        ],
+        [
+          2622038981,
+          32,
+          256
+        ],
+        [
+          4010902892,
+          256,
+          256
+        ]
+      ],
+      "seed": "0xe37aa742bc235fa0",
+      "source_sha256": "d766ba168abc5de788569b9b1ca64e44dbd952479e7ee6ca760e53aa6e4288cc",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "panda",
+      "family": "rollout",
+      "file": "programs/gnet05r-rollout-01.inv",
+      "id": "gnet05r-rollout-01",
+      "layout": "n x h x [7 joint positions, step cost]",
+      "normalized_sha256": "a0315fa3a1640fb08cb7df05ce927cb602725a5c495c3e6ed0003a3a8177729d",
+      "oracle_inputs": [
+        [
+          1890228921,
+          1,
+          2
+        ],
+        [
+          1939324005,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n",
+        "h"
+      ],
+      "scored_inputs": [
+        [
+          2045648436,
+          1,
+          64
+        ],
+        [
+          563250920,
+          32,
+          64
+        ],
+        [
+          911803115,
+          256,
+          64
+        ],
+        [
+          2464999434,
+          1,
+          256
+        ],
+        [
+          832945250,
+          32,
+          256
+        ],
+        [
+          2797386,
+          256,
+          256
+        ]
+      ],
+      "seed": "0x54d3ddb3bda01c59",
+      "source_sha256": "d03e3c663c351aec10a2eeac44347c8d2df5b7d2977744f07b2a41ef6a30d2be",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "panda",
+      "family": "rollout",
+      "file": "programs/gnet05r-rollout-02.inv",
+      "id": "gnet05r-rollout-02",
+      "layout": "n x h x [7 joint positions, step cost]",
+      "normalized_sha256": "1685d8595c9f20722cc45acf625087ddf5b3de124d1a0ed3b757f3944266fc0f",
+      "oracle_inputs": [
+        [
+          2553455368,
+          1,
+          2
+        ],
+        [
+          1303336680,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n",
+        "h"
+      ],
+      "scored_inputs": [
+        [
+          4218779798,
+          1,
+          64
+        ],
+        [
+          68103974,
+          32,
+          64
+        ],
+        [
+          520816958,
+          256,
+          64
+        ],
+        [
+          2711694006,
+          1,
+          256
+        ],
+        [
+          3325361273,
+          32,
+          256
+        ],
+        [
+          1710987066,
+          256,
+          256
+        ]
+      ],
+      "seed": "0xd8201cd5308f000a",
+      "source_sha256": "1c18d3cec9dc79a28ccf04bd6d5ad696ac4704188b7836cab2a50911656f0735",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "rollout",
+      "file": "programs/gnet05r-rollout-03.inv",
+      "id": "gnet05r-rollout-03",
+      "layout": "n x h x [6 joint positions, step cost]",
+      "normalized_sha256": "0f2b417ab5c76afdf1bb89d5ece490053352f8066d3130566217df046fe9b6c4",
+      "oracle_inputs": [
+        [
+          3119089798,
+          1,
+          2
+        ],
+        [
+          3008525851,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n",
+        "h"
+      ],
+      "scored_inputs": [
+        [
+          3692065645,
+          1,
+          64
+        ],
+        [
+          1239242953,
+          32,
+          64
+        ],
+        [
+          4018072848,
+          256,
+          64
+        ],
+        [
+          1306891456,
+          1,
+          256
+        ],
+        [
+          1729502389,
+          32,
+          256
+        ],
+        [
+          3827928056,
+          256,
+          256
+        ]
+      ],
+      "seed": "0x9558b8af6d6e33a9",
+      "source_sha256": "bed68104b2158376b7718acf392b8fd55ac8d12cf96c744e289dee094bda588c",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "rollout",
+      "file": "programs/gnet05r-rollout-04.inv",
+      "id": "gnet05r-rollout-04",
+      "layout": "n x h x [6 joint positions, step cost]",
+      "normalized_sha256": "e866fc261c4b084eb7532f79bc27868ed01f7da9ce1b70d12b8de7ef81a7377e",
+      "oracle_inputs": [
+        [
+          3462746578,
+          1,
+          2
+        ],
+        [
+          3894883786,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n",
+        "h"
+      ],
+      "scored_inputs": [
+        [
+          2883258300,
+          1,
+          64
+        ],
+        [
+          1846092665,
+          32,
+          64
+        ],
+        [
+          3142752760,
+          256,
+          64
+        ],
+        [
+          2325586606,
+          1,
+          256
+        ],
+        [
+          3737418240,
+          32,
+          256
+        ],
+        [
+          3264801002,
+          256,
+          256
+        ]
+      ],
+      "seed": "0xa01e6d70920709a5",
+      "source_sha256": "7e299ee782cd62305f1adac1baba9b25cdf0350ec7312cea07d05c757d960929",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "rollout",
+      "file": "programs/gnet05r-rollout-05.inv",
+      "id": "gnet05r-rollout-05",
+      "layout": "n x h x [6 joint positions, step cost]",
+      "normalized_sha256": "3d042cb9d043dc5a443f4d828c4df166fba198629c13a243586c8a5a181f99b6",
+      "oracle_inputs": [
+        [
+          2885381713,
+          1,
+          2
+        ],
+        [
+          1734991065,
+          2,
+          3
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n",
+        "h"
+      ],
+      "scored_inputs": [
+        [
+          3785344436,
+          1,
+          64
+        ],
+        [
+          1717050297,
+          32,
+          64
+        ],
+        [
+          269044961,
+          256,
+          64
+        ],
+        [
+          3075027194,
+          1,
+          256
+        ],
+        [
+          3019105441,
+          32,
+          256
+        ],
+        [
+          2099763740,
+          256,
+          256
+        ]
+      ],
+      "seed": "0x14f452145a0fb150",
+      "source_sha256": "6b3806e7b9c519753c747984bffcf6fe5964f0d9ece123fc58bd6d0d3ed2654f",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "none",
+      "family": "pointcloud",
+      "file": "programs/gnet05r-pointcloud-00.inv",
+      "id": "gnet05r-pointcloud-00",
+      "layout": "[kept count k, kept xyz in input order (3k), m neighbour-count slots: counts within the radius (self included) for the first min(m, k) kept points, zero after]",
+      "normalized_sha256": "1ee8a22506b299d31efea502db53a6030a42bafd806aa5855361884e4c9107ea",
+      "oracle_inputs": [
+        [
+          3391873062,
+          16,
+          4
+        ],
+        [
+          4265434947,
+          64,
+          8
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          457250184,
+          1024,
+          64
+        ],
+        [
+          3780335702,
+          65536,
+          256
+        ]
+      ],
+      "seed": "0xa9b8a33bbd12eeb6",
+      "source_sha256": "2051190a427c30765ead0a31e4dd11eab163de755dfe72677259ae6d100beb34",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "fused"
+    },
+    {
+      "arm": "none",
+      "family": "pointcloud",
+      "file": "programs/gnet05r-pointcloud-01.inv",
+      "id": "gnet05r-pointcloud-01",
+      "layout": "[kept count k, kept xyz in input order (3k), m neighbour-count slots: counts within the radius (self included) for the first min(m, k) kept points, zero after]",
+      "normalized_sha256": "7e31016efd3807c3aee1704d73f86182a289cf1265f0197eeb14a0286a5423c7",
+      "oracle_inputs": [
+        [
+          4066073769,
+          16,
+          4
+        ],
+        [
+          2131127921,
+          64,
+          8
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          3506331260,
+          1024,
+          64
+        ],
+        [
+          3956722200,
+          65536,
+          256
+        ]
+      ],
+      "seed": "0x53e3f48ddd32e002",
+      "source_sha256": "9d9f66eb632c93c30f02f8843bacf4ed2408fd2c347a8da0851d716fa9f323a9",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "staged"
+    },
+    {
+      "arm": "none",
+      "family": "pointcloud",
+      "file": "programs/gnet05r-pointcloud-02.inv",
+      "id": "gnet05r-pointcloud-02",
+      "layout": "[kept count k, kept xyz in input order (3k), m neighbour-count slots: counts within the radius (self included) for the first min(m, k) kept points, zero after]",
+      "normalized_sha256": "69b1d3ff7a508eaceea808f6ae3ff8c74427ab7b30af1b76e803ffadcc8563e7",
+      "oracle_inputs": [
+        [
+          3688327000,
+          16,
+          4
+        ],
+        [
+          4225914657,
+          64,
+          8
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          3464789557,
+          1024,
+          64
+        ],
+        [
+          679546093,
+          65536,
+          256
+        ]
+      ],
+      "seed": "0xcf24315d1087a518",
+      "source_sha256": "9c87e155687b8d197e05610b382591aaa4f48c01cc96923566a7b648ddcc805e",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "scanned"
+    },
+    {
+      "arm": "none",
+      "family": "pointcloud",
+      "file": "programs/gnet05r-pointcloud-03.inv",
+      "id": "gnet05r-pointcloud-03",
+      "layout": "[kept count k, kept xyz in input order (3k), m neighbour-count slots: counts within the radius (self included) for the first min(m, k) kept points, zero after]",
+      "normalized_sha256": "34a136c7ebbab163ff91680988c14567fc03965964a6d17b21ff6bac794f62b7",
+      "oracle_inputs": [
+        [
+          2958683563,
+          16,
+          4
+        ],
+        [
+          3013497292,
+          64,
+          8
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          1447052790,
+          1024,
+          64
+        ],
+        [
+          2208428541,
+          65536,
+          256
+        ]
+      ],
+      "seed": "0x1eb36a5146c5432d",
+      "source_sha256": "94253d1664125ab3ee5f2e420eccf1ba990921f38fff8b66218024c7398d4ad2",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "fused"
+    },
+    {
+      "arm": "none",
+      "family": "pointcloud",
+      "file": "programs/gnet05r-pointcloud-04.inv",
+      "id": "gnet05r-pointcloud-04",
+      "layout": "[kept count k, kept xyz in input order (3k), m neighbour-count slots: counts within the radius (self included) for the first min(m, k) kept points, zero after]",
+      "normalized_sha256": "b8fb2eab30a15957490f68d62e84aafdde47089de417ba82c9e7b1e389e63711",
+      "oracle_inputs": [
+        [
+          3115383008,
+          16,
+          4
+        ],
+        [
+          760777262,
+          64,
+          8
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          1873135092,
+          1024,
+          64
+        ],
+        [
+          1193394667,
+          65536,
+          256
+        ]
+      ],
+      "seed": "0x452c47c57563bd86",
+      "source_sha256": "2282f5b7ed83f8e90b87d0f8a4ddcc891d42d021883b970dc84801781ca7379b",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "staged"
+    },
+    {
+      "arm": "none",
+      "family": "pointcloud",
+      "file": "programs/gnet05r-pointcloud-05.inv",
+      "id": "gnet05r-pointcloud-05",
+      "layout": "[kept count k, kept xyz in input order (3k), m neighbour-count slots: counts within the radius (self included) for the first min(m, k) kept points, zero after]",
+      "normalized_sha256": "dec9489c3464f04a29513c63d7f1e7186578da284d976c40d72d97d9a7587467",
+      "oracle_inputs": [
+        [
+          3257461903,
+          16,
+          4
+        ],
+        [
+          960242053,
+          64,
+          8
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          2812469364,
+          1024,
+          64
+        ],
+        [
+          1085151621,
+          65536,
+          256
+        ]
+      ],
+      "seed": "0xdaebe300fa3baa9d",
+      "source_sha256": "384000ae44dfe0c7b6faca788501dd2ef145e77bba0d2b751883061753eb78ab",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "scanned"
+    },
+    {
+      "arm": "ur5e",
+      "family": "pipeline",
+      "file": "programs/gnet05r-pipeline-00.inv",
+      "id": "gnet05r-pipeline-00",
+      "layout": "n x [9 per-geom minimum distance to kept points (m), clearance cost]",
+      "normalized_sha256": "c6e4330e3643fc949fe9f22756e7adfce840cb3b1f6ecdf2ccf7afc689b69083",
+      "oracle_inputs": [
+        [
+          3474637662,
+          1,
+          16
+        ],
+        [
+          369938304,
+          2,
+          24
+        ]
+      ],
+      "ordinal": 0,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          3880058100,
+          1,
+          256
+        ],
+        [
+          2083150841,
+          64,
+          256
+        ],
+        [
+          3177797295,
+          1024,
+          256
+        ]
+      ],
+      "seed": "0x9507f2af4fe2f4d3",
+      "source_sha256": "7779a0bdbfab6e0957a2961504bcf27aa53fe60ea060692192b1f09c1ab31870",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "pipeline",
+      "file": "programs/gnet05r-pipeline-01.inv",
+      "id": "gnet05r-pipeline-01",
+      "layout": "n x [9 per-geom minimum distance to kept points (m), clearance cost]",
+      "normalized_sha256": "bbd0b2615d2b9e2389aa729730c39663cfef0bce45f2ea647a8bdc63d12fc54f",
+      "oracle_inputs": [
+        [
+          3404586089,
+          1,
+          16
+        ],
+        [
+          316715639,
+          2,
+          24
+        ]
+      ],
+      "ordinal": 1,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          2883838977,
+          1,
+          256
+        ],
+        [
+          11162916,
+          64,
+          256
+        ],
+        [
+          2817320640,
+          1024,
+          256
+        ]
+      ],
+      "seed": "0x806104f86fae19ba",
+      "source_sha256": "7c1d06c2c825c86d3c23c6198d68eb131c279e839a47d2fc90732a36e29f3c9a",
+      "split": "tuning",
+      "transforms": "trigonometric",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "pipeline",
+      "file": "programs/gnet05r-pipeline-02.inv",
+      "id": "gnet05r-pipeline-02",
+      "layout": "n x [9 per-geom minimum distance to kept points (m), clearance cost]",
+      "normalized_sha256": "c4db141d5849fc93bd1c228753e61fb4e15e07e99792750e4ae28796a6710d06",
+      "oracle_inputs": [
+        [
+          3818290699,
+          1,
+          16
+        ],
+        [
+          1238820298,
+          2,
+          24
+        ]
+      ],
+      "ordinal": 2,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          2683174094,
+          1,
+          256
+        ],
+        [
+          563652494,
+          64,
+          256
+        ],
+        [
+          3523431080,
+          1024,
+          256
+        ]
+      ],
+      "seed": "0x650a4684a4f08c60",
+      "source_sha256": "dbcbd334ce226b6da28c26b3ffc0306af4a388e6541c30dc38c3f3820e0b087f",
+      "split": "held_out",
+      "transforms": "trigonometric",
+      "variant": "segments"
+    },
+    {
+      "arm": "ur5e",
+      "family": "pipeline",
+      "file": "programs/gnet05r-pipeline-03.inv",
+      "id": "gnet05r-pipeline-03",
+      "layout": "n x [9 per-geom minimum distance to kept points (m), clearance cost]",
+      "normalized_sha256": "0d68cb22429851fd1eaf8669f8a8dd30668be48ac015472f802b44ccdbc3f4e9",
+      "oracle_inputs": [
+        [
+          498083181,
+          1,
+          16
+        ],
+        [
+          3352597843,
+          2,
+          24
+        ]
+      ],
+      "ordinal": 3,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          3902952508,
+          1,
+          256
+        ],
+        [
+          3901496156,
+          64,
+          256
+        ],
+        [
+          456615705,
+          1024,
+          256
+        ]
+      ],
+      "seed": "0x6b3d1488da2a55b3",
+      "source_sha256": "b7dd6452c4048a16265965193202c6fd45e66457a30e3c34fbcd099da904bf35",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "table"
+    },
+    {
+      "arm": "ur5e",
+      "family": "pipeline",
+      "file": "programs/gnet05r-pipeline-04.inv",
+      "id": "gnet05r-pipeline-04",
+      "layout": "n x [9 per-geom minimum distance to kept points (m), clearance cost]",
+      "normalized_sha256": "c937951addb14cde403036092ece69a2f1086d1b9150e62d678c79e0a94aa235",
+      "oracle_inputs": [
+        [
+          3964238332,
+          1,
+          16
+        ],
+        [
+          128673970,
+          2,
+          24
+        ]
+      ],
+      "ordinal": 4,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          325393198,
+          1,
+          256
+        ],
+        [
+          995840879,
+          64,
+          256
+        ],
+        [
+          561239869,
+          1024,
+          256
+        ]
+      ],
+      "seed": "0xe1ce21c7a1893426",
+      "source_sha256": "e6e63283b5d91c13a83efd0ec26a9b07de5cc46bcae1c7c138aaf6c1d0df0512",
+      "split": "held_out",
+      "transforms": "precomputed",
+      "variant": "unrolled"
+    },
+    {
+      "arm": "ur5e",
+      "family": "pipeline",
+      "file": "programs/gnet05r-pipeline-05.inv",
+      "id": "gnet05r-pipeline-05",
+      "layout": "n x [9 per-geom minimum distance to kept points (m), clearance cost]",
+      "normalized_sha256": "63f5dc68f1d4855511d8a99e310a23b5e6ff0e9edb49692855ca43809d1b3305",
+      "oracle_inputs": [
+        [
+          3369413744,
+          1,
+          16
+        ],
+        [
+          4228642488,
+          2,
+          24
+        ]
+      ],
+      "ordinal": 5,
+      "params": [
+        "seed",
+        "n",
+        "m"
+      ],
+      "scored_inputs": [
+        [
+          1135803604,
+          1,
+          256
+        ],
+        [
+          3011950697,
+          64,
+          256
+        ],
+        [
+          1894522932,
+          1024,
+          256
+        ]
+      ],
+      "seed": "0x84d0b5ea675e6373",
+      "source_sha256": "e1a54f410fc0dab453f514b0a03b40fcaa59af846f177d5ad262b26fd8d6bcd0",
+      "split": "tuning",
+      "transforms": "precomputed",
+      "variant": "segments"
+    }
+  ],
+  "schema": "invar-gnet05-robotics-v1"
+}

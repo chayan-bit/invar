@@ -1,0 +1,16 @@
+fn increment(xs: mut Array<i32>) -> Unit {
+    for i in 0 .. len(xs) {
+        xs[i] = xs[i] + 1;
+    }
+    return;
+}
+
+fn consume(xs: take Array<i32>) -> i32 {
+    return xs[0u32];
+}
+
+fn main() -> i32 {
+    var values: Array<i32> = [40, 41];
+    increment(values);
+    return consume(move values);
+}

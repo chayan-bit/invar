@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    var xs: Array<i32> = [1i32];
+    let c = closure [read xs: Array<i32>]() -> i32 { return xs[0u32]; };
+    xs[0u32] = 2i32;
+    return c();
+}

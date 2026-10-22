@@ -1,0 +1,5 @@
+fn chain(n: i32) -> i32 {
+    if n == 0 { return 1; }
+    return chain(n - 1) + 1;
+}
+fn main() -> i32 { return chain(12); }

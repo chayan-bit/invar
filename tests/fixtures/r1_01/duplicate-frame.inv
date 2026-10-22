@@ -1,0 +1,3 @@
+frame world;
+frame world;
+fn main() -> i32 { return 0i32; }

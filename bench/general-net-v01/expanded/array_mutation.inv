@@ -1,0 +1,1 @@
+fn main() -> i32 { var xs: Array<i32> = [2, 5]; xs[0u32] = xs[1u32] + 7; return xs[0u32] + xs[1u32]; }

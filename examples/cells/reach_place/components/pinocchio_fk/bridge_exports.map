@@ -1,0 +1,9 @@
+{
+  global:
+    invar_pinocchio_bridge_v1_version;
+    invar_pinocchio_bridge_v1_init;
+    invar_pinocchio_bridge_v1_configure;
+    invar_pinocchio_bridge_v1_step;
+    invar_pinocchio_bridge_v1_shutdown;
+  local: *;
+};

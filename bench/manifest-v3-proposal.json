@@ -1,0 +1,1435 @@
+{
+  "baselines": {
+    "owner": "#337 (ENG-26)",
+    "reported_separately": true,
+    "status": "pending"
+  },
+  "freeze": "not frozen: the permanent held-out freeze is gated by #228 and needs maintainer confirmation",
+  "generator": "domain-suites-v1",
+  "gpu_performance": "not_run",
+  "pending": [
+    {
+      "program": "ml-quantized_matmul",
+      "reason": "i8 storage with i32 accumulation needs the reduced-precision storage types of #280 (ENG-03); not approximated with wider types"
+    }
+  ],
+  "schema_version": 1,
+  "split_policy": "seeded 25% of each suite's kernels, rounded up, all cases of a kernel on one side; independent of every result",
+  "status": "proposal-pending-review",
+  "suites": {
+    "games": {
+      "held_out_sha256": "a9527e1dcdeb12e08812362e3e3412cccb701f43a35fc43b36ef4b631b3705ef",
+      "program_counts": {
+        "held_out": 8,
+        "total": 20,
+        "tuning": 12
+      },
+      "programs": [
+        {
+          "canonical_sha256": "8fa8644116ca82ad825b060f1faf0a3abafd5436dda97fd164b6c074820e181f",
+          "id": "games-particle_integrate-n1_t1-c0",
+          "inputs": [
+            {
+              "len": 3,
+              "seed": 61
+            },
+            {
+              "len": 3,
+              "seed": 161
+            }
+          ],
+          "kernel": "particle_integrate",
+          "shape": {
+            "n": 1,
+            "t": 1
+          },
+          "source_sha256": "74c3d95817105026ac65c2c325c92eb5bee768e4d1521f543270f8d223c143ee",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "fec30a519e1eaf86fe004d9ce8e642cd76d4070e13a20f2e29be4c8024eab153",
+          "id": "games-particle_integrate-n9_t3-c1",
+          "inputs": [
+            {
+              "len": 27,
+              "seed": 62
+            },
+            {
+              "len": 27,
+              "seed": 162
+            }
+          ],
+          "kernel": "particle_integrate",
+          "shape": {
+            "n": 9,
+            "t": 3
+          },
+          "source_sha256": "5b4fca58a9722bb789fc82fdc113afc8e64e872aacf7afe1bcc907bfb406c0e5",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "d1788817130df994be28c2ae87a90fd509a1fe43de3421b1cfc49ec0e049d4b2",
+          "id": "games-particle_integrate-n33_t40-c2",
+          "inputs": [
+            {
+              "len": 99,
+              "seed": 63
+            },
+            {
+              "len": 99,
+              "seed": 163
+            }
+          ],
+          "kernel": "particle_integrate",
+          "shape": {
+            "n": 33,
+            "t": 40
+          },
+          "source_sha256": "ed68d6e1d33f169f16a754f8078c1a941aa3d0ca0e495e196d271a55d86adb34",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "bf8c84dcdf402abd4dc246b9cb4962e44bdb7181a3fafa316bee3205f83c5889",
+          "id": "games-particle_integrate-n64_t10-c3",
+          "inputs": [
+            {
+              "len": 192,
+              "seed": 64
+            },
+            {
+              "len": 192,
+              "seed": 164
+            }
+          ],
+          "kernel": "particle_integrate",
+          "shape": {
+            "n": 64,
+            "t": 10
+          },
+          "source_sha256": "948a2574650844c6e196d941c173651db4df4bf9fb90ad0d42dda17dac0206fc",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "2edfcec537cc2dee63c5ca24dfb6fb2e39e2201e0f7ec58dedb7f7ecdd32b097",
+          "id": "games-grid_broadphase-n1_g1-c0",
+          "inputs": [
+            {
+              "len": 2,
+              "seed": 71
+            }
+          ],
+          "kernel": "grid_broadphase",
+          "shape": {
+            "g": 1,
+            "n": 1
+          },
+          "source_sha256": "1e6d7467b75ef030c746bb5cbc568d108daa0b4f2039f9349e00f7c3dc2a1b65",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "9c871f0625501db8db2b93d35694ad93e4fd2d203d47848250e426b999bd0751",
+          "id": "games-grid_broadphase-n24_g4-c1",
+          "inputs": [
+            {
+              "len": 48,
+              "seed": 72
+            }
+          ],
+          "kernel": "grid_broadphase",
+          "shape": {
+            "g": 4,
+            "n": 24
+          },
+          "source_sha256": "131318a70d1cb0398565b822adead56202958b3425b58685b2ea22d729eb6ec3",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "88e77964dd1ca6eb0279f71badd004c179c6db23e84e6ae7fb07b60baad445b9",
+          "id": "games-grid_broadphase-n60_g8-c2",
+          "inputs": [
+            {
+              "len": 120,
+              "seed": 73
+            }
+          ],
+          "kernel": "grid_broadphase",
+          "shape": {
+            "g": 8,
+            "n": 60
+          },
+          "source_sha256": "18694620243a7c390a3e4f7e8d594bf83766ec69305e605e491d062fe6e3d020",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "39a142d65aaea75573f46399f00415dcaedacfd6ee02fc06697bf6a8b3b1aaff",
+          "id": "games-grid_broadphase-n80_g3-c3",
+          "inputs": [
+            {
+              "len": 160,
+              "seed": 74
+            }
+          ],
+          "kernel": "grid_broadphase",
+          "shape": {
+            "g": 3,
+            "n": 80
+          },
+          "source_sha256": "c644c491c56cb916653d63a611b831c9ff2b39e0b76220914bb165db614f0075",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "09c7aad159b8187ea308c7d1911800c0c4670059002395eb941fc9a8ac81b747",
+          "id": "games-skinning-n1_b1-c0",
+          "inputs": [
+            {
+              "len": 3,
+              "seed": 81
+            },
+            {
+              "len": 4,
+              "seed": 181
+            },
+            {
+              "len": 12,
+              "seed": 281
+            }
+          ],
+          "kernel": "skinning",
+          "shape": {
+            "b": 1,
+            "n": 1
+          },
+          "source_sha256": "be29392ab88324ee3dd81b3ab781746c8d478fc951bcad08a65bcb8c1e6329f1",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "01954d94d48632edfa5f42c70185f36e2eb322fbadccd7285c314e71fd45ff49",
+          "id": "games-skinning-n10_b3-c1",
+          "inputs": [
+            {
+              "len": 30,
+              "seed": 82
+            },
+            {
+              "len": 40,
+              "seed": 182
+            },
+            {
+              "len": 36,
+              "seed": 282
+            }
+          ],
+          "kernel": "skinning",
+          "shape": {
+            "b": 3,
+            "n": 10
+          },
+          "source_sha256": "d7bc308bcf760f5b43a87c3ef995b98701c68373ae26e2a180a63134bc74d2ee",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "ee91e01b4f399d5058ed9421ea50e464a00d1ff70390af675e9a2cdd0348f82e",
+          "id": "games-skinning-n33_b5-c2",
+          "inputs": [
+            {
+              "len": 99,
+              "seed": 83
+            },
+            {
+              "len": 132,
+              "seed": 183
+            },
+            {
+              "len": 60,
+              "seed": 283
+            }
+          ],
+          "kernel": "skinning",
+          "shape": {
+            "b": 5,
+            "n": 33
+          },
+          "source_sha256": "3f2028ffe48e4fcb7bcaf5668c1b68a6a7bb4ed0419975ff25b6e7fb70a399d9",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "02d832aabfe2a0abc1686413434d09bc9de32998a6cbfbaa483980aa9d8814f8",
+          "id": "games-skinning-n64_b2-c3",
+          "inputs": [
+            {
+              "len": 192,
+              "seed": 84
+            },
+            {
+              "len": 256,
+              "seed": 184
+            },
+            {
+              "len": 24,
+              "seed": 284
+            }
+          ],
+          "kernel": "skinning",
+          "shape": {
+            "b": 2,
+            "n": 64
+          },
+          "source_sha256": "bcab34db3de4e89c882a177c4e95ba5282fc1205b2ddd5139e49ace4fdc77a80",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "e98ac0e16f5ffeaa051a5c0169b51a408e2d4a9585813d8840bd9cf643a083db",
+          "id": "games-frustum_cull-n1-c0",
+          "inputs": [
+            {
+              "len": 4,
+              "seed": 91
+            }
+          ],
+          "kernel": "frustum_cull",
+          "shape": {
+            "n": 1
+          },
+          "source_sha256": "564c990fd23b02e2713ad1a6a7489731f34318ac07cdd5e2a1e70bc7b91dc064",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "036e032cfcaf61581207926e2877f4d9f89a9eddad995ab106dafaea54f4285d",
+          "id": "games-frustum_cull-n31-c1",
+          "inputs": [
+            {
+              "len": 124,
+              "seed": 92
+            }
+          ],
+          "kernel": "frustum_cull",
+          "shape": {
+            "n": 31
+          },
+          "source_sha256": "67e711ea14a970421f618dec8225f2948b47fa6f55773846a2f59a4a6713aa87",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "de8f505496945c731c986b0f7c0305b4847c7adc2a44b1296ea0ce67cd99ca66",
+          "id": "games-frustum_cull-n100-c2",
+          "inputs": [
+            {
+              "len": 400,
+              "seed": 93
+            }
+          ],
+          "kernel": "frustum_cull",
+          "shape": {
+            "n": 100
+          },
+          "source_sha256": "6a3fc6c5beda431b40c5daba59ee3eb31bcbe6cf7cd1f6acffb42c4dcbe74447",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "4b4f5ba5d30af7feac54cb9bb53c67418fa74154b4a17b947c4522ecec98ee11",
+          "id": "games-frustum_cull-n257-c3",
+          "inputs": [
+            {
+              "len": 1028,
+              "seed": 94
+            }
+          ],
+          "kernel": "frustum_cull",
+          "shape": {
+            "n": 257
+          },
+          "source_sha256": "8dbf4f076452c677e07a36425b3ab44d7fbd1b537cdf7026917dde2164b62a00",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "b431292649eca979c7cf4d858133dad632bbec85ecca0a6cd45e25e04deed73c",
+          "id": "games-grid_bfs-n1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 101
+            }
+          ],
+          "kernel": "grid_bfs",
+          "shape": {
+            "n": 1
+          },
+          "source_sha256": "4a625bdbbd03f9f5b352fa1362feb51696aa297cf4daf669a49b01cf62541b7e",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "723eda54834819beee17051b0dfe623c1537bcd04fe91ca94f7aeaab2fd16730",
+          "id": "games-grid_bfs-n5-c1",
+          "inputs": [
+            {
+              "len": 25,
+              "seed": 102
+            }
+          ],
+          "kernel": "grid_bfs",
+          "shape": {
+            "n": 5
+          },
+          "source_sha256": "c7e62964aa2b28a32d389c537656d5de7e9b7f26d3be4b4d3f8cd8ea91a79ca2",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "db4fac72f7d5048d71dfecedd9f171f7c111bdc495fe3422680881b93d572bd2",
+          "id": "games-grid_bfs-n12-c2",
+          "inputs": [
+            {
+              "len": 144,
+              "seed": 103
+            }
+          ],
+          "kernel": "grid_bfs",
+          "shape": {
+            "n": 12
+          },
+          "source_sha256": "f14815499924ee0e7be8c5ea0abe21dd55d72f100778003c717526941e3fa4ab",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "47c78fbe863237633c2b3a210aa9f28e2d997a12acdb8b3d391b0d232ab313d7",
+          "id": "games-grid_bfs-n20-c3",
+          "inputs": [
+            {
+              "len": 400,
+              "seed": 104
+            }
+          ],
+          "kernel": "grid_bfs",
+          "shape": {
+            "n": 20
+          },
+          "source_sha256": "760eba9fe318b32889e773021744519008e3c30dc45e9af5f8645458a4219668",
+          "split": "held_out"
+        }
+      ],
+      "seed": 7237123391355777841
+    },
+    "ml": {
+      "held_out_sha256": "705b441d2942085c0b32ab77f1b1dfbbd8dadbf90bbc95ba71d4da0fef36ca8a",
+      "program_counts": {
+        "held_out": 8,
+        "total": 26,
+        "tuning": 18
+      },
+      "programs": [
+        {
+          "canonical_sha256": "7dd87f8ea2231a857807640f186f0b37b9604b628f104eb7d46c26d4a1baac3a",
+          "id": "ml-softmax_rows-r1_c1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 11
+            }
+          ],
+          "kernel": "softmax_rows",
+          "shape": {
+            "c": 1,
+            "r": 1
+          },
+          "source_sha256": "768ef0be8c50089621a8b5e8e2e7e1974e21add7a1411a2ead3ccaa2918f8a46",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "10e8b7afebc26fb09e0183dc8cf1c0773f6314370a25ac3d1a2428a73f4065bb",
+          "id": "ml-softmax_rows-r3_c7-c1",
+          "inputs": [
+            {
+              "len": 21,
+              "seed": 12
+            }
+          ],
+          "kernel": "softmax_rows",
+          "shape": {
+            "c": 7,
+            "r": 3
+          },
+          "source_sha256": "be4cc4dba572b88c575d93a784a933f1ee425257ce745ea9011fcfc88b96a4be",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "94f7986e05d6eddf7d7401617c7a553658f0f0f1c592571c9d7e350876eab381",
+          "id": "ml-softmax_rows-r4_c32-c2",
+          "inputs": [
+            {
+              "len": 128,
+              "seed": 13
+            }
+          ],
+          "kernel": "softmax_rows",
+          "shape": {
+            "c": 32,
+            "r": 4
+          },
+          "source_sha256": "19b76345b2c664c8de13266648aec95d755ab3081c84ab47b6a2ec44a568e147",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "e73ff2c2bf0d41182ed7b55fbed174a819fc2ebb5705230b72ac004138d730c5",
+          "id": "ml-softmax_rows-r5_c33-c3",
+          "inputs": [
+            {
+              "len": 165,
+              "seed": 14
+            }
+          ],
+          "kernel": "softmax_rows",
+          "shape": {
+            "c": 33,
+            "r": 5
+          },
+          "source_sha256": "fc45f6f02648ee44b91a09929fab36b59f5f0d61a2be93e36caaf2856d222350",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "76cb749753f8ba89ffccb8bd9fc1ad7f7b24d4846c3973799d2a32c529466111",
+          "id": "ml-softmax_rows-r2_c129-c4",
+          "inputs": [
+            {
+              "len": 258,
+              "seed": 15
+            }
+          ],
+          "kernel": "softmax_rows",
+          "shape": {
+            "c": 129,
+            "r": 2
+          },
+          "source_sha256": "4872dd8407ffad815d41be4ffde12d28b8575388737e2fbe77afec08906ce479",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "322b8072ad230672c644b191394c53e321366d4418a88a2e98bcd1e93894c67e",
+          "id": "ml-rmsnorm_rows-r1_c1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 21
+            },
+            {
+              "len": 1,
+              "seed": 121
+            }
+          ],
+          "kernel": "rmsnorm_rows",
+          "shape": {
+            "c": 1,
+            "r": 1
+          },
+          "source_sha256": "d67d4dac2eb91060ad695c4745ebc1126f377c7aeabfc5caab0fc3f3fa737d86",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "153eb9a297035098f6407dd93d513d8d3b86efea55b508fb425d5ca5f14d3a9f",
+          "id": "ml-rmsnorm_rows-r3_c8-c1",
+          "inputs": [
+            {
+              "len": 24,
+              "seed": 22
+            },
+            {
+              "len": 8,
+              "seed": 122
+            }
+          ],
+          "kernel": "rmsnorm_rows",
+          "shape": {
+            "c": 8,
+            "r": 3
+          },
+          "source_sha256": "c2919621c63d05c1403d8bfdffb104278eb0a7caf001e264ef6050c8dd4e19d2",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "1d61cdb58dbfc905ffbe17ea8d76bcc1d0e13865546234b5115ecea0d043857e",
+          "id": "ml-rmsnorm_rows-r4_c31-c2",
+          "inputs": [
+            {
+              "len": 124,
+              "seed": 23
+            },
+            {
+              "len": 31,
+              "seed": 123
+            }
+          ],
+          "kernel": "rmsnorm_rows",
+          "shape": {
+            "c": 31,
+            "r": 4
+          },
+          "source_sha256": "e211bc0eac0c0a49562d69865d1f67d14d64bb1ff56bc33a38554b1d7a5c26aa",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "1b5b2295aad7669f8a954ec607d14af5d829c0378d18ad3899ad2bba3c3389ff",
+          "id": "ml-rmsnorm_rows-r6_c64-c3",
+          "inputs": [
+            {
+              "len": 384,
+              "seed": 24
+            },
+            {
+              "len": 64,
+              "seed": 124
+            }
+          ],
+          "kernel": "rmsnorm_rows",
+          "shape": {
+            "c": 64,
+            "r": 6
+          },
+          "source_sha256": "6936c29fcfd672cf204ff80e6d948992a150af91b3048a650f56ff6bf24a9515",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "7e5720033b471b729778b483d73bf882976799e404fd3d9edfe6ebc4ae104aaf",
+          "id": "ml-layernorm_rows-r1_c2-c0",
+          "inputs": [
+            {
+              "len": 2,
+              "seed": 31
+            },
+            {
+              "len": 2,
+              "seed": 131
+            },
+            {
+              "len": 2,
+              "seed": 231
+            }
+          ],
+          "kernel": "layernorm_rows",
+          "shape": {
+            "c": 2,
+            "r": 1
+          },
+          "source_sha256": "2c034094a46866cde37f8896313d325d0b4969ef82fe70356972635226a56c7c",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "9b5102dfc567adc968fedc2e21051cb65d23a30019c093f9c3c5ab3c5a8bc2d1",
+          "id": "ml-layernorm_rows-r3_c8-c1",
+          "inputs": [
+            {
+              "len": 24,
+              "seed": 32
+            },
+            {
+              "len": 8,
+              "seed": 132
+            },
+            {
+              "len": 8,
+              "seed": 232
+            }
+          ],
+          "kernel": "layernorm_rows",
+          "shape": {
+            "c": 8,
+            "r": 3
+          },
+          "source_sha256": "037e48cfde301c31bc3000bdb276fb6f6403d95a6bacc22b0990c8a9ae8810c7",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "082b23a251502248cfb0c3aaf6996caa6eb94fe684e677c333d9180c019456db",
+          "id": "ml-layernorm_rows-r4_c33-c2",
+          "inputs": [
+            {
+              "len": 132,
+              "seed": 33
+            },
+            {
+              "len": 33,
+              "seed": 133
+            },
+            {
+              "len": 33,
+              "seed": 233
+            }
+          ],
+          "kernel": "layernorm_rows",
+          "shape": {
+            "c": 33,
+            "r": 4
+          },
+          "source_sha256": "a6b0bddd9abdcb7f95dd7bfdca87fce189fb388b7abe9b2499000e76ae9f39cb",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "de039ff40a1f5bd3a486918eda8ab4f3f4e59fb59144fa91015cfb9d596d29f6",
+          "id": "ml-layernorm_rows-r5_c64-c3",
+          "inputs": [
+            {
+              "len": 320,
+              "seed": 34
+            },
+            {
+              "len": 64,
+              "seed": 134
+            },
+            {
+              "len": 64,
+              "seed": 234
+            }
+          ],
+          "kernel": "layernorm_rows",
+          "shape": {
+            "c": 64,
+            "r": 5
+          },
+          "source_sha256": "be55bb0855f5737beab914f80c3291df1c5524449d69d1cd7433697be3bced7d",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "4fa1b313fdb254d2e2e6122b0e961f04e5aad7f99a03de0c0aed4f50d45b4478",
+          "id": "ml-gemm_f32-m1_k1_n1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 41
+            },
+            {
+              "len": 1,
+              "seed": 141
+            }
+          ],
+          "kernel": "gemm_f32",
+          "shape": {
+            "k": 1,
+            "m": 1,
+            "n": 1
+          },
+          "source_sha256": "e3d90b81ed53faa6c7d7e78543cca4ca9de7793fd20c19a8f3b0d4ea7de7ac1e",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "72ba67b92f5f258388363a491125865b300c435083fd42abf1eb6582b75508ae",
+          "id": "ml-gemm_f32-m8_k8_n8-c1",
+          "inputs": [
+            {
+              "len": 64,
+              "seed": 42
+            },
+            {
+              "len": 64,
+              "seed": 142
+            }
+          ],
+          "kernel": "gemm_f32",
+          "shape": {
+            "k": 8,
+            "m": 8,
+            "n": 8
+          },
+          "source_sha256": "c7b81ef2d276c13ef61875229f3ebaed525345094c11270cd12c599bbf1d9c74",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "33eddbdd0f41be4eea68d378001af8f3d592a7a0622f6cdc2e0b6b601ba20fed",
+          "id": "ml-gemm_f32-m7_k13_n5-c2",
+          "inputs": [
+            {
+              "len": 91,
+              "seed": 43
+            },
+            {
+              "len": 65,
+              "seed": 143
+            }
+          ],
+          "kernel": "gemm_f32",
+          "shape": {
+            "k": 13,
+            "m": 7,
+            "n": 5
+          },
+          "source_sha256": "5d9e3679f92b1255525650d4f57eba1e046ec3b76f2e012682aebb22a6df0547",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "e6d673ca3691bbcfe1142b10963edbbb5f9affc4c5800a4f1baa661b9403d431",
+          "id": "ml-gemm_f32-m16_k4_n9-c3",
+          "inputs": [
+            {
+              "len": 64,
+              "seed": 44
+            },
+            {
+              "len": 36,
+              "seed": 144
+            }
+          ],
+          "kernel": "gemm_f32",
+          "shape": {
+            "k": 4,
+            "m": 16,
+            "n": 9
+          },
+          "source_sha256": "2a0b941fd0bf9f9f36f4092e01472c6335d4ae560452d0980a1b750ebf82e776",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "1e94c4604fa9b760910b2d634389cd7a75be8d98849616d69d64afe5e28cd460",
+          "id": "ml-gemm_f32-m3_k17_n11-c4",
+          "inputs": [
+            {
+              "len": 51,
+              "seed": 45
+            },
+            {
+              "len": 187,
+              "seed": 145
+            }
+          ],
+          "kernel": "gemm_f32",
+          "shape": {
+            "k": 17,
+            "m": 3,
+            "n": 11
+          },
+          "source_sha256": "3f00c55bc18c757ded09912e592b14e433e6b48b6a7fd5f67bb4e3e1d145c110",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "91a24fb30f20a682399a5c9cbfa4147c1891716da7d258cb6c9b0766109420fd",
+          "id": "ml-gemm_tc-m1_k1_n1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 81
+            },
+            {
+              "len": 1,
+              "seed": 181
+            }
+          ],
+          "kernel": "gemm_tc",
+          "shape": {
+            "k": 1,
+            "m": 1,
+            "n": 1
+          },
+          "source_sha256": "2a30635b9a47967ef7b99be58cf051631c08e52eb293157d5ba9bd2879a8cb85",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "ad814f5756f26bf7e95a7cceb0849c09961c56857632da952d0debbcea3e7e30",
+          "id": "ml-gemm_tc-m8_k8_n8-c1",
+          "inputs": [
+            {
+              "len": 64,
+              "seed": 82
+            },
+            {
+              "len": 64,
+              "seed": 182
+            }
+          ],
+          "kernel": "gemm_tc",
+          "shape": {
+            "k": 8,
+            "m": 8,
+            "n": 8
+          },
+          "source_sha256": "815025f50fd80b1f3a277a91471a882ff3e19de73f9667886c3137c8353920a0",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "8b2ae947aac0c7305b90cd5e1c0ac8f0c2d513ddb6b4957a057b46dddc94519a",
+          "id": "ml-gemm_tc-m7_k13_n5-c2",
+          "inputs": [
+            {
+              "len": 91,
+              "seed": 83
+            },
+            {
+              "len": 65,
+              "seed": 183
+            }
+          ],
+          "kernel": "gemm_tc",
+          "shape": {
+            "k": 13,
+            "m": 7,
+            "n": 5
+          },
+          "source_sha256": "47ee1dfb3709e91a8e6932fda260192ad7986dbebb3401ce4361dac37ddc2a7e",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "0af5c763d22afb0f112cf7af6b578934ff312c5163aa96fba4ea2f0f0529333e",
+          "id": "ml-gemm_tc-m4_k17_n6-c3",
+          "inputs": [
+            {
+              "len": 68,
+              "seed": 84
+            },
+            {
+              "len": 102,
+              "seed": 184
+            }
+          ],
+          "kernel": "gemm_tc",
+          "shape": {
+            "k": 17,
+            "m": 4,
+            "n": 6
+          },
+          "source_sha256": "767bc583e36961dccdcfb0dbb903567ef386e24f5ce1124bbe96847b204777fa",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "afa08d06ded46f1cae371237f314c91f34436e9354ea4e2c65ae16817ce07ff3",
+          "id": "ml-attention-s1_d1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 51
+            },
+            {
+              "len": 1,
+              "seed": 151
+            },
+            {
+              "len": 1,
+              "seed": 251
+            }
+          ],
+          "kernel": "attention",
+          "shape": {
+            "d": 1,
+            "s": 1
+          },
+          "source_sha256": "5122df6ab544d4bb33d8b7c5c8554f537d9db12a0405a043c0a5567145557510",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "b5ae5b2e7961a363ff80ea6d59f91750800c231e906441bb24b0f3ed11ac46d5",
+          "id": "ml-attention-s4_d8-c1",
+          "inputs": [
+            {
+              "len": 32,
+              "seed": 52
+            },
+            {
+              "len": 32,
+              "seed": 152
+            },
+            {
+              "len": 32,
+              "seed": 252
+            }
+          ],
+          "kernel": "attention",
+          "shape": {
+            "d": 8,
+            "s": 4
+          },
+          "source_sha256": "b168307cf95e7f79c9f49a06626efa5dca81b7ac2b0548173e4268f9f29bb6ee",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "9d65179a574ae4747493e829311666f452b23f09b39552a770270364bfc90bf2",
+          "id": "ml-attention-s6_d16-c2",
+          "inputs": [
+            {
+              "len": 96,
+              "seed": 53
+            },
+            {
+              "len": 96,
+              "seed": 153
+            },
+            {
+              "len": 96,
+              "seed": 253
+            }
+          ],
+          "kernel": "attention",
+          "shape": {
+            "d": 16,
+            "s": 6
+          },
+          "source_sha256": "b9b798c996b61971013f4c6a34166e614bafaf18345b02641e4c63a78b83d028",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "76e04b5e4416e0242362f7eb6dafa1db773260ddf543a24600f575a107d50930",
+          "id": "ml-attention-s9_d5-c3",
+          "inputs": [
+            {
+              "len": 45,
+              "seed": 54
+            },
+            {
+              "len": 45,
+              "seed": 154
+            },
+            {
+              "len": 45,
+              "seed": 254
+            }
+          ],
+          "kernel": "attention",
+          "shape": {
+            "d": 5,
+            "s": 9
+          },
+          "source_sha256": "9df9a079964cf87876498f06db2672e3eb313adcece64b7093e242973bb0a018",
+          "split": "held_out"
+        }
+      ],
+      "seed": 7237123391355777841
+    },
+    "robotics": {
+      "held_out_sha256": "ed8d5580e5a2e67e818e3f68f1e2a7e1df9858d34790230cdefc1b36d0fd09f4",
+      "program_counts": {
+        "held_out": 8,
+        "total": 24,
+        "tuning": 16
+      },
+      "programs": [
+        {
+          "canonical_sha256": "d4918657693ace409d5831e079d7d4f5dd9449ed924455e45c4289e400d68193",
+          "id": "robotics-batched_fk-n1_l1-c0",
+          "inputs": [
+            {
+              "len": 1,
+              "seed": 111
+            }
+          ],
+          "kernel": "batched_fk",
+          "shape": {
+            "l": 1,
+            "n": 1
+          },
+          "source_sha256": "2ddef8241729dcec266dfd9b8e1dc14042b65617aaf235fe918adffd28cd23f9",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "ef76a7d0dfd03630db29c0ffac18918810f3aa67ec5479ad64358a2137b50708",
+          "id": "robotics-batched_fk-n8_l3-c1",
+          "inputs": [
+            {
+              "len": 24,
+              "seed": 112
+            }
+          ],
+          "kernel": "batched_fk",
+          "shape": {
+            "l": 3,
+            "n": 8
+          },
+          "source_sha256": "05a6d8978c270409df5713f8539055b088cb2daa4a0eda576383b033fe1888f9",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "0b6cdc843147e07ca91ab35783d9c10fde5c3453c1d465b16abd28475c3a4aaa",
+          "id": "robotics-batched_fk-n33_l6-c2",
+          "inputs": [
+            {
+              "len": 198,
+              "seed": 113
+            }
+          ],
+          "kernel": "batched_fk",
+          "shape": {
+            "l": 6,
+            "n": 33
+          },
+          "source_sha256": "ccbc84f920c5aa79aa2f2322ea426498bcfa5ca0cb2e39e76769a091e8ffc154",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "5b44594b2b3b3a25e66f77428c0d3b57b90f6a11513ace53f8b4328c4a256a9d",
+          "id": "robotics-batched_fk-n64_l7-c3",
+          "inputs": [
+            {
+              "len": 448,
+              "seed": 114
+            }
+          ],
+          "kernel": "batched_fk",
+          "shape": {
+            "l": 7,
+            "n": 64
+          },
+          "source_sha256": "820166849c522bb4f2a95a4e6056819814430a7a37a06a2433a73aeafb8f0732",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "0683a73aaa05ea302123fed33c7aa84bf76646c2c56af98eca2617e2e20713b4",
+          "id": "robotics-dls_ik_step-n1-c0",
+          "inputs": [
+            {
+              "len": 3,
+              "seed": 121
+            },
+            {
+              "len": 2,
+              "seed": 221
+            }
+          ],
+          "kernel": "dls_ik_step",
+          "shape": {
+            "n": 1
+          },
+          "source_sha256": "29674e6185b8528447d750ae68471e57e0abe0914a9ab50d01f359a1eb3c6dba",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "f2dd65a1ed4989f3e33b8d2e16e9a90d0aa5237298e9b3faaf51618a1182b150",
+          "id": "robotics-dls_ik_step-n7-c1",
+          "inputs": [
+            {
+              "len": 21,
+              "seed": 122
+            },
+            {
+              "len": 14,
+              "seed": 222
+            }
+          ],
+          "kernel": "dls_ik_step",
+          "shape": {
+            "n": 7
+          },
+          "source_sha256": "3220faa84a8cadd9c83d3249606108c9ef2bdc92a68d0f4996251d3e8fe34042",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "bf7fddd8f5c91fc2f31f61b5ca8c738ef0c38d0ef9f19d9bf31d235ca2effb42",
+          "id": "robotics-dls_ik_step-n32-c2",
+          "inputs": [
+            {
+              "len": 96,
+              "seed": 123
+            },
+            {
+              "len": 64,
+              "seed": 223
+            }
+          ],
+          "kernel": "dls_ik_step",
+          "shape": {
+            "n": 32
+          },
+          "source_sha256": "78c48e627b35e264c7ca0d892d98a5cddb1de4f2e099828318e5dd2da0983543",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "e3c39261bed5c016bc0e0d6438ed7a785fd35b56bb37dcd92c8a0414a396ae83",
+          "id": "robotics-dls_ik_step-n65-c3",
+          "inputs": [
+            {
+              "len": 195,
+              "seed": 124
+            },
+            {
+              "len": 130,
+              "seed": 224
+            }
+          ],
+          "kernel": "dls_ik_step",
+          "shape": {
+            "n": 65
+          },
+          "source_sha256": "aa4d83db87de25e2ab080591b29fb08455f32177728c21a047f6d6b8e3f91d15",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "361753604b1e067b9b1b7bfee5fb26d5bc0af9a5fdcf2154ed81cbde6c489421",
+          "id": "robotics-sphere_collision-a1_b1-c0",
+          "inputs": [
+            {
+              "len": 4,
+              "seed": 131
+            },
+            {
+              "len": 4,
+              "seed": 231
+            }
+          ],
+          "kernel": "sphere_collision",
+          "shape": {
+            "a": 1,
+            "b": 1
+          },
+          "source_sha256": "6ab6bb6a6e58d661e72267363b5dfd3079a1c42a880fd0de5dcc6f0e58ad3abd",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "bef334e43d2aa0ac8ca2beb4945148471e2406bb7c454c71e0554ec6f59a7dc4",
+          "id": "robotics-sphere_collision-a9_b14-c1",
+          "inputs": [
+            {
+              "len": 36,
+              "seed": 132
+            },
+            {
+              "len": 56,
+              "seed": 232
+            }
+          ],
+          "kernel": "sphere_collision",
+          "shape": {
+            "a": 9,
+            "b": 14
+          },
+          "source_sha256": "2ce31499a9fd41b539504a6ba0a00e7655dc7f46eb54b456aff719d15f902790",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "d9e5217a50103b44a205d31ba3ea04b3fcc18472bc9cda841513fe3a836625d2",
+          "id": "robotics-sphere_collision-a40_b25-c2",
+          "inputs": [
+            {
+              "len": 160,
+              "seed": 133
+            },
+            {
+              "len": 100,
+              "seed": 233
+            }
+          ],
+          "kernel": "sphere_collision",
+          "shape": {
+            "a": 40,
+            "b": 25
+          },
+          "source_sha256": "0ed5d9b406476090dbb121e8567829d993e5f742462d7a876cc81724b41442bb",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "48011582afebf7cbe007b560dc30abc1ff33151bcfac859465bc323aeca6c1bb",
+          "id": "robotics-sphere_collision-a48_b40-c3",
+          "inputs": [
+            {
+              "len": 192,
+              "seed": 134
+            },
+            {
+              "len": 160,
+              "seed": 234
+            }
+          ],
+          "kernel": "sphere_collision",
+          "shape": {
+            "a": 48,
+            "b": 40
+          },
+          "source_sha256": "b6f126aaa95cd2c937caf23900da6c5a327d5397c34e10e1d52deb017d3f878e",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "20b5c2434ddb78d6eeca9f7c61af9387bcad77657cb638f9449cb85aac89963c",
+          "id": "robotics-mpc_rollout-k1_h1-c0",
+          "inputs": [
+            {
+              "len": 2,
+              "seed": 141
+            }
+          ],
+          "kernel": "mpc_rollout",
+          "shape": {
+            "h": 1,
+            "k": 1
+          },
+          "source_sha256": "a9b8526430b6ae168743999959b85b523b057817282fa259f6d362297b8f279d",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "a83238318e3647a49aca86768fb5ddcb62b493f7d8e685e7e9b605aaad24e12f",
+          "id": "robotics-mpc_rollout-k16_h10-c1",
+          "inputs": [
+            {
+              "len": 320,
+              "seed": 142
+            }
+          ],
+          "kernel": "mpc_rollout",
+          "shape": {
+            "h": 10,
+            "k": 16
+          },
+          "source_sha256": "fb90c8e4d79b925e24354e4ef0e9b0917d027c317edb83d909a3db35a21abcad",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "8ebc98c7baa2a38c34c38fc5ceef5fe7f76134266b1cc3a096581c00b942babe",
+          "id": "robotics-mpc_rollout-k33_h12-c2",
+          "inputs": [
+            {
+              "len": 792,
+              "seed": 143
+            }
+          ],
+          "kernel": "mpc_rollout",
+          "shape": {
+            "h": 12,
+            "k": 33
+          },
+          "source_sha256": "73045ac730ed19a5f4e7af4b3dec21c89655553829257926c0079840155785e0",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "09eb3a7adb9c0c50fab97492f84deb4d160f9ef2a1299d3ac90b4707ac8887ad",
+          "id": "robotics-mpc_rollout-k40_h12-c3",
+          "inputs": [
+            {
+              "len": 960,
+              "seed": 144
+            }
+          ],
+          "kernel": "mpc_rollout",
+          "shape": {
+            "h": 12,
+            "k": 40
+          },
+          "source_sha256": "0947693922df4610d3d190579f67e6aade70a228b3979722689e0f6e8d042e0c",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "d3c7e850d33eba73527ec97ece59876047de148b7d2f5c1c4097bae2c25a71ba",
+          "id": "robotics-voxel_filter-n1_g1-c0",
+          "inputs": [
+            {
+              "len": 3,
+              "seed": 151
+            }
+          ],
+          "kernel": "voxel_filter",
+          "shape": {
+            "g": 1,
+            "n": 1
+          },
+          "source_sha256": "5c7a085600aedfba70055326df875a60e3804a40243d367f0c897e58c5d95796",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "812353a92ca01a702fcb335c5f099e4e7f17e25da4844b90df76f4fe271476ed",
+          "id": "robotics-voxel_filter-n50_g2-c1",
+          "inputs": [
+            {
+              "len": 150,
+              "seed": 152
+            }
+          ],
+          "kernel": "voxel_filter",
+          "shape": {
+            "g": 2,
+            "n": 50
+          },
+          "source_sha256": "ab8c628951773aeb144478fd77139438515ddc00f818cb3a2985cf0e9a4cd01c",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "e96659c2b243f640847696f67ceb63aad81981e1d0115c85cad974614c26f596",
+          "id": "robotics-voxel_filter-n200_g4-c2",
+          "inputs": [
+            {
+              "len": 600,
+              "seed": 153
+            }
+          ],
+          "kernel": "voxel_filter",
+          "shape": {
+            "g": 4,
+            "n": 200
+          },
+          "source_sha256": "cbb21717bbfaa515344458f6ac82c961c1740573851c12e79ea7c31d462ed353",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "299bad503bafa3748750b1d967acbaf802519599bb973b2d6d5f376f9e0afeb5",
+          "id": "robotics-voxel_filter-n300_g3-c3",
+          "inputs": [
+            {
+              "len": 900,
+              "seed": 154
+            }
+          ],
+          "kernel": "voxel_filter",
+          "shape": {
+            "g": 3,
+            "n": 300
+          },
+          "source_sha256": "687002bce3099b56af58d50a814978c78726543ff510741835038fff3cd8da0e",
+          "split": "tuning"
+        },
+        {
+          "canonical_sha256": "7368a43d613c2f060dccd02549a91a86be79c239e6d1fbac7e24cc8b56535fbc",
+          "id": "robotics-radius_filter-n1-c0",
+          "inputs": [
+            {
+              "len": 3,
+              "seed": 161
+            }
+          ],
+          "kernel": "radius_filter",
+          "shape": {
+            "n": 1
+          },
+          "source_sha256": "5466d9b85017920acdb007d8daeb93e5a51a8123dab583d77c4236075de5bbc0",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "452ce79c96b529c58ae84e9800b711110551e2e1bbe80b89689f130c42750103",
+          "id": "robotics-radius_filter-n20-c1",
+          "inputs": [
+            {
+              "len": 60,
+              "seed": 162
+            }
+          ],
+          "kernel": "radius_filter",
+          "shape": {
+            "n": 20
+          },
+          "source_sha256": "313dfc9ab122da464af563e0ee14dd5b6a62f7ff5dc834333d5118cbead90f56",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "d27e1dd4813f89b1d5512f1c0b3a002ff5c07febb816f2ea0803473a43fa70f7",
+          "id": "robotics-radius_filter-n48-c2",
+          "inputs": [
+            {
+              "len": 144,
+              "seed": 163
+            }
+          ],
+          "kernel": "radius_filter",
+          "shape": {
+            "n": 48
+          },
+          "source_sha256": "b14b192ab83da8fe15ed8bc5b8726d5544367c8c8c2155d517030261dd7edc01",
+          "split": "held_out"
+        },
+        {
+          "canonical_sha256": "a23ac3c3b1b0b9dcdd2c6f0654599866fcf29041f9cb0c267c8a683bae2ab04a",
+          "id": "robotics-radius_filter-n64-c3",
+          "inputs": [
+            {
+              "len": 192,
+              "seed": 164
+            }
+          ],
+          "kernel": "radius_filter",
+          "shape": {
+            "n": 64
+          },
+          "source_sha256": "b098dbbbd38dad43a06c19d66e9d78b1a38822772bad584ca0859abbba551307",
+          "split": "held_out"
+        }
+      ],
+      "seed": 7237123391355777841
+    }
+  },
+  "v1_held_out_sha256": "abfdfa44acf8e62c7d55c63d1690668d52e5b8b8f604abe0a3d38d3c9a293c34",
+  "v1_held_out_sha256_note": "unchanged: the domain suites never enter the M5-01 held-out hash"
+}

@@ -1,0 +1,9 @@
+module alpha {
+    import beta::other;
+    pub fn first() -> i32 { return other(); }
+}
+module beta {
+    import alpha::first;
+    pub fn other() -> i32 { return first(); }
+}
+fn main() -> i32 { return 0; }

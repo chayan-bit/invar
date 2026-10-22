@@ -1,0 +1,2 @@
+fn depth(n: u32) -> i32 { if n == 0u32 { return 0; } return depth(n - 1u32); }
+fn main() -> i32 { return depth(70u32); }

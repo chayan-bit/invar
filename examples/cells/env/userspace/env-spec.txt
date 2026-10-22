@@ -1,0 +1,74 @@
+# conda-forge specification of the S1-06 user-space environment (Route 1).
+# Library versions that the s104 image pins are pinned to the same upstream
+# version here; build tooling floats within the stated series and is frozen
+# by the exported explicit lock (lock-linux-64.txt). Pinocchio 4.1.0, coal 3.0.3
+# and eigenpy 3.13.0 build from their ROS release tags in the workspace, as in
+# the image; MuJoCo Python comes from the hash-pinned mujoco-requirements.txt.
+python=3.14
+numpy=2.5.3
+c-compiler
+cxx-compiler
+cmake=4.*
+ninja
+make
+pkg-config
+git
+eigen=3.4.0
+libboost-devel=1.90
+libboost-python-devel=1.90
+tinyxml2
+yaml-cpp
+spdlog=1.15.3
+fmt=11.*
+console_bridge
+urdfdom
+urdfdom_headers
+assimp
+orocos-kdl
+openssl
+libcurl
+zstd
+lz4
+sqlite
+pybind11
+pyyaml
+lark
+empy=4.*
+setuptools
+catkin_pkg
+colcon-common-extensions
+vcstool
+pytest
+lxml
+jinja2
+typeguard
+netifaces
+psutil
+rust
+glfw
+libglu
+xorg-libx11
+libacl
+asio
+libgl-devel
+patchelf
+lttng-ust
+libuuid
+argcomplete
+packaging
+nlohmann_json
+octomap=1.10.0
+libcap=2.76
+bullet-cpp=3.25
+elfutils=0.194
+libegl-devel
+libopengl-devel
+# Python run dependencies of the workspace's rosdep keys (launch, controller_manager,
+# mujoco_ros2_control, eigenpy). Keys deliberately not provided: test and lint
+# tools (pytest, flake8*, mypy), jrl-cmakemodules maintainer scripts (rich,
+# ruamel.yaml, tomlkit), sros2 (cryptography) and the mujoco_ros2_control model
+# conversion tools (PyKDL); none is on the S1-06 run path.
+osrf_pycommon=0.2.1
+filelock=4.1.1
+importlib_resources=7.1.0
+scipy=1.18.1

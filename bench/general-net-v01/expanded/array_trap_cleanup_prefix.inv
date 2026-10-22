@@ -1,0 +1,1 @@
+fn main() -> i32 { if true { let done: Array<i32> = [1, 2]; } let xs: Array<i32> = [1]; return xs[1u32]; }

@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "basis": "Hand-derived array root results; source main observes the same producing function, but named source API exposes scalar results only. Core owned oracle supplies separate runtime observation.",
+  "quanta": [
+    1,
+    3,
+    17
+  ],
+  "storage": {
+    "elements": 128,
+    "allocations": 64,
+    "cleanup_events": 128
+  },
+  "returned_roots": [
+    {
+      "id": "returned_i32_implicit",
+      "source": "expanded/array_owner_implicit_return.inv",
+      "entry": "make",
+      "arguments": [],
+      "expected": {
+        "status": "ok",
+        "result": {
+          "type": "Array<i32>",
+          "value": [
+            3,
+            5
+          ]
+        }
+      },
+      "expected_cleanup": [],
+      "expected_allocations": 1
+    },
+    {
+      "id": "returned_u32_0",
+      "source": "expanded/owner_return_unsigned.inv",
+      "entry": "unsigned_owner",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "expected": {
+        "status": "ok",
+        "result": {
+          "type": "Array<u32>",
+          "value": []
+        }
+      },
+      "expected_cleanup": [],
+      "expected_allocations": 1
+    },
+    {
+      "id": "returned_u32_3",
+      "source": "expanded/owner_return_unsigned.inv",
+      "entry": "unsigned_owner",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 3
+        }
+      ],
+      "expected": {
+        "status": "ok",
+        "result": {
+          "type": "Array<u32>",
+          "value": [
+            4294967295,
+            4294967295,
+            4294967295
+          ]
+        }
+      },
+      "expected_cleanup": [],
+      "expected_allocations": 1
+    }
+  ],
+  "worklist": {
+    "source": "expanded/worklist_fair_roots.inv",
+    "entry": "fair_root",
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "fuel": 1000,
+    "transitions": 10000,
+    "trace_events": 10000,
+    "initial_quantum": 1,
+    "initial_submissions": 8,
+    "fair_submissions": 512,
+    "resume_quantum": 17,
+    "resume_submissions": 10000
+  },
+  "backend_budget_cases": [
+    {
+      "id": "heap_limit",
+      "source": "expanded/runtime_array_loop.inv",
+      "entry": "fill_fold",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 5
+        }
+      ],
+      "storage": {
+        "elements": 4,
+        "allocations": 64,
+        "cleanup_events": 128
+      },
+      "expected_status": 11
+    },
+    {
+      "id": "allocation_limit",
+      "source": "expanded/array_loop_cleanup.inv",
+      "entry": "main",
+      "arguments": [],
+      "storage": {
+        "elements": 128,
+        "allocations": 2,
+        "cleanup_events": 128
+      },
+      "expected_status": 12
+    },
+    {
+      "id": "cleanup_limit",
+      "source": "expanded/array_mutation.inv",
+      "entry": "main",
+      "arguments": [],
+      "storage": {
+        "elements": 128,
+        "allocations": 64,
+        "cleanup_events": 0
+      },
+      "expected_status": 13
+    }
+  ]
+}

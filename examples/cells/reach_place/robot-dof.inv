@@ -1,0 +1,30 @@
+fn run() -> i32 { return 0; }
+component source {
+    port out q: std::robotics::JointPositions<f64,robot_dof> @ 100 Hz;
+    resource cpu_cores = 1, memory = 16 MiB;
+    wcet 1 ms;
+    deadline 10 ms;
+    license "Apache-2.0";
+    isolation in-process;
+    impl invar run;
+}
+component sink {
+    port in q: std::robotics::JointPositions<f64,robot_dof> @ 100 Hz;
+    resource cpu_cores = 1, memory = 16 MiB;
+    wcet 1 ms;
+    deadline 10 ms;
+    license "Apache-2.0";
+    isolation in-process;
+    impl invar run;
+}
+connect src.q -> dst.q policy sample-and-hold;
+product RobotDof {
+    distribution internal;
+    commercial true;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 2, memory = 64 MiB;
+}
+system robot_dof for RobotDof {
+    src: source;
+    dst: sink;
+}

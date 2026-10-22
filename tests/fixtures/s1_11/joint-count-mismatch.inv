@@ -1,0 +1,4 @@
+fn accepts_seven(value: read std::robotics::JointPositions<i32,7>) -> i32 { return 1; }
+fn provides_six(value: read std::robotics::JointPositions<i32,6>) -> i32 {
+    return accepts_seven(value);
+}

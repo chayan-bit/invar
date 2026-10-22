@@ -1,0 +1,57 @@
+{
+  "source_url": "https://raw.githubusercontent.com/PointCloudLibrary/data/084fa0e260580cc765ded83de4ec3f495f1d6f1e/tutorials/table_scene_lms400.pcd",
+  "source_sha256": "e285d415641e0d9de695b611db874cc8fe995e8089b77a50d6056d24d8cbcc58",
+  "source_points": 460400,
+  "fields": [
+    "x",
+    "y",
+    "z",
+    "intensity",
+    "distance",
+    "sid"
+  ],
+  "source_format": "PCD v0.7 binary_compressed LZF field-major little-endian f32",
+  "source_padding_bytes": 3870,
+  "source_padding_sha256": "75c0b643b8f9f2ad923c95d5ebb55c2b82bc738d2e16d178be1f39adf8bd556e",
+  "selection": "source index floor(j*460400/4096), j=0..4095; no coordinate transformation",
+  "sample_points": 4096,
+  "sample_soa_sha256": "925c2918a8d9275418ddc69b18e3b02fb4ecb168e18f3efd526c80ae3793ebd0",
+  "axis_bounds": [
+    [
+      -1.0952999591827393,
+      0.9256700277328491
+    ],
+    [
+      -0.6908599734306335,
+      0.4364300072193146
+    ],
+    [
+      -1.9139000177383423,
+      -1.0333000421524048
+    ]
+  ],
+  "query_sample_indices": [
+    0,
+    256,
+    512,
+    768,
+    1024,
+    1280,
+    1536,
+    1792,
+    2048,
+    2304,
+    2560,
+    2816,
+    3072,
+    3328,
+    3584,
+    3840
+  ],
+  "radius_f32_bits": "3d4ccccd",
+  "cell_width_f32_bits": "3d4ccccd",
+  "output_stride": 32,
+  "expected_results": "pending independent Rust oracle through existing <=1024-point blocks",
+  "license": "BSD-3-Clause",
+  "license_blob": "c9c2021acdc748210839c79f7d50ad61957a591d"
+}

@@ -1,0 +1,4 @@
+fn main() -> i32 {
+    let sum: u32 = wrapping_add(quantity::<m>(1u32), 2u32);
+    return 0;
+}

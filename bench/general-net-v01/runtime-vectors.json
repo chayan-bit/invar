@@ -1,0 +1,1817 @@
+{
+  "schema_version": 1,
+  "input_binding": "runtime_scalar_i32_u32_original_function",
+  "case_count": 67,
+  "basis": "Hand-derived scalar values and exact operator byte spans. Runtime arguments reach the original checked function; no rewritten source specialization. Tool caps apply only to GNET observation, not source.",
+  "cases": [
+    {
+      "id": "fib_0",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "fib_1",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "fib_2",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2
+        }
+      }
+    },
+    {
+      "id": "fib_3",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 3
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 3
+        }
+      }
+    },
+    {
+      "id": "fib_4",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 5
+        }
+      }
+    },
+    {
+      "id": "fib_5",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 5
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 8
+        }
+      }
+    },
+    {
+      "id": "fib_6",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 6
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 13
+        }
+      }
+    },
+    {
+      "id": "fib_7",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 7
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 21
+        }
+      }
+    },
+    {
+      "id": "fib_8",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 8
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 34
+        }
+      }
+    },
+    {
+      "id": "fib_9",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 55
+        }
+      }
+    },
+    {
+      "id": "mutual_0_-9",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": -9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -9
+        }
+      }
+    },
+    {
+      "id": "mutual_0_0",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "mutual_0_14",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 14
+        }
+      }
+    },
+    {
+      "id": "mutual_1_-9",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": -9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      }
+    },
+    {
+      "id": "mutual_1_0",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "mutual_1_14",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -14
+        }
+      }
+    },
+    {
+      "id": "mutual_2_-9",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        },
+        {
+          "type": "i32",
+          "value": -9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -9
+        }
+      }
+    },
+    {
+      "id": "mutual_2_0",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "mutual_2_14",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        },
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 14
+        }
+      }
+    },
+    {
+      "id": "mutual_7_-9",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 7
+        },
+        {
+          "type": "i32",
+          "value": -9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      }
+    },
+    {
+      "id": "mutual_7_0",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 7
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "mutual_7_14",
+      "source": "expanded/runtime_mutual_choice.inv",
+      "entry": "choose",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 7
+        },
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -14
+        }
+      }
+    },
+    {
+      "id": "triangle_0",
+      "source": "expanded/while_triangle.inv",
+      "entry": "triangle",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "triangle_1",
+      "source": "expanded/while_triangle.inv",
+      "entry": "triangle",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 3
+        }
+      }
+    },
+    {
+      "id": "triangle_9",
+      "source": "expanded/while_triangle.inv",
+      "entry": "triangle",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 27
+        }
+      }
+    },
+    {
+      "id": "add_0",
+      "source": "expanded/checked_add_overflow.inv",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "add_1",
+      "source": "expanded/checked_add_overflow.inv",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 2147483647
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2147483647
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "add_2",
+      "source": "expanded/checked_add_overflow.inv",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -2147483648
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -2147483648
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "add_3",
+      "source": "expanded/checked_add_overflow.inv",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -9
+        },
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 5
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "add_overflow",
+      "source": "expanded/checked_add_overflow.inv",
+      "entry": "add",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 2147483647
+        },
+        {
+          "type": "i32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 41,
+            "end": 42
+          }
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "divide_min_overflow",
+      "source": "expanded/checked_min_division.inv",
+      "entry": "quotient",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -2147483648
+        },
+        {
+          "type": "i32",
+          "value": -1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 46,
+            "end": 47
+          }
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "divide_zero",
+      "source": "expanded/checked_min_division.inv",
+      "entry": "quotient",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 7
+        },
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "start": 46,
+            "end": 47
+          }
+        }
+      },
+      "expected_source_steps": 4
+    },
+    {
+      "id": "product_0",
+      "source": "expanded/wrapping_unsigned_product.inv",
+      "entry": "multiply",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4294967295
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "product_1",
+      "source": "expanded/wrapping_unsigned_product.inv",
+      "entry": "multiply",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4294967295
+        },
+        {
+          "type": "u32",
+          "value": 2
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 4294967294
+        }
+      }
+    },
+    {
+      "id": "product_2",
+      "source": "expanded/wrapping_unsigned_product.inv",
+      "entry": "multiply",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "u32",
+          "value": 4294967295
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "u32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "constant_fuel_1",
+      "source": "expanded/constant_fuel_prefix.inv",
+      "entry": "constant",
+      "arguments": [],
+      "fuel": 1,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 1,
+        "steps_used": 1
+      },
+      "expected_source_steps": 1
+    },
+    {
+      "id": "constant_fuel_2",
+      "source": "expanded/constant_fuel_prefix.inv",
+      "entry": "constant",
+      "arguments": [],
+      "fuel": 2,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 42
+        }
+      },
+      "expected_source_steps": 2
+    },
+    {
+      "id": "constant_fuel_3",
+      "source": "expanded/constant_fuel_prefix.inv",
+      "entry": "constant",
+      "arguments": [],
+      "fuel": 3,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 42
+        }
+      },
+      "expected_source_steps": 2
+    },
+    {
+      "id": "depth_63",
+      "source": "expanded/recursive_frame_limit.inv",
+      "entry": "depth",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 63
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "depth_64",
+      "source": "expanded/recursive_frame_limit.inv",
+      "entry": "depth",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 64
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "tool_error",
+        "code": "CALL_DEPTH_LIMIT"
+      }
+    },
+    {
+      "id": "source_order_fuel",
+      "source": "expanded/oldest_loop_before_trap.inv",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 73,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 73,
+        "steps_used": 73
+      },
+      "expected_source_steps": 73
+    },
+    {
+      "id": "transition_limit",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 8
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 5,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 34
+        }
+      },
+      "expected_oracle_failure": "TransitionLimit"
+    },
+    {
+      "id": "trace_limit",
+      "source": "expanded/runtime_recursive_fib.inv",
+      "entry": "fib",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 8
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 5,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 34
+        }
+      },
+      "expected_oracle_failure": "TraceLimit"
+    },
+    {
+      "id": "array_runtime_0",
+      "source": "expanded/runtime_array_loop.inv",
+      "entry": "fill_fold",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 0
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 0
+        }
+      ]
+    },
+    {
+      "id": "array_runtime_1",
+      "source": "expanded/runtime_array_loop.inv",
+      "entry": "fill_fold",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 3
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "id": "array_runtime_5",
+      "source": "expanded/runtime_array_loop.inv",
+      "entry": "fill_fold",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 5
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 15
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 5
+        }
+      ]
+    },
+    {
+      "id": "array_private_arena_limit",
+      "source": "expanded/runtime_array_loop.inv",
+      "entry": "fill_fold",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 5
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 4
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 15
+        }
+      },
+      "expected_oracle_failure": "Allocation"
+    },
+    {
+      "id": "record_runtime_-9",
+      "source": "expanded/runtime_record_fields.inv",
+      "entry": "fields",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": -9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -14
+        }
+      }
+    },
+    {
+      "id": "record_runtime_0",
+      "source": "expanded/runtime_record_fields.inv",
+      "entry": "fields",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 4
+        }
+      }
+    },
+    {
+      "id": "record_runtime_14",
+      "source": "expanded/runtime_record_fields.inv",
+      "entry": "fields",
+      "arguments": [
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 32
+        }
+      }
+    },
+    {
+      "id": "variant_runtime_0",
+      "source": "expanded/runtime_variant_selection.inv",
+      "entry": "selection",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        },
+        {
+          "type": "i32",
+          "value": 9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2
+        }
+      }
+    },
+    {
+      "id": "variant_runtime_1",
+      "source": "expanded/runtime_variant_selection.inv",
+      "entry": "selection",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        },
+        {
+          "type": "i32",
+          "value": -9
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -9
+        }
+      }
+    },
+    {
+      "id": "variant_runtime_4",
+      "source": "expanded/runtime_variant_selection.inv",
+      "entry": "selection",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        },
+        {
+          "type": "i32",
+          "value": 14
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 14
+        }
+      }
+    },
+    {
+      "id": "view_runtime_entry",
+      "source": "expanded/view_stride_mutation.inv",
+      "entry": "main",
+      "arguments": [],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 1000000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 38
+        }
+      }
+    },
+    {
+      "id": "transfer_0",
+      "source": "expanded/owner_recursive_transfer.inv",
+      "entry": "transfer",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "id": "transfer_1",
+      "source": "expanded/owner_recursive_transfer.inv",
+      "entry": "transfer",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "id": "transfer_4",
+      "source": "expanded/owner_recursive_transfer.inv",
+      "entry": "transfer",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "id": "transfer_8",
+      "source": "expanded/owner_recursive_transfer.inv",
+      "entry": "transfer",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 8
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "id": "compaction_0",
+      "source": "expanded/owner_compaction_mut_loan.inv",
+      "entry": "compact",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "dead",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "id": "compaction_1",
+      "source": "expanded/owner_compaction_mut_loan.inv",
+      "entry": "compact",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 4
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "dead",
+          "length": 2
+        },
+        {
+          "name": "tmp",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "id": "compaction_4",
+      "source": "expanded/owner_compaction_mut_loan.inv",
+      "entry": "compact",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 4
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 13
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "dead",
+          "length": 2
+        },
+        {
+          "name": "tmp",
+          "length": 2
+        },
+        {
+          "name": "tmp",
+          "length": 2
+        },
+        {
+          "name": "tmp",
+          "length": 2
+        },
+        {
+          "name": "tmp",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "id": "fair_divergent",
+      "source": "expanded/worklist_fair_roots.inv",
+      "entry": "fair_root",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 1000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 1000,
+        "steps_used": 1000
+      },
+      "expected_cleanup": []
+    },
+    {
+      "id": "fair_value",
+      "source": "expanded/worklist_fair_roots.inv",
+      "entry": "fair_root",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        }
+      },
+      "expected_cleanup": []
+    },
+    {
+      "id": "fair_trap_prefix",
+      "source": "expanded/worklist_fair_roots.inv",
+      "entry": "fair_root",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 2
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "start": 196,
+            "end": 208
+          }
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "done",
+          "length": 2
+        }
+      ]
+    },
+    {
+      "id": "fair_owned_cleanup",
+      "source": "expanded/worklist_fair_roots.inv",
+      "entry": "fair_root",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 3
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 23
+        }
+      },
+      "expected_cleanup": [
+        {
+          "name": "fresh",
+          "length": 2
+        }
+      ]
+    },
+    {
+      "id": "ordered_earlier_divergence",
+      "source": "expanded/worklist_ordered_runtime.inv",
+      "entry": "ordered",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 0
+        }
+      ],
+      "fuel": 73,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 73,
+        "steps_used": 73
+      },
+      "expected_cleanup": []
+    },
+    {
+      "id": "ordered_later_trap",
+      "source": "expanded/worklist_ordered_runtime.inv",
+      "entry": "ordered",
+      "arguments": [
+        {
+          "type": "u32",
+          "value": 1
+        }
+      ],
+      "fuel": 100000,
+      "limits": {
+        "transitions": 1000000,
+        "trace_events": 10000,
+        "array_elements": 2000000
+      },
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "start": 124,
+            "end": 132
+          }
+        }
+      },
+      "expected_cleanup": []
+    }
+  ]
+}

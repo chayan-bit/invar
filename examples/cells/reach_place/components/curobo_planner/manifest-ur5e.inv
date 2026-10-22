@@ -1,0 +1,44 @@
+// Production endpoint contract candidate; no passing record or live qualification.
+frame world; frame base: world; frame tool: base; frame cube: world;
+extern component curobo_planner {
+    abi c "invar_curobo_bridge_v1";
+    lifecycle init, configure, step, shutdown;
+    config c "inv_planner_config_v1";
+    port in request: std::robotics::PlannerRequest<f64,6,base,tool,cube> @ 0.2 Hz layout c "inv_planner_request6_f64_v2";
+    port out trajectory: std::robotics::PlannerTrajectory<f64,6> @ 0.2 Hz layout c "inv_planner_trajectory6_f64_v1";
+    resource cpu_cores = 1, memory = 1 GiB, gpu_memory = 2 GiB;
+    wcet 5 s; deadline 5 s;
+    license "Apache-2.0"; isolation separate-process;
+    golden "endpoint-ur5e.json" tolerance abs 0.002 m, abs 0.017453292519943295 rad;
+    property "trajectory is finite";
+    shim "bridge.c";
+    input "../../../../../tests/fixtures/foreign-components/CMakeLists.txt";
+    input "../../../../../tests/fixtures/foreign-components/curobo_planner/compare_model_fk.py";
+    input "../../../../../tests/fixtures/foreign-components/curobo_planner/model_sources.json";
+    input "../../../../../tests/fixtures/foreign-components/curobo_planner/prepare_models.py";
+    input "../../../../../tests/fixtures/foreign-components/generate_pinocchio_goldens.py";
+    input "../../../../../tests/fixtures/foreign-components/pinocchio_goldens.json";
+    input "../../../assets/menagerie/universal_robots_ur5e/LICENSE";
+    input "../../../assets/menagerie/universal_robots_ur5e/ur5e.xml";
+    input "../pinocchio_fk/abi_exports.map";
+    input "../pinocchio_fk/abi_reference.cpp";
+    input "../pinocchio_fk/abi_reference.h";
+    input "../pinocchio_fk/bridge.c";
+    input "../pinocchio_fk/bridge_exports.map";
+    input "../pinocchio_fk/core.cpp";
+    input "../pinocchio_fk/core.hpp";
+    input "../pinocchio_fk/golden/panda_fk.json";
+    input "../pinocchio_fk/manifest-ur5e.inv";
+    input "artifacts/ur5e/fk-evidence.json";
+    input "artifacts/ur5e/libinvar_curobo_bridge_v1.so";
+    input "artifacts/ur5e/libinvar_pinocchio_bridge_v1.so";
+    input "artifacts/ur5e/scene.yml";
+    input "artifacts/ur5e/ur5e.urdf";
+    input "artifacts/ur5e/ur5e.yml";
+    input "planner_reference.c";
+    input "planner_reference.h";
+    input "planner_server.py";
+    input "runtime-ur5e.json";
+    input "../../cell-ur5e.inv";
+    input "../../assets/menagerie/universal_robots_ur5e/scene.xml";
+}

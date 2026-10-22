@@ -1,0 +1,17 @@
+fn frustum_cull(spheres: read Array<f32>, n: u32) -> Array<u32> {
+    let planes: Array<f32> = [0.894, 0.0, 0.447, 0.9, -0.894, 0.0, 0.447, 0.9, 0.0, 0.894, 0.447, 0.9, 0.0, -0.894, 0.447, 0.9, 0.0, 0.0, 1.0, 0.5, 0.0, 0.0, -1.0, 1.5];
+    var visible: Array<u32> = filled_u32(n, 0u32);
+    for i in 0u32..n {
+        let x: f32 = spheres[i * 4u32];
+        let y: f32 = spheres[i * 4u32 + 1u32];
+        let z: f32 = spheres[i * 4u32 + 2u32];
+        let r: f32 = (spheres[i * 4u32 + 3u32] + 1.0) * 0.1;
+        var inside: u32 = 1u32;
+        for p in 0u32..6u32 {
+            let d: f32 = planes[p * 4u32] * x + planes[p * 4u32 + 1u32] * y + planes[p * 4u32 + 2u32] * z + planes[p * 4u32 + 3u32];
+            if d < 0.0 - r { inside = 0u32; }
+        }
+        visible[i] = inside;
+    }
+    return move visible;
+}

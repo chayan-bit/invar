@@ -1,0 +1,10 @@
+fn main() -> i32 {
+    let xs: Array<i32> = [1i32, 8i32];
+    let ys: Array<i32> = [2i32];
+    let n: i32 = 3i32;
+    let c = closure [copy n: i32, read xs: Array<i32>, take ys: Array<i32>] (x: i32) -> i32 {
+        return n + xs[0u32] + ys[0u32] + x;
+    };
+    let answer: i32 = c(4i32);
+    return answer;
+}

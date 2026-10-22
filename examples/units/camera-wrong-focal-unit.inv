@@ -1,0 +1,11 @@
+fn main() -> i32 {
+    let camera: std::robotics::CameraIntrinsics<i32> = std::robotics::CameraIntrinsics<i32> {
+        width: quantity::<px>(640u32), height: quantity::<px>(480u32),
+        fx: quantity::<m>(500), fy: quantity::<px>(500),
+        cx: quantity::<px>(320), cy: quantity::<px>(240),
+        distortion: std::robotics::Distortion<i32> {
+            model: 0u32, k1: 0, k2: 0, p1: 0, p2: 0, k3: 0
+        }
+    };
+    return 0;
+}

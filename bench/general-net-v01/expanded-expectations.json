@@ -1,0 +1,501 @@
+{
+  "schema_version": 1,
+  "basis": "Hand-derived results, operator byte spans and named owner lifetimes; not captured evaluator outputs. Raw MIR implicit owned-return extra tick is declared separately.",
+  "cases": [
+    {
+      "id": "array_mutation",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 2
+        }
+      ]
+    },
+    {
+      "id": "array_owner_implicit_return",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 5
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_source_steps": 12,
+      "expected_cleanup": [
+        {
+          "name": "a",
+          "length": 2
+        }
+      ],
+      "historical_raw_mir_extra_steps": 1,
+      "shared_mir_fuel_fix": "e949fa9817bc3a8d59f127e98b4a39aef2304f5e"
+    },
+    {
+      "id": "array_owner_explicit_return",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 5
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_source_steps": 12,
+      "expected_cleanup": [
+        {
+          "name": "a",
+          "length": 2
+        }
+      ]
+    },
+    {
+      "id": "array_take_reborrow",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 10
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "id": "array_replacement",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 1
+        }
+      ]
+    },
+    {
+      "id": "array_loop_cleanup",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 18
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 2
+        },
+        {
+          "name": "xs",
+          "length": 2
+        }
+      ]
+    },
+    {
+      "id": "array_empty_u32",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 0
+        }
+      ]
+    },
+    {
+      "id": "array_trap_cleanup_prefix",
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "start": 95,
+            "end": 103
+          }
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "done",
+          "length": 2
+        }
+      ]
+    },
+    {
+      "id": "array_rhs_before_bad_index",
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "start": 58,
+            "end": 59
+          }
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": []
+    },
+    {
+      "id": "array_size_limit",
+      "expected_source": {
+        "status": "tool_error"
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": []
+    },
+    {
+      "id": "view_stride_mutation",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 38
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "view_borrowed_return",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 40
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "record_scalar_fields",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 31
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "record_moved_owner",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 9
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "variant_owned_scalar",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 8
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "variant_owned_array",
+      "expected_source": {
+        "status": "source_error"
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "blob_utf8_bytes",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "while_triangle",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 21
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "for_u32_edge",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 2
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "runtime_recursive_fib",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 34
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "runtime_mutual_choice",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": -9
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "checked_add_overflow",
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 41,
+            "end": 42
+          }
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": []
+    },
+    {
+      "id": "checked_min_division",
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INTEGER_OVERFLOW",
+          "span": {
+            "start": 46,
+            "end": 47
+          }
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": []
+    },
+    {
+      "id": "wrapping_unsigned_product",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": []
+    },
+    {
+      "id": "constant_fuel_prefix",
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 1,
+        "steps_used": 1
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_source_steps": 1,
+      "expected_cleanup": []
+    },
+    {
+      "id": "oldest_loop_before_trap",
+      "expected_source": {
+        "status": "evaluation_limit",
+        "fuel_limit": 73,
+        "steps_used": 73
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_source_steps": 73,
+      "expected_cleanup": []
+    },
+    {
+      "id": "recursive_frame_limit",
+      "expected_source": {
+        "status": "tool_error"
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": []
+    },
+    {
+      "id": "owner_use_after_move",
+      "expected_source": {
+        "status": "source_error"
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "runtime_array_loop",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 15
+        }
+      },
+      "raw_mir_extra_steps": 0,
+      "expected_cleanup": [
+        {
+          "name": "xs",
+          "length": 5
+        }
+      ]
+    },
+    {
+      "id": "runtime_record_fields",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 22
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "runtime_variant_selection",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 8
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "result_owned_propagation",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "owner_recursive_transfer",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 7
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "owner_compaction_mut_loan",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 13
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "worklist_fair_roots",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 17
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "worklist_ordered_runtime",
+      "expected_source": {
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "start": 124,
+            "end": 132
+          }
+        }
+      },
+      "raw_mir_extra_steps": 0
+    },
+    {
+      "id": "owner_return_unsigned",
+      "expected_source": {
+        "status": "ok",
+        "result": {
+          "type": "i32",
+          "value": 1
+        }
+      },
+      "raw_mir_extra_steps": 0
+    }
+  ],
+  "raw_mir_baseline": "e949fa9817bc3a8d59f127e98b4a39aef2304f5e canonical implicit owned-return fix; raw and checked MIR now agree with source at fuel11"
+}

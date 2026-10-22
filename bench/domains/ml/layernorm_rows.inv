@@ -1,0 +1,22 @@
+fn layernorm_rows(x: read Array<f32>, gamma: read Array<f32>, beta: read Array<f32>, rows: u32, cols: u32) -> Array<f32> {
+    var out: Array<f32> = filled_f32(rows * cols, 0.0);
+    let n: f32 = f32_from_u32(cols);
+    for r in 0u32..rows {
+        let base: u32 = r * cols;
+        var sum: f32 = 0.0;
+        for c in 0u32..cols {
+            sum = sum + x[base + c];
+        }
+        let mean: f32 = sum / n;
+        var spread: f32 = 0.0;
+        for c2 in 0u32..cols {
+            let d: f32 = x[base + c2] - mean;
+            spread = spread + d * d;
+        }
+        let inv: f32 = 1.0 / sqrt(spread / n + 0.00001);
+        for c3 in 0u32..cols {
+            out[base + c3] = (x[base + c3] - mean) * inv * gamma[c3] + beta[c3];
+        }
+    }
+    return move out;
+}

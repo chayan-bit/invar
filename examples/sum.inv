@@ -1,0 +1,12 @@
+fn sum(xs: read Array<i32>) -> i32 {
+    var result: i32 = 0;
+    for i in 0 .. len(xs) {
+        result = result + xs[i];
+    }
+    return result;
+}
+
+fn main() -> i32 {
+    let values: Array<i32> = [1, 2, 3, 4];
+    return sum(values);
+}

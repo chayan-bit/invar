@@ -1,0 +1,30 @@
+frame world;
+frame base: world;
+frame tool: base;
+
+extern component pinocchio_fk {
+    abi c "invar_pinocchio_bridge_v1";
+    lifecycle init, configure, step, shutdown;
+    config c "inv_fk_config_v1";
+    port in q: std::robotics::JointPositions<f64,7> @ 100 Hz layout c "inv_joint7_f64";
+    port out pose: std::robotics::Pose<f64,base,tool> @ 100 Hz layout c "inv_pose_f64";
+    resource cpu_cores = 1, memory = 64 MiB;
+    wcet 1 ms;
+    deadline 10 ms;
+    license "BSD-2-Clause" link dynamic;
+    isolation in-process;
+    golden "golden/panda_fk.json" tolerance abs 0.000000000001 m, abs 0.000000000001 rad;
+    property "pose.rotation is unit norm within 0.000000000001";
+    shim "bridge.c";
+    input "abi_reference.h";
+    input "abi_reference.cpp";
+    input "core.hpp";
+    input "core.cpp";
+    input "abi_exports.map";
+    input "bridge_exports.map";
+    input "../../../../../tests/fixtures/foreign-components/pinocchio_goldens.json";
+    input "../../../../../tests/fixtures/foreign-components/generate_pinocchio_goldens.py";
+    input "../../../../../tests/fixtures/foreign-components/CMakeLists.txt";
+    input "../../../../../tests/fixtures/foreign-components/models/franka_emika_panda/panda.xml";
+    input "../../../../../tests/fixtures/foreign-components/models/franka_emika_panda/LICENSE";
+}

@@ -1,0 +1,24 @@
+// Six revolute joints: Rz(q0) Ry(q1) Ry(q2) Rx(q3) Ry(q4) Rx(q5).
+// Propagate a full rotation and link-origin translation; return the TCP xyz.
+fn rotate(r:mut Array<f32>,a:u32,b:u32,s:f32,c:f32)->Unit {
+    for row in 0u32..3u32 {
+        let u=r[row*3u32+a];let v=r[row*3u32+b];
+        r[row*3u32+a]=u*c+v*s;
+        r[row*3u32+b]=v*c-u*s;
+    }
+}
+fn fk(q:read Array<f32>,out:mut Array<f32>)->f32 {
+    var r:Array<f32> =[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0];
+    var x=0.0;var y=0.0;var z=0.0;
+    for j in 0u32..6u32 {
+        let s=sin(q[j]);let c=cos(q[j]);
+        var a=0u32;var b=1u32;
+        if j==1u32 or j==2u32 or j==4u32 {a=2u32;b=0u32;}
+        if j==3u32 or j==5u32 {a=1u32;b=2u32;}
+        rotate(r,a,b,s,c);
+        x=x+r[0u32]*0.25;y=y+r[3u32]*0.25;z=z+r[6u32]*0.25;
+    }
+    out[0u32]=x;out[1u32]=y;out[2u32]=z;
+    return sqrt(x*x+y*y+z*z);
+}
+fn main()->i32{return 0;}

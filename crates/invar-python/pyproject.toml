@@ -1,0 +1,21 @@
+[build-system]
+requires = ["maturin==1.9.6"]
+build-backend = "maturin"
+
+[project]
+name = "invar-python"
+version = "0.1.0"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = ["numpy>=1.26,<3"]
+description = "Bounded Python scalar-artifact and C-import boundary for Invar"
+
+[project.optional-dependencies]
+test = ["pytest==8.4.2", "jsonschema==4.25.1"]
+
+[tool.maturin]
+features = ["extension-module"]
+module-name = "invar_python"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

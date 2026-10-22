@@ -1,0 +1,225 @@
+(* Bootstrap 0.1 plus bounded L1-01..L1-04, R1-01, S1-11, and S1-01..S1-06 system syntax. Lexical and typing rules: bootstrap.md. *)
+(* v0.2 spatial checking uses opaque VoxelGrid and built-in Neighbors/Knn
+   records through ordinary bindings and field moves. No tuple binding.
+   Execution remains unsupported pending the sort-backed grid runtime. *)
+program       = { top_item } ;
+top_item      = module | import | component_import | frame | system_item | foreign_function | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
+module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
+import        = "import", identifier, { "::", identifier }, "::", identifier, ";" ;
+component_import = "import", "component", string_literal, [ "for", "robot", path ], ";" ;
+frame         = "frame", identifier, [ ":", identifier ], ";" ;
+system_item   = component | extern_component | connect | flow | product | system | robot_model | cell_model ;
+component     = "component", identifier, "{", { component_clause }, "}" ;
+extern_component = "extern", "component", identifier, "{", { extern_clause }, "}" ;
+component_clause = port | param | resource | license | isolation | wcet | deadline | implementation ;
+extern_clause = port | resource | license | isolation | wcet | deadline | "abi", "c", string_literal, ";"
+              | "lifecycle", identifier, { ",", identifier }, ";"
+              | "config", "c", string_literal, ";"
+              | "input", string_literal, ";"
+              | "golden", string_literal, [ "tolerance", "abs", quantity_literal,
+                  { ",", "abs", quantity_literal } ], ";"
+              | "property", string_literal, ";"
+              | "shim", string_literal, ";" ;
+port          = "port", ( "in" | "out" ), identifier, ":", type, "@", quantity_literal,
+                { "latency", quantity_literal | "layout", "c", string_literal | "bus", identifier | "optional" }, ";" ;
+param         = "param", identifier, ":", ( "Quantity", "<", "dec", ",", unit_type, ">", "=", quantity_literal,
+                [ "range", quantity_literal, "..", quantity_literal ]
+              | "Transform", "<", identifier, ",", identifier, ">", "=", "identity" ), ";" ;
+resource      = "resource", resource_item, { ",", resource_item }, ";" ;
+resource_item = identifier, { ".", identifier }, "=", quantity_literal ;
+license       = "license", string_literal, { "link", ( "static" | "dynamic" | "process" )
+              | "modified", ( "true" | "false" ) | "replaceable", ( "true" | "false" )
+              | "network_exposed", ( "true" | "false" ) | "grant", string_literal }, ";" ;
+isolation     = "isolation", ( "in-process" | "separate-process" | "separate-partition" ), ";" ;
+wcet          = "wcet", quantity_literal, ";" ;
+deadline      = "deadline", quantity_literal, ";" ;
+implementation = "impl", ( "extern" | "invar" ), path, ";" ;
+connect       = "connect", port_path, "->", port_path, "policy", ( "sample-and-hold" | "queue", "(", integer_literal, ")" | "decimate", "(", integer_literal, ")" ), ";" ;
+flow          = "flow", identifier, ":", port_path, "->", port_path, { "->", port_path }, "within", quantity_literal, ";" ;
+product       = "product", identifier, "{", { "distribution", ( "internal" | "proprietary-binary" | "open" ), ";"
+              | "commercial", ( "true" | "false" ), ";" | "robot", path, ";"
+              | "capacity", resource_item, { ",", resource_item }, ";" }, "}" ;
+system        = "system", identifier, [ "for", path, { ",", path } ], "{", { identifier, ":", path, ";" }, "}" ;
+(* S1-05: exact decimals and units are checked; tuples are ordered, not sets.
+   An asset is source provenance. Import resolves it into checked v5 model
+   data; generation uses that model and hash-checked file-set assets. *)
+robot_model   = "robot", identifier, "{", "license", string_literal, ";",
+                [ "asset", ( "mjcf" | "urdf" ), string_literal, "sha256", string_literal, ";" ],
+                { link_decl | joint_decl | actuator_decl | sensor_decl | "tool", identifier, "pose", pose_literal, ";" }, "}" ;
+link_decl     = "link", identifier, "{", "parent", ( identifier | "world" ), ";",
+                "origin", pose_literal, ";", "mass", quantity_literal, ";",
+                [ "inertial_origin", pose_literal, ";" ],
+                "inertia", decimal_tuple6, "kg", "*", "m", "*", "m", ";",
+                { geometry_decl }, "}" ;
+joint_decl    = "joint", identifier, "{", "kind", ( "revolute" | "prismatic" | "fixed" ), ";",
+                "parent", identifier, ";", "child", identifier, ";",
+                "axis", decimal_tuple3, ";",
+                "position", ( quantity_literal, "..", quantity_literal | "unbounded" ), ";",
+                "velocity", ( quantity_literal | "unbounded" ), ";",
+                "effort", ( quantity_literal | "unbounded" ), ";", "}" ;
+actuator_decl = "actuator", identifier, "{", "mode", ( "position" | "velocity" | "motor-torque" ), ";",
+                ( "joint" | "tendon" ), identifier, ";", "gear", decimal_atom, ";",
+                "control", quantity_literal, "..", quantity_literal, ";", "}" ;
+sensor_decl   = "sensor", identifier, "{", "kind", ( "joint-position" | "joint-velocity" |
+                "force-torque" | "camera" ), ";", "source", identifier, ";",
+                [ "intrinsics", "(", "width", quantity_literal, ",", "height", quantity_literal,
+                  ",", "fx", quantity_literal, ",", "fy", quantity_literal,
+                  ",", "cx", quantity_literal, ",", "cy", quantity_literal,
+                  ",", "distortion", "none", ")", ";" ], "}" ;
+cell_model    = "cell", identifier, "{", "robot", path, ";", "mount", pose_literal,
+                [ "on", identifier, [ "exclude", "(", identifier, { ",", identifier }, ")" ] ], ";",
+                { cell_object | "io", identifier, ":", ( "digital-in" | "digital-out" ), ";" }, "}" ;
+cell_object   = ( "fixture" | "object" ), identifier, "{", "pose", pose_literal, ";",
+                [ "dynamic", "mass", quantity_literal, "attachable", ";" ],
+                [ "grasp", "pose", pose_literal, ";" ], { geometry_decl }, "}" ;
+geometry_decl = ( "visual" | "collision" ), ( "box", decimal_tuple3, "m" | "sphere", decimal_atom, "m" |
+                "cylinder", decimal_tuple2, "m" | "capsule", decimal_tuple2, "m" |
+                "mesh", string_literal, "sha256", string_literal ), ";" ;
+pose_literal  = "xyz", quantity_tuple3, "quat", decimal_tuple4 ;
+quantity_tuple3 = "(", quantity_literal, ",", quantity_literal, ",", quantity_literal, ")" ;
+decimal_tuple2 = "(", decimal_atom, ",", decimal_atom, ")" ;
+decimal_tuple3 = "(", decimal_atom, ",", decimal_atom, ",", decimal_atom, ")" ;
+decimal_tuple4 = "(", decimal_atom, ",", decimal_atom, ",", decimal_atom, ",", decimal_atom, ")" ;
+decimal_tuple6 = "(", decimal_atom, ",", decimal_atom, ",", decimal_atom, ",", decimal_atom,
+                 ",", decimal_atom, ",", decimal_atom, ")" ;
+decimal_atom = [ "-" ], ( integer_literal | decimal_literal ) ;
+path          = identifier, { "::", identifier } ;
+port_path     = identifier, ".", identifier ;
+quantity_literal = [ "-" ], ( integer_literal | decimal_literal ), [ unit_literal ] ;
+unit_literal  = identifier, { ( "/" | "*" ), identifier } ;
+decimal_literal = digit, { digit }, ".", digit, { digit } ;
+string_literal = '"', { ? UTF-8 scalar except newline and unescaped quote, or escaped quote, backslash, n, r, t ? }, '"' ;
+byte_literal = "b", '"', { ? source UTF-8 byte except newline and unescaped quote, or escaped quote, backslash, n, r, t, or x followed by two hex digits ? }, '"' ;
+record        = "struct", identifier, [ record_params ], "{", [ record_fields, [ "," ] ], "}" ;
+record_params = "<", record_param, { ",", record_param }, ">" ;
+record_param  = identifier, ":", ( "Value" | "Frame" | "Unit" ) | "const", identifier, ":", "u32" ;
+record_fields = record_field, { ",", record_field } ;
+record_field  = identifier, ":", type ;
+variant       = "enum", identifier, "{", [ variant_arms, [ "," ] ], "}" ;
+variant_arms  = variant_arm, { ",", variant_arm } ;
+variant_arm   = identifier, [ "(", type, ")" ] ;
+numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric-v2.md *)
+function      = "fn", identifier, [ generic_params ], "(", [ params ], ")", "->", type, [ "from", identifier ], block ;
+foreign_function = "extern", "c", "fn", identifier, "(", [ params ], ")", "->", result_type, "oracle", identifier, ";" ;
+generic_params = "<", generic_param, { ",", generic_param }, ">" ;
+generic_param = identifier, ":", "Value" ;
+params        = param, { ",", param }, [ "," ] ;
+param         = identifier, ":", [ mode ], type ;
+mode          = "read" | "mut" | "take" ;
+type          = scalar | "Array", "<", ( numeric_type | "Bool" | identifier ), ">" | view_type | result_type | quantity_type | geometric_type | identifier, { "::", identifier }, [ "<", type_arg, { ",", type_arg }, ">" ] ;
+type_arg      = type | integer_literal ;
+quantity_type = "Quantity", "<", ( integer_type | identifier ), ",", unit_type, ">" ;
+geometric_type = "Vector3", "<", ( integer_type | identifier ), ",", unit_type, ",", identifier, ">"
+               | "Point", "<", ( integer_type | identifier ), ",", identifier, ">"
+               | "Transform", "<", identifier, ",", identifier, ">" ;
+unit_type     = identifier, { ( "/" | "*" ), identifier } | ( "Mul" | "Div" ), "<", unit_type, ",", unit_type, ">" | "Pow", "<", unit_type, ",", [ "-" ], digit, { digit }, ">" ;
+view_type     = ( "View" | "MutView" ), "<", integer_type, ">" ;
+result_type   = "Result", "<", result_member, ",", result_member, ">" ;
+result_member = numeric_type | "Bool" | "Bytes" | "String" | "Utf8Error" | "ForeignError" | result_type ;
+scalar        = numeric_type | "Bool" | "Unit" ;
+numeric_type  = integer_type | float_type ;
+integer_type  = "i32" | "u32" ;
+float_type    = "f32" | "f64" ;
+block         = "{", { statement }, "}" ;
+statement     = binding | assignment | return_stmt | if_stmt
+              | while_stmt | for_stmt | expression, ";" ;
+binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;
+assignment    = place, "=", expression, ";" ;
+place         = identifier, [ "[", expression, "]" ] ;
+return_stmt   = "return", [ expression ], ";" ;
+if_stmt       = "if", expression, block, [ "else", ( block | if_stmt ) ] ;
+while_stmt    = "while", expression, block ;
+for_stmt      = "for", identifier, "in", expression, "..", expression, block ;
+expression    = or_expr ;
+or_expr       = and_expr, { "or", and_expr } ;
+and_expr      = compare_expr, { "and", compare_expr } ;
+compare_expr  = add_expr, [ compare_op, add_expr ] ;
+compare_op    = "==" | "!=" | "<" | "<=" | ">" | ">=" ;
+add_expr      = mul_expr, { ( "+" | "-" ), mul_expr } ;
+mul_expr      = unary_expr, { ( "*" | "/" | "%" ), unary_expr } ;
+unary_expr    = ( "not" | "-" ), unary_expr | "move", identifier, [ ".", identifier ] | postfix_expr ;
+postfix_expr  = primary, { "[", expression, "]" | ".", identifier | "?" } ;
+primary       = integer_literal | decimal_literal | string_literal | byte_literal | "true" | "false" | name_or_call | match_expr | closure_expr
+              | "(", expression, ")" | "[", [ arguments ], "]" ;
+name_or_call  = identifier, { "::", identifier }, [ "<", type_args, ">" | "::", "<", type_args, ">" ], [ "(", [ arguments ], ")" | "{", [ record_inits, [ "," ] ], "}" ] ;
+type_args     = type, { ",", type } ;
+closure_expr  = "closure", "[", [ captures ], "]", "(", [ params ], ")", "->", type, block ;
+captures     = capture, { ",", capture } ;
+capture      = ( "copy" | "read" | "take" ), identifier, ":", type ;
+match_expr    = "match", expression, "{", [ match_arms, [ "," ] ], "}" ;
+match_arms    = match_arm, { ",", match_arm } ;
+match_arm     = identifier, { "::", identifier }, [ "(", identifier, ")" ], "=>", expression ;
+record_inits  = record_init, { ",", record_init } ;
+record_init   = identifier, ":", expression ;
+arguments     = expression, { ",", expression }, [ "," ] ;
+identifier    = identifier_start, { identifier_continue } ;
+identifier_start = letter | "_" ;
+identifier_continue = identifier_start | digit ;
+integer_literal = digit, { digit }, [ "i32" | "u32" ] ;
+decimal_literal = digit, { digit }, ".", digit, { digit }, [ float_type ] ;
+letter        = "A" .. "Z" | "a" .. "z" ;
+digit         = "0" .. "9" ;
+(* Longest token match applies. Keyword identifiers are excluded.
+   Unit parses as a type but is permitted only as a function return type.
+   Calls target named functions/intrinsics only. No chained calls/methods.
+   Arrays contain i32, u32, f32, f64 or Bool elements; contextual array types are required.
+   A decimal literal without suffix takes f32 or f64 from context, default f32;
+   at most 256 significant digits; any other glued identifier is malformed.
+   f32 follows strict-f32-v1 and f64 strict-f64-v1: round-to-nearest-even,
+   no contraction, explicit fma only, no float remainder and no float views.
+   Conversions are the reserved intrinsics f32_from_i32, f32_from_u32,
+   f64_from_i32, f64_from_u32, f64_from_f32, f32_from_f64, i32_from_f32,
+   u32_from_f32, i32_from_f64 and u32_from_f64; float to integer truncates
+   toward zero and traps INTEGER_OVERFLOW on NaN or out of range.
+   invar-math-cr-v1 reserves sqrt, cbrt, hypot, sin, cos, tan, asin, acos,
+   atan, atan2, sinh, cosh, tanh, exp, exp2, expm1, log, log2, log10, log1p,
+   pow, floor, ceil, trunc, round, abs, copysign, min and max, overloaded on
+   f32 or f64 and correctly rounded; see docs/design/v02-f64math.md.
+   sort, sort_by_key, argsort, segmented_sort are reserved ordinary calls.
+   Comparison chaining is syntactically excluded. Range syntax exists only
+   in for statements. Assignment is a statement, not an expression.
+   Modules are one source file; std::robotics is the shipped qualified module.
+   Generic records use bounded Value/Frame/Unit parameters and const N:u32 in 1..64;
+   FixedArray<T,N> is a type-only inline C-layout field for the robotics vocabulary.
+   i64 nanosecond stamps are type-only.
+   System declaration quantities use exact decimal text with explicit units;
+   ports use f32/f64 wire types, and only f32 has arithmetic.
+   System items evaluate at compile time into checked invar-system-v1, v2 when
+   S1-03 bus, license, or identity metadata is present, and v3 when S1-02 typed
+   config or golden tolerances are present. Earlier schemas remain frozen. Unknown
+   The v2 identity transform constant is a typed direct tree-edge source only;
+   nonidentity exact-decimal transforms are required by S1-05/S1-06 geometry.
+   clauses and all limits fail with registered S10xx source diagnostics.
+   px is a nominal camera unit, distinct from one and every SI unit, with no mixed algebra.
+   Imports name exported functions or nominal types. Runtime records have 1..16 checked fields; scalar projection uses a named
+   record binding; array fields require explicit move from an owned record.
+   Variants have 1..16 arms with zero or one scalar (numeric or Bool) payload; matches
+   borrow a named owner or consume `move` of that owner, cover every arm,
+   and return a scalar. Result<T,E> permits scalar, Bytes, String, the two
+   nominal error types, or nested Result payloads
+   to depth four, with context-typed Result::Ok/Result::Err constructors.
+   Postfix ? unwraps Ok or returns Err from a Result-returning function with
+   exactly the same E; it performs ordinary cleanup and no error conversion.
+   Bytes and String are immutable owned byte sequences limited to one MiB.
+   String is valid UTF-8, has no normalization, and len returns byte length.
+   Bytes indexing returns u32; bytes_slice, utf8_slice, utf8_decode and
+   utf8_encode borrow a named owner for the call. Range errors trap;
+   malformed UTF-8 and split code-point boundaries return Utf8Error.
+   sum_tree(xs), dot_tree(a, b), sum_exact(xs) and dot_exact(a, b) are reserved
+   reduction intrinsics: each operand is a bare named Array<f32> read-borrowed
+   for the call, and the result is f32 (bootstrap.md, v0.2 float reductions).
+   vector3::<unit,frame>(x,y,z) and point::<frame>(x,y,z) construct
+   fixed three-coordinate values; Point coordinates and Transform translation
+   use integer micrometres. transform::<from,to>(tx,ty,tz,r00..r22) requires
+   a constant proper signed-permutation rotation. A * B composes A: from->mid
+   with B: mid->to; a transform also applies to a point or vector in its source frame.
+   L1-03 generic functions have Value parameters and exact instantiation;
+   closure syntax is restricted to a local let binding and one call in the
+   same lexical block, with explicit typed captures. Generic record parameters
+   have no L1-03 two-function-parameter cap.
+   At most 32 modules,
+   256 imports, 128 records, 128 variants and 128 functions. Module import
+   cycles are rejected; forward references within the file are permitted.
+   Reserved keywords also include later-feature starters:
+   async, await, scope, match, break, continue,
+   total, effects, requires, ensures, from. Diagnose unsupported use. *)

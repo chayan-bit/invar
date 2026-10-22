@@ -1,0 +1,483 @@
+{
+  "valid_aggregate/compile/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_device_speculative/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_device_speculative/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_device_speculative/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_numeric/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_owned/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_owned/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_owned/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_owned_numeric/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_resumable/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_resumable/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_resumable/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_resumable_numeric/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_resumable_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_resumable_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_resumable_owned_numeric/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_resumable_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_resumable_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_aggregate/compile_speculative/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_speculative/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_aggregate/compile_speculative/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_int_loop/compile/Cpu": {
+    "abi": 1,
+    "normalized_id": "dddb81d31ab8dd1a1178277c06c36e150bc0a3cfbce4df8b677f60b8386e7efb",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile/Cuda": {
+    "abi": 1,
+    "normalized_id": "8062b9411860cfb6e5cc160433183586edbc5931e7a893fc99c391f7720a7d36",
+    "target": "Cuda"
+  },
+  "valid_int_loop/compile/Metal": {
+    "abi": 1,
+    "normalized_id": "24ad45da57ae0f939a14a91a0dbb40adc79ef0fc78517a85c914d36ea05c1c54",
+    "target": "Metal"
+  },
+  "valid_int_loop/compile_device_speculative/Cpu": {
+    "error": "Compiler(SpeculationTarget)"
+  },
+  "valid_int_loop/compile_device_speculative/Cuda": {
+    "abi": 5,
+    "normalized_id": "d6d886d55468f187899a6908fc019f78e031512b130c1e42fae9f0e3c2f0e3d7",
+    "target": "Cuda"
+  },
+  "valid_int_loop/compile_device_speculative/Metal": {
+    "abi": 5,
+    "normalized_id": "6d1711ec2a0081af3d62215ec3252d85fc377536cb921e406bd5199d0fa30077",
+    "target": "Metal"
+  },
+  "valid_int_loop/compile_numeric/Cpu": {
+    "abi": 8,
+    "normalized_id": "2c19ac48aa9a890a7ed9a2f50c11166b97f1040eb792338a5ac20ef0e43e9f39",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_owned/Cpu": {
+    "abi": 2,
+    "normalized_id": "afa702e2b28ca3eab0f82040412b91c9d6afd5802d8d947474457ea0c30b39e4",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_owned/Cuda": {
+    "abi": 2,
+    "normalized_id": "dc4079d66b485830ab4274376c176e44ea75cd1c917d07d44a0dabb74c22fdd0",
+    "target": "Cuda"
+  },
+  "valid_int_loop/compile_owned/Metal": {
+    "abi": 2,
+    "normalized_id": "5fbc24f5ddf177a2db0e10c70df086272c6b5cb494ede2d82075a30a5469fa8d",
+    "target": "Metal"
+  },
+  "valid_int_loop/compile_owned_numeric/Cpu": {
+    "abi": 10,
+    "normalized_id": "c01c70114f9a06c9cddd648b5653ea0eb4cddeb7bfbe7d92d1fc76bef4222f47",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_resumable/Cpu": {
+    "abi": 3,
+    "normalized_id": "2634dc485f8d02cef36fead32ee402268d95c0d5c1a30d2a0bb8791edd20e43d",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_resumable/Cuda": {
+    "abi": 3,
+    "normalized_id": "39051abb493ea4efa4a355159b2c406fa6ec3842c79d5a91aecda3b52c31c142",
+    "target": "Cuda"
+  },
+  "valid_int_loop/compile_resumable/Metal": {
+    "abi": 3,
+    "normalized_id": "b0789ea955a2a05f75bbd23aafc0141e9912a99eab0c3a6d76d1edc5a54787c2",
+    "target": "Metal"
+  },
+  "valid_int_loop/compile_resumable_numeric/Cpu": {
+    "abi": 9,
+    "normalized_id": "833b88a8249fdbd2f2c21fd893c01fcccb191a365159f079af8d1182112152d8",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_resumable_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_resumable_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "normalized_id": "ee18273f5487f989630c4addd892c9a170b89a0dfc2706b54f02a1b0926d2a06",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_resumable_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_resumable_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_int_loop/compile_speculative/Cpu": {
+    "abi": 4,
+    "normalized_id": "76bb484da07083e72077ed33033a3b407cb7b45aa787a2393e952a55f2432b46",
+    "target": "Cpu"
+  },
+  "valid_int_loop/compile_speculative/Cuda": {
+    "error": "Compiler(SpeculationTarget)"
+  },
+  "valid_int_loop/compile_speculative/Metal": {
+    "error": "Compiler(SpeculationTarget)"
+  },
+  "valid_numeric/compile/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_device_speculative/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_device_speculative/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_device_speculative/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_numeric/Cpu": {
+    "abi": 8,
+    "normalized_id": "a7e38d819d9e9dd6bb4e1daa4059fb1791f96fb48af765cadefef65dae7803a1",
+    "target": "Cpu"
+  },
+  "valid_numeric/compile_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_owned/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_owned/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_owned/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_owned_numeric/Cpu": {
+    "abi": 10,
+    "normalized_id": "0350fb19c79789d62be06c1a6440d05d211beacc84b417654f28f0f3217e669b",
+    "target": "Cpu"
+  },
+  "valid_numeric/compile_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_resumable/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_resumable/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_resumable/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_resumable_numeric/Cpu": {
+    "abi": 9,
+    "normalized_id": "0e58d48d267a3dc1cad0c041757a350777f2ac4d8a61ef7c9a9626953f9978e6",
+    "target": "Cpu"
+  },
+  "valid_numeric/compile_resumable_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_resumable_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "normalized_id": "7ce9f8dd5a59fb920a4ea360992a45de1104e2cfac9c863fce6901b5c3d34fe5",
+    "target": "Cpu"
+  },
+  "valid_numeric/compile_resumable_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_resumable_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_numeric/compile_speculative/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_speculative/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_numeric/compile_speculative/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_device_speculative/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_device_speculative/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_device_speculative/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_numeric/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_owned/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_owned/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_owned/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_owned_numeric/Cpu": {
+    "abi": 10,
+    "normalized_id": "fbc861b6679128c496674aaf24912d354036283132d8c0a4a3f9fa1ae721e31a",
+    "target": "Cpu"
+  },
+  "valid_owned_numeric/compile_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_resumable/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_resumable/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_resumable/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_resumable_numeric/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_resumable_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_resumable_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "normalized_id": "2550bcc1cbeeb6d2538cbe72c3b6164769b2c05df2fdb377f19f457ad9d130ca",
+    "target": "Cpu"
+  },
+  "valid_owned_numeric/compile_resumable_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_resumable_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_owned_numeric/compile_speculative/Cpu": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_speculative/Cuda": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_owned_numeric/compile_speculative/Metal": {
+    "error": "Compiler(UnsupportedType)"
+  },
+  "valid_scalar/compile/Cpu": {
+    "abi": 1,
+    "normalized_id": "5b12dc989b68675121d34e221c302da48ac763abf7381a4868ec07cdd3fb8026",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile/Cuda": {
+    "abi": 1,
+    "normalized_id": "a006845e8ad8b48d1266a3535345452396ff87206850c1ee5ac878cf748c34dc",
+    "target": "Cuda"
+  },
+  "valid_scalar/compile/Metal": {
+    "abi": 1,
+    "normalized_id": "fe2b805c029aa2e2118e03c777b61cddd3463a9eb289badc93744599a490ebf2",
+    "target": "Metal"
+  },
+  "valid_scalar/compile_device_speculative/Cpu": {
+    "error": "Compiler(SpeculationTarget)"
+  },
+  "valid_scalar/compile_device_speculative/Cuda": {
+    "abi": 5,
+    "normalized_id": "fb45ac28887b6492312f119aaf11f0bc3349a6e94da45779528ad8e7e1fc6bb2",
+    "target": "Cuda"
+  },
+  "valid_scalar/compile_device_speculative/Metal": {
+    "abi": 5,
+    "normalized_id": "a8194a582280284c64fd7a49f3aeef61bb30ad5af11395d07d5696b163ae6670",
+    "target": "Metal"
+  },
+  "valid_scalar/compile_numeric/Cpu": {
+    "abi": 8,
+    "normalized_id": "54e3b839938759f2674aaea0dafeb2f6295ef29fed6ac6054a7f457fec27547f",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_owned/Cpu": {
+    "abi": 2,
+    "normalized_id": "a3d1c14e42fda70364904938ad1a5cc86b42ba3aad930443a3646ab05a5fbeb8",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_owned/Cuda": {
+    "abi": 2,
+    "normalized_id": "702efd5a1f7ffbf169a7486e262a766fec3a2a3cd33dd5667e459133c51940d0",
+    "target": "Cuda"
+  },
+  "valid_scalar/compile_owned/Metal": {
+    "abi": 2,
+    "normalized_id": "3d19226ba097ad166db4409443ee7444549a84a897322639160359c524b4328a",
+    "target": "Metal"
+  },
+  "valid_scalar/compile_owned_numeric/Cpu": {
+    "abi": 10,
+    "normalized_id": "1c8af812a78dda8d7313415d8f9a6e8915f14d74bd8400df3c88765eaa0bfdb1",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_resumable/Cpu": {
+    "abi": 3,
+    "normalized_id": "122ed7c8c10314e8903febd0b3eecee916a8225e3e808a76b87c65c53b558d89",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_resumable/Cuda": {
+    "abi": 3,
+    "normalized_id": "592a5c2fa23a6caa2726b57640bd5601242d140e4c3d3459126511c52fc05b1c",
+    "target": "Cuda"
+  },
+  "valid_scalar/compile_resumable/Metal": {
+    "abi": 3,
+    "normalized_id": "c9d03624f66c0996616ece317b00275f9272bb81ead5c120aab4cb4b6ae4c6d7",
+    "target": "Metal"
+  },
+  "valid_scalar/compile_resumable_numeric/Cpu": {
+    "abi": 9,
+    "normalized_id": "36af19794430a5b4feec49eb621caf98fd07e16f961f89d7fee5cb2d5cfed727",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_resumable_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_resumable_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_resumable_owned_numeric/Cpu": {
+    "abi": 11,
+    "normalized_id": "f48dc19f94e47d073cfcdc2cb9601783f5b4bd898451063e7e65d2bf6fb808a4",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_resumable_owned_numeric/Cuda": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_resumable_owned_numeric/Metal": {
+    "error": "Compiler(NumericTarget)"
+  },
+  "valid_scalar/compile_speculative/Cpu": {
+    "abi": 4,
+    "normalized_id": "f46aaab32989d2003f057bac050f5644bfbb0caaabe395488dbba498fb49c737",
+    "target": "Cpu"
+  },
+  "valid_scalar/compile_speculative/Cuda": {
+    "error": "Compiler(SpeculationTarget)"
+  },
+  "valid_scalar/compile_speculative/Metal": {
+    "error": "Compiler(SpeculationTarget)"
+  }
+}

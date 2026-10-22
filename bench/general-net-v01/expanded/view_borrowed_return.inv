@@ -1,0 +1,2 @@
+fn sample(xs: read Array<i32>) -> View<i32> from xs { let v = view(xs, 1u32, 3u32); return v; }
+fn main() -> i32 { let xs: Array<i32> = [10, 20, 30]; let v = sample(xs); return v[1u32] + xs[0u32]; }

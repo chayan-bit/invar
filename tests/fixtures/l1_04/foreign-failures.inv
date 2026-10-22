@@ -1,0 +1,30 @@
+extern c fn c_status() -> Result<Bytes, ForeignError> oracle oracle_bytes;
+extern c fn c_overflow_len() -> Result<Bytes, ForeignError> oracle oracle_bytes;
+extern c fn c_borrowed_return() -> Result<Bytes, ForeignError> oracle oracle_bytes;
+extern c fn c_null_data() -> Result<Bytes, ForeignError> oracle oracle_bytes;
+extern c fn c_bad_utf8() -> Result<String, ForeignError> oracle oracle_text;
+extern c fn c_wrong_tag() -> Result<i32, ForeignError> oracle oracle_i32;
+extern c fn c_missing() -> Result<i32, ForeignError> oracle oracle_i32;
+
+fn oracle_bytes() -> Result<Bytes, ForeignError> { return Result::Err(ForeignError::Failure()); }
+fn oracle_text() -> Result<String, ForeignError> { return Result::Err(ForeignError::Failure()); }
+fn oracle_i32() -> Result<i32, ForeignError> { return Result::Err(ForeignError::Failure()); }
+
+fn main() -> i32 {
+  let one = c_status();
+  let two = c_overflow_len();
+  let three = c_borrowed_return();
+  let four = c_null_data();
+  let five = c_bad_utf8();
+  let six = c_wrong_tag();
+  let seven = c_missing();
+  let a: Bool = match move one { Result::Ok(a_value) => false, Result::Err(a_error) => true };
+  let b: Bool = match move two { Result::Ok(b_value) => false, Result::Err(b_error) => true };
+  let c: Bool = match move three { Result::Ok(c_value) => false, Result::Err(c_error) => true };
+  let d: Bool = match move four { Result::Ok(d_value) => false, Result::Err(d_error) => true };
+  let e: Bool = match move five { Result::Ok(e_value) => false, Result::Err(e_error) => true };
+  let f: Bool = match move six { Result::Ok(f_value) => false, Result::Err(f_error) => true };
+  let g: Bool = match move seven { Result::Ok(g_value) => false, Result::Err(g_error) => true };
+  if a and b and c and d and e and f and g { return 7; }
+  return 0;
+}

@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chayan-bit/invar/blob/main/schema/invar-diagnostics-v2.schema.json",
+  "title": "invar-diagnostics-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "status",
+    "diagnostics"
+  ],
+  "properties": {
+    "schema": {
+      "const": "invar-diagnostics-v2"
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "source_error",
+        "tool_error",
+        "trap",
+        "evaluation_limit"
+      ]
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "i32"
+        },
+        "value": {
+          "type": "integer"
+        }
+      }
+    },
+    "checks_completed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checks_pending": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "span"
+      ],
+      "properties": {
+        "category": {
+          "enum": [
+            "INTEGER_OVERFLOW",
+            "DIVISION_BY_ZERO",
+            "INDEX_OUT_OF_BOUNDS",
+            "UNIT_CONVERSION_INEXACT"
+          ]
+        },
+        "span": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "integer"
+            },
+            "end": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "fuel_limit": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "steps_used": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tool_code": {
+      "type": "string"
+    },
+    "cleanup_trace": {
+      "type": "array",
+      "maxItems": 1000000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "length"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "length": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "steps_used_at_limit": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "numeric_contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "binary64": {
+          "const": "strict-f64-v1"
+        },
+        "math": {
+          "const": "invar-math-cr-v1"
+        },
+        "trig": {
+          "const": "invar-trig-f32-v1"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "start",
+        "end",
+        "start_line",
+        "start_column",
+        "end_line",
+        "end_column"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "start_line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "start_column": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "end_line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "end_column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "edit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "span",
+        "replacement"
+      ],
+      "properties": {
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "replacement": {
+          "type": "string",
+          "maxLength": 65536
+        }
+      }
+    },
+    "fix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "edits"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "edits": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/edit"
+          }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "message",
+        "path",
+        "span",
+        "secondary_spans",
+        "suggested_fixes",
+        "notes",
+        "ir_path"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^(?:[A-Z][A-Z0-9_]*|S1[0-9]{3})$"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning",
+            "note"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "span": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "secondary_spans": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "span",
+              "label"
+            ],
+            "properties": {
+              "span": {
+                "$ref": "#/$defs/span"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 256
+              }
+            }
+          }
+        },
+        "suggested_fixes": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/fix"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        },
+        "ir_path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4096
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

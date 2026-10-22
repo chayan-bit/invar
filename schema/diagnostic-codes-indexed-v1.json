@@ -1,0 +1,326 @@
+{
+  "schema": "invar-diagnostic-codes-indexed-v1",
+  "extends": "invar-diagnostic-codes-v1",
+  "codes": [
+    {
+      "code": "BULK_AMBIGUOUS_COMPLETION",
+      "meaning": "receipts from more than one of the eight loop-override families (histogram, scatter, gather, summary, tensor, transpose, stencil, ordinary array/scalar bulk) reached one loop head; unknown or pending indexed receipts are quarantined (or leaked if the slot is occupied), and nothing is published or replayed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Every production loop-override provider builds a receipt for exactly one of the eight families, where a prefix scan's output array and final scalar form one ordinary bulk family, so receipts of several families at one head indicate an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_bulk_ambiguous_completion"
+    },
+    {
+      "code": "GATHER_BAD_COMPLETION",
+      "meaning": "gather output is not fresh zeros, or candidate values or access records disagree with the source gather",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The in-process producer computes the candidate from the validated live owners, so a candidate that disagrees with the source operation indicates an internal producer fault.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_COUNT",
+      "meaning": "gather entry or publication counter would overflow",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "These counters are bounded by validated fuel and entry counts far below their integer range, so overflow indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_harness_faults"
+    },
+    {
+      "code": "GATHER_FAILED_COMPLETION",
+      "meaning": "gather completion status is neither complete, unknown nor pending; nothing is published",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Public checked-source runs use the synchronous in-process producer, which always reports a complete status; any other status arises only from a faulted producer or a forged receipt.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_FUEL",
+      "meaning": "gather publication would overflow the step counter",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "These counters are bounded by validated fuel and entry counts far below their integer range, so overflow indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_FUEL_RECIPE",
+      "meaning": "gather loop head or tick spans no longer match the plan's fuel recipe",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Plans are bound from the same checked source and verified MIR at entry, so checked source cannot make the plan's source, contract, function or tick recipe differ at publication.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_LOAN",
+      "meaning": "gather owners could not be borrowed for publication",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_harness_faults"
+    },
+    {
+      "code": "GATHER_LOOP_BINDING",
+      "meaning": "gather loop counter, bound, tick count or remaining fuel disagrees with the completion",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_OWNER",
+      "meaning": "gather value, index or output slot is not a u32 array, the output is not owned, or the output aliases an input",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_harness_faults"
+    },
+    {
+      "code": "GATHER_POST_ENTRY",
+      "meaning": "gather producer failed after entry; no publication or source replay",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The producer only runs on validated, prepaid inputs, so a failure after entry indicates an internal or environment fault, which is never replayed.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_SOURCE_BINDING",
+      "meaning": "gather plan no longer binds the source hash, verified MIR, program contract digest, function name or fingerprint (including a missing function), or loop span",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Plans are bound from the same checked source and verified MIR at entry, so checked source cannot make the plan's source, contract, function or tick recipe differ at publication.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_STALE_COMPLETION",
+      "meaning": "gather owner identities, contents, extents or cost changed since entry, or the candidate length disagrees",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "GATHER_UNKNOWN_COMPLETION",
+      "meaning": "gather completion status is unknown or pending; the reached frame is quarantined (or leaked if the quarantine slot is occupied or borrowed) and nothing is released, published or replayed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Public checked-source runs use the synchronous in-process producer, which always reports a complete status; any other status arises only from a faulted producer or a forged receipt.",
+      "fault_test": "issue_ai_01_machine_diagnostics_gather_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_BAD_COMPLETION",
+      "meaning": "histogram candidate fails validation of its source-order sums and duplicate-occurrence permutation",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The in-process producer computes the candidate from the validated live owners, so a candidate that disagrees with the source operation indicates an internal producer fault.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_BUDGET",
+      "meaning": "histogram runtime header, publish header or cost recomputation failed or overflowed, or the prepaid visit meter was exceeded",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Budget shortfalls are refused before entry and the full remainder is prepaid, so exceeding the prepaid meter or overflowing its arithmetic indicates an internal accounting invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_COUNT",
+      "meaning": "histogram entry or publication counter would overflow",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "These counters are bounded by validated fuel and entry counts far below their integer range, so overflow indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_harness_faults"
+    },
+    {
+      "code": "HISTOGRAM_EXTENT",
+      "meaning": "histogram bin slot is not u32, or the bin count, output extent or cost disagrees with the completion",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_FAILED_COMPLETION",
+      "meaning": "histogram completion status is neither complete, unknown nor pending; nothing is published",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Public checked-source runs use the synchronous in-process producer, which always reports a complete status; any other status arises only from a faulted producer or a forged receipt.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_FRESH_OUTPUT",
+      "meaning": "histogram output was not fresh zeros at publication",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_FUEL",
+      "meaning": "histogram publication would overflow the step counter",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "These counters are bounded by validated fuel and entry counts far below their integer range, so overflow indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_LOAN",
+      "meaning": "histogram owners could not be borrowed for publication",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_LOOP_BINDING",
+      "meaning": "histogram loop counter, bound, tick count or remaining fuel disagrees with the completion",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_METER",
+      "meaning": "histogram run meter is already borrowed at publication",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The run meter is held only by the in-flight completion, so a conflicting borrow indicates an internal ownership invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_OWNER",
+      "meaning": "histogram owner slot is not a u32 array, has the wrong ownership, differs from the entered owners, or aliases the output",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_POST_ENTRY",
+      "meaning": "histogram producer failed after entry; no publication or source replay",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The producer only runs on validated, prepaid inputs, so a failure after entry indicates an internal or environment fault, which is never replayed.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_PRIVATE_ALLOCATION",
+      "meaning": "histogram private attempt record could not be reserved",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "A failed bounded private reservation is an allocator or environment failure, not a property of checked source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_SOURCE_BINDING",
+      "meaning": "histogram completion is not permitted by the run ledger or no longer binds the program, function, loop head or condition",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Plans are bound from the same checked source and verified MIR at entry, so checked source cannot make the plan's source, contract, function or tick recipe differ at publication.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "HISTOGRAM_UNKNOWN_COMPLETION",
+      "meaning": "histogram completion status is unknown or pending; the reached frame is quarantined (or leaked if the quarantine slot is occupied or borrowed) and nothing is released, published or replayed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Public checked-source runs use the synchronous in-process producer, which always reports a complete status; any other status arises only from a faulted producer or a forged receipt.",
+      "fault_test": "issue_ai_01_machine_diagnostics_histogram_publication_faults"
+    },
+    {
+      "code": "SCATTER_BAD_COMPLETION",
+      "meaning": "scatter output is not fresh zeros, or candidate words, destinations or access records disagree with the source scatter",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The in-process producer computes the candidate from the validated live owners, so a candidate that disagrees with the source operation indicates an internal producer fault.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_COUNT",
+      "meaning": "scatter entry or publication counter would overflow",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "These counters are bounded by validated fuel and entry counts far below their integer range, so overflow indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_harness_faults"
+    },
+    {
+      "code": "SCATTER_FAILED_COMPLETION",
+      "meaning": "scatter completion status is neither complete, unknown nor pending; nothing is published",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Public checked-source runs use the synchronous in-process producer, which always reports a complete status; any other status arises only from a faulted producer or a forged receipt.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_FUEL",
+      "meaning": "scatter publication would overflow the step counter",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "These counters are bounded by validated fuel and entry counts far below their integer range, so overflow indicates an internal invariant violation.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_FUEL_RECIPE",
+      "meaning": "scatter loop head or tick spans no longer match the plan's fuel recipe",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Plans are bound from the same checked source and verified MIR at entry, so checked source cannot make the plan's source, contract, function or tick recipe differ at publication.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_LOAN",
+      "meaning": "scatter owners could not be borrowed for publication",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_harness_faults"
+    },
+    {
+      "code": "SCATTER_LOOP_BINDING",
+      "meaning": "scatter loop counter, bound, tick count or remaining fuel disagrees with the completion",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_OWNER",
+      "meaning": "scatter input or output slot is not a u32 array, the output is not owned, or the output aliases the input",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_harness_faults"
+    },
+    {
+      "code": "SCATTER_POST_ENTRY",
+      "meaning": "scatter producer failed after entry; no publication or source replay",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The producer only runs on validated, prepaid inputs, so a failure after entry indicates an internal or environment fault, which is never replayed.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_SOURCE_BINDING",
+      "meaning": "scatter plan no longer binds the source hash, verified MIR, program or certificate contract digest, certificate domain, function name or fingerprint (including a missing function), or loop span",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Plans are bound from the same checked source and verified MIR at entry, so checked source cannot make the plan's source, contract, function or tick recipe differ at publication.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_STALE_COMPLETION",
+      "meaning": "scatter owner identities, contents, extents or cost changed since entry, or the candidate length disagrees",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Preparation refuses, falling back to ordinary execution, unless these live-loop facts hold, and no source code runs between preparation and publication at the same loop head.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    },
+    {
+      "code": "SCATTER_UNKNOWN_COMPLETION",
+      "meaning": "scatter completion status is unknown or pending; the reached frame is quarantined (or leaked if the quarantine slot is occupied or borrowed) and nothing is released, published or replayed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Public checked-source runs use the synchronous in-process producer, which always reports a complete status; any other status arises only from a faulted producer or a forged receipt.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scatter_publication_faults"
+    }
+  ]
+}

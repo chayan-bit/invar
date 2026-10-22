@@ -1,0 +1,1 @@
+fn loan(xs:mut Array<f32>)->i32 {for i in 0u32..5u32 {let scratch=filled_i32(2u32,3);xs[0u32]=xs[0u32]+f32_from_i32(scratch[1u32]);}if xs[0u32]==16.0 {return 7;}return 0;} fn main()->i32 {if true {let dead=filled_u32(2u32,9u32);}var xs:Array<f32> = [1.0];return loan(xs);}

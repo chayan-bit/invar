@@ -1,0 +1,10 @@
+fn main() -> i32 {
+    var keys: Array<u32> = [3u32, 1u32, 2u32];
+    sort(keys);
+    let a: Array<f32> = filled_f32(70000u32, 0.5);
+    let b: Array<f32> = filled_f32(70000u32, 2.0);
+    let s = sum_tree(a);
+    let d = dot_exact(a, b);
+    if keys[0u32] != 1u32 or s != 35000.0 or d != 70000.0 { return 1; }
+    return 0;
+}

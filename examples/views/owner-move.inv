@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    let xs: Array<i32> = [1i32];
+    let part = view(xs, 0u32, 1u32);
+    let other: Array<i32> = move xs;
+    return part[0u32];
+}

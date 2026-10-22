@@ -1,0 +1,4945 @@
+{
+  "budgets": {
+    "default": 100000,
+    "max": 10000000
+  },
+  "counts": {
+    "device Cuda admitted": 60,
+    "device Cuda refused": 12,
+    "device Cuda refused compiler_structural_budget": 12,
+    "device Metal admitted": 60,
+    "device Metal refused": 12,
+    "device Metal refused compiler_structural_budget": 12,
+    "negative tool": 7,
+    "negative trap": 5,
+    "oracle equal tool": 7,
+    "oracle equal trap": 5,
+    "oracle equal value": 322
+  },
+  "deep": [
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-00",
+      "row": {
+        "expected": "I32(96871)",
+        "input": [
+          49152,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1308887
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-01",
+      "row": {
+        "expected": "I32(97048)",
+        "input": [
+          24576,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1081297
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-02",
+      "row": {
+        "expected": "I32(66882)",
+        "input": [
+          32768,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1255534
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-03",
+      "row": {
+        "expected": "I32(84879)",
+        "input": [
+          49152,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1441355
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-divide-04",
+      "row": {
+        "expected": "I32(93876)",
+        "input": [
+          24576,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 960963
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-divide-05",
+      "row": {
+        "expected": "I32(73209)",
+        "input": [
+          65536,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 807677
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-divide-06",
+      "row": {
+        "expected": "I32(66809)",
+        "input": [
+          24576,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 663428
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-07",
+      "row": {
+        "expected": "I32(89252)",
+        "input": [
+          24576,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1105472
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-08",
+      "row": {
+        "expected": "I32(91621)",
+        "input": [
+          4096,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1881575
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-09",
+      "row": {
+        "expected": "I32(29180)",
+        "input": [
+          12288,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1122117
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-divide-10",
+      "row": {
+        "expected": "I32(96011)",
+        "input": [
+          24576,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1135405
+      }
+    },
+    {
+      "budget": 3000000,
+      "id": "gnet05-divide-11",
+      "row": {
+        "expected": "I32(9925)",
+        "input": [
+          6144,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 2651949
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-compose-00",
+      "row": {
+        "expected": "I32(91842)",
+        "input": [
+          2048,
+          16
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 529369
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-compose-01",
+      "row": {
+        "expected": "I32(90725)",
+        "input": [
+          12288,
+          16
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1191475
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-compose-02",
+      "row": {
+        "expected": "I32(82302)",
+        "input": [
+          12288,
+          16
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 886551
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-compose-03",
+      "row": {
+        "expected": "I32(41067)",
+        "input": [
+          65536,
+          16
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 171216
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-compose-06",
+      "row": {
+        "expected": "I32(26583)",
+        "input": [
+          16384,
+          16
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 141375
+      }
+    },
+    {
+      "budget": 3000000,
+      "id": "gnet05-compose-10",
+      "row": {
+        "expected": "I32(95258)",
+        "input": [
+          1536,
+          16
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 2215548
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-forkjoin-00",
+      "row": {
+        "expected": "I32(4123)",
+        "input": [
+          19,
+          654
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 966981
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-forkjoin-01",
+      "row": {
+        "expected": "I32(9783)",
+        "input": [
+          18,
+          837
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 944802
+      }
+    },
+    {
+      "budget": 3000000,
+      "id": "gnet05-forkjoin-02",
+      "row": {
+        "expected": "I32(2186)",
+        "input": [
+          21,
+          49
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 2295898
+      }
+    },
+    {
+      "budget": 4000000,
+      "id": "gnet05-forkjoin-03",
+      "row": {
+        "expected": "I32(3901)",
+        "input": [
+          12288,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 3231522
+      }
+    },
+    {
+      "budget": 5000000,
+      "id": "gnet05-forkjoin-04",
+      "row": {
+        "expected": "I32(8887)",
+        "input": [
+          15,
+          206
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 4649479
+      }
+    },
+    {
+      "budget": 7000000,
+      "id": "gnet05-forkjoin-05",
+      "row": {
+        "expected": "I32(5400)",
+        "input": [
+          26,
+          32
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 6889333
+      }
+    },
+    {
+      "budget": 1000000,
+      "id": "gnet05-forkjoin-06",
+      "row": {
+        "expected": "I32(8438)",
+        "input": [
+          14,
+          419
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 851688
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-forkjoin-07",
+      "row": {
+        "expected": "I32(9841)",
+        "input": [
+          49152,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1720194
+      }
+    },
+    {
+      "budget": 7000000,
+      "id": "gnet05-forkjoin-08",
+      "row": {
+        "expected": "I32(9627)",
+        "input": [
+          8192,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 6399799
+      }
+    },
+    {
+      "budget": 5000000,
+      "id": "gnet05-forkjoin-09",
+      "row": {
+        "expected": "I32(259)",
+        "input": [
+          12288,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 4828615
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-forkjoin-10",
+      "row": {
+        "expected": "I32(4511)",
+        "input": [
+          24576,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1406281
+      }
+    },
+    {
+      "budget": 2000000,
+      "id": "gnet05-forkjoin-11",
+      "row": {
+        "expected": "I32(6305)",
+        "input": [
+          65536,
+          24
+        ],
+        "negative": false,
+        "oracle": "equal",
+        "reference": "value",
+        "steps": 1606536
+      }
+    }
+  ],
+  "deep_counts": {
+    "deep oracle equal value": 30
+  },
+  "inputs": 334,
+  "programs": 72,
+  "rows": [
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-00",
+      "inputs": [
+        {
+          "expected": "I32(130)",
+          "input": [
+            3,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(1472)",
+          "input": [
+            63,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 602
+        },
+        {
+          "expected": "I32(90999)",
+          "input": [
+            257,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5354
+        },
+        {
+          "expected": "I32(2882)",
+          "input": [
+            377,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 179
+        },
+        {
+          "expected": "I32(34992)",
+          "input": [
+            1536,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 48446
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-01",
+      "inputs": [
+        {
+          "expected": "I32(6042)",
+          "input": [
+            3,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 85
+        },
+        {
+          "expected": "I32(57524)",
+          "input": [
+            68,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 497
+        },
+        {
+          "expected": "I32(61222)",
+          "input": [
+            263,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 7907
+        },
+        {
+          "expected": "I32(4579)",
+          "input": [
+            243,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 259
+        },
+        {
+          "expected": "I32(81546)",
+          "input": [
+            2048,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 81587
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-02",
+      "inputs": [
+        {
+          "expected": "I32(132)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(12568)",
+          "input": [
+            59,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 629
+        },
+        {
+          "expected": "I32(91069)",
+          "input": [
+            367,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5054
+        },
+        {
+          "expected": "I32(267)",
+          "input": [
+            202,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 123
+        },
+        {
+          "expected": "I32(69298)",
+          "input": [
+            2048,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 77389
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-03",
+      "inputs": [
+        {
+          "expected": "I32(1324)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(61256)",
+          "input": [
+            34,
+            4
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 965
+        },
+        {
+          "expected": "I32(68422)",
+          "input": [
+            278,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 6442
+        },
+        {
+          "expected": "I32(2230)",
+          "input": [
+            345,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 179
+        },
+        {
+          "expected": "I32(32692)",
+          "input": [
+            2048,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 59219
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-04",
+      "inputs": [
+        {
+          "expected": "I32(71)",
+          "input": [
+            2,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(17579)",
+          "input": [
+            22,
+            4
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 703
+        },
+        {
+          "expected": "I32(99848)",
+          "input": [
+            394,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 6546
+        },
+        {
+          "expected": "I32(1522)",
+          "input": [
+            247,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 179
+        },
+        {
+          "expected": "I32(81690)",
+          "input": [
+            2048,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 80100
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-05",
+      "inputs": [
+        {
+          "expected": "I32(364)",
+          "input": [
+            1,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(586)",
+          "input": [
+            34,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 204
+        },
+        {
+          "expected": "I32(27820)",
+          "input": [
+            341,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1463
+        },
+        {
+          "expected": "I32(930)",
+          "input": [
+            204,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 123
+        },
+        {
+          "expected": "I32(30138)",
+          "input": [
+            4096,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 81357
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-06",
+      "inputs": [
+        {
+          "expected": "I32(772)",
+          "input": [
+            1,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(2152)",
+          "input": [
+            42,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 208
+        },
+        {
+          "expected": "I32(29624)",
+          "input": [
+            156,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1054
+        },
+        {
+          "expected": "I32(952)",
+          "input": [
+            364,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 123
+        },
+        {
+          "expected": "I32(74776)",
+          "input": [
+            3072,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 82897
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-07",
+      "inputs": [
+        {
+          "expected": "I32(63)",
+          "input": [
+            3,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 51
+        },
+        {
+          "expected": "I32(7248)",
+          "input": [
+            58,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 799
+        },
+        {
+          "expected": "I32(82522)",
+          "input": [
+            350,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 6805
+        },
+        {
+          "expected": "I32(186)",
+          "input": [
+            321,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 140
+        },
+        {
+          "expected": "I32(97461)",
+          "input": [
+            1536,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69311
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-08",
+      "inputs": [
+        {
+          "expected": "I32(15)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 357
+        },
+        {
+          "expected": "I32(1368)",
+          "input": [
+            47,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4614
+        },
+        {
+          "expected": "I32(34916)",
+          "input": [
+            280,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 67073
+        },
+        {
+          "expected": "I32(322)",
+          "input": [
+            353,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2235
+        },
+        {
+          "expected": "I32(31538)",
+          "input": [
+            192,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 89819
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-09",
+      "inputs": [
+        {
+          "expected": "I32(2167)",
+          "input": [
+            1,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 136
+        },
+        {
+          "expected": "I32(48802)",
+          "input": [
+            76,
+            4
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1926
+        },
+        {
+          "expected": "I32(35247)",
+          "input": [
+            375,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5029
+        },
+        {
+          "expected": "I32(5856)",
+          "input": [
+            233,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 310
+        },
+        {
+          "expected": "I32(16782)",
+          "input": [
+            768,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 68079
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-10",
+      "inputs": [
+        {
+          "expected": "I32(3299)",
+          "input": [
+            2,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 119
+        },
+        {
+          "expected": "I32(40341)",
+          "input": [
+            72,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 704
+        },
+        {
+          "expected": "I32(57385)",
+          "input": [
+            226,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 7967
+        },
+        {
+          "expected": "I32(717)",
+          "input": [
+            308,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 264
+        },
+        {
+          "expected": "I32(45159)",
+          "input": [
+            1536,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 71304
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "divide",
+      "id": "gnet05-divide-11",
+      "inputs": [
+        {
+          "expected": "I32(77)",
+          "input": [
+            3,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1792
+        },
+        {
+          "expected": "I32(371)",
+          "input": [
+            68,
+            4
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 9176
+        },
+        {
+          "expected": "I32(553)",
+          "input": [
+            293,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 14153
+        },
+        {
+          "expected": "I32(66)",
+          "input": [
+            274,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1559
+        },
+        {
+          "expected": "I32(2708)",
+          "input": [
+            128,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 64723
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-00",
+      "inputs": [
+        {
+          "expected": "I32(8410)",
+          "input": [
+            1,
+            145
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 206
+        },
+        {
+          "expected": "I32(7443)",
+          "input": [
+            3,
+            519
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 206
+        },
+        {
+          "expected": "I32(670)",
+          "input": [
+            5,
+            820
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 579
+        },
+        {
+          "expected": "I32(8478)",
+          "input": [
+            6,
+            815
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 240
+        },
+        {
+          "expected": "I32(2660)",
+          "input": [
+            29,
+            820
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79096
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-01",
+      "inputs": [
+        {
+          "expected": "I32(30)",
+          "input": [
+            1,
+            167
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 721
+        },
+        {
+          "expected": "I32(24)",
+          "input": [
+            3,
+            313
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 559
+        },
+        {
+          "expected": "I32(58)",
+          "input": [
+            5,
+            650
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1392
+        },
+        {
+          "expected": "I32(36)",
+          "input": [
+            6,
+            858
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 709
+        },
+        {
+          "expected": "I32(72)",
+          "input": [
+            9,
+            858
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1532
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-02",
+      "inputs": [
+        {
+          "expected": "I32(7)",
+          "input": [
+            0,
+            999
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 178
+        },
+        {
+          "expected": "I32(1435)",
+          "input": [
+            3,
+            492
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4761
+        },
+        {
+          "expected": "I32(58)",
+          "input": [
+            6,
+            62
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1187
+        },
+        {
+          "expected": "I32(2680)",
+          "input": [
+            5,
+            892
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4019
+        },
+        {
+          "expected": "I32(874)",
+          "input": [
+            12,
+            892
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 76971
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-03",
+      "inputs": [
+        {
+          "expected": "I32(33)",
+          "input": [
+            1,
+            870
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 772
+        },
+        {
+          "expected": "I32(158)",
+          "input": [
+            4,
+            685
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1342
+        },
+        {
+          "expected": "I32(132)",
+          "input": [
+            5,
+            799
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1782
+        },
+        {
+          "expected": "I32(1674)",
+          "input": [
+            6,
+            521
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4258
+        },
+        {
+          "expected": "I32(9096)",
+          "input": [
+            18,
+            799
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69777
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-04",
+      "inputs": [
+        {
+          "expected": "I32(9979)",
+          "input": [
+            1,
+            303
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 304
+        },
+        {
+          "expected": "I32(6801)",
+          "input": [
+            3,
+            770
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 261
+        },
+        {
+          "expected": "I32(2355)",
+          "input": [
+            6,
+            661
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 618
+        },
+        {
+          "expected": "I32(9246)",
+          "input": [
+            5,
+            425
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 287
+        },
+        {
+          "expected": "I32(2355)",
+          "input": [
+            6,
+            661
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 618
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=6",
+        "metal": "admitted fork_candidates=6"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-05",
+      "inputs": [
+        {
+          "expected": "I32(324)",
+          "input": [
+            0,
+            626
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27
+        },
+        {
+          "expected": "I32(3953)",
+          "input": [
+            4,
+            294
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 345
+        },
+        {
+          "expected": "I32(6009)",
+          "input": [
+            6,
+            660
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5221
+        },
+        {
+          "expected": "I32(5006)",
+          "input": [
+            5,
+            666
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2319
+        },
+        {
+          "expected": "I32(4548)",
+          "input": [
+            9,
+            666
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 55181
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-06",
+      "inputs": [
+        {
+          "expected": "I32(996)",
+          "input": [
+            0,
+            689
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 44
+        },
+        {
+          "expected": "I32(70)",
+          "input": [
+            3,
+            15
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 87
+        },
+        {
+          "expected": "I32(1376)",
+          "input": [
+            6,
+            786
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 87
+        },
+        {
+          "expected": "I32(2470)",
+          "input": [
+            6,
+            215
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 104
+        },
+        {
+          "expected": "I32(1695)",
+          "input": [
+            9,
+            15
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 453
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=2",
+        "metal": "admitted fork_candidates=2"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-07",
+      "inputs": [
+        {
+          "expected": "I32(62)",
+          "input": [
+            0,
+            637
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 44
+        },
+        {
+          "expected": "I32(3043)",
+          "input": [
+            4,
+            816
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 373
+        },
+        {
+          "expected": "I32(449)",
+          "input": [
+            5,
+            863
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 100
+        },
+        {
+          "expected": "I32(8814)",
+          "input": [
+            6,
+            628
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 995
+        },
+        {
+          "expected": "I32(944)",
+          "input": [
+            21,
+            628
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 82205
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-08",
+      "inputs": [
+        {
+          "expected": "I32(1552)",
+          "input": [
+            1,
+            508
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 61
+        },
+        {
+          "expected": "I32(1874)",
+          "input": [
+            4,
+            344
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 717
+        },
+        {
+          "expected": "I32(1428)",
+          "input": [
+            6,
+            330
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2279
+        },
+        {
+          "expected": "I32(2793)",
+          "input": [
+            5,
+            954
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 751
+        },
+        {
+          "expected": "I32(2530)",
+          "input": [
+            13,
+            344
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 62851
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-09",
+      "inputs": [
+        {
+          "expected": "I32(474)",
+          "input": [
+            0,
+            912
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27
+        },
+        {
+          "expected": "I32(2318)",
+          "input": [
+            4,
+            508
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 200
+        },
+        {
+          "expected": "I32(5377)",
+          "input": [
+            5,
+            193
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 379
+        },
+        {
+          "expected": "I32(430)",
+          "input": [
+            5,
+            311
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 197
+        },
+        {
+          "expected": "I32(6639)",
+          "input": [
+            29,
+            508
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 84284
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-10",
+      "inputs": [
+        {
+          "expected": "I32(387)",
+          "input": [
+            0,
+            710
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27
+        },
+        {
+          "expected": "I32(429)",
+          "input": [
+            4,
+            325
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 163
+        },
+        {
+          "expected": "I32(3739)",
+          "input": [
+            5,
+            994
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 519
+        },
+        {
+          "expected": "I32(400)",
+          "input": [
+            6,
+            149
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 231
+        },
+        {
+          "expected": "I32(2843)",
+          "input": [
+            20,
+            994
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 85981
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "branch",
+      "id": "gnet05-branch-11",
+      "inputs": [
+        {
+          "expected": "I32(32)",
+          "input": [
+            0,
+            513
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 44
+        },
+        {
+          "expected": "I32(8763)",
+          "input": [
+            3,
+            990
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 331
+        },
+        {
+          "expected": "I32(4343)",
+          "input": [
+            6,
+            388
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 925
+        },
+        {
+          "expected": "I32(4839)",
+          "input": [
+            6,
+            861
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 616
+        },
+        {
+          "expected": "I32(6686)",
+          "input": [
+            21,
+            990
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 77513
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-00",
+      "inputs": [
+        {
+          "expected": "I32(1)",
+          "input": [
+            0,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 262
+        },
+        {
+          "expected": "I32(9)",
+          "input": [
+            19,
+            20
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2760
+        },
+        {
+          "expected": "I32(2)",
+          "input": [
+            56,
+            40
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1938
+        },
+        {
+          "expected": "I32(7)",
+          "input": [
+            52,
+            42
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3328
+        },
+        {
+          "expected": "I32(94)",
+          "input": [
+            959,
+            42
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 78057
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-01",
+      "inputs": [
+        {
+          "expected": "I32(1)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 224
+        },
+        {
+          "expected": "I32(1)",
+          "input": [
+            5,
+            27
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 334
+        },
+        {
+          "expected": "I32(1)",
+          "input": [
+            45,
+            62
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 854
+        },
+        {
+          "expected": "I32(3)",
+          "input": [
+            47,
+            12
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2578
+        },
+        {
+          "expected": "I32(10)",
+          "input": [
+            959,
+            12
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 68739
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-02",
+      "inputs": [
+        {
+          "expected": "I32(1)",
+          "input": [
+            0,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 218
+        },
+        {
+          "expected": "I32(3)",
+          "input": [
+            13,
+            30
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 903
+        },
+        {
+          "expected": "I32(1)",
+          "input": [
+            48,
+            23
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 890
+        },
+        {
+          "expected": "I32(2)",
+          "input": [
+            49,
+            48
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1730
+        },
+        {
+          "expected": "I32(12)",
+          "input": [
+            767,
+            48
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 66022
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-03",
+      "inputs": [
+        {
+          "expected": "I32(15)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 400
+        },
+        {
+          "expected": "I32(197)",
+          "input": [
+            23,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2402
+        },
+        {
+          "expected": "I32(341)",
+          "input": [
+            352,
+            703
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 528
+        },
+        {
+          "expected": "I32(4756)",
+          "input": [
+            377,
+            252
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 11989
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-04",
+      "inputs": [
+        {
+          "expected": "I32(1)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 98
+        },
+        {
+          "expected": "I32(67)",
+          "input": [
+            29,
+            87
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 707
+        },
+        {
+          "expected": "I32(969)",
+          "input": [
+            464,
+            467
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 944
+        },
+        {
+          "expected": "I32(225)",
+          "input": [
+            230,
+            178
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1118
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-05",
+      "inputs": [
+        {
+          "expected": "I32(3)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 140
+        },
+        {
+          "expected": "I32(8)",
+          "input": [
+            44,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 222
+        },
+        {
+          "expected": "I32(405)",
+          "input": [
+            148,
+            756
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 554
+        },
+        {
+          "expected": "I32(963)",
+          "input": [
+            372,
+            512
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1044
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-06",
+      "inputs": [
+        {
+          "expected": "I32(1)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 98
+        },
+        {
+          "expected": "I32(29)",
+          "input": [
+            42,
+            98
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 677
+        },
+        {
+          "expected": "I32(43)",
+          "input": [
+            228,
+            461
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 991
+        },
+        {
+          "expected": "I32(112)",
+          "input": [
+            121,
+            57
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1338
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-07",
+      "inputs": [
+        {
+          "expected": "I32(752)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 128
+        },
+        {
+          "expected": "I32(6127)",
+          "input": [
+            0,
+            46
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2396
+        },
+        {
+          "expected": "I32(1291)",
+          "input": [
+            273,
+            716
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 186
+        },
+        {
+          "expected": "I32(9869)",
+          "input": [
+            497,
+            235
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 111
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-08",
+      "inputs": [
+        {
+          "expected": "I32(30)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 77
+        },
+        {
+          "expected": "I32(34)",
+          "input": [
+            9,
+            11
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 50
+        },
+        {
+          "expected": "I32(346)",
+          "input": [
+            346,
+            580
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 128
+        },
+        {
+          "expected": "I32(133)",
+          "input": [
+            443,
+            681
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 50
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-09",
+      "inputs": [
+        {
+          "expected": "I32(4)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 77
+        },
+        {
+          "expected": "I32(134)",
+          "input": [
+            23,
+            43
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 153
+        },
+        {
+          "expected": "I32(648)",
+          "input": [
+            81,
+            820
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 395
+        },
+        {
+          "expected": "I32(101)",
+          "input": [
+            235,
+            152
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 50
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-10",
+      "inputs": [
+        {
+          "expected": "I32(70)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 77
+        },
+        {
+          "expected": "I32(154)",
+          "input": [
+            36,
+            51
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 50
+        },
+        {
+          "expected": "I32(1892)",
+          "input": [
+            468,
+            129
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 195
+        },
+        {
+          "expected": "I32(4322)",
+          "input": [
+            401,
+            729
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 624
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "frontier",
+      "id": "gnet05-frontier-11",
+      "inputs": [
+        {
+          "expected": "I32(1)",
+          "input": [
+            0,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 232
+        },
+        {
+          "expected": "I32(1)",
+          "input": [
+            10,
+            22
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 430
+        },
+        {
+          "expected": "I32(33)",
+          "input": [
+            49,
+            72
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 6890
+        },
+        {
+          "expected": "I32(27)",
+          "input": [
+            59,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 7506
+        },
+        {
+          "expected": "I32(34)",
+          "input": [
+            959,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 71213
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-00",
+      "inputs": [
+        {
+          "expected": "I32(57)",
+          "input": [
+            1,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1488
+        },
+        {
+          "expected": "I32(15)",
+          "input": [
+            363,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2046
+        },
+        {
+          "expected": "I32(46)",
+          "input": [
+            340,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1556
+        },
+        {
+          "expected": "I32(57)",
+          "input": [
+            241,
+            40
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3102
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-01",
+      "inputs": [
+        {
+          "expected": "I32(4)",
+          "input": [
+            0,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 727
+        },
+        {
+          "expected": "I32(4)",
+          "input": [
+            94,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1341
+        },
+        {
+          "expected": "trap DivisionByZero",
+          "input": [
+            256,
+            13
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "trap",
+          "steps": 1228
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            408,
+            3029
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 2091
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-02",
+      "inputs": [
+        {
+          "expected": "I32(293)",
+          "input": [
+            0,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 117
+        },
+        {
+          "expected": "I32(3002)",
+          "input": [
+            171,
+            9
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 194
+        },
+        {
+          "expected": "I32(2361)",
+          "input": [
+            336,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 150
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            463,
+            3726
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 765
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-03",
+      "inputs": [
+        {
+          "expected": "I32(2433)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 169
+        },
+        {
+          "expected": "I32(275)",
+          "input": [
+            405,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 219
+        },
+        {
+          "expected": "I32(4990)",
+          "input": [
+            277,
+            7
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 331
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            49,
+            2834
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 816
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-04",
+      "inputs": [
+        {
+          "expected": "I32(110)",
+          "input": [
+            0,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79
+        },
+        {
+          "expected": "I32(672)",
+          "input": [
+            168,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79
+        },
+        {
+          "expected": "trap DivisionByZero",
+          "input": [
+            488,
+            13
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "trap",
+          "steps": 73
+        },
+        {
+          "expected": "I32(3572)",
+          "input": [
+            211,
+            38
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-05",
+      "inputs": [
+        {
+          "expected": "I32(159)",
+          "input": [
+            2,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 116
+        },
+        {
+          "expected": "I32(192)",
+          "input": [
+            23,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 105
+        },
+        {
+          "expected": "trap DivisionByZero",
+          "input": [
+            144,
+            15
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "trap",
+          "steps": 73
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            114,
+            3864
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 773
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-06",
+      "inputs": [
+        {
+          "expected": "I32(924)",
+          "input": [
+            2,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79
+        },
+        {
+          "expected": "I32(9440)",
+          "input": [
+            489,
+            8
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79
+        },
+        {
+          "expected": "trap DivisionByZero",
+          "input": [
+            99,
+            14
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "trap",
+          "steps": 73
+        },
+        {
+          "expected": "I32(9423)",
+          "input": [
+            321,
+            19
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 79
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-07",
+      "inputs": [
+        {
+          "expected": "I32(39)",
+          "input": [
+            0,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1063
+        },
+        {
+          "expected": "I32(44)",
+          "input": [
+            389,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2339
+        },
+        {
+          "expected": "I32(24)",
+          "input": [
+            340,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1185
+        },
+        {
+          "expected": "I32(32)",
+          "input": [
+            463,
+            15
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1684
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-08",
+      "inputs": [
+        {
+          "expected": "I32(352)",
+          "input": [
+            1,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69
+        },
+        {
+          "expected": "I32(1177)",
+          "input": [
+            101,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69
+        },
+        {
+          "expected": "I32(2200)",
+          "input": [
+            223,
+            8
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69
+        },
+        {
+          "expected": "I32(4246)",
+          "input": [
+            465,
+            26
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-09",
+      "inputs": [
+        {
+          "expected": "I32(12)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 382
+        },
+        {
+          "expected": "I32(38)",
+          "input": [
+            132,
+            4
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2006
+        },
+        {
+          "expected": "I32(10)",
+          "input": [
+            249,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1580
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            48,
+            2035
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 2830
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-10",
+      "inputs": [
+        {
+          "expected": "I32(1761)",
+          "input": [
+            2,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 281
+        },
+        {
+          "expected": "I32(8012)",
+          "input": [
+            280,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 292
+        },
+        {
+          "expected": "I32(306)",
+          "input": [
+            177,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 252
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            292,
+            3366
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 918
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=0",
+        "metal": "admitted fork_candidates=0"
+      },
+      "family": "serial",
+      "id": "gnet05-serial-11",
+      "inputs": [
+        {
+          "expected": "I32(1439)",
+          "input": [
+            0,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 127
+        },
+        {
+          "expected": "I32(5515)",
+          "input": [
+            227,
+            7
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 193
+        },
+        {
+          "expected": "trap DivisionByZero",
+          "input": [
+            50,
+            6
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "trap",
+          "steps": 73
+        },
+        {
+          "expected": "tool CALL_DEPTH_LIMIT",
+          "input": [
+            405,
+            2712
+          ],
+          "negative": true,
+          "oracle": "equal",
+          "reference": "tool",
+          "steps": 773
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-00",
+      "inputs": [
+        {
+          "expected": "I32(986)",
+          "input": [
+            2,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 135
+        },
+        {
+          "expected": "I32(4176)",
+          "input": [
+            45,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1205
+        },
+        {
+          "expected": "I32(79082)",
+          "input": [
+            88,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4393
+        },
+        {
+          "expected": "I32(10278)",
+          "input": [
+            66,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1385
+        },
+        {
+          "expected": "I32(83181)",
+          "input": [
+            512,
+            16
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 84296
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=4",
+        "metal": "admitted fork_candidates=4"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-01",
+      "inputs": [
+        {
+          "expected": "I32(4618)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 152
+        },
+        {
+          "expected": "I32(24032)",
+          "input": [
+            25,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 970
+        },
+        {
+          "expected": "I32(34225)",
+          "input": [
+            87,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2434
+        },
+        {
+          "expected": "I32(16095)",
+          "input": [
+            142,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 873
+        },
+        {
+          "expected": "I32(40411)",
+          "input": [
+            768,
+            16
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 78044
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=7",
+        "metal": "admitted fork_candidates=7"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-02",
+      "inputs": [
+        {
+          "expected": "I32(59)",
+          "input": [
+            1,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 50
+        },
+        {
+          "expected": "I32(36436)",
+          "input": [
+            26,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 735
+        },
+        {
+          "expected": "I32(10109)",
+          "input": [
+            138,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3019
+        },
+        {
+          "expected": "I32(43951)",
+          "input": [
+            117,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 408
+        },
+        {
+          "expected": "I32(46795)",
+          "input": [
+            1024,
+            16
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 72925
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-03",
+      "inputs": [
+        {
+          "expected": "I32(1644)",
+          "input": [
+            2,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 237
+        },
+        {
+          "expected": "I32(15304)",
+          "input": [
+            54,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 724
+        },
+        {
+          "expected": "I32(12576)",
+          "input": [
+            92,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 714
+        },
+        {
+          "expected": "I32(13763)",
+          "input": [
+            120,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 393
+        },
+        {
+          "expected": "I32(73607)",
+          "input": [
+            6144,
+            16
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 55884
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-04",
+      "inputs": [
+        {
+          "expected": "I32(219)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 755
+        },
+        {
+          "expected": "I32(5058)",
+          "input": [
+            8,
+            60
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4692
+        },
+        {
+          "expected": "I32(3452)",
+          "input": [
+            253,
+            936
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1551
+        },
+        {
+          "expected": "I32(3807)",
+          "input": [
+            73,
+            932
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 755
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-05",
+      "inputs": [
+        {
+          "expected": "I32(49)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1319
+        },
+        {
+          "expected": "I32(627)",
+          "input": [
+            30,
+            8
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 13639
+        },
+        {
+          "expected": "I32(100)",
+          "input": [
+            450,
+            117
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2423
+        },
+        {
+          "expected": "I32(452)",
+          "input": [
+            183,
+            668
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4863
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-06",
+      "inputs": [
+        {
+          "expected": "I32(7401)",
+          "input": [
+            2,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 118
+        },
+        {
+          "expected": "I32(62239)",
+          "input": [
+            53,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 668
+        },
+        {
+          "expected": "I32(13105)",
+          "input": [
+            93,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 922
+        },
+        {
+          "expected": "I32(40283)",
+          "input": [
+            137,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 689
+        },
+        {
+          "expected": "I32(78985)",
+          "input": [
+            8192,
+            16
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 73296
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-07",
+      "inputs": [
+        {
+          "expected": "I32(409)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 179
+        },
+        {
+          "expected": "I32(168)",
+          "input": [
+            46,
+            65
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4185
+        },
+        {
+          "expected": "I32(1082)",
+          "input": [
+            445,
+            391
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 325
+        },
+        {
+          "expected": "I32(2051)",
+          "input": [
+            209,
+            409
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 884
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-08",
+      "inputs": [
+        {
+          "expected": "I32(4665)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 501
+        },
+        {
+          "expected": "I32(4282)",
+          "input": [
+            35,
+            95
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4871
+        },
+        {
+          "expected": "I32(4767)",
+          "input": [
+            350,
+            264
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2509
+        },
+        {
+          "expected": "I32(6852)",
+          "input": [
+            143,
+            966
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 474
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-09",
+      "inputs": [
+        {
+          "expected": "I32(102)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1082
+        },
+        {
+          "expected": "I32(924)",
+          "input": [
+            46,
+            71
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5698
+        },
+        {
+          "expected": "I32(209)",
+          "input": [
+            83,
+            309
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1559
+        },
+        {
+          "expected": "I32(2007)",
+          "input": [
+            251,
+            884
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 11989
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-10",
+      "inputs": [
+        {
+          "expected": "I32(54)",
+          "input": [
+            0,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1234
+        },
+        {
+          "expected": "I32(3582)",
+          "input": [
+            54,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 18872
+        },
+        {
+          "expected": "I32(20024)",
+          "input": [
+            144,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 55485
+        },
+        {
+          "expected": "I32(480)",
+          "input": [
+            66,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5607
+        },
+        {
+          "expected": "I32(76931)",
+          "input": [
+            64,
+            16
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 87012
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "compose",
+      "id": "gnet05-compose-11",
+      "inputs": [
+        {
+          "expected": "I32(4538)",
+          "input": [
+            0,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 583
+        },
+        {
+          "expected": "I32(13171)",
+          "input": [
+            38,
+            64
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 237
+        },
+        {
+          "expected": "I32(7469)",
+          "input": [
+            248,
+            661
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 776
+        },
+        {
+          "expected": "I32(4918)",
+          "input": [
+            391,
+            256
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5006
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-00",
+      "inputs": [
+        {
+          "expected": "I32(742)",
+          "input": [
+            1,
+            187
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 65
+        },
+        {
+          "expected": "I32(6828)",
+          "input": [
+            4,
+            654
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 471
+        },
+        {
+          "expected": "I32(7194)",
+          "input": [
+            6,
+            361
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1411
+        },
+        {
+          "expected": "I32(249)",
+          "input": [
+            6,
+            104
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3171
+        },
+        {
+          "expected": "I32(2711)",
+          "input": [
+            14,
+            361
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 82743
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-01",
+      "inputs": [
+        {
+          "expected": "I32(4269)",
+          "input": [
+            1,
+            510
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 256
+        },
+        {
+          "expected": "I32(1367)",
+          "input": [
+            3,
+            928
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 324
+        },
+        {
+          "expected": "I32(3749)",
+          "input": [
+            5,
+            586
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1240
+        },
+        {
+          "expected": "I32(180)",
+          "input": [
+            5,
+            837
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2614
+        },
+        {
+          "expected": "I32(7546)",
+          "input": [
+            15,
+            928
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 73919
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-02",
+      "inputs": [
+        {
+          "expected": "I32(148)",
+          "input": [
+            0,
+            278
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27
+        },
+        {
+          "expected": "I32(2381)",
+          "input": [
+            3,
+            611
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 242
+        },
+        {
+          "expected": "I32(1446)",
+          "input": [
+            6,
+            614
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 481
+        },
+        {
+          "expected": "I32(4398)",
+          "input": [
+            6,
+            49
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1681
+        },
+        {
+          "expected": "I32(7758)",
+          "input": [
+            13,
+            611
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 75152
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-03",
+      "inputs": [
+        {
+          "expected": "I32(16)",
+          "input": [
+            3,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 378
+        },
+        {
+          "expected": "I32(2186)",
+          "input": [
+            27,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3972
+        },
+        {
+          "expected": "I32(1587)",
+          "input": [
+            185,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 39303
+        },
+        {
+          "expected": "I32(2210)",
+          "input": [
+            328,
+            8
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 82882
+        },
+        {
+          "expected": "I32(8464)",
+          "input": [
+            256,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 64439
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-04",
+      "inputs": [
+        {
+          "expected": "I32(53)",
+          "input": [
+            0,
+            68
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27
+        },
+        {
+          "expected": "I32(6148)",
+          "input": [
+            3,
+            213
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 725
+        },
+        {
+          "expected": "I32(9969)",
+          "input": [
+            5,
+            158
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3339
+        },
+        {
+          "expected": "I32(4575)",
+          "input": [
+            6,
+            206
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5828
+        },
+        {
+          "expected": "I32(4288)",
+          "input": [
+            9,
+            206
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 69520
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-05",
+      "inputs": [
+        {
+          "expected": "I32(25)",
+          "input": [
+            0,
+            126
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27
+        },
+        {
+          "expected": "I32(9698)",
+          "input": [
+            3,
+            876
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 833
+        },
+        {
+          "expected": "I32(2788)",
+          "input": [
+            6,
+            454
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4186
+        },
+        {
+          "expected": "I32(5779)",
+          "input": [
+            5,
+            32
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1624
+        },
+        {
+          "expected": "I32(8986)",
+          "input": [
+            14,
+            32
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 70833
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "refused compiler_structural_budget",
+        "metal": "refused compiler_structural_budget"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-06",
+      "inputs": [
+        {
+          "expected": "I32(1909)",
+          "input": [
+            1,
+            474
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 141
+        },
+        {
+          "expected": "I32(4339)",
+          "input": [
+            4,
+            705
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 1290
+        },
+        {
+          "expected": "I32(2980)",
+          "input": [
+            5,
+            419
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2797
+        },
+        {
+          "expected": "I32(8547)",
+          "input": [
+            6,
+            344
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 6226
+        },
+        {
+          "expected": "I32(7440)",
+          "input": [
+            11,
+            344
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 88607
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-07",
+      "inputs": [
+        {
+          "expected": "I32(1744)",
+          "input": [
+            3,
+            1
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 85
+        },
+        {
+          "expected": "I32(5972)",
+          "input": [
+            41,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 437
+        },
+        {
+          "expected": "I32(5586)",
+          "input": [
+            287,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5154
+        },
+        {
+          "expected": "I32(5156)",
+          "input": [
+            383,
+            9
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 11685
+        },
+        {
+          "expected": "I32(3715)",
+          "input": [
+            2048,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 72284
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-08",
+      "inputs": [
+        {
+          "expected": "I32(488)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 51
+        },
+        {
+          "expected": "I32(5487)",
+          "input": [
+            52,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 920
+        },
+        {
+          "expected": "I32(3354)",
+          "input": [
+            322,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 27674
+        },
+        {
+          "expected": "I32(2049)",
+          "input": [
+            302,
+            7
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 42016
+        },
+        {
+          "expected": "I32(2213)",
+          "input": [
+            192,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 67656
+        }
+      ],
+      "split": "tuning"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=1",
+        "metal": "admitted fork_candidates=1"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-09",
+      "inputs": [
+        {
+          "expected": "I32(2400)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 119
+        },
+        {
+          "expected": "I32(5886)",
+          "input": [
+            52,
+            4
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 3848
+        },
+        {
+          "expected": "I32(9056)",
+          "input": [
+            275,
+            5
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 7959
+        },
+        {
+          "expected": "I32(5752)",
+          "input": [
+            317,
+            8
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 42472
+        },
+        {
+          "expected": "I32(4901)",
+          "input": [
+            256,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 53933
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-10",
+      "inputs": [
+        {
+          "expected": "I32(2643)",
+          "input": [
+            2,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 119
+        },
+        {
+          "expected": "I32(8461)",
+          "input": [
+            40,
+            3
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 2224
+        },
+        {
+          "expected": "I32(1886)",
+          "input": [
+            303,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 17755
+        },
+        {
+          "expected": "I32(4078)",
+          "input": [
+            380,
+            8
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 21551
+        },
+        {
+          "expected": "I32(2747)",
+          "input": [
+            1536,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 86860
+        }
+      ],
+      "split": "held_out"
+    },
+    {
+      "devices": {
+        "cuda": "admitted fork_candidates=3",
+        "metal": "admitted fork_candidates=3"
+      },
+      "family": "forkjoin",
+      "id": "gnet05-forkjoin-11",
+      "inputs": [
+        {
+          "expected": "I32(844)",
+          "input": [
+            1,
+            0
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 34
+        },
+        {
+          "expected": "I32(481)",
+          "input": [
+            22,
+            2
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 312
+        },
+        {
+          "expected": "I32(8705)",
+          "input": [
+            298,
+            6
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 4887
+        },
+        {
+          "expected": "I32(140)",
+          "input": [
+            206,
+            7
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 5113
+        },
+        {
+          "expected": "I32(8399)",
+          "input": [
+            3072,
+            24
+          ],
+          "negative": false,
+          "oracle": "equal",
+          "reference": "value",
+          "steps": 80662
+        }
+      ],
+      "split": "held_out"
+    }
+  ],
+  "schema": "invar-gnet05-validation-v2"
+}

@@ -1,0 +1,8 @@
+fn main() -> i32 {
+  let empty_bytes: Bytes = b"";
+  let empty_text: String = "";
+  let composed: String = "é";
+  let decomposed: String = "é";
+  if len(empty_bytes) == 0u32 and len(empty_text) == 0u32 and len(composed) == 2u32 and len(decomposed) == 3u32 { return 7; }
+  return 0;
+}

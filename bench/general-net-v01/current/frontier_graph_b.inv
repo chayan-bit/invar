@@ -1,0 +1,31 @@
+fn reach(edges: read Array<u32>, start: u32) -> i32 {
+    var frontier: Array<u32> = filled_u32(5u32, 0u32);
+    var seen: Array<u32> = filled_u32(5u32, 0u32);
+    frontier[start] = 1u32;
+    for step in 0u32 .. 5u32 {
+        var next: Array<u32> = filled_u32(5u32, 0u32);
+        for u in 0u32 .. 5u32 {
+            if frontier[u] == 1u32 and seen[u] == 0u32 {
+                seen[u] = 1u32;
+                for neighbor in 0u32 .. 5u32 {
+                    if edges[u * 5u32 + neighbor] == 1u32 and seen[neighbor] == 0u32 { next[neighbor] = 1u32; }
+                }
+            }
+        }
+        for copy_index in 0u32 .. 5u32 { frontier[copy_index] = next[copy_index]; }
+    }
+    var count: i32 = 0;
+    for count_index in 0u32 .. 5u32 { if seen[count_index] == 1u32 { count = count + 1; } }
+    return count;
+}
+
+fn main() -> i32 {
+    let edges: Array<u32> = [
+        0u32,1u32,0u32,0u32,0u32,
+        0u32,0u32,0u32,0u32,0u32,
+        0u32,0u32,0u32,1u32,0u32,
+        0u32,0u32,1u32,0u32,1u32,
+        0u32,0u32,0u32,0u32,0u32
+    ];
+    return reach(edges, 2u32);
+}

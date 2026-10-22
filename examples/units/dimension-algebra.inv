@@ -1,0 +1,12 @@
+fn main() -> i32 {
+    let force: Quantity<i32, N> = quantity::<N>(2i32);
+    let arm: Quantity<i32, m> = quantity::<m>(3i32);
+    let torque: Quantity<i32, Nm> = force * arm;
+    let second: Quantity<i32, s> = quantity::<s>(1i32);
+    let velocity: Quantity<i32, Div<m, s>> = arm / second;
+    let frequency: Quantity<i32, Hz> = 1i32 / second;
+    if torque == quantity::<Nm>(6i32) and velocity == arm / second and frequency == 1i32 / second {
+        return 1i32;
+    }
+    return 0i32;
+}

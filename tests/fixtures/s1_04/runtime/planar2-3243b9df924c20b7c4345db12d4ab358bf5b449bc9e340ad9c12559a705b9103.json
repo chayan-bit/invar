@@ -1,0 +1,59 @@
+{
+  "child_sha256": null,
+  "component": "planar2",
+  "host": {
+    "arch": "aarch64",
+    "os": "linux"
+  },
+  "inputs": [
+    {
+      "path": "<generated>",
+      "role": "generated-header",
+      "sha256": "b7942bb891bedb0e56ac3c49a7877db1b56262dbffb560183a3b234636a1b6e1"
+    },
+    {
+      "path": "tests/fixtures/s1_04/runtime/planar2_goldens.json",
+      "role": "golden",
+      "sha256": "8131b4c50799e5a524c1a3320747a69384e9e8c8a2dedc2f73bdb4d770b9e1b8"
+    },
+    {
+      "path": "tests/fixtures/s1_04/runtime/generate_goldens.py",
+      "role": "input",
+      "sha256": "d40c4e9330c1c4c5cf928ebf9a9ac311e5695be14b4a1ff72508b3aa5d33b49e"
+    },
+    {
+      "path": "tests/fixtures/s1_04/runtime/planar2.c",
+      "role": "input",
+      "sha256": "2d0def4424d7bdb39512102c3d1ecf20cfce90becbe71b3eb9595eebd5c26b15"
+    },
+    {
+      "path": "tests/fixtures/s1_04/runtime/planar2.h",
+      "role": "input",
+      "sha256": "9e7717b888c593704df4bdd167df21d96a9a34f205cdf9f6b87995aefac2b41f"
+    },
+    {
+      "path": "tests/fixtures/s1_04/runtime/planar2-manifest.inv",
+      "role": "manifest",
+      "sha256": "4f02414f664aed6b05066c18eabc5ab35e30243d413b52ff1d6afcca419bdfaa"
+    },
+    {
+      "path": "tests/fixtures/s1_04/runtime/bridge.c",
+      "role": "shim",
+      "sha256": "4b717db243ec2d39bbfd48a9c21cf37aee104d45fd4ae03f84e725139b222c2e"
+    }
+  ],
+  "library_sha256": "0e49c34de6739b9982ddace15ff8aa6fd64661fe8ad3f27ae5abcf64c6b7f6f2",
+  "library_version": "invar-component-v1/planar2-fixture-1",
+  "manifest_hash": "3243b9df924c20b7c4345db12d4ab358bf5b449bc9e340ad9c12559a705b9103",
+  "model_sha256": null,
+  "results": {
+    "golden_vectors": 7,
+    "invalid_inputs": "pass",
+    "layout": "pass",
+    "lifecycle": "pass",
+    "process": "not_applicable",
+    "property_samples": 16
+  },
+  "schema": "invar-component-evidence-v1",
+  "status": "pass"
+}

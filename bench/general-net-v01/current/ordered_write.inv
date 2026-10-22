@@ -1,0 +1,11 @@
+fn bump(xs: mut Array<i32>) -> i32 {
+    xs[0u32] = xs[0u32] + 1;
+    return xs[0u32];
+}
+fn read_one(xs: read Array<i32>) -> i32 { return xs[0u32]; }
+fn main() -> i32 {
+    var xs: Array<i32> = [1];
+    let first: i32 = bump(xs);
+    let second: i32 = read_one(xs);
+    return first * 10 + second;
+}

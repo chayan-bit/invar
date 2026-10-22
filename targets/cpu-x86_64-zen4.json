@@ -1,0 +1,16 @@
+{
+  "schema": "invar-target-v1",
+  "name": "cpu-x86_64-zen4",
+  "source": "AMD Software Optimization Guide for the AMD Zen 4 Microarchitecture (pub. 57647); lscpu on a Zen 4 EPYC server. L3 is per CCD of up to 8 cores; SKUs may enable fewer",
+  "device": {"backend": "cpu", "arch": "x86_64", "model": "zen4"},
+  "cpu": {
+    "simd_width_bits": 512,
+    "isa": ["sse4_2", "avx2", "fma", "avx512f", "avx512bw", "avx512vl", "avx512_vnni", "avx512_bf16"],
+    "caches": [
+      {"level": 1, "bytes": 32768, "line_bytes": 64, "shared_by_cores": 1, "core_class": null},
+      {"level": 2, "bytes": 1048576, "line_bytes": 64, "shared_by_cores": 1, "core_class": null},
+      {"level": 3, "bytes": 33554432, "line_bytes": 64, "shared_by_cores": 8, "core_class": null}
+    ],
+    "numa_nodes": null
+  }
+}

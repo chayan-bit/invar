@@ -1,0 +1,4 @@
+fn older(mode: u32) -> i32 { if mode == 0u32 { while true {} } for i in 0u32..30u32 {} return 7; }
+fn later(mode: u32, value: i32) -> i32 { if mode == 0u32 { return value / 0; } return value + 1; }
+fn run(first: u32, second: u32, value: i32) -> i32 { return older(first) + later(second, value); }
+fn main() -> i32 { return run(1u32, 1u32, 3); }

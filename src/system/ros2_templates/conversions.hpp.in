@@ -1,0 +1,41 @@
+#pragma once
+#include <cmath>
+#include <string>
+#include <vector>
+#include <geometry_msgs/msg/pose.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include "@PREFIX@.h"
+
+namespace @NAMESPACE@ {
+inline bool from_ros(const sensor_msgs::msg::JointState & source,
+                     const std::vector<std::string> & joint_names,
+                     @PREFIX@_inputs & target) {
+  if (joint_names.size() != @JOINTS@ || source.name.size() != source.position.size() ||
+      source.name.size() > 4096) return false;
+  for (std::size_t i = 0; i < @JOINTS@; ++i) {
+    for (std::size_t previous = 0; previous < i; ++previous)
+      if (joint_names[previous] == joint_names[i]) return false;
+    bool found = false;
+    for (std::size_t index = 0; index < source.name.size(); ++index) {
+      if (source.name[index] != joint_names[i]) continue;
+      if (found || !std::isfinite(source.position[index])) return false;
+      target.@INPUT@.values[i] = source.position[index];
+      found = true;
+    }
+    if (!found) return false;
+  }
+  return true;
+}
+
+inline geometry_msgs::msg::Pose to_ros(const @PREFIX@_outputs & source) {
+  geometry_msgs::msg::Pose target;
+  target.position.x = source.@OUTPUT@.translation_m[0];
+  target.position.y = source.@OUTPUT@.translation_m[1];
+  target.position.z = source.@OUTPUT@.translation_m[2];
+  target.orientation.x = source.@OUTPUT@.quaternion_xyzw[0];
+  target.orientation.y = source.@OUTPUT@.quaternion_xyzw[1];
+  target.orientation.z = source.@OUTPUT@.quaternion_xyzw[2];
+  target.orientation.w = source.@OUTPUT@.quaternion_xyzw[3];
+  return target;
+}
+}

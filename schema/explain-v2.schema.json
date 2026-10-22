@@ -1,0 +1,551 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chayan-bit/invar/blob/main/schema/explain-v2.schema.json",
+  "title": "invar-explain-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "status",
+    "diagnostics",
+    "source_identity",
+    "regions",
+    "explicit_sorts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "invar-explain-v2"
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "status": {
+      "const": "ok"
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "source_identity": {
+      "type": "string"
+    },
+    "regions": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string"
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "candidate_identity": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "admitted",
+              "rejected"
+            ]
+          },
+          "first_rejected_obligation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rule_revision": {
+            "type": "string"
+          },
+          "rule_identities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "numeric_policy": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "chosen_plan": {
+            "type": "string"
+          },
+          "fallback_plan": {
+            "type": "string"
+          },
+          "execution": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "partner": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "start": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "end": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "law": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "prefix": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "intermediate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "partner",
+              "law",
+              "prefix",
+              "intermediate"
+            ]
+          },
+          "runtime_guard": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "upper": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "constant": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "constant"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "length": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "length"
+                        ]
+                      }
+                    ]
+                  },
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "output": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "upper",
+                  "inputs",
+                  "output"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "facts": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "reads": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "owner": {
+                          "type": "string"
+                        },
+                        "element_type": {
+                          "type": "string"
+                        },
+                        "offset": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "owner",
+                        "element_type",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "writes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "owner": {
+                          "type": "string"
+                        },
+                        "element_type": {
+                          "type": "string"
+                        },
+                        "offset": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "owner",
+                        "element_type",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "ownership": {
+                    "type": "string"
+                  },
+                  "loan_state": {
+                    "type": "string"
+                  },
+                  "effect_order": {
+                    "type": "string"
+                  },
+                  "trap_summary": {
+                    "type": "string"
+                  },
+                  "termination": {
+                    "type": "string"
+                  },
+                  "physical_alias": {
+                    "type": "string"
+                  },
+                  "cleanup": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reads",
+                  "writes",
+                  "ownership",
+                  "loan_state",
+                  "effect_order",
+                  "trap_summary",
+                  "termination",
+                  "physical_alias",
+                  "cleanup"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "obligations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "evidence",
+                "detail"
+              ]
+            }
+          }
+        },
+        "required": [
+          "function",
+          "span",
+          "candidate_identity",
+          "status",
+          "first_rejected_obligation",
+          "rule_revision",
+          "rule_identities",
+          "numeric_policy",
+          "target",
+          "chosen_plan",
+          "fallback_plan",
+          "execution",
+          "runtime_guard",
+          "facts",
+          "obligations"
+        ]
+      }
+    },
+    "device_schema": {
+      "const": "invar-explain-device-v2"
+    },
+    "device_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requested_engine": {
+          "enum": [
+            "cuda",
+            "metal",
+            "auto"
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "function": {
+                "type": "string"
+              },
+              "span": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              },
+              "backend": {
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "cuda-failed-before-publication",
+                  "cuda-feature-unavailable",
+                  "device-plan-ineligible",
+                  "device-unavailable",
+                  "forced-device",
+                  "live-guard-false",
+                  "measured-cpu-cost",
+                  "measured-device-cost",
+                  "metal-buffer-slot-limit",
+                  "metal-failed-before-publication",
+                  "publication-guard-false",
+                  "staged-consumer",
+                  "toolchain-unavailable",
+                  "sort-cost-unmeasured"
+                ]
+              },
+              "kind": {
+                "type": "string"
+              },
+              "cost_ms": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpu": {
+                        "type": "number"
+                      },
+                      "device": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "cpu",
+                      "device"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "implementation": {
+                "enum": [
+                  "cpu-lsd-radix-4x8",
+                  "cpu-parallel-lsd-radix-4x8",
+                  "cuda-lsd-radix-8x4",
+                  "metal-lsd-radix-8x4",
+                  "cpu-empty-sort"
+                ]
+              }
+            },
+            "required": [
+              "function",
+              "span",
+              "backend",
+              "reason"
+            ]
+          }
+        },
+        "result": {
+          "type": "integer"
+        },
+        "module_cache_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schedule_hint_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schedule_hint_invalids": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "requested_engine",
+        "choices",
+        "result",
+        "module_cache_hits",
+        "schedule_hint_hits",
+        "schedule_hint_invalids"
+      ]
+    },
+    "explicit_sorts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 65536,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "sort",
+              "sort_by_key",
+              "argsort",
+              "segmented_sort"
+            ]
+          },
+          "span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "default_implementation": {
+            "const": "cpu-lsd-radix-4x8"
+          },
+          "reason": {
+            "const": "sort-cost-unmeasured"
+          },
+          "rule": {
+            "const": "explicit-stable-sort-v1"
+          }
+        },
+        "required": [
+          "function",
+          "operation",
+          "span",
+          "default_implementation",
+          "reason",
+          "rule"
+        ]
+      }
+    }
+  }
+}

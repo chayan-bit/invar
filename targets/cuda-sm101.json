@@ -1,0 +1,35 @@
+{
+  "schema": "invar-target-v1",
+  "name": "cuda-sm101",
+  "source": "CUDA C++ Programming Guide 12.9, Technical Specifications per Compute Capability; PTX ISA 8.8, mma and cp.async",
+  "device": {"backend": "cuda", "sm": 101},
+  "gpu": {
+    "subgroup_width": 32,
+    "max_threads_per_group": 1024,
+    "shared_bytes_per_group": 49152,
+    "shared_bytes_per_group_optin": 232448,
+    "registers_per_thread": 255,
+    "memory_levels": [
+      {"level": "global", "alignment_bytes": 256},
+      {"level": "shared", "alignment_bytes": 16},
+      {"level": "registers", "alignment_bytes": 4}
+    ],
+    "copy_atoms": [
+      {"name": "ld-global-4", "kind": "plain", "from": "global", "to": "registers", "bytes": 4, "alignment_bytes": 4},
+      {"name": "ld-global-8", "kind": "plain", "from": "global", "to": "registers", "bytes": 8, "alignment_bytes": 8},
+      {"name": "ld-global-16", "kind": "plain", "from": "global", "to": "registers", "bytes": 16, "alignment_bytes": 16},
+      {"name": "st-shared-4", "kind": "plain", "from": "registers", "to": "shared", "bytes": 4, "alignment_bytes": 4},
+      {"name": "ld-shared-4", "kind": "plain", "from": "shared", "to": "registers", "bytes": 4, "alignment_bytes": 4},
+      {"name": "st-global-4", "kind": "plain", "from": "registers", "to": "global", "bytes": 4, "alignment_bytes": 4},
+      {"name": "cp-async-4", "kind": "cp-async", "from": "global", "to": "shared", "bytes": 4, "alignment_bytes": 4},
+      {"name": "cp-async-8", "kind": "cp-async", "from": "global", "to": "shared", "bytes": 8, "alignment_bytes": 8},
+      {"name": "cp-async-16", "kind": "cp-async", "from": "global", "to": "shared", "bytes": 16, "alignment_bytes": 16},
+      {"name": "tma-tile", "kind": "tma", "from": "global", "to": "shared", "bytes": 16, "alignment_bytes": 16, "max_box_extent": 256}
+    ],
+    "mma_atoms": [
+      {"name": "mma-sync-m16n8k16-f16-f32", "instruction": "mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32", "m": 16, "n": 8, "k": 16, "threads": 32, "a_type": "f16", "b_type": "f16", "acc_type": "f32", "contract": "tc-f16-f32-v1", "reference": "tc::reference::reference"},
+      {"name": "mma-sync-m16n8k16-bf16-f32", "instruction": "mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32", "m": 16, "n": 8, "k": 16, "threads": 32, "a_type": "bf16", "b_type": "bf16", "acc_type": "f32", "contract": "tc-bf16-f32-v1", "reference": null},
+      {"name": "mma-sync-m16n8k8-tf32-f32", "instruction": "mma.sync.aligned.m16n8k8.row.col.f32.tf32.tf32.f32", "m": 16, "n": 8, "k": 8, "threads": 32, "a_type": "tf32", "b_type": "tf32", "acc_type": "f32", "contract": "tc-tf32-f32-v1", "reference": null}
+    ]
+  }
+}

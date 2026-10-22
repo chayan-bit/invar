@@ -1,0 +1,7 @@
+fn run(a: read Array<f32>, b: read Array<f32>, out: mut Array<f32>, c: f32) -> f32 {
+    for i in 0u32..len(out) {
+        out[i] = (a[i] * b[i]) + c;
+    }
+    return fma(a[0u32], b[0u32], c);
+}
+fn main() -> i32 { return 0; }

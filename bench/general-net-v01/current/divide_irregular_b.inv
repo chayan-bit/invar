@@ -1,0 +1,14 @@
+fn split(xs: read Array<i32>, shape: read Array<u32>, lo: u32, hi: u32) -> i32 {
+    let width: u32 = hi - lo;
+    if width == 1u32 { return xs[lo]; }
+    let pivot: u32 = lo + 1u32 + shape[lo] % (width - 1u32);
+    let left: i32 = split(xs, shape, lo, pivot);
+    let right: i32 = split(xs, shape, pivot, hi);
+    return left * 2 + right + 1;
+}
+
+fn main() -> i32 {
+    let xs: Array<i32> = [7, 1, 4, 1, 8, 2, 5];
+    let shape: Array<u32> = [3u32, 0u32, 4u32, 1u32, 2u32, 5u32, 0u32];
+    return split(xs, shape, 0u32, len(xs));
+}

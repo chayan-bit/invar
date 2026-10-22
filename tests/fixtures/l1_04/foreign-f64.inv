@@ -1,0 +1,10 @@
+extern c fn c_f64_trunc(value: f64) -> Result<i32, ForeignError> oracle trunc_oracle;
+
+fn trunc_oracle(value: f64) -> Result<i32, ForeignError> {
+  return Result::Ok(i32_from_f64(value));
+}
+
+fn main() -> i32 {
+  let answer: Result<i32, ForeignError> = c_f64_trunc(-7.75f64);
+  return match move answer { Result::Ok(value) => value + 14i32, Result::Err(error) => 0i32 };
+}

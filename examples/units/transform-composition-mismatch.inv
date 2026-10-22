@@ -1,0 +1,10 @@
+frame world;
+frame base: world;
+frame tool: base;
+
+fn main() -> i32 {
+    let a: Transform<world,base> = transform::<world,base>(0,0,0, 1,0,0, 0,1,0, 0,0,1);
+    let b: Transform<world,tool> = transform::<world,tool>(0,0,0, 1,0,0, 0,1,0, 0,0,1);
+    let invalid: Transform<world,tool> = a * b;
+    return 0;
+}

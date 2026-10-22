@@ -1,0 +1,1164 @@
+{
+  "schema": "invar-diagnostic-codes-v1",
+  "reserved_ranges": [
+    {
+      "start": "S1000",
+      "end": "S1099",
+      "owner": "system dialect"
+    },
+    {
+      "start": "S1100",
+      "end": "S1399",
+      "owner": "graph checks"
+    },
+    {
+      "start": "S1400",
+      "end": "S1499",
+      "owner": "foreign manifests"
+    },
+    {
+      "start": "S1500",
+      "end": "S1599",
+      "owner": "ROS 2 target"
+    },
+    {
+      "start": "S1600",
+      "end": "S1699",
+      "owner": "robot and cell"
+    },
+    {
+      "start": "S1700",
+      "end": "S1799",
+      "owner": "robotics vocabulary"
+    },
+    {
+      "start": "S1800",
+      "end": "S1899",
+      "owner": "company-start acceptance"
+    },
+    {
+      "start": "S1900",
+      "end": "S1999",
+      "owner": "reserved"
+    }
+  ],
+  "codes": [
+    {
+      "code": "ADMISSION_RECORD_LIMIT",
+      "meaning": "admission record exceeds its byte limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "ADMISSION_REGION_LIMIT",
+      "meaning": "retired: the loop region count is bounded by the analysis byte budget (RESOURCE_LIMIT)",
+      "deprecated": true,
+      "reachability": "external",
+      "justification": "Retired by the byte budget in #278; no source can raise it, and the code is kept so older documents stay readable.",
+      "boundary_test": "issue_ai_01_machine_diagnostics_qualification_retired_code_stays_in_evidence"
+    },
+    {
+      "code": "ADMISSION_SCHEMA",
+      "meaning": "admission record has an unsupported schema version",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The CLI never accepts a persisted admission record, so checked source cannot supply an unsupported record schema.",
+      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+    },
+    {
+      "code": "ADMISSION_SOURCE",
+      "meaning": "admission region span lies outside source bytes",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CLI admission uses source bytes and MIR lowered from those same bytes, so checked source cannot create an out-of-bounds MIR span.",
+      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+    },
+    {
+      "code": "ADMISSION_SOURCE_LIMIT",
+      "meaning": "source exceeds the admission byte limit",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The parser rejects source above its byte limit before admission runs.",
+      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+    },
+    {
+      "code": "ADMISSION_STALE",
+      "meaning": "persisted admission record disagrees with fresh analysis",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The CLI recomputes admission facts and never accepts a persisted record supplied by source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+    },
+    {
+      "code": "ALIAS",
+      "meaning": "candidate may alias a source or output owner",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "ARRAY_SIZE_LIMIT",
+      "meaning": "array size limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "CALL_DEPTH_LIMIT",
+      "meaning": "call depth limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "CLEANUP",
+      "meaning": "candidate cannot preserve cleanup order",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "COEFFICIENT",
+      "meaning": "affine recurrence coefficient is not eligible",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "CPU_CANCELLED",
+      "meaning": "cpu cancelled",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CPU_CANCELLED requires a worker fault or malformed chunk state that checked source cannot construct.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+    },
+    {
+      "code": "CPU_CANDIDATE",
+      "meaning": "cpu candidate",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The scheduler verifies the compiler-selected candidate before dispatch, so checked source cannot supply forged candidate metadata.",
+      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+    },
+    {
+      "code": "CPU_CHUNK_OVERLAP",
+      "meaning": "cpu chunk overlap",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CPU_CHUNK_OVERLAP requires a worker fault or malformed chunk state that checked source cannot construct.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+    },
+    {
+      "code": "CPU_JOIN",
+      "meaning": "cpu join",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CPU_JOIN requires a worker fault or malformed chunk state that checked source cannot construct.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+    },
+    {
+      "code": "CPU_SPAWN",
+      "meaning": "cpu spawn",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CPU_SPAWN requires a worker fault or malformed chunk state that checked source cannot construct.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+    },
+    {
+      "code": "CPU_TIMEOUT",
+      "meaning": "cpu timeout",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CPU_TIMEOUT requires a worker fault or malformed chunk state that checked source cannot construct.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+    },
+    {
+      "code": "CPU_WORKERS",
+      "meaning": "cpu workers",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The CLI rejects worker counts outside the supported range before it loads source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+    },
+    {
+      "code": "CPU_WORKER_PANIC",
+      "meaning": "cpu worker panic",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "CPU_WORKER_PANIC requires a worker fault or malformed chunk state that checked source cannot construct.",
+      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+    },
+    {
+      "code": "CUDA_PENDING",
+      "meaning": "cuda pending",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "A pending CUDA result is a device execution state and cannot be encoded by a checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_cuda_backend_faults"
+    },
+    {
+      "code": "CUDA_UNAVAILABLE",
+      "meaning": "cuda unavailable",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "DEBUG_UNSUPPORTED",
+      "meaning": "--debug outside native builds and native-serial runs",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "DEPENDENCE",
+      "meaning": "candidate has an unproved cross-iteration dependence",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "DEVICE_TOOLCHAIN_MISMATCH",
+      "meaning": "device toolchain mismatch",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "A device toolchain mismatch depends on the installed driver or runtime, not checked program semantics.",
+      "fault_test": "issue_ai_01_machine_diagnostics_cuda_backend_faults"
+    },
+    {
+      "code": "DIAGNOSTIC_COUNT_LIMIT",
+      "meaning": "too many diagnostics to emit in one document",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The public check, run and explain paths stop at their first error, so checked source cannot construct a document with more than 64 diagnostics.",
+      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+    },
+    {
+      "code": "DIAGNOSTIC_DOCUMENT_LIMIT",
+      "meaning": "explain document exceeds the output size limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "DIVISION_BY_ZERO",
+      "meaning": "division by zero",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "EFFECT_ORDER",
+      "meaning": "candidate changes source effect order",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "ENTRYPOINT_MISSING",
+      "meaning": "entrypoint missing",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "ENTRYPOINT_SIGNATURE",
+      "meaning": "entrypoint signature",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "EVALUATION_LIMIT",
+      "meaning": "evaluation limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "EXTRACTION",
+      "meaning": "candidate cannot be extracted into a supported graph",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Map admission establishes the extraction preconditions, so checked source cannot make extraction fail afterward.",
+      "fault_test": "issue_ai_01_machine_diagnostics_planner_extraction_fault"
+    },
+    {
+      "code": "FILE_EXTENSION",
+      "meaning": "file extension",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FILE_READ",
+      "meaning": "file read",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FOOTPRINT",
+      "meaning": "candidate read or write footprint is not proved",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRAME_CYCLE",
+      "meaning": "declared frame parent relation contains a cycle",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRAME_DUPLICATE",
+      "meaning": "frame name is declared more than once",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRAME_MISMATCH",
+      "meaning": "geometric values have incompatible coordinate frames or kinds",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRAME_PARENT_UNKNOWN",
+      "meaning": "frame parent is not declared",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRAME_ROOTS",
+      "meaning": "declared frame tree has more than one root",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRAME_UNKNOWN",
+      "meaning": "a geometric value names an undeclared coordinate frame",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FRESH_OUTPUT",
+      "meaning": "candidate output is not proved fresh",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FUSION",
+      "meaning": "adjacent map candidates cannot be fused",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "FUSION_GUARD",
+      "meaning": "fusion guard is not proved",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "GRAPH",
+      "meaning": "candidate graph is invalid or unavailable",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The recurrence graph builder receives a compiler-validated affine shape, so checked source cannot make its typed graph invalid.",
+      "fault_test": "issue_ai_01_machine_diagnostics_recurrence_graph_fault"
+    },
+    {
+      "code": "INDEXED_SOURCE_BINDING",
+      "meaning": "indexed admission contract disagrees with its checked source or MIR",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Production admission derives the indexed contract from the same checked source and MIR; a mismatch indicates stale or invalid internal binding.",
+      "fault_test": "issue_ai_01_machine_diagnostics_indexed_admission_binding_fault"
+    },
+    {
+      "code": "GRID_MIR_MISMATCH",
+      "meaning": "grid source and MIR disagree",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Grid recognition receives the MIR lowered from its checked source, so ordinary source cannot supply a different MIR function.",
+      "fault_test": "issue_ai_01_machine_diagnostics_grid_admission_faults"
+    },
+    {
+      "code": "GRID_SOURCE",
+      "meaning": "grid source failed validation",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The grid recognizer receives source that has already been parsed and checked, so ordinary source cannot reach this internal revalidation failure.",
+      "fault_test": "issue_ai_01_machine_diagnostics_grid_admission_faults"
+    },
+    {
+      "code": "INDEX_OUT_OF_BOUNDS",
+      "meaning": "index out of bounds",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "INTEGER_OVERFLOW",
+      "meaning": "integer overflow",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "INTERNAL_ARRAY_COPY",
+      "meaning": "evaluator array copy invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_ARRAY_COPY requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INTERNAL_ARRAY_SIZE",
+      "meaning": "evaluator array length conversion failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_ARRAY_SIZE requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_eval_faults"
+    },
+    {
+      "code": "INTERNAL_BINDING",
+      "meaning": "evaluator binding invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_BINDING requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INTERNAL_BORROW",
+      "meaning": "evaluator borrow invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_BORROW requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INTERNAL_CALL",
+      "meaning": "evaluator call invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_CALL requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INTERNAL_HOST_COMMIT",
+      "meaning": "host mut writeback precheck invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_HOST_COMMIT requires a mut owner whose type, borrow or length changed during a call to a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_host_commit_precheck_fault"
+    },
+    {
+      "code": "INTERNAL_HOST_READ",
+      "meaning": "host read argument invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_HOST_READ requires a read argument to change during a call to a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_host_read_changed_read_argument_fault"
+    },
+    {
+      "code": "INTERNAL_INDEX",
+      "meaning": "evaluator index conversion invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_INDEX requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_eval_faults"
+    },
+    {
+      "code": "INTERNAL_LITERAL",
+      "meaning": "evaluator literal invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_LITERAL requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INTERNAL_MAIN",
+      "meaning": "checked main returned a value other than i32",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_MAIN requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_internal_main_fault"
+    },
+    {
+      "code": "INTERNAL_RETURN",
+      "meaning": "evaluator return invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_RETURN requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INTERNAL_SCOPE",
+      "meaning": "evaluator or checker scope invariant failed",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_SCOPE requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_missing_runtime_scope"
+    },
+    {
+      "code": "INTERNAL_TYPE",
+      "meaning": "runtime value disagreed with its checked type",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "INTERNAL_TYPE requires evaluator state inconsistent with a successfully checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+    },
+    {
+      "code": "INVALID_FUEL",
+      "meaning": "invalid fuel",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The CLI rejects zero fuel before loading the program, so checked source cannot pass invalid fuel to an evaluator.",
+      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+    },
+    {
+      "code": "INVALID_UTF8",
+      "meaning": "invalid utf8",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "LEX_INVALID_LITERAL",
+      "meaning": "lex invalid literal",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "LEX_INVALID_TOKEN",
+      "meaning": "lex invalid token",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "MATCH_NONEXHAUSTIVE",
+      "meaning": "match omits a variant arm",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "METAL_PENDING",
+      "meaning": "metal pending",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "A pending Metal result is a device execution state and cannot be encoded by a checked program.",
+      "fault_test": "issue_ai_01_machine_diagnostics_metal_backend_faults"
+    },
+    {
+      "code": "METAL_UNAVAILABLE",
+      "meaning": "metal unavailable",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "MIR_BLOCK",
+      "meaning": "verified MIR references a missing block",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_BLOCK requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "MIR_CALL",
+      "meaning": "verified MIR has an invalid call",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_CALL requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "MIR_FOR",
+      "meaning": "verified MIR has an invalid counted loop",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_FOR requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "MIR_INDEX",
+      "meaning": "verified MIR has an invalid index",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_INDEX requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_size_index_faults"
+    },
+    {
+      "code": "MIR_INVALID",
+      "meaning": "MIR verifier rejected an invalid program",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The CLI verifies MIR produced by lowering before it is executed, so checked source cannot supply a forged MIR schema or graph.",
+      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+    },
+    {
+      "code": "MIR_LOAN",
+      "meaning": "verified MIR violates a runtime loan invariant",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_LOAN requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "MIR_PLACE",
+      "meaning": "verified MIR references an unavailable place",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_PLACE requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "MIR_SIZE",
+      "meaning": "MIR exceeds a documented size limit",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_SIZE requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_size_index_faults"
+    },
+    {
+      "code": "MIR_TYPE",
+      "meaning": "verified MIR runtime value has the wrong type",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_TYPE requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "MIR_VALUE",
+      "meaning": "verified MIR references a missing value",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "MIR_VALUE requires MIR state that the lowering and verifier reject before checked source executes.",
+      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+    },
+    {
+      "code": "M5_LIBRARY_PATH",
+      "meaning": "qualification library directory is not an absolute existing directory",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "M5_USAGE",
+      "meaning": "qualification command arguments are missing, duplicated or unsupported",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "MODULE_IMPORT_CYCLE",
+      "meaning": "module imports form a cycle",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "MODULE_LIMIT",
+      "meaning": "module or import count exceeds its bound",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "NAME_DUPLICATE",
+      "meaning": "name duplicate",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "NAME_UNKNOWN",
+      "meaning": "name unknown",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "NATIVE_ABI",
+      "meaning": "native abi",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The native host ABI handshake is produced by the compiler and host process, not checked source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+    },
+    {
+      "code": "NATIVE_BACKEND",
+      "meaning": "native backend",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Native backend availability is determined by the compiler toolchain, not checked source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+    },
+    {
+      "code": "NATIVE_BUILD",
+      "meaning": "native build",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "A native build tool failure is an environment or compiler failure, not a property supplied by checked source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+    },
+    {
+      "code": "NATIVE_TOOL",
+      "meaning": "native tool",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "The native tool executable is resolved by the environment and cannot be named by checked source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+    },
+    {
+      "code": "NATIVE_TRACE_LIMIT",
+      "meaning": "native trace limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "NATIVE_UNAVAILABLE",
+      "meaning": "native unavailable",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "NO_ADMITTED_CANDIDATE",
+      "meaning": "no source region has a proved parallel candidate",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "NUMERIC_POLICY",
+      "meaning": "candidate cannot preserve the declared numeric policy",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWNERSHIP",
+      "meaning": "candidate ownership proof failed",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWN_BORROW_CONFLICT",
+      "meaning": "own borrow conflict",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWN_BORROW_SOURCE",
+      "meaning": "own borrow source",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWN_MOVE_REQUIRED",
+      "meaning": "own move required",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWN_MUT_REQUIRED",
+      "meaning": "own mut required",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWN_RETURN_BORROW",
+      "meaning": "own return borrow",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "OWN_USE_AFTER_MOVE",
+      "meaning": "own use after move",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "PARSE_EXPECTED_TOKEN",
+      "meaning": "parse expected token",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "PHYSICAL_BOUNDS",
+      "meaning": "candidate physical memory bounds are not proved",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "PUBLICATION",
+      "meaning": "candidate cannot publish output only after completion",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "RANGE",
+      "meaning": "candidate loop range cannot be proved bounded",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "RECORD_LIMIT",
+      "meaning": "record count or field count exceeds its bound",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "RESOURCE_LIMIT",
+      "meaning": "resource limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "RETURN_MISSING",
+      "meaning": "return missing",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "ROTATION_INVALID",
+      "meaning": "rotation is not a proper signed-permutation matrix",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "SEED",
+      "meaning": "collective seed does not meet the required plan contract",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "SHAPE",
+      "meaning": "candidate does not match a supported transformation shape",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "SOURCE_NESTING_LIMIT",
+      "meaning": "source nesting limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "SOURCE_SIZE_LIMIT",
+      "meaning": "source size limit",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "STATE_DEPENDENCE",
+      "meaning": "recurrence has an unsupported state dependence",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "TC_CONTRACT",
+      "meaning": "TC completion disagrees with its recognized fresh-output contraction",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Checked TC source has fixed argument types, validated extents and a fresh output owner, so a mismatched private completion cannot arise from valid source.",
+      "fault_test": "issue_ai_01_machine_diagnostics_tc_serial_completion_refuses_output_aliases"
+    },
+    {
+      "code": "TC_INPUT_RANGE",
+      "meaning": "TC operand is nonfinite or rounds outside the finite binary16 range",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "TARGET_UNKNOWN",
+      "meaning": "no target description selects the device",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Whether a target description selects the device depends on the installed GPU and the built-in target files, not checked program semantics.",
+      "fault_test": "issue_ai_01_machine_diagnostics_target_unknown_fault"
+    },
+    {
+      "code": "TERMINATION",
+      "meaning": "candidate loop termination is not proved",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "TOTALITY",
+      "meaning": "candidate operation may trap or fail where totality is required",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "TYPE_MISMATCH",
+      "meaning": "type mismatch",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNIT_AS_VALUE",
+      "meaning": "unit type name is used as a runtime value",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNIT_CONVERSION_INEXACT",
+      "meaning": "an explicit integer unit conversion has a fractional result",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNIT_MISMATCH",
+      "meaning": "quantity units or their numeric scalars do not match",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNIT_UNKNOWN",
+      "meaning": "quantity names an unknown or overflowing unit expression",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNKNOWN_EFFECT",
+      "meaning": "candidate includes an operation with unknown effects",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNREACHED_OR_GUARD_FALSE",
+      "meaning": "candidate was not reached or its runtime guard failed",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "UNSUPPORTED_FEATURE",
+      "meaning": "unsupported feature",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "VARIANT_LIMIT",
+      "meaning": "variant count or arm count exceeds its bound",
+      "deprecated": false,
+      "reachability": "source"
+    },
+    {
+      "code": "HOST_ARRAY_ALIAS",
+      "meaning": "host array alias",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Host-supplied array buffers may overlap a mut argument or another element type while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_reference_host_array_alias_maps_to_buffer_alias"
+    },
+    {
+      "code": "HOST_ARRAY_EXTENT",
+      "meaning": "host array extent",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Host-supplied array metadata may overflow or be misaligned while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_reference_host_array_extent_maps_to_buffer_limit"
+    },
+    {
+      "code": "HOST_STAGING_LIMIT",
+      "meaning": "host staging limit",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Host staging for host array arguments can exceed its bound or fail to reserve while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_reference_host_staging_limit_maps_to_staging_limit"
+    },
+    {
+      "code": "HOST_TAKE_UNAVAILABLE",
+      "meaning": "host take unavailable",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "A host call may target a take parameter, which has no host-boundary contract, while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_reference_host_take_unavailable_maps_to_take_unavailable"
+    },
+    {
+      "code": "PY_ABI_TYPE_UNAVAILABLE",
+      "meaning": "abi type unavailable",
+      "deprecated": false,
+      "reachability": "invariant",
+      "justification": "Checked L1-04 signatures admit only the frozen scalar and byte/text tags. The binding rejects a corrupt internal signature before loading or calling any library.",
+      "fault_test": "issue_ai_01_machine_diagnostics_python_invalid_checked_signature_fault_is_typed"
+    },
+    {
+      "code": "PY_ARGUMENT_COUNT",
+      "meaning": "argument count",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    },
+    {
+      "code": "PY_ARRAY_ALIGNMENT",
+      "meaning": "array alignment",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ARRAY_BOOL_VALUE",
+      "meaning": "bool array byte other than 0 or 1",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_bool_array_bytes_other_than_zero_or_one_are_refused"
+    },
+    {
+      "code": "PY_ARRAY_CONTIGUITY",
+      "meaning": "array contiguity",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ARRAY_DTYPE",
+      "meaning": "array dtype",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ARRAY_OWNERSHIP",
+      "meaning": "array ownership",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ARRAY_RANK",
+      "meaning": "array rank",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ARRAY_SHAPE",
+      "meaning": "array shape",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ARRAY_WRITABILITY",
+      "meaning": "array writability",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_readonly_output_alias_and_subclass_rejected"
+    },
+    {
+      "code": "PY_BUFFER_ALIAS",
+      "meaning": "buffer alias",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_readonly_output_alias_and_subclass_rejected"
+    },
+    {
+      "code": "PY_BUFFER_LIMIT",
+      "meaning": "buffer limit",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_invalid_arrays"
+    },
+    {
+      "code": "PY_ENGINE_UNAVAILABLE",
+      "meaning": "engine unavailable",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_unsupported_engine_is_precise"
+    },
+    {
+      "code": "PY_EXPORT_UNAVAILABLE",
+      "meaning": "export unavailable",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    },
+    {
+      "code": "PY_FOREIGN_ALLOCATION",
+      "meaning": "foreign allocation",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_foreign_error_boundary_documents"
+    },
+    {
+      "code": "PY_FOREIGN_LAYOUT",
+      "meaning": "foreign layout",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    },
+    {
+      "code": "PY_FOREIGN_LIBRARY",
+      "meaning": "foreign library",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_foreign_error_boundary_documents"
+    },
+    {
+      "code": "PY_FOREIGN_STATUS",
+      "meaning": "foreign status",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    },
+    {
+      "code": "PY_FOREIGN_SYMBOL",
+      "meaning": "foreign symbol",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    },
+    {
+      "code": "PY_FOREIGN_VERSION",
+      "meaning": "foreign version",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_foreign_error_boundary_documents"
+    },
+    {
+      "code": "PY_LIBRARY_PATH",
+      "meaning": "library path",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    },
+    {
+      "code": "PY_STAGING_LIMIT",
+      "meaning": "staging limit",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Host staging for an explicit reference-engine array call can exceed its bound or fail to reserve while checked Invar source remains valid.",
+      "boundary_test": "issue_l1_06_python_binding_reference_staging_limit_is_a_typed_resource_error"
+    },
+    {
+      "code": "PY_TAKE_UNAVAILABLE",
+      "meaning": "take unavailable",
+      "deprecated": false,
+      "reachability": "external",
+      "justification": "Malformed external Python arguments or C-boundary failures can occur while checked Invar source remains valid.",
+      "boundary_test": "test_all_exception_classes_have_schema_valid_documents"
+    }
+  ],
+  "explain_reason_codes": [
+    "calibration-probe-failed",
+    "capacity",
+    "cpu-cost-unknown",
+    "cuda-failed-before-publication",
+    "cuda-feature-unavailable",
+    "device-cost-unknown",
+    "device-plan-ineligible",
+    "device-unavailable",
+    "forced-device",
+    "illegal",
+    "live-guard-false",
+    "measured",
+    "measured-cpu-cost",
+    "measured-device-cost",
+    "metal-buffer-slot-limit",
+    "metal-failed-before-publication",
+    "metal-feature-or-platform-unavailable",
+    "metal-no-f64",
+    "profile-missing",
+    "provisional-untrusted",
+    "publication-guard-false",
+    "sort-cost-unmeasured",
+    "spatial-cost-unmeasured",
+    "spatial-host-work",
+    "staged-consumer",
+    "toolchain-unavailable",
+    "unmeasured"
+  ]
+}

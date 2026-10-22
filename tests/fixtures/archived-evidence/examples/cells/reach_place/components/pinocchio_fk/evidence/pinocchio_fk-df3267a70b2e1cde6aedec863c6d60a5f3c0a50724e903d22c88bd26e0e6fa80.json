@@ -1,0 +1,99 @@
+{
+  "child_sha256": null,
+  "component": "pinocchio_fk",
+  "host": {
+    "arch": "aarch64",
+    "os": "linux"
+  },
+  "inputs": [
+    {
+      "path": "<generated>",
+      "role": "generated-header",
+      "sha256": "fe3c32a94557e1e074c31911d95c186562d3b738cb9f64696101271db103186e"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/golden/panda_fk.json",
+      "role": "golden",
+      "sha256": "3f907af98ce3a9ceb550d06f10e709b8c48bd64d7ca4000bcb0a04d8140b8a39"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/abi_exports.map",
+      "role": "input",
+      "sha256": "cc7b22233615039867bd9f826b7f59c20835917fecd37e07c10ab1edd84bed75"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/abi_reference.cpp",
+      "role": "input",
+      "sha256": "20d3f960b14212c09eace96bc98500272c1296c013db3600d2b81f1eba172142"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/abi_reference.h",
+      "role": "input",
+      "sha256": "79bd51c5d97b2f139b2a6b91bb874309845ed4e7d747db200e424ef6d3939001"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/bridge_exports.map",
+      "role": "input",
+      "sha256": "305d0d52db2e95a2ffed211d2d46f260311a9bd02a34cecd1500893573397887"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/core.cpp",
+      "role": "input",
+      "sha256": "2196620d9c69e29ba26f1db3ec98a7167fd449bc962d89fa96c865b2eeb19a10"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/core.hpp",
+      "role": "input",
+      "sha256": "cf755fff4c2977507c9ed0bd234df1af743f72c7a6a79f7c546cf7851a6955a6"
+    },
+    {
+      "path": "tests/fixtures/foreign-components/CMakeLists.txt",
+      "role": "input",
+      "sha256": "248759919e8818e85caf841fcd204282ab9f023568b9cdc656b18c75cf38bb7d"
+    },
+    {
+      "path": "tests/fixtures/foreign-components/generate_pinocchio_goldens.py",
+      "role": "input",
+      "sha256": "83780bcfec8da8fcbdda03863011721fe5fa12108c15e3cac1c4264064c2a708"
+    },
+    {
+      "path": "tests/fixtures/foreign-components/models/franka_emika_panda/LICENSE",
+      "role": "input",
+      "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+    },
+    {
+      "path": "tests/fixtures/foreign-components/models/franka_emika_panda/panda.xml",
+      "role": "input",
+      "sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273"
+    },
+    {
+      "path": "tests/fixtures/foreign-components/pinocchio_goldens.json",
+      "role": "input",
+      "sha256": "3f907af98ce3a9ceb550d06f10e709b8c48bd64d7ca4000bcb0a04d8140b8a39"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/manifest.inv",
+      "role": "manifest",
+      "sha256": "1f6789b1ef8060a424996440307b76e23bae7e294e6cade550814b4342251830"
+    },
+    {
+      "path": "examples/cells/reach_place/components/pinocchio_fk/bridge.c",
+      "role": "shim",
+      "sha256": "81b4d57688e6d036df8bb85aa0d16a057371583f99e9b6803d43e5c38f4c3dfa"
+    }
+  ],
+  "library_sha256": "372eeba979eb2a4e0d8641f479fccf823c1d2eaf783e35b1d088fec5656ef72d",
+  "library_version": "invar-component-v1/invar-pinocchio-reference-abi-1/pinocchio-4.1.0",
+  "manifest_hash": "df3267a70b2e1cde6aedec863c6d60a5f3c0a50724e903d22c88bd26e0e6fa80",
+  "model_sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+  "results": {
+    "golden_vectors": 4,
+    "invalid_inputs": "pass",
+    "layout": "pass",
+    "lifecycle": "pass",
+    "process": "not_applicable",
+    "property_samples": 16
+  },
+  "schema": "invar-component-evidence-v1",
+  "status": "pass"
+}

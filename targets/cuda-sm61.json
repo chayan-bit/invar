@@ -1,0 +1,27 @@
+{
+  "schema": "invar-target-v1",
+  "name": "cuda-sm61",
+  "source": "CUDA C++ Programming Guide 12.9, Technical Specifications per Compute Capability",
+  "device": {"backend": "cuda", "sm": 61},
+  "gpu": {
+    "subgroup_width": 32,
+    "max_threads_per_group": 1024,
+    "shared_bytes_per_group": 49152,
+    "shared_bytes_per_group_optin": 49152,
+    "registers_per_thread": 255,
+    "memory_levels": [
+      {"level": "global", "alignment_bytes": 256},
+      {"level": "shared", "alignment_bytes": 16},
+      {"level": "registers", "alignment_bytes": 4}
+    ],
+    "copy_atoms": [
+      {"name": "ld-global-4", "kind": "plain", "from": "global", "to": "registers", "bytes": 4, "alignment_bytes": 4},
+      {"name": "ld-global-8", "kind": "plain", "from": "global", "to": "registers", "bytes": 8, "alignment_bytes": 8},
+      {"name": "ld-global-16", "kind": "plain", "from": "global", "to": "registers", "bytes": 16, "alignment_bytes": 16},
+      {"name": "st-shared-4", "kind": "plain", "from": "registers", "to": "shared", "bytes": 4, "alignment_bytes": 4},
+      {"name": "ld-shared-4", "kind": "plain", "from": "shared", "to": "registers", "bytes": 4, "alignment_bytes": 4},
+      {"name": "st-global-4", "kind": "plain", "from": "registers", "to": "global", "bytes": 4, "alignment_bytes": 4}
+    ],
+    "mma_atoms": []
+  }
+}

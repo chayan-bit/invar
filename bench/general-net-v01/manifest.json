@@ -1,0 +1,370 @@
+{
+  "case_count": 15,
+  "cases": [
+    {
+      "expected_check": {
+        "diagnostic_codes": [
+          "OWN_BORROW_CONFLICT"
+        ],
+        "exit": 1,
+        "status": "source_error"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "OWN_BORROW_CONFLICT"
+        ],
+        "exit": 1,
+        "status": "source_error"
+      },
+      "family": "ownership",
+      "fuel": 100000,
+      "id": "alias_conflict",
+      "input_binding": "source_literals_current_cli",
+      "role": "source_rejection",
+      "source": "current/alias_conflict.inv",
+      "source_bytes": 153,
+      "source_sha256": "9fb85841af8a7ded653063d6c5a808d90566cea27692a1d6c891caa215c04b45",
+      "variant": "alias"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 33
+        },
+        "status": "ok"
+      },
+      "family": "input_branch_tree",
+      "fuel": 100000,
+      "id": "branch_tree_a",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/branch_tree_a.inv",
+      "source_bytes": 875,
+      "source_sha256": "981efe79cb00d53580cff7c150d190e2fd4f30205870afa1fffbbe449514eb25",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 26
+        },
+        "status": "ok"
+      },
+      "family": "input_branch_tree",
+      "fuel": 100000,
+      "id": "branch_tree_b",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/branch_tree_b.inv",
+      "source_bytes": 875,
+      "source_sha256": "eb3c907d5f375744d570bc046d42daaa93ccfb2998774ff3f5c0b9743211869a",
+      "variant": "B"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 9
+        },
+        "status": "ok"
+      },
+      "family": "composed_recursive_loop_branch",
+      "fuel": 100000,
+      "id": "composed_split_leaf",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/composed_split_leaf.inv",
+      "source_bytes": 811,
+      "source_sha256": "4949974d97e2b20878d924133c563907f47bb5d87823bf01de2cceb4c37b071d",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "EVALUATION_LIMIT"
+        ],
+        "exit": 4,
+        "fuel_limit": 200,
+        "status": "evaluation_limit",
+        "steps_used": 200
+      },
+      "family": "divergence_prefix",
+      "fuel": 200,
+      "id": "divergent_prefix",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/divergent_prefix.inv",
+      "source_bytes": 133,
+      "source_sha256": "03f025ba7f86283c765c223d67c41f72f45e2a8d3c07596fb11e0115a2faec18",
+      "variant": "earlier_nontermination"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 67
+        },
+        "status": "ok"
+      },
+      "family": "irregular_divide",
+      "fuel": 100000,
+      "id": "divide_irregular_a",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/divide_irregular_a.inv",
+      "source_bytes": 532,
+      "source_sha256": "17b84ee81d9d70e3fa9627c451992e0c6b7da0d9f24b1d745f61f6df6f85ee17",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 84
+        },
+        "status": "ok"
+      },
+      "family": "irregular_divide",
+      "fuel": 100000,
+      "id": "divide_irregular_b",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/divide_irregular_b.inv",
+      "source_bytes": 532,
+      "source_sha256": "dd3a178e3ad710a385f41a9f1f3263d31e8b1ceafe15076cb9d15b71566b60e7",
+      "variant": "B"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 5
+        },
+        "status": "ok"
+      },
+      "family": "dynamic_graph_frontier",
+      "fuel": 100000,
+      "id": "frontier_graph_a",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/frontier_graph_a.inv",
+      "source_bytes": 1081,
+      "source_sha256": "a4aa0ae4c05f31ff8473bc2f4b6511a947454f7a212f1c7b2a3b54ef8c14eb0a",
+      "variant": "A"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 3
+        },
+        "status": "ok"
+      },
+      "family": "dynamic_graph_frontier",
+      "fuel": 100000,
+      "id": "frontier_graph_b",
+      "input_binding": "source_literals_current_cli",
+      "role": "held_out_dynamic",
+      "source": "current/frontier_graph_b.inv",
+      "source_bytes": 1081,
+      "source_sha256": "bb92bc1bcb72734da4735a03b0c0099345de9b54364ef9a56055b465d13d64b9",
+      "variant": "B"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "DIVISION_BY_ZERO"
+        ],
+        "exit": 3,
+        "status": "trap",
+        "trap": {
+          "category": "DIVISION_BY_ZERO",
+          "span": {
+            "end": 30,
+            "start": 29
+          }
+        }
+      },
+      "family": "ordered_traps",
+      "fuel": 100000,
+      "id": "ordered_trap_first",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/ordered_trap_first.inv",
+      "source_bytes": 156,
+      "source_sha256": "aa622189a01b5382c3ac818c59cab7e5bcb9ae0eccf4d56dd9f3e492f30d7fcc",
+      "variant": "first"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "diagnostic_codes": [
+          "INDEX_OUT_OF_BOUNDS"
+        ],
+        "exit": 3,
+        "status": "trap",
+        "trap": {
+          "category": "INDEX_OUT_OF_BOUNDS",
+          "span": {
+            "end": 101,
+            "start": 93
+          }
+        }
+      },
+      "family": "ordered_traps",
+      "fuel": 100000,
+      "id": "ordered_trap_later",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/ordered_trap_later.inv",
+      "source_bytes": 152,
+      "source_sha256": "139ec3a4b19ad714d1aa670e4fa93da47d232f0731b712434d65132b5b5dd502",
+      "variant": "later"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 22
+        },
+        "status": "ok"
+      },
+      "family": "ordered_memory",
+      "fuel": 100000,
+      "id": "ordered_write",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/ordered_write.inv",
+      "source_bytes": 300,
+      "source_sha256": "5f317c6c7ed0fde46698d8dac6ea905d9abff19f44f0f6a138f17cb4217d129b",
+      "variant": "write_then_read"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 13
+        },
+        "status": "ok"
+      },
+      "family": "serial_control",
+      "fuel": 100000,
+      "id": "serial_chain",
+      "input_binding": "source_literals_current_cli",
+      "role": "control",
+      "source": "current/serial_chain.inv",
+      "source_bytes": 124,
+      "source_sha256": "c9d20ef29f04662d48a82c63da15b78520e6530943f8549d71b205953e751e96",
+      "variant": "chain"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 5
+        },
+        "status": "ok"
+      },
+      "family": "tiny_control",
+      "fuel": 100000,
+      "id": "tiny_control",
+      "input_binding": "source_literals_current_cli",
+      "role": "control",
+      "source": "current/tiny_control.inv",
+      "source_bytes": 157,
+      "source_sha256": "e09e0d7ecc82f0d9096a0c2913ba0387b5ed4a3c303d97fef688a57aa0cc584f",
+      "variant": "one_element"
+    },
+    {
+      "expected_check": {
+        "exit": 0,
+        "status": "ok"
+      },
+      "expected_reference_run": {
+        "exit": 0,
+        "result": {
+          "type": "i32",
+          "value": 7
+        },
+        "status": "ok"
+      },
+      "family": "demand",
+      "fuel": 100000,
+      "id": "unselected_trap_diverge",
+      "input_binding": "source_literals_current_cli",
+      "role": "semantic_negative",
+      "source": "current/unselected_trap_diverge.inv",
+      "source_bytes": 149,
+      "source_sha256": "c2749cb72f8f9bf0fbc0c4d8cffd17f21584180b593912e55d9b1e4c132cba69",
+      "variant": "untaken"
+    }
+  ],
+  "schema_version": 1,
+  "parity_spec": "parity-spec.json",
+  "seed": null,
+  "source_language": "bootstrap_v01_supported_syntax",
+  "status": "proposed_v01_general_net_acceptance_prep"
+}

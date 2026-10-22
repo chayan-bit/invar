@@ -1,0 +1,5 @@
+// Ordinary i32 addition is checked: overflow is a source trap, never a wrap.
+fn main() -> i32 {
+    let largest: i32 = 2147483647;
+    return largest + 1;
+}

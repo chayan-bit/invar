@@ -1,0 +1,65 @@
+# ARM64 ROS pins from the official Resolute index, SHA-256
+# 153bc378ab165908e8f86a6533df1c575a8aefdd158ac141188e2679d5e1d6b9.
+FROM ros:lyrical-ros-base@sha256:0c19f326a339ed770ef1d4c0646a8b53bdb49dd5ff74b6de41ebdb8ac21e1806
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# The live ROS index no longer lists the 2026-09-16 pins below. Resolve ROS
+# packages only from the immutable 2026-09-18 ROS snapshot, signed by the
+# "ROS Snapshot builder" key 4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA.
+COPY ros-snapshots-key.asc /etc/apt/keyrings/ros-snapshots.asc
+RUN echo 'b64b891805249c408ea3a9fd0457c1ae42ad6e5713be58737688d6a65886565d  /etc/apt/keyrings/ros-snapshots.asc' \
+      | sha256sum -c - \
+    && rm /etc/apt/sources.list.d/ros2.sources \
+    && printf '%s\n' 'Types: deb' 'URIs: http://snapshots.ros.org/lyrical/2026-09-18/ubuntu' \
+      'Suites: resolute' 'Components: main' 'Signed-By: /etc/apt/keyrings/ros-snapshots.asc' \
+      > /etc/apt/sources.list.d/ros2-snapshot.sources
+
+RUN test "$(dpkg --print-architecture)" = arm64 \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip=25.1.1+dfsg-1ubuntu2 \
+    python3-venv=3.14.3-0ubuntu2 \
+    ros-lyrical-ros2-control=6.10.1-1resolute.20260916.074527 \
+    ros-lyrical-ros2-controllers=6.9.0-1resolute.20260916.072810 \
+    ros-lyrical-controller-manager=6.10.1-1resolute.20260916.070952 \
+    ros-lyrical-mujoco-ros2-control=0.1.2-1resolute.20260916.072010 \
+    ros-lyrical-mujoco-ros2-control-demos=0.1.2-1resolute.20260916.073431 \
+    ros-lyrical-mujoco-vendor=0.1.0-1resolute.20260826.115610 \
+    ros-lyrical-generate-parameter-library=1.3.0-1resolute.20260915.085755 \
+    ros-lyrical-rmw-zenoh-cpp=0.10.6-1resolute.20260915.030033 \
+    ros-lyrical-rosbag2-storage-mcap=0.33.3-1resolute.20260915.113602 \
+    ros-lyrical-ros2bag=0.33.3-1resolute.20260915.131112 \
+    ros-lyrical-ros2launch=0.29.9-1resolute.20260915.121425 \
+    ros-lyrical-pinocchio=4.1.0-1resolute.20260825.024635 \
+    && rm -rf /var/lib/apt/lists/*
+
+# The base image has older interface libraries than the pinned controller build.
+RUN set -eu; \
+    mkdir -p /tmp/ros-interface-fix; \
+    for spec in \
+      'builtin-interfaces 2.4.5-1resolute.20260915.030751 bfe8895674c87ee15388959b8e9ae9cf515e92e9a40ca7d2ddfa3b1ce90ea99e' \
+      'geometry-msgs 5.9.3-1resolute.20260915.040510 bfa950a88832b3c56ce61703c1f2309cc21fe17709eac50b8d987829f7f10eec' \
+      'lifecycle-msgs 2.4.5-1resolute.20260915.032933 8100804db2b019f6a967731afceb34696d65f7e6e574e96f1eaed9eb1e9401a1' \
+      'sensor-msgs 5.9.3-1resolute.20260915.042131 e435ce1ae24c92627d53bcb999627d547892fb6c03ce43129712b4a21fe92c1a' \
+      'service-msgs 2.4.5-1resolute.20260915.031315 8930449861467aeddf5ced351a13a0965fb66f25d178bb58d2badbfb8bfacc07' \
+      'std-msgs 5.9.3-1resolute.20260915.033923 432d3e36ee83fc2955b71cf558375ef9b4e7f148a04a38121b9e009cb7681321' \
+      'trajectory-msgs 5.9.3-1resolute.20260915.042337 21f50884bd0d15478b1d00af828876b2fe80ce8823dc51fbfa5b11e89b84d897' \
+      'diagnostic-msgs 5.9.3-1resolute.20260915.041359 70aed5a6f8ecdab2ff3f7fef3a21c1aff378bcd86ddee6ee3913cef8948ebaf5' \
+      'unique-identifier-msgs 2.8.1-3resolute.20260915.030214 3beb0a82bd4a44634045016369a5b9ad7911c52b8c6c3d381dfbd418de271d8f'; do \
+      read -r package version checksum <<< "$spec"; \
+      file="ros-lyrical-${package}_${version}_arm64.deb"; \
+      curl -fsSL --retry 3 \
+        "https://repo.ros2.org/ubuntu/main/pool/main/r/ros-lyrical-${package}/${file}" \
+        -o "/tmp/ros-interface-fix/${file}"; \
+      printf '%s  %s\n' "$checksum" "/tmp/ros-interface-fix/${file}" | sha256sum -c -; \
+    done; \
+    dpkg -i /tmp/ros-interface-fix/*.deb; \
+    rm -rf /tmp/ros-interface-fix
+
+COPY mujoco-requirements.txt /tmp/mujoco-requirements.txt
+RUN python3 -m venv --system-site-packages /opt/invar-ros-python \
+    && /opt/invar-ros-python/bin/pip install --no-cache-dir --require-hashes \
+         -r /tmp/mujoco-requirements.txt \
+    && rm /tmp/mujoco-requirements.txt
+
+ENV PATH="/opt/invar-ros-python/bin:${PATH}"

@@ -1,0 +1,5 @@
+fn slow(n: u32) -> i32 { for i in 0u32..n {} return 7; }
+fn owned(value: i32) -> i32 { let xs: Array<i32> = [value, 2]; return xs[0u32] + xs[1u32]; }
+fn run(n: u32, value: i32) -> i32 { return slow(n) + owned(value); }
+fn main() -> i32 { return run(30u32, 3); }
+fn priority(n: u32, value: i32) -> i32 { let keep = filled_i32(2u32, 1); return run(n, value) + keep[0u32]; }

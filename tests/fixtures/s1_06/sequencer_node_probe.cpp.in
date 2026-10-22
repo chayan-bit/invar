@@ -1,0 +1,81 @@
+#include "projection.hpp"
+#include "stub.hpp"
+#include "probe_data.hpp"
+#define main generated_task_main
+#include "node.cpp"
+#undef main
+#include <cassert>
+#include <deque>
+#include <limits>
+int main(int argc,char **argv){
+ if(argc!=6)return 2;
+ std::signal(SIGPIPE,SIG_IGN);
+ stub::params={{"runtime_path",argv[1]},{"binding_path",argv[2]},{"task_path",argv[3]},{"task_sha256",argv[4]}};
+ const std::string mode=argv[5];const bool good=mode=="valid"||mode=="not_ready";
+ using State=invar_cell_interfaces::msg::CellSnapshot@JOINTS@V1;
+ using Req=invar_cell_interfaces::msg::PlannerRequest@JOINTS@V2;
+ using Plan=invar_cell_interfaces::msg::PlannerTrajectory@JOINTS@V1;
+ auto q=home;std::array<double,7> cube{0.3,0,0.025,0,0,0,1};std::deque<Plan> plans;int requests=0,approved=0;std::vector<std::string> phases;
+ stub::published<Req> = [&](const Req&r){++requests;Plan p;p.dt_s=1.0/255;p.waypoints.resize(256);auto end=q;
+  invar_tool_projection_v1::Pose target{{r.target_base_from_tool[0],r.target_base_from_tool[1],r.target_base_from_tool[2]},{r.target_base_from_tool[3],r.target_base_from_tool[4],r.target_base_from_tool[5],r.target_base_from_tool[6]}};
+  if(!invar_tool_projection_v1::apply(target.p,target.q,invar_tool_projection_v1::inverse(invar_tool_projection_v1::source_base_from_reference_base),invar_tool_projection_v1::inverse(invar_tool_projection_v1::reference_from_cell)))std::abort();
+  for(int i=0;i<3;++i)end[i]=target.p[i];
+  if(r.phase==4)end=r.goal_q_rad;
+  for(int i=0;i<256;++i){p.waypoints[i].time_from_start_s=double(i)/255;for(int j=0;j<@JOINTS@;++j)p.waypoints[i].q_rad[j]=q[j]+(end[j]-q[j])*double(i)/255;}
+  if(mode=="endpoint")p.waypoints.back().q_rad=q;
+  if(mode=="late_invalid")p.waypoints[254].q_rad.back()=1000;
+  if(mode=="late_velocity")p.waypoints[254].dq_rad_s.back()=1000;
+  if(mode=="nonfinite")p.waypoints[254].q_rad.back()=std::numeric_limits<double>::quiet_NaN();
+  if(mode=="start")p.waypoints.front().q_rad[0]+=2e-6;
+  if(mode=="collapsed_time")p.waypoints[254].time_from_start_s=p.waypoints[253].time_from_start_s;
+  if(mode=="capacity")p.waypoints.resize(257);
+  plans.push_back(p);
+ };
+ stub::published<Plan> = [&](const Plan&p){++approved;q=p.waypoints.back().q_rad;};
+ stub::published<std_msgs::msg::String> = [&](const std_msgs::msg::String&m){phases.push_back(m.data);};
+ auto send=[&](std::uint64_t ns,bool attached){State s;s.simulation_ns=ns;s.step_index=++step_index;s.source_ir_sha256=source_hash;s.joint_order_sha256=order_hash;s.q_rad=q;
+  invar_tool_projection_v1::Pose tool{{q[0],q[1],q[2]},{0,0,0,1}};
+  if(!invar_tool_projection_v1::fk_to_cell(tool.p,tool.q))std::abort();
+  s.world_from_tool={tool.p[0],tool.p[1],tool.p[2],tool.q[0],tool.q[1],tool.q[2],tool.q[3]};
+  s.world_from_cube=cube;s.attached=attached?1:0;s.geom_classes={0,1,2,3};
+  s.robot_joint_order_sha256=robot_order_hash;s.robot_q_si.assign(robot_home.begin(),robot_home.end());s.robot_dq_si_per_s.assign(robot_home.size(),0);
+  for(std::size_t i=0;i<q.size();++i)s.robot_q_si[arm_indices[i]]=q[i];
+  if(mode=="robot_limit")s.robot_q_si.back()=1000;
+  if(mode=="robot_velocity")s.robot_dq_si_per_s.back()=1000;
+  if(mode=="robot_conflict")s.robot_q_si[arm_indices[0]]+=5e-7;
+  if(mode=="stale_source"||mode=="main_failure")s.source_ir_sha256[0]^=1;
+  if(mode=="stale_order")s.joint_order_sha256[0]^=1;
+  if(mode=="same_state")s.world_from_tool[0]+=2e-6;
+  if(mode=="contact")s.contact_geom_ids={1,2};
+  stub::send(s);while(!plans.empty()){auto p=plans.front();plans.pop_front();stub::send(p);}
+ };
+ if(mode=="main_failure"||mode=="main_shutdown") {
+  if(mode=="main_failure")stub::spin_hook=[&]{send(0,false);};
+  const int status=generated_task_main(0,nullptr);
+  assert(status==1&&stub::stopped&&approved==0);return status;
+ }
+ try{
+  if(mode=="dead_process")stub::params["runtime_path"]="/bin/false";
+  if(mode=="stalled_process"||mode=="partial_process")stub::params["runtime_path"]=std::string(argv[2])+"."+mode;
+  auto node=std::make_shared<TaskNode>();
+  // Without a live planner subscription no snapshot is admitted and no request is lost.
+  if(mode=="not_ready"){stub::subscribers=0;send(0,false);assert(requests==0&&!node->completed());stub::subscribers=1;}
+  send(0,false);send(1000000000,false);send(5000000000,false);
+  if(mode=="service")stub::service_success=false;
+  // Attach, settle 200 ms, then lift, transfer and place; release, retreat and plan home.
+  send(6000000000,false);send(6010000000,true);send(6210000000,true);send(10000000000,true);send(11000000000,true);
+  send(15000000000,true);send(16000000000,true);send(20000000000,true);
+  cube=final_cube;send(21000000000,true);send(21010000000,false);send(25000000000,false);send(26000000000,false);
+  send(30000000000,false);send(31000000000,false);
+  assert(good);assert(node->completed());assert(stub::stopped);assert(requests==7&&approved==7);assert(stub::attachment_calls==std::vector<bool>({true,false}));
+  // Every task phase change seen by a snapshot was published once, in order. No
+  // snapshot arrives mid-execution here, so no executing phase is seen.
+  const std::vector<std::string> expected{"pregrasp/planning/world=free","descend/need_plan/world=approach","descend/planning/world=approach",
+   "attach","settle","lift/need_plan/world=held_contact","lift/planning/world=held_contact","transfer/need_plan/world=held","transfer/planning/world=held",
+   "place_descend/need_plan/world=held_contact","place_descend/planning/world=held_contact","release","retreat/need_plan/world=approach","retreat/planning/world=approach",
+   "home/need_plan/world=home","home/planning/world=home","complete"};
+  assert(phases==expected);
+  assert(q==home);return 0;
+ }catch(const std::exception&){assert(!good);assert(!stub::stopped);if(mode=="service")assert(approved==2);else assert(approved==0);
+  int status=0;assert(::waitpid(-1,&status,WNOHANG)==-1&&errno==ECHILD);return 1;}
+}

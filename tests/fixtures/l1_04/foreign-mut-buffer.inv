@@ -1,0 +1,2 @@
+extern c fn bad(data: mut Bytes) -> Result<i32, ForeignError> oracle missing;
+fn main() -> i32 { return 0; }

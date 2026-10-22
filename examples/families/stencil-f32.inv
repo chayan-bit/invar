@@ -1,0 +1,27 @@
+// Out-of-place radius-1 five-point f32 stencil with a constant-zero boundary and source-ordered sums.
+fn step(a: read Array<f32>, rows: u32, cols: u32) -> Array<f32> {
+    var b = filled_f32(rows * cols, 0.0);
+    for r in 0u32 .. rows {
+        for c in 0u32 .. cols {
+            var n = 0.0;
+            if r > 0u32 { n = a[(r - 1u32) * cols + c]; }
+            var s = 0.0;
+            if r + 1u32 < rows { s = a[(r + 1u32) * cols + c]; }
+            var w = 0.0;
+            if c > 0u32 { w = a[r * cols + (c - 1u32)]; }
+            var e = 0.0;
+            if c + 1u32 < cols { e = a[r * cols + (c + 1u32)]; }
+            b[r * cols + c] = (((a[r * cols + c] + n) + s) + w) + e;
+        }
+    }
+    return b;
+}
+
+fn main() -> i32 {
+    let a: Array<f32> = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    let b = step(a, 2u32, 3u32);
+    if b[0u32] == 7.0 and b[4u32] == 17.0 {
+        return 7;
+    }
+    return 0;
+}

@@ -1,0 +1,38 @@
+frame base;
+frame tool: base;
+
+import component "components/pinocchio_fk/manifest.inv";
+
+fn run() -> i32 { return 0; }
+component source {
+    port out q: std::robotics::JointPositions<f64,7> @ 100 Hz;
+    resource cpu_cores = 1, memory = 16 MiB;
+    wcet 1 ms;
+    deadline 10 ms;
+    license "Apache-2.0";
+    isolation in-process;
+    impl invar run;
+}
+component sink {
+    port in pose: std::robotics::Pose<f64,base,tool> @ 100 Hz;
+    resource cpu_cores = 1, memory = 16 MiB;
+    wcet 1 ms;
+    deadline 10 ms;
+    license "Apache-2.0";
+    isolation in-process;
+    impl invar run;
+}
+connect src.q -> fk.q policy sample-and-hold;
+connect fk.pose -> dst.pose policy sample-and-hold;
+
+product ManifestImport {
+    distribution internal;
+    commercial true;
+    robot menagerie::franka_emika_panda;
+    capacity cpu_cores = 3, memory = 128 MiB;
+}
+system manifest_import for ManifestImport {
+    src: source;
+    fk: pinocchio_fk;
+    dst: sink;
+}

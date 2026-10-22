@@ -1,0 +1,3 @@
+fn signed(a:i32)->f32 {return f32_from_i32(a);}
+fn unsigned(a:u32)->f32 {return f32_from_u32(a);}
+fn main()->i32 {if signed(2147483647)==2147483648.0 and unsigned(4294967295u32)==4294967296.0 {return 7;}return 0;}

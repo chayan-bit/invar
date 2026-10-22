@@ -1,0 +1,1 @@
+fn main() -> i32 { let bytes: Bytes = b"a"; let part: Bytes = bytes_slice(bytes, 0u32, 2u32); return 0; }

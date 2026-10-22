@@ -1,0 +1,202 @@
+{
+  "binary_sha256": "80cc0d2fa2c1ecd304b8d1562476e5f3502389d20b6f1c6ab1b1c83a5bbb1518",
+  "checks": {
+    "compiled_first_protocol_and_unchanged_parity_gate": "passed",
+    "kinematics_cpu_oracle_contract_digest_and_shape": "passed",
+    "parity_metric_provenance_and_prerequisites": "passed",
+    "robotics_reference_lineage_and_blockers": "passed",
+    "source_check_and_reference_run": 30,
+    "source_hashes": 15,
+    "workload_rows": 8
+  },
+  "formal_staging_validation": "pending_main_cpu_lease",
+  "kinematics_cpu_oracle_contract_sha256": "85362985e3729e6f40eac401efc3772d27fb90f93238f3e0174a01517bd2b0b6",
+  "manifest_sha256": "c9820a5c76529ff6c428fc87d2f24307aeca657801d0f4ede6cdacd99aecb94b",
+  "measurement_status": "none",
+  "parity_spec_sha256": "ec2371d091b1c2a6cdff02a6de5058c64ab23893197f2643514135ae5416d14f",
+  "results": [
+    {
+      "action": "check",
+      "exit": 1,
+      "id": "alias_conflict",
+      "status": "source_error"
+    },
+    {
+      "action": "run",
+      "exit": 1,
+      "id": "alias_conflict",
+      "status": "source_error"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "branch_tree_a",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "branch_tree_a",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "branch_tree_b",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "branch_tree_b",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "composed_split_leaf",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "composed_split_leaf",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "divergent_prefix",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 4,
+      "id": "divergent_prefix",
+      "status": "evaluation_limit"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "divide_irregular_a",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "divide_irregular_a",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "divide_irregular_b",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "divide_irregular_b",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "frontier_graph_a",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "frontier_graph_a",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "frontier_graph_b",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "frontier_graph_b",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "ordered_trap_first",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 3,
+      "id": "ordered_trap_first",
+      "status": "trap"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "ordered_trap_later",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 3,
+      "id": "ordered_trap_later",
+      "status": "trap"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "ordered_write",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "ordered_write",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "serial_chain",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "serial_chain",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "tiny_control",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "tiny_control",
+      "status": "ok"
+    },
+    {
+      "action": "check",
+      "exit": 0,
+      "id": "unselected_trap_diverge",
+      "status": "ok"
+    },
+    {
+      "action": "run",
+      "exit": 0,
+      "id": "unselected_trap_diverge",
+      "status": "ok"
+    }
+  ],
+  "robotics_inventory_commit": "52c363f",
+  "schema_version": 1,
+  "status": "local_prebuilt_binary_preflight_passed"
+}

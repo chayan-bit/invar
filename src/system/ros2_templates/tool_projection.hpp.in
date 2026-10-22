@@ -1,0 +1,64 @@
+#pragma once
+#include <cmath>
+#include <cstddef>
+#include <fstream>
+#include <string>
+// Private generated adapter; external C/INVP/ROS wire layouts are unchanged.
+namespace { namespace invar_tool_projection_v1 {
+struct Pose { double p[3]; double q[4]; };
+inline constexpr char reference_model[] = R"INVAR_MODEL(@REFERENCE_MODEL@)INVAR_MODEL";
+inline bool reference_model_matches(const std::string & path) {
+  if (sizeof(reference_model)==1) return true;
+  std::ifstream file(path,std::ios::binary);
+  if(!file) return false;
+  for(std::size_t i=0;i<sizeof(reference_model)-1;++i) {
+    char c=0; if(!file.get(c) || c!=reference_model[i]) return false;
+  }
+  return file.peek()==std::char_traits<char>::eof() && !file.bad();
+}
+inline constexpr Pose reference_from_cell{{@TRANSLATION@},{@QUATERNION@}};
+inline constexpr Pose source_base_from_reference_base{{@BASE_TRANSLATION@},{@BASE_QUATERNION@}};
+inline bool valid(const Pose & a) {
+  double norm=0;
+  for (double x:a.p) if(!std::isfinite(x)) return false;
+  for (double x:a.q) { if(!std::isfinite(x)) return false; norm+=x*x; }
+  return std::isfinite(norm) && std::abs(std::sqrt(norm)-1.0)<=1e-12;
+}
+inline void rotate(const Pose & a,const double *v,double *out) {
+  const double x=a.q[0],y=a.q[1],z=a.q[2],w=a.q[3];
+  const double t[3]={2*(y*v[2]-z*v[1]),2*(z*v[0]-x*v[2]),2*(x*v[1]-y*v[0])};
+  out[0]=v[0]+w*t[0]+y*t[2]-z*t[1];
+  out[1]=v[1]+w*t[1]+z*t[0]-x*t[2];
+  out[2]=v[2]+w*t[2]+x*t[1]-y*t[0];
+}
+inline bool compose(const Pose & a,const Pose & b,Pose & out) {
+  if(!valid(a)||!valid(b)) return false;
+  Pose result{}; rotate(a,b.p,result.p);
+  for(std::size_t i=0;i<3;++i) result.p[i]+=a.p[i];
+  const double x=a.q[0],y=a.q[1],z=a.q[2],w=a.q[3],u=b.q[0],v=b.q[1],s=b.q[2],t=b.q[3];
+  result.q[0]=w*u+x*t+y*s-z*v; result.q[1]=w*v-x*s+y*t+z*u;
+  result.q[2]=w*s+x*v-y*u+z*t; result.q[3]=w*t-x*u-y*v-z*s;
+  if(!valid(result)) return false;
+  out=result; return true;
+}
+inline Pose inverse(const Pose & a) {
+  Pose result{{0,0,0},{-a.q[0],-a.q[1],-a.q[2],a.q[3]}};
+  const double v[3]={-a.p[0],-a.p[1],-a.p[2]}; rotate(result,v,result.p); return result;
+}
+inline bool apply(double *p,double *q,const Pose & left,const Pose & right) {
+  Pose a{{p[0],p[1],p[2]},{q[0],q[1],q[2],q[3]}},b{},c{};
+  if(!compose(left,a,b)||!compose(b,right,c)) return false;
+  for(std::size_t i=0;i<3;++i) p[i]=c.p[i];
+  for(std::size_t i=0;i<4;++i) q[i]=c.q[i];
+  return true;
+}
+inline constexpr Pose identity{{0,0,0},{0,0,0,1}};
+inline bool fk_to_cell(double *p,double *q) { return apply(p,q,source_base_from_reference_base,reference_from_cell); }
+template<class Request> bool request_to_reference(Request & value) {
+  auto candidate=value;
+  if(!apply(candidate.target_base_from_tool.xyz_m,candidate.target_base_from_tool.quaternion_xyzw,inverse(source_base_from_reference_base),inverse(reference_from_cell)) ||
+     !apply(candidate.cube_base_pose.xyz_m,candidate.cube_base_pose.quaternion_xyzw,inverse(source_base_from_reference_base),identity) ||
+     !apply(candidate.tool_from_cube.xyz_m,candidate.tool_from_cube.quaternion_xyzw,reference_from_cell,identity)) return false;
+  value=candidate; return true;
+}
+}}

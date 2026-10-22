@@ -1,0 +1,87 @@
+#include "node.hpp"
+#include "conversions.hpp"
+#include "tool_projection.hpp"
+#include <cstring>
+#include <dlfcn.h>
+#include <filesystem>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+#include <rclcpp_components/register_node_macro.hpp>
+
+namespace @NAMESPACE@ {
+namespace {
+template <typename Function>
+Function load_symbol(void * library, const char * name) {
+  auto * symbol = dlsym(library, name);
+  if (symbol == nullptr) throw std::runtime_error(std::string("missing C shim symbol: ") + name);
+  return reinterpret_cast<Function>(symbol);
+}
+}
+
+struct ComponentNode::Impl {
+  void * library = nullptr;
+  @PREFIX@_context * context = nullptr;
+  decltype(&@PREFIX@_shutdown) shutdown = nullptr;
+  decltype(&@PREFIX@_step) step = nullptr;
+  std::vector<std::string> joint_names;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr subscription;
+  rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr publisher;
+  ~Impl() {
+    if (context != nullptr && shutdown != nullptr) shutdown(&context);
+    if (library != nullptr) dlclose(library);
+  }
+};
+
+ComponentNode::ComponentNode(const rclcpp::NodeOptions & options)
+    : rclcpp::Node("@NODE@", options), impl_(std::make_unique<Impl>()) {
+  const auto library_path = declare_parameter<std::string>("library_path", "");
+  if (!std::filesystem::path(library_path).is_absolute())
+    throw std::runtime_error("foreign library_path must be absolute");
+  impl_->library = dlopen(library_path.c_str(), RTLD_NOW | RTLD_LOCAL);
+  if (impl_->library == nullptr) throw std::runtime_error("cannot load foreign component library");
+  const auto version = load_symbol<decltype(&@PREFIX@_version)>(impl_->library, "@PREFIX@_version");
+  const char * version_text = version();
+  if (version_text == nullptr || std::strncmp(version_text, "invar-component-v1/", 19) != 0)
+    throw std::runtime_error("foreign component ABI version mismatch");
+  @PROJECTION_VERSION_CHECK@
+  const auto init = load_symbol<decltype(&@PREFIX@_init)>(impl_->library, "@PREFIX@_init");
+  const auto configure = load_symbol<decltype(&@PREFIX@_configure)>(impl_->library, "@PREFIX@_configure");
+  impl_->step = load_symbol<decltype(&@PREFIX@_step)>(impl_->library, "@PREFIX@_step");
+  impl_->shutdown = load_symbol<decltype(&@PREFIX@_shutdown)>(impl_->library, "@PREFIX@_shutdown");
+  @INIT_PATH@
+  if (init(&impl_->context, child_data, child_size) != 0 || impl_->context == nullptr)
+    throw std::runtime_error("foreign component init failed");
+  @CONFIG@
+  if (configure(impl_->context, &config) != 0)
+    throw std::runtime_error("foreign component configure failed");
+  impl_->joint_names = declare_parameter<std::vector<std::string>>("joint_names", {@JOINT_NAMES@});
+  if (impl_->joint_names.size() != @JOINTS@)
+    throw std::runtime_error("foreign joint_names size mismatch");
+  auto input_qos = rclcpp::QoS(rclcpp::KeepLast(@INPUT_DEPTH@)).reliable();
+  auto output_qos = rclcpp::QoS(rclcpp::KeepLast(@OUTPUT_DEPTH@)).reliable();
+  impl_->publisher = create_publisher<geometry_msgs::msg::Pose>("@OUTPUT@", output_qos);
+  impl_->subscription = create_subscription<sensor_msgs::msg::JointState>(
+      "@INPUT@", input_qos, [this](sensor_msgs::msg::JointState::ConstSharedPtr message) {
+        @PREFIX@_inputs input{};
+        if (!from_ros(*message, impl_->joint_names, input)) {
+          RCLCPP_WARN(get_logger(), "JointState violates checked Invar port contract");
+          return;
+        }
+        @PREFIX@_outputs output{};
+        if (impl_->step(impl_->context, &input, &output) != 0) {
+          RCLCPP_ERROR(get_logger(), "foreign component step failed");
+          return;
+        }
+        if (!invar_tool_projection_v1::fk_to_cell(output.@OUTPUT@.translation_m, output.@OUTPUT@.quaternion_xyzw)) {
+          RCLCPP_ERROR(get_logger(), "invalid reference-to-cell FK transform");
+          return;
+        }
+        impl_->publisher->publish(to_ros(output));
+      });
+}
+
+ComponentNode::~ComponentNode() = default;
+}
+RCLCPP_COMPONENTS_REGISTER_NODE(@NAMESPACE@::ComponentNode)

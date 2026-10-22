@@ -1,0 +1,4 @@
+fn earlier(n: u32) -> i32 { if n == 0u32 { while true {} } return 4; }
+fn later() -> i32 { let xs: Array<i32> = [1]; return xs[1u32]; }
+fn ordered(n: u32) -> i32 { return earlier(n) + later(); }
+fn main() -> i32 { return ordered(1u32); }

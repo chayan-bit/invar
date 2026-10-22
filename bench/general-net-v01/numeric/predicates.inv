@@ -1,0 +1,7 @@
+fn eq(a:f32,b:f32)->Bool {return a==b;}
+fn ne(a:f32,b:f32)->Bool {return a!=b;}
+fn lt(a:f32,b:f32)->Bool {return a<b;}
+fn le(a:f32,b:f32)->Bool {return a<=b;}
+fn gt(a:f32,b:f32)->Bool {return a>b;}
+fn ge(a:f32,b:f32)->Bool {return a>=b;}
+fn main()->i32 {let n=0.0/0.0;if ne(n,n) and eq(-0.0,0.0) and not lt(n,1.0) {return 7;}return 0;}

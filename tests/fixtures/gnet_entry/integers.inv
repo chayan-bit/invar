@@ -1,0 +1,5 @@
+fn run(a: read Array<i32>, b: read Array<u32>, x: mut Array<i32>, y: mut Array<u32>) -> u32 {
+    for i in 0u32..len(a) { x[i] = a[i] + 1; y[i] = wrapping_mul(b[i], 3u32); }
+    return len(y);
+}
+fn main() -> i32 { return 0; }

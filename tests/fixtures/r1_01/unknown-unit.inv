@@ -1,0 +1,4 @@
+fn main() -> i32 {
+    let x: Quantity<i32, parsec> = quantity::<parsec>(1i32);
+    return 0i32;
+}

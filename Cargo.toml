@@ -1,0 +1,92 @@
+[package]
+name = "invar"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license.workspace = true
+
+[workspace]
+members = ["crates/invar-cuda", "crates/invar-device", "crates/invar-foreign", "crates/invar-math", "crates/invar-metal"]
+
+[workspace.package]
+license = "Apache-2.0"
+
+[features]
+native = ["dep:inkwell"]
+cuda = ["invar-cuda/runtime"]
+metal = ["dep:invar-metal"]
+# Test-only: emits a racing device fault hook into ABI5 kernels. Never enable
+# for a production build; suites prove the hook is absent without it.
+gnet-fault-injection = []
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "invar"
+path = "src/main.rs"
+
+[[bin]]
+name = "invar-sequencer"
+path = "src/bin/invar-sequencer.rs"
+
+[[bin]]
+name = "invar-nvrtc"
+path = "src/bin/invar-nvrtc.rs"
+required-features = ["cuda"]
+
+[[bin]]
+name = "invar-m3-03-cold"
+path = "src/bin/invar-m3-03-cold.rs"
+required-features = ["cuda"]
+
+[dependencies]
+invar-cuda = { path = "crates/invar-cuda" }
+invar-device = { path = "crates/invar-device" }
+invar-foreign = { path = "crates/invar-foreign" }
+invar-math = { path = "crates/invar-math" }
+invar-metal = { path = "crates/invar-metal", optional = true }
+inkwell = { version = "=0.8.0", default-features = false, features = ["llvm21-1-force-dynamic"], optional = true }
+serde_json = "1.0"
+spdx = "=0.13.5"
+jsonschema = { version = "=0.57.0", default-features = false }
+num-bigint = "=0.4.8"
+num-rational = "=0.4.2"
+sha2 = "=0.11.0"
+roxmltree = "=0.21.1"
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.189"
+
+[[bench]]
+name = "sort"
+path = "bench/sort.rs"
+harness = false
+
+[dev-dependencies]
+half = "=2.7.1"
+rayon = "=1.11.0"
+invar-cuda = { path = "crates/invar-cuda" }
+# tests/issue_dx_20_debug_info.rs reads the native backend's DWARF back.
+gimli = { version = "=0.34.0", default-features = false, features = ["read", "std"] }
+object = { version = "=0.40.0", default-features = false, features = ["read_core", "elf", "macho", "std"] }
+
+[build-dependencies]
+sha2 = "=0.11.0"
+
+[[example]]
+name = "sort-report"
+path = "bench/sort-report.rs"
+
+# CI Debug suites. Same checks as `dev` (debug assertions, overflow checks), but optimised enough that
+# Rust-bound tests run several times faster than at opt-level 0. Selected with `--cargo-profile ci-debug`
+# in .github/workflows/ci.yml; local `cargo test` keeps plain `dev`. tests/ci_profile_canary.rs fails
+# if this profile ever loses its checks. Debuginfo is set here because the workflow's
+# CARGO_PROFILE_DEV_DEBUG does not reach a profile that only inherits dev.
+[profile.ci-debug]
+inherits = "dev"
+opt-level = 1
+debug-assertions = true
+overflow-checks = true
+debug = "line-tables-only"

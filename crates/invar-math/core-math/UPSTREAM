@@ -1,0 +1,8 @@
+CORE-MATH, correctly rounded mathematical functions (MIT, see LICENSE).
+Repository: https://gitlab.inria.fr/core-math/core-math
+Commit: dae5dd8c0d5bd2691b45de28c9edbe12f067c3d3 (2026-10-15)
+Copied unmodified: src/binary32/<f>/<f>f.c and src/binary64/<f>/<f>.c for
+cbrt hypot sin cos tan asin acos atan atan2 sinh cosh tanh exp exp2 expm1
+log log2 log10 log1p pow, plus the local headers they include
+(binary64/atan2/tint.h, binary64/{log,log10,log1p,pow}/dint.h,
+binary64/pow/{pow.h,qint.h}). SHA256SUMS pins every file; a test checks it.

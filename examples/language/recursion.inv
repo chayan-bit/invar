@@ -1,0 +1,14 @@
+// Direct recursion with an explicit base case.
+fn fib(n: u32) -> u32 {
+    if n < 2u32 {
+        return n;
+    }
+    return fib(n - 1u32) + fib(n - 2u32);
+}
+
+fn main() -> i32 {
+    if fib(10u32) == 55u32 {
+        return 55;
+    }
+    return 0;
+}

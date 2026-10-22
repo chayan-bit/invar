@@ -1,0 +1,6 @@
+fn main() -> i32 {
+    let xs: Array<i32> = [4];
+    var out: Array<i32> = [0];
+    for i in 0u32 .. len(xs) { out[i] = xs[i] + 1; }
+    return out[0u32];
+}

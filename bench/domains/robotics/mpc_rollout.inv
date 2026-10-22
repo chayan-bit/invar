@@ -1,0 +1,21 @@
+fn mpc_rollout(controls: read Array<f32>, k: u32, horizon: u32) -> Array<f32> {
+    var cost: Array<f32> = filled_f32(k, 0.0);
+    for c in 0u32..k {
+        var x: f32 = 0.0;
+        var y: f32 = 0.0;
+        var th: f32 = 0.0;
+        var denom: f32 = 0.0;
+        for h in 0u32..horizon {
+            let v: f32 = controls[(c * horizon + h) * 2u32];
+            let w: f32 = controls[(c * horizon + h) * 2u32 + 1u32];
+            th = th + w * 0.1;
+            x = x + v * cos(th) * 0.1;
+            y = y + v * sin(th) * 0.1;
+            let dx: f32 = x - 1.0;
+            let dy: f32 = y - 0.5;
+            denom = denom + (dx * dx + dy * dy + 0.01 * (v * v + w * w));
+        }
+        cost[c] = denom;
+    }
+    return move cost;
+}

@@ -1,0 +1,95 @@
+// Real MuJoCo C API, CPU ROS stand-ins. No transport or task acceptance claim.
+#include "stub.hpp"
+#include "probe_data.hpp"
+#include "plugin.cpp"
+#include <cassert>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <limits>
+using Snapshot=invar_cell_interfaces::msg::CellSnapshot@JOINTS@V1;
+int main(int argc,char **argv) {
+  if(argc!=2)return 2;
+  char error[2048]{};
+  std::unique_ptr<mjModel,decltype(&mj_deleteModel)> m(mj_loadXML(argv[1],nullptr,error,sizeof(error)),mj_deleteModel);
+  if(!m){std::cerr<<error;return 2;}
+  assert(std::string(mj_versionString())=="3.12.0");
+  std::unique_ptr<mjData,decltype(&mj_deleteData)> d(mj_makeData(m.get()),mj_deleteData),oracle(mj_makeData(m.get()),mj_deleteData);
+  const int home=mj_name2id(m.get(),mjOBJ_KEY,"home");assert(home>=0);
+  mj_resetDataKeyframe(m.get(),d.get(),home);mj_forward(m.get(),d.get());
+  auto node=std::make_shared<rclcpp::Node>("snapshot_cpu_probe");
+  auto plugin=std::make_unique<invar_cell_bringup::AttachmentPlugin>();
+  assert(plugin->init(node,m.get(),d.get()));
+  // A callback on a copy can have external effects. Unsupported global
+  // callbacks must be refused before invoking them, not called speculatively.
+  int callback_calls=0;
+  static int *calls=nullptr;calls=&callback_calls;
+  mjcb_control=[](const mjModel*,mjData*){++*calls;};
+  auto unsupported=std::make_unique<invar_cell_bringup::AttachmentPlugin>();
+  assert(!unsupported->init(node,m.get(),d.get()));assert(callback_calls==0);
+  mjcb_control=nullptr;
+  std::vector<Snapshot> captured;
+  stub::published<Snapshot> = [&](const Snapshot&s){captured.push_back(s);};
+  const int size=mj_stateSize(m.get(),mjSTATE_INTEGRATION),site=mj_name2id(m.get(),mjOBJ_SITE,"invar_tool"),weld=mj_name2id(m.get(),mjOBJ_EQUALITY,"cube_attach");
+  std::vector<mjtNum> before(size),after(size);
+  constexpr std::array<const char *,@JOINTS@> names={@JOINT_NAMES@};
+  constexpr std::array<const char *,@ROBOT_JOINTS@> robot_names={@ROBOT_JOINT_NAMES@};
+  double max_position_error=0;
+  for(int frame=0;frame<12;++frame) {
+    // mj_step can leave derived caches behind integrated q. Capture must
+    // forward its private copy; the live state's bytes must remain untouched.
+    if(frame>0)mj_step(m.get(),d.get());
+    mj_copyData(oracle.get(),m.get(),d.get());mj_forward(m.get(),oracle.get());
+    mj_getState(m.get(),d.get(),before.data(),mjSTATE_INTEGRATION);
+    const std::vector<mjtNum> accelerations(d->qacc,d->qacc+m->nv),site_cache(d->site_xpos,d->site_xpos+3*m->nsite);
+    plugin->pre_step(d.get());
+    mj_getState(m.get(),d.get(),after.data(),mjSTATE_INTEGRATION);
+    assert(before==after);
+    assert(std::equal(accelerations.begin(),accelerations.end(),d->qacc));
+    assert(std::equal(site_cache.begin(),site_cache.end(),d->site_xpos));
+    plugin->update(m.get(),d.get());
+    assert(captured.size()==std::size_t(frame+1));
+    const auto &s=captured.back();assert(s.step_index==std::uint64_t(frame+1));
+    assert(s.source_ir_sha256==source_hash&&s.joint_order_sha256==order_hash);
+    assert(s.robot_joint_order_sha256==robot_order_hash);
+    assert(s.robot_q_si.size()==robot_names.size()&&s.robot_dq_si_per_s.size()==robot_names.size());
+    for(std::size_t i=0;i<robot_names.size();++i) {
+      const int j=mj_name2id(m.get(),mjOBJ_JOINT,robot_names[i]);assert(j>=0);
+      assert(s.robot_q_si[i]==d->qpos[m->jnt_qposadr[j]]);assert(s.robot_dq_si_per_s[i]==d->qvel[m->jnt_dofadr[j]]);
+    }
+    assert(s.simulation_ns==static_cast<std::uint64_t>(d->time*1e9));
+    assert(s.contact_geom_ids.size()==std::size_t(2*oracle->ncon));
+    assert(s.geom_classes.size()==std::size_t(m->ngeom));
+    for(std::size_t i=0;i<names.size();++i) {
+      const int j=mj_name2id(m.get(),mjOBJ_JOINT,names[i]);assert(j>=0);
+      assert(s.q_rad[i]==d->qpos[m->jnt_qposadr[j]]);assert(s.dq_rad_s[i]==d->qvel[m->jnt_dofadr[j]]);
+    }
+    for(int i=0;i<3;++i)max_position_error=std::max(max_position_error,std::abs(s.world_from_tool[i]-oracle->site_xpos[3*site+i]));
+    mjtNum quat[4];mju_mat2Quat(quat,oracle->site_xmat+9*site);
+    for(int i=0;i<4;++i)assert(s.world_from_tool[3+i]==quat[(i+1)%4]);
+    const int cube=mj_name2id(m.get(),mjOBJ_BODY,"cube");
+    for(int i=0;i<3;++i)assert(s.world_from_cube[i]==oracle->xpos[3*cube+i]);
+    for(int i=0;i<4;++i)assert(s.world_from_cube[3+i]==oracle->xquat[4*cube+(i+1)%4]);
+    for(int i=0;i<oracle->ncon;++i){assert(s.contact_geom_ids[2*i]==oracle->contact[i].geom1);assert(s.contact_geom_ids[2*i+1]==oracle->contact[i].geom2);}
+    for(int g=0;g<m->ngeom;++g) {
+      const int body=m->geom_bodyid[g];int expected=0;
+      if(body==mj_name2id(m.get(),mjOBJ_BODY,"table"))expected=2;
+      else if(body==mj_name2id(m.get(),mjOBJ_BODY,"cube"))expected=3;
+      else for(int b=body;b>0;b=m->body_parentid[b])if(b==mj_name2id(m.get(),mjOBJ_BODY,"@ROBOT_ROOT@")){expected=1;break;}
+      assert(s.geom_classes[g]==expected);
+    }
+  }
+  assert(max_position_error<=1e-15);
+  auto set=std::make_shared<std_srvs::srv::SetBool::Request>();auto ack=std::make_shared<std_srvs::srv::SetBool::Response>();set->data=true;
+  stub::service<std_srvs::srv::SetBool>(set,ack);assert(ack->success);assert(!d->eq_active[weld]);
+  plugin->pre_step(d.get());assert(d->eq_active[weld]);plugin->update(m.get(),d.get());assert(captured.back().attached==0);
+  plugin->pre_step(d.get());plugin->update(m.get(),d.get());assert(captured.back().attached==1);
+  plugin->on_reset(d.get());assert(!d->eq_active[weld]);
+  // A full producer ring must cause an explicit fault before further publish.
+  const auto published=captured.size();
+  for(int i=0;i<257;++i)plugin->pre_step(d.get());
+  bool failed=false;try{plugin->update(m.get(),d.get());}catch(const std::runtime_error&e){failed=std::string(e.what()).find("S1406")!=std::string::npos;}
+  assert(failed&&captured.size()==published);
+  plugin->cleanup();
+  std::cout<<"{\"joint_count\":@JOINTS@,\"frames\":12,\"same_state_max_translation_m\":"<<max_position_error<<",\"live_integration_state_unchanged\":true,\"overflow_rejected\":true,\"qualification\":\"real_MuJoCo_CPU_ROS_standins_only\"}\n";
+}
