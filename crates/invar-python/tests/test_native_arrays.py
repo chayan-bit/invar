@@ -77,7 +77,8 @@ def test_array_descriptors_report_modes_and_the_copy_path(arrays, scalar_engine)
     assert all(p["zero_copy"] is zero_copy for p in scale["parameters"][:2])
     caps = inv.capabilities()
     assert caps["numeric_array_abi"] is False, "the public C ABI is unchanged"
-    assert caps["array_exports"] == ["read Array<i32>", "read Array<u32>", "mut Array<i32>", "mut Array<u32>", "read Array<f32>", "mut Array<f32>"]
+    assert caps["array_exports"] == ["read Array<i32>", "read Array<u32>", "mut Array<i32>", "mut Array<u32>", "read Array<f32>", "mut Array<f32>",
+                                     "read Array<f64>", "mut Array<f64>", "read Array<Bool>", "mut Array<Bool>"]
     assert caps["gil_released"] is False
 
 

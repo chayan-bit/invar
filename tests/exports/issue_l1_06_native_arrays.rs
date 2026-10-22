@@ -389,3 +389,142 @@ fn issue_l1_06_native_arrays_reference_is_disclosed_as_copying() {
     assert!(!outcome.zero_copy);
     assert!(outcome.record_addresses.is_empty());
 }
+
+const V02_SOURCE: &str = "\
+fn halve(xs: read Array<f64>, out: mut Array<f64>) -> u32 { for i in 0u32..len(xs) { out[i] = xs[i] * 0.5; } return len(out); }
+fn positive(xs: read Array<f64>, out: mut Array<Bool>) -> u32 { for i in 0u32..len(xs) { out[i] = xs[i] > 0.0; } return len(out); }
+fn flip(flags: mut Array<Bool>) -> u32 { for i in 0u32..len(flags) { flags[i] = not flags[i]; } return len(flags); }
+fn poke(xs: mut Array<f64>, i: u32) -> u32 { xs[0u32] = 1.0; xs[i] = 2.0; return len(xs); }";
+const V02_NAMES: [&str; 4] = ["halve", "positive", "flip", "poke"];
+
+/// Run `halve` + `positive` + `flip` + a trapping `poke` and return every observable byte.
+fn v02_observe(engine: ExportEngine) -> (Vec<u64>, Vec<bool>, Vec<bool>, Vec<u64>, String) {
+    let mut artifact = compile_exports(V02_SOURCE.as_bytes(), PATH, &V02_NAMES, engine).unwrap();
+    // NaN payloads, signed zero, infinities and the smallest subnormal survive bit for bit.
+    let input: Vec<f64> = [
+        0x7FF8_0000_0000_0123u64,
+        0x8000_0000_0000_0000,
+        0x7FF0_0000_0000_0000,
+        0x0000_0000_0000_0001,
+        0x4000_0000_0000_0000,
+        0xBFF0_0000_0000_0000,
+    ]
+    .map(f64::from_bits)
+    .to_vec();
+    let mut halved = vec![0.0f64; input.len()];
+    let mut marks = vec![true; input.len()];
+    for (name, args) in [
+        (
+            "halve",
+            vec![
+                HostArgument::Read(HostReadArray::Float64(&input)),
+                HostArgument::Mut(HostMutArray::Float64(&mut halved)),
+            ],
+        ),
+        (
+            "positive",
+            vec![
+                HostArgument::Read(HostReadArray::Float64(&input)),
+                HostArgument::Mut(HostMutArray::Bool(&mut marks)),
+            ],
+        ),
+    ] {
+        let mut args = args;
+        let outcome = artifact.invoke_arrays(name, &mut args, 10_000).unwrap();
+        assert_eq!(outcome.value, ScalarValue::U32(input.len() as u32));
+        assert_eq!(outcome.zero_copy, engine == ExportEngine::NativeSerial);
+    }
+    let mut flags = vec![true, false, true];
+    let mut args = vec![HostArgument::Mut(HostMutArray::Bool(&mut flags))];
+    artifact.invoke_arrays("flip", &mut args, 10_000).unwrap();
+    drop(args);
+    // A trap after the first store restores the pre-call bits.
+    let mut trapped = vec![f64::from_bits(0x7FF8_0000_0000_0123); 2];
+    let mut args = vec![
+        HostArgument::Mut(HostMutArray::Float64(&mut trapped)),
+        HostArgument::U32(9),
+    ];
+    let error = artifact
+        .invoke_arrays("poke", &mut args, 10_000)
+        .unwrap_err();
+    drop(args);
+    let trap = format!("{error:?}");
+    assert!(matches!(
+        error,
+        ExportError::Evaluation(EvalError::Trap {
+            category: TrapCategory::IndexOutOfBounds,
+            ..
+        })
+    ));
+    (
+        // Arithmetic NaN payloads are unobservable (docs/numeric-v1.md); only copies keep them.
+        halved
+            .iter()
+            .map(|x| {
+                if x.is_nan() {
+                    0x7FF8_0000_0000_0000
+                } else {
+                    x.to_bits()
+                }
+            })
+            .collect(),
+        marks,
+        flags,
+        trapped.iter().map(|x| x.to_bits()).collect(),
+        trap,
+    )
+}
+
+#[test]
+fn issue_l1_06_native_f64_and_bool_arrays_equal_the_reference_bit_for_bit() {
+    let reference = v02_observe(ExportEngine::Reference);
+    assert_eq!(reference.1, [false, false, true, true, true, false]);
+    assert_eq!(reference.2, [false, true, false]);
+    assert_eq!(
+        reference.3, [0x7FF8_0000_0000_0123; 2],
+        "trap restored the payload"
+    );
+    for engine in engines() {
+        assert_eq!(v02_observe(engine), reference, "{engine:?}");
+    }
+}
+
+#[test]
+fn issue_l1_06_f64_and_bool_export_admission() {
+    for engine in engines() {
+        let artifact = compile_exports(V02_SOURCE.as_bytes(), PATH, &V02_NAMES, engine).unwrap();
+        let positive = &artifact.signatures()[1];
+        assert_eq!(
+            positive
+                .params
+                .iter()
+                .map(|p| (p.ty, p.array))
+                .collect::<Vec<_>>(),
+            [
+                (ScalarType::F64, Some(ArrayMode::Read)),
+                (ScalarType::Bool, Some(ArrayMode::Mut)),
+            ]
+        );
+        for refused in [
+            "fn f(x: f64) -> u32 { return 0u32; }",
+            "fn f(xs: read Array<f64>) -> f64 { return xs[0u32]; }",
+            "fn f(xs: read Array<Bool>) -> Bool { return xs[0u32]; }",
+            "fn f(xs: take Array<f64>) -> u32 { return len(xs); }",
+            "fn f(xs: read Array<f64>) -> Array<f64> { return filled_f64(1u32, 0.0); }",
+        ] {
+            let error = compile_exports(refused.as_bytes(), PATH, &["f"], engine)
+                .err()
+                .unwrap_or_else(|| panic!("admitted {refused}"));
+            assert!(
+                matches!(
+                    error,
+                    ExportError::Boundary {
+                        code: "NATIVE_ABI",
+                        ..
+                    } | ExportError::Source(_)
+                ),
+                "{refused}: {error:?}"
+            );
+        }
+    }
+}

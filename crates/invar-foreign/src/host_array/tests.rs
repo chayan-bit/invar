@@ -472,6 +472,10 @@ fn descriptor_tags_are_private_and_match_the_loader() {
             descriptor_tag(ELEMENT_U32, MODE_MUT),
             descriptor_tag(ELEMENT_F32, MODE_READ),
             descriptor_tag(ELEMENT_F32, MODE_MUT),
+            descriptor_tag(ELEMENT_F64, MODE_READ),
+            descriptor_tag(ELEMENT_F64, MODE_MUT),
+            descriptor_tag(ELEMENT_BOOL, MODE_READ),
+            descriptor_tag(ELEMENT_BOOL, MODE_MUT),
         ]
     );
     for tag in crate::exports::ARRAY_TAGS {
@@ -479,7 +483,9 @@ fn descriptor_tags_are_private_and_match_the_loader() {
         assert!(tag > crate::STRING);
         assert!(decode_descriptor_tag(tag).is_some());
     }
-    for tag in [0, 1, 2, 3, 4, 0x110, 0x112, 0x132, 0x141, 0x211, 0x1111] {
+    for tag in [
+        0, 1, 2, 3, 4, 0x110, 0x112, 0x132, 0x161, 0x101, 0x211, 0x1111,
+    ] {
         assert_eq!(decode_descriptor_tag(tag), None, "{tag:#x}");
     }
 }
@@ -496,7 +502,7 @@ fn f32_record_and_exact_bit_rollback_on_drop_error_and_panic() {
         );
     }
     assert_eq!(decode_descriptor_tag(descriptor_tag(3, 2)), None);
-    assert_eq!(decode_descriptor_tag(descriptor_tag(4, 1)), None);
+    assert_eq!(decode_descriptor_tag(descriptor_tag(6, 1)), None);
     for path in ["drop", "error", "panic", "commit"] {
         let reads = BITS.map(f32::from_bits);
         let mut xs = BITS.map(f32::from_bits);
@@ -544,4 +550,160 @@ fn f32_record_and_exact_bit_rollback_on_drop_error_and_panic() {
         );
         assert_eq!(xs.map(f32::to_bits), BITS);
     }
+}
+
+#[test]
+fn f64_and_bool_records_and_exact_bit_rollback_on_drop_error_and_panic() {
+    const WORDS: [u64; 4] = [
+        0x7FF0_0000_0000_0001,
+        0xFFF8_0000_0001_2345,
+        0x8000_0000_0000_0000,
+        1,
+    ];
+    assert_eq!((ELEMENT_F64, ELEMENT_BOOL), (4, 5));
+    for path in ["drop", "error", "panic", "commit"] {
+        let mut xs = WORDS.map(f64::from_bits);
+        let mut flags = [true, false, true];
+        let address = xs.as_ptr().addr();
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let mut call = HostArrayCall::prepare(vec![
+                HostArray::MutF64(&mut xs),
+                HostArray::MutBool(&mut flags),
+            ])
+            .unwrap();
+            let records = call.records();
+            assert_eq!(
+                records
+                    .get(0)
+                    .map(|r| (r.element(), r.mode(), r.address(), r.len())),
+                Some((4, 3, address, 4))
+            );
+            assert_eq!(records.get(1).map(|r| (r.element(), r.len())), Some((5, 3)));
+            drop(records);
+            for array in call.arrays_mut() {
+                match array {
+                    HostArray::MutF64(v) => v.fill(1.0),
+                    HostArray::MutBool(v) => v.fill(false),
+                    _ => unreachable!(),
+                }
+            }
+            match path {
+                "commit" => call.commit(),
+                "error" => assert!(call.finish::<(), ()>(Err(())).is_err()),
+                "panic" => panic!("injected f64 decode panic"),
+                _ => drop(call),
+            }
+        }));
+        assert_eq!(outcome.is_err(), path == "panic");
+        if path == "commit" {
+            assert_eq!(
+                (xs.map(f64::to_bits), flags),
+                ([1.0f64.to_bits(); 4], [false; 3])
+            );
+        } else {
+            assert_eq!((xs.map(f64::to_bits), flags), (WORDS, [true, false, true]));
+        }
+    }
+    for fail_at in 0..4 {
+        let mut xs = WORDS.map(f64::from_bits);
+        let mut flags = [true; 2];
+        assert_eq!(
+            HostArrayCall::prepare_with(
+                vec![HostArray::MutF64(&mut xs), HostArray::MutBool(&mut flags)],
+                Some(fail_at)
+            )
+            .err(),
+            Some(HostArrayError::Snapshot)
+        );
+        assert_eq!(xs.map(f64::to_bits), WORDS);
+        assert_eq!(flags, [true; 2]);
+    }
+}
+
+#[test]
+fn f64_and_bool_bounds_use_element_sizes() {
+    // 1,000,000 f64 is within the per-array bound; one more bool is a length error.
+    let ok = vec![0.0f64; MAX_ELEMENTS];
+    assert!(HostArrayCall::prepare(vec![HostArray::ReadF64(&ok)]).is_ok());
+    let long = vec![false; MAX_ELEMENTS + 1];
+    assert_eq!(
+        HostArrayCall::prepare(vec![HostArray::ReadBool(&long)]).err(),
+        Some(HostArrayError::Length)
+    );
+    // Two 1M mut f64 arrays hold 2M live elements and snapshot 16 MB: allowed for a call with an 8-byte array.
+    let (mut a, mut b) = (vec![0.0f64; MAX_ELEMENTS], vec![0.0f64; MAX_ELEMENTS]);
+    assert!(
+        HostArrayCall::prepare(vec![HostArray::MutF64(&mut a), HostArray::MutF64(&mut b)]).is_ok()
+    );
+    // Three 1M arrays exceed the 2M live-element bound whatever the element size.
+    let flags = vec![false; MAX_ELEMENTS];
+    assert_eq!(
+        HostArrayCall::prepare(vec![
+            HostArray::ReadBool(&flags),
+            HostArray::ReadF64(&ok),
+            HostArray::ReadF64(&a),
+        ])
+        .err(),
+        Some(HostArrayError::Live)
+    );
+    // A call of 4-byte arrays keeps the 8 MB snapshot bound: two 1M mut u32 arrays fit exactly.
+    let (mut x, mut y) = (vec![0u32; MAX_ELEMENTS], vec![0u32; MAX_ELEMENTS]);
+    assert!(
+        HostArrayCall::prepare(vec![HostArray::MutU32(&mut x), HostArray::MutU32(&mut y)]).is_ok()
+    );
+}
+
+#[test]
+fn f64_and_bool_extents_alias_and_union_rules() {
+    let extent = |element, mutable, address, length| Extent {
+        element,
+        mutable,
+        address,
+        length,
+    };
+    let a = 0x1000_0000usize;
+    // Exact read/read alias shares memory; any overlap involving mut, or across element types, is refused.
+    assert!(
+        validate(&[
+            extent(ELEMENT_F64, false, a, 4),
+            extent(ELEMENT_F64, false, a, 4)
+        ])
+        .is_ok()
+    );
+    assert_eq!(
+        validate(&[
+            extent(ELEMENT_F64, true, a, 4),
+            extent(ELEMENT_F64, false, a + 8, 1)
+        ]),
+        Err(HostArrayError::Alias)
+    );
+    assert_eq!(
+        validate(&[
+            extent(ELEMENT_F64, false, a, 4),
+            extent(ELEMENT_BOOL, false, a + 8, 4)
+        ]),
+        Err(HostArrayError::Alias)
+    );
+    // Touching extents of different element sizes are counted separately, element by element.
+    assert!(
+        validate(&[
+            extent(ELEMENT_F64, false, a, 2),
+            extent(ELEMENT_BOOL, false, a + 16, 4)
+        ])
+        .is_ok()
+    );
+    let wide = MAX_ELEMENTS;
+    assert_eq!(
+        validate(&[
+            extent(ELEMENT_F64, false, a, wide),
+            extent(ELEMENT_F64, false, a + wide * 8, wide),
+            extent(ELEMENT_BOOL, false, a + wide * 16, wide),
+        ]),
+        Err(HostArrayError::Live)
+    );
+    // An f64 extent that overflows the address space is an extent error, not a wrapped length.
+    assert_eq!(
+        validate(&[extent(ELEMENT_F64, false, usize::MAX - 7, 2)]),
+        Err(HostArrayError::Extent)
+    );
 }
