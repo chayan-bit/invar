@@ -1,52 +1,21 @@
-//! #48 C4 part B: under `--numeric-contract trig-f32-v1`, f32 `sin` and `cos`
-//! carry their `invar-trig-f32-v1` names after typing, and every device path
-//! still admits them: f32 source regions and the general net (oracle, CUDA
-//! and Metal emitters, run here on the CPU device model). The devices already
-//! run `invar-trig-f32-v1`, so the bits match the host helpers.
-//!
-//! The selection is process-wide and one-way, so every test in this binary
-//! selects it first.
+//! #48 C4: f32 `sin` and `cos` run `invar-trig-f32-v1` on every device path:
+//! f32 source regions and the general net (oracle, CUDA and Metal emitters,
+//! run here on the CPU device model), with the bits of the host helpers.
 #![forbid(unsafe_code)]
 #[path = "support/gnet_entry.rs"]
 mod entry;
 use invar::{
     check, eval, front,
     general_net::{compiled::Target, device_host::cpu::CpuModel},
-    math, mir,
 };
 use invar_device::trig_f32;
 
-fn renamed(source: &str) {
-    let checked = check::check(front::parse(source.as_bytes()).unwrap(), true)
-        .unwrap_or_else(|error| panic!("{error:?}\n{source}"));
-    let program = mir::lower(&checked).unwrap();
-    let calls: Vec<&str> = program
-        .functions
-        .iter()
-        .flat_map(|function| &function.blocks)
-        .flat_map(|block| &block.instructions)
-        .filter_map(|instruction| match &instruction.kind {
-            mir::Operation::Call { name, .. } => Some(name.as_str()),
-            _ => None,
-        })
-        .collect();
-    for name in [math::TRIG_F32_SIN, math::TRIG_F32_COS] {
-        assert!(calls.contains(&name), "{name} in {calls:?}");
-    }
-    assert!(
-        !calls.iter().any(|n| matches!(*n, "sin" | "cos")),
-        "{calls:?}"
-    );
-}
-
 #[test]
-fn issue_210_trig_option_f32_source_regions_complete_on_the_device_plan() {
-    math::select_trig_f32_v1();
+fn issue_210_trig_f32_source_regions_complete_on_the_device_plan() {
     let source = "fn kernel(a: read Array<f32>, n: u32) -> Array<f32> { var out = filled_f32(n, 0.0); \
                   for i in 0u32..n { out[i] = fma(sin(a[i]), cos(a[i]), sqrt(a[i])); } return out; } \
                   fn main() -> i32 { let a: Array<f32> = [0.5, 3.0, 100000.0, 1000000000000000000000000000000.0, 0.0]; \
                   let out = kernel(a, 5u32); for i in 0u32..5u32 { if out[i] != fma(sin(a[i]), cos(a[i]), sqrt(a[i])) { return 0; } } return 7; }";
-    renamed(source);
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     let reference = eval::observe(&checked, 1_000_000);
     assert_eq!(reference.result, Ok(eval::Value::I32(7)));
@@ -64,9 +33,7 @@ fn issue_210_trig_option_f32_source_regions_complete_on_the_device_plan() {
 }
 
 #[test]
-fn issue_210_trig_option_general_net_runs_trig_f32_v1_on_both_device_targets() {
-    math::select_trig_f32_v1();
-    renamed("fn main() -> i32 { let x: f32 = 0.5; if sin(x) == cos(x) { return 0; } return 1; }");
+fn issue_210_trig_general_net_runs_trig_f32_v1_on_both_device_targets() {
     let xs: Vec<u32> = (0u32..256)
         .map(|i| (i << 24) | (i.wrapping_mul(0x9e3779b1) >> 8))
         .chain([

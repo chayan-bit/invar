@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=304 citations=325
-Size record: tokens=27960 estimator=bytes/3 limit=30000
+Counts: statements=303 citations=324
+Size record: tokens=27889 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1129,7 +1129,6 @@ fn main() -> i32 {
 [N13.2.2] Each code declares `reachability` of `source`, `invariant` or `external`, and checked source never emits an `invariant` code. `tests/issue_ai_01_machine_diagnostics/documents.rs::issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes`
 [N13.2.3] A code is never reused or renamed, and only `source` codes carry fixes. `schema/diagnostic-codes-v1.json`
 [N13.2.4] The `S1xxx` ranges are 1000 system dialect, 1100 to 1399 graph checks, 1400 foreign manifests, 1500 ROS 2, 1600 robot and cell, 1700 vocabulary, 1800 acceptance and 1900 reserved. `schema/diagnostic-codes-v1.json`
-[N13.2.5] The schema files are pinned by digest, so a change without a version bump fails. `tests/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_schema_digests_are_frozen`
 
 ### 13.3 Explain
 

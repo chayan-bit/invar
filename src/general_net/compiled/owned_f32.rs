@@ -80,7 +80,7 @@ pub(super) fn validate(
                     mir::Operation::Call { name, .. }
                         if !names.contains(name.as_str())
                             && !matches!(
-                                crate::math::f32_trig_base(name),
+                                name.as_str(),
                                 "filled_i32"
                                     | "filled_u32"
                                     | "filled_f32"
