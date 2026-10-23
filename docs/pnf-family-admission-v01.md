@@ -45,10 +45,9 @@ P3 constructs no completion, MIR override or device receipt.
 ## Verification and current gaps
 
 `tests/pnf_family_admission.rs` compares admissions by function and exact source
-span with the existing recognizers. It uses the existing 60 GNET-05 and 140
-M5-01 fixtures, plus snapshots of 48 robotics and 12 C1 residual forkjoin
-programs from the GNET-05 robotics corpus. Snapshot provenance and every SHA-256 are in
-`tests/pnf_family_fixtures/lineage.json`; no source generator is rerun. Focused
+span with the existing recognizers. It reads the 72 GNET-05 programs and the 48
+GNET-05 robotics programs in place under `bench/general-net-v01/gnet05`, plus the
+140 M5-01 fixtures; no source generator is rerun. Focused
 family programs and rename/near-miss variants supplement the corpus.
 
 The differential check requires every recognizer match to have either an
