@@ -416,11 +416,7 @@ pub fn run_native_with(
         message,
     })?;
     annotate_native_document(&mut document, path, source);
-    document["schema"] = serde_json::json!(if document["schema_version"] == 2 {
-        "invar-diagnostics-v2"
-    } else {
-        crate::diagnostics::SCHEMA
-    });
+    document["schema"] = serde_json::json!(crate::diagnostics::SCHEMA);
     Ok((status, document))
 }
 
@@ -556,7 +552,7 @@ mod tests {
     #[test]
     fn issue_ai_01_machine_diagnostics_native_backend_faults() {
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         let path = "fixture.inv";
         for (tool_code, expected) in [
@@ -565,7 +561,7 @@ mod tests {
             (None, "NATIVE_TOOL"),
         ] {
             let mut document =
-                serde_json::json!({"schema_version":1,"status":"tool_error","diagnostics":[]});
+                serde_json::json!({"schema_version":3,"status":"tool_error","diagnostics":[]});
             if let Some(code) = tool_code {
                 document["tool_code"] = serde_json::json!(code);
             }
@@ -587,7 +583,7 @@ mod tests {
         let document = error.to_diagnostics_json("fixture.inv", b"");
         assert_eq!(document["diagnostics"][0]["code"], "INTERNAL_MAIN");
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         assert!(jsonschema::is_valid(&schema, &document));
     }

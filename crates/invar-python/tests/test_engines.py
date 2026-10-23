@@ -12,7 +12,7 @@ import pytest
 from conftest import child_timeout
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-SCHEMA = json.loads((ROOT / "schema/invar-diagnostics-v1.schema.json").read_text())
+SCHEMA = json.loads((ROOT / "schema/invar-diagnostics-v3.schema.json").read_text())
 DEVICE_SCHEMA = json.loads((ROOT / "schema/invar-explain-device-v1.schema.json").read_text())
 EXPLAIN_SCHEMA = json.loads((ROOT / "schema/explain-v1.schema.json").read_text())
 SIMPLE = "fn main() -> i32 { return 42; }"

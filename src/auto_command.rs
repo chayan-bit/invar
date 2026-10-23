@@ -49,7 +49,6 @@ pub fn explain_version(document: &mut serde_json::Value, engine: Option<&str>) -
 /// `invar-diagnostics-v3` recording `auto_path: "established"` (#50).
 pub fn receipt(mut document: serde_json::Value, path: &OsString, engine: Engine) -> i32 {
     if engine == Engine::Auto {
-        document["schema_version"] = json!(3);
         document["auto_path"] = json!("established");
     }
     print_run_json(document, path)
@@ -238,7 +237,7 @@ pub fn command(args: &[OsString]) -> i32 {
         let (status, mut doc) = match run.observation.result {
             Ok(Value::I32(v)) => (
                 0,
-                json!({"schema_version":1,"status":"ok","diagnostics":[],"result":{"type":"i32","value":v}}),
+                json!({"schema_version":3,"status":"ok","diagnostics":[],"result":{"type":"i32","value":v}}),
             ),
             Ok(_) => {
                 return Err(EvalError::Tool {
@@ -300,7 +299,6 @@ pub fn command(args: &[OsString]) -> i32 {
             doc["placement"] = summary.clone();
             doc["auto_path"] = json!("placement");
             doc["placement"]["engine"] = json!("none");
-            doc["schema_version"] = json!(3);
             if json_output {
                 if print_run_json(doc, path) == 2 {
                     return 2;
@@ -311,8 +309,7 @@ pub fn command(args: &[OsString]) -> i32 {
             status
         }
         Ok((status, mut doc)) => {
-            doc["schema_version"] = json!(3);
-            doc["schema"] = json!("invar-diagnostics-v3");
+            doc["schema"] = json!(invar::diagnostics::SCHEMA);
             if explain {
                 let mut report = match invar::schedule::regions(&source, &program) {
                     Ok(r) => r.to_json(),

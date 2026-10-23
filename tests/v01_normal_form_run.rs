@@ -314,7 +314,7 @@ fn run_receipt_records_the_law_and_the_removed_opt_out_changes_nothing() {
     assert!(route["laws"].as_array().unwrap().contains(&"L3".into()));
     assert!(route["certificates"].as_u64().unwrap() >= 2);
     assert_eq!(route["fingerprint"].as_str().unwrap().len(), 64);
-    let v1 = schema("invar-diagnostics-v1.schema.json");
+    let v1 = schema("invar-diagnostics-v3.schema.json");
     assert!(jsonschema::is_valid(&v1, &document), "{document}");
     assert_eq!(cli(&args, true), (0, document.clone()));
     let (_, reference) = cli(
@@ -350,7 +350,7 @@ fn issue_54_a_loop_no_family_lowers_records_a_typed_fallback() {
         serde_json::json!({"status": "fallback", "reason": "no-lowering:reduce/lifted-sum"}),
         "{document}"
     );
-    let v1 = schema("invar-diagnostics-v1.schema.json");
+    let v1 = schema("invar-diagnostics-v3.schema.json");
     assert!(jsonschema::is_valid(&v1, &document), "{document}");
     let mut forged = document.clone();
     forged["normal_form"]["reason"] = "no-lowering:".into();
@@ -365,7 +365,7 @@ fn issue_54_every_normal_form_schema_accepts_the_typed_fallback() {
     let malformed = serde_json::json!({"status": "fallback", "reason": "no-lowering:reduce/"});
     for (name, pointer) in [
         (
-            "invar-diagnostics-v1.schema.json",
+            "invar-diagnostics-v3.schema.json",
             "/properties/normal_form",
         ),
         (

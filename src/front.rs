@@ -68,13 +68,13 @@ impl FrontError {
         self
     }
 
-    /// Deterministic version-1 diagnostic document for this front-end result.
+    /// Compact, source-free summary; the schema-valid form is [`Self::to_diagnostics_json`].
     pub fn to_json(&self, path: &str) -> Value {
         let span = self
             .span
             .map(|span| json!({"start": span.start, "end": span.end}));
         json!({
-            "schema_version": 1,
+            "schema_version": 3,
             "status": match self.kind { ErrorKind::Source => "source_error", ErrorKind::Tool => "tool_error" },
             "diagnostics": [{
                 "code": self.code,

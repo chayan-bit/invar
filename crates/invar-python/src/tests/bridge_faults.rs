@@ -484,7 +484,7 @@ fn issue_ai_01_machine_diagnostics_python_invalid_checked_signature_fault_is_typ
             )
             .unwrap();
             let schema: Value = serde_json::from_str(include_str!(
-                "../../../../schema/invar-diagnostics-v1.schema.json"
+                "../../../../schema/invar-diagnostics-v3.schema.json"
             ))
             .unwrap();
             assert!(jsonschema::is_valid(&schema, &document));

@@ -988,7 +988,7 @@ mod hardening_tests {
             .unwrap_err();
         assert_eq!(invalid_plan.code(), "CPU_CANDIDATE");
         let schema: serde_json::Value = serde_json::from_str(include_str!(
-            "../../schema/invar-diagnostics-v1.schema.json"
+            "../../schema/invar-diagnostics-v3.schema.json"
         ))
         .unwrap();
         for failure in [invalid_mir, invalid_plan] {

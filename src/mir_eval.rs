@@ -183,7 +183,7 @@ mod diagnostic_tests {
         #[cfg(target_pointer_width = "64")]
         cases.push((mir_len_u32(u32::MAX as usize + 1).unwrap_err(), "MIR_SIZE"));
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         for (error, code) in cases {
             let document = error.to_diagnostics_json("fixture.inv", b"");
@@ -252,7 +252,7 @@ mod diagnostic_tests {
         );
 
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         for (error, expected) in errors.into_iter().zip([
             "MIR_VALUE",

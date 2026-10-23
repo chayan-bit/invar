@@ -129,7 +129,7 @@ Not claimed: that declared licenses are correct; this is an engineering check, n
 Every generator is a pure function from the checked `invar-system-v1` IR to a file set.
 Output is byte-identical for identical input: each target has a double-run hashing test and a golden-file test.
 Generators never read the source text, the environment, the clock or the network, and they order all output deterministically.
-Failures and warnings go through `invar-diagnostics-v1` with stable `S1xxx` reason codes registered in the AI-01 registry:
+Failures and warnings go through `invar-diagnostics-v3` with stable `S1xxx` reason codes registered in the AI-01 registry:
 
 | Range | Owner |
 | --- | --- |

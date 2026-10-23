@@ -11,7 +11,7 @@ from scalar_cases import SOURCE, SOURCE_PATH, SUCCESS, TRAPS
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-SCHEMA = json.loads((ROOT / "schema/invar-diagnostics-v1.schema.json").read_text())
+SCHEMA = json.loads((ROOT / "schema/invar-diagnostics-v3.schema.json").read_text())
 
 
 def oracle_trap(case):

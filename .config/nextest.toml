@@ -50,7 +50,7 @@ priority = 95
 
 # The longest tests (2-10 min each in CI) start first so they do not end up as the tail of the run.
 [[profile.default.overrides]]
-filter = 'test(/denominator$|every_fuel_prefix_matches_source_and_|every_epoch_and_oracle$|detects_device_mutations$|detects_device_lowering_mutations$|child_failure_prefixes_and_source_order$|across_quanta$|cell_projection_cpu_both_arms$|s2_status_corpus_reaches_every_device_status$|actual_facade_admission_and_reference_replay$|binding_source_graph_and_protocol_faults$|numeric_source_failure_fuel_and_admission$/)'
+filter = 'test(/denominator$|every_fuel_prefix_matches_source_and_|every_epoch_and_oracle$|detects_device_lowering_mutations$|child_failure_prefixes_and_source_order$|across_quanta$|cell_projection_cpu_both_arms$|s2_status_corpus_reaches_every_device_status$|actual_facade_admission_and_reference_replay$|binding_source_graph_and_protocol_faults$|numeric_source_failure_fuel_and_admission$/)'
 priority = 90
 
 # The rest of the tests above 120 s in Debug or Release on main.
