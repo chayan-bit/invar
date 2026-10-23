@@ -2,7 +2,7 @@
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
 Counts: statements=266 citations=283
-Size record: tokens=25375 estimator=bytes/3 limit=30000
+Size record: tokens=25317 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1031,7 +1031,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 11.3 CPU parallel and admitted regions
 
-[N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain-v1.md`
+[N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
 [N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
 [N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/issue_m2_03.rs::issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws`
 [N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers`
@@ -1059,12 +1059,12 @@ fn main() -> i32 {
 
 ### 11.5 GPU targets
 
-[N11.5.1] Forced `cuda` or `metal` fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for missing hardware, an ineligible region or a false guard, and never returns a CPU result as a device pass. `docs/explain-device-v1.md`
+[N11.5.1] Forced `cuda` or `metal` fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for missing hardware, an ineligible region or a false guard, and never returns a CPU result as a device pass. `docs/explain.md`
 [N11.5.2] CUDA admits NVRTC 12.4 or newer in the 12.x series and compute capability 5.0 or newer, compiled for the explicit `sm` of device zero. `docs/cuda-target-v1.md`
 [N11.5.3] Metal needs Apple7 or newer with MSL 3.1, a kernel needing more than 31 buffer arguments is Metal-ineligible, and the general-net task cascade additionally needs MSL 3.2 and otherwise uses its staged form. `docs/gnet-task-v01.md`
 [N11.5.4] The device IR admits `u32` maps (fused chains of 2 to 16 stages), reductions and affine scans through one verifier, and only a verified plan reaches code emission. `tests/issue_m3_04_cuda_reductions_scans.rs::issue_m3_04_cuda_reductions_scans_graph_plans_lower_to_shared_ir`
 [N11.5.5] Unknown completion is `CUDA_PENDING` or `METAL_PENDING`, permits no CPU replay, and keeps loans and quarantine. `tests/issue_m3_05_guarded_gpu_integration.rs::issue_m3_05_gpu_failure_prefix_and_quarantine`
-[N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain-device-v1.md`
+[N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain.md`
 [N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md` `docs/remaining-work.md`
 [N11.5.8] Map DAGs, wrapping reductions and affine scans admit up to 2^28 `u32` elements on the device. `docs/cuda-target-v1.md`
 [N11.5.9] A device schedule is selected from at most 32 enumerated bounded candidates, each passing the physical device verifier, and the existing measured cost model breaks equal costs by enumeration order. `docs/bounded-schedule-dispatch.md`
@@ -1101,12 +1101,12 @@ fn main() -> i32 {
 
 ### 13.3 Explain
 
-[N13.3.1] `invar explain PATH --format json` emits `invar-explain-v1` with `source_identity` and `regions`, and success is exit 0 even when every region is rejected. `docs/explain-v1.md`
-[N13.3.2] Each region has `function`, `span`, `status`, `first_rejected_obligation`, `rule_revision`, `numeric_policy`, `chosen_plan`, `fallback_plan`, `runtime_guard`, `facts`, `execution` and ordered `obligations`. `schema/explain-v1.schema.json`
-[N13.3.3] Obligation evidence is `checked_invariant`, `trusted_rule`, `runtime_guard` or `unknown`, and unknown evidence rejects admission. `docs/explain-v1.md`
-[N13.3.4] `explain --engine cuda|metal|auto` adds `device_execution` described by `invar-explain-device-v1`. `schema/invar-explain-device-v1.schema.json`
-[N13.3.5] Persisted admission documents are descriptive, and validation re-analyses current MIR and source bytes. `docs/explain-v1.md`
-[N13.3.6] `source_identity` is `fnv1a64:` over the source bytes and establishes identity and not authenticity. `docs/explain-v1.md`
+[N13.3.1] `invar explain PATH --format json` emits `invar-explain-v5` with `source_identity` and `regions`, and success is exit 0 even when every region is rejected. `docs/explain.md`
+[N13.3.2] Each region has `function`, `span`, `status`, `first_rejected_obligation`, `rule_revision`, `numeric_policy`, `chosen_plan`, `fallback_plan`, `runtime_guard`, `facts`, `execution` and ordered `obligations`. `schema/explain-v5.schema.json`
+[N13.3.3] Obligation evidence is `checked_invariant`, `trusted_rule`, `runtime_guard` or `unknown`, and unknown evidence rejects admission. `docs/explain.md`
+[N13.3.4] `explain --engine cuda|metal|auto` adds `device_execution` described by `invar-explain-device-v5`. `schema/invar-explain-device-v5.schema.json`
+[N13.3.5] Persisted admission documents are descriptive, and validation re-analyses current MIR and source bytes. `docs/explain.md`
+[N13.3.6] `source_identity` is `fnv1a64:` over the source bytes and establishes identity and not authenticity. `docs/explain.md`
 
 ```invar outcome=value:0
 fn main() -> i32 { return 0; }
@@ -1195,7 +1195,7 @@ fn main() -> i32 {
 [NB.2.1] `sort(xs)`, `sort_by_key(keys, values)`, `argsort(xs)` and `segmented_sort(xs, offsets)` are stable, sort keys of `i32`, `u32` or `f32`, and `argsort` returns an owned `Array<u32>` of original indices. `spec/bootstrap.md`
 [NB.2.2] Float keys use IEEE totalOrder after each NaN becomes `0x7fc00000`, signed zeros stay distinct, and payloads, which may also be `Array<Bool>`, keep their bits. `spec/bootstrap.md`
 [NB.2.3] A key and value length mismatch or invalid segment offsets trap with `INDEX_OUT_OF_BOUNDS` at the call span before any write. `spec/bootstrap.md`
-[NB.2.4] A report with an explicit sort site uses `invar-explain-v3`, which names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain-v3.md`
+[NB.2.4] A report with an explicit sort site names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain.md`
 
 ```invar outcome=value:7
 fn main() -> i32 {
@@ -1225,7 +1225,7 @@ fn main() -> i32 {
 [NB.3.3] `knn(grid, qx, qy, qz, k)` returns `Knn { idx, d2 }` ordered by squared distance and then original index, and pads missing slots with `u32::MAX` and positive infinity. `spec/bootstrap.md`
 [NB.3.4] A nonpositive or non-finite cell or an out-of-range cell index traps with `INTEGER_OVERFLOW`, and coordinate arrays of different lengths trap with `INDEX_OUT_OF_BOUNDS`. `spec/bootstrap.md`
 [NB.3.5] A `VoxelGrid` parameter is `read` or `take` and never `mut`, and query result arrays leave their record only through `move result.field`. `spec/bootstrap.md`
-[NB.3.6] A report with a spatial site uses `invar-explain-v4`, whose sites name the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain-v4.md`
+[NB.3.6] A report with a spatial site names the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain.md`
 
 ```invar outcome=value:3
 fn main() -> i32 {
@@ -1289,4 +1289,4 @@ fn main() -> i32 {
 [NB.5.3] Placement owns `--engine auto` only when one of those flags is given or the live host's default profile is not a matching provisional one, and every other auto run keeps the established path of N11.5.6, whose documents take the versions of NB.5.6. `src/auto_command.rs::placement_requested` `tests/v02_placement.rs::auto_stays_on_the_established_path_unless_placement_is_asked_for`
 [NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/v02_placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
-[NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement emits `invar-explain-v5`, which is v4 plus `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run emits the same versions without `placement`, recording `auto_path` as `established`. `docs/explain-v5.md` `schema/explain-v5.schema.json`
+[NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement adds `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run has no `placement` and records `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`
