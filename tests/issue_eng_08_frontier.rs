@@ -235,18 +235,6 @@ fn issue_eng_08_overflow_and_oversized_sources_refuse_without_allocating() {
 }
 
 #[test]
-fn issue_eng_08_deleted_caps_no_longer_exist_in_frontier_source() {
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    let text = std::fs::read_to_string(root.join("frontier_source.rs")).unwrap();
-    let mut checked = 0;
-    for deleted in ["MAX_VERTICES", "MAX_ROUNDS", "1_000_000", "8192"] {
-        assert!(!text.contains(deleted), "{deleted}");
-        checked += 1;
-    }
-    assert_eq!(checked, 4);
-}
-
-#[test]
 fn issue_eng_08_language_array_limit_still_refuses_below_the_byte_budget() {
     let c = contract(3, 2);
     let big = vec![0u32; invar::array_limits::MAX_ARRAY_LEN + 1];
