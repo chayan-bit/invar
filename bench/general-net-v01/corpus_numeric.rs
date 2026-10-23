@@ -101,12 +101,25 @@ fn oracle_record(o: &oracle::Observation) -> Json {
     json!({"status":if o.failure==Some(oracle::ToolFailure::Unsupported){"unsupported"}else{"executed"},"reason":o.failure.map(|f|format!("{f:?}")),"semantic":semantic(&o.semantic),"steps_used":o.semantic.steps_used,"transitions":o.transitions,"max_frames":o.max_frames,"events":o.events.len(),"cleanup":base::cleanup(&o.semantic)})
 }
 fn emit(net: &Net, entry: &str) -> Result<compiled::Artifact, compiled::Error> {
-    compiled::emit_numeric(
+    emit_for(net, entry, compiled::Target::Cpu)
+}
+/// The ABI11 owned-numeric continuation is the only CPU numeric artifact.
+fn emit_for(
+    net: &Net,
+    entry: &str,
+    target: compiled::Target,
+) -> Result<compiled::Artifact, compiled::Error> {
+    compiled::emit_resumable_owned_numeric(
         net,
         &net.verify().unwrap(),
         entry,
-        compiled::Target::Cpu,
+        target,
         compiled::Limits::default(),
+        compiled::OwnedLimits {
+            elements: 128,
+            allocations: 128,
+            cleanup_events: 128,
+        },
     )
 }
 fn report(name: &str, value: Json) {
@@ -137,14 +150,15 @@ impl Cpu {
         Self::with_sse_mask(a, false)
     }
     fn with_sse_mask(a: compiled::Artifact, force_no_sse: bool) -> Self {
-        assert_eq!(a.abi_version(), 8);
+        assert_eq!(a.abi_version(), 11);
         assert_eq!(a.numeric_policy(), Some(NumericPolicy::STRICT_F32));
         assert!(
-            a.owned_layout().is_none()
-                && a.continuation_layout().is_none()
+            a.continuation_layout().is_some()
                 && a.speculation_layout().is_none()
                 && a.device_layout().is_none()
         );
+        let owned = a.owned_layout().unwrap();
+        let (heap, clean) = (owned.heap_words(), owned.cleanup_words());
         static NEXT: AtomicUsize = AtomicUsize::new(0);
         let dir = std::env::temp_dir().join(format!(
             "invar-corpus-numeric-{}-{}",
@@ -174,7 +188,7 @@ int main(int argc,char** argv){{
 #else
  if(argv[2][0]=='1'){{std::cerr<<"unsupported x86 FTZ/DAZ: compiled target has no SSE\n";return 77;}}
 #endif
- gnet_u fuel,trans,cap;while(std::cin>>fuel>>trans>>cap){{if(cap>1000000)return 2;std::vector<gnet_w> input({n});for(auto& x:input)if(!(std::cin>>x))return 2;gnet_w output[8]={{}};std::vector<gnet_u> trace(cap*7);gnet_run(input.data(),output,trace.data(),fuel,trans,cap);if(output[7]<0||(gnet_u)output[7]>cap)return 3;for(auto x:output)std::cout<<x<<' ';for(gnet_u i=0;i<(gnet_u)output[7]*7;++i)std::cout<<trace[i]<<' ';std::cout<<'\n';}}}}
+ gnet_u fuel,trans,cap;while(std::cin>>fuel>>trans>>cap){{if(cap>1000000)return 2;std::vector<gnet_w> input({n});for(auto& x:input)if(!(std::cin>>x))return 2;gnet_w output[10]={{}};std::vector<gnet_u> trace(cap*7);std::vector<gnet_w> heap({heap});std::vector<gnet_u> cleanup({clean});GnetTask task={{}};gnet_u rounds=0;while(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,heap.data(),cleanup.data(),&task,1000000))if(++rounds>1000001)return 4;if(output[7]<0||(gnet_u)output[7]>cap||output[8]!=0)return 3;for(gnet_u i=0;i<8;++i)std::cout<<output[i]<<' ';for(gnet_u i=0;i<(gnet_u)output[7]*7;++i)std::cout<<trace[i]<<' ';std::cout<<'\n';}}}}
 "#,
             n = a.params().len()
         );
@@ -217,7 +231,7 @@ int main(int argc,char** argv){{
             b"sse-ftz-daz=1\n" => true,
             other => panic!("unexpected numeric capability response: {other:?}"),
         };
-        let metadata = json!({"host_environment_capabilities":{"x86_FTZ_DAZ":x86_ftz_daz,"forced_no_sse_for_test":force_no_sse},"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","target":format!("{:?}",a.target()),"params":a.params().iter().map(|p|format!("{p:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":base::digest(a.source().as_bytes()),"harness_sha256":base::digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_executable_sha256":base::digest(&fs::read(dir.join("run")).unwrap()),"owned_layout":false,"continuation_layout":false,"speculation_layout":false,"device_layout":false});
+        let metadata = json!({"host_environment_capabilities":{"x86_FTZ_DAZ":x86_ftz_daz,"forced_no_sse_for_test":force_no_sse},"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","target":format!("{:?}",a.target()),"params":a.params().iter().map(|p|format!("{p:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":base::digest(a.source().as_bytes()),"harness_sha256":base::digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_executable_sha256":base::digest(&fs::read(dir.join("run")).unwrap()),"owned_layout":true,"continuation_layout":true,"speculation_layout":false,"device_layout":false});
         if let Some(r) = std::env::var_os("INVAR_GNET_CORPUS_REPORT_DIR") {
             let p = PathBuf::from(r)
                 .join("numeric-artifacts")
@@ -329,7 +343,7 @@ int main(int argc,char** argv){{
             Ok(eval::Value::U32(x)) => assert_eq!(w[1], i64::from(*x)),
             Ok(eval::Value::Bool(x)) => assert_eq!(w[1], i64::from(*x)),
             Ok(eval::Value::Unit) | Err(_) => assert_eq!(w[1], 0),
-            x => panic!("ABI8 scalar result {x:?}"),
+            x => panic!("scalar result {x:?}"),
         };
         assert_eq!(w.len(), 8 + o.events.len() * 7);
         for (actual, e) in w[8..].chunks_exact(7).zip(&o.events) {
@@ -497,7 +511,7 @@ pub fn rounding_environment() {
         }
     }
     eprintln!(
-        "ABI8 rounding/environment:{comparisons} actual native/reference comparisons across14 source entries"
+        "ABI11 rounding/environment:{comparisons} actual native/reference comparisons across14 source entries"
     );
     report(
         "numeric-environment",
@@ -534,8 +548,16 @@ pub fn fuel_and_admission() {
         expectation(&done, &case["expected_source"]);
         let emitted = emit(&net, "main");
         if path.contains("excluded") {
-            assert_eq!(emitted.unwrap_err(), compiled::Error::UnsupportedType);
-            rejection += 1;
+            // Nominal f32 members stay refused. f32 arrays and owners are ABI11
+            // programs but keep the oracle-only rows recorded for them here.
+            let admission = if path.contains("nominal") {
+                assert_eq!(emitted.unwrap_err(), compiled::Error::UnsupportedType);
+                rejection += 1;
+                "UnsupportedType"
+            } else {
+                assert!(emitted.is_ok(), "{path} is an ABI11 program");
+                "admitted"
+            };
             let mut prefixes = Vec::new();
             for fuel in 1..=done.steps_used + 1 {
                 let l = oracle::Limits { fuel, ..limits() };
@@ -543,14 +565,14 @@ pub fn fuel_and_admission() {
                 let mid = mir_eval::observe(&m, fuel);
                 equal(&s, &mid);
                 let o = oracle::observe(&net, &net.verify().unwrap(), l).unwrap();
-                // Every excluded ABI8 form, including nominal f32 members, now
-                // has exact CPU oracle agreement; only the ABI8 emitter refuses.
+                // Every excluded form, including nominal f32 members, has
+                // exact CPU oracle agreement.
                 assert_eq!(o.failure, None);
                 equal(&s, &o.semantic);
                 reference += 1;
                 prefixes.push(json!({"fuel":fuel,"source":recorded(&s),"oracle":oracle_record(&o)}))
             }
-            rows.push(json!({"source":path,"abi8":"UnsupportedType","prefixes":prefixes}));
+            rows.push(json!({"source":path,"abi11":admission,"prefixes":prefixes}));
             continue;
         }
         let h = Cpu::new(emitted.unwrap());
@@ -661,20 +683,11 @@ pub fn fuel_and_admission() {
         assert_eq!(w.len(), 8);
         rejection += 1
     }
-    for t in [compiled::Target::Cuda, compiled::Target::Metal] {
-        assert_eq!(
-            compiled::emit_numeric(
-                &n,
-                &n.verify().unwrap(),
-                "echo",
-                t,
-                compiled::Limits::default()
-            )
-            .unwrap_err(),
-            compiled::Error::NumericTarget
-        );
-        rejection += 1
-    }
+    assert_eq!(
+        emit_for(&n, "echo", compiled::Target::Metal).unwrap_err(),
+        compiled::Error::NumericTarget
+    );
+    rejection += 1;
     assert_eq!(
         compiled::emit(
             &n,
@@ -706,7 +719,7 @@ pub fn fuel_and_admission() {
     assert!(signature.events.is_empty());
     rejection += 1;
     eprintln!(
-        "ABI8 failure/admission:{native} native comparisons,{reference} source/MIR/oracle and {named_reference} named source/oracle fuel observations,{rejection} explicit exclusions/rejections"
+        "ABI11 failure/admission:{native} native comparisons,{reference} source/MIR/oracle and {named_reference} named source/oracle fuel observations,{rejection} explicit exclusions/rejections"
     );
     report(
         "numeric-failures",
