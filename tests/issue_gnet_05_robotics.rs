@@ -365,7 +365,7 @@ fn issue_gnet_05_robotics_compiler_decisions_ignore_names_hashes_and_ids() {
                 );
             }
             out.push(
-                match provenance::compile_owned_numeric(
+                match provenance::compile_resumable_owned_numeric(
                     source.as_bytes(),
                     "run",
                     Target::Cpu,

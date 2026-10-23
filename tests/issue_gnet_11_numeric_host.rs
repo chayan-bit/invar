@@ -1,9 +1,9 @@
-//! Actual loaded ABI11 owned numeric continuations. The ABI10 loaded host and
-//! the independent owned net oracle are comparators; neither supplies a result.
+//! Actual loaded ABI11 owned numeric continuations. The independent owned net
+//! oracle is the comparator; it never supplies a result.
 use invar::{
     eval,
     general_net::{
-        compiled, numeric_owned_host,
+        compiled,
         numeric_owned_resume_host::{Error, Plan, Progress},
         oracle,
     },
@@ -42,16 +42,6 @@ fn limits(elements: usize) -> oracle::Limits {
 }
 fn plan(source: &str, entry: &str, elements: usize) -> Plan {
     Plan::from_source(
-        source.as_bytes(),
-        entry,
-        Default::default(),
-        storage(elements),
-        Path::new("c++"),
-    )
-    .unwrap()
-}
-fn reference(source: &str, entry: &str, elements: usize) -> numeric_owned_host::Plan {
-    numeric_owned_host::Plan::from_source(
         source.as_bytes(),
         entry,
         Default::default(),
@@ -113,20 +103,13 @@ fn drive(
         }
     }
 }
-fn compare(
-    p: &mut Plan,
-    r: &mut numeric_owned_host::Plan,
-    args: &[eval::Value],
-    l: oracle::Limits,
-) -> oracle::Observation {
+fn compare(p: &mut Plan, args: &[eval::Value], l: oracle::Limits) -> oracle::Observation {
     let (net, proof) = p.artifact().checked_net();
     let entry = p.artifact().manifest()["entry"]
         .as_str()
         .unwrap()
         .to_owned();
     let expected = oracle::observe_call(net, proof, &entry, args, l).unwrap();
-    let direct = r.run(args, l).unwrap();
-    same(&direct, &expected);
     let mut first = None;
     for quantum in [1, 2, 3, 17, 1_000_000] {
         let (actual, yields) = drive(p, args, l, quantum);
@@ -146,7 +129,7 @@ fn compare(
 }
 
 #[test]
-fn issue_gnet_11_loaded_fixture_quanta_match_abi10_and_oracle() {
+fn issue_gnet_11_loaded_fixture_quanta_match_oracle() {
     for name in FIXTURES {
         let source = std::fs::read_to_string(format!(
             "tests/issue_gnet_10_f32_arrays_fixtures/{name}.inv"
@@ -154,12 +137,10 @@ fn issue_gnet_11_loaded_fixture_quanta_match_abi10_and_oracle() {
         .unwrap();
         let elements = if name == "mixed_relocation" { 3 } else { 128 };
         let mut p = plan(&source, "main", elements);
-        let mut r = reference(&source, "main", elements);
-        let done = compare(&mut p, &mut r, &[], limits(elements));
+        let done = compare(&mut p, &[], limits(elements));
         for fuel in 1..=done.semantic.steps_used + 1 {
             compare(
                 &mut p,
-                &mut r,
                 &[],
                 oracle::Limits {
                     fuel,
@@ -178,17 +159,15 @@ fn issue_gnet_11_loaded_recursion_loans_and_budget_failures() {
     // Nested frames hold loan aliases and owners across yields.
     let s = "fn fill(xs:mut Array<f32>,n:u32)->Unit{if n>0u32{let t=filled_f32(1u32,1.0);xs[0u32]=fma(xs[0u32],t[0u32],1.0);fill(xs,n-1u32);}} fn run(x:f32,n:u32)->Array<f32>{var xs:Array<f32> = [x,-0.0];fill(xs,n);let ys=move xs;return ys;}";
     let mut p = plan(s, "run", 128);
-    let mut r = reference(s, "run", 128);
     for (bits, n) in [(0x3f800001, 5), (0x80000000, 0), (0x7fa00001, 3)] {
         let args = [
             eval::Value::F32(F32Bits::from_bits(bits)),
             eval::Value::U32(n),
         ];
-        compare(&mut p, &mut r, &args, limits(128));
+        compare(&mut p, &args, limits(128));
         for cap in [0, 1, 2, 3, 7, 40] {
             compare(
                 &mut p,
-                &mut r,
                 &args,
                 oracle::Limits {
                     transitions: cap,
@@ -197,7 +176,6 @@ fn issue_gnet_11_loaded_recursion_loans_and_budget_failures() {
             );
             compare(
                 &mut p,
-                &mut r,
                 &args,
                 oracle::Limits {
                     trace_events: cap as usize,
@@ -208,10 +186,8 @@ fn issue_gnet_11_loaded_recursion_loans_and_budget_failures() {
     }
     let s = "fn run(x:f32)->f32{return run(x);}";
     let mut p = plan(s, "run", 128);
-    let mut r = reference(s, "run", 128);
     let o = compare(
         &mut p,
-        &mut r,
         &[eval::Value::F32(F32Bits::from_bits(1))],
         limits(128),
     );
@@ -389,4 +365,40 @@ fn issue_gnet_11_loaded_refuses_non_abi11_admission() {
         Path::new("invar-no-such-compiler-11"),
     );
     assert!(matches!(missing, Err(Error::Input)));
+}
+
+#[cfg(unix)]
+#[test]
+fn issue_gnet_11_loader_refuses_changed_library_bytes_and_identity() {
+    use invar_foreign::numeric_owned_resume::{Driver, Error as Loader, file_digest};
+    let dir = std::env::temp_dir().join(format!("gnet11-loader-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let (cpp, lib) = (dir.join("id.cpp"), dir.join("id.so"));
+    std::fs::write(&cpp, "#include <cstddef>\nextern \"C\" unsigned int invar_fault_identity(unsigned char* p,std::size_t n){if(n!=32)return 2;for(int i=0;i<32;i++)p[i]=0;return 0;}").unwrap();
+    let shared = if cfg!(target_os = "macos") {
+        "-dynamiclib"
+    } else {
+        "-shared"
+    };
+    let out = std::process::Command::new("c++")
+        .args(["-fPIC", shared])
+        .arg(&cpp)
+        .arg("-o")
+        .arg(&lib)
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let hash = file_digest(&lib).unwrap();
+    let load = |path: &Path, id| {
+        Driver::load(path, hash, id, "invar_fault", vec![], 144 + 64, [4, 4]).map(drop)
+    };
+    // A wrong embedded identity and changed library bytes are both refused.
+    assert!(matches!(load(&lib, [17; 32]), Err(Loader::Identity)));
+    std::fs::write(&lib, b"forged library").unwrap();
+    assert!(matches!(load(&lib, [0; 32]), Err(Loader::Identity)));
+    std::fs::remove_dir_all(&dir).unwrap();
 }

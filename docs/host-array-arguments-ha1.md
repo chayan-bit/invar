@@ -366,7 +366,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
   | Path | Refusal |
   |---|---|
   | export compilation (`src/exports.rs:205–206`) | `NATIVE_ABI`, "export parameter is not original i32/u32" |
-  | owned-numeric host (`src/general_net/numeric_owned_host.rs:567–579`) | `Error::Input` for a non-scalar argument |
+  | owned-numeric host (`src/general_net/numeric_owned_resume_host.rs`, `encode`) | `Error::Input` for a non-scalar argument |
   | binding `call` | `PY_EXPORT_UNAVAILABLE` |
   | binding `call_foreign` | `PY_ABI_TYPE_UNAVAILABLE` |
   | public C ABI v1 | has no array tag and no `Mut` mode |

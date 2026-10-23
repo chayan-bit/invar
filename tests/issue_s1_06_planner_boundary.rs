@@ -21,12 +21,12 @@ system planner_config_probe for P {{ sequencer: Sequencer; planner: curobo_plann
     let ir = invar::system::compile(front::parse_system(source.as_bytes()).unwrap()).unwrap();
     let json = ir.canonical_json();
     let mut document: serde_json::Value = serde_json::from_str(&json).unwrap();
-    assert_eq!(document["schema"], "invar-system-v9");
-    assert_eq!(document["version"], 9);
+    assert_eq!(document["schema"], "invar-system-v12");
+    assert_eq!(document["version"], 12);
     assert_eq!(document["planner_frame_policy"], "request-consumer-v1");
     invar::system::SystemIr::from_json(json.as_bytes()).unwrap();
-    document["schema"] = serde_json::json!("invar-system-v7");
-    document["version"] = serde_json::json!(7);
+    document["schema"] = serde_json::json!("invar-system-v11");
+    document["version"] = serde_json::json!(11);
     assert!(invar::system::SystemIr::from_json(document.to_string().as_bytes()).is_err());
     for bad in [
         manifest.replace("separate-process", "in-process"),
@@ -172,8 +172,8 @@ fn issue_s1_06_planner_system_ir_is_additive_and_specializes_robot_dof() {
     assert!(ir.graph_issues().is_empty(), "{:?}", ir.graph_issues());
     let json = ir.canonical_json();
     let document: serde_json::Value = serde_json::from_str(&json).unwrap();
-    assert_eq!(document["schema"], "invar-system-v9");
-    assert_eq!(document["version"], 9);
+    assert_eq!(document["schema"], "invar-system-v12");
+    assert_eq!(document["version"], 12);
     assert_eq!(document["planner_frame_policy"], "request-consumer-v1");
     assert_eq!(document["planner_contract"], "invar-planner-wire-v1");
     assert!(!json.contains("robot_dof"));
@@ -181,9 +181,6 @@ fn issue_s1_06_planner_system_ir_is_additive_and_specializes_robot_dof() {
     let mut malformed = document;
     malformed["planner_contract"] = serde_json::json!("unknown");
     assert!(invar::system::SystemIr::from_json(malformed.to_string().as_bytes()).is_err());
-    let legacy = include_str!("fixtures/s1_03/graph-base.inv");
-    let legacy = invar::system::compile(front::parse_system(legacy.as_bytes()).unwrap()).unwrap();
-    assert!(legacy.canonical_json().contains("invar-system-v2"));
 }
 
 #[test]
@@ -235,34 +232,6 @@ fn issue_s1_06_request_consumers_require_measured_sources_and_preserve_legacy() 
         }
         assert!(SystemIr::from_json(wrong.to_string().as_bytes()).is_err());
         assert!(graph::check(&wrong).iter().any(|i| i.code == "S1200"));
-    }
-    let captured: Value =
-        serde_json::from_str(include_str!("fixtures/s1_06/planner-wire-v7.json")).unwrap();
-    for version in [7, 8] {
-        let mut old = captured.clone();
-        old["schema"] = json!(format!("invar-system-v{version}"));
-        old["version"] = json!(version);
-        SystemIr::from_json(old.to_string().as_bytes()).unwrap();
-        assert!(
-            graph::check(&old).is_empty(),
-            "legacy output requests remain publishers"
-        );
-        old["planner_frame_policy"] = json!("request-consumer-v1");
-        assert!(SystemIr::from_json(old.to_string().as_bytes()).is_err());
-        assert!(graph::check(&old).iter().any(|i| i.code == "S1200"));
-        let mut combined_legacy = document.clone();
-        combined_legacy["schema"] = json!(format!("invar-system-v{version}"));
-        combined_legacy["version"] = json!(version);
-        combined_legacy
-            .as_object_mut()
-            .unwrap()
-            .remove("planner_frame_policy");
-        SystemIr::from_json(combined_legacy.to_string().as_bytes()).unwrap();
-        assert!(
-            graph::check(&combined_legacy)
-                .iter()
-                .any(|i| i.code == "S1202")
-        );
     }
     let mut undeclared = document.clone();
     undeclared["frames"]

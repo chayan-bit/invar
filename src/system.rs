@@ -42,18 +42,7 @@ pub use generate::{generate_mjcf, generate_ros2_mjcf, generate_urdf};
 
 const MAX_ITEMS: usize = 256;
 const MAX_IR_BYTES: usize = 1_048_576;
-pub const SCHEMA_JSON: &str = include_str!("../schema/invar-system-v1.schema.json");
-pub const SCHEMA_V2_JSON: &str = include_str!("../schema/invar-system-v2.schema.json");
-pub const SCHEMA_V3_JSON: &str = include_str!("../schema/invar-system-v3.schema.json");
-pub const SCHEMA_V4_JSON: &str = include_str!("../schema/invar-system-v4.schema.json");
-pub const SCHEMA_V5_JSON: &str = include_str!("../schema/invar-system-v5.schema.json");
-pub const SCHEMA_V6_JSON: &str = include_str!("../schema/invar-system-v6.schema.json");
-pub const SCHEMA_V7_JSON: &str = include_str!("../schema/invar-system-v7.schema.json");
-pub const SCHEMA_V8_JSON: &str = include_str!("../schema/invar-system-v8.schema.json");
-pub const SCHEMA_V9_JSON: &str = include_str!("../schema/invar-system-v9.schema.json");
-pub const SCHEMA_V10_JSON: &str = include_str!("../schema/invar-system-v10.schema.json");
-pub const SCHEMA_V11_JSON: &str = include_str!("../schema/invar-system-v11.schema.json");
-pub const SCHEMA_V12_JSON: &str = include_str!("../schema/invar-system-v12.schema.json");
+pub const SCHEMA_JSON: &str = include_str!("../schema/invar-system-v12.schema.json");
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SystemIr {
@@ -76,33 +65,17 @@ impl SystemIr {
         &self.robot_warnings
     }
 
-    /// A v2 document with the source and all graph checks established.
+    /// A source-compiled document that passed all graph checks.
     pub fn checked_document(&self) -> Result<&Value, &'static str> {
-        if !self.graph_ready() || !graph::check(&self.document).is_empty() {
-            return Err("system IR has not passed v2 graph checks");
+        if !self.checked_source || !graph::check(&self.document).is_empty() {
+            return Err("system IR has not passed the graph checks");
         }
         Ok(&self.document)
     }
 
-    /// True when a source-backed v2 model can be graph checked; this does not mean it passed.
+    /// True for a source-compiled model, which can be graph checked; this does not mean it passed.
     pub fn graph_ready(&self) -> bool {
         self.checked_source
-            && matches!(
-                self.document["schema"].as_str(),
-                Some(
-                    "invar-system-v2"
-                        | "invar-system-v3"
-                        | "invar-system-v4"
-                        | "invar-system-v5"
-                        | "invar-system-v6"
-                        | "invar-system-v7"
-                        | "invar-system-v8"
-                        | "invar-system-v9"
-                        | "invar-system-v10"
-                        | "invar-system-v11"
-                        | "invar-system-v12"
-                )
-            )
     }
 
     pub fn graph_issues(&self) -> Vec<(&'static str, String, Span)> {
@@ -145,9 +118,7 @@ impl SystemIr {
             .map_or(0, Vec::len);
         let connections = self.document["connections"].as_array().map_or(0, Vec::len);
         let flows = self.document["flows"].as_array().map_or(0, Vec::len);
-        let schema = self.document["schema"]
-            .as_str()
-            .unwrap_or("invar-system-v2");
+        let schema = self.document["schema"].as_str().unwrap_or("");
         let mut report = format!(
             "# Invar system check: {system}\n\n- IR: {schema}\n- Instances: {instances}\n- Connections: {connections}\n- Flows: {flows}\n- Timing: passed\n- Frame tree: passed\n- Resources: passed\n- License and isolation: passed (SPDX list {spdx_list})\n\nDeadlines and WCET values are declared budgets, not measurements, until R1-06 evidence exists.\n\nBus bandwidth models declared port rate × canonical C layout bytes × 8; it excludes serialization and network overhead.\n\nThe license check is an engineering check, not legal advice.\n",
             spdx_list = spdx::identifiers::VERSION,
@@ -164,23 +135,11 @@ impl SystemIr {
         }
         let document: Value =
             serde_json::from_slice(bytes).map_err(|_| "invalid system IR JSON")?;
-        let schema_text = match document["schema"].as_str() {
-            Some("invar-system-v1") => SCHEMA_JSON,
-            Some("invar-system-v2") => SCHEMA_V2_JSON,
-            Some("invar-system-v3") => SCHEMA_V3_JSON,
-            Some("invar-system-v4") => SCHEMA_V4_JSON,
-            Some("invar-system-v5") => SCHEMA_V5_JSON,
-            Some("invar-system-v6") => SCHEMA_V6_JSON,
-            Some("invar-system-v7") => SCHEMA_V7_JSON,
-            Some("invar-system-v8") => SCHEMA_V8_JSON,
-            Some("invar-system-v9") => SCHEMA_V9_JSON,
-            Some("invar-system-v10") => SCHEMA_V10_JSON,
-            Some("invar-system-v11") => SCHEMA_V11_JSON,
-            Some("invar-system-v12") => SCHEMA_V12_JSON,
-            _ => return Err("unsupported system IR version"),
-        };
+        if document["schema"] != "invar-system-v12" {
+            return Err("unsupported system IR version");
+        }
         let schema: Value =
-            serde_json::from_str(schema_text).map_err(|_| "invalid system IR schema")?;
+            serde_json::from_str(SCHEMA_JSON).map_err(|_| "invalid system IR schema")?;
         if !jsonschema::is_valid(&schema, &document) {
             return Err("invalid system IR model");
         }

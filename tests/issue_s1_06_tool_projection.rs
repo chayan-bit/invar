@@ -97,7 +97,6 @@ fn issue_s1_06_source_tool_projection_executes_rust_and_generated_cpp_both_arms(
         let directed = r.translation_m.iter().any(|v| v.abs() > 1e-9)
             || r.quaternion_xyzw[3].abs() < 1.0 - 1e-12;
         tool_projection::verify_value(&projection.value()).unwrap();
-        tool_projection::verify_value(&projection.clone().legacy().value()).unwrap();
         assert_eq!(projection.schema, "invar-tool-projection-v2");
         for case in 0..6 {
             let mut corrupt = projection.value();

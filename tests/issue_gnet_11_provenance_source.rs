@@ -73,7 +73,7 @@ fn source_owned_roots_are_fresh_and_scalar_admission_is_unchanged() {
 }
 
 #[test]
-fn abi11_receipt_binds_owners_and_continuation_without_widening_abi10() {
+fn abi11_receipt_binds_owners_and_continuation() {
     let storage = compiled::OwnedLimits {
         elements: 16,
         allocations: 8,
@@ -87,18 +87,7 @@ fn abi11_receipt_binds_owners_and_continuation_without_widening_abi10() {
         storage,
     )
     .unwrap();
-    let b = provenance::compile_owned_numeric(
-        SOURCE.as_bytes(),
-        "run",
-        compiled::Target::Cpu,
-        Default::default(),
-        storage,
-    )
-    .unwrap();
     assert_eq!(a.artifact().abi_version(), 11);
-    assert_eq!(b.artifact().abi_version(), 10);
-    assert_ne!(a.id(), b.id());
-    assert!(b.manifest().get("numeric_owned_continuation").is_none());
     assert_eq!(a.manifest()["numeric"]["array_f32"]["kind"], 258);
     let c = &a.manifest()["numeric_owned_continuation"];
     assert_eq!(c["profile"], "cpu-owned-numeric-continuation-v1");

@@ -35,6 +35,15 @@ pub const TASK_COUNTERS: usize = 18;
 /// Aggregate host-controlled buffer cap: native storage plus host snapshots.
 pub const MAX_BYTES: usize = 128 * 1024 * 1024;
 
+/// A completed terminal packet with the storage the decoder validates.
+#[derive(Debug)]
+pub struct Invocation {
+    pub output: [i64; OUTPUT_WORDS],
+    pub trace: Vec<u64>,
+    pub heap: Vec<i64>,
+    pub cleanup: Vec<u64>,
+}
+
 /// Copies of initialized native storage for validation, never a resume permit.
 #[derive(Debug)]
 pub struct Snapshot {

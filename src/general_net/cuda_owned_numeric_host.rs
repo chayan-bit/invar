@@ -23,7 +23,7 @@
     reason = "ABI12 stage 2c S1: consumed by the S2 CPU group model backend; exercised by owned lifecycle tests now"
 )]
 use super::{
-    compiled, coverage, numeric_owned_host, oracle,
+    compiled, coverage, oracle, owned_numeric_decode,
     owned_numeric_task::{self as task, PENDING, TaskShape, TaskWords, TokenKey},
     provenance,
 };
@@ -1090,13 +1090,13 @@ impl<'p, B: Backend> Session<'p, B> {
         heap.extend_from_slice(s.heap);
         cleanup.clear();
         cleanup.extend_from_slice(s.cleanup);
-        let raw = invar_foreign::numeric_owned::Invocation {
+        let raw = invar_foreign::numeric_owned_resume::Invocation {
             output: s.output.try_into().expect("10 output words"),
             trace: std::mem::take(trace),
             heap: std::mem::take(heap),
             cleanup: std::mem::take(cleanup),
         };
-        let decoded = numeric_owned_host::decode(
+        let decoded = owned_numeric_decode::decode(
             p.artifact.artifact().result(),
             p.artifact.source().len(),
             &p.sites,
@@ -1107,7 +1107,7 @@ impl<'p, B: Backend> Session<'p, B> {
         );
         self.decode = (raw.trace, raw.heap, raw.cleanup);
         decoded.map_err(|e| match e {
-            numeric_owned_host::Error::Allocation => Error::Allocation,
+            owned_numeric_decode::Error::Allocation => Error::Allocation,
             _ => Error::Decode { root: r },
         })
     }

@@ -9,7 +9,7 @@ use crate::{
 use std::collections::BTreeMap;
 
 pub(super) type TokenKey = (usize, usize, usize);
-/// Pending output words: the ABI10 packet is written only at termination.
+/// Pending output words: the ten-word packet is written only at termination.
 pub(super) const PENDING: [i64; 10] = [i64::MIN; 10];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -149,7 +149,7 @@ fn cleanup_names(program: &crate::mir::Program, key: TokenKey) -> &[String] {
 }
 /// Validate a newly captured task against the previous validated snapshot.
 /// Pending packets are checked completely here and never decoded. Terminal
-/// packets are checked for cross-snapshot consistency, then decoded by ABI10.
+/// packets are checked for cross-snapshot consistency, then decoded by the owned-numeric decoder.
 pub(super) fn validate(
     plan: &TaskShape<'_>,
     l: oracle::Limits,
@@ -507,7 +507,7 @@ mod tests {
     use super::*;
     use crate::{
         eval,
-        general_net::{numeric_owned_host, provenance},
+        general_net::{owned_numeric_decode, provenance},
         numeric_contract::F32Bits,
     };
     use std::{collections::BTreeSet, fmt::Write as _, fs, path::PathBuf};
@@ -813,20 +813,20 @@ int main() {{
             }
         }
         assert!(pending_checked > 50 && terminal_checked > 10);
-        // Independent ABI11 output check: the unchanged ABI10 decoder on the
+        // Independent ABI11 output check: the owned-numeric decoder on the
         // final packets equals the independent net oracle per root.
         let (net, proof) = owned.artifact.checked_net();
         let last = snapshots.last().unwrap();
         for (lane, root) in last.iter().zip(ROOTS) {
             assert_eq!(lane.counters()[1], 1, "every root terminal");
-            let decoded = numeric_owned_host::decode(
+            let decoded = owned_numeric_decode::decode(
                 owned.artifact.artifact().result(),
                 owned.artifact.source().len(),
                 &owned.sites,
                 &owned.program,
                 owned.artifact.artifact().owned_layout().unwrap(),
                 limits(),
-                &invar_foreign::numeric_owned::Invocation {
+                &invar_foreign::numeric_owned_resume::Invocation {
                     output: lane.output,
                     trace: lane.trace.clone(),
                     heap: lane.heap.clone(),

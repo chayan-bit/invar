@@ -145,8 +145,8 @@ fn issue_s1_02_foreign_manifests_versioned_system_ir_round_trips() {
     );
     let ir = system::compile(front::parse_system(source.as_bytes()).unwrap()).unwrap();
     let document: serde_json::Value = serde_json::from_str(&ir.canonical_json()).unwrap();
-    assert_eq!(document["schema"], "invar-system-v3");
-    let schema: serde_json::Value = serde_json::from_str(system::SCHEMA_V3_JSON).unwrap();
+    assert_eq!(document["schema"], "invar-system-v12");
+    let schema: serde_json::Value = serde_json::from_str(system::SCHEMA_JSON).unwrap();
     assert!(jsonschema::is_valid(&schema, &document));
     let restored = system::SystemIr::from_json(ir.canonical_json().as_bytes()).unwrap();
     assert_eq!(restored.canonical_json(), ir.canonical_json());

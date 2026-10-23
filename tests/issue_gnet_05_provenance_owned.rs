@@ -27,7 +27,14 @@ fn storage() -> compiled::OwnedLimits {
 
 const NUMERIC: &[u8] = b"fn calc(a: f32, b: f32, c: f32) -> f32 { return fma(a,b,c); }";
 fn numeric(source: &[u8]) -> ProvenancedArtifact {
-    provenance::compile_numeric(source, "calc", compiled::Target::Cpu, Limits::default()).unwrap()
+    numeric_with(source, compiled::Target::Cpu, Limits::default()).unwrap()
+}
+fn numeric_with(
+    source: &[u8],
+    target: compiled::Target,
+    limits: Limits,
+) -> Result<ProvenancedArtifact, Error> {
+    provenance::compile_resumable_owned_numeric(source, "calc", target, limits, storage())
 }
 fn numeric_separate(source: &[u8]) -> Vec<u8> {
     std::str::from_utf8(source)
@@ -50,12 +57,12 @@ fn numeric_limits() -> oracle::Limits {
 }
 
 #[test]
-fn issue_gnet_05_provenance_abi8_exact_policy_bits_layout_and_all_compile_budgets() {
+fn issue_gnet_05_provenance_numeric_exact_policy_bits_layout_and_all_compile_budgets() {
     let a = numeric(NUMERIC);
     let b = numeric(NUMERIC);
     assert_eq!(a.id(), b.id());
     assert_eq!(a.manifest(), b.manifest());
-    assert_eq!(a.artifact().abi_version(), 8);
+    assert_eq!(a.artifact().abi_version(), 11);
     assert_eq!(
         a.artifact().numeric_policy(),
         Some(NumericPolicy::STRICT_F32)
@@ -70,18 +77,15 @@ fn issue_gnet_05_provenance_abi8_exact_policy_bits_layout_and_all_compile_budget
         invar::layout_contract::VERSION
     );
     assert_eq!(a.manifest()["numeric"]["f32"]["maximum"], u32::MAX);
-    assert_eq!(
-        a.manifest()["numeric"]["output_words"],
-        compiled::OUTPUT_WORDS
-    );
+    assert_eq!(a.manifest()["numeric"]["output_words"], 10);
     assert_eq!(
         a.manifest()["numeric"]["event_words"],
         compiled::EVENT_WORDS
     );
     assert_eq!(a.manifest()["params"], json!(["F32", "F32", "F32"]));
     assert_eq!(a.manifest()["result"], "F32");
-    assert!(a.artifact().owned_layout().is_none());
-    assert!(a.artifact().continuation_layout().is_none());
+    assert!(a.artifact().owned_layout().is_some());
+    assert!(a.artifact().continuation_layout().is_some());
     assert!(a.artifact().speculation_layout().is_none());
     assert!(a.artifact().device_layout().is_none());
     assert!(a.artifact().aggregate_layout().is_none());
@@ -100,12 +104,12 @@ fn issue_gnet_05_provenance_abi8_exact_policy_bits_layout_and_all_compile_budget
             9 => l.compiler.source_bytes += 1,
             _ => unreachable!(),
         }
-        let b = provenance::compile_numeric(NUMERIC, "calc", compiled::Target::Cpu, l).unwrap();
+        let b = numeric_with(NUMERIC, compiled::Target::Cpu, l).unwrap();
         assert_ne!(a.id(), b.id(), "compile budget {field}");
         assert_eq!(a.artifact().source(), b.artifact().source());
     }
-    // Legacy manifests retain their original shape and version; numeric policy
-    // is added only when the actual emitter identifies CPU ABI8.
+    // Non-numeric manifests carry no numeric block; numeric policy is added
+    // only when the actual emitter identifies a numeric artifact.
     let legacy = provenance::compile(
         b"fn calc() -> i32 { return 7; }",
         "calc",
@@ -126,7 +130,7 @@ fn issue_gnet_05_provenance_abi8_exact_policy_bits_layout_and_all_compile_budget
 }
 
 #[test]
-fn issue_gnet_05_provenance_abi8_stale_mutations_and_unsupported_modes_reject() {
+fn issue_gnet_05_provenance_numeric_stale_mutations_and_unsupported_modes_reject() {
     let a = numeric(NUMERIC);
     for forged in forged_leaves(a.manifest()) {
         assert_eq!(a.verify_manifest(&forged), Err(Error::ManifestMismatch));
@@ -145,12 +149,10 @@ fn issue_gnet_05_provenance_abi8_stale_mutations_and_unsupported_modes_reject() 
     let mut stale = net.clone();
     stale.graph.revision += 1;
     assert!(matches!(a.verify_net(&stale, proof), Err(Error::Net(_))));
-    for target in [compiled::Target::Cuda, compiled::Target::Metal] {
-        assert!(matches!(
-            provenance::compile_numeric(NUMERIC, "calc", target, Limits::default()),
-            Err(Error::Compiler(compiled::Error::NumericTarget))
-        ));
-    }
+    assert!(matches!(
+        numeric_with(NUMERIC, compiled::Target::Metal, Limits::default()),
+        Err(Error::Compiler(compiled::Error::NumericTarget))
+    ));
     assert!(matches!(
         provenance::compile(NUMERIC, "calc", compiled::Target::Cpu, Limits::default()),
         Err(Error::Compiler(compiled::Error::UnsupportedType))
@@ -165,19 +167,17 @@ fn issue_gnet_05_provenance_abi8_stale_mutations_and_unsupported_modes_reject() 
         ),
         Err(Error::Compiler(compiled::Error::UnsupportedType))
     ));
-    assert!(matches!(
-        provenance::compile_numeric(
-            b"fn calc() -> Array<f32> { return filled_f32(1u32,0.0); }",
-            "calc",
+    assert!(
+        numeric_with(
+            b"struct Numeric{x:f32} fn calc() -> i32 { return 7; }",
             compiled::Target::Cpu,
             Limits::default()
-        ),
-        Err(Error::Compiler(compiled::Error::UnsupportedType))
-    ));
+        )
+        .is_err()
+    );
     assert!(matches!(
-        provenance::compile_numeric(
+        numeric_with(
             b"fn calc() -> f32 { return 1u32; }",
-            "calc",
             compiled::Target::Cpu,
             Limits::default()
         ),
@@ -186,7 +186,7 @@ fn issue_gnet_05_provenance_abi8_stale_mutations_and_unsupported_modes_reject() 
 }
 
 #[test]
-fn issue_gnet_05_provenance_abi8_oracle_preserves_exact_nan_zero_and_runtime_budgets() {
+fn issue_gnet_05_provenance_numeric_oracle_preserves_exact_nan_zero_and_runtime_budgets() {
     let echo = numeric(b"fn calc(a: f32) -> f32 { return a; }");
     let mut ids = std::collections::BTreeSet::new();
     for bits in [
@@ -264,313 +264,6 @@ fn issue_gnet_05_provenance_abi8_oracle_preserves_exact_nan_zero_and_runtime_bud
     );
 }
 
-#[test]
-fn issue_gnet_05_provenance_abi8_component_identity_exact_bytes_and_no_execution_authority() {
-    let a = numeric(NUMERIC);
-    let args = numeric_args(&[0x3f800000, 0x40000000, 0]);
-    let input = [0x3f800000i64, 0x40000000, 0];
-    let output = [0i64, 0x40000000, 0, 0, 6, 6, 1, 1];
-    let trace = [0u64; 7];
-    let l = numeric_limits();
-    let id = a
-        .numeric_cpu_identity(
-            b"component bytes; not a claimed process",
-            &args,
-            l,
-            &output,
-            &trace,
-        )
-        .unwrap();
-    id.verify_artifact(&a).unwrap();
-    id.verify_components(
-        b"component bytes; not a claimed process",
-        &input,
-        l,
-        &output,
-        &trace,
-    )
-    .unwrap();
-    assert_eq!(id.manifest()["execution_observed"], false);
-    assert_eq!(id.manifest()["source_completion_certified"], false);
-    assert_eq!(id.manifest()["resume_authorized"], false);
-    for forged in forged_leaves(id.manifest()) {
-        assert_eq!(id.verify_manifest(&forged), Err(Error::ManifestMismatch));
-    }
-    for field in 0..4 {
-        let mut changed = l;
-        match field {
-            0 => changed.fuel += 1,
-            1 => changed.transitions += 1,
-            2 => changed.trace_events += 1,
-            3 => changed.array_elements += 1,
-            _ => unreachable!(),
-        }
-        assert_eq!(
-            id.verify_components(
-                b"component bytes; not a claimed process",
-                &input,
-                changed,
-                &output,
-                &trace
-            ),
-            Err(Error::ExecutionMismatch)
-        );
-        assert_ne!(
-            id.id(),
-            a.numeric_cpu_identity(
-                b"component bytes; not a claimed process",
-                &args,
-                changed,
-                &output,
-                &trace
-            )
-            .unwrap()
-            .id()
-        );
-    }
-    assert_eq!(
-        id.verify_components(b"replacement executable", &input, l, &output, &trace),
-        Err(Error::ExecutionMismatch)
-    );
-    let mut wrong = input;
-    wrong[0] ^= 1;
-    assert_eq!(
-        id.verify_components(
-            b"component bytes; not a claimed process",
-            &wrong,
-            l,
-            &output,
-            &trace
-        ),
-        Err(Error::ExecutionMismatch)
-    );
-    let mut wrong = output;
-    wrong[1] ^= 1;
-    assert_eq!(
-        id.verify_components(
-            b"component bytes; not a claimed process",
-            &input,
-            l,
-            &wrong,
-            &trace
-        ),
-        Err(Error::ExecutionMismatch)
-    );
-    let mut wrong = trace;
-    wrong[1] ^= 1;
-    assert_eq!(
-        id.verify_components(
-            b"component bytes; not a claimed process",
-            &input,
-            l,
-            &output,
-            &wrong
-        ),
-        Err(Error::ExecutionMismatch)
-    );
-    let b = numeric(&numeric_separate(NUMERIC));
-    assert_eq!(id.verify_artifact(&b), Err(Error::ArtifactMismatch));
-    assert!(
-        a.numeric_cpu_identity(b"x", &[eval::Value::U32(0)], l, &output, &trace)
-            .is_err()
-    );
-    assert!(
-        a.numeric_cpu_identity(b"", &args, l, &output, &trace)
-            .is_err()
-    );
-    assert!(
-        a.numeric_cpu_identity(b"x", &args, l, &output[..7], &trace)
-            .is_err()
-    );
-    assert!(
-        a.numeric_cpu_identity(b"x", &args, l, &output, &trace[..6])
-            .is_err()
-    );
-    let mut invalid = output;
-    invalid[7] = -1;
-    assert!(
-        a.numeric_cpu_identity(b"x", &args, l, &invalid, &trace)
-            .is_err()
-    );
-    let invalid_l = oracle::Limits {
-        trace_events: 0,
-        ..l
-    };
-    assert!(
-        a.numeric_cpu_identity(b"x", &args, invalid_l, &output, &trace)
-            .is_err()
-    );
-    let legacy = compile(SOURCE, false, storage());
-    assert!(
-        legacy
-            .numeric_cpu_identity(b"x", &[], l, &output, &trace)
-            .is_err()
-    );
-}
-
-#[test]
-fn issue_gnet_05_provenance_abi8_actual_cpu_executable_replacement_and_every_fuel_prefix() {
-    static NEXT: AtomicUsize = AtomicUsize::new(0);
-    let dir = std::env::temp_dir().join(format!(
-        "invar-abi8-provenance-{}-{}",
-        std::process::id(),
-        NEXT.fetch_add(1, Ordering::Relaxed)
-    ));
-    fs::create_dir(&dir).unwrap();
-    let driver = r#"
-#include <iostream>
-#include <vector>
-#include <unistd.h>
-int main(){gnet_u fuel,trans,cap;while(std::cin>>fuel>>trans>>cap){gnet_w input[3];for(auto& x:input)std::cin>>x;gnet_w output[8]={};std::vector<gnet_u> trace(cap*7);gnet_run(input,output,trace.data(),fuel,trans,cap);for(auto x:output)std::cout<<x<<' ';for(gnet_u i=0;i<(gnet_u)output[7]*7;++i)std::cout<<trace[i]<<' ';std::cout<<'\n';}}
-"#;
-    let mut previous: Option<provenance::NumericCpuIdentity> = None;
-    for (source, expected) in [
-        (NUMERIC.to_vec(), 0xa8800000u32),
-        (numeric_separate(NUMERIC), 0u32),
-    ] {
-        let a = numeric(&source);
-        let whole = format!("{}\n{driver}", a.artifact().source());
-        fs::write(dir.join("candidate.cpp"), &whole).unwrap();
-        let built = child_deadline::command(60)
-            .arg("c++")
-            .args([
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("candidate.cpp"))
-            .arg("-o")
-            .arg(dir.join("candidate"))
-            .output()
-            .unwrap();
-        assert!(
-            built.status.success(),
-            "{}",
-            String::from_utf8_lossy(&built.stderr)
-        );
-        let executable = fs::read(dir.join("candidate")).unwrap();
-        let bits = [0x3f800001, 0x3f7ffffe, 0xbf800000];
-        let args = numeric_args(&bits);
-        let input: Vec<i64> = bits.iter().map(|&n| i64::from(n)).collect();
-        let full = a.observe_oracle(&args, numeric_limits()).unwrap();
-        assert_eq!(
-            full.observation().semantic.result,
-            Ok(eval::Value::F32(F32Bits::from_bits(expected)))
-        );
-        let complete = full.observation().semantic.steps_used;
-        let mut rows = Vec::new();
-        for fuel in 1..=complete + 1 {
-            rows.push((
-                oracle::Limits {
-                    fuel,
-                    ..numeric_limits()
-                },
-                input.clone(),
-            ));
-        }
-        // Exact bit carriers must be checked by actual emitted code before work.
-        rows.push((numeric_limits(), vec![-1, input[1], input[2]]));
-        rows.push((
-            numeric_limits(),
-            vec![u32::MAX as i64 + 1, input[1], input[2]],
-        ));
-        let text = rows
-            .iter()
-            .map(|(l, x)| {
-                format!(
-                    "{} {} {} {} {} {}\n",
-                    l.fuel, l.transitions, l.trace_events, x[0], x[1], x[2]
-                )
-            })
-            .collect::<String>();
-        fs::write(dir.join("input.txt"), &text).unwrap();
-        let run = child_deadline::command(20)
-            .arg(dir.join("candidate"))
-            .stdin(std::process::Stdio::from(
-                fs::File::open(dir.join("input.txt")).unwrap(),
-            ))
-            .output()
-            .unwrap();
-        assert!(
-            run.status.success(),
-            "{}",
-            String::from_utf8_lossy(&run.stderr)
-        );
-        let outputs: Vec<Vec<i64>> = String::from_utf8(run.stdout)
-            .unwrap()
-            .lines()
-            .map(|line| {
-                line.split_whitespace()
-                    .map(|n| n.parse().unwrap())
-                    .collect()
-            })
-            .collect();
-        assert_eq!(outputs.len(), rows.len());
-        for ((l, raw), words) in rows.iter().zip(&outputs) {
-            if raw[0] < 0 || raw[0] > i64::from(u32::MAX) {
-                assert_eq!(words, &vec![8, 0, 0, 0, 0, 0, 0, 0]);
-                continue;
-            }
-            let observed = a.observe_oracle(&args, *l).unwrap().observation();
-            let status = if l.fuel < complete { 3 } else { 0 };
-            assert_eq!(
-                &words[..8],
-                &[
-                    status,
-                    if status == 0 { i64::from(expected) } else { 0 },
-                    0,
-                    0,
-                    observed.semantic.steps_used as i64,
-                    observed.transitions as i64,
-                    observed.max_frames as i64,
-                    observed.events.len() as i64
-                ]
-            );
-            assert_eq!(words.len(), 8 + observed.events.len() * 7);
-            let trace: Vec<u64> = words[8..]
-                .iter()
-                .map(|&n| u64::try_from(n).unwrap())
-                .collect();
-            for (actual, e) in trace.chunks_exact(7).zip(&observed.events) {
-                assert_eq!(
-                    actual,
-                    &[
-                        u64::from(e.kind == oracle::EventKind::Complete),
-                        e.frame,
-                        e.activation,
-                        e.token.block.function as u64,
-                        e.token.block.block as u64,
-                        e.token.position as u64,
-                        e.rule as u64
-                    ]
-                );
-            }
-            let identity = a
-                .numeric_cpu_identity(&executable, &args, *l, &words[..8], &trace)
-                .unwrap();
-            identity.verify_artifact(&a).unwrap();
-            identity
-                .verify_components(&executable, raw, *l, &words[..8], &trace)
-                .unwrap();
-            if l.fuel == complete + 1 {
-                if let Some(prior) = &previous {
-                    assert_eq!(prior.verify_artifact(&a), Err(Error::ArtifactMismatch));
-                    assert_eq!(
-                        prior.verify_components(&executable, raw, *l, &words[..8], &trace),
-                        Err(Error::ExecutionMismatch)
-                    );
-                }
-                println!(
-                    "{}",
-                    json!({"harness_backend":"actual_emitted_cpu_ubsan","driver_execution":false,"artifact_id":a.id(),"compiler_build":env!("INVAR_BUILD_DIGEST"),"executable_sha256":hash(&executable),"full_cpp_sha256":hash(whole.as_bytes()),"runtime_input":raw,"fuel_prefix_cases":complete+1,"invalid_carriers":2,"header":&words[..8],"trace_words":trace.len(),"component_identity_id":identity.id(),"component_identity":identity.manifest()})
-                );
-                previous = Some(identity);
-            }
-        }
-    }
-    fs::remove_dir_all(dir).unwrap();
-}
 fn compile(source: &[u8], resumable: bool, limits: compiled::OwnedLimits) -> ProvenancedArtifact {
     let emit = if resumable {
         provenance::compile_resumable
