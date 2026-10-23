@@ -237,7 +237,7 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 
 ### Tests
 
-`tests/issue_eng_03_numeric_tiers.rs`:
+`tests/numeric_tiers/issue_eng_03_numeric_tiers.rs`:
 - the policy accept and refuse sets, and the unchanged v1 `Debug` text;
 - the tier references, including a fixture where the tree shape differs from the left fold;
 - 10,000 seeded fold inputs (cancellation, subnormals, signed zeros, infinities, the NaN class, and any finite word). On each, Strict, Tree and Exact stay inside the Relaxed bound, and Exact equals the once-rounded rational sum;
@@ -249,20 +249,20 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 - i8 and u8 narrowing traps;
 - a strict f32 fold (no attribute, and `fold = "strict"`) stays `Serial` in the parallel normal form with the v1 reason.
 
-`tests/issue_eng_03_tier_engines.rs`:
+`tests/numeric_tiers/issue_eng_03_tier_engines.rs`:
 - 80 seeded folds under Tree, Exact and Strict (infinities, NaN, signed zeros, subnormals, cancellation, any finite word) equal `FoldTier::reference` on the reference evaluator, MIR, cpu-parallel (2 workers, and 1, 2, 7 and 64 on every tenth) and native-serial under `--features native`;
 - a fixture where Tree and Exact differ, and empty loops that keep a `-0` init;
 - 100,003 generated terms under Tree and Exact at 1, 2, 7 and 64 workers;
 - every fold shape above that is refused, and the shapes that are not folds;
 - fuel prefixes on the reference evaluator and MIR.
 
-`tests/issue_eng_03_storage_arrays.rs`, on the reference evaluator, MIR, cpu-parallel (1, 2 and 7 workers) and native-serial under `--features native`:
+`tests/numeric_tiers/issue_eng_03_storage_arrays.rs`, on the reference evaluator, MIR, cpu-parallel (1, 2 and 7 workers) and native-serial under `--features native`:
 - f16 and bf16 stores of signed zeros, infinities, NaN, the overflow threshold, subnormals, ties both ways and seeded words equal the oracle's rounding; fill values round too;
 - i8 and u8 loads widen and in-range stores keep their value;
 - i8 and u8 narrowing traps at the first trap in source order, in a fill, a store and a loop;
 - a storage store inside a loop, with fuel prefixes on the reference evaluator and MIR;
 - the refused crossings, views and type mismatches.
 
-`tests/issue_eng_03_fold_receipts.rs`:
+`tests/numeric_tiers/issue_eng_03_fold_receipts.rs`:
 - the fold receipt for Tree, Exact, Relaxed and a Strict function's `reassoc_add` fold, and for all of them together; none for a strict fold or a tier without a fold;
 - placement run and explain documents carry it and validate against their schemas; the established documents do not.

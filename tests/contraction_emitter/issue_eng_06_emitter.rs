@@ -6,17 +6,13 @@
 //! signed-zero and subnormal shapes. Device rows are not run here.
 #![forbid(unsafe_code)]
 
-#[allow(dead_code)]
-#[path = "../src/contraction_source.rs"]
-mod contraction_source;
-#[path = "issue_m4_03_device/corpus.rs"]
-mod corpus;
+use crate::corpus;
+use invar::contraction_source;
 
 use contraction_source::{Contract, DeviceEmission};
 use corpus::{
     DIRECT, NORMAL, SHAPES, SUBNORMAL, TC_DIRECT, oracle, random_words, strict_equal, words,
 };
-use invar::{check, front, general_net, hex, layout_contract, mir, numeric_contract, tensor_cache};
 use invar_device::contraction::{self, Error, gemm_tiled_v1};
 use invar_device::moves::{self, Axis, Layout, Move, Operand, Schedule};
 use invar_device::target::{Level, Registry, Target};
