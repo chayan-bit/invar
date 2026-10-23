@@ -5,7 +5,7 @@ fn schema(name: &str) -> Value {
 }
 
 #[test]
-fn spatial_explain_uses_registered_families_and_strict_v4() {
+fn spatial_explain_uses_registered_families_and_strict_v5() {
     let registry = schema("diagnostic-codes-v1.json");
     assert!(
         registry["explain_reason_codes"]
@@ -25,17 +25,9 @@ fn spatial_explain_uses_registered_families_and_strict_v4() {
         assert!(output.status.success(), "{:?}", output);
         assert!(output.stderr.is_empty());
         let document: Value = serde_json::from_slice(&output.stdout).unwrap();
-        // #50: an auto explain is the unified v5, the same spatial sites as v4.
-        let v4 = schema(if engine.is_some() {
-            "explain-v5.schema.json"
-        } else {
-            "explain-v4.schema.json"
-        });
-        assert!(jsonschema::is_valid(&v4, &document), "{document}");
-        assert!(!jsonschema::is_valid(
-            &schema("explain-v3.schema.json"),
-            &document
-        ));
+        assert_eq!(document["schema"], "invar-explain-v5");
+        let v5 = schema("explain-v5.schema.json");
+        assert!(jsonschema::is_valid(&v5, &document), "{document}");
         let sites = document["explicit_spatial"].as_array().unwrap();
         assert_eq!(sites.len(), 4);
         for site in sites {
@@ -65,14 +57,14 @@ fn spatial_explain_uses_registered_families_and_strict_v4() {
         ] {
             let mut bad = document.clone();
             bad["explicit_spatial"][0][key] = wrong.into();
-            assert!(!jsonschema::is_valid(&v4, &bad));
+            assert!(!jsonschema::is_valid(&v5, &bad));
         }
         let mut mismatched = document.clone();
         mismatched["explicit_spatial"][0]["family_id"] = "spatial.knn.f32".into();
-        assert!(!jsonschema::is_valid(&v4, &mismatched));
+        assert!(!jsonschema::is_valid(&v5, &mismatched));
         let mut extra = document;
         extra["explicit_spatial"][0]["invented_cost"] = 0.0.into();
-        assert!(!jsonschema::is_valid(&v4, &extra));
+        assert!(!jsonschema::is_valid(&v5, &extra));
     }
     assert_eq!(invar::spatial::placement::family_id("sort"), None);
 }
@@ -107,7 +99,7 @@ fn spatial_forced_explain_distinguishes_device_and_host_work() {
         assert!(output.status.success(), "{:?}", output);
         let doc: Value = serde_json::from_slice(&output.stdout).unwrap();
         assert!(jsonschema::is_valid(
-            &schema("explain-v4.schema.json"),
+            &schema("explain-v5.schema.json"),
             &doc
         ));
         assert_eq!(doc["device_execution"]["result"], 3);

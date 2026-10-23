@@ -24,13 +24,9 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
     let invariants = invariant_codes();
     let registered = registry_codes();
     let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
-    let explain_schema = schema("explain-v1.schema.json");
+    let explain_schema = schema("explain-v5.schema.json");
     let diagnostic_validator = jsonschema::validator_for(&diagnostic_schema).unwrap();
     let explain_validator = jsonschema::validator_for(&explain_schema).unwrap();
-    let explain_validator_v3 =
-        jsonschema::validator_for(&schema("explain-v3.schema.json")).unwrap();
-    let explain_validator_v4 =
-        jsonschema::validator_for(&schema("explain-v4.schema.json")).unwrap();
     let mut reached = HashSet::new();
     for file in files {
         let path = file.to_str().unwrap();
@@ -68,12 +64,8 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
                     assert_eq!(document["diagnostics"][0]["code"], code, "{args:?}");
                 }
             }
-            let validator = if document["schema"] == "invar-explain-v1" {
+            let validator = if document["schema"] == "invar-explain-v5" {
                 &explain_validator
-            } else if document["schema"] == "invar-explain-v3" {
-                &explain_validator_v3
-            } else if document["schema"] == "invar-explain-v4" {
-                &explain_validator_v4
             } else {
                 &diagnostic_validator
             };
@@ -276,12 +268,8 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
             );
             assert_eq!(document["diagnostics"][0]["severity"], "note");
         }
-        let validator = if document["schema"] == "invar-explain-v1" {
+        let validator = if document["schema"] == "invar-explain-v5" {
             &explain_validator
-        } else if document["schema"] == "invar-explain-v3" {
-            &explain_validator_v3
-        } else if document["schema"] == "invar-explain-v4" {
-            &explain_validator_v4
         } else {
             &diagnostic_validator
         };
@@ -348,10 +336,8 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
 #[test]
 fn issue_ai_01_machine_diagnostics_cli_documents_validate() {
     let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
-    let explain_schema = schema("explain-v1.schema.json");
-    let placement_explain_schema = schema("explain-v5.schema.json");
-    let placement_device_schema = schema("invar-explain-device-v5.schema.json");
-    let device_schema = schema("invar-explain-device-v1.schema.json");
+    let explain_schema = schema("explain-v5.schema.json");
+    let device_schema = schema("invar-explain-device-v5.schema.json");
     let codes = registry_codes();
     let valid = fixture("valid", b"fn main() -> i32 { return 42; }");
     let invalid = fixture("invalid", b"fn main() -> i32 { return unknown; }");
@@ -431,10 +417,8 @@ fn issue_ai_01_machine_diagnostics_cli_documents_validate() {
         if exit == 4 {
             assert_eq!(document["diagnostics"][0]["code"], "EVALUATION_LIMIT");
         }
-        let placement = document["schema"] == "invar-explain-v5";
-        let validator = jsonschema::validator_for(if placement {
-            &placement_explain_schema
-        } else if is_explain {
+        let validator = jsonschema::validator_for(if is_explain {
+            assert_eq!(document["schema"], "invar-explain-v5", "{args:?}");
             &explain_schema
         } else {
             &diagnostic_schema
@@ -449,16 +433,8 @@ fn issue_ai_01_machine_diagnostics_cli_documents_validate() {
                 .collect::<Vec<_>>()
         );
         if let Some(device) = document.get("device_execution") {
-            if placement {
-                assert!(
-                    jsonschema::is_valid(&placement_device_schema, device),
-                    "{device}"
-                );
-                assert_eq!(document["device_schema"], "invar-explain-device-v5");
-            } else {
-                assert!(jsonschema::is_valid(&device_schema, device), "{device}");
-                assert_eq!(document["device_schema"], "invar-explain-device-v1");
-            }
+            assert!(jsonschema::is_valid(&device_schema, device), "{device}");
+            assert_eq!(document["device_schema"], "invar-explain-device-v5");
         }
         if args[1] == "examples/fsum.inv" {
             let reductions = document["device_execution"]["choices"]

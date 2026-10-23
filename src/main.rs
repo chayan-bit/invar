@@ -747,14 +747,13 @@ fn explain(path: &OsString, engine: Option<&str>, artifact: Option<&OsString>) -
                     Err(error) => return auto_command::report(error, path, true, selected),
                 }
             }
-            let version = auto_command::explain_version(&mut document, engine);
-            document["schema"] = serde_json::json!(format!("invar-explain-v{version}"));
-            if version > 1 {
-                document["schema_version"] = serde_json::json!(version);
+            // Every `--engine auto` explain records its path (#50).
+            if engine == Some("auto") {
+                document["auto_path"] = serde_json::json!("established");
             }
+            document["schema"] = serde_json::json!(invar::admission::SCHEMA);
             if document.get("device_execution").is_some() {
-                document["device_schema"] =
-                    serde_json::json!(format!("invar-explain-device-v{version}"));
+                document["device_schema"] = serde_json::json!(invar::admission::DEVICE_SCHEMA);
             }
             if document.to_string().len() > 1_000_000 {
                 return report_front(
