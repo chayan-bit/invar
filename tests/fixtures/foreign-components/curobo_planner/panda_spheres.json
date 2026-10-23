@@ -2,7 +2,7 @@
  "schema": "invar-panda-collision-spheres-v1",
  "frame": "each Menagerie body frame (prepare_models.py maps to URDF link frames)",
  "source_sha256": {
-  "panda.xml": "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b",
+  "panda.xml": "93a8d8e137ae43a33e7499ff627c1f633fb27d94f58ea7545b97c8f65027db1d",
   "assets/link0.stl": "dfc6d94330de8ddb005b311bfdba9f3b8e1aa7c256b71592ee7ff32cb9a9a5aa",
   "assets/link1.stl": "e41a39a94108fcf56aacff603fc91ec80541f4c1af17b51a0de5617f5566e6d2",
   "assets/link2.stl": "370f7605a0fae3529db169ded50f52f171024aa792d4d773bc84197301f6a039",
@@ -40,7 +40,7 @@
  "grow_spacing_m": 0.001,
  "grow_limit_m": 0.015,
  "surface_patch_radius_m": 0.01,
- "fit_script_sha256": "9a326edd5efbea2782823defb58e73ba5abc0167c87a04dd7bb2c80a3e499a73",
+ "fit_script_sha256": "31e6bdd84318cb69936766d559b074bbc6dac540665caea98d24f50b372e8b64",
  "links": {
   "panda_link0": {
    "spheres": [

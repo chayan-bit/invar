@@ -12,3 +12,7 @@ The duplicated meshes were removed only after byte comparison and MuJoCo model
 equivalence checks. The upstream manifest and licenses remain in the canonical
 model tree. The original full tree is recoverable at commit
 `164dc101db77bbe6226de1a86f68cabfb425bc58`.
+
+The retained XML is also the unstripped original that the vendored model derives from.
+The runnable copy under `../reach_place/assets/menagerie/` drops the visual-only geoms and their meshes.
+`issue_s1_06_ur5e_vendored_model_is_the_pinned_original_without_visual_geoms` proves that is the only difference.

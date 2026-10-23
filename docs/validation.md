@@ -1,6 +1,6 @@
 # Validation contract
 
-Status: M0, M1-01, and M1-03 landed with the initial Rust bootstrap, and M1-02 through M1-05 (native LLVM CPU, the revised typed graph/source agreement, checked rewrites, and extraction) and the later increments are on `main`; open items are in [remaining work](remaining-work.md). The specification and example gate is `cargo test --locked --test issue_ai_02_spec_examples`. See [M1 acceptance](m1-acceptance.md) and [native evidence](native-toolchain-v1.md). Automatic source-loop recognition, CPU parallel scheduling, device acceptance, and source-to-three-agent encoding are outside M1. The historical document-only bootstrap was not compiler evidence.
+Status: M0, M1-01, and M1-03 landed with the initial Rust bootstrap, and M1-02 through M1-05 (native LLVM CPU, the revised typed graph/source agreement, checked rewrites, and extraction) and the later increments are on `main`; open items are tracked in GitHub issues. The specification and example gate is `cargo test --locked --test issue_ai_02_spec_examples`. See [native evidence](native-toolchain-v1.md). Automatic source-loop recognition, CPU parallel scheduling, device acceptance, and source-to-three-agent encoding are outside M1. The historical document-only bootstrap was not compiler evidence.
 
 ## M0 required commands
 
@@ -72,7 +72,7 @@ Run them locally on a CUDA-capable Linux host or an Apple Silicon Mac when a cha
 
 ## Later implementation and hardware acceptance
 
-After M0, use [the detailed plan](implementation-plan.md), its shared executable acceptance interface, and each [issue contract](issues/README.md). List filtered tests and require a nonzero relevant count before running them in Debug/Release. Default CPU CI and real CUDA qualification are distinct: skipped, mock-only or unavailable-device checks cannot close a hardware issue. [Performance acceptance](performance-acceptance.md) defines independent baselines, numerical policy and the frozen per-family targets; no performance claim follows from this specification or the standalone recurrence probe.
+After M0, use each GitHub issue's acceptance contract. List filtered tests and require a nonzero relevant count before running them in Debug/Release. Default CPU CI and real CUDA qualification are distinct: skipped, mock-only or unavailable-device checks cannot close a hardware issue. [Performance acceptance](performance-acceptance.md) defines independent baselines, numerical policy and the frozen per-family targets; no performance claim follows from this specification or the standalone recurrence probe.
 
 ## Ordered affine-pair source form
 
