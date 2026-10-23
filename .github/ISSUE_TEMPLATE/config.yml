@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/chayan-bit/invar/security/advisories/new
+    about: Please report vulnerabilities privately, not in a public issue.
+  - name: Documentation
+    url: https://github.com/chayan-bit/invar/blob/main/README.md
+    about: Read the README, the language specification and the contributing guide first.
