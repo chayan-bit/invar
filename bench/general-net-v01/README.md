@@ -4,8 +4,8 @@
 
 ## Owned arrays and resumable CPU continuation
 
-The additive [strict-f32 ABI8 corpus](NUMERIC.md) retains every prior row and adds
-96 hand-derived observations. It executes published scalar numeric CPU emission,
+The additive [strict-f32 ABI11 corpus](NUMERIC.md) retains every prior row and adds
+96 hand-derived observations. It executes the published CPU numeric emission,
 records source/oracle/compiler exclusions, and now executes all 250 valid source
 rows through the private numeric named reference. The unchanged 254-row
 denominator retains four frontend rejections and all compiler/oracle exclusions.

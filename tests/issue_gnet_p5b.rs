@@ -205,7 +205,11 @@ fn call_closure_matches_3000_trap_heavy_inputs() {
         let args = [Value::I32(x), Value::I32(d)];
         let (net, proof) = plan.artifact().checked_net();
         let expected = oracle::observe_call(net, proof, "run", &args, limits).unwrap();
-        let Progress::Complete(got) = plan.start(&args, limits).unwrap().resume(1_000_000).unwrap()
+        let Progress::Complete(got) = plan
+            .start(&args, limits)
+            .unwrap()
+            .resume(1_000_000)
+            .unwrap()
         else {
             panic!("case {case} must finish in one maximal quantum")
         };
