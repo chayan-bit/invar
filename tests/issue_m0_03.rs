@@ -123,7 +123,7 @@ fn issue_m0_03_cli_check_json_and_status() {
         assert!(output.stderr.is_empty());
         let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
         assert_eq!(value["status"], expected_status);
-        assert_eq!(value["schema_version"], 1);
+        assert_eq!(value["schema_version"], 3);
         assert!(value["diagnostics"].is_array());
         if let Some(code) = code {
             assert_eq!(value["diagnostics"][0]["code"], code);

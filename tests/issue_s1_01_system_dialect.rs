@@ -51,7 +51,7 @@ fn issue_s1_01_system_dialect_emits_checked_canonical_ir() {
         .unwrap();
     assert!(check.status.success());
     let document: serde_json::Value = serde_json::from_slice(&check.stdout).unwrap();
-    assert_eq!(document["schema"], "invar-diagnostics-v1");
+    assert_eq!(document["schema"], "invar-diagnostics-v3");
     assert_eq!(document["diagnostics"], serde_json::json!([]));
     let second = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(["system", "ir", FIXTURE])
@@ -73,7 +73,7 @@ fn issue_s1_01_system_dialect_negative_fixtures_have_registered_spans() {
         .map(|entry| entry["code"].as_str().unwrap())
         .collect();
     let diagnostic_schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json")).unwrap();
     let mut files: Vec<_> = std::fs::read_dir(root)
         .unwrap()
         .map(|entry| entry.unwrap().path())

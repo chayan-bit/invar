@@ -29,7 +29,7 @@ fn v02_fk_panda_matches_pinocchio_on_every_cpu_engine() {
         let json = run(&engine);
         assert_eq!(json["result"]["value"], 4, "{engine:?}: {json}");
         assert_eq!(json["numeric_contracts"], contracts(), "{engine:?}");
-        valid("invar-diagnostics-v1.schema.json", &json);
+        valid("invar-diagnostics-v3.schema.json", &json);
     }
     let explain = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(["explain", EXAMPLE, "--format", "json"])

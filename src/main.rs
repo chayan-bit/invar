@@ -649,23 +649,17 @@ fn system_command(path: &OsString, action: SystemAction<'_>) -> i32 {
 /// Numeric contracts of the program `invar run` executes, recorded in its
 /// JSON receipt (one program per process).
 static RUN_CONTRACTS: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
-/// Its fold receipt, which only invar-diagnostics-v3 carries (D12).
+/// Its fold receipt (D12).
 static RUN_FOLD: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
 
 fn print_run_json(mut document: serde_json::Value, path: &OsString) -> i32 {
     if let Some(contracts) = RUN_CONTRACTS.get() {
         document["numeric_contracts"] = contracts.clone();
     }
-    if let Some(fold) = RUN_FOLD.get().filter(|_| document["schema_version"] == 3) {
+    if let Some(fold) = RUN_FOLD.get() {
         document["numeric_contracts"]["fold"] = fold.clone();
     }
-    document["schema"] = serde_json::json!(if document["schema_version"] == 3 {
-        "invar-diagnostics-v3"
-    } else if document["schema_version"] == 2 {
-        "invar-diagnostics-v2"
-    } else {
-        invar::diagnostics::SCHEMA
-    });
+    document["schema"] = serde_json::json!(invar::diagnostics::SCHEMA);
     let serialized = document.to_string();
     if serialized.len() > 1_000_000 {
         println!(
@@ -836,7 +830,7 @@ fn execute(
         if json {
             return print_run_json(
                 serde_json::json!({
-                    "schema_version": 1, "status": "ok", "diagnostics": [],
+                    "schema_version": 3, "status": "ok", "diagnostics": [],
                     "checks_completed": ["syntax", "names", "types", "local_ownership", "call_loans", "view_lifetimes"],
                     "checks_pending": []
                 }),
@@ -888,7 +882,7 @@ fn execute(
                 if json {
                     return print_run_json(
                         serde_json::json!({
-                            "schema_version": 1, "status": "ok", "diagnostics": [],
+                            "schema_version": 3, "status": "ok", "diagnostics": [],
                             "result": {"type": "i32", "value": value}
                         }),
                         path,
@@ -949,7 +943,7 @@ fn execute_scheduled(
                     diagnostics.push(note);
                 }
                 let mut document = serde_json::json!({
-                    "schema_version":1, "status":"ok", "diagnostics":diagnostics,
+                    "schema_version":3, "status":"ok", "diagnostics":diagnostics,
                     "result":{"type":"i32", "value":receipt["result"]},
                 });
                 if let Some(route) = receipt.get("normal_form") {
@@ -1046,7 +1040,7 @@ mod diagnostic_tests {
         let document = error.to_diagnostics_json("fixture.inv", b"");
         assert_eq!(document["diagnostics"][0]["code"], "NATIVE_BUILD");
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         assert!(jsonschema::is_valid(&schema, &document));
     }

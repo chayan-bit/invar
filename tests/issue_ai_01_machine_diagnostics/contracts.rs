@@ -27,7 +27,7 @@ fn issue_ai_01_machine_diagnostics_positions_and_fix() {
     assert_eq!(status, 1);
     assert_eq!(document["diagnostics"][0]["code"], "ENTRYPOINT_MISSING");
     assert!(jsonschema::is_valid(
-        &schema("invar-diagnostics-v1.schema.json"),
+        &schema("invar-diagnostics-v3.schema.json"),
         &document
     ));
     let edits = document["diagnostics"][0]["suggested_fixes"][0]["edits"]
@@ -140,7 +140,7 @@ fn issue_ai_01_machine_diagnostics_reject_invalid_contracts() {
         )],
     );
     assert!(!codes_registered(&unregistered, &registry_codes()));
-    let diagnostic_schema = schema("invar-diagnostics-v1.schema.json");
+    let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
     assert!(jsonschema::is_valid(
         &diagnostic_schema,
         &invariant_with_fix

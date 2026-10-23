@@ -211,7 +211,7 @@ fn issue_l1_06_python_binding_exact_scalar_validation_without_callbacks() {
         .unwrap();
         let values = scope.get_item("values").unwrap().unwrap();
         let schema: Value = serde_json::from_str(include_str!(
-            "../../../schema/invar-diagnostics-v1.schema.json"
+            "../../../schema/invar-diagnostics-v3.schema.json"
         ))
         .unwrap();
         for value in values.try_iter().unwrap() {
@@ -258,7 +258,7 @@ fn issue_l1_06_python_binding_exact_scalar_validation_without_callbacks() {
 fn issue_l1_06_python_binding_foreign_error_boundary_documents() {
     Python::attach(|py| {
         let schema: Value = serde_json::from_str(include_str!(
-            "../../../schema/invar-diagnostics-v1.schema.json"
+            "../../../schema/invar-diagnostics-v3.schema.json"
         ))
         .unwrap();
         for (external, expected) in [
@@ -304,7 +304,7 @@ fn issue_l1_06_python_binding_foreign_error_boundary_documents() {
 fn issue_l1_06_python_binding_reference_staging_limit_is_a_typed_resource_error() {
     Python::attach(|py| {
         let schema: Value = serde_json::from_str(include_str!(
-            "../../../schema/invar-diagnostics-v1.schema.json"
+            "../../../schema/invar-diagnostics-v3.schema.json"
         ))
         .unwrap();
         let core = invar::eval::EvalError::Tool {
@@ -340,7 +340,7 @@ fn assert_host_mapping<E: pyo3::PyTypeInfo>(
     expected: &str,
 ) {
     let schema: Value = serde_json::from_str(include_str!(
-        "../../../schema/invar-diagnostics-v1.schema.json"
+        "../../../schema/invar-diagnostics-v3.schema.json"
     ))
     .unwrap();
     let error = host_error(py, core, "reference.inv", b"");
@@ -442,7 +442,7 @@ mod bridge_faults;
 fn issue_l1_06_python_binding_device_failures_preserve_codes_without_replay() {
     Python::attach(|py| {
         let schema: Value = serde_json::from_str(include_str!(
-            "../../../schema/invar-diagnostics-v1.schema.json"
+            "../../../schema/invar-diagnostics-v3.schema.json"
         ))
         .unwrap();
         for code in [

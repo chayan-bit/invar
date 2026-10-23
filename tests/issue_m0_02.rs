@@ -104,7 +104,7 @@ fn issue_m0_02_lexical_spans_and_json() {
     let document = error.to_json("a\"b\n.inv");
     let encoded = serde_json::to_string(&document).unwrap();
     let decoded: serde_json::Value = serde_json::from_str(&encoded).unwrap();
-    assert_eq!(decoded["schema_version"], 1);
+    assert_eq!(decoded["schema_version"], 3);
     assert_eq!(decoded["status"], "source_error");
     assert_eq!(decoded["diagnostics"][0]["path"], "a\"b\n.inv");
     assert_eq!(decoded["diagnostics"][0]["span"]["start"], start);
