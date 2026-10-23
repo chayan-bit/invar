@@ -1,25 +1,16 @@
 # Explain JSON
 
-`invar explain PATH --format json` prints one JSON document describing how each region of a checked program is admitted.
-The document version depends on what the program contains and how it is run:
+`invar explain PATH --format json` prints one `invar-explain-v5` document, with `schema_version: 5`, describing how each region of a checked program is admitted.
+With `--engine cuda|metal|auto` the document also carries `device_execution`, whose `device_schema` is `invar-explain-device-v5`.
+The strict schemas are `schema/explain-v5.schema.json` and `schema/invar-explain-device-v5.schema.json`.
 
-| Document | Emitted for |
-| --- | --- |
-| `invar-explain-v1` | Every other program |
-| `invar-explain-v3` | A program with an explicit sort site |
-| `invar-explain-v4` | A program with a spatial site |
-| `invar-explain-v5` | `--engine auto` |
-
-With `--engine cuda|metal|auto` the document also carries `device_execution`, whose `device_schema` follows the document version (`invar-explain-device-v1`, `-v3`, `-v4` or `-v5`).
-The strict schemas are in `schema/`.
-
-## Static report (v1)
+## Static report
 
 `invar explain INPUT --format json` reads and checks one Invar source file, lowers it to verified MIR, then prints one JSON document.
 Successful analysis exits 0 even when every region is rejected.
 Source and tool errors use the existing `source_error`/`tool_error` documents and exit codes 1/2.
 
-The success document has `schema_version: 1`, `status: "ok"`, `diagnostics: []`, `source_identity`, and `regions` in source/MIR order.
+The success document has `schema_version: 5`, `status: "ok"`, `diagnostics: []`, `source_identity`, and `regions` in source/MIR order.
 `source_identity` is `fnv1a64:` followed by 16 lowercase hexadecimal digits from FNV-1a (64-bit offset `0xcbf29ce484222325`, multiplier `0x100000001b3`) over exact source bytes.
 This checksum establishes identity, not authenticity.
 
@@ -40,11 +31,11 @@ Persisted documents are descriptive admission inputs.
 A checksum or successful validation does not prove semantic equivalence by itself.
 Later extraction and execution must recheck the obligations at their own boundary.
 
-v0.2 `f64` programs add the optional `numeric_contracts` object and the device reason `metal-no-f64`.
+`f64` programs add the optional `numeric_contracts` object and the device reason `metal-no-f64`.
 
-## Explicit sorts (v3)
+## Explicit sorts
 
-A report with a sort site uses `invar-explain-v3`, `schema_version: 3` and device schema `invar-explain-device-v3`.
+A report with a sort site lists it in `explicit_sorts`.
 Each checked `explicit_sorts` site adds a required `calibration_id` with the C14 family spelling `sort.<op>.<type>`, such as `sort.argsort.f32` or `sort.sort_by_key.u32`.
 Operations remain overloaded by their key array type.
 These ids identify calibration families; they do not assert measured costs.
@@ -52,10 +43,7 @@ These ids identify calibration families; they do not assert measured costs.
 `sort-cost-unmeasured` is registered in `explain_reason_codes` in `schema/diagnostic-codes-v1.json`.
 Automatic execution still selects CPU with no cost estimate.
 
-## Spatial sites (v4)
-
-Programs with checked spatial calls emit `invar-explain-v4` and `schema_version: 4`.
-A spatial program that also sorts lists its sort sites in `explicit_sorts` exactly as v3 does, including the C14 `calibration_id`.
+## Spatial sites
 
 `explicit_spatial` lists checked sites in MIR order, including unreached branches.
 Each site records its function, operation, source span, `cpu-sorted-grid` default, `explicit-spatial-v1` rule, and registered `spatial-cost-unmeasured` reason.
@@ -71,35 +59,31 @@ The calibration identities are:
 The strict schema rejects unknown fields, operations, reasons, and mismatched operation/family pairs.
 Checked sites are not execution or calibration samples.
 
-With `--engine cuda|metal|auto`, `device_schema` is `invar-explain-device-v4`.
-Reached spatial choices carry the same family identity.
+With `--engine cuda|metal|auto`, reached spatial choices carry the same family identity.
 Forced kernels retain their device backend, implementation, and `forced-device` reason.
 Host metadata, empty operations without a launch, and explicit host sorts report `cpu-serial` with `spatial-host-work` instead of a device launch.
 Unmeasured automatic spatial execution stays on CPU with no invented cost, even if the generic bandwidth model favors the GPU.
 Independent benchmark qualification and the 1.10x gate remain prerequisites for automatic device placement.
 
-## Auto engine (v5)
+## Auto engine
 
-`invar explain PATH --engine auto` emits `invar-explain-v5` and `schema_version: 5`, and `invar run PATH --engine auto --format json` emits `invar-diagnostics-v3`, whichever path runs the auto engine.
-`auto_path` names that path: `"placement"` or `"established"`.
+Under `--engine auto`, the explain document and the `invar run PATH --engine auto --format json` receipt carry `auto_path`, which names the path that ran the auto engine: `"placement"` or `"established"`.
+Other explains have no `auto_path`.
 Placement owns it only when the user asks for it: `--profile`, `--host-class` or `--trust-provisional`, or a calibration profile for the live host at `calibration/<host-class>.json`.
 A matching provisional profile at the default path never switches auto by itself.
 A frozen, mismatched or malformed one does, so placement reports its refusal or typed error instead of skipping it.
 
-v5 is v4 plus two objects, required when `auto_path` is `"placement"` and absent when it is `"established"`:
+Two objects are required when `auto_path` is `"placement"` and absent when it is `"established"`:
 - `placement`: the shared placement receipt ([placement-v1](../spec/placement-v1.md)), with the profile identity, the CPU and device costs, and each region's choice.
 - `execution`: the run document of the same execution, an `invar-diagnostics-v3` receipt.
 
-`explicit_sorts`, `explicit_spatial` and `numeric_contracts` are optional and appear exactly as in v3, v4 and v1, so the intrinsic sites stay visible under placement.
-`numeric_contracts` may also carry `fold`, which the top-level v5 document and the `invar-diagnostics-v3` receipt of `invar run --engine auto` add: each declared fold tier a lowered fold used, to the algorithm that ran ([numeric contracts](numeric.md#receipts)).
+`explicit_sorts`, `explicit_spatial` and `numeric_contracts` stay optional and unchanged, so the intrinsic sites stay visible under placement.
+`numeric_contracts` may also carry `fold`, which the top-level explain document and the `invar-diagnostics-v3` receipt of `invar run --engine auto` add: each declared fold tier a lowered fold used, to the algorithm that ran ([numeric contracts](numeric.md#receipts)).
 The receipt embedded as `execution` carries no `numeric_contracts`.
-The device execution follows `invar-explain-device-v5`, which is device v4 plus the placement reasons `measured-cpu-cost` and `measured-device-cost`, and the optional `normal_form` route of device v1.
+The device execution may carry the placement reasons `measured-cpu-cost` and `measured-device-cost` and the optional `normal_form` route.
 
-Every placement document, the v5 explain and its `execution` receipt alike, records `auto_path: "placement"`.
-Every established document records `auto_path: "established"`: it is the v1, v3 or v4 document of the same run with only the version fields moved to v5 (`schema`, `schema_version`, `device_schema`), and its run receipt is `invar-diagnostics-v3` without `placement`.
-Explains without `--engine` and forced CUDA or Metal explains keep v1, v3 and v4.
-
-The strict schemas are `schema/explain-v5.schema.json` and `schema/invar-explain-device-v5.schema.json`.
+Every placement document, the explain and its `execution` receipt alike, records `auto_path: "placement"`.
+Every established document records `auto_path: "established"` and has no `placement`, and neither does its run receipt.
 
 ## Device execution
 
