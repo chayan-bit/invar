@@ -131,7 +131,7 @@ pub fn encode(
 }
 
 impl Net {
-    pub(super) fn decode_term(&self, id: NodeId) -> Result<term::Term, Error> {
+    pub fn decode_term(&self, id: NodeId) -> Result<term::Term, Error> {
         let node = self.node(id)?;
         let child = |index| self.decode_term(node.inputs[index]).map(Box::new);
         let kind = match &node.op {

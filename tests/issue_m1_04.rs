@@ -1,12 +1,16 @@
 use std::collections::BTreeMap;
 
+#[path = "../test-support/term_oracle.rs"]
+mod term;
+
 use invar::{
     check::check,
     front::parse,
     mir, mir_eval, mir_net,
-    term::{self, Event, Kind, Term},
     typed_net::{self, Effect, Error, Limits, Signature, Type},
 };
+
+use term::{Event, Kind, Term};
 
 const GRAPH_LIMITS: Limits = Limits {
     nodes: 64,
@@ -155,11 +159,11 @@ fn issue_m1_04_typed_net_verifier_cbv_demand_and_failure_provenance() {
         ..RUN_LIMITS
     };
     assert_eq!(
-        graph.observe(&proof, bounded).unwrap(),
+        term::observe_net(&graph, &proof, bounded).unwrap(),
         term::observe(&program, &discarded, bounded)
     );
     assert_eq!(
-        graph.observe(&proof, bounded).unwrap().result,
+        term::observe_net(&graph, &proof, bounded).unwrap().result,
         Err(term::Error::StepLimit(90))
     );
 
@@ -180,7 +184,7 @@ fn issue_m1_04_typed_net_verifier_cbv_demand_and_failure_provenance() {
     ]);
     let graph = typed_net::encode(&program, &branch, &types, &signatures, GRAPH_LIMITS).unwrap();
     let proof = graph.verify(GRAPH_LIMITS).unwrap();
-    let observed = graph.observe(&proof, RUN_LIMITS).unwrap();
+    let observed = term::observe_net(&graph, &proof, RUN_LIMITS).unwrap();
     assert_eq!(observed, term::observe(&program, &branch, RUN_LIMITS));
     assert!(!observed.events.contains(&Event::Demand(7)));
 
@@ -199,7 +203,7 @@ fn issue_m1_04_typed_net_verifier_cbv_demand_and_failure_provenance() {
     let empty = term::Program::default();
     let graph = typed_net::encode(&empty, &first, &types, &BTreeMap::new(), GRAPH_LIMITS).unwrap();
     let proof = graph.verify(GRAPH_LIMITS).unwrap();
-    let observed = graph.observe(&proof, RUN_LIMITS).unwrap();
+    let observed = term::observe_net(&graph, &proof, RUN_LIMITS).unwrap();
     assert_eq!(observed, term::observe(&empty, &first, RUN_LIMITS));
     assert_eq!(
         observed.result,
@@ -252,9 +256,8 @@ fn issue_m1_04_typed_net_verifier_cbv_demand_and_failure_provenance() {
         GRAPH_LIMITS,
     )
     .unwrap();
-    let observed = graph
-        .observe(&graph.verify(GRAPH_LIMITS).unwrap(), RUN_LIMITS)
-        .unwrap();
+    let observed =
+        term::observe_net(&graph, &graph.verify(GRAPH_LIMITS).unwrap(), RUN_LIMITS).unwrap();
     assert_eq!(observed, term::observe(&named_program, &named, RUN_LIMITS));
     assert_eq!(
         observed.result,
@@ -290,12 +293,16 @@ fn issue_m1_04_typed_net_verifier_rejects_types_affine_duplication_and_stale_fac
     )
     .unwrap();
     let proof = graph.verify(GRAPH_LIMITS).unwrap();
-    let before = graph.observe(&proof, RUN_LIMITS).unwrap().result;
+    let before = term::observe_net(&graph, &proof, RUN_LIMITS)
+        .unwrap()
+        .result;
     graph.nodes[graph.entry].as_mut().unwrap().inputs.swap(0, 1);
     assert_eq!(graph.check_proof(&proof), Err(Error::StaleProof));
     let after_proof = graph.verify(GRAPH_LIMITS).unwrap();
     assert_ne!(
-        graph.observe(&after_proof, RUN_LIMITS).unwrap().result,
+        term::observe_net(&graph, &after_proof, RUN_LIMITS)
+            .unwrap()
+            .result,
         before
     );
     graph.nodes[graph.entry].as_mut().unwrap().inputs[0] =
@@ -375,4 +382,246 @@ fn issue_m1_04_typed_net_verifier_rejects_types_affine_duplication_and_stale_fac
     graph.schema_version = typed_net::SCHEMA_VERSION;
     graph.nodes[0].as_mut().unwrap().effect = Effect::MayFail;
     assert_eq!(graph.verify(GRAPH_LIMITS), Err(Error::Effect(0)));
+}
+
+mod term_oracle_self_tests {
+    use super::term::{Error, Event, Function, Kind, Limits, Program, Term, Value, observe};
+
+    const LIMITS: Limits = Limits {
+        nodes: 64,
+        depth: 16,
+        steps: 32,
+    };
+
+    fn t(id: u32, kind: Kind) -> Term {
+        Term { id, kind }
+    }
+
+    fn call(id: u32, name: &str, args: Vec<Term>) -> Term {
+        t(
+            id,
+            Kind::Call {
+                name: name.into(),
+                args,
+            },
+        )
+    }
+
+    fn spin() -> Program {
+        Program {
+            functions: [(
+                "spin".into(),
+                Function {
+                    params: vec![],
+                    body: call(90, "spin", vec![]),
+                },
+            )]
+            .into(),
+        }
+    }
+
+    #[test]
+    fn issue_m1_04_term_oracle_preserves_demand_and_provenance() {
+        // A discarded argument remains demanded under call-by-value.
+        let discarded = t(
+            0,
+            Kind::Apply(
+                Box::new(t(
+                    1,
+                    Kind::Lambda {
+                        binder: 10,
+                        body: Box::new(t(2, Kind::Nat(7))),
+                    },
+                )),
+                Box::new(call(3, "spin", vec![])),
+            ),
+        );
+        let observation = observe(&spin(), &discarded, Limits { steps: 7, ..LIMITS });
+        assert_eq!(observation.result, Err(Error::StepLimit(90)));
+        assert_eq!(
+            &observation.events[..4],
+            &[
+                Event::Demand(0),
+                Event::Demand(1),
+                Event::Complete(1),
+                Event::Demand(3),
+            ]
+        );
+        assert!(!observation.events.contains(&Event::Demand(2)));
+
+        // The unselected branch is never demanded, even if divergent.
+        let branch = t(
+            4,
+            Kind::If {
+                condition: Box::new(t(5, Kind::Bool(true))),
+                yes: Box::new(t(6, Kind::Nat(5))),
+                no: Box::new(call(7, "spin", vec![])),
+            },
+        );
+        let observation = observe(&spin(), &branch, LIMITS);
+        assert_eq!(observation.result, Ok(Value::Nat(5)));
+        assert_eq!(observation.steps, 3);
+        assert!(!observation.events.contains(&Event::Demand(7)));
+        assert!(!observation.events.contains(&Event::Demand(90)));
+
+        // Function position is evaluated before the argument, including traps.
+        let first = t(
+            8,
+            Kind::Apply(
+                Box::new(t(9, Kind::Fail("function"))),
+                Box::new(t(10, Kind::Fail("argument"))),
+            ),
+        );
+        let observation = observe(&Program::default(), &first, LIMITS);
+        assert_eq!(
+            observation.result,
+            Err(Error::Trap {
+                at: 9,
+                label: "function"
+            })
+        );
+        assert!(!observation.events.contains(&Event::Demand(10)));
+
+        let function_diverges = t(
+            20,
+            Kind::Apply(
+                Box::new(call(21, "spin", vec![])),
+                Box::new(t(22, Kind::Fail("argument"))),
+            ),
+        );
+        let observation = observe(&spin(), &function_diverges, Limits { steps: 7, ..LIMITS });
+        assert_eq!(observation.result, Err(Error::StepLimit(90)));
+        assert!(!observation.events.contains(&Event::Demand(22)));
+
+        // Named-call arguments are left-to-right; a later trap is hidden.
+        let named = call(
+            11,
+            "missing",
+            vec![
+                t(12, Kind::Unit),
+                t(13, Kind::Fail("second")),
+                t(14, Kind::Fail("third")),
+            ],
+        );
+        let observation = observe(&Program::default(), &named, LIMITS);
+        assert_eq!(
+            observation.result,
+            Err(Error::Trap {
+                at: 13,
+                label: "second"
+            })
+        );
+        assert!(!observation.events.contains(&Event::Demand(14)));
+    }
+
+    #[test]
+    fn issue_m1_04_term_oracle_affine_binding_and_limits() {
+        let identity = t(
+            1,
+            Kind::Lambda {
+                binder: 20,
+                body: Box::new(t(2, Kind::Var(20))),
+            },
+        );
+        let applied = t(
+            0,
+            Kind::Apply(Box::new(identity), Box::new(t(3, Kind::Nat(9)))),
+        );
+        assert_eq!(
+            observe(&Program::default(), &applied, LIMITS).result,
+            Ok(Value::Nat(9))
+        );
+
+        let duplicate = t(
+            4,
+            Kind::Let {
+                binder: 21,
+                value: Box::new(t(
+                    5,
+                    Kind::Lambda {
+                        binder: 22,
+                        body: Box::new(t(6, Kind::Var(22))),
+                    },
+                )),
+                body: Box::new(t(
+                    7,
+                    Kind::Pair(Box::new(t(8, Kind::Var(21))), Box::new(t(9, Kind::Var(21)))),
+                )),
+            },
+        );
+        assert_eq!(
+            observe(&Program::default(), &duplicate, LIMITS).result,
+            Err(Error::MissingBinder { at: 9, binder: 21 })
+        );
+
+        // Capturing an affine closure consumes it from the surrounding scope.
+        let capture = t(
+            24,
+            Kind::Let {
+                binder: 25,
+                value: Box::new(t(
+                    26,
+                    Kind::Lambda {
+                        binder: 27,
+                        body: Box::new(t(28, Kind::Var(27))),
+                    },
+                )),
+                body: Box::new(t(
+                    29,
+                    Kind::Let {
+                        binder: 30,
+                        value: Box::new(t(
+                            31,
+                            Kind::Lambda {
+                                binder: 32,
+                                body: Box::new(t(33, Kind::Var(25))),
+                            },
+                        )),
+                        body: Box::new(t(34, Kind::Var(25))),
+                    },
+                )),
+            },
+        );
+        assert_eq!(
+            observe(&Program::default(), &capture, LIMITS).result,
+            Err(Error::MissingBinder { at: 34, binder: 25 })
+        );
+
+        let copyable = t(
+            10,
+            Kind::Let {
+                binder: 23,
+                value: Box::new(t(11, Kind::Nat(4))),
+                body: Box::new(t(
+                    12,
+                    Kind::Pair(
+                        Box::new(t(13, Kind::Var(23))),
+                        Box::new(t(14, Kind::Var(23))),
+                    ),
+                )),
+            },
+        );
+        assert_eq!(
+            observe(&Program::default(), &copyable, LIMITS).result,
+            Ok(Value::Pair(
+                Box::new(Value::Nat(4)),
+                Box::new(Value::Nat(4))
+            ))
+        );
+
+        let recursive = call(15, "spin", vec![]);
+        assert_eq!(
+            observe(&spin(), &recursive, Limits { depth: 3, ..LIMITS }).result,
+            Err(Error::DepthLimit(90))
+        );
+        assert_eq!(
+            observe(
+                &Program::default(),
+                &copyable,
+                Limits { nodes: 2, ..LIMITS }
+            )
+            .result,
+            Err(Error::NodeLimit)
+        );
+    }
 }
