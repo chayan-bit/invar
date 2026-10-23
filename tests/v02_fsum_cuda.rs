@@ -114,7 +114,7 @@ fn v02_fsum_cuda_subnormal_and_contraction_cases() {
     }
 }
 
-/// Resident GPU medians; compare with `bench/baselines/cuda-cub-f32sum.cu`.
+/// Resident GPU medians; compare with `tools/bench/baselines/cuda-cub-f32sum.cu`.
 /// `cargo test --release --features cuda --test v02_fsum_cuda -- --ignored`
 #[test]
 #[ignore = "benchmark; run alone under INVAR_GPU_EXCLUSIVE=1"]

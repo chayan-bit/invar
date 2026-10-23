@@ -1,15 +1,12 @@
 # Tracked .rs files over 800 lines, with the line count each may not exceed (scripts/check-file-size).
 # One `<lines> <path>` per line, sorted by path. Lower an entry in the PR that splits the file; drop it when the
 # file is back under 800 lines. Never raise one: split the file instead.
-952 bench/acceptance.rs
 1211 bench/general-net-v01/corpus_children.rs
 908 bench/general-net-v01/corpus_numeric.rs
 959 bench/general-net-v01/gnet05/generate.rs
-1314 bench/heldout.rs
 963 crates/invar-cuda/src/cuda.rs
 993 crates/invar-device/src/segmented.rs
 1386 crates/invar-device/src/trig_f32.rs
-991 qualification/device.rs
 1732 src/check.rs
 1028 src/component_test/planner.rs
 801 src/eval/engine.rs
@@ -55,8 +52,6 @@
 876 tests/issue_m4_02_stencil_source.rs
 858 tests/issue_m4_06_bounded_schedule_tuning.rs
 806 tests/issue_m4_07_summary_source.rs
-1128 tests/issue_m5_01_benchmark_manifest.rs
-914 tests/issue_m5_01_build_lineage.rs
 897 tests/issue_p0a_trig_f32.rs
 856 tests/issue_s1_06_sequencer_binding.rs
 1067 tests/net_law_collective.rs
@@ -67,3 +62,8 @@
 839 tests/support/gnet_device.rs
 1852 tests/support/substep_admission_cases.rs
 930 tests/v02_placement.rs
+952 tools/bench/acceptance.rs
+1314 tools/bench/heldout.rs
+991 tools/qualification/device.rs
+1128 tools/tests/issue_m5_01_benchmark_manifest.rs
+914 tools/tests/issue_m5_01_build_lineage.rs

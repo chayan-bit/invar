@@ -1,16 +1,7 @@
 use std::{collections::HashSet, path::PathBuf, process::Command};
 
 use invar::{diagnostics, front::Span};
-// The qualification harness is compiled into this test to inject its faults;
-// it expects these names at the crate root.
-#[allow(unused_imports)]
-use invar::{check, front, mir, schedule};
-pub use invar::{general_net, hex, layout_contract, numeric_contract, tensor_cache};
 use serde_json::{Value, json};
-
-#[path = "../qualification/mod.rs"]
-#[allow(dead_code)]
-mod qualification;
 
 fn schema(name: &str) -> Value {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

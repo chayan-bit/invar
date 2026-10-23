@@ -9,24 +9,24 @@ use serde_json::{Value, json};
 use std::path::Path;
 
 #[allow(dead_code)]
-#[path = "../src/contraction_source.rs"]
+#[path = "../../src/contraction_source.rs"]
 mod contraction_source;
-#[path = "../tests/issue_m4_01_device/ops.rs"]
+#[path = "../../tests/issue_m4_01_device/ops.rs"]
 mod floating;
 #[allow(dead_code)]
-#[path = "../tests/support/m402.rs"]
+#[path = "../../tests/support/m402.rs"]
 mod grid;
 #[allow(dead_code)]
-#[path = "../tests/support/m4_05_device.rs"]
+#[path = "../../tests/support/m4_05_device.rs"]
 mod indices;
-#[path = "../tests/issue_m4_03_device/corpus.rs"]
+#[path = "../../tests/issue_m4_03_device/corpus.rs"]
 mod matrix;
-#[path = "../tests/support/pair_reduction.rs"]
+#[path = "../../tests/support/pair_reduction.rs"]
 mod pair;
 #[allow(dead_code)]
-#[path = "../tests/support/m4_04_cases.rs"]
+#[path = "../../tests/support/m4_04_cases.rs"]
 mod segments;
-#[path = "../tests/issue_m4_07_device/corpus.rs"]
+#[path = "../../tests/issue_m4_07_device/corpus.rs"]
 mod summaries;
 
 pub const FAMILIES: [&str; 10] = [

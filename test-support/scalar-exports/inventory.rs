@@ -273,7 +273,7 @@ pub fn classify(id: String, source: String) -> Value {
 pub fn enumerate() -> Value {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let mut paths = Vec::new();
-    for dir in ["examples", "tests/fixtures", "bench", "lib"] {
+    for dir in ["examples", "tests/fixtures", "bench", "tools/bench", "lib"] {
         files(&root.join(dir), &["inv", "invar"], &mut paths);
     }
     paths.sort();
@@ -288,12 +288,15 @@ pub fn enumerate() -> Value {
         })
         .collect();
     let benchmark: Value =
-        serde_json::from_str(&fs::read_to_string(root.join("bench/corpus-v1.json")).unwrap())
+        serde_json::from_str(&fs::read_to_string(root.join("tools/bench/corpus-v1.json")).unwrap())
             .unwrap();
     let benchmark_count = benchmark["programs"].as_array().unwrap().len();
     for program in benchmark["programs"].as_array().unwrap() {
         entries.push(classify(
-            format!("bench/corpus-v1.json#{}", program["id"].as_str().unwrap()),
+            format!(
+                "tools/bench/corpus-v1.json#{}",
+                program["id"].as_str().unwrap()
+            ),
             program["source"].as_str().unwrap().to_string(),
         ));
     }
@@ -307,7 +310,7 @@ pub fn enumerate() -> Value {
         ));
     }
     let mut rust_paths = Vec::new();
-    for dir in ["src", "tests", "crates", "bench"] {
+    for dir in ["src", "tests", "crates", "bench", "tools"] {
         files(&root.join(dir), &["rs"], &mut rust_paths);
     }
     rust_paths.sort();
@@ -361,7 +364,7 @@ pub fn enumerate() -> Value {
         }
     }
     json!({"schema_version":1,"implementation_base":"d1fa19b54ab879fb121d129b3d643345839e1632",
-        "scope":"All .inv/.invar in examples, tests/fixtures, bench, lib; all 240 benchmark embedded programs; 252 exported M2 generated programs; Rust string literals containing fn/extern c in src/tests/crates/bench (excluding this lane's new test and named module). Input occurrences are counted, not deduplicated.",
+        "scope":"All .inv/.invar in examples, tests/fixtures, bench, tools/bench, lib; all 240 benchmark embedded programs; 252 exported M2 generated programs; Rust string literals containing fn/extern c in src/tests/crates/bench/tools (excluding this lane's new test and named module). Input occurrences are counted, not deduplicated.",
         "limitations":["Rust literals include incomplete fragments and uninstantiated format templates; parse rejection does not classify their runtime expansions.","Runtime-generated programs outside the explicitly replayed M2 corpus are not enumerated; full-repository callable corpus cannot be claimed until generators and frozen API are covered.","Reachable-MIR scalar screening is conservative and is not the export owner's admission policy.","No named-call/native-export executions or acceptance count yet."],
         "compiled_export_admission":"separate_actual_facade_qualification",
         "summary":{"input_entries":entries.len(),"standalone_sources":standalone_count,"benchmark_embedded":benchmark_count,"generated_m2":m2_count,"rust_literal_occurrences":inline_count,

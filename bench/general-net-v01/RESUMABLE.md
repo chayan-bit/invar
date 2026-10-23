@@ -137,8 +137,8 @@ adapter without authoring or committing a shared-root change. Main can import
 the two benchmark commits directly on that compatible core and run:
 
 ```sh
-INVAR_GNET_CORPUS_REPORT_DIR=/tmp/gnet-owned-debug-new cargo test --offline --locked --test issue_gnet_v01_corpus_expansion --test issue_gnet_05_parity_report -- --nocapture
-INVAR_GNET_CORPUS_REPORT_DIR=/tmp/gnet-owned-release-new cargo test --offline --locked --release --test issue_gnet_v01_corpus_expansion --test issue_gnet_05_parity_report -- --nocapture
+INVAR_GNET_CORPUS_REPORT_DIR=/tmp/gnet-owned-debug-new cargo test -p invar -p invar-tools --offline --locked --test issue_gnet_v01_corpus_expansion --test issue_gnet_05_parity_report -- --nocapture
+INVAR_GNET_CORPUS_REPORT_DIR=/tmp/gnet-owned-release-new cargo test -p invar -p invar-tools --offline --locked --release --test issue_gnet_v01_corpus_expansion --test issue_gnet_05_parity_report -- --nocapture
 cargo fmt --all -- --check
 cargo clippy --offline --locked --all-targets -- -D warnings
 ```

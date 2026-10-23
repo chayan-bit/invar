@@ -14,7 +14,7 @@ The validator refuses any such entry as a measured result: `--generated-case` on
 `manifest-v2-proposal.json` stays pending M5 review: it is derived from the map/reduction/scan base only and is neither adopted nor rejected by this revision.
 
 ```sh
-cargo run --locked --bin invar-bench -- --manifest bench/manifest-v1.json --track generated --validate-only --report target/m5-manifest-validation.json
+cargo run --locked -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track generated --validate-only --report target/m5-manifest-validation.json
 ```
 
 The report's kind is `manifest_validation`; its `gpu_performance` is `not_run`.
@@ -24,7 +24,7 @@ same command and writes report schema 2. It changes reduction required bytes to
 input recipe and seed 17. It remains provisional. `--write-v2-proposal` creates
 it from a validated v1 manifest at a new path and refuses overwrite. The one
 matched Metal n33 run's reports are kept in
-`tests/fixtures/archived-evidence/parallel-benchmark-baselines/`; the ratio gates
+`tools/tests/fixtures/archived-evidence/parallel-benchmark-baselines/`; the ratio gates
 remain pending. V2 baseline execution requires `--baseline-build-record`; saved
 v2 report association requires `--generated-build-record`. Both records are
 checked against report hashes and retain their unreviewed status.
@@ -35,7 +35,7 @@ reported separately from the fixture's first-call timer. A matching generated
 parent-wall label does not grant cold ratio eligibility: process workload scope
 still needs M5 review.
 The clean n33 cold-process pair's raw reports are in
-`tests/fixtures/archived-evidence/parallel-benchmark-baselines/v2-clean-n33-25c5083/`.
+`tools/tests/fixtures/archived-evidence/parallel-benchmark-baselines/v2-clean-n33-25c5083/`.
 Generated timing currently measures a parameterized device plan extracted from a
 checked three-element corpus source. The measured length, LCG inputs and collective seed
 are separate from that source's literal invocation. New reports identify the
@@ -52,7 +52,7 @@ invocation state alone does not prove which commit built the benchmark binary.
 Read-only GPU availability has a separate command and never times a kernel:
 
 ```sh
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track generated --preflight --report target/m5-metal-preflight.json
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track generated --preflight --report target/m5-metal-preflight.json
 ```
 
 Run the same command with `--features cuda` on an authorized CUDA host. A
@@ -73,7 +73,7 @@ result/step/cleanup agreement and confirms a GPU region was executed; it does
 not time kernels or satisfy a performance gate:
 
 ```sh
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track generated --require-gpu --metal-held-out-smoke --report target/m5-metal-held-out-smoke.json
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track generated --require-gpu --metal-held-out-smoke --report target/m5-metal-held-out-smoke.json
 ```
 
 ## External library comparisons
@@ -89,8 +89,8 @@ CUDA fixture (run only on a host where uploading this repository source is
 authorized):
 
 ```sh
-nvcc -std=c++17 -O2 -arch=sm_86 bench/baselines/cuda-cub.cu -o cuda-cub
-cargo run --locked --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./cuda-cub --baseline-family affine --baseline-elements 4093 --report target/cuda-cub-affine-n4093.json
+nvcc -std=c++17 -O2 -arch=sm_86 tools/bench/baselines/cuda-cub.cu -o cuda-cub
+cargo run --locked -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./cuda-cub --baseline-family affine --baseline-elements 4093 --report target/cuda-cub-affine-n4093.json
 ```
 
 The fixture calls CUB `DeviceReduce` and `DeviceScan` for u32 and f32,
@@ -117,17 +117,17 @@ The external cuBLAS FP32 GEMM path uses pedantic math mode, but cuBLAS still
 reassociates or fuses dot products relative to strict ordered source loops:
 
 ```sh
-nvcc -std=c++17 -O2 -arch=sm_86 bench/baselines/cuda-cublas-gemm.cu -lcublas -o cuda-cublas-gemm
-cargo run --locked --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./cuda-cublas-gemm --baseline-family f32gemm --baseline-elements 16 --report target/cuda-cublas-f32gemm-n16.json
+nvcc -std=c++17 -O2 -arch=sm_86 tools/bench/baselines/cuda-cublas-gemm.cu -lcublas -o cuda-cublas-gemm
+cargo run --locked -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./cuda-cublas-gemm --baseline-family f32gemm --baseline-elements 16 --report target/cuda-cublas-f32gemm-n16.json
 ```
 
 Local Apple MPS comparison:
 
 ```sh
-xcrun clang++ -std=c++17 -O2 -fobjc-arc bench/baselines/metal-mpsgraph-u32.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -framework MetalPerformanceShadersGraph -o metal-mpsgraph-u32
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mpsgraph-u32 --baseline-family map --baseline-elements 4093 --report target/metal-mpsgraph-map-n4093.json
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mpsgraph-u32 --baseline-family sum --baseline-elements 1048576 --report target/metal-mpsgraph-sum-n1048576.json
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mpsgraph-u32 --baseline-family affine --baseline-elements 4093 --report target/metal-mpsgraph-affine-n4093.json
+xcrun clang++ -std=c++17 -O2 -fobjc-arc tools/bench/baselines/metal-mpsgraph-u32.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -framework MetalPerformanceShadersGraph -o metal-mpsgraph-u32
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mpsgraph-u32 --baseline-family map --baseline-elements 4093 --report target/metal-mpsgraph-map-n4093.json
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mpsgraph-u32 --baseline-family sum --baseline-elements 1048576 --report target/metal-mpsgraph-sum-n1048576.json
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mpsgraph-u32 --baseline-family affine --baseline-elements 4093 --report target/metal-mpsgraph-affine-n4093.json
 ```
 
 MPSGraph `UInt32` elementwise map and reduction are independent Apple library
@@ -144,8 +144,8 @@ applies preceding-block prefixes and the nonidentity seed. The harness checks
 the entire u32 output and validates its explicit workspace and launch counts:
 
 ```sh
-xcrun clang++ -std=c++17 -O2 -fobjc-arc bench/baselines/metal-affine-handwritten.mm -framework Foundation -framework Metal -o metal-affine-handwritten
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-affine-handwritten --baseline-family affine --baseline-elements 4093 --report target/metal-affine-handwritten-n4093.json
+xcrun clang++ -std=c++17 -O2 -fobjc-arc tools/bench/baselines/metal-affine-handwritten.mm -framework Foundation -framework Metal -o metal-affine-handwritten
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-affine-handwritten --baseline-family affine --baseline-elements 4093 --report target/metal-affine-handwritten-n4093.json
 ```
 
 Its report kind is `handwritten_quality_control` and gate status is
@@ -153,8 +153,8 @@ Its report kind is `handwritten_quality_control` and gate status is
 which implementation is the fastest correct eligible baseline.
 
 ```sh
-xcrun clang++ -std=c++17 -O2 -fobjc-arc bench/baselines/metal-mps-gemm.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -o metal-mps-gemm
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mps-gemm --baseline-family f32gemm --baseline-elements 16 --report target/metal-mps-f32gemm-n16.json
+xcrun clang++ -std=c++17 -O2 -fobjc-arc tools/bench/baselines/metal-mps-gemm.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -o metal-mps-gemm
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mps-gemm --baseline-family f32gemm --baseline-elements 16 --report target/metal-mps-f32gemm-n16.json
 ```
 
 MPS GEMM is an external f32 baseline; strict ordered f32 acceptance is pending
@@ -162,9 +162,9 @@ M4-01. MPSImageReduceRowSum and MPSImageIntegral provide external f32
 reduction and scan comparisons:
 
 ```sh
-xcrun clang++ -std=c++17 -O2 -fobjc-arc bench/baselines/metal-mps-image.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -o metal-mps-image
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mps-image --baseline-family f32sum --baseline-elements 33 --report target/metal-mps-f32sum-n33.json
-cargo run --locked --features metal --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mps-image --baseline-family f32scan --baseline-elements 33 --report target/metal-mps-f32scan-n33.json
+xcrun clang++ -std=c++17 -O2 -fobjc-arc tools/bench/baselines/metal-mps-image.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -o metal-mps-image
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mps-image --baseline-family f32sum --baseline-elements 33 --report target/metal-mps-f32sum-n33.json
+cargo run --locked --features metal -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./metal-mps-image --baseline-family f32scan --baseline-elements 33 --report target/metal-mps-f32scan-n33.json
 ```
 
 These float baselines do not establish a u32 comparison. The MPSGraph u32
@@ -198,9 +198,9 @@ A single wrong word makes the run `exact_full_output_fail`, and no timing from i
 MPSGraph gather on `UInt32` rounds values through float32 and fails exact output. It is therefore ineligible, and `gather_hw` is the Metal gather baseline.
 
 ```sh
-xcrun clang++ -std=c++17 -O2 -fobjc-arc bench/baselines/metal-families.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -framework MetalPerformanceShadersGraph -o metal-families
-nvcc -std=c++17 -O2 -arch=sm_XX bench/baselines/cuda-families.cu -o cuda-families
-cargo run --locked --release --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./FIXTURE --baseline-family stencil --baseline-elements 65536 --report NEW_REPORT.json
+xcrun clang++ -std=c++17 -O2 -fobjc-arc tools/bench/baselines/metal-families.mm -framework Foundation -framework Metal -framework MetalPerformanceShaders -framework MetalPerformanceShadersGraph -o metal-families
+nvcc -std=c++17 -O2 -arch=sm_XX tools/bench/baselines/cuda-families.cu -o cuda-families
+cargo run --locked --release -p invar-tools --bin invar-bench -- --manifest tools/bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./FIXTURE --baseline-family stencil --baseline-elements 65536 --report NEW_REPORT.json
 ```
 
 Timings from these fixtures are baseline samples only. Performance runs and their measurement conditions are tracked in the M5 GitHub issues.

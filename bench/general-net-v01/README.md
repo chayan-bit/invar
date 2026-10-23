@@ -85,7 +85,7 @@ The proposed `ablation_design` requires B net-derived compiled production code, 
 
 ## Reference validation and backend integration
 
-The additive Rust CLI validates every source hash and runs fresh `invar check` and `invar run --engine reference` observations, including expected negative exits. A validation pass covers source-literal corpus semantics only. Build `invar` and `invar-bench` together and use a new output path each time. `--source-revision` is caller supplied; the CLI records the executable SHA-256 but cannot verify that the binary came from that revision. Reports mark `source_revision_provenance: caller_supplied_unverified` and `executable_source_binding: unverified`:
+The additive Rust CLI validates every source hash and runs fresh `invar check` and `invar run --engine reference` observations, including expected negative exits. A validation pass covers source-literal corpus semantics only. Build `invar` and `invar-bench` together (`cargo build -p invar -p invar-tools`) and use a new output path each time. `--source-revision` is caller supplied; the CLI records the executable SHA-256 but cannot verify that the binary came from that revision. Reports mark `source_revision_provenance: caller_supplied_unverified` and `executable_source_binding: unverified`:
 
 ```sh
 target/debug/invar-bench --gnet-validate --manifest bench/general-net-v01/manifest.json --spec bench/general-net-v01/parity-spec.json --invar target/debug/invar --source-revision "$REVISION" --report "$NEW_REFERENCE_REPORT"

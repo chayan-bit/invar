@@ -98,11 +98,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    let schema: Value = serde_json::from_str(include_str!("../schema/explain-v3.schema.json"))?;
+    let schema: Value =
+        serde_json::from_str(include_str!("../../../schema/explain-v3.schema.json"))?;
     let parent = Path::new(&directory).parent().ok_or("benchmark parent")?;
     let identity = format!(
         "fnv1a64:{:016x}",
-        invar_device::source_hash(include_str!("../examples/sort.inv"))
+        invar_device::source_hash(include_str!("../../../examples/sort.inv"))
     );
     for (engine, implementation) in [
         ("cpu", "cpu-lsd-radix-4x8"),
