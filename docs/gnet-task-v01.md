@@ -1,7 +1,7 @@
 # GNET P4b: residual fork-join task region T (`gnet-task-v1`)
 
 This is the v0.1 lowering for programs whose certified parallel normal form keeps a fork-join after every law (law L20, `NormalForm::is_flat() == false`).
-It implements the [region design](design/gnet-parallel-v01.md)'s fork-join T reduced to fixed-width expansion, nested forks, a compacted arena and source-ordered joins ([normal-form design](design/net-parallel-laws-v01.md) section 10, P4b row).
+It implements the fork-join region T reduced to fixed-width expansion, nested forks, a compacted arena and source-ordered joins.
 
 ## Admission (`src/general_net/task/mod.rs`)
 
@@ -71,7 +71,7 @@ For contrast, `cost::digit_padding` reports the padded share of the P4a spike's 
 
 - `tests/net_task_region.rs`: CPU model (ASan and UBSan) against the CPU net oracle on the C1 family and generated trap-heavy fork-joins, under a wide plan and a tight plan that fills the arena; every named mutation (`task::Mutation`) must be caught; refusals.
 - `tests/net_task_region_metal.rs` and `tests/net_task_region_cuda.rs` (ignored): the same corpora on the devices.
-- `tests/net_task_region_bench.rs` and the bench tests in `tests/net_task_region_cuda.rs` (ignored): the D5 residual-tier bench against handwritten B-form kernels (`bench/task-region-v01/c1_handwritten.inc`).
+- `bench/net_task_region_bench.rs` and the bench tests in `tests/net_task_region_cuda.rs` (ignored): the D5 residual-tier bench against handwritten B-form kernels (`bench/task-region-v01/c1_handwritten.inc`).
 
 ## D5 residual tier (not met; refused to the native path)
 

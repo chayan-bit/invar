@@ -199,7 +199,7 @@ fn issue_m4_01_tensor_cache_rejects_versions_types_rank_and_shape() {
         );
     }
     // NumericPolicy is opaque. Invalid policy bytes fail at its public
-    // constructor before KeyInput can exist; version 2 (numeric-v2.md) uses
+    // constructor before KeyInput can exist; version 2 (docs/numeric.md) uses
     // its own kind spellings, so a v1 kind under it is refused.
     assert_eq!(
         NumericPolicy::from_parts(3, "strict-f32"),

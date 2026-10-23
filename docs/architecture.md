@@ -1,6 +1,6 @@
 # Invar architecture, design revision 0.4
 
-Status: implementation direction, not a proved system. The implemented language is specified in [the v0.1 specification](spec/invar-v0.1.md) and the [bootstrap specification](../spec/bootstrap.md). The [detailed implementation plan](implementation-plan.md) fixes the current delivery order and issue contracts. The archived 0.1 proposal supplies long-term context only.
+Status: implementation direction, not a proved system. The implemented language is specified in [the v0.1 specification](spec/invar-v0.1.md) and the [bootstrap specification](../spec/bootstrap.md). Planned work is tracked in GitHub issues.
 
 ## One meaning, multiple admitted implementations
 

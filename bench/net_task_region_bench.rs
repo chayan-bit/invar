@@ -16,9 +16,9 @@
 #![cfg(all(feature = "metal", target_os = "macos"))]
 #![forbid(unsafe_code)]
 
-#[path = "support/task_bench.rs"]
+#[path = "../tests/support/task_bench.rs"]
 mod bench;
-#[path = "support/task_model.rs"]
+#[path = "../tests/support/task_model.rs"]
 mod model;
 
 use std::{cell::RefCell, rc::Rc};

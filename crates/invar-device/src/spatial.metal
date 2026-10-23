@@ -24,7 +24,7 @@ SOFTWARE.
 */
 // Spatial uniform-grid organization adapted from cuNSearch (MIT), commit
 // 4dd5598824bb7dfceae86d89758a6be74e7a9ac4. Copyright 2019-present
-// cuNSearch contributors. See docs/design/v02-spatial.md and upstream MIT notice.
+// cuNSearch contributors (github.com/InteractiveComputerGraphics/cuNSearch); MIT notice above.
 // Invar uses exact signed cell keys, stable radix ordering, inclusive radius,
 // self inclusion, true counts, strict binary32 and original-index tie breaking.
 typedef uint U;
