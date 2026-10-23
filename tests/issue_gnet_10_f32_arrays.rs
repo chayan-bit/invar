@@ -96,7 +96,7 @@ struct Cpu {
 }
 impl Cpu {
     fn new(n: &Net, entry: &str, s: compiled::OwnedLimits) -> Self {
-        let a = compiled::emit_owned_numeric(
+        let a = compiled::emit_resumable_owned_numeric(
             n,
             &n.verify().unwrap(),
             entry,
@@ -105,10 +105,10 @@ impl Cpu {
             s,
         )
         .unwrap();
-        assert_eq!(a.abi_version(), 10);
+        assert_eq!(a.abi_version(), 11);
         assert_eq!(a.numeric_policy(), Some(NumericPolicy::STRICT_F32));
         assert!(
-            a.continuation_layout().is_none()
+            a.continuation_layout().is_some()
                 && a.speculation_layout().is_none()
                 && a.device_layout().is_none()
                 && a.aggregate_layout().is_none()
@@ -133,7 +133,7 @@ int main(int argc,char** argv){{
  while(std::cin>>fuel>>trans>>cap){{if(cap>1000000)return 2;std::vector<gnet_w> input({params});for(auto& x:input)if(!(std::cin>>x))return 2;
  std::vector<gnet_w> output_guard(12,-31337),heap_guard({heap}+2,-31337);gnet_w* output=output_guard.data()+1;gnet_w* heap=heap_guard.data()+1;std::memset(output,0,80);std::memset(heap,0,{heap}*8);
  std::vector<gnet_u> trace_guard(cap*7+2,912345),cleanup_guard({clean}+2,912345);gnet_u* trace=trace_guard.data()+1;gnet_u* cleanup=cleanup_guard.data()+1;
- gnet_run(input.data(),output,trace,fuel,trans,cap,heap,cleanup);
+ GnetTask task={{}};gnet_u rounds=0;while(!gnet_resume(input.data(),output,trace,fuel,trans,cap,heap,cleanup,&task,1000000))if(++rounds>1000001)return 7;
  if(output_guard.front()!=-31337||output_guard.back()!=-31337||heap_guard.front()!=-31337||heap_guard.back()!=-31337||trace_guard.front()!=912345||trace_guard.back()!=912345||cleanup_guard.front()!=912345||cleanup_guard.back()!=912345)return 3;
  if(output[7]<0||(gnet_u)output[7]>cap||output[8]<0||(gnet_u)output[8]>{cleanup_cap}||output[9]<0||(gnet_u)output[9]>{slots})return 4;
  if(mode!="normal"){{if(output[0]!=0||output[1]<=0)return 5;gnet_w h=output[1];gnet_u d=((gnet_u)h-1)*4,allocated=(gnet_u)output[9],live=(gnet_u)heap[d+1];gnet_w status=0,value=777;gnet_u index=0;
@@ -174,7 +174,7 @@ int main(int argc,char** argv){{
             out.status,
             String::from_utf8_lossy(&out.stderr)
         );
-        let metadata = json!({"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","params":a.params().iter().map(|x|format!("{x:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":digest(a.source().as_bytes()),"harness_sha256":digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_sha256":digest(&fs::read(dir.join("run")).unwrap()),"owned":{"elements":layout.elements(),"allocations":layout.allocations(),"cleanup_events":layout.cleanup_events(),"heap_words":layout.heap_words(),"cleanup_words":layout.cleanup_words(),"storage_bytes":layout.storage_bytes()},"array_kinds":{"i32":0,"u32":1,"f32":258},"no_continuation_speculation_device":true});
+        let metadata = json!({"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","params":a.params().iter().map(|x|format!("{x:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":digest(a.source().as_bytes()),"harness_sha256":digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_sha256":digest(&fs::read(dir.join("run")).unwrap()),"owned":{"elements":layout.elements(),"allocations":layout.allocations(),"cleanup_events":layout.cleanup_events(),"heap_words":layout.heap_words(),"cleanup_words":layout.cleanup_words(),"storage_bytes":layout.storage_bytes()},"array_kinds":{"i32":0,"u32":1,"f32":258},"no_speculation_device":true});
         if let Some(r) = std::env::var_os("INVAR_GNET_ARRAY_REPORT_DIR") {
             let p = PathBuf::from(r)
                 .join("artifacts")
@@ -693,32 +693,24 @@ fn issue_gnet_10_malformed_private_heap_and_bit_writes_fail_closed() {
 fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
     let n = net(&source("literals.inv"));
     let proof = n.verify().unwrap();
-    let a = compiled::emit_owned_numeric(
-        &n,
-        &proof,
-        "main",
-        compiled::Target::Cpu,
-        compiled::Limits::default(),
-        storage(),
-    )
-    .unwrap();
-    assert_eq!(a.abi_version(), 10);
+    let numeric = |n: &Net, proof: &general_net::Proof, entry: &str, target, s| {
+        compiled::emit_resumable_owned_numeric(
+            n,
+            proof,
+            entry,
+            target,
+            compiled::Limits::default(),
+            s,
+        )
+    };
+    let a = numeric(&n, &proof, "main", compiled::Target::Cpu, storage()).unwrap();
+    assert_eq!(a.abi_version(), 11);
     let mut rejections = 0;
-    for target in [compiled::Target::Cuda, compiled::Target::Metal] {
-        assert_eq!(
-            compiled::emit_owned_numeric(
-                &n,
-                &proof,
-                "main",
-                target,
-                compiled::Limits::default(),
-                storage()
-            )
-            .unwrap_err(),
-            compiled::Error::NumericTarget
-        );
-        rejections += 1
-    }
+    assert_eq!(
+        numeric(&n, &proof, "main", compiled::Target::Metal, storage()).unwrap_err(),
+        compiled::Error::NumericTarget
+    );
+    rejections += 1;
     for result in [
         compiled::emit(
             &n,
@@ -734,20 +726,6 @@ fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
             compiled::Target::Cpu,
             compiled::Limits::default(),
             storage(),
-        ),
-        compiled::emit_numeric(
-            &n,
-            &proof,
-            "main",
-            compiled::Target::Cpu,
-            compiled::Limits::default(),
-        ),
-        compiled::emit_resumable_numeric(
-            &n,
-            &proof,
-            "main",
-            compiled::Target::Cpu,
-            compiled::Limits::default(),
         ),
         compiled::emit_resumable(
             &n,
@@ -786,7 +764,7 @@ fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
         let c = checked(source);
         let n = Net::lower(&c, general_net::Limits::default()).unwrap();
         assert_eq!(
-            compiled::emit_owned_numeric(
+            numeric(
                 &n,
                 &n.verify().unwrap(),
                 if source.contains("entry") {
@@ -795,7 +773,6 @@ fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
                     "main"
                 },
                 compiled::Target::Cpu,
-                compiled::Limits::default(),
                 storage()
             )
             .unwrap_err(),
@@ -805,14 +782,7 @@ fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
     }
     let other = net("fn main()->i32{return 7;}");
     assert!(matches!(
-        compiled::emit_owned_numeric(
-            &other,
-            &proof,
-            "main",
-            compiled::Target::Cpu,
-            compiled::Limits::default(),
-            storage()
-        ),
+        numeric(&other, &proof, "main", compiled::Target::Cpu, storage()),
         Err(compiled::Error::Boundary(_))
     ));
     rejections += 1;
@@ -835,15 +805,7 @@ fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
         },
     ] {
         assert_eq!(
-            compiled::emit_owned_numeric(
-                &n,
-                &proof,
-                "main",
-                compiled::Target::Cpu,
-                compiled::Limits::default(),
-                s
-            )
-            .unwrap_err(),
+            numeric(&n, &proof, "main", compiled::Target::Cpu, s).unwrap_err(),
             compiled::Error::Limit
         );
         rejections += 1
@@ -860,7 +822,7 @@ fn issue_gnet_10_profile_types_proofs_limits_and_legacy_rejections() {
     }
     report(
         "admission",
-        json!({"actual_rejections":rejections,"abi10_metadata":h.metadata,"ABI1_9_admission":"unchanged; oracle now intentionally admits direct arrays"}),
+        json!({"actual_rejections":rejections,"abi11_metadata":h.metadata}),
     );
 }
 /// A record that owns an `Array<f32>` and is released by reassignment never reaches emitted
@@ -919,7 +881,7 @@ fn issue_gnet_10_record_owning_f32_array_is_refused_by_every_compiled_entry() {
         compiled::Target::Cuda,
         compiled::Target::Metal,
     ] {
-        results.push(compiled::emit_owned_numeric(
+        results.push(compiled::emit_resumable_owned_numeric(
             &n,
             &proof,
             "main",

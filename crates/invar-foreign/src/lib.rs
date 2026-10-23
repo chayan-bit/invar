@@ -10,9 +10,7 @@ pub mod device;
 pub mod exports;
 pub mod host_array;
 pub mod numeric;
-pub mod numeric_owned;
 pub mod numeric_owned_resume;
-pub mod numeric_resume;
 
 pub const ABI_VERSION: u32 = 1;
 pub const MAX_BYTES: usize = 1_048_576;

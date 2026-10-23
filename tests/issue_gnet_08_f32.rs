@@ -11,6 +11,29 @@ use std::{
     process::{Command, Stdio},
     sync::atomic::{AtomicUsize, Ordering},
 };
+fn storage() -> compiled::OwnedLimits {
+    compiled::OwnedLimits {
+        elements: 128,
+        allocations: 128,
+        cleanup_events: 128,
+    }
+}
+/// The only CPU numeric emission: the ABI11 owned-numeric continuation.
+fn emit(
+    net: &Net,
+    proof: &general_net::Proof,
+    entry: &str,
+    target: compiled::Target,
+) -> Result<compiled::Artifact, compiled::Error> {
+    compiled::emit_resumable_owned_numeric(
+        net,
+        proof,
+        entry,
+        target,
+        compiled::Limits::default(),
+        storage(),
+    )
+}
 fn checked(source: &str, main: bool) -> check::CheckedProgram {
     check::check(front::parse(source.as_bytes()).unwrap(), main).unwrap()
 }
@@ -22,29 +45,12 @@ struct Cpu {
 }
 impl Cpu {
     fn new(net: &Net, entry: &str) -> Self {
-        Self::build(net, entry, None)
+        Self::resumable(net, entry, 1_000_000)
     }
     fn resumable(net: &Net, entry: &str, quantum: u64) -> Self {
-        Self::build(net, entry, Some(quantum))
-    }
-    fn build(net: &Net, entry: &str, quantum: Option<u64>) -> Self {
-        let emitter = if quantum.is_some() {
-            compiled::emit_resumable_numeric
-        } else {
-            compiled::emit_numeric
-        };
-        let a = emitter(
-            net,
-            &net.verify().unwrap(),
-            entry,
-            compiled::Target::Cpu,
-            compiled::Limits::default(),
-        )
-        .unwrap();
-        assert_eq!(a.abi_version(), if quantum.is_some() { 9 } else { 8 });
+        let a = emit(net, &net.verify().unwrap(), entry, compiled::Target::Cpu).unwrap();
+        assert_eq!(a.abi_version(), 11);
         assert_eq!(a.numeric_policy(), Some(NumericPolicy::STRICT_F32));
-        assert!(a.owned_layout().is_none());
-        assert_eq!(a.continuation_layout().is_some(), quantum.is_some());
         assert!(a.device_layout().is_none());
         static NEXT: AtomicUsize = AtomicUsize::new(0);
         let dir = std::env::temp_dir().join(format!(
@@ -54,14 +60,12 @@ impl Cpu {
         ));
         fs::create_dir(&dir).unwrap();
         let n = a.params().len();
-        let run = if let Some(quantum) = quantum {
-            let bytes = a.continuation_layout().unwrap().task_bytes();
-            format!(
-                "static_assert(sizeof(GnetTask)=={bytes});GnetTask task={{}};gnet_u rounds=0;while(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,nullptr,nullptr,&task,{quantum})){{if(++rounds>1000001) return 3;}}auto before=task.transitions;if(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,nullptr,nullptr,&task,{quantum})||task.transitions!=before||task.allocated||task.live||task.cleanup_used) return 4;"
-            )
-        } else {
-            "gnet_run(input.data(),output,trace.data(),fuel,trans,cap);".to_owned()
-        };
+        let bytes = a.continuation_layout().unwrap().task_bytes();
+        let storage = a.owned_layout().unwrap();
+        let (heap, cleanup) = (storage.heap_words(), storage.cleanup_words().max(1));
+        let run = format!(
+            "static_assert(sizeof(GnetTask)=={bytes});GnetTask task={{}};std::vector<gnet_w> heap({heap});std::vector<gnet_u> cleanup({cleanup});gnet_u rounds=0;while(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,heap.data(),cleanup.data(),&task,{quantum})){{if(++rounds>1000001) return 3;}}auto before=task.transitions;if(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,heap.data(),cleanup.data(),&task,{quantum})||task.transitions!=before||task.allocated||task.live||task.cleanup_used) return 4;"
+        );
         let driver = format!(
             r#"
 #include <iostream>
@@ -76,7 +80,7 @@ int main(int argc,char** argv) {{
  if(argc>2) _mm_setcsr(_mm_getcsr()|0x8040);
 #endif
  gnet_u fuel,trans,cap;
- while(std::cin>>fuel>>trans>>cap) {{ std::vector<gnet_w> input({n});for(auto& x:input) std::cin>>x; gnet_w output[8]={{}};std::vector<gnet_u> trace(cap*7);{run}for(auto x:output)std::cout<<x<<' ';for(gnet_u i=0;i<(gnet_u)output[7]*7;++i)std::cout<<trace[i]<<' ';std::cout<<'\n'; }}
+ while(std::cin>>fuel>>trans>>cap) {{ std::vector<gnet_w> input({n});for(auto& x:input) std::cin>>x; gnet_w output[10]={{}};std::vector<gnet_u> trace(cap*7);{run}for(int i=0;i<8;++i)std::cout<<output[i]<<' ';for(gnet_u i=0;i<(gnet_u)output[7]*7;++i)std::cout<<trace[i]<<' ';std::cout<<'\n'; }}
 }}
 "#
         );
@@ -444,13 +448,10 @@ fn issue_gnet_08_metadata_proof_inputs_and_exclusions_stay_explicit() {
     for words in resumed.batch(&rows, 0, false) {
         assert_eq!(&words[..8], &[8, 0, 0, 0, 0, 0, 0, 0]);
     }
-    for target in [compiled::Target::Cuda, compiled::Target::Metal] {
-        assert_eq!(
-            compiled::emit_numeric(&net, &proof, "run", target, compiled::Limits::default())
-                .unwrap_err(),
-            compiled::Error::NumericTarget
-        );
-    }
+    assert_eq!(
+        emit(&net, &proof, "run", compiled::Target::Metal).unwrap_err(),
+        compiled::Error::NumericTarget
+    );
     assert_eq!(
         compiled::emit(
             &net,
@@ -468,45 +469,28 @@ fn issue_gnet_08_metadata_proof_inputs_and_exclusions_stay_explicit() {
     )
     .unwrap();
     assert!(matches!(
-        compiled::emit_numeric(
-            &other,
-            &proof,
-            "run",
-            compiled::Target::Cpu,
-            compiled::Limits::default()
-        ),
+        emit(&other, &proof, "run", compiled::Target::Cpu),
         Err(compiled::Error::Boundary(_))
     ));
-    assert!(matches!(
-        compiled::emit_resumable_numeric(
-            &other,
-            &proof,
-            "run",
-            compiled::Target::Cpu,
-            compiled::Limits::default()
+    for (source, admitted) in [
+        ("fn main()->i32 {let a:Array<f32> = [1.0];return 7;}", true),
+        ("struct Numeric {x:f32} fn main()->i32{return 7;}", false),
+        (
+            "fn unused()->Array<f32>{return filled_f32(1u32,1.0);} fn main()->i32{return 7;}",
+            true,
         ),
-        Err(compiled::Error::Boundary(_))
-    ));
-    for source in [
-        "fn main()->i32 {let a:Array<f32> = [1.0];return 7;}",
-        "struct Numeric {x:f32} fn main()->i32{return 7;}",
-        "fn unused()->Array<f32>{return filled_f32(1u32,1.0);} fn main()->i32{return 7;}",
     ] {
         let n = lowered(source);
         let p = n.verify().unwrap();
-        assert_eq!(
-            compiled::emit_numeric(
-                &n,
-                &p,
-                "main",
-                compiled::Target::Cpu,
-                compiled::Limits::default()
-            )
-            .unwrap_err(),
-            compiled::Error::UnsupportedType
-        );
+        // f32 arrays are direct owners; nominal numeric fields stay refused.
+        let emitted = emit(&n, &p, "main", compiled::Target::Cpu);
+        if admitted {
+            assert_eq!(emitted.unwrap().abi_version(), 11);
+        } else {
+            assert_eq!(emitted.unwrap_err(), compiled::Error::UnsupportedType);
+        }
         // The oracle observes every form exactly (GNET-02 closed the nominal
-        // f32 member gap); only the compiled numeric emitter still refuses.
+        // f32 member gap).
         let observed = oracle::observe(&n, &p, limits()).unwrap();
         assert_eq!(observed.failure, None);
         let c = checked(source, true);
@@ -553,7 +537,7 @@ fn issue_gnet_08_scalar_f32_variant_payload_agrees_on_every_reference_engine() {
 }
 
 #[test]
-fn issue_gnet_08_existing_integer_owner_cleanup_and_numeric_cpu_exclusion() {
+fn issue_gnet_08_existing_integer_owner_cleanup_and_numeric_cpu_admission() {
     let source = "fn main()->i32 {if true {let a:Array<i32> = [1,2];let x=1.0/0.0;}let y=0.0/0.0;if y!=y{return 7;}return 0;}";
     let c = checked(source, true);
     let m = mir::lower(&c).unwrap();
@@ -571,16 +555,12 @@ fn issue_gnet_08_existing_integer_owner_cleanup_and_numeric_cpu_exclusion() {
         assert_eq!(net.semantic.cleanup_trace, source.cleanup_trace);
         assert_eq!(mid.cleanup_trace, source.cleanup_trace);
     }
+    // An integer owner beside f32 is a direct ABI11 owner.
     assert_eq!(
-        compiled::emit_numeric(
-            &n,
-            &p,
-            "main",
-            compiled::Target::Cpu,
-            compiled::Limits::default()
-        )
-        .unwrap_err(),
-        compiled::Error::UnsupportedType
+        emit(&n, &p, "main", compiled::Target::Cpu)
+            .unwrap()
+            .abi_version(),
+        11
     );
 }
 
@@ -652,35 +632,19 @@ fn issue_gnet_09_numeric_continuations_preserve_bits_every_fuel_and_tool_prefix(
             cpu.compare(&n, "run", &args, row.0, &w);
         }
     }
-    for source in [
-        "fn main()->i32{let a:Array<i32> = [1];return 7;}",
-        "fn main()->i32{let a:Array<f32> = [1.0];return 7;}",
-        "struct Packet{x:i32} fn main()->i32{return 7;}",
-    ] {
-        let n = lowered(source);
-        assert_eq!(
-            compiled::emit_resumable_numeric(
-                &n,
-                &n.verify().unwrap(),
-                "main",
-                compiled::Target::Cpu,
-                compiled::Limits::default()
-            )
-            .unwrap_err(),
-            compiled::Error::UnsupportedType
-        );
-    }
-    for target in [compiled::Target::Cuda, compiled::Target::Metal] {
-        assert_eq!(
-            compiled::emit_resumable_numeric(
-                &n,
-                &n.verify().unwrap(),
-                "run",
-                target,
-                compiled::Limits::default()
-            )
-            .unwrap_err(),
-            compiled::Error::NumericTarget
-        );
-    }
+    let packet = lowered("struct Packet{x:i32} fn main()->i32{return 7;}");
+    assert_eq!(
+        emit(
+            &packet,
+            &packet.verify().unwrap(),
+            "main",
+            compiled::Target::Cpu
+        )
+        .unwrap_err(),
+        compiled::Error::UnsupportedType
+    );
+    assert_eq!(
+        emit(&n, &n.verify().unwrap(), "run", compiled::Target::Metal).unwrap_err(),
+        compiled::Error::NumericTarget
+    );
 }
