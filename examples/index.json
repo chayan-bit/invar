@@ -312,38 +312,6 @@
       }
     },
     {
-      "path": "examples/cells/reach_place/components/curobo_planner/manifest-ur5e.inv",
-      "intent": "Foreign component manifest curobo_planner manifest-ur5e that checks standalone.",
-      "family": "foreign-manifest",
-      "tags": [
-        "manifest"
-      ],
-      "spec_section": "10.1",
-      "engines": [
-        "check"
-      ],
-      "expect": {
-        "command": "check",
-        "status": "ok"
-      }
-    },
-    {
-      "path": "examples/cells/reach_place/components/curobo_planner/manifest.inv",
-      "intent": "Foreign component manifest curobo_planner manifest that checks standalone.",
-      "family": "foreign-manifest",
-      "tags": [
-        "manifest"
-      ],
-      "spec_section": "10.1",
-      "engines": [
-        "check"
-      ],
-      "expect": {
-        "command": "check",
-        "status": "ok"
-      }
-    },
-    {
       "path": "examples/cells/reach_place/components/pinocchio_fk/manifest-unrecorded.inv",
       "intent": "Foreign component manifest pinocchio_fk manifest-unrecorded that checks standalone.",
       "family": "foreign-manifest",
