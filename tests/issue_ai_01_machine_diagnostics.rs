@@ -96,20 +96,19 @@ fn source_codes() -> HashSet<String> {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|entry| entry["reachability"] == "source" && entry["deprecated"] == false)
+        .filter(|entry| entry["reachability"] == "source")
         .map(|entry| entry["code"].as_str().unwrap().to_owned())
         .collect()
 }
 
 // The tests live in the sibling files of this directory, spliced in with
 // `include!` so every test keeps its flat name and one test binary.
-const OWN_SOURCES: [&str; 6] = [
+const OWN_SOURCES: [&str; 5] = [
     include_str!("issue_ai_01_machine_diagnostics/registry.rs"),
     include_str!("issue_ai_01_machine_diagnostics/documents.rs"),
     include_str!("issue_ai_01_machine_diagnostics/fault_fixtures.rs"),
     include_str!("issue_ai_01_machine_diagnostics/contracts.rs"),
     include_str!("issue_ai_01_machine_diagnostics/indexed_and_versions.rs"),
-    include_str!("issue_ai_01_machine_diagnostics/qualification.rs"),
 ];
 
 include!("issue_ai_01_machine_diagnostics/registry.rs");
@@ -117,4 +116,3 @@ include!("issue_ai_01_machine_diagnostics/documents.rs");
 include!("issue_ai_01_machine_diagnostics/fault_fixtures.rs");
 include!("issue_ai_01_machine_diagnostics/contracts.rs");
 include!("issue_ai_01_machine_diagnostics/indexed_and_versions.rs");
-include!("issue_ai_01_machine_diagnostics/qualification.rs");

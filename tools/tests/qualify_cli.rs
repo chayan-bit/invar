@@ -12,9 +12,11 @@ fn registered_source_code(code: &str) -> bool {
         .unwrap(),
     )
     .unwrap();
-    registry["codes"].as_array().unwrap().iter().any(|entry| {
-        entry["code"] == code && entry["reachability"] == "source" && entry["deprecated"] != true
-    })
+    registry["codes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|entry| entry["code"] == code && entry["reachability"] == "source")
 }
 
 fn refusal(args: &[&str]) -> Value {
