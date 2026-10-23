@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=303 citations=324
-Size record: tokens=27889 estimator=bytes/3 limit=30000
+Size record: tokens=27893 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -514,7 +514,7 @@ fn main() -> i32 {
 [N5.8.2] The numeric policy is `strict-f32-v1`: IEEE 754 binary32, round to nearest even, no reassociation or contraction, and subnormals preserved. `src/numeric_contract.rs`
 [N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
 [N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
-[N5.8.5] `trunc_i32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::trunc_i32`
+[N5.8.5] `i32_from_f32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::i32_from_f32`
 [N5.8.6] On `f32`, `sqrt`, `sin` and `cos` follow `invar-trig-f32-v1` on every engine today, where `sqrt` is correctly rounded and `sin` and `cos` are a fixed operation sequence with the same 32-bit word everywhere, and moving them to `invar-math-cr-v1` is tracked by issue #48. `src/math.rs` `docs/trig-f32-v1.md`
 
 ```invar outcome=value:7
@@ -537,7 +537,7 @@ fn main() -> i32 {
 fn main() -> i32 {
     let root: f32 = sqrt(2.25);
     if root == 1.5 and sin(0.0) == 0.0 and cos(0.0) == 1.0 {
-        return trunc_i32(9.75);
+        return i32_from_f32(9.75);
     }
     return 0;
 }
@@ -546,7 +546,7 @@ fn main() -> i32 {
 ```invar outcome=trap:INTEGER_OVERFLOW
 fn main() -> i32 {
     let big: f32 = 3000000000.0;
-    return trunc_i32(big);
+    return i32_from_f32(big);
 }
 ```
 
