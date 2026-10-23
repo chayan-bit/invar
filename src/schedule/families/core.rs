@@ -41,7 +41,7 @@ pub(super) fn is_producer(candidate: &Candidate) -> bool {
 }
 
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
-use device::{Collected, Launch, estimate, independent};
+use self::device::{Collected, Launch, estimate, independent};
 
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
 /// The CUDA and Metal modules below differ only in their launches and plan checks.
