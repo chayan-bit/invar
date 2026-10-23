@@ -5,7 +5,7 @@
 //! wraps it in `mod fsum`). It therefore uses only `core`/`std` and no crate
 //! paths. The independent reference semantics live in `fsum_reference.rs`.
 //!
-//! Tree shape (normative, `spec/bootstrap.md`): leaves are left-to-right folds
+//! Tree shape (normative, spec NB.1.6): leaves are left-to-right folds
 //! of consecutive blocks of [`LEAF`] elements; node `(L, j)` exists iff
 //! `j * 2^L < m` (leaf count `m`) and is the sum of its two children, or its
 //! left child alone when the right one does not exist. Any aligned chunk of

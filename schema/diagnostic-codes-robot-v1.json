@@ -2,14 +2,14 @@
   "schema": "invar-diagnostic-codes-robot-v1",
   "extends": "invar-diagnostic-codes-ros2-v1",
   "codes": [
-    {"code":"S1600","meaning":"malformed, duplicate, or unsupported robot or cell declaration","deprecated":false,"reachability":"source"},
-    {"code":"S1601","meaning":"robot or cell reference is missing, kinematic tree is invalid, or frames form a loop","deprecated":false,"reachability":"source"},
-    {"code":"S1602","meaning":"mass, inertia tensor, or geometry dimension is physically invalid","deprecated":false,"reachability":"source"},
-    {"code":"S1603","meaning":"joint or actuator lower limit exceeds upper limit","deprecated":false,"reachability":"source"},
-    {"code":"S1604","meaning":"unsupported non-dynamic MJCF or URDF metadata was omitted with a warning","deprecated":false,"reachability":"source"},
-    {"code":"S1605","meaning":"asset path or SHA-256 reference is invalid or does not match","deprecated":false,"reachability":"source"},
-    {"code":"S1606","meaning":"robot asset license fails the product license lattice","deprecated":false,"reachability":"source"},
-    {"code":"S1607","meaning":"MJCF or URDF asset is malformed or uses an unsupported dynamics element","deprecated":false,"reachability":"source"},
-    {"code":"S1608","meaning":"cell mount is not on its declared fixture top face, or a mount exclusion names a link that is not mounted to that surface","deprecated":false,"reachability":"source"}
+    {"code":"S1600","meaning":"malformed, duplicate, or unsupported robot or cell declaration","reachability":"source"},
+    {"code":"S1601","meaning":"robot or cell reference is missing, kinematic tree is invalid, or frames form a loop","reachability":"source"},
+    {"code":"S1602","meaning":"mass, inertia tensor, or geometry dimension is physically invalid","reachability":"source"},
+    {"code":"S1603","meaning":"joint or actuator lower limit exceeds upper limit","reachability":"source"},
+    {"code":"S1604","meaning":"unsupported non-dynamic MJCF or URDF metadata was omitted with a warning","reachability":"source"},
+    {"code":"S1605","meaning":"asset path or SHA-256 reference is invalid or does not match","reachability":"source"},
+    {"code":"S1606","meaning":"robot asset license fails the product license lattice","reachability":"source"},
+    {"code":"S1607","meaning":"MJCF or URDF asset is malformed or uses an unsupported dynamics element","reachability":"source"},
+    {"code":"S1608","meaning":"cell mount is not on its declared fixture top face, or a mount exclusion names a link that is not mounted to that surface","reachability":"source"}
   ]
 }

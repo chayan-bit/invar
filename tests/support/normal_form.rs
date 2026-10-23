@@ -10,6 +10,15 @@ use invar::{
     },
     laws::Law,
 };
+use std::path::PathBuf;
+
+/// The canonical GNET-05 corpus (`programs/`, `robotics/programs/`); tests read
+/// it in place, so moving the corpus changes only this line.
+pub const GNET05: &str = "bench/general-net-v01/gnet05";
+
+pub fn gnet05() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GNET05)
+}
 
 pub fn compile(source: &str) -> (Net, Proof) {
     let checked =

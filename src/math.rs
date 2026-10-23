@@ -12,45 +12,8 @@ use crate::numeric_contract::{F32Bits, F64Bits};
 /// Contract identifier recorded in docs, receipts and device artifacts.
 pub const CONTRACT: &str = "invar-math-cr-v1";
 
-/// `--numeric-contract trig-f32-v1` (#48 C4): f32 `sin` and `cos` run
-/// `invar-trig-f32-v1` for the whole process. The CLI sets it once, before any
-/// program is checked; it is never cleared.
-static TRIG_F32_V1: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-
-/// Select `trig-f32-v1` for every program this process checks.
-pub fn select_trig_f32_v1() {
-    TRIG_F32_V1.store(true, std::sync::atomic::Ordering::Relaxed);
-}
-
-pub fn trig_f32_v1_selected() -> bool {
-    TRIG_F32_V1.load(std::sync::atomic::Ordering::Relaxed)
-}
-
-/// The call names f32 `sin` and `cos` take under `trig-f32-v1`, so MIR,
-/// explain and receipts carry the contract. They are not identifiers, so
-/// source cannot call them.
-pub const TRIG_F32_SIN: &str = "sin@trig-f32-v1";
-pub const TRIG_F32_COS: &str = "cos@trig-f32-v1";
-
-pub fn trig_f32_v1(name: &str) -> bool {
-    matches!(name, TRIG_F32_SIN | TRIG_F32_COS)
-}
-
-/// `sin` or `cos` for their `trig-f32-v1` names, else `name`: the device paths
-/// already run `invar-trig-f32-v1` for f32 `sin` and `cos`.
-pub fn f32_trig_base(name: &str) -> &str {
-    match name {
-        TRIG_F32_SIN => "sin",
-        TRIG_F32_COS => "cos",
-        _ => name,
-    }
-}
-
 /// The operand count of a float library intrinsic (3 for `fma`).
 pub fn intrinsic_arity(name: &str) -> usize {
-    if trig_f32_v1(name) {
-        return 1;
-    }
     MathFn::from_name(name).map_or(3, |f| f.arity())
 }
 
@@ -251,7 +214,7 @@ pub fn contracts(program: &crate::mir::Program) -> Option<serde_json::Value> {
         instructions().any(|i| matches!(i.output, Some((_, Type::F64 | Type::ArrayF64))));
     // C4 interim: f32 sin, cos and sqrt are invar-trig-f32-v1.
     let trig_f32 = |i: &crate::mir::Instruction| {
-        matches!(&i.kind, Operation::Call { name, .. } if matches!(name.as_str(), "sin" | "cos" | "sqrt") || trig_f32_v1(name))
+        matches!(&i.kind, Operation::Call { name, .. } if matches!(name.as_str(), "sin" | "cos" | "sqrt"))
             && matches!(i.output, Some((_, Type::F32)))
     };
     let trig = instructions().any(trig_f32);

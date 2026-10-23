@@ -5,7 +5,6 @@
     {
       "code": "CALIBRATION_IO",
       "meaning": "a calibration profile could not be read or published without overwriting an existing path",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Profile files and output paths are external inputs; an IO failure never changes the selected engine.",
       "boundary_test": "issue_v02_placement_bounded_loader_atomic_publish_and_no_clobber"
@@ -13,7 +12,6 @@
     {
       "code": "TUNING_ADMISSION",
       "meaning": "the requested schedule failed current typed or physical admission",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -21,7 +19,6 @@
     {
       "code": "TUNING_BUDGET",
       "meaning": "a compile, tuning-time or temporary-storage bound was exceeded",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -29,7 +26,6 @@
     {
       "code": "TUNING_COMPLETION_UNKNOWN",
       "meaning": "device completion is unknown; publication and CPU replay are forbidden",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays"
@@ -37,7 +33,6 @@
     {
       "code": "TUNING_COST_UNKNOWN",
       "meaning": "required cost or residency facts are missing, invalid or inconsistent",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_cost_residency_and_controls"
@@ -45,7 +40,6 @@
     {
       "code": "TUNING_DEVICE_UNAVAILABLE",
       "meaning": "the requested device is unavailable",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays"
@@ -53,7 +47,6 @@
     {
       "code": "TUNING_FREEZE_REQUIRED",
       "meaning": "offline measurement requires the permanent reviewed M5 freeze",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -61,7 +54,6 @@
     {
       "code": "TUNING_GUARD_FALSE",
       "meaning": "the live optimization guard is false",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays"
@@ -69,7 +61,6 @@
     {
       "code": "TUNING_HINT_INVALID",
       "meaning": "the untrusted hint is stale, corrupt or forged",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_cache_identity_and_revalidation"
@@ -77,7 +68,6 @@
     {
       "code": "TUNING_LAUNCH_FAILED",
       "meaning": "the device launch boundary failed before publication",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays"
@@ -85,7 +75,6 @@
     {
       "code": "TUNING_NO_CANDIDATES",
       "meaning": "the schedule request contained no candidates",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -93,7 +82,6 @@
     {
       "code": "TUNING_NUMERIC_POLICY",
       "meaning": "the supplied plan or failure facts require changed numeric semantics",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays"
@@ -101,7 +89,6 @@
     {
       "code": "TUNING_PRODUCTION_OUTPUT",
       "meaning": "measurement was requested on production-visible output",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -109,7 +96,6 @@
     {
       "code": "TUNING_RUNTIME_FORBIDDEN",
       "meaning": "runtime schedule tuning was requested",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -117,7 +103,6 @@
     {
       "code": "TUNING_TRANSFER_FAILED",
       "meaning": "the device transfer boundary failed before publication",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays"
@@ -125,7 +110,6 @@
     {
       "code": "TUNING_UNSUPPORTED_SCHEDULE",
       "meaning": "the requested schedule axis has no admitted implementation",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"
@@ -133,7 +117,6 @@
     {
       "code": "TUNING_VARIANT_LIMIT",
       "meaning": "more than 32 schedules were requested for one region",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The host planning interface accepts schedule requests, untrusted cache data and device cost or completion facts outside checked Invar source; a refused request is not a source-language or compiler invariant error.",
       "boundary_test": "issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals"

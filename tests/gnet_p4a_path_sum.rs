@@ -48,10 +48,6 @@ impl Rng {
     }
 }
 
-const FIXTURES: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/tests/net_normal_form_fixtures/gnet05"
-);
 const GATE: [&str; 4] = ["divide-00", "divide-02", "compose-00", "compose-02"];
 
 const L9_PATHSUM: &str = "fn leaf(x: i32) -> i32 { if x % 2 == 0 { return (x / 2 + 16) % 10007; } return (x * 3 + 1) % 10007; } fn dc(lo: i32, hi: i32, d: i32) -> i32 { if hi - lo <= 5 { return leaf(lo * 4 + hi); } if d <= 0 { return leaf(hi - lo + 7); } let m1 = lo + 1 + ((hi - lo - 2) * 3) / 9; let m2 = m1 + 1 + ((hi - m1 - 2) * 3) / 6; let a = dc(lo, m1, d - 1); let b = dc(m1, m2, d - 1); let c = dc(m2, hi, d - 1); return (a * 5 + b + c * 2) % 100003; } fn run(lo: i32, a: i32, b: i32) -> i32 { return dc(lo, lo + a, b); }";
@@ -167,7 +163,8 @@ fn geometry_args(r: &mut Rng) -> Vec<i64> {
 }
 
 fn fixture(name: &str) -> String {
-    std::fs::read_to_string(format!("{FIXTURES}/gnet05-{name}.inv")).expect("fixture")
+    let path = support::gnet05().join(format!("programs/gnet05-{name}.inv"));
+    std::fs::read_to_string(path).expect("fixture")
 }
 
 fn programs() -> Vec<Program> {

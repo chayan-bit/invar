@@ -1,6 +1,6 @@
 # Validation contract
 
-Status: M0, M1-01, and M1-03 landed with the initial Rust bootstrap, and M1-02 through M1-05 (native LLVM CPU, the revised typed graph/source agreement, checked rewrites, and extraction) and the later increments are on `main`; open items are tracked in GitHub issues. The specification and example gate is `cargo test --locked --test issue_ai_02_spec_examples`. See [native evidence](native-toolchain-v1.md). Automatic source-loop recognition, CPU parallel scheduling, device acceptance, and source-to-three-agent encoding are outside M1. The historical document-only bootstrap was not compiler evidence.
+Status: M0 and M1-01 landed with the initial Rust bootstrap (M1-03, the untyped reference reducer, was retired and removed in 2026-10), and M1-02 through M1-05 (native LLVM CPU, the revised typed graph/source agreement, checked rewrites, and extraction) and the later increments are on `main`; open items are tracked in GitHub issues. The specification and example gate is `cargo test --locked --test issue_ai_02_spec_examples`. See [native evidence](native-toolchain-v1.md). Automatic source-loop recognition, CPU parallel scheduling, device acceptance, and source-to-primitive-agent encoding are outside M1. The historical document-only bootstrap was not compiler evidence.
 
 ## M0 required commands
 
@@ -55,7 +55,7 @@ M0 has only reference execution. Do not label two calls to the same evaluator a 
 
 M1 must inspect LLVM for accidental `nsw`/`nuw`, unjustified `noalias`/alignment, and progress promises. Arithmetic checks must dominate invalid division and other poisonous operations. Preserve operator source mapping in optimized trap paths. A wrapping operation is not allowed to acquire signed/unsigned no-overflow promises.
 
-M1 also requires the minimal reference reducer, the separate typed connectivity verifier, and source/typed-graph/extraction agreement on supported fragments. Test malformed ports, forbidden ownership duplication, branch demand, wrapping-map fusion, beta rewriting, and stale evidence. M1's beta/fusion and connectivity mutation tests change extracted behavior or reject. M2 must route an automatically recognized ordinary source loop through this path; a hand-constructed map fixture alone cannot satisfy that later gate. See [parallelism foundations](parallelism-foundation.md).
+M1 also requires the separate typed connectivity verifier, and source/typed-graph/extraction agreement on supported fragments. Test malformed ports, forbidden ownership duplication, branch demand, wrapping-map fusion, beta rewriting, and stale evidence. M1's beta/fusion and connectivity mutation tests change extracted behavior or reject. M2 must route an automatically recognized ordinary source loop through this path; a hand-constructed map fixture alone cannot satisfy that later gate. See [parallelism foundations](parallelism-foundation.md).
 
 M2 must mutate plan inputs/rule IDs/hashes/evidence to prove rejection; unknown information cannot admit a plan. Compare forced serial and chunked runs with worker counts 1, 2, and a bounded larger count. Include zero/tiny/ragged lengths, cutoff boundaries, alias attempts, and numeric extremes. Use available thread sanitizer tests for the scheduler's actual memory accesses. A false runtime guard must exercise the serial fallback; an invalid internal candidate must fail compilation.
 
@@ -66,6 +66,7 @@ Every milestone acceptance records commit, host/architecture, compiler/toolchain
 ## Continuous integration
 
 GitHub Actions runs CPU-only checks on GitHub-hosted Linux runners: Lint, Check, Hygiene, four Test shards and the CPU-model corpus test.
+On pull requests the corpus sweeps (device CPU model, GNET corpus denominators and #54 selection parity) run a deterministic 1-in-8 sample by path hash that keeps every corpus directory; pushes to main and `just test` set `INVAR_FULL_CORPUS=1` and run the whole corpus.
 The workflow is [ci.yml](../.github/workflows/ci.yml).
 CUDA and Metal suites are not run in CI.
 Run them locally on a CUDA-capable Linux host or an Apple Silicon Mac when a change touches a device path, and record the hardware and result in the pull request.
