@@ -266,17 +266,7 @@ pub(crate) fn provide<D: Device>(
         return Ok(None);
     };
     Ok(Some(LoopOverride {
-        histogram: None,
-        scatter: None,
-        gather: None,
         iterations: live.iterations,
-        input_lengths: Vec::new(),
-        scalar: None,
-        array: None,
-        summary: None,
-        region: None,
-        tensor: None,
-        stencil: None,
         transpose: Some(Completion {
             contract: contract.clone(),
             dimensions,
@@ -284,6 +274,7 @@ pub(crate) fn provide<D: Device>(
             values,
             ticks,
         }),
+        ..Default::default()
     }))
 }
 
