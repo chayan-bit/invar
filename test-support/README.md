@@ -74,7 +74,7 @@ Sweep of compiled/process test deadlines:
   fixture compile and fresh-process scalar-artifact checks consume the same knob.
 
 Product limits are intentionally unchanged: `src/native.rs`,
-`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_host,numeric_resume_host,numeric_owned_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
+`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
 `src/gnet_device_command.rs`, `bench/{baseline,build_lineage,general-net-v01/cli}.rs`,
 and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
 real contract; GPU completion polling and semantic timing fixtures are not
