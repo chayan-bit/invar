@@ -98,7 +98,7 @@ record_field  = identifier, ":", type ;
 variant       = "enum", identifier, "{", [ variant_arms, [ "," ] ], "}" ;
 variant_arms  = variant_arm, { ",", variant_arm } ;
 variant_arm   = identifier, [ "(", type, ")" ] ;
-numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric-v2.md *)
+numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric.md *)
 function      = "fn", identifier, [ generic_params ], "(", [ params ], ")", "->", type, [ "from", identifier ], block ;
 foreign_function = "extern", "c", "fn", identifier, "(", [ params ], ")", "->", result_type, "oracle", identifier, ";" ;
 generic_params = "<", generic_param, { ",", generic_param }, ">" ;
@@ -174,7 +174,7 @@ digit         = "0" .. "9" ;
    invar-math-cr-v1 reserves sqrt, cbrt, hypot, sin, cos, tan, asin, acos,
    atan, atan2, sinh, cosh, tanh, exp, exp2, expm1, log, log2, log10, log1p,
    pow, floor, ceil, trunc, round, abs, copysign, min and max, overloaded on
-   f32 or f64 and correctly rounded; see docs/design/v02-f64math.md.
+   f32 or f64 and correctly rounded.
    sort, sort_by_key, argsort, segmented_sort are reserved ordinary calls.
    Comparison chaining is syntactically excluded. Range syntax exists only
    in for statements. Assignment is a statement, not an expression.

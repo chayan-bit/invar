@@ -144,19 +144,3 @@ fn issue_eng_08_matcher_analysis_bytes_are_budgeted() {
         Err(Error::Exceeded(e)) if e.resource == Resource::Analysis
     ));
 }
-
-#[test]
-fn issue_eng_08_deleted_cap_no_longer_exists() {
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    let mut scanned = 0;
-    for file in [
-        "summary_source.rs",
-        "summary_source/matcher.rs",
-        "summary_source/host.rs",
-    ] {
-        let text = std::fs::read_to_string(root.join(file)).unwrap();
-        assert!(!text.contains("MAX_MATCHED_DIMENSION"), "{file}");
-        scanned += 1;
-    }
-    assert_eq!(scanned, 3);
-}

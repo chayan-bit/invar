@@ -666,7 +666,7 @@ fn issue_eng_03_a_strict_f32_fold_stays_serial_in_the_normal_form() {
     use invar::general_net::normal_form::{self, Node};
     // A strict fold is never reassociated: the parallel normal form keeps
     // refusing it with the v1 reason. Tiered folds never reach it as a float
-    // sum, because the checker lowers them first (numeric-v2.md).
+    // sum, because the checker lowers them first (docs/numeric.md).
     let mut serial = 0;
     for attribute in ["", "#[numeric(fold = \"strict\")]"] {
         let source = format!(

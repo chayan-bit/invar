@@ -1,10 +1,10 @@
 # HA-1: host array arguments (revision HA-1.3)
 
-P0b limit update (2026-10-15): the language per-array limit is now 2^24 and the live-element ceiling is 2^28, shared by source, MIR, native allocation and the net oracle. Historical 1,000,000/2,000,000 figures below describe the original HA-1 acceptance. GNET ABI13 adds a copying device entry with retained Rust leases and successful-return publication after confirmed completion; it does not establish the native/Python zero-copy requirements. The private HA-1 native host-array protocol retains its separate tool bounds: 1,000,000 elements per array, 2,000,000 live elements and 8,000,000 rollback bytes; larger host calls are typed refusals. These bounds do not cap native source-owned allocations. See [GNET entry ABI13](gnet-entry-v13.md).
+P0b limit update (2026-10-15): the language per-array limit is now 2^24 and the live-element ceiling is 2^28, shared by source, MIR, native allocation and the net oracle. Historical 1,000,000/2,000,000 figures below describe the original HA-1 acceptance. GNET ABI13 adds a copying device entry with retained Rust leases and successful-return publication after confirmed completion; it does not establish the native/Python zero-copy requirements. The private HA-1 native host-array protocol retains its separate tool bounds: 1,000,000 elements per array, 2,000,000 live elements and 8,000,000 rollback bytes; larger host calls are typed refusals. These bounds do not cap native source-owned allocations. See Entry ABI13 in `src/general_net/CONTRACT.md`.
 
 **Status: frozen.** The maintainers approved the pending decisions on 2026-10-04
 and delegated option choices to engineering judgement. HA-1 amends
-L1-06 (`docs/issues/next/L1-06-python-binding.md`) at the host boundary; it does
+the L1-06 Python binding contract at the host boundary; it does
 not change the language, MIR, Value layout or any ABI.
 
 **HA-1.1 (2026-10-05):**
@@ -32,7 +32,7 @@ not change the language, MIR, Value layout or any ABI.
 **HA-1.3 (2026-10-14), decided 2026-10-14:**
 - Extend the private section 12 record with element value 3 = `f32` (IEEE binary32), alongside 1 = `i32` and 2 = `u32`.
 - Modes remain 1 = `read` and 3 = `mut`, with unchanged size, offsets, alignment, limits, alias rules and rollback obligations.
-- Native-serial admits `read`/`mut Array<f32>` at caller addresses under `strict-f32-v1`, as defined by M4-01's `src/numeric_contract.rs` and `docs/m4-source.md`.
+- Native-serial admits `read`/`mut Array<f32>` at caller addresses under `strict-f32-v1`, as defined by M4-01's `src/numeric_contract.rs` and `docs/numeric.md`.
 - Copies, stores and rollback preserve every bit, including NaN payloads and signed zero; arithmetic follows the existing policy (NaN payload/sign are unobservable arithmetic outcomes), with gradual underflow and no FTZ, reassociation or implicit contraction.
 - The public C ABI v1 is unchanged; element 3 is private and is never a public scalar or array tag.
 - Returned arrays remain on the explicitly copying reference path; `take` remains refused.
@@ -103,7 +103,7 @@ not change the language, MIR, Value layout or any ABI.
 | 4 | hold the GIL for array calls and pin exports; refuse every overlap involving `mut`; callers must prevent concurrent native access outside the GIL (the GIL cannot make that safe); no guarantees across process kill or abort | §4, §8 |
 | 5 | NumPy-owned `take` is refused before execution; Rust reference `take` stays unexposed pending its own contract | §9 |
 | 6 | the same-address proof applies to native engines only; reference engines are explicitly copying semantic oracles | §10 |
-| — | no hidden fallback and no partial publication | §2, §7 |
+| - | no hidden fallback and no partial publication | §2, §7 |
 
 ## 1. Definitions
 

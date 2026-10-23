@@ -39,7 +39,7 @@
   },
   "cell_source": {
     "path": "../../cell.inv",
-    "sha256": "a6ea8cebe4f84255337d1a510bdcf8a43da2fcf94ddc2550bf542c67324fdd75"
+    "sha256": "8f92be29c83c814793b872a5bbcd54ca1bc1117f0a69b03e69669fc8d39f2efb"
   },
   "config": {
     "base_frame": "panda_link0",
@@ -159,7 +159,7 @@
       ]
     },
     "reference_implementation_sha256": "20d3f960b14212c09eace96bc98500272c1296c013db3600d2b81f1eba172142",
-    "reference_model_sha256": "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b",
+    "reference_model_sha256": "93a8d8e137ae43a33e7499ff627c1f633fb27d94f58ea7545b97c8f65027db1d",
     "schema": "invar-tool-projection-v2",
     "source_base_from_reference_base": {
       "quaternion_xyzw": [

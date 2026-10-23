@@ -1,8 +1,7 @@
 # GNET core boundary contract 1
 
-This is the bounded implementation contract for `general_net`, based on the
-compiled-first `docs/general-gpu-v01.md` and `docs/cuda-parity-v01.md` at integration
-`6bbc111c8123e7ee64dd8a0652e297641949d5c8`, a descendant of `d52473e`.
+This is the bounded implementation contract for `general_net`.
+Its general semantic obligations are in [Semantic obligations](#semantic-obligations); its performance acceptance is `docs/performance-acceptance.md`.
 The existing MIR, typed-net and MIR-net v1 formats remain unchanged.
 This module has its own `CONTRACT_VERSION = 1`; it has no serialized input format yet.
 
@@ -248,7 +247,7 @@ GNET-03 admits i32/u32 owned arrays anywhere inside the program: the root owns t
 P0b extends this boundary with ABI13 for f32 scalars, read/mut contiguous i32/u32/f32 arrays and read flat scalar records. Flat records and owned i32/u32/f32 arrays may also be returned. P5b validates returned allocation IDs, live descriptors, kinds, lengths, heap ranges and canonical words before copying the result or publishing mutable arguments. ABI5 retains its scalar packet and launch geometry.
 Variants, nested/array-containing records, views, text, take entry parameters and unit intrinsics remain `unsupported_type`/`unsupported_call` refusals; programs over the compiler or net structural budgets are `compiler_structural_budget`/`net_structural_budget`.
 `device_host::refusal_class` is the stable class; the `gnet-device` receipt records `placement` with `mode: forced-device`, `executed`, the refusal class and `fallback: none`.
-Forced device mode never substitutes another engine. ABI13 executes exact integer-software binary32, including subnormals, after the live D1 preflight. Native float admission stays disabled; receipts record the probe and exact software fallback, with no CPU replay. Automatic placement is GNET-04. See [ABI13](../../docs/gnet-entry-v13.md).
+Forced device mode never substitutes another engine. ABI13 executes exact integer-software binary32, including subnormals, after the live D1 preflight. Native float admission stays disabled; receipts record the probe and exact software fallback, with no CPU replay. Automatic placement is GNET-04. See [Entry ABI13](#entry-abi13).
 
 Device statuses 9-13 decode as IndexOutOfBounds, ArraySizeLimit, HeapLimit, AllocationLimit and CleanupLimit.
 HeapLimit equals the oracle's allocation failure when the oracle arena uses the device element cap.
@@ -286,3 +285,202 @@ Without the feature `Fault` is uninhabited and the hook text is not compiled: th
 Metal libraries are compiled from the emitted source at run time and the evidence Mac has no offline Metal toolchain, so Metal absence rests on the source and binary checks.
 These are differential results, not a simulation proof; no performance, placement or parity claim is made.
 
+## Semantic obligations
+
+Let source configuration C = (control, store, ownership, ordered observation prefix), and executable-net state N include graph, demanded frontier, leases and ordered commit state.
+Define a relation R(C,N).
+For each logical net transition N -> N', establish either an invisible administrative step preserving R, or source steps C ->* C' with R(C',N').
+Establish an equivalent simulation for compiled CPU and device steps against N.
+Progress under the specified fair schedule and divergence-sensitive behavior is required; forward simulation alone can hide starvation.
+
+Observable agreement includes normal values, first source-ordered trap and source span, visible write/foreign-effect prefix, normal ownership cleanup, and the contract's logical Demand/Complete events.
+GPU physical work is not itself a logical Demand event.
+Do not equate evaluator fuel with net rewrite count.
+Precisely distinguish semantic limits from backend exhaustion or user cancellation; exhaustion is never proof of divergence.
+
+Demand activates only the selected branch.
+Ownership/region tokens forbid duplication of affine owners and order conflicting memory operations.
+A device task holds input leases through the fence; FFI consumes the appropriate ordered host token.
+Unknown overlap serializes or uses a checked runtime guard; a failed guard cannot publish a speculative write.
+No unchecked foreign purity annotation authorizes speculation.
+
+### Expose independent work without termination proofs
+
+For `let a = f(x); let b = g(y); a + b`, independent observationally pure calls may execute concurrently even if their termination is unknown.
+The proposed rule is bounded speculation with source-ordered commit:
+
+1. Run later work in finite preemptible compiled work quanta on stable inputs and isolated private scratch. Hold its result or trap.
+2. Always give the oldest source frontier progress. If f returns, g may become the frontier; if f traps, discard g; if f diverges, never publish g.
+3. No speculative writes, foreign effects, cleanup, or logical demand events become visible. No affine ownership is copied. Uncertain shared resources serialize.
+4. Speculative scratch cannot deplete the resources reserved for the serial path. Scratch exhaustion suspends/discards speculative work rather than failing the source computation. Record semantic fuel/resource accounting in source order; any replay for accounting must itself be effect-free and explicitly specified.
+5. Kernels have finite quanta so a speculative divergent call cannot prevent the oldest task progressing or cancellation. Reclamation waits for device completion.
+
+This is a proof obligation, not an established theorem.
+Counterexample to catch: f loops forever and g immediately traps or fills speculative memory; reporting g's trap/OOM as the source result is incorrect.
+Refusing all possibly-diverging pure calls solely for lack of a termination proof would miss the intended generality.
+
+## Compiled dynamic work
+
+Emit program-specific branch, loop, frame/continuation and worklist code for dynamic source behavior.
+A bounded worklist may use epochs when its algorithm needs global synchronization: discover candidates, check ownership/dependence and capacity, execute nonconflicting work, publish source-ordered observations, then retire state after all readers and device fences complete.
+It is not a generic net-opcode interpreter.
+Shared-edge writes and stale generations still require checked guards; allocation failure must leave a valid continuation and no partially published effects.
+Deferral cannot starve an older source frontier.
+
+Completion requires resolved root/commit frontier, empty ready/deferred/host queues where used, no in-flight work and completed streams.
+An empty local queue alone is insufficient.
+CPU reference and compiled CPU/GPU paths share the net's logical rule semantics; their physical scheduling and storage strategies may differ.
+If a guard fails before execution, select the compiled alternative.
+Switching after progress requires transferring the exact live continuation, ownership and effect frontier, with no replay of visible effects.
+
+## Entry ABI13
+
+An expanded entry uses ABI13; scalar integer entries keep ABI5.
+Parameters are i32/u32/Bool/f32, `read` or `mut Array<i32|u32|f32>`, or `read` flat records of i32/u32/Bool/f32.
+Flat scalar records and owned `Array<i32|u32|f32>` results are supported.
+`take` parameters, variants, nested records and records containing owners are typed refusals.
+At most eight parameters and sixteen fields per record are admitted.
+Field order is checked-source declaration order, never host struct padding.
+
+The twelve physical buffers, task counters, group of 32 threads and kernel symbol remain unchanged.
+Buffer 0 contains parameter words, allocation/live counters, then a canonical owned heap image.
+Root initialization copies the image once before the first source step.
+Each scalar/field/element occupies an eight-byte word: sign-extended i32, zero-extended u32/f32 bits, and Bool 0/1.
+Record and array parameters are stable allocation IDs into the existing checked heap layout.
+Records carry the existing per-field presence mask.
+
+Host entry uses safe `eval::Value` containers.
+Shared/exclusive RefCell leases prevent conflicting caller access while a session owns borrowed arrays.
+Exact read aliases share a device owner.
+Any duplicate identity involving `mut` is refused conservatively, including empty owners; partial or strided views are not admitted.
+There is no raw-pointer, external-stride or caller-supplied record-padding ABI.
+Wrong field count/types or a strided Value produces `wrong_layout`; capacity/length produces `oversize`; mutable alias produces `alias`; unsupported owners produce `unsupported_type`; an already borrowed container produces `borrowed`.
+Each refusal precedes backend allocation.
+
+Device writes remain private across continuation epochs.
+Only a successful source return after the completion fence reaches publication.
+Every destination descriptor, length, kind, live bit and scalar word is checked before the first mutable host write.
+Trap, fuel exhaustion, cancellation, malformed completion and unknown completion publish no host array changes.
+Unknown completion retains the existing quarantine and forbids replay.
+Array transfers and readbacks are copying; native/Python zero-copy remains a separate gate.
+Oracle receipts hash bounded inputs and alias topology before mutation, then retain an independent snapshot of flat record results.
+Returned arrays are copied into fresh host storage only after their issued handle, kind, live flag, length, heap range and canonical element words validate.
+A malformed result prevents mutable-argument publication as well.
+
+Strict-f32-v1 uses the existing independently tested integer-software binary32 operations for every ABI13 operation on both targets.
+This is the exact fallback path, including all subnormal inputs/results, signed zeros, NaNs and explicit fma.
+Each physical backend runs the existing cached D1 live-device probe before preparing ABI13 work and records its completed report.
+Native floating arithmetic is never admitted; every operation uses the exact software fallback, including when the probe detects flushing or contraction.
+A failed or unknown probe completion refuses preparation through the existing poison/quarantine gate.
+There is no hardware-float fast path or CPU replay.
+Metal disables fast math and emits `#pragma METAL fp contract(off)`; CUDA disables contraction and FTZ and requests precise division/sqrt.
+Receipts identify software arithmetic, absence of native admission and the subnormal path.
+CPU net agreement compares exact words, steps, trap spans, transitions, Demand/Complete events and cleanup.
+
+`array_limits` defines a 2^24 per-array cap and a 2^28 live-element ceiling.
+A 2^24-element host f32/u32/i32 array is 64 MiB, or 128 MiB in GNET's eight-byte carriers.
+The fixed packet plus heap requires about 256 MiB for one full-size input, before bounded frame/trace/scratch.
+Callers must explicitly raise `Limits.owned.elements` and `Limits.buffer_bytes`; the default remains conservative.
+The full-size test also sets `Limits.private.slots = 0`: unchanged speculation storage otherwise replicates the owner heap per private slot and can exceed its separate scratch budget.
+Source fuel, trace and per-plan storage limits are unchanged.
+
+The hard storage ceiling is 8 GiB, following the 2^28 device caps policy.
+Before allocating the packet, host admission also checks four payload copies plus the retained input against that ceiling, covering adapter storage, byte capture, decoded checkpoints and readback overlap.
+Metal checks live maxBufferLength and recommended working set minus current allocations; CUDA checks threefold concurrent storage and free memory less a ten-percent margin.
+Checked arithmetic is retained for lengths, byte extents, heap sizes and totals.
+Allocation failure remains explicit.
+The CPU device model retains its smaller 64 MiB bound; full-size source acceptance and full-size Metal admission are separate tests.
+
+The private `gnet-device` command accepts f32 as `{"bits":1065353216}`, arrays as JSON arrays of exact typed elements, and flat records as arrays in declaration order.
+f32 array elements use the same bits object.
+Expanded receipts include `arguments_after` after reclaim releases all leases.
+The CLI's OS argument-size limit is separate from the Rust host API's supported array size.
+
+P5b packages the exact D1 probe MSL as a second offline library for ABI13.
+Build and load derive the same inventory from the admitted artifact and reject missing, stale, extra or wrong-entry libraries before installation.
+ABI5 keeps its one-library container.
+The container format and production prohibition on runtime source compilation are unchanged.
+
+The compiled C++, CUDA and MSL numeric bodies admit `sin`, `cos` and `sqrt`, including ABI13 entries.
+`trig_f32.rs` generates the frozen operation sequence over the existing exact integer f32 helpers; its integer square-root primitive rounds correctly without device float arithmetic.
+NaNs, signed zeros, infinities, subnormals and huge trig arguments follow `invar-trig-f32-v1`.
+The launch, speculation and scheduling structure is unchanged.
+
+## Host-frame body capsules (protocol v1)
+
+`device_host::host_frame::Plan` consumes the verified net's P1a partition and P1b PNF, checks every certificate with `certificate::check_all`, and emits from the same net-derived MIR as the continuation compiler.
+
+The adopted catalogue calls first-exit L15 and monotone frontier L14.
+L13 is compaction.
+`compiled::body_map::Compiled` exposes sites, explicit admission misses, the MIR contract fingerprint and both generated sources.
+`Site` names its `(function, head)` region and Map, First or Frontier shape.
+No caller-supplied certificate, task image or device address can construct a host-frame plan.
+
+`Plan::run` owns native serial control, exclusive entry leases, region scratch, fences, validation, ordered publication and replay.
+The frame is compiled program-specific C++, through the existing bounded compiler child and reviewed native loader.
+It does not evaluate tree nodes or graph opcodes.
+
+### Continuation boundary
+
+A site pauses before its loop branch, after evaluating the first header.
+Lane zero begins at that branch.
+Later lanes restart at the header with their own induction value; each stops on the backedge before the next header.
+After a successful chunk the native frame executes the final header or requests the next chunk.
+Calls, branches, inner loops, integer traps, strict software f32, and iteration-local owners use the existing continuation/operation emitter.
+The native frame never hands its addresses to a shader.
+
+Two device kernels form one capsule: `invar_gnet_body_map_v1` uses groups of 256 with grid-stride coverage beyond 65,535 groups; `invar_gnet_body_resolve_v1` uses one 256-thread tree min reduction to find the first non-complete lane.
+Both execute in encoder/stream order under one observed completion fence.
+Neither uses cross-group waiting.
+Pending/unknown completion retains the physical work; it cannot trigger CPU replay or host publication.
+
+### Twelve-buffer capsule layout
+
+All words are 64 bits.
+Sizes are checked before allocation.
+These are compiler-private images, not a serialized user input format.
+
+| Slot | Contents |
+| --- | --- |
+| 0 | Immutable ordinary entry packet |
+| 1 | Ten terminal packet words per lane |
+| 2 | Seven-word trace events per lane, bounded by config[3] |
+| 3 | `[lanes, lane_fuel, lane_transitions, lane_trace_events, site+1, lo]` |
+| 4 | Private owned heap per lane |
+| 5 | Private cleanup transcript per lane |
+| 6 | Private continuation task per lane |
+| 7 | Untouched native task seed |
+| 8 | Untouched native heap seed |
+| 9 | Frontier prefix marker followed by per-lane carried sum seeds |
+| 10 | Frontier round-start active-writer flags |
+| 11 | Fourteen control words per lane; word 9 is the resolved boundary index |
+
+Task layout remains the existing 64-frame continuation plus 18 counters.
+Control words 0/1/2 are lane mode/site/depth; 6 is completion kind (1 backedge, 2 terminal, 3 quantum cut); 8 records branch entry.
+A completed capsule is validated against the private seed and capacities before any image is merged.
+
+Normal-map merge adjusts child frame IDs, root block activations, source fuel, physical transitions and ordered Demand/Complete events in lane order.
+Local allocation IDs are remapped as dead descriptors; live owners cannot escape a certified iteration.
+Heap relocation is resolved through descriptors.
+A region whose aggregate source budgets do not fit keeps the untouched native checkpoint.
+
+The host entry commits mutable buffers only after normal return, exactly as `oracle.rs::observe_entry` and HA-1.1 `eval/host_read.rs` do.
+Traps, fuel/trace cuts and backend failures leave host buffers unchanged.
+Internal continuation state still carries its exact source prefix, including writes in a failing iteration.
+
+`First` uses the minimum boundary index.
+Successful preceding lanes may commit, then the native frame replays the winning iteration, preserving traps before an exit, writes within a trapping iteration and final cleanup.
+Source fuel or trace cuts can select an earlier iteration; in that case the original checkpoint is replayed.
+An early exit never publishes later iterations.
+
+`Frontier` first maps against the round-start snapshot, then reconstructs earlier active own-writers and carried sum prefixes for a second map.
+Only certified constant monotone stores and non-scan lifted integer sums are admitted.
+Failed probes or overflowing prefixes replay from the native checkpoint.
+Other carried representations, runtime guards and compound first/frontier forms are explicit misses whose serial control stays compiled.
+
+### Region backend interface
+
+`RegionBackend::execute` consumes a compiler-issued capsule plus initialized images and group count, and returns images only after confirmed completion.
+The native frame and CPU lane model are explicit and cannot be confused with physical Metal/CUDA execution.
+The physical adapters retain the existing ABI5 entry and add a separate region path; no old geometry is widened implicitly.
+No consumer re-infers legality from an observed shape or a cost estimate.

@@ -70,7 +70,7 @@ fn cxx(args: &[&str]) {
 fn host_build(directory: &Path, name: &str, source: &str) -> PathBuf {
     let (unit, driver) = (
         directory.join(format!("{name}.cpp")),
-        directory.join("driver.cpp"),
+        directory.join(format!("{name}-driver.cpp")),
     );
     std::fs::write(&unit, source).unwrap();
     std::fs::write(&driver, HOST_DRIVER).unwrap();
