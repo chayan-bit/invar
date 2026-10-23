@@ -257,17 +257,7 @@ pub fn run_source<D: Device>(
             return Ok(None);
         };
         Ok(Some(LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
             iterations: live.iterations,
-            input_lengths: Vec::new(),
-            scalar: None,
-            array: None,
-            summary: None,
-            region: None,
-            transpose: None,
-            stencil: None,
             tensor: Some(Completion::Contraction(ContractionCompletion {
                 contract: contract.clone(),
                 dimensions,
@@ -275,6 +265,7 @@ pub fn run_source<D: Device>(
                 values,
                 ticks,
             })),
+            ..Default::default()
         }))
     };
     let (observation, completed) =

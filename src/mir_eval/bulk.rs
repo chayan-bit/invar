@@ -3,6 +3,7 @@
 use super::*;
 
 /// A prevalidated bulk result, published only when the live loop guard still matches.
+#[derive(Default)]
 pub(crate) struct LoopOverride {
     pub histogram: Option<crate::histogram_source::host::Completion>,
     pub scatter: Option<crate::scatter_proof::host::Completion>,
@@ -23,18 +24,8 @@ impl LoopOverride {
     /// A plan whose only authority is one completed region.
     pub(crate) fn completed(region: super::region::CompletedRegion) -> Self {
         Self {
-            histogram: None,
-            scatter: None,
-            gather: None,
-            iterations: 0,
-            input_lengths: Vec::new(),
-            scalar: None,
-            array: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
-            summary: None,
             region: Some(Box::new(region)),
+            ..Default::default()
         }
     }
 
@@ -474,18 +465,8 @@ mod hardening_tests {
         let mut begun = 0;
         let mut refusals = Vec::new();
         let mut result = LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
             iterations: 2,
-            input_lengths: Vec::new(),
-            scalar: None,
-            array: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
-            summary: None,
-            region: None,
+            ..Default::default()
         };
         match kind {
             0 => {
@@ -635,14 +616,7 @@ mod hardening_tests {
                     scatter: if mask & 2 != 0 { s.scatter } else { None },
                     gather: if mask & 1 != 0 { g.gather } else { None },
                     iterations: 2,
-                    input_lengths: Vec::new(),
-                    scalar: None,
-                    array: None,
-                    tensor: None,
-                    transpose: None,
-                    stencil: None,
-                    summary: None,
-                    region: None,
+                    ..Default::default()
                 };
                 if let Some(c) = plan.histogram.as_mut() {
                     c.status = current[2];
