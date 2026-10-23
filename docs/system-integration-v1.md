@@ -205,8 +205,8 @@ pinned FK/planner reference definitions. Generated cell FK output is composed
 with the source-derived `reference_from_cell`; planner goals use its inverse and
 attachment poses its forward direction. The adapters emit explicit pinned-source
 metadata, check finite unit transforms and refuse unsupported anchors/models.
-The endpoint harness's additive v2 runtime/golden/evidence formats bind the cell
-source and projection; legacy v1 retains its reference-frame meaning. The IR,
+The endpoint harness's v3 runtime/golden/evidence formats bind the cell
+source and projection. The IR,
 C/INVP/ROS layouts and metric limits do not change. This CPU-tested adapter does
 not establish live ROS/cuRobo, collision or complete integration-start acceptance.
 
