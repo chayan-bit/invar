@@ -146,7 +146,7 @@ fn rows() -> Vec<Row> {
                     args(&case["arguments"])
                 },
                 limits: oracle::Limits {
-                    fuel: case["fuel"].as_u64().unwrap(),
+                    fuel: case["fuel"].as_u64().unwrap_or(1000),
                     transitions: case["limits"]["transitions"].as_u64().unwrap_or(100_000),
                     trace_events: case["limits"]["trace_events"].as_u64().unwrap_or(100_000)
                         as usize,
