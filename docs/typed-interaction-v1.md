@@ -32,8 +32,9 @@ The verifier counts uses of each affine binder. Sequential inputs add their
 counts; alternative `Select` branches use the maximum because only one branch
 is demanded. A function or array value cannot be used twice. Effect facts are
 recomputed from connectivity; unknown or possibly failing work cannot satisfy
-the current total-rule guard. Term evaluation follows these connections and
-records demand/completion events independently of `term::observe`. A bounded
+the current total-rule guard. Term evaluation (test support in
+`test-support/term_oracle.rs`) follows these connections and records
+demand/completion events independently of the term-level `observe` oracle. A bounded
 step/depth/node exhaustion is a tool result, not source divergence.
 
 ## Public MIR connections
