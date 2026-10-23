@@ -7,6 +7,9 @@ pub use invar::{
 mod qualification;
 use qualification::device::{self, Target};
 use serde_json::json;
+#[cfg(feature = "cuda")]
+#[path = "support/invar_bin.rs"]
+mod invar_bin;
 
 #[test]
 fn issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls() {
@@ -62,10 +65,7 @@ fn issue_m5_02_full_pipeline_qualification_metal_gpu() {
 #[test]
 #[ignore = "requires the exact RTX 5070 Ti and a local NVRTC helper"]
 fn issue_m5_02_full_pipeline_qualification_cuda_gpu() {
-    hardware(
-        Target::Cuda,
-        Some(std::path::Path::new(env!("CARGO_BIN_EXE_invar-nvrtc"))),
-    );
+    hardware(Target::Cuda, Some(&invar_bin::invar_bin("invar-nvrtc")));
 }
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
 fn hardware(target: Target, compiler: Option<&std::path::Path>) {

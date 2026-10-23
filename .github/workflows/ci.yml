@@ -36,7 +36,7 @@ jobs:
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --all-targets --locked -- -D warnings
+        run: cargo clippy -p invar -p invar-tools --all-targets --locked -- -D warnings
 
   check:
     name: Check
@@ -50,7 +50,7 @@ jobs:
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - name: Check all targets
-        run: cargo check --all-targets --locked
+        run: cargo check -p invar -p invar-tools --all-targets --locked
 
   test:
     name: Test (${{ matrix.name }})
@@ -100,7 +100,7 @@ jobs:
         env:
           NEXTEST_ARGS: ${{ matrix.args }}
         # NEXTEST_ARGS is intentionally word-split (it holds flags and a quoted filterset).
-        run: eval "cargo nextest run --locked --profile ci --cargo-profile ci-debug $NEXTEST_ARGS"
+        run: eval "cargo nextest run --locked --profile ci --cargo-profile ci-debug -p invar -p invar-tools $NEXTEST_ARGS"
       - name: Doctests
         if: matrix.doctests
         run: cargo test --locked --doc
@@ -139,7 +139,7 @@ jobs:
         with:
           key: native
       - name: Clippy (native)
-        run: cargo clippy --locked --all-targets --features native -- -D warnings
+        run: cargo clippy --locked -p invar -p invar-tools --all-targets --features native -- -D warnings
       - name: Native backend tests
         run: >
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
@@ -162,7 +162,7 @@ jobs:
           key: cuda
       # cudarc loads the driver and NVRTC dynamically, so no CUDA toolkit or GPU is needed to compile.
       - name: Check (cuda)
-        run: cargo check --locked --all-targets --features cuda
+        run: cargo check --locked -p invar -p invar-tools --all-targets --features cuda
 
   metal:
     name: Build (metal)
@@ -178,7 +178,7 @@ jobs:
         with:
           key: metal
       - name: Check (metal)
-        run: cargo check --locked --all-targets --features metal
+        run: cargo check --locked -p invar -p invar-tools --all-targets --features metal
 
   python:
     name: Build (python)

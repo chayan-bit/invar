@@ -8,14 +8,14 @@ checked for permutation, exact key/ID mapping and stable equal-key IDs after
 the timer; a full SHA-256 over little-endian key/ID pairs must agree everywhere.
 
 ```sh
-cargo bench --locked --bench sort --no-run
+cargo bench --locked -p invar-tools --bench sort --no-run
 # Run the printed executable directly, not cargo's default bench arguments:
 <sort-executable> cpu 26 5
 <cuda-sort-executable> cuda 26 5
 <metal-sort-executable> metal 26 5
 cargo build --locked --release -p invar-metal --example sort-baseline
 <sort-baseline-executable> 26 5
-cargo run --locked --release --example sort-report -- <benchmark-report-dir>
+cargo run --locked --release -p invar-tools --example sort-report -- <benchmark-report-dir>
 ```
 
 The CUDA build needs `--features cuda` and `INVAR_NVRTC_COMPILER` pointing to

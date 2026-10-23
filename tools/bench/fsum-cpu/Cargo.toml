@@ -1,6 +1,6 @@
 # Standalone CPU benchmark for the v0.2 fsum lane: Invar's cpu-parallel
 # reductions next to rayon's unordered sum. Not a workspace member, so the
-# main build never pulls rayon. Run from this directory:
+# main build never pulls this rayon. Run from this directory:
 #   cargo run --release -- bench 4  (or: calibrate)
 [package]
 name = "fsum-cpu-bench"
@@ -11,5 +11,5 @@ publish = false
 [workspace]
 
 [dependencies]
-invar = { path = "../.." }
+invar = { path = "../../.." }
 rayon = "=1.10.0"

@@ -1,9 +1,10 @@
 # bin
 
-Additional command binaries.
+Runtime helper binaries of the compiler.
 invar-sequencer.rs runs system sequencing.
-invar-bench.rs dispatches the benchmark harness in bench/.
-invar-nvrtc.rs and invar-m3-03-cold.rs require the cuda feature.
+invar-nvrtc.rs compiles CUDA source out of process for the CUDA engine and requires the cuda feature.
+
+The acceptance, qualification and benchmark binaries (invar-bench, invar-heldout, invar-performance-report, invar-qualify, invar-pathsum-gate, invar-m3-03-cold) live in [tools](../../tools/README.md).
 
 See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
 Preserve diagnostics, source order, deterministic observations and receipt identities.
