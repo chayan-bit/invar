@@ -3,15 +3,15 @@
 use invar::{check, eval, front, mir, mir_eval, ownership};
 use serde_json::{Value, json};
 
-#[path = "../test-support/scalar-exports/inventory.rs"]
+#[path = "../../test-support/scalar-exports/inventory.rs"]
 mod inventory;
 
-#[path = "../test-support/scalar-exports/facade_corpus.rs"]
+#[path = "../../test-support/scalar-exports/facade_corpus.rs"]
 mod facade_corpus;
 
 fn vectors() -> Value {
     serde_json::from_str(include_str!(
-        "../test-support/scalar-exports/scalar-vectors-v1.json"
+        "../../test-support/scalar-exports/scalar-vectors-v1.json"
     ))
     .unwrap()
 }
@@ -122,32 +122,20 @@ fn issue_l1_06_scalar_export_corpus_pinned_source_fuel_preparation() {
 }
 
 #[test]
-fn issue_l1_06_scalar_export_corpus_inventory() {
-    let report = inventory::enumerate();
-    assert!(report["summary"]["input_entries"].as_u64().unwrap() > 751);
-    assert!(report["summary"]["checked_functions"].as_u64().unwrap() > 0);
-    assert!(report["summary"]["scalar_mir_candidates"].as_u64().unwrap() > 0);
+fn issue_l1_06_scalar_export_corpus_actual_facade_admission_and_reference_replay() {
+    let corpus = inventory::enumerate();
+    assert!(corpus["summary"]["input_entries"].as_u64().unwrap() > 751);
+    assert!(corpus["summary"]["checked_functions"].as_u64().unwrap() > 0);
+    assert!(corpus["summary"]["scalar_mir_candidates"].as_u64().unwrap() > 0);
     assert_eq!(
-        report["compiled_export_admission"],
+        corpus["compiled_export_admission"],
         "separate_actual_facade_qualification"
     );
-    let summary = &report["summary"];
-    eprintln!(
-        "preparation inventory: {} inputs, {} checked functions, {} scalar MIR candidates, {} screened out; input statuses {}; actual facade admission is tested separately",
-        summary["input_entries"],
-        summary["checked_functions"],
-        summary["scalar_mir_candidates"],
-        summary["excluded_by_preparation_screen"],
-        summary["input_statuses"]
-    );
+    eprintln!("preparation inventory: {}", corpus["summary"]);
     if let Some(path) = std::env::var_os("INVAR_SCALAR_INVENTORY_OUTPUT") {
-        std::fs::write(path, serde_json::to_vec_pretty(&report).unwrap()).unwrap();
+        std::fs::write(path, serde_json::to_vec_pretty(&corpus).unwrap()).unwrap();
     }
-}
-
-#[test]
-fn issue_l1_06_scalar_export_corpus_actual_facade_admission_and_reference_replay() {
-    let report = facade_corpus::qualify(inventory::enumerate());
+    let report = facade_corpus::qualify(corpus);
     assert!(report["summary"]["accepted_functions"].as_u64().unwrap() > 0);
     assert!(report["summary"]["excluded_functions"].as_u64().unwrap() > 0);
     eprintln!("actual export admission: {}", report["summary"]);

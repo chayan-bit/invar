@@ -3,13 +3,13 @@ use invar::front::{BinaryOp, ElseArm, ErrorKind, ExprKind, StmtKind, parse};
 #[test]
 fn issue_m0_02_examples_and_grammar() {
     for source in [
-        include_bytes!("../examples/sum.inv").as_slice(),
-        include_bytes!("../examples/ownership.inv").as_slice(),
+        include_bytes!("../../examples/sum.inv").as_slice(),
+        include_bytes!("../../examples/ownership.inv").as_slice(),
     ] {
         let program = parse(source).expect("committed example parses");
         assert_eq!(
             program.functions.len(),
-            if source == include_bytes!("../examples/sum.inv") {
+            if source == include_bytes!("../../examples/sum.inv") {
                 2
             } else {
                 3

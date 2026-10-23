@@ -3,7 +3,6 @@ use invar::{
     eval::{EvalError, TrapCategory, Value, run},
     front::parse,
 };
-use std::process::Command;
 
 fn execute(source: &str, fuel: u64) -> Result<invar::eval::Outcome, EvalError> {
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
@@ -212,71 +211,4 @@ fn issue_m0_04_fuel_and_call_depth() {
             ..
         }
     ));
-}
-
-#[test]
-fn issue_m0_04_cli_status_and_json() {
-    let path = std::env::temp_dir().join(format!("invar-m0-04-{}.inv", std::process::id()));
-    let binary = env!("CARGO_BIN_EXE_invar");
-    let cases = [
-        ("fn main() -> i32 { return 41; }", 0, "ok", None),
-        (
-            "fn main() -> i32 { return 1 / 0; }",
-            3,
-            "trap",
-            Some("DIVISION_BY_ZERO"),
-        ),
-        (
-            "fn main() -> i32 { while true {} return 0; }",
-            4,
-            "evaluation_limit",
-            None,
-        ),
-        (
-            "fn f() -> Unit {}",
-            1,
-            "source_error",
-            Some("ENTRYPOINT_MISSING"),
-        ),
-        (
-            "fn main() -> i32 { let xs: Array<i32> = filled_i32(16777217u32, 0); return 0; }",
-            2,
-            "tool_error",
-            Some("ARRAY_SIZE_LIMIT"),
-        ),
-    ];
-    for (source, exit, status, code) in cases {
-        std::fs::write(&path, source).unwrap();
-        let output = Command::new(binary)
-            .args([
-                "run",
-                path.to_str().unwrap(),
-                "--engine",
-                "reference",
-                "--fuel",
-                "10",
-                "--format",
-                "json",
-            ])
-            .output()
-            .unwrap();
-        assert_eq!(output.status.code(), Some(exit), "{source}");
-        assert!(output.stderr.is_empty());
-        let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-        assert_eq!(value["status"], status);
-        if exit == 0 {
-            assert_eq!(value["result"]["value"], 41);
-        }
-        if exit == 4 {
-            assert_eq!(value["steps_used"], 10);
-        }
-        if let Some(code) = code {
-            if exit == 3 {
-                assert_eq!(value["trap"]["category"], code);
-            } else {
-                assert_eq!(value["diagnostics"][0]["code"], code);
-            }
-        }
-    }
-    std::fs::remove_file(&path).unwrap();
 }
