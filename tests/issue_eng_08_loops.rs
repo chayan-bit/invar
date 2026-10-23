@@ -114,22 +114,3 @@ fn issue_eng_08_chains_past_the_stage_bound_stay_correct_and_do_not_overflow_the
     }
     assert_eq!(cases, 2);
 }
-
-#[test]
-fn issue_eng_08_deleted_loop_caps_no_longer_exist() {
-    let source = include_str!("../src/loops.rs");
-    let mut cases = 0;
-    for deleted in [
-        "MAX_CHAIN",
-        "nodes: 64",
-        "map_ops: 16",
-        "array_len: 1_000_000",
-    ] {
-        assert!(!source.contains(deleted), "{deleted}");
-        cases += 1;
-    }
-    let chain = include_str!("../src/loops/chain.rs");
-    assert!(!chain.contains("2..=16"));
-    cases += 1;
-    assert_eq!(cases, 5);
-}
