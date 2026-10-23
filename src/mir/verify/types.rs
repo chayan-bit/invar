@@ -113,7 +113,7 @@ fn float_intrinsic(name: &str, args: &[&Type]) -> Option<Type> {
         ("filled_f32", [Type::U32, Type::F32]) => Some(Type::ArrayF32),
         ("filled_f64", [Type::U32, Type::F64]) => Some(Type::ArrayF64),
         ("tc_mul_add", [Type::F32, Type::F32, Type::F32]) => Some(Type::F32),
-        ("tc_mul_add", _) | (crate::math::TRIG_F32_SIN | crate::math::TRIG_F32_COS, [Type::F64]) => None,
+        ("tc_mul_add", _) => None,
         _ => {
             let arity = crate::math::intrinsic_arity(name);
             let first = *args.first()?;
