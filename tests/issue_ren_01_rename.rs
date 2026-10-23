@@ -57,7 +57,8 @@ fn issue_ren_01_rename_packages() {
             "invar-device",
             "invar-foreign",
             "invar-math",
-            "invar-metal"
+            "invar-metal",
+            "invar-tools"
         ]
     );
 }
