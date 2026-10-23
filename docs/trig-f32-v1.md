@@ -1,7 +1,7 @@
 # Trig contract v1 (`invar-trig-f32-v1`)
 
 This document is normative for the source intrinsics `sin`, `cos` and `sqrt` and freezes decision D6.
-It extends [`strict-f32-v1`](numeric-v1.md): every rule there still holds, and this contract only adds three intrinsics.
+It extends [`strict-f32-v1`](numeric.md): every rule there still holds, and this contract only adds three intrinsics.
 
 `sin(x: f32) -> f32`, `cos(x: f32) -> f32` and `sqrt(x: f32) -> f32` take and return IEEE 754 binary32 values without implicit conversion.
 `sin` and `cos` are a frozen software sequence of IEEE basic operations and explicit fused multiply-adds.
@@ -133,7 +133,7 @@ The exhaustive CPU audit (`p0a_trig_exhaustive_cpu`) records, for every input, t
 Measured over all 2^32 inputs: the smallest such magnitude is exactly 2^-126, the smallest normal (the `sqrt` operand for input `0x00800000`), and no operation underflows to zero.
 So no floating operation of the sequence reads or produces a subnormal, and a device that flushes subnormals (FTZ or DAZ) returns the same words.
 Subnormal arguments reach `sin` and `cos` only through the integer tiny path and reach `sqrt` only through the exact integer-to-float scaling.
-This is why the CUDA and Metal emitters need no dispatch guard for these nodes, unlike strict-f32-v1 arithmetic on a flushing Metal device (see `numeric-v1.md`, device admission).
+This is why the CUDA and Metal emitters need no dispatch guard for these nodes, unlike strict-f32-v1 arithmetic on a flushing Metal device (see `numeric.md`, device admission).
 
 Device admission (`f32_ops::admits_trig`) still runs the live strict probe: every probe case that mismatches on the device for an operation the helpers use (`+`, `-`, `*`, `fma` for trig; `*`, `uint` conversion and `sqrt` for `sqrt`) must be a subnormal-class case, or the plan is refused before submission.
 CUDA additionally requires `admits_strict()` as for every strict plan.

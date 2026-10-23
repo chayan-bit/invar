@@ -39,7 +39,7 @@ Effect on existing documents: none; `$id` identifies the schema and constrains n
 
 Decided 2026-10-21 (D12): the optional `fold` key goes only into the newest schemas that carry `numeric_contracts`, and the frozen older versions are unchanged.
 
-Reason: numeric policy v2 lets a function declare how its f32 folds associate ([numeric-v2](numeric-v2.md)), and the checker lowers each tiered fold to `sum_tree` or `sum_exact`. Relaxed folds, and the `reassoc_add` folds of a Strict function, take the Tree lowering (ENG-03 step 5'). A receipt must say which algorithm ran.
+Reason: numeric policy v2 lets a function declare how its f32 folds associate ([numeric contracts](numeric.md)), and the checker lowers each tiered fold to `sum_tree` or `sum_exact`. Relaxed folds, and the `reassoc_add` folds of a Strict function, take the Tree lowering (ENG-03 step 5'). A receipt must say which algorithm ran.
 
 | File | Change | FNV-1a 64 (pinned) |
 | --- | --- | --- |
@@ -125,7 +125,7 @@ Tests that pin the new contract:
 
 Approved 2026-10-19.
 
-Reason: v0.2 makes `f64` executable under `strict-f64-v1` and adds the correctly rounded `invar-math-cr-v1` library ([design](design/v02-f64math.md)).
+Reason: v0.2 makes `f64` executable under `strict-f64-v1` and adds the correctly rounded `invar-math-cr-v1` library.
 Explain and run documents must record which numeric contracts a program used, and Metal explain must say why `f64` code stays on the CPU.
 The maintainers chose to extend the v1 documents in place rather than emit these fields only under new schema versions.
 
