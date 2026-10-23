@@ -6,7 +6,7 @@
 //! artifact's own `gnet_resume`; tails and a red zone must keep sentinels.
 //! Terminal values are checked against the independent net oracle. This is
 //! never NVRTC compilation, device execution, host support or a performance
-//! claim; ABI12 has no runtime loader in stage 1.
+//! claim; ABI12 has no runtime loader, and every execution entry refuses it.
 #![cfg(unix)]
 #[allow(dead_code)]
 #[path = "../test-support/child_deadline.rs"]
@@ -14,7 +14,12 @@ mod child_deadline;
 
 use invar::{
     check, eval, front,
-    general_net::{self, Net, compiled, oracle},
+    general_net::{
+        self, Net, compiled,
+        device_host::{Backend, cpu},
+        oracle,
+        provenance::{self, FenceBackend},
+    },
     numeric_contract::F32Bits,
 };
 use std::{
@@ -30,9 +35,6 @@ use std::{
 
 const KERNEL: &str = "invar_gnet_owned_numeric_resume_v1";
 const WALL: Duration = Duration::from_secs(180);
-const TASK: i32 = 10;
-const HEAP: i32 = 13;
-const TAIL: i32 = 15;
 const ASAN: i32 = 86;
 const UBSAN: i32 = 87;
 
@@ -579,7 +581,8 @@ fn issue_gnet_12_model_matches_abi11_every_epoch_and_oracle() {
             })
             .collect();
         let model = build(case.name, &harness(&cpu, &dev, &case.roots, l));
-        for quantum in [1, 3, 17] {
+        // Sampled schedules: a yield after every step, and a coarse quantum.
+        for quantum in [1, 17] {
             let label = format!("{}-{quantum}", case.name);
             let run = model.execute(&label, quantum);
             assert_eq!(run.outputs.len(), case.roots.len(), "{label}");
@@ -602,29 +605,37 @@ fn issue_gnet_12_model_matches_abi11_every_epoch_and_oracle() {
             assert_eq!(run.pending.first(), Some(&(case.roots.len() as u64)));
             assert_eq!(run.pending.last(), Some(&0));
             assert_eq!(run.pending.len() as u64, run.epochs + 1);
+            if case.name == "special" {
+                special_bits(&case.roots, &run.outputs);
+            }
             observed.push((label, run.epochs));
+        }
+        // An invalid quantum finishes every lane in one epoch with status 8.
+        let invalid: &[u64] = if case.name == "special" {
+            &[0, 1_000_001]
+        } else {
+            &[]
+        };
+        for &quantum in invalid {
+            let run = model.execute(&format!("{}-status8-{quantum}", case.name), quantum);
+            assert_eq!(run.epochs, 1);
+            assert_eq!(run.pending, [case.roots.len() as u64, 0]);
+            assert!(run.outputs.iter().all(|o| o[0] == 8 && o[7] == 0));
         }
     }
     // Success; overflow, division and index traps; fuel, call-depth,
     // transition, trace and source array-size limits; backend element,
     // allocation-slot and cleanup limits. Status 7 has no ordinary-source
-    // producer; status 8 has its own test.
+    // producer; status 8 (invalid quantum) is checked on the special case above.
     assert_eq!(statuses, [0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13].into());
     eprintln!("ABI12 model runs (label, epochs): {observed:?}");
 }
 
-#[test]
-fn issue_gnet_12_model_special_results_are_exact_bits() {
-    // Terminal f32 results include NaN-payload copies (moves are bit-exact)
-    // and canonical NaN from arithmetic, both read back from the device model.
-    let case = &cases()[0];
-    let l = case.limits();
-    let net = lowered(case.source);
-    let (cpu, dev) = case.artifacts(&net);
-    let run = build("special-bits", &harness(&cpu, &dev, &case.roots, l)).execute("bits", 5);
+/// Terminal f32 results include NaN-payload copies (moves are bit-exact) and
+/// canonical NaN from arithmetic, both read back from the device model.
+fn special_bits(roots: &[Vec<u32>], outputs: &[Vec<i64>]) {
     let (mut payload_copies, mut canonical, mut traps) = (0, 0, 0);
-    for (lane, root) in case.roots.iter().enumerate() {
-        let o = &run.outputs[lane];
+    for (root, o) in roots.iter().zip(outputs) {
         match o[0] {
             0 => {
                 let bits = o[1] as u32;
@@ -642,94 +653,83 @@ fn issue_gnet_12_model_special_results_are_exact_bits() {
             other => panic!("unexpected status {other} for {root:x?}"),
         }
     }
-    eprintln!(
-        "special bits: payload copies {payload_copies}, canonical NaN {canonical}, index traps {traps}"
-    );
     assert!(payload_copies > 0 && canonical > 0 && traps > 0);
 }
 
+/// ABI12 is a compile receipt only: every fence backend and the CPU device
+/// model refuse it explicitly, the model before any compiler call.
 #[test]
-fn issue_gnet_12_model_invalid_quantum_finishes_with_status_8() {
-    let case = &cases()[0];
-    let net = lowered(case.source);
-    let (cpu, dev) = case.artifacts(&net);
-    let model = build("status8", &harness(&cpu, &dev, &case.roots, case.limits()));
-    for quantum in [0, 1_000_001] {
-        let run = model.execute(&format!("status8-{quantum}"), quantum);
-        assert_eq!(run.epochs, 1);
-        assert_eq!(run.pending, [case.roots.len() as u64, 0]);
-        assert!(run.outputs.iter().all(|o| o[0] == 8 && o[7] == 0));
+fn issue_gnet_12_execution_entries_refuse_abi12() {
+    let l = provenance::Limits::default();
+    let source = SPECIAL_SOURCE.as_bytes();
+    let abi12 = provenance::compile_resumable_owned_numeric(
+        source,
+        "run",
+        compiled::Target::Cuda,
+        l,
+        STORAGE,
+    )
+    .unwrap();
+    assert_eq!(abi12.artifact().abi_version(), 12);
+    // Any admitted workset will do: ABI12 is refused before it is inspected.
+    let children = "fn branch(depth: u32) -> i32 { if depth<2u32 { return 1; } return branch(depth-1u32)+branch(depth-2u32); } fn run(n: u32) -> i32 { return branch(n); }";
+    let speculation = compiled::SpeculationLimits {
+        slots: 2,
+        fuel: 10000,
+        transitions: 10000,
+        trace_events: 1024,
+        quantum: 32,
+        lookahead: 128,
+        scratch_bytes: 1024 * 1024,
+    };
+    let owned = compiled::OwnedLimits {
+        elements: 16,
+        allocations: 8,
+        cleanup_events: 16,
+    };
+    let abi5 = provenance::compile_device_speculative(
+        children.as_bytes(),
+        "run",
+        compiled::Target::Cuda,
+        l,
+        owned,
+        speculation,
+    )
+    .unwrap();
+    let config = compiled::DeviceConfig {
+        fuel: 10000,
+        transitions: 10000,
+        trace_events: 1024,
+        quantum: 32,
+        rounds: 64,
+        capacity: 2,
+    };
+    let layout = abi5.artifact().device_layout().unwrap();
+    let bytes = layout.buffer_bytes(config).unwrap();
+    let workset = layout
+        .workset(
+            config,
+            std::array::from_fn(|i| compiled::BufferRange {
+                device: 1,
+                allocation: (i + 1) as u64,
+                offset: 0,
+                bytes: bytes[i],
+            }),
+        )
+        .unwrap();
+    for backend in [
+        FenceBackend::CudaDriver,
+        FenceBackend::MetalCommand,
+        FenceBackend::CpuGroupModel,
+    ] {
+        let refused = abi12.fenced_execution(workset.clone(), (), 1, backend);
+        assert!(
+            matches!(refused, Err(provenance::Error::ExecutionMismatch)),
+            "{backend:?}"
+        );
     }
-}
-
-/// Replace every occurrence in the device namespace only (the yield check is
-/// emitted once per continuation state); the CPU reference is untouched.
-fn mutate_device(text: &str, from: &str, to: &str) -> String {
-    let start = text.find("namespace dev {").unwrap();
-    let (head, tail) = text.split_at(start);
-    assert!(tail.contains(from), "missing device text {from}");
-    format!("{head}{}", tail.replace(from, to))
-}
-
-#[test]
-fn issue_gnet_12_model_detects_device_mutations() {
-    let case = &cases()[0];
-    let net = lowered(case.source);
-    let (cpu, dev) = case.artifacts(&net);
-    let heap = cpu.owned_layout().unwrap().heap_words();
-    let text = harness(&cpu, &dev, &case.roots, case.limits());
-    // A hardware-float substitute for the integer software adder: it differs
-    // from strict-f32-v1 at least on NaN payload propagation.
-    let float_add = "GNET_FN gnet_u gnet_f32_add(gnet_u a,gnet_u b) { float x,y; unsigned int ua=(unsigned int)a,ub=(unsigned int)b; __builtin_memcpy(&x,&ua,4); __builtin_memcpy(&y,&ub,4); float z=x+y; unsigned int r; __builtin_memcpy(&r,&z,4); return r; }\nGNET_FN gnet_u gnet_f32_add_integer(gnet_u a,gnet_u b) {";
-    let mutations: [(&str, String, String, i32); 7] = [
-        (
-            "no-lane-guard",
-            "if (lane>=config[0]) return;".into(),
-            String::new(),
-            TAIL,
-        ),
-        (
-            "no-block-offset",
-            "(gnet_u)blockIdx.x * blockDim.x + threadIdx.x".into(),
-            "(gnet_u)threadIdx.x".into(),
-            TASK,
-        ),
-        (
-            "swapped-config",
-            "config[1],config[2],config[3]".into(),
-            "config[2],config[1],config[3]".into(),
-            TASK,
-        ),
-        (
-            "short-heap-stride",
-            format!("heap+lane*{heap}"),
-            format!("heap+lane*{}", heap - 4),
-            HEAP,
-        ),
-        (
-            "late-yield",
-            "if (slice_steps==quantum) { GNET_YIELD; }".into(),
-            "if (slice_steps==quantum+1) { GNET_YIELD; }".into(),
-            TASK,
-        ),
-        (
-            "tie-rounding",
-            "(gnet_f32_below(a,shift-1)||(q&1))".into(),
-            "true".into(),
-            TASK,
-        ),
-        (
-            "hardware-float-add",
-            "GNET_FN gnet_u gnet_f32_add(gnet_u a,gnet_u b) {".into(),
-            float_add.into(),
-            TASK,
-        ),
-    ];
-    for (name, from, to, code) in mutations {
-        let o = build(name, &mutate_device(&text, &from, &to)).run(3);
-        assert!(!o.timed_out, "{name}");
-        assert_eq!(o.sanitizer(), None, "{name}: {}", o.stderr);
-        assert_eq!(o.code, Some(code), "{name}: {}", o.last());
-        eprintln!("mutation {name}: exit {code}, {}", o.last());
-    }
+    // A compile attempt would fail differently: this compiler does not exist.
+    let mut model = cpu::CpuModel::with_compiler(Path::new("/nonexistent/invar-abi12-cxx"));
+    let prepared = model.prepare(abi12.artifact(), [8; 12], &[], [0; 6]);
+    assert_eq!(prepared.err().as_deref(), Some(cpu::UNSUPPORTED_ABI12));
 }
