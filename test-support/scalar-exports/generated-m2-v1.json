@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "origin": "tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_recognition_corpus",
+  "origin": "tests/schedule_cpu/recognition_corpus.rs::issue_m2_05_cpu_scheduler_fallback_recognition_corpus",
   "implementation_base": "d1fa19b54ab879fb121d129b3d643345839e1632",
   "programs": [
     {

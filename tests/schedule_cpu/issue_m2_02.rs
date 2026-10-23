@@ -1,4 +1,4 @@
-#[path = "support/language_limits.rs"]
+#[path = "../support/language_limits.rs"]
 mod language_limits;
 #[cfg(feature = "native")]
 use invar::native;

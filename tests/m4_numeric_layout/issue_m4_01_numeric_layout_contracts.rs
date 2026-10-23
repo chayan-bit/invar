@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 use invar::{check, eval, front, mir, mir_eval, tensor};
-#[path = "issue_m4_01_device/ops.rs"]
+#[path = "../issue_m4_01_device/ops.rs"]
 mod ops;
 
 #[test]

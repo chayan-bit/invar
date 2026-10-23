@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "support/language_limits.rs"]
+#[path = "../support/language_limits.rs"]
 mod language_limits;
 use invar::{
     check,

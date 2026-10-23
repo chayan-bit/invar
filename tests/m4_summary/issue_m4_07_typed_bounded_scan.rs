@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "../test-support/term_oracle.rs"]
+#[path = "../../test-support/term_oracle.rs"]
 mod term;
 
 use invar::{

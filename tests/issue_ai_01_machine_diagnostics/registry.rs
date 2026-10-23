@@ -237,6 +237,8 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
         "HEAD",
         // Benchmark toolchain identification prefix, not an emitted diagnostic.
         "NVRTC",
+        // Backend display name in shared core-family scheduling messages.
+        "CUDA",
         // rustc error codes asserted by the host-array compile-fail harness
         // (crates/invar-foreign/src/host_array/tests.rs), and that harness's
         // marker for a rustc error without a code. Not Invar diagnostics.
