@@ -101,13 +101,13 @@ fn issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate() {
             "ADMISSION_SCHEMA",
         ),
         (
-            invar::admission::validate_serialized(&json!({"schema_version": 1}), source, &mir)
+            invar::admission::validate_serialized(&json!({"schema_version": 5}), source, &mir)
                 .unwrap_err(),
             "ADMISSION_STALE",
         ),
         (
             invar::admission::validate_serialized(
-                &json!({"schema_version": 1, "padding": "x".repeat(1_000_000)}),
+                &json!({"schema_version": 5, "padding": "x".repeat(1_000_000)}),
                 source,
                 &mir,
             )

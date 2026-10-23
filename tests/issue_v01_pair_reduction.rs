@@ -73,9 +73,9 @@ fn pair_reduction_source_reference_mir_and_chunked_cpu() {
             );
             let report = region(&source, &program);
             let schema: serde_json::Value =
-                serde_json::from_str(include_str!("../schema/explain-v1.schema.json")).unwrap();
+                serde_json::from_str(include_str!("../schema/explain-v5.schema.json")).unwrap();
             let mut document = report.to_json();
-            document["schema"] = serde_json::json!("invar-explain-v1");
+            document["schema"] = serde_json::json!("invar-explain-v5");
             assert!(jsonschema::is_valid(&schema, &document));
             assert!(matches!(
                 report.regions()[0].execution(),

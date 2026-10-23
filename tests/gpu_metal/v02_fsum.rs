@@ -42,7 +42,7 @@ fn guard_fires(op: Op, label: &str) -> bool {
 mod body;
 
 fn device_schema() -> serde_json::Value {
-    let schema = include_str!("../../schema/invar-explain-device-v1.schema.json");
+    let schema = include_str!("../../schema/invar-explain-device-v5.schema.json");
     serde_json::from_str(schema).unwrap()
 }
 
