@@ -1,4 +1,4 @@
-use invar::{check::check, device_ir, front::parse, mir};
+use invar::{check::check, front::parse, mir};
 use invar_device::Capabilities;
 
 #[path = "support/m3_02_cases.rs"]

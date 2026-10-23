@@ -44,8 +44,10 @@ fn on_device(reductions: &[Reduction]) -> bool {
     reductions.iter().all(|r| r.backend == "cuda")
 }
 
+type Placement = (DeviceCostModel, fn(&Reduction) -> bool);
+
 /// The device-favouring model places every reduction on CUDA, the CPU model on the CPU.
-fn auto_models() -> [(DeviceCostModel, fn(&Reduction) -> bool); 2] {
+fn auto_models() -> [Placement; 2] {
     [
         (body::DEVICE, |r| r.backend.starts_with("cuda")),
         (body::CPU, |r| r.backend.starts_with("cpu-")),

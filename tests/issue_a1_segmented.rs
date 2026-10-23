@@ -1,13 +1,12 @@
 //! CLI refusals for forced engines on a program with no device candidate; device runs are in `tests/gpu_{cuda,metal}/a1_segmented.rs`.
 
-use a1_segmented_common::cli;
-
 #[path = "support/a1_segmented_common.rs"]
 mod a1_segmented_common;
 
 #[cfg(not(feature = "cuda"))]
 #[test]
 fn forced_engines_refuse_a_program_without_a_candidate() {
+    use a1_segmented_common::cli;
     let dir = std::env::temp_dir().join(format!("invar-a1-segmented-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("no-region.inv");

@@ -32,10 +32,12 @@ fn on_device(reductions: &[Reduction]) -> bool {
     reductions.iter().any(|r| r.backend == "metal")
 }
 
+type Placement = (DeviceCostModel, fn(&Reduction) -> bool);
+
 /// Auto has no measured Metal crossover for any reduction yet
 /// (`metal_min_terms` is unbounded), so even the device-favouring model
 /// keeps every call on the CPU, as in the fsum-only program.
-fn auto_models() -> [(DeviceCostModel, fn(&Reduction) -> bool); 2] {
+fn auto_models() -> [Placement; 2] {
     fn cpu_by_measurement(r: &Reduction) -> bool {
         r.backend.starts_with("cpu-") && r.reason == "measured-cpu-cost"
     }

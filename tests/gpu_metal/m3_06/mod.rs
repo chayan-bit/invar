@@ -1,7 +1,7 @@
 //! Live MIR dispatch, auto choice, CLI explain, the M2 corpus and device kernels on Metal;
 //! the CPU emission check is `tests/issue_m3_06_metal/main.rs`.
 use invar::{admission, check, device_ir, front, mir};
-use invar_device::{Capabilities, Provenance};
+use invar_device::Provenance;
 
 static GPU_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 

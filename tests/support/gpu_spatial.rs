@@ -35,7 +35,7 @@ fn pack(p: &[[F; 3]]) -> Vec<u32> {
         .flat_map(|a| p.iter().map(move |p| p[a].to_bits()))
         .collect()
 }
-struct Grid {
+pub struct Grid {
     points: Vec<u32>,
     ids: Vec<u32>,
     ranges: Vec<u32>,

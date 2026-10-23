@@ -1,5 +1,5 @@
 //! Owning-device tensor dispatch tests on Metal; the ordinary CLI tests stay in `tests/a1_tensor_dispatch.rs`.
-use invar::{mir, mir_eval};
+use invar::mir_eval;
 use std::process::Command;
 
 #[path = "../support/a1_tensor_common.rs"]

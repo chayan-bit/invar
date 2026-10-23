@@ -1,5 +1,5 @@
 //! Indexed source routing on a real CUDA device; the CPU routing tests stay in `tests/issue_a1_indexed.rs`.
-use invar::{mir, mir_eval, schedule};
+use invar::{mir_eval, schedule};
 
 #[path = "../support/a1_indexed_common.rs"]
 mod a1_indexed_common;
