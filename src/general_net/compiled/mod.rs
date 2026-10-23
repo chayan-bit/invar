@@ -358,7 +358,7 @@ impl<'a> Program<'a> {
                             } else if !(matches!(name.as_str(), "wrapping_add" | "wrapping_mul")
                                 || program.numeric.is_some()
                                     && matches!(
-                                        crate::math::f32_trig_base(name),
+                                        name.as_str(),
                                         "fma"
                                             | "f32_from_i32"
                                             | "f32_from_u32"

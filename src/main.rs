@@ -26,10 +26,6 @@ fn main() {
 }
 
 fn run(args: Vec<OsString>) -> i32 {
-    let args = match cli::numeric_contract(args) {
-        Ok(args) => args,
-        Err(code) => return code,
-    };
     if let Some(code) = native_command::debug_command(&args) {
         return code;
     }
