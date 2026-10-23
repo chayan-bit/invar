@@ -1,10 +1,100 @@
-# Numeric contract v2: fold tiers
+# Numeric contracts
 
-This document is normative for ENG-03.
-It extends [numeric contract v1](numeric-v1.md) and does not change it.
-Every rule of v1 still holds, except that a function may now declare how its binary32 folds associate.
+This document is normative for the f32 source semantics (`strict-f32-v1`) and for the declared fold tiers and storage types of numeric policy version 2.
+The f64 contract `strict-f64-v1` and the math library `invar-math-cr-v1` are specified in Appendix B of [the specification](spec/invar-v0.1.md); the f32 `sin`, `cos` and `sqrt` sequence is [`invar-trig-f32-v1`](trig-f32-v1.md).
 
-## Policy
+## Policy `strict-f32-v1`
+
+The default policy is `{ version: 1, kind: "strict-f32" }`, named `strict-f32-v1`.
+An unknown policy version or kind is refused with a typed diagnostic rather than approximated.
+
+### Source grammar
+
+`f32` is an IEEE 754 binary32 scalar and `Array<f32>` is an affine owned array.
+A decimal literal has grammar `digit+ "." digit+` and is rounded once from its exact decimal value to binary32 using round to nearest, ties to even.
+Decimal literals contain at most 256 digits and unary negation is separate, including for negative zero.
+`filled_f32(length: u32, value: f32) -> Array<f32>` constructs an array under the existing allocation limit.
+`+`, `-`, `*`, `/`, unary `-`, and the six comparison operators accept matching f32 operands without implicit integer conversion.
+`fma(a: f32, b: f32, c: f32) -> f32` computes the exact product plus addend with one rounding.
+`f32_from_u32` and `f32_from_i32` round the exact integer to nearest even.
+`sin`, `cos` and `sqrt` (each `f32 -> f32`) follow the frozen [`invar-trig-f32-v1`](trig-f32-v1.md) contract: `sqrt` is correctly rounded, and `sin` and `cos` are a fixed sequence of the operations above that is bit-identical on every engine but not correctly rounded.
+`trunc_i32(value: f32) -> i32` first requires a finite value in the closed interval `[i32::MIN, i32::MAX]`, then truncates toward zero.
+An invalid `trunc_i32` traps `INTEGER_OVERFLOW` at the source call, before publication of any subsequent result.
+`Quantity<f32, Unit>` checks units before erasing the unit tag to f32 and must generate identical code to the equivalent bare f32 program.
+
+### Strict semantics
+
+Every arithmetic operation rounds independently to nearest even.
+Subnormal inputs and results are preserved without flush to zero or denormals as zero.
+Signed zeros are preserved according to IEEE arithmetic, and exact cancellation under nearest even produces positive zero except addition of two negative zeros.
+Overflow produces the signed infinity and invalid floating arithmetic produces NaN rather than an integer arithmetic trap.
+NaN payloads and NaN signs are unobservable in M4 and every NaN result compares as the same NaN class for engine agreement.
+Source comparisons are IEEE unordered for NaNs, so every ordered comparison and equality is false and inequality is true.
+Positive and negative zero compare equal.
+Strict engine agreement requires identical non-NaN words and NaN-class equality.
+Implicit FMA, contraction, reassociation, and silent fast math are forbidden.
+A strict reduction is a source-order left fold from its specified initial value with one rounding per addition.
+A strict inclusive scan emits each prefix of that same left fold, including the initial value in the first addition.
+An empty reduction returns its initial value and an empty scan has no output elements.
+A strict rank-2 contraction initializes each cell to positive zero and visits the inner axis in increasing source order with separate multiply and add roundings.
+Parallelism may distribute independent cells or map elements but must preserve the ordered operations within each cell or prefix.
+
+### Explicit relaxed contracts
+
+Explicit `fma` changes only that operation's rounding and does not relax adjacent operations.
+`reassoc_add(acc, x)` explicitly permits reassociation of its reduction, with error bounded by `(n - 1) * 2^-24 * sum(abs(x_i))` against the source-order reference for the finite domain covered by that contract.
+`tc_mul_add` selects the separate `tc-f16-f32-v1` contract and does not change ordinary f32 operations.
+Ordinary checking admits it only as the direct-cell step of a recognized fresh-zero matrix contraction.
+Reference, serial MIR, the CPU net oracle and CPU/auto fallback round inputs to binary16, retain source control flow/fuel/bounds/cleanup, and return the once-rounded exact sum of products.
+Nonfinite or overflowing reached inputs report `TC_INPUT_RANGE`; an unreached contraction does not inspect its inputs.
+The CPU net oracle executes its own activations, fuel, traps and cleanup; only binary16 rounding and exact D5 arithmetic are shared. Native executables use the same pure integer D5 oracle at successful function completion; native library export remains explicitly unsupported for TC.
+Device completion may return any result within the amended D5 bound. A quiescent device refusal uses the exact serial path; unknown completion still forbids replay or publication.
+Unsupported relaxed syntax or policies must be refused and cannot silently become strict or fast arithmetic.
+M4-01 does not implement a Tensor Core schedule or claim performance acceptance.
+
+### Device admission and fallback
+
+Every process probes the live device under the pinned strict compiler options before admitting arithmetic, comparisons, or conversions.
+CUDA requires disabled FMA contraction and FTZ and explicit precise division and square-root options.
+Metal requires disabled fast math and `#pragma METAL fp contract(off)`.
+Division remains CPU-only unless device admission establishes its required rounding and subnormal behavior.
+Source `sin`, `cos` and `sqrt` run on a device only through the `invar-trig-f32-v1` helpers ([`trig-f32-v1.md`](trig-f32-v1.md)), which never read or produce a subnormal; they are admitted when every probe mismatch of the operations they use is a subnormal-class case.
+A flushing Metal device may execute an operation only behind a sound dispatch guard covering every possible divergence under the documented device model.
+A flagged dispatch is discarded after confirmed completion and rerun on the exact CPU path with an explicit fallback reason.
+Unknown completion quarantines work and forbids publication and CPU replay.
+An operation whose guard cannot be justified is refused before submission.
+Policy, IR version, layout version, target capability, compiler options, and generated source all participate in artifact and cache identity.
+
+### Semantic fixtures
+
+The committed `issue_m4_01_numeric_oracle`, `issue_m4_01_decimal_literals`, and `issue_m4_01_source_f32` fixtures establish literal rounding, signed zeros, infinities, NaNs, cancellation, conversion traps, and independent exact CPU outcomes.
+The committed `issue_m4_01_device/corpus.rs` establishes zero, one, odd, rectangular, and subnormal contraction cases.
+Device or mock-only outcomes do not establish native, CPU-parallel, or hardware acceptance for a missing engine.
+
+### Implementation
+
+The source and MIR evaluators use the integer/rational binary32 oracle.
+Native LLVM carries f32 bits in internal scalar words, emits strict floating operations without reassociation/contraction flags, and preserves subnormals.
+Only explicit `fma` fuses multiplication/addition.
+Source `main` remains i32.
+MIR carries the strict numeric policy and layout version 1; verification rejects stale layout versions, and MIR/net/provenance/export identities bind both contracts.
+The production layout checker validates bounded physical byte maps.
+Ordinary ordered rank-2 matrix loops produce sealed source annotations bound to the exact verified MIR function and stable net identity.
+Concrete dimensions and input lengths bind bounded row-major byte maps; unknown forms keep CPU execution.
+`tensor::emit_cuda` checks actual source, ownership/net contracts and layouts, then emits a strict program-specific contraction and a canonical SHA-256 cache identity from those exact inputs, options and emitted bytes.
+Required CUDA numeric options prohibit FMA contraction and FTZ.
+A matching content key remains an untrusted hint; it grants no pointer lease, source-fuel/trap commit or device-fence/launch permission.
+`tensor::host::run_source` admits only reached contraction loops, checks the full remaining source fuel, and holds live read loans through private staging and confirmed completion.
+Packets bind the artifact key, dimensions, lengths, unique call generation and input-byte digest.
+Publication updates the fresh source output atomically and charges its exact source ticks.
+Pending, failed, stale, malformed or nonfinite work keeps the ordered source fallback with the original spans and cleanup, and unconfirmed work stays quarantined.
+
+## Policy version 2: fold tiers and storage types
+
+Version 2 lets a function declare how its binary32 folds associate, and adds storage-only narrow types.
+Every rule of `strict-f32-v1` still holds for a function without a declaration.
+
+### Policy
 
 A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 `base` is `f32` or `f64`.
@@ -28,7 +118,7 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 - `tc-f16-f32-v1` is unchanged: no serialized field selects it.
 - Code: `NumericPolicy::from_parts`, `NumericPolicy::fold` and `FoldTier` in `src/numeric_contract.rs`.
 
-## Tiered folds
+### Tiered folds
 
 - A tiered fold is one update `acc = acc + term` (or `acc = term + acc`) directly in the body of a counted `for i in lower..upper` loop, where:
   - `acc` is declared `f32`, by annotation, a float literal or a parameter;
@@ -44,11 +134,11 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 | Exact | `sum_exact([init, s0, s1, ...])`, the correctly rounded sum of all N summands. |
 | Relaxed | Any result the bound below admits. |
 
-- Tree and Exact are bit-identical on every engine and every worker count, because `sum_tree` and `sum_exact` are ([design](design/v02-fsum.md)).
+- Tree and Exact are bit-identical on every engine and every worker count, because `sum_tree` and `sum_exact` are (Appendix B of [the specification](spec/invar-v0.1.md)).
 - With `init` = `+0`, Tree equals `0.0 + sum_tree(slots)`, and Exact equals `sum_exact(slots)` except that an all-`-0` input gives `+0`, as the strict fold does.
 - Code: `FoldTier::reference` in `src/numeric_contract/fold.rs`.
 
-### Lowering on the CPU engines
+#### Lowering on the CPU engines
 
 - In a Tree or Exact function, the checker rewrites each tiered fold before typing (`src/check/numeric/fold_tiers.rs`). A Relaxed function's folds, and the `reassoc_add` folds of a Strict function, take the Tree rewrite, a fixed deterministic choice that the Relaxed contract admits (ENG-03 step 5'):
   - the bounds are evaluated once, in order;
@@ -66,12 +156,12 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
   - an accumulator whose `f32` type is only inferred.
 - An accumulator declared inside the loop body restarts each iteration and is not a fold of that loop.
 
-### On the devices
+#### On the devices
 
-- A lowered fold needs no device law of its own: the slot store is an ordinary store loop, and the reduction is the same `sum_tree` or `sum_exact` call that forced CUDA and Metal already run on their fsum kernels, which are bit-identical to the CPU reduction ([design](design/v02-fsum.md)).
+- A lowered fold needs no device law of its own: the slot store is an ordinary store loop, and the reduction is the same `sum_tree` or `sum_exact` call that forced CUDA and Metal already run on their fsum kernels, which are bit-identical to the CPU reduction (Appendix B of [the specification](spec/invar-v0.1.md)).
 - Tests: `tests/issue_eng_03_tier_cuda.rs` (the H100, `--features cuda`) and `tests/issue_eng_03_tier_metal.rs` (the Mac, `--features metal`) run Tree and Exact folds of 1, 4,096 and 100,003 cancelling terms forced on the device. They require the oracle's bits, and the fold's reduction receipt to name the device.
 
-## Declaration
+### Declaration
 
 - A function declares its tier with one attribute before `fn` (or `pub fn`): `#[numeric(fold = "strict" | "tree" | "exact" | "relaxed")]`. Without it, a function is strict.
   - An unknown tier string, including `fast`, is a `NUMERIC_POLICY` compile error.
@@ -88,7 +178,7 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
   - Tree, Exact and Relaxed lower as below; a Relaxed fold gives the Tree result with the Tree program's fuel.
 - Code: `numeric_attribute` in `src/front/parser.rs`, `src/check/numeric.rs`.
 
-## The Relaxed bound
+### The Relaxed bound
 
 Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24 * S`.
 
@@ -103,7 +193,7 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
   - This is the v1 `reassoc_add` bound, stated against the exact sum rather than the source-order fold.
 - Code: `fold::relaxed_admits`, computed in exact rationals.
 
-## Storage conversions
+### Storage conversions
 
 `f16` (IEEE binary16), `bf16` (bfloat16), `i8` and `u8` are storage-only: no arithmetic is defined on them.
 
@@ -117,7 +207,7 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 - Code: `src/numeric_contract/storage.rs`.
 - `half` 2.7.1 is a test-only cross-check (a dev-dependency).
 
-### Storage arrays in source
+#### Storage arrays in source
 
 `Array<f16>`, `Array<bf16>`, `Array<i8>` and `Array<u8>` hold storage elements. There are no scalar narrow types.
 - `filled_f16(n, x)`, `filled_bf16(n, x)` (with `x: f32`), `filled_i8(n, x)` (`x: i32`) and `filled_u8(n, x)` (`x: u32`) make one; the fill value is stored once, so it rounds or traps like any store.
@@ -130,7 +220,7 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 - On the CPU engines, after typing, a storage array runs as its widened array, and every store passes through one generated conversion (`src/check/storage.rs`). The reference evaluator, MIR, cpu-parallel and native-serial run that one program, so they agree in bits, traps and fuel. A store also spends the fuel of its conversion call.
 - The elements are held widened, so a storage array does not yet save memory; packed storage is a later change with the same results.
 
-## Receipts
+### Receipts
 
 - Placement documents record the lowered folds in `numeric_contracts.fold` (D12): the top-level explain-v5 document and the invar-diagnostics-v3 receipt of `invar run --engine auto`. Each declared tier a lowered fold used maps to the algorithm that ran. The run receipt embedded in v5 as `execution` carries no `numeric_contracts`.
   - Example: `{"exact": "exact", "relaxed": "tree"}`.
@@ -139,29 +229,13 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 - A program without a lowered fold carries no `fold`, and older document versions never do.
 - Code: `math::fold_receipt`; the checker collects the record in `fold_tiers::rewrite`.
 
-## Not yet in this contract
+### Not yet in this contract
 
 - Updates under `if` and folds over nested loops (refused today).
 - A streaming Tree lowering without the slot buffer. (The parallel normal form needs no float-sum law: a lowered fold reaches it as a slot store and one `sum_tree` or `sum_exact` call, and a Strict f32 fold keeps its refusal.)
 - Storage arrays across function boundaries, views of them, packed storage, and reductions (`sum_tree` and the folds) over them.
 
-ENG-03 is complete without them. A Relaxed fold's cost-based choice between Tree and Exact is #63 (ENG-07), and fused kernels that honour the tiers are #99 (ENG-16). The other items have no issue yet.
-
-## Acceptance (ENG-03)
-
-| ENG-03 acceptance | Where it is pinned |
-| --- | --- |
-| Policy: the four v2 tiers, `fast` and unknown versions and kinds refused, frozen receipt ids unchanged | `issue_eng_03_numeric_tiers` (including the unchanged v1 `Debug` text that the frozen receipt ids embed) |
-| Strict f32 fold stays PNF `Serial` with the same reason | `issue_eng_03_a_strict_f32_fold_stays_serial_in_the_normal_form` |
-| Tree bit-identical to `sum_tree` on reference, native-serial and cpu-parallel (1, 2, 7, 64 workers); Exact equals the rational oracle | `issue_eng_03_tier_engines` |
-| Relaxed within the bound on 10,000 seeded inputs (cancellation, subnormals, infinities, NaN class, signed zero) | `issue_eng_03_numeric_tiers` |
-| Storage: all 65,536 f16 and bf16 patterns, every rounding boundary, i8/u8 first trap in source order | `issue_eng_03_numeric_tiers`, `issue_eng_03_storage_arrays` |
-| Negative: `reassoc_add` on a product, a caller's Relaxed on a strict callee, an unknown tier string | `issue_eng_03_numeric_tiers` |
-| Negative: a forged certificate claiming Tree on a Strict function | Not expressible: tiered folds reach the normal form only as a slot store and one `sum_tree`/`sum_exact` call, so no certificate carries a fold tier (step 5 re-scope) |
-| Device rows: CUDA and Metal fsum lowering of source folds | `issue_eng_03_tier_cuda` (NVIDIA H100) and `issue_eng_03_tier_metal` (Apple M4), run for ENG-03 step 6 |
-| Receipts record the lowering (Decision 4) | `issue_eng_03_fold_receipts` (explain-v5 and invar-diagnostics-v3, D12) |
-
-## Tests
+### Tests
 
 `tests/issue_eng_03_numeric_tiers.rs`:
 - the policy accept and refuse sets, and the unchanged v1 `Debug` text;

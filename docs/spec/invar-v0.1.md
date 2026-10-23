@@ -1,8 +1,8 @@
 # Invar v0.1 compact language specification (draft for AI-02)
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
-Counts: statements=266 citations=284
-Size record: tokens=25181 estimator=bytes/3 limit=30000
+Counts: statements=266 citations=283
+Size record: tokens=25131 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -11,9 +11,9 @@ Size record: tokens=25181 estimator=bytes/3 limit=30000
 Note: this file is machine checked by `tests/issue_ai_02_spec_examples.rs`; the checks are described in 1.2.
 [N1.1.1] A line starting with `[N` and an identifier is a normative statement and is a requirement on conforming implementations of Invar v0.1. `tests/issue_ai_02_spec_examples.rs::check_spec_text`
 [N1.1.2] Every normative statement cites at least one repository file, and a `path::name` citation names text that occurs in that file. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_normative_statements_cite_existing_sources`
-[N1.1.3] A line starting with `Note:` is informative and carries no requirement. `docs/issues/next/AI-02-spec-examples-docs.md`
-[N1.1.4] Where this specification and the implementation disagree, the test fails and the disagreement is fixed or escalated, never papered over. `docs/issues/next/AI-02-spec-examples-docs.md`
-[N1.1.5] Planned work appears only in clearly labelled roadmap text, open v0.1 gaps appear only in Appendix A, and v0.2 features that are on `main` appear only in Appendix B. `docs/issues/next/AI-02-spec-examples-docs.md`
+[N1.1.3] A line starting with `Note:` is informative and carries no requirement. `tests/issue_ai_02_spec_examples.rs`
+[N1.1.4] Where this specification and the implementation disagree, the test fails and the disagreement is fixed or escalated, never papered over. `tests/issue_ai_02_spec_examples.rs`
+[N1.1.5] Planned work appears only in clearly labelled roadmap text, open v0.1 gaps appear only in Appendix A, and v0.2 features that are on `main` appear only in Appendix B. `tests/issue_ai_02_spec_examples.rs`
 
 ### 1.2 Executable blocks and outcome tags
 
@@ -265,7 +265,7 @@ fn main() -> i32 {
 
 [N5.1.1] A `module` has `pub` and private items, `import m::name;` brings a public item into scope, and forward references inside the file are allowed. `tests/issue_l1_01_language_core.rs::issue_l1_01_language_core_forward_module_resolution_agrees_across_engines`
 [N5.1.2] Duplicate names, invalid visibility, malformed imports and import cycles are source errors, and there are at most 32 modules and 256 imports. `src/check/modules.rs::MAX_MODULES`
-[N5.1.3] Module resolution is deterministic and the whole program is one file. `docs/issues/next/L1-01-modules-records-result.md`
+[N5.1.3] Module resolution is deterministic and the whole program is one file. `tests/issue_l1_01_language_core.rs`
 
 ```invar outcome=value:21
 import math::triple;
@@ -492,12 +492,12 @@ fn main() -> i32 {
 
 ### 5.8 f32 and decimal literals
 
-[N5.8.1] The compiler accepts `f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons. `docs/m4-source.md`
+[N5.8.1] The compiler accepts `f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons. `docs/numeric.md`
 [N5.8.2] The numeric policy is `strict-f32-v1`: IEEE 754 binary32, round to nearest even, no reassociation or contraction, and subnormals preserved. `src/numeric_contract.rs`
 [N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
 [N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
-[N5.8.5] `trunc_i32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric-v1.md::trunc_i32`
-[N5.8.6] `sqrt`, `sin` and `cos` on `f32` are correctly rounded under the default math contract `invar-math-cr-v1` (Appendix B.4), which supersedes `invar-trig-f32-v1`, and every engine returns the same 32-bit word. `docs/design/v02-f64math.md`
+[N5.8.5] `trunc_i32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::trunc_i32`
+[N5.8.6] `sqrt`, `sin` and `cos` on `f32` are correctly rounded under the default math contract `invar-math-cr-v1` (Appendix B.4), which supersedes `invar-trig-f32-v1`, and every engine returns the same 32-bit word. `src/math.rs`
 
 ```invar outcome=value:7
 fn nudge(x: f32) -> f32 { return x + 0.2; }
@@ -1065,7 +1065,7 @@ fn main() -> i32 {
 [N11.5.4] The device IR admits `u32` maps (fused chains of 2 to 16 stages), reductions and affine scans through one verifier, and only a verified plan reaches code emission. `tests/issue_m3_04_cuda_reductions_scans.rs::issue_m3_04_cuda_reductions_scans_graph_plans_lower_to_shared_ir`
 [N11.5.5] Unknown completion is `CUDA_PENDING` or `METAL_PENDING`, permits no CPU replay, and keeps loans and quarantine. `tests/issue_m3_05_guarded_gpu_integration.rs::issue_m3_05_gpu_failure_prefix_and_quarantine`
 [N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain.md`
-[N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md` `docs/remaining-work.md`
+[N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md`
 [N11.5.8] Map DAGs, wrapping reductions and affine scans admit up to 2^28 `u32` elements on the device. `docs/cuda-target-v1.md`
 [N11.5.9] A device schedule is selected from at most 32 enumerated bounded candidates, each passing the physical device verifier, and the existing measured cost model breaks equal costs by enumeration order. `docs/bounded-schedule-dispatch.md`
 
@@ -1089,7 +1089,7 @@ fn main() -> i32 {
 
 [N13.1.1] Diagnostics use the schema `invar-diagnostics-v3` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v3.schema.json`
 [N13.1.2] A diagnostic has a stable `code`, a `severity`, a message, a primary span with byte offsets and one-based line and column, secondary spans, notes and suggested fixes. `tests/issue_ai_01_machine_diagnostics/contracts.rs::issue_ai_01_machine_diagnostics_positions_and_fix`
-[N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `docs/issues/next/AI-01-machine-diagnostics-explain-schema.md`
+[N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `schema/diagnostic-codes-v1.json`
 [N13.1.4] The status is one of `ok`, `source_error`, `tool_error`, `trap` and `evaluation_limit`, with exit codes 0, 1, 2, 3 and 4. `schema/invar-diagnostics-v3.schema.json`
 
 ### 13.2 Registry
@@ -1121,7 +1121,7 @@ fn main() -> i32 { return 0; }
 [N14.1.5] The reference array entry copies, the GIL is not released, and external array owners, scheduled host arrays and `take` buffers are unavailable. `crates/invar-python/src/lib.rs::external_array_owners`
 [N14.1.6] Exports accept `read` and `mut` `Array<i32>`, `Array<u32>` and `Array<f32>` parameters, which `native-serial` passes zero-copy at the NumPy address with rollback on failure and the reference path copies. `crates/invar-python/src/lib.rs::array_export_paths`
 [N14.1.8] `CheckedModule.run_main` runs `main` on any engine of `reference`, `native-serial`, `cpu-parallel`, `auto`, `cuda` and `metal`, and `receipt()` returns the receipt of the last successful `run_main`. `crates/invar-python/src/module.rs::run_main`
-[N14.1.7] The private wheel qualification is Linux x86_64 with glibc 2.41 and CPython 3.12 only. `docs/python-native-wheel.md`
+[N14.1.7] The private wheel qualification is Linux x86_64 with glibc 2.41 and CPython 3.12 only. `crates/invar-python/README.md`
 
 ## 15. Example library and coverage
 
@@ -1134,7 +1134,7 @@ fn main() -> i32 { return 0; }
 
 Note: the open content in this appendix is not current behaviour, and no statement above relies on it.
 Note: AI-02 depends on L1-06, S1-06 and M5-03, none of which is closed, so the spec must be re-verified after each of them closes.
-Note: the open set is every open `release:v0.1` issue plus the GNET slices #47, #45 and #51, and `docs/remaining-work.md` records each item's evidence, remaining gate and blocker.
+Note: the open set is every open `release:v0.1` issue plus the GNET slices #47, #45 and #51, and each GitHub issue records its evidence, remaining gate and blocker.
 
 | Issue | Open content | Spec sections that change when it closes |
 | --- | --- | --- |
@@ -1220,7 +1220,7 @@ fn main() -> i32 {
 
 ### B.3 Spatial grid queries
 
-[NB.3.1] `voxel_grid_build(xs, ys, zs, cell)` copies read-borrowed `Array<f32>` coordinates into an opaque affine `VoxelGrid`, and a point with any non-finite coordinate is excluded and counted by `grid_excluded(grid)`. `docs/design/v02-spatial.md`
+[NB.3.1] `voxel_grid_build(xs, ys, zs, cell)` copies read-borrowed `Array<f32>` coordinates into an opaque affine `VoxelGrid`, and a point with any non-finite coordinate is excluded and counted by `grid_excluded(grid)`. `src/spatial/runtime.rs`
 [NB.3.2] `radius_neighbors(grid, qx, qy, qz, radius, max_k)` returns `Neighbors { counts, idx }` with true counts that are never clipped to the stride, using strict f32 `d2 <= radius * radius`. `spec/bootstrap.md`
 [NB.3.3] `knn(grid, qx, qy, qz, k)` returns `Knn { idx, d2 }` ordered by squared distance and then original index, and pads missing slots with `u32::MAX` and positive infinity. `spec/bootstrap.md`
 [NB.3.4] A nonpositive or non-finite cell or an out-of-range cell index traps with `INTEGER_OVERFLOW`, and coordinate arrays of different lengths trap with `INDEX_OUT_OF_BOUNDS`. `spec/bootstrap.md`
@@ -1254,12 +1254,12 @@ fn main() -> i32 {
 
 ### B.4 Binary64 and the correctly rounded math library
 
-[NB.4.1] `f64` is a primitive beside `f32` under `strict-f64-v1`, with `Array<f64>`, record and payload fields, round to nearest even, gradual underflow and no contraction except an explicit `fma`. `docs/design/v02-f64math.md`
+[NB.4.1] `f64` is a primitive beside `f32` under `strict-f64-v1`, with `Array<f64>`, record and payload fields, round to nearest even, gradual underflow and no contraction except an explicit `fma`. `src/numeric_contract/binary64.rs`
 [NB.4.2] A decimal literal may carry an `f32` or `f64` suffix, and an unsuffixed literal takes its float type from context and otherwise defaults to `f32`. `spec/grammar.ebnf`
-[NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `docs/design/v02-f64math.md`
-[NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded. `docs/design/v02-f64math.md`
-[NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `docs/design/v02-f64math.md`
-[NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `docs/design/v02-f64math.md`
+[NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `src/eval/floating.rs::i32_from_f64`
+[NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded. `src/math.rs`
+[NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `src/math.rs`
+[NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `src/engine.rs::metal-no-f64`
 [NB.4.7] An `extern c fn` of N7.3.1 also accepts `f64` as a value argument, the result `T` stays `i32`, `u32`, `Bytes` or `String`, and an `f64` result or any `f32` argument or result is `TYPE_MISMATCH`. `tests/issue_l1_04_bytes_strings_cabi.rs::v02_f64_foreign_scalar_argument_matches_its_oracle` `src/check.rs::valid_result`
 [NB.4.8] An `f64` argument has tag `INV_TAG_F64_V1` (5) and mode `INV_MODE_VALUE_V1`, and its `scalar` holds the binary64 encoding, which C reads with `memcpy` into a `double`. `include/invar_foreign_v1.h` `tests/fixtures/l1_04/foreign.c`
 Note: the binary64 CUDA kernels whose CORE-MATH sources declare an anonymous struct inside a union (`cos`, `tan`, `atan2`, `log`, `log10` and `pow`) need NVRTC 12.9 or newer, every other CUDA unit keeps the 12.4 floor of N11.5.2, and a rewrite for NVRTC 12.4 and 12.6 is deferred to the Jetson Orin target (#21).

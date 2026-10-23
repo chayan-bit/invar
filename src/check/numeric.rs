@@ -1,4 +1,4 @@
-//! Numeric policy v2 declarations (`docs/numeric-v2.md`): fold tiers and the
+//! Numeric policy v2 declarations (`docs/numeric.md`): fold tiers and the
 //! `reassoc_add` intrinsic. `acc = reassoc_add(acc, x)` in a loop that uses
 //! `acc` nowhere else becomes `acc + x`, with its span kept for the f32 check
 //! after typing. Tree, Exact and Relaxed folds, and the `reassoc_add` folds of

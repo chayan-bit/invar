@@ -7,7 +7,7 @@ No tuning or GPU job is part of this change.
 
 ## Contract, quoted verbatim
 
-From `docs/issues/next/M5-01-benchmark-manifest.md`:
+From the M5-01 issue contract (GitHub issue #7):
 
 > A deterministic seeded generator produces at least 200 random eligible programs across every supported family, varying chain length 1 to 16, 1 to 4 inputs, 1 to 4 outputs and mixed operations.
 > The generated programs are split into a tuning set and a held-out set.

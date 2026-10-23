@@ -616,7 +616,7 @@ fn issue_s1_02_foreign_manifests_env_pinocchio_independent_goldens() {
         (
             "ur5e",
             "manifest-ur5e.inv",
-            "examples/cells/reach_place/assets/menagerie/universal_robots_ur5e/ur5e.xml",
+            "examples/cells/assets/menagerie/universal_robots_ur5e/ur5e.xml",
             "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
             "pinocchio_fk_ur5e_generated",
             4,

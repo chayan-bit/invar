@@ -100,12 +100,20 @@ pub struct Projection {
 }
 
 /// (vendored cell model, pinned FK model) pairs with identical kinematics.
-/// `issue_s1_06_panda_inertia` proves the principal-inertia Panda rewrite changes only
-/// `<inertial>` elements of the upstream copy the FK goldens pin.
-const SAME_KINEMATICS: [(&str, &str); 1] = [(
-    "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b",
-    "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
-)];
+/// `issue_s1_06_panda_inertia` proves the vendored Panda differs from the upstream copy
+/// the FK goldens pin only by the principal-inertia rewrite of `<inertial>` elements and
+/// the removal of visual-only geoms; the vendored UR5e differs from its pinned original
+/// only by that removal.
+const SAME_KINEMATICS: [(&str, &str); 2] = [
+    (
+        "93a8d8e137ae43a33e7499ff627c1f633fb27d94f58ea7545b97c8f65027db1d",
+        "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+    ),
+    (
+        "43b30279ed0f3e590de8a948504fb28582258a36014f5577971b8e0744644fdd",
+        "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
+    ),
+];
 
 /// Whether the FK model bound to a planner record has the projection's reference
 /// kinematics: the same bytes, or a pinned pair proven to differ only in inertia.

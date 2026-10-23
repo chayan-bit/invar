@@ -189,7 +189,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "9917e21332116e5e729fe14a72cf98a5f929418d157e1ebaf1d89da7ec3ce9b4"
+        "ir_sha256": "5d3836b9fd425e2379249092b4001d5fd8dc7044fcfd73b1f85428d62a068aae"
       }
     },
     {
@@ -208,7 +208,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "60da97fada4c5a28d071ef08746fafab27c4ea616bf81a7269b4ab1bfb6b1ef5"
+        "ir_sha256": "422291d902bee96e02724de418159cf105c556aaf0ca07e747949cf3366d0d8f"
       }
     },
     {
@@ -230,17 +230,17 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "b76a11dbe1fc4ab53db43f8d7aac4d9bde316b4c585defda7d4d9c2f3d76d1ff",
+        "ir_sha256": "b062fd3edef93309e0e77b17def51891c3252339710dcc1840ae1eb6bb612c07",
         "generate": [
           {
             "target": "ros2",
-            "files": 55,
-            "tree_sha256": "696ce00a3a2a6a28e32653351b98ddb95038e29d77179fb2e5196adc76d01f45"
+            "files": 35,
+            "tree_sha256": "089059ca1dbda315f106b970979a63f8f075d2c5db1ed54a514c815c4bc1fc18"
           },
           {
             "target": "mjcf",
-            "files": 22,
-            "tree_sha256": "0cf35b41bdb7f7009709d1c9e6bfbaf247c1274ede0ebdd1004f57bae4660157"
+            "files": 2,
+            "tree_sha256": "9d714c10aa0bacb49368d6d6f3869f867eb4cf1a9cf2ac2bff171baa959c3c04"
           }
         ]
       }
@@ -264,17 +264,17 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "4553671b008c5fc61e56e632b5f70bf07115e482cbc89b87656c4684061ca3a8",
+        "ir_sha256": "5315d1b931aa0c9bf7375767bf93d634e195a1971e2c7d302f1558253d3db8ad",
         "generate": [
           {
             "target": "ros2",
-            "files": 102,
-            "tree_sha256": "bbcc9e6119c7a9281837f5d96263f415282b93025cb3e62b77b2afc47faa96d5"
+            "files": 47,
+            "tree_sha256": "fb2e466b99a9f59ba783cb1b1ff9ebbd683beb81208afa5a6930803b7cc7045f"
           },
           {
             "target": "mjcf",
-            "files": 69,
-            "tree_sha256": "1749e9480686d6c125dfa2b32c8efcfbca36be00d02ff2ac712eb1a09c8f16ba"
+            "files": 14,
+            "tree_sha256": "358f88397b5e8c93b02483ae20d8b8675d7c4e2a12448e5fb79e569126f0340e"
           }
         ]
       }

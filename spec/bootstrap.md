@@ -123,7 +123,6 @@ There is no implicit conversion, no float remainder and no float view.
 `round` rounds half away from zero; `copysign` treats a NaN sign source as positive; `min` and `max` are IEEE 754-2019 minimumNumber and maximumNumber, so a NaN operand is ignored and `-0 < +0`.
 All these names are reserved and cannot name a function, parameter or local.
 Every engine that executes a type returns identical encodings; Metal has no binary64 and runs f64 programs on the CPU with explain reason `metal-no-f64`.
-The design and evidence are in [`docs/design/v02-f64math.md`](../docs/design/v02-f64math.md).
 
 ## Reference execution and tool protocol
 
@@ -195,7 +194,7 @@ In an ordinary source component port, `std::robotics::JointPositions<f64,robot_d
 
 ## Bounded M4-01 f32 source
 
-`f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons are source features under numeric policy `strict-f32-v1`; the exact rules are in [the M4 source increment](../docs/m4-source.md).
+`f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons are source features under numeric policy `strict-f32-v1`; the exact rules are in [the numeric contracts](../docs/numeric.md).
 `%` is not defined on `f32`, an integer is never implicitly an `f32`, and `main` still returns `i32`.
 
 ## v0.2 deterministic float reductions
@@ -246,7 +245,6 @@ A device whose binary32 arithmetic flushes subnormals must detect every operatio
 
 ## v0.2 spatial grid queries
 
-The v0.2 spatial contract follows [the binding rulings](../docs/design/v02-robotics-language.md#44-rulings-2026-10-18) and [spatial design](../docs/design/v02-spatial.md).
 `voxel_grid_build` returns opaque affine `VoxelGrid`; `radius_neighbors` returns built-in `Neighbors { counts: Array<u32>, idx: Array<u32> }`; `knn` returns built-in `Knn { idx: Array<u32>, d2: Array<f32> }`.
 Query records bind normally, and `move result.counts`, `move result.idx`, and `move result.d2` transfer array fields with existing affine record rules; tuple binding is unsupported.
 `grid_excluded(read grid) -> u32` reports points omitted because any coordinate is non-finite.
