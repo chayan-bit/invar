@@ -48,8 +48,8 @@ Sweep of compiled/process test deadlines:
   compiler/model/run watchdogs, including the asynchronous group child.
 - `tests/issue_gnet_{12_cuda_owned_numeric_model,f32_helpers_flag_independence,resume_device_model}.rs`:
   the existing process-group poll runners. CPU limits remain unchanged.
-- `tests/issue_m4_02_{stencil_source,transpose_source}.rs`,
-  `tests/issue_m4_03_matrix_contraction_tensor_core.rs`,
+- `tests/m4_transpose_stencil/issue_m4_02_{stencil_source,transpose_source}.rs`,
+  `tests/m4_contraction/issue_m4_03_matrix_contraction_tensor_core.rs`,
   `crates/invar-device/tests/m4_02_transpose.rs`: compiler and CPU-model runs.
   Embedded `alarm()` wall timers now use the parent group watchdog instead;
   stencil's independent CPU limit remains unchanged.

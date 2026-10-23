@@ -83,8 +83,8 @@ segmented/compaction, Python or robotics implementation files were edited.
 
 ```sh
 # CPU host, bounded memory and no swap:
-cargo test --locked --test issue_m4_05_device
-cargo test --locked --release --test issue_m4_05_device
+cargo test --locked --test m4_indexed issue_m4_05_device
+cargo test --locked --release --test m4_indexed issue_m4_05_device
 cargo clippy --locked --all-targets -- -D warnings
 cargo clippy --locked --features cuda --all-targets -- -D warnings
 cargo clippy --locked --features metal --all-targets -- -D warnings

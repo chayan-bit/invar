@@ -16,6 +16,8 @@ use crate::{
 
 #[cfg(feature = "cuda")]
 pub mod cuda;
+#[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
+mod device;
 mod families;
 mod lowering;
 #[cfg(all(feature = "metal", target_os = "macos"))]

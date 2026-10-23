@@ -1,6 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "support/language_limits.rs"]
-mod language_limits;
+use crate::language_limits;
 use invar::{
     check, eval, front, general_net, mir, mir_eval,
     scatter_proof::host::{self, Budget},

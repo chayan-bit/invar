@@ -1,16 +1,12 @@
 #![forbid(unsafe_code)]
 #[allow(dead_code)]
-#[path = "../test-support/child_deadline.rs"]
+#[path = "../../test-support/child_deadline.rs"]
 mod child_deadline;
 
-// Proposed shared allocation: pub mod contraction_source;. Until allocated,
-// compile the owned module against the actual existing library boundaries.
-#[allow(dead_code)]
-#[path = "../src/contraction_source.rs"]
-mod contraction_source;
 use contraction_source::{Contract, Emission, Error};
+use invar::contraction_source;
 use invar::{
-    check, eval, front, general_net, hex, layout_contract, mir, numeric_contract, tensor_cache,
+    check, eval, front, general_net, layout_contract, mir, numeric_contract, tensor_cache,
 };
 use invar::{mir_eval, tensor};
 use invar_device::{Capabilities, Provenance, floating};

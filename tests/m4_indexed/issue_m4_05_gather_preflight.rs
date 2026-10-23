@@ -1,6 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "support/language_limits.rs"]
-mod language_limits;
+use crate::language_limits;
 
 // Test-local proposal checks, not runtime admission or publication authority.
 // Keep the reviewed source module and shared exports/hooks unchanged.
