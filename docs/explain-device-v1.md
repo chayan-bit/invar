@@ -60,7 +60,6 @@ Metal has no binary64, and Invar does not emulate it: under `--engine metal` or
 `auto` on Metal, every function that computes an `f64` value is listed once, at
 its first such instruction, with backend `mir-serial` and reason `metal-no-f64`,
 and runs on the CPU.
-The `metal-no-f64` reason was added to the frozen v1 enum with maintainer approval on 2026-10-19 ([frozen contract changes](contract-changes.md)).
 Forced CUDA or Metal fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for
 missing hardware, ineligible regions or false live guards;
 compilation/verification mismatch uses `DEVICE_TOOLCHAIN_MISMATCH`. Unknown

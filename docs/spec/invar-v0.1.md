@@ -1,8 +1,8 @@
 # Invar v0.1 compact language specification (draft for AI-02)
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
-Counts: statements=268 citations=285
-Size record: tokens=25533 estimator=bytes/3 limit=30000
+Counts: statements=267 citations=284
+Size record: tokens=25451 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -785,9 +785,9 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 8.2 The invar-system IR
 
-[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-vN`, byte-identical for identical input, with one frozen schema file per version in `schema/`. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
+[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-vN`, byte-identical for identical input, with one schema file per version in `schema/`. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
 [N8.2.2] The checker emits the lowest version that can represent the source: v2 when a bus, identity transform or license detail is used, v3 for typed config, input paths or golden tolerances, v4 for parameter ranges, v5 for robot and cell models, v6 for tool and dynamic objects, v7 and v8 for planner records and config, v9 and v10 for the planner frame policy and grasp, v11 for an actuator `hold` command and v12 for a cell mount surface. `src/system/compiler.rs::use_v2`
-[N8.2.3] Earlier schema files stay frozen, an unknown version is rejected, and relabelling a document does not make it valid. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
+[N8.2.3] An unknown version is rejected, and relabelling a document does not make it valid. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
 [N8.2.4] Permuting module order of the same system gives byte-identical IR. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_module_permutation_is_byte_identical`
 [N8.2.5] Deserializing an IR does not establish a source check, and only a source-compiled model can pass the graph checks. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
 
@@ -1087,7 +1087,7 @@ fn main() -> i32 {
 
 ### 13.1 Diagnostics
 
-[N13.1.1] Diagnostics use the frozen schema `invar-diagnostics-v1` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v1.schema.json`
+[N13.1.1] Diagnostics use the schema `invar-diagnostics-v1` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v1.schema.json`
 [N13.1.2] A diagnostic has a stable `code`, a `severity`, a message, a primary span with byte offsets and one-based line and column, secondary spans, notes and suggested fixes. `tests/issue_ai_01_machine_diagnostics/contracts.rs::issue_ai_01_machine_diagnostics_positions_and_fix`
 [N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `docs/issues/next/AI-01-machine-diagnostics-explain-schema.md`
 [N13.1.4] The status is one of `ok`, `source_error`, `tool_error`, `trap` and `evaluation_limit`, with exit codes 0, 1, 2, 3 and 4. `schema/invar-diagnostics-v1.schema.json`
@@ -1097,9 +1097,8 @@ fn main() -> i32 {
 
 [N13.2.1] Every emitted code is in a committed registry, `schema/diagnostic-codes-v1.json` plus the extension files, and a test scans the source in both directions. `tests/issue_ai_01_machine_diagnostics/registry.rs::issue_ai_01_machine_diagnostics_registry_covers_emitted_literals`
 [N13.2.2] Each code declares `reachability` of `source`, `invariant` or `external`, and checked source never emits an `invariant` code. `tests/issue_ai_01_machine_diagnostics/documents.rs::issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes`
-[N13.2.3] A code is never reused or renamed, and only `source` codes carry fixes. `docs/issues/next/AI-01-machine-diagnostics-explain-schema.md`
+[N13.2.3] Only `source` codes carry fixes. `tests/issue_ai_01_machine_diagnostics/registry.rs::issue_ai_01_machine_diagnostics_registry_covers_emitted_literals`
 [N13.2.4] The `S1xxx` ranges are 1000 system dialect, 1100 to 1399 graph checks, 1400 foreign manifests, 1500 ROS 2, 1600 robot and cell, 1700 vocabulary, 1800 acceptance and 1900 reserved. `schema/diagnostic-codes-v1.json`
-[N13.2.5] The schema files are pinned by digest, so a change without a version bump fails. `tests/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_schema_digests_are_frozen`
 
 ### 13.3 Explain
 

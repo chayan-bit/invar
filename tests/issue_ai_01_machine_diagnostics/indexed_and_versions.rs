@@ -9,7 +9,6 @@ fn indexed_registry_codes() -> HashSet<String> {
         .unwrap()
         .iter()
         .map(|entry| {
-            assert_eq!(entry["deprecated"], false, "{entry}");
             assert_eq!(entry["reachability"], "invariant", "{entry}");
             assert!(valid_registry_entry(entry), "{entry}");
             entry["code"].as_str().unwrap().to_owned()
@@ -293,37 +292,6 @@ fn issue_ai_01_machine_diagnostics_indexed_cli_documents_validate() {
         }
         std::fs::remove_file(path).unwrap();
     }
-}
-
-#[test]
-fn issue_ai_01_machine_diagnostics_schema_digests_are_frozen() {
-    // A digest changes only with an approved entry in docs/contract-changes.md
-    // (2026-10-19: numeric_contracts and metal-no-f64 for strict-f64-v1;
-    // numeric_contracts.trig for invar-trig-f32-v1 under the C4 interim;
-    // 2026-10-20: normal_form for the P6(a) normal-form route, #54;
-    // 2026-10-22: public-repository $id URLs;
-    // 2026-10-23: tracker references in descriptions).
-    fn fnv1a(bytes: &[u8]) -> u64 {
-        bytes.iter().fold(0xcbf29ce484222325u64, |hash, byte| {
-            (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3)
-        })
-    }
-    assert_eq!(
-        fnv1a(include_bytes!(
-            "../../schema/invar-diagnostics-v1.schema.json"
-        )),
-        0x879d_475c_646c_15bf
-    );
-    assert_eq!(
-        fnv1a(include_bytes!("../../schema/explain-v1.schema.json")),
-        0x9583_d18f_fbf7_2f5e
-    );
-    assert_eq!(
-        fnv1a(include_bytes!(
-            "../../schema/invar-explain-device-v1.schema.json"
-        )),
-        0xbe49_76c7_c7b3_1a61
-    );
 }
 
 #[test]

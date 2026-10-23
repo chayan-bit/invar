@@ -197,11 +197,10 @@ This section records where the merged or merging workstreams differ from, or sha
 - **C6.** `grid_excluded` is part of the spatial surface (row added to section 4.1).
 - **C14.** The maintainers approved extending the frozen v1 documents in place (2026-10-19).
   Explain v1/v3 and diagnostics v1/v2 gain the optional `numeric_contracts` object, and the device reason enums gain `metal-no-f64`.
-  Each change and its digest pin is recorded in [contract-changes](../contract-changes.md).
 - **C4 (interim).** Main already shipped `invar-trig-f32-v1` for f32 `sin`, `cos` and `sqrt` before f64math landed.
   Those three keep it on every engine, and `numeric_contracts` records it as `trig`; `invar-math-cr-v1` covers f64 and every other library function.
   This differs from C4's v0.2 default until #48 settles it.
-- **Library names.** The 29 `invar-math-cr-v1` names are reserved for `fn`; a variable may share one, and a call still resolves to the library ([contract-changes](../contract-changes.md)).
+- **Library names.** The 29 `invar-math-cr-v1` names are reserved for `fn`; a variable may share one, and a call still resolves to the library.
 - **Placement** builds on the GNET P1 and P8 stack and M4-06 residency, so it lands after them.
   It owns `--engine auto` only when asked for (`--profile`, `--host-class`, `--trust-provisional`) or when the live host's default path holds a profile other than a matching provisional one.
   A frozen, mismatched or malformed default then reports its refusal or typed error instead of being skipped ([explain-v5](../explain-v5.md)).
