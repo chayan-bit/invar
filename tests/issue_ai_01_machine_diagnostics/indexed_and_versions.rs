@@ -113,7 +113,7 @@ fn issue_ai_01_machine_diagnostics_indexed_registry_matches_family_sources() {
 
 #[test]
 fn issue_ai_01_machine_diagnostics_indexed_unknown_codes_rejected() {
-    let diagnostic_schema = schema("invar-diagnostics-v1.schema.json");
+    let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     let invariants = invariant_codes();
     let document_for = |code: &str| {
@@ -190,7 +190,7 @@ fn issue_ai_01_machine_diagnostics_indexed_unknown_codes_rejected() {
 /// (review3 R1), where a valid program must not surface an indexed code.
 #[test]
 fn issue_ai_01_machine_diagnostics_indexed_cli_documents_validate() {
-    let diagnostic_schema = schema("invar-diagnostics-v1.schema.json");
+    let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     let invariants = invariant_codes();
     for (name, source) in [
@@ -295,31 +295,31 @@ fn issue_ai_01_machine_diagnostics_indexed_cli_documents_validate() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_v2_conversion_trap_is_versioned() {
-    let v1 = schema("invar-diagnostics-v1.schema.json");
-    let v2 = schema("invar-diagnostics-v2.schema.json");
+fn issue_ai_01_machine_diagnostics_conversion_trap_is_versioned() {
+    let v3 = schema("invar-diagnostics-v3.schema.json");
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/r1_01/inexact-conversion.inv");
     let path = path.to_str().unwrap();
     let (status, document) = cli(&["run", path, "--engine", "reference", "--format", "json"]);
     assert_eq!(status, 3, "{document}");
-    assert_eq!(document["schema"], "invar-diagnostics-v2");
-    assert_eq!(document["schema_version"], 2);
+    assert_eq!(document["schema"], "invar-diagnostics-v3");
+    assert_eq!(document["schema_version"], 3);
     assert_eq!(document["trap"]["category"], "UNIT_CONVERSION_INEXACT");
-    assert!(jsonschema::is_valid(&v2, &document));
-    assert!(!jsonschema::is_valid(&v1, &document));
-    let mut old_identity = document.clone();
-    old_identity["schema"] = "invar-diagnostics-v1".into();
-    old_identity["schema_version"] = 1.into();
-    assert!(!jsonschema::is_valid(&v1, &old_identity));
-    let old_document = invar::diagnostics::document("ok", vec![]);
-    assert!(jsonschema::is_valid(&v1, &old_document));
+    assert!(jsonschema::is_valid(&v3, &document));
+    let mut relabelled = document.clone();
+    relabelled["schema"] = "invar-diagnostics-v1".into();
+    relabelled["schema_version"] = 1.into();
+    assert!(!jsonschema::is_valid(&v3, &relabelled));
+    assert!(jsonschema::is_valid(
+        &v3,
+        &invar::diagnostics::document("ok", vec![])
+    ));
     #[cfg(feature = "native")]
     {
         let (status, native) = cli(&["run", path, "--engine", "native-serial", "--format", "json"]);
         assert_eq!(status, 3, "{native}");
-        assert_eq!(native["schema"], "invar-diagnostics-v2");
-        assert!(jsonschema::is_valid(&v2, &native));
+        assert_eq!(native["schema"], "invar-diagnostics-v3");
+        assert!(jsonschema::is_valid(&v3, &native));
     }
 }
 

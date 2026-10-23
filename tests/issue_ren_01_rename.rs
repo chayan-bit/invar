@@ -16,7 +16,7 @@ fn issue_ren_01_rename_cli_and_extension() {
         .expect("run renamed binary");
     assert!(output.status.success());
     let document: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert_eq!(document["schema"], "invar-diagnostics-v1");
+    assert_eq!(document["schema"], "invar-diagnostics-v3");
     assert_eq!(document["result"]["value"], 10);
 
     let rejected = Command::new(binary)

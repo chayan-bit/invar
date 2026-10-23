@@ -496,7 +496,7 @@ mod tests {
             .push('_');
         let mismatched = bind(source.as_bytes(), &forged, region).err().unwrap();
         let schema: serde_json::Value = serde_json::from_str(include_str!(
-            "../../../schema/invar-diagnostics-v1.schema.json"
+            "../../../schema/invar-diagnostics-v3.schema.json"
         ))
         .unwrap();
         for (error, expected, input) in [

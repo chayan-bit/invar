@@ -12,7 +12,7 @@ fn cli(args: &[&str], exit: i32, status: &str) -> serde_json::Value {
         String::from_utf8_lossy(&output.stderr)
     );
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert_eq!(value["schema_version"], 1);
+    assert_eq!(value["schema_version"], 3);
     assert_eq!(value["status"], status);
     assert!(value["diagnostics"].is_array());
     value

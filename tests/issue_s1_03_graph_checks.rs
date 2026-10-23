@@ -27,7 +27,7 @@ fn issue_s1_03_graph_checks_twelve_component_cell_and_golden_report() {
     );
     assert_eq!(first.stdout, second.stdout);
     let diagnostics: serde_json::Value = serde_json::from_slice(&first.stdout).unwrap();
-    assert_eq!(diagnostics["schema"], "invar-diagnostics-v1");
+    assert_eq!(diagnostics["schema"], "invar-diagnostics-v3");
     assert!(
         diagnostics["diagnostics"]
             .as_array()
@@ -193,7 +193,7 @@ fn issue_s1_03_graph_checks_negative_fixtures_emit_registered_source_spans() {
         .map(|entry| entry["code"].as_str().unwrap())
         .collect();
     let diagnostic_schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json")).unwrap();
     let mut files: Vec<_> = std::fs::read_dir(root)
         .unwrap()
         .map(|entry| entry.unwrap().path())

@@ -130,13 +130,12 @@ fn auto_path_decides_whether_the_placement_receipt_is_present() {
     refused(&run, receipt.clone(), &|d| {
         d["auto_path"] = json!("placement")
     });
-    // Only the two paths exist, and the field is required.
+    // Only the two paths exist. The v3 schemas also describe non-auto
+    // documents, so `established` asserts every auto document carries one.
     refused(&explain, document.clone(), &|d| {
         d["auto_path"] = json!("cuda")
     });
-    refused(&run, receipt.clone(), &|d| {
-        d.as_object_mut().unwrap().remove("auto_path");
-    });
+    refused(&run, receipt.clone(), &|d| d["auto_path"] = json!("cuda"));
 }
 
 #[test]

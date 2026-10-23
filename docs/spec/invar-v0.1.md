@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=303 citations=324
-Size record: tokens=27892 estimator=bytes/3 limit=30000
+Counts: statements=302 citations=323
+Size record: tokens=27815 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -558,7 +558,7 @@ fn main() -> i32 {
 [N6.1.2] The known units are `one m mm um kg g s ms us ns A K mol cd rad urad deg Hz N Nm px`, with dimension product, quotient and integer power in the type. `src/check/unit_math.rs`
 [N6.1.3] `+`, `-` and comparison need identical units, `*` and `/` combine dimensions, and `1 / s` is `Hz`. `tests/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_dimension_products_quotients_and_rates`
 [N6.1.4] `to::<unit>(q)` is the only conversion between scales, there is no implicit conversion, and a unit is not a value. `tests/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_quantity_source_errors`
-[N6.1.5] A scale conversion that is not exact traps with `UNIT_CONVERSION_INEXACT`, whose JSON uses diagnostics schema version 2. `tests/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_v2_conversion_trap_is_versioned`
+[N6.1.5] A scale conversion that is not exact traps with `UNIT_CONVERSION_INEXACT`. `tests/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_conversion_trap_is_versioned`
 [N6.1.6] `rad` and `deg` conversions use a certified bound on pi and round to nearest even. `src/angle.rs`
 [N6.1.7] `px` is a nominal camera unit distinct from `one` and every SI unit. `spec/grammar.ebnf`
 
@@ -1117,11 +1117,10 @@ fn main() -> i32 {
 
 ### 13.1 Diagnostics
 
-[N13.1.1] Diagnostics use the schema `invar-diagnostics-v1` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v1.schema.json`
+[N13.1.1] Diagnostics use the schema `invar-diagnostics-v3` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v3.schema.json`
 [N13.1.2] A diagnostic has a stable `code`, a `severity`, a message, a primary span with byte offsets and one-based line and column, secondary spans, notes and suggested fixes. `tests/issue_ai_01_machine_diagnostics/contracts.rs::issue_ai_01_machine_diagnostics_positions_and_fix`
 [N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `schema/diagnostic-codes-v1.json`
-[N13.1.4] The status is one of `ok`, `source_error`, `tool_error`, `trap` and `evaluation_limit`, with exit codes 0, 1, 2, 3 and 4. `schema/invar-diagnostics-v1.schema.json`
-[N13.1.5] Version 2 of the diagnostics schema exists for the unit-conversion trap, and the v1 file stays committed. `schema/invar-diagnostics-v2.schema.json`
+[N13.1.4] The status is one of `ok`, `source_error`, `tool_error`, `trap` and `evaluation_limit`, with exit codes 0, 1, 2, 3 and 4. `schema/invar-diagnostics-v3.schema.json`
 
 ### 13.2 Registry
 
@@ -1300,4 +1299,4 @@ fn main() -> i32 {
 [NB.5.3] Placement owns `--engine auto` only when one of those flags is given or the live host's default profile is not a matching provisional one, and every other auto run keeps the established path of N11.5.6, whose documents take the versions of NB.5.6. `src/auto_command.rs::placement_requested` `tests/v02_placement.rs::auto_stays_on_the_established_path_unless_placement_is_asked_for`
 [NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/v02_placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
-[NB.5.6] A placement run receipt is `invar-diagnostics-v3` with a `placement` object, and `explain --engine auto` under placement emits `invar-explain-v5`, which is v4 plus `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run emits the same versions without `placement`, recording `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`
+[NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement emits `invar-explain-v5`, which is v4 plus `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run emits the same versions without `placement`, recording `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`

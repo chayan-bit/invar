@@ -505,7 +505,7 @@ mod tests {
             "INTERNAL_ARRAY_SIZE",
         ));
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         for (error, code) in errors {
             let document = error.to_diagnostics_json("fixture.inv", b"");
@@ -521,7 +521,7 @@ mod tests {
         let document = error.to_diagnostics_json("fixture.inv", b"");
         assert_eq!(document["diagnostics"][0]["code"], "INTERNAL_SCOPE");
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         assert!(jsonschema::is_valid(&schema, &document));
     }
