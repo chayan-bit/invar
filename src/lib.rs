@@ -26,7 +26,6 @@ pub mod hex;
 pub mod histogram_source;
 pub mod indexed_device;
 pub mod indexed_source;
-pub mod interaction;
 pub mod laws;
 pub mod laws_synth;
 pub mod layout_contract;

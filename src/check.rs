@@ -192,16 +192,6 @@ pub fn check(program: Program, require_main: bool) -> Result<CheckedProgram, Fro
     check_impl(program, require_main, false, None)
 }
 
-/// Check a program whose recognized matrix contraction steps (call spans)
-/// may use `tc_mul_add`. Every other `tc_mul_add` remains a source error, so
-/// callers can pin admission to a particular recognized entry.
-pub fn check_contraction(
-    program: Program,
-    tc_steps: &[Span],
-) -> Result<CheckedProgram, FrontError> {
-    check_impl(program, false, false, Some(tc_steps))
-}
-
 /// Check wire-only robotics declarations without producing an executable program.
 pub fn check_port_types(program: Program) -> Result<(), FrontError> {
     check_impl(program, false, true, Some(&[])).map(|_| ())
