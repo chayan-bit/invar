@@ -10,5 +10,5 @@ The initial candidate is a zero-based counted wrapping `u32` map with one or two
 
 Persisted documents are descriptive admission inputs. `admission::validate_serialized` bounds their size to 1,000,000 JSON bytes and re-analyzes current verified MIR and source bytes; any changed source, rule, policy, fact, or obligation rejects the record. A checksum or successful validation does not prove semantic equivalence by itself. Later extraction and execution must recheck the obligations at their own boundary.
 
-Version 1 remains frozen apart from the approved `f64` extension below. Explicit sort metadata uses [Explain JSON v3](explain-v3.md) (v2 is historical); spatial metadata uses [Explain JSON v4](explain-v4.md).
+Version 1 remains frozen apart from the approved `f64` extension below. Explicit sort metadata uses [Explain JSON v3](explain-v3.md); spatial metadata uses [Explain JSON v4](explain-v4.md).
 The v1 schema was extended in place for v0.2 `f64` (optional `numeric_contracts`, reason `metal-no-f64`), approved by owner 2026-10-19; see [frozen contract changes](contract-changes.md).

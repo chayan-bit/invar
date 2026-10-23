@@ -188,7 +188,7 @@ These rulings are final for the workstreams.
 This section records where the merged or merging workstreams differ from, or sharpen, sections 4.1 to 4.4.
 
 - **Explain versions.** Explain v1 stays frozen and digest-checked.
-  v2 is the historical first sort version; sort emits v3, which adds the C14 `calibration_id` to `explicit_sorts`.
+  Sort emits v3, which adds the C14 `calibration_id` to `explicit_sorts`.
   Spatial emits v4, which adds `explicit_spatial` and keeps the v3 sort entries when a program also sorts.
   f64math took no new number: with maintainer approval it extended v1 and v3 in place (see C14 in this list).
   Placement emits v5: v4 plus the placement receipt and its run document, only when placement owns `--engine auto`.
