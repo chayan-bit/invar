@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=323
-Size record: tokens=27772 estimator=bytes/3 limit=30000
+Size record: tokens=27765 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
