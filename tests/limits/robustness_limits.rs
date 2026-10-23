@@ -1,4 +1,4 @@
-#[path = "support/language_limits.rs"]
+#[path = "../support/language_limits.rs"]
 mod language_limits;
 use std::time::{Duration, Instant};
 

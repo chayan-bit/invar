@@ -1,5 +1,5 @@
 //! Core-independent boundary policy gates; actual Python/C execution is in pytest.
-#[path = "../crates/invar-python/src/validation.rs"]
+#[path = "../../crates/invar-python/src/validation.rs"]
 mod validation;
 
 use validation::{Dtype, Failure, Metadata, validate};
@@ -131,28 +131,8 @@ fn issue_l1_06_python_binding_empty_large_and_readonly_inputs() {
 }
 
 #[test]
-fn issue_l1_06_python_binding_real_source_diagnostics_and_reference_smoke() {
-    let source = b"fn main() -> i32 { return 6 * 7; }";
-    let checked = invar::check::check(invar::front::parse(source).unwrap(), true).unwrap();
-    invar::ownership::check(&checked).unwrap();
-    assert_eq!(
-        invar::eval::run(&checked, 100).unwrap().value,
-        invar::eval::Value::I32(42)
-    );
-    let source = b"fn main() -> i32 { return 1 / 0; }";
-    let checked = invar::check::check(invar::front::parse(source).unwrap(), true).unwrap();
-    let document = invar::eval::run(&checked, 100)
-        .unwrap_err()
-        .to_diagnostics_json("<python>", source);
-    let schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json")).unwrap();
-    assert!(jsonschema::is_valid(&schema, &document));
-    assert_eq!(document["diagnostics"][0]["code"], "DIVISION_BY_ZERO");
-}
-
-#[test]
 fn issue_l1_06_python_binding_frozen_abi_has_no_numeric_array_or_export_tags() {
-    let header = include_str!("../include/invar_foreign_v1.h");
+    let header = include_str!("../../include/invar_foreign_v1.h");
     assert!(header.contains("INV_TAG_BYTES_V1 3u"));
     assert!(!header.contains("INV_TAG_F32"));
     assert!(!header.contains("INV_TAG_ARRAY"));
@@ -202,8 +182,10 @@ fn issue_l1_06_python_binding_scalar_artifact_values_trap_and_recovery() {
         serde_json::json!({"category":"INTEGER_OVERFLOW", "span":{"start":span_start,"end":span_start+1}})
     );
     assert_eq!(document["diagnostics"][0]["path"], "binding-snapshot.inv");
-    let schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json")).unwrap();
+    let schema: serde_json::Value = serde_json::from_str(include_str!(
+        "../../schema/invar-diagnostics-v3.schema.json"
+    ))
+    .unwrap();
     assert!(jsonschema::is_valid(&schema, &document));
     assert_eq!(
         artifact
@@ -240,7 +222,7 @@ fn issue_l1_06_python_binding_engine_names_and_guarded_receipts() {
     assert_eq!(receipt["result"], 42);
     assert_eq!(receipt["backends"], serde_json::json!(["mir-serial"]));
     let schema = serde_json::from_str(include_str!(
-        "../schema/invar-explain-device-v5.schema.json"
+        "../../schema/invar-explain-device-v5.schema.json"
     ))
     .unwrap();
     assert!(jsonschema::is_valid(

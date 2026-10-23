@@ -2,7 +2,9 @@ use std::process::Command;
 
 use invar::{check, eval, front, mir, mir_eval};
 
-const VIEWS: &str = include_str!("fixtures/l1_02_views.inv");
+use crate::engines::agree;
+
+const VIEWS: &str = include_str!("../fixtures/l1_02_views.inv");
 
 fn checked(source: &str) -> check::CheckedProgram {
     check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap()
@@ -10,9 +12,7 @@ fn checked(source: &str) -> check::CheckedProgram {
 
 #[test]
 fn issue_l1_02_borrowed_views_reference_mir_native_agree() {
-    let checked = checked(VIEWS);
-    let reference = eval::run(&checked, 10_000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(65));
+    let reference = agree(VIEWS, 10_000, 65);
     assert_eq!(
         reference.cleanup_trace,
         vec![eval::CleanupEvent {
@@ -20,55 +20,18 @@ fn issue_l1_02_borrowed_views_reference_mir_native_agree() {
             length: 6
         }]
     );
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 10_000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 10_000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(
-            document["result"],
-            serde_json::json!({"type":"i32","value":65})
-        );
-        assert_eq!(document["steps_used"], reference.steps_used);
-        assert_eq!(
-            document["cleanup_trace"],
-            serde_json::json!([{"name":"xs","length":6}])
-        );
-    }
 }
 
 #[test]
 fn issue_l1_02_borrowed_views_read_return_from_mut_parameter() {
     let source = "fn peek(xs: mut Array<i32>) -> View<i32> from xs { return view(xs,0u32,1u32); } fn main() -> i32 { var xs: Array<i32> = [8i32]; let part = peek(xs); return part[0u32]; }";
-    let checked = checked(source);
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(8));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 8);
-        assert_eq!(document["steps_used"], reference.steps_used);
-    }
+    agree(source, 1000, 8);
 }
 
 #[test]
 fn issue_l1_02_borrowed_views_nested_reborrow_chain() {
     let source = "fn main() -> i32 { var xs: Array<i32> = [1i32]; let a = view_mut(xs,0u32,1u32); if true { let b = view_mut(a,0u32,1u32); if true { let c = view_mut(b,0u32,1u32); c[0u32] = 9i32; } b[0u32] = b[0u32] + 1i32; } return a[0u32]; }";
-    let checked = checked(source);
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(10));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 10);
-    }
+    agree(source, 1000, 10);
 }
 
 #[test]

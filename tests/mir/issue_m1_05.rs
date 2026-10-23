@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
-#[path = "../test-support/term_oracle.rs"]
-mod term;
+use crate::term;
 
 use invar::{
     check::check,

@@ -5,12 +5,12 @@ use invar::exports::{
     compile_exports,
 };
 
-const A: &[u8] = include_bytes!("../test-support/export-lineage/source-a.inv");
-const B: &[u8] = include_bytes!("../test-support/export-lineage/source-b.inv");
+const A: &[u8] = include_bytes!("../../test-support/export-lineage/source-a.inv");
+const B: &[u8] = include_bytes!("../../test-support/export-lineage/source-b.inv");
 const UNSELECTED: &[u8] =
-    include_bytes!("../test-support/export-lineage/source-unselected-change.inv");
+    include_bytes!("../../test-support/export-lineage/source-unselected-change.inv");
 const SIGNATURE_CHANGE: &[u8] =
-    include_bytes!("../test-support/export-lineage/source-signature-change.inv");
+    include_bytes!("../../test-support/export-lineage/source-signature-change.inv");
 const SOURCE_PATH: &str = "/virtual/scalar-lineage.inv";
 const BOTH: &[&str] = &["shared_symbol", "peer_symbol"];
 
