@@ -13,6 +13,7 @@ use crate::device;
 use crate::generate;
 use crate::guard;
 use crate::par;
+#[cfg(any(feature = "metal", feature = "cuda"))]
 use crate::parallel;
 use crate::robotics;
 

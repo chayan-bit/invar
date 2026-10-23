@@ -12,6 +12,7 @@
 use crate::agree;
 #[cfg(feature = "cuda")]
 use crate::aot;
+#[cfg(any(feature = "metal", feature = "cuda"))]
 use crate::device;
 use crate::generate;
 use crate::guard;

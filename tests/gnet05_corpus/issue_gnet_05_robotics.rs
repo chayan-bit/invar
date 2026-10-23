@@ -12,7 +12,6 @@
 #![forbid(unsafe_code)]
 
 use crate::agree;
-use crate::device;
 use crate::generate;
 use crate::guard;
 use crate::par;
