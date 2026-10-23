@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
-#[path = "support/law_bench.rs"]
+#[path = "law_bench.rs"]
 mod bench;
-#[path = "support/law_collective.rs"]
+#[path = "../tests/support/law_collective.rs"]
 mod support;
 
 #[test]

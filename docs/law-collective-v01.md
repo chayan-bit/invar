@@ -264,7 +264,7 @@ splits them.
 
 ### Template timing protocol
 
-`tests/net_law_collective_bench.rs` and `tests/support/law_bench.rs` freeze four
+`bench/net_law_collective_bench.rs` and `bench/law_bench.rs` freeze four
 flat-template cases: checked-sum reduce, i32 min reduce, wrapping affine scan,
 and integer max-plus scan at every power of two from 2^20 through 2^26.
 The handwritten reference implements its own algebra and adjacent Blelloch
