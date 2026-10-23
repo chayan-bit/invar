@@ -2,7 +2,7 @@
 //! to one verified IR for CUDA and Metal, host admission refusals, and the IR's
 //! independent reference model against the source expectation (CPU net oracle
 //! and reference evaluator) for every adversarial case. Device execution is in
-//! the ignored `issue_m4_04_gpu` (CUDA) and `issue_m4_04_metal_gpu` suites.
+//! the ignored `gpu_cuda::m4_04` and `gpu_metal::m4_04` suites.
 #![forbid(unsafe_code)]
 
 #[path = "../support/m4_04_cases.rs"]

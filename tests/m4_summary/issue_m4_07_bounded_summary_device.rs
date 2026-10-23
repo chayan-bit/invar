@@ -1,6 +1,6 @@
 //! M4-07 device lowering and reason codes, selected by the acceptance name
 //! `issue_m4_07_bounded_summary_families`. Hardware runs are in
-//! `issue_m4_07_gpu` (CUDA) and `issue_m4_07_metal_gpu` (Metal).
+//! `gpu_cuda::m4_07` and `gpu_metal::m4_07`.
 #![forbid(unsafe_code)]
 #[path = "../issue_m4_07_device/corpus.rs"]
 mod corpus;

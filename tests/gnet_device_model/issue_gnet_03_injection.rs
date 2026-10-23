@@ -1,7 +1,7 @@
 //! GNET-03 device fault injection on the CPU group model (feature
 //! `gnet-fault-injection` only): thread 31 of the 32-thread group rewrites
 //! shared slot words between group barriers in the emitted CUDA and Metal
-//! bodies. `issue_gnet_03_gpu` and `issue_gnet_03_metal_gpu` run the same
+//! bodies. `gpu_cuda::gnet_03` and `gpu_metal::gnet_03` run the same
 //! injection on the actual devices.
 #![cfg(feature = "gnet-fault-injection")]
 #![forbid(unsafe_code)]
