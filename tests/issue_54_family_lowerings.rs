@@ -80,8 +80,8 @@ fn parity(program: &oracle::Program) -> Parity {
     out
 }
 
-fn selection_parity(dirs: &[&str], least: usize) {
-    let results = oracle::each(dirs, parity);
+fn selection_parity(dirs: &[&str], sampled: bool, least: usize) {
+    let results = oracle::each(dirs, sampled, parity);
     assert!(results.len() >= least, "corpus shrank to {}", results.len());
     let mut matched = BTreeMap::<&str, usize>::new();
     for family in results.iter().flat_map(|r| &r.matched) {
@@ -108,13 +108,13 @@ fn selection_parity(dirs: &[&str], least: usize) {
 
 #[test]
 fn issue_54_selection_parity_on_the_corpus() {
-    selection_parity(oracle::CORPUS, 600);
+    selection_parity(oracle::CORPUS, true, oracle::sample::floor(600));
 }
 
 /// The fast Tier 1 slice of the corpus pass above.
 #[test]
 fn issue_54_selection_parity_on_the_examples() {
-    selection_parity(&["examples"], 40);
+    selection_parity(&["examples"], false, 40);
 }
 
 /// Results, traps and fuel equal; a tool error (an engine limit) by its code.
@@ -131,7 +131,7 @@ fn same(a: &eval::Observation, b: &eval::Observation) -> bool {
 
 #[test]
 fn issue_54_equal_to_reference_at_1_2_7_64_workers() {
-    let results = oracle::each(oracle::CORPUS, |program| {
+    let results = oracle::each(oracle::CORPUS, true, |program| {
         let reference = eval::observe(&program.checked, FUEL);
         let mut published = 0;
         let mut differences = Vec::new();
@@ -216,7 +216,7 @@ fn issue_54_forged_certificates_are_refused_before_any_step() {
         ("mutated-ring", mutated_ring),
         ("dropped-guard", dropped_guard),
     ];
-    let results = oracle::each(oracle::CORPUS, |program| {
+    let results = oracle::each(oracle::CORPUS, true, |program| {
         let honest = schedule::selection(&program.source, &program.mir, &Hooks::default()).unwrap();
         let mut forged = Vec::new();
         for (name, forge) in forges {
