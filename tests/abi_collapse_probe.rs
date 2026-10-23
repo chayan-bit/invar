@@ -203,6 +203,54 @@ fn oracle_string(source: &[u8], entry: &str, xs: &[eval::Value], l: oracle::Limi
         .unwrap_or_else(err)
 }
 
+/// Strip tool-failure message prose (it names the ABI) before comparing.
+fn strip_messages(s: &str) -> String {
+    let mut out = String::new();
+    let mut rest = s;
+    while let Some(i) = rest.find("message: \"") {
+        out.push_str(&rest[..i + 9]);
+        rest = &rest[i + 10..];
+        let end = rest.find('"').unwrap_or(rest.len());
+        rest = &rest[(end + 1).min(rest.len())..];
+    }
+    out.push_str(rest);
+    out
+}
+
+fn category(a: &str, b: &str) -> &'static str {
+    if a == b {
+        "equal"
+    } else if strip_messages(a) == strip_messages(b) {
+        "message_only"
+    } else if a.starts_with("ERR") || b.starts_with("ERR") {
+        "host_error"
+    } else {
+        "semantic"
+    }
+}
+
+fn run_all(
+    plans: &mut BTreeMap<(String, String, u32), Result<Host, String>>,
+    row: &Row,
+    l: oracle::Limits,
+    quantum: u64,
+    runs: &mut usize,
+) -> BTreeMap<u32, String> {
+    let mut seen = BTreeMap::new();
+    for abi in 8..=11 {
+        let key = (row.path.clone(), row.entry.clone(), abi);
+        if let Some(Ok(host)) = plans.get_mut(&key) {
+            // ABI8/10 have no quantum; run them once per fuel.
+            if quantum != 1_000_000 && matches!(abi, 8 | 10) {
+                continue;
+            }
+            seen.insert(abi, host.run(&row.args, l, quantum));
+            *runs += 1;
+        }
+    }
+    seen
+}
+
 #[test]
 fn abi_collapse_probe() {
     let rows = rows();
@@ -211,9 +259,10 @@ fn abi_collapse_probe() {
     let mut summary = json!({"rows": rows.len(), "admitted": {}, "older_admitted_abi11_refused": [], "observation_mismatches": 0, "runs": 0, "abi11_vs_oracle_mismatches": 0});
     let mut admitted = BTreeMap::<u32, usize>::new();
     let mut mismatches = 0usize;
-    let mut oracle_mismatches = 0usize;
     let mut runs = 0usize;
     let mut refused = Vec::new();
+    let mut categories = BTreeMap::<String, usize>::new();
+    let mut budget_rows = std::collections::BTreeSet::new();
     for row in &rows {
         let source = fs::read(&row.path).unwrap();
         let mut admission = BTreeMap::new();
@@ -247,33 +296,51 @@ fn abi_collapse_probe() {
         }
         let mut diffs = Vec::new();
         for (l, quantum) in fuels {
-            let mut seen = BTreeMap::new();
-            for abi in 8..=11 {
-                let key = (row.path.clone(), row.entry.clone(), abi);
-                if let Some(Ok(host)) = plans.get_mut(&key) {
-                    // ABI8/10 ignore the quantum; run them once per fuel.
-                    if quantum != 1_000_000 && matches!(abi, 8 | 10) {
-                        continue;
-                    }
-                    seen.insert(abi, host.run(&row.args, l, quantum));
-                    runs += 1;
+            let mut l = l;
+            let mut seen = run_all(&mut plans, row, l, quantum, &mut runs);
+            // The ABI11 host has a 128 MiB host-buffer budget; record and retry
+            // with smaller trace/transition budgets so semantics still compare.
+            for (trace, transitions) in [(100_000, l.transitions), (100_000, 200_000)] {
+                if seen.get(&11).is_some_and(|o| o == "ERR Limit")
+                    && seen.iter().any(|(a, o)| *a != 11 && o != "ERR Limit")
+                {
+                    *categories
+                        .entry("abi11_host_budget_refusal_retried".into())
+                        .or_default() += 1;
+                    budget_rows.insert(row.id.clone());
+                    l = oracle::Limits {
+                        trace_events: l.trace_events.min(trace),
+                        transitions: l.transitions.min(transitions),
+                        ..l
+                    };
+                    seen = run_all(&mut plans, row, l, quantum, &mut runs);
                 }
             }
             let Some(latest) = seen.get(&11).cloned() else {
                 continue;
             };
-            if l.fuel == full.fuel
-                && quantum == 1_000_000
-                && latest != oracle_string(&source, &row.entry, &row.args, l)
-            {
-                oracle_mismatches += 1;
-                diffs.push(json!({"fuel": l.fuel, "quantum": quantum, "kind": "abi11_vs_oracle", "abi11": latest, "oracle": reference}));
+            if quantum == 1_000_000 && l.fuel == full.fuel {
+                let o = oracle_string(&source, &row.entry, &row.args, l);
+                let cat = category(&latest, &o);
+                *categories
+                    .entry(format!("abi11_vs_oracle:{cat}"))
+                    .or_default() += 1;
+                if cat != "equal" && diffs.len() < 12 {
+                    diffs.push(json!({"fuel": l.fuel, "limits": format!("{l:?}"), "quantum": quantum, "kind": "abi11_vs_oracle", "category": cat, "abi11": latest, "oracle": o}));
+                }
             }
             for (abi, obs) in &seen {
-                if *abi != 11 && *obs != latest {
+                if *abi == 11 {
+                    continue;
+                }
+                let cat = category(obs, &latest);
+                *categories
+                    .entry(format!("abi{abi}_vs_abi11:{cat}"))
+                    .or_default() += 1;
+                if cat != "equal" {
                     mismatches += 1;
-                    if diffs.len() < 6 {
-                        diffs.push(json!({"fuel": l.fuel, "quantum": quantum, "abi": abi, "older": obs, "abi11": latest}));
+                    if diffs.len() < 12 || cat == "semantic" && diffs.len() < 40 {
+                        diffs.push(json!({"fuel": l.fuel, "limits": format!("{l:?}"), "quantum": quantum, "abi": abi, "category": cat, "older": obs, "abi11": latest}));
                     }
                 }
             }
@@ -283,8 +350,10 @@ fn abi_collapse_probe() {
     summary["admitted"] = json!(admitted);
     summary["older_admitted_abi11_refused"] = json!(refused);
     summary["observation_mismatches"] = json!(mismatches);
-    summary["abi11_vs_oracle_mismatches"] = json!(oracle_mismatches);
+
     summary["runs"] = json!(runs);
+    summary["categories"] = json!(categories);
+    summary["abi11_budget_rows"] = json!(budget_rows);
     let dir = std::env::var("ABI_PROBE_OUT").unwrap_or_else(|_| "target/abi-probe".into());
     fs::create_dir_all(&dir).unwrap();
     fs::write(
