@@ -12,7 +12,6 @@ mod bounded_scan;
 mod codec;
 mod dag;
 mod extract;
-mod observe;
 mod rewrite;
 mod verify;
 
@@ -20,7 +19,6 @@ pub use bounded_scan::{BoundedFamily, BoundedObservation, BoundedScanError};
 pub use codec::encode;
 pub use dag::DagOp;
 pub use extract::{Plan, Source};
-pub use observe::ArrayObservation;
 
 pub const SCHEMA_VERSION: u32 = 1;
 pub const TABLE_SCAN_RULE: &str = "finite-state-table-scan-v1";
@@ -84,7 +82,7 @@ pub enum ZipOp {
 }
 
 impl ZipOp {
-    pub(crate) fn apply(self, left: u32, right: u32) -> u32 {
+    pub fn apply(self, left: u32, right: u32) -> u32 {
         match self {
             Self::WrappingAdd => left.wrapping_add(right),
             Self::WrappingMul => left.wrapping_mul(right),
@@ -93,7 +91,7 @@ impl ZipOp {
 }
 
 impl MapOp {
-    pub(crate) fn apply(self, value: u32) -> u32 {
+    pub fn apply(self, value: u32) -> u32 {
         match self {
             Self::WrappingAdd(n) => value.wrapping_add(n),
             Self::WrappingMul(n) => value.wrapping_mul(n),
