@@ -1,4 +1,6 @@
 //! Per-source caches stay local to workers; report rows retain manifest order.
+//! Every row is checked against its source and oracle expectations; only the
+//! sampled sources (`corpus_sample`) also compile and run the CPU backends.
 use super::*;
 
 type Cache = BTreeMap<(String, String, bool, usize), Cpu>;
@@ -9,17 +11,27 @@ pub(super) fn run() {
     let config = document("owned-vectors.json");
     let storage = owned_limits(&config["storage"]);
     let schedules = schedules(&config);
+    let queues = queues([&manifest, &vectors]);
+    let keep = corpus_sample::paths(queues.iter().flatten().map(|(_, kind, case)| {
+        let path = case["source"].as_str().unwrap();
+        (
+            path.to_owned(),
+            format!("{kind}:{}", corpus_sample::category(path)),
+        )
+    }));
     let mut results = std::thread::scope(|scope| {
-        let workers = queues([&manifest, &vectors])
+        let workers = queues
             .into_iter()
             .map(|queue| {
-                let schedules = &schedules;
+                let (schedules, keep) = (&schedules, &keep);
                 scope.spawn(move || {
                     let mut cache = Cache::new();
                     queue
                         .into_iter()
                         .map(|(index, kind, case)| {
-                            let (row, matched) = row(kind, case, storage, schedules, &mut cache);
+                            let sampled = keep.contains(case["source"].as_str().unwrap());
+                            let (row, matched) =
+                                row(kind, case, storage, schedules, sampled, &mut cache);
                             (index, row, matched)
                         })
                         .collect::<Vec<_>>()
@@ -145,6 +157,7 @@ fn row(
     case: &Json,
     storage: compiled::OwnedLimits,
     schedules: &[Vec<u64>],
+    sampled: bool,
     cache: &mut Cache,
 ) -> (Json, usize) {
     let id = case["id"].as_str().unwrap();
@@ -171,8 +184,8 @@ fn row(
     } else {
         storage
     };
-    let (owned, first) = backend(&context, false, storage, schedules, cache);
-    let (resumable, second) = backend(&context, true, storage, schedules, cache);
+    let (owned, first) = backend(&context, false, storage, schedules, sampled, cache);
+    let (resumable, second) = backend(&context, true, storage, schedules, sampled, cache);
     source_order(&context);
     (
         json!({"id":id,"kind":kind,"source_sha256":digest(&bytes),"entry":context.entry,"arguments":case["arguments"],"source":recorded(&context.source),"oracle":observed(&context.expected),"storage":{"elements":storage.elements,"allocations":storage.allocations,"cleanup_events":storage.cleanup_events},"owned_cpu":owned,"resumable_cpu":resumable}),
@@ -185,9 +198,11 @@ fn backend(
     resumable: bool,
     storage: compiled::OwnedLimits,
     schedules: &[Vec<u64>],
+    sampled: bool,
     cache: &mut Cache,
 ) -> (Json, usize) {
     let artifact = match emit(&context.net, context.entry, resumable, storage) {
+        Ok(_) if !sampled => return (json!({"status":"sampled_out"}), 0),
         Ok(artifact) => artifact,
         Err(error) => return (compiled_rejection(error), 0),
     };

@@ -134,8 +134,7 @@ fn issue_eng_03_only_placement_documents_carry_the_fold_receipt() {
                 document["execution"].get("numeric_contracts").is_none(),
                 "{document}"
             );
-            // The established documents (explain v1, diagnostics v1) never
-            // carry it: their frozen schemas are unchanged (D12).
+            // Non-placement documents never carry it.
             let established: &[&str] = if command == "run" {
                 &[
                     "run",
