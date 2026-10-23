@@ -1,8 +1,7 @@
 # Typed interaction graph v1 (M1)
 
 This is the accepted M1 typed graph contract after the 2026-09-23 design
-revision. It is distinct from the untyped three-agent reducer in
-`src/interaction.rs`. No Invar source-to-three-agent encoding is claimed.
+revision. No Invar source-to-primitive-agent encoding is claimed.
 
 ## Finite term graph
 
@@ -70,5 +69,3 @@ route.
 Proof tokens and source identities use process-local hashes for stale-data
 checks. They are not serialized trust artifacts or cryptographic digests.
 Verification must run again after loading or rebuilding any future region.
-The pure three-agent reducer remains available for separate research; its
-universal-computation result does not prove this typed graph correct.

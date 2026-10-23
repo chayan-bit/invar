@@ -1,8 +1,7 @@
 //! Versioned, demand-ordered typed interaction graph for the bounded M1 fragment.
 //!
-//! This is the production graph contract, not an encoding into the independent
-//! three-agent reference reducer. Child connections are ordered input ports;
-//! changing one changes extraction or fails verification.
+//! This is the production graph contract. Child connections are ordered input
+//! ports; changing one changes extraction or fails verification.
 
 use std::collections::{BTreeMap, BTreeSet, hash_map::DefaultHasher};
 use std::hash::{Hash, Hasher};
