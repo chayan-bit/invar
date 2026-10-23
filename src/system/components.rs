@@ -6,8 +6,7 @@ pub(super) fn component<'a>(
     external: bool,
     clauses: &'a [SystemClause],
     functions: &BTreeSet<String>,
-    use_v2: bool,
-    use_v3: bool,
+    manifest_rules: bool,
 ) -> Result<Component<'a>, FrontError> {
     let mut ports = BTreeMap::new();
     let mut port_docs = Vec::new();
@@ -60,7 +59,7 @@ pub(super) fn component<'a>(
                     return Err(error("S1000", "extern port needs a C layout", *span));
                 }
                 if external
-                    && use_v3
+                    && manifest_rules
                     && !layout
                         .as_deref()
                         .is_some_and(|layout| foreign_port_layout(ty, layout))
@@ -73,11 +72,7 @@ pub(super) fn component<'a>(
                 }
                 let rate = positive(rate, Some("Hz"))?;
                 let latency = latency.as_ref().map(duration).transpose()?;
-                let mut port_doc = json!({"name":name,"direction":direction,"type":type_name(ty),"rate":rate,"latency":latency,"optional":optional,"layout":layout});
-                if use_v2 {
-                    port_doc["bus"] = json!(bus);
-                }
-                port_docs.push(port_doc);
+                port_docs.push(json!({"name":name,"direction":direction,"type":type_name(ty),"rate":rate,"latency":latency,"optional":optional,"layout":layout,"bus":bus}));
             }
             SystemClause::Param {
                 name,
@@ -143,13 +138,6 @@ pub(super) fn component<'a>(
                 }
             }
             SystemClause::IdentityParam { name, ty, span } => {
-                if !use_v2 {
-                    return Err(error(
-                        "S1203",
-                        "identity transform requires system IR v2",
-                        *span,
-                    ));
-                }
                 let expected = type_name(ty);
                 let Some(("Transform", args)) = crate::robotics::generic_parts(&expected) else {
                     return Err(error(
@@ -200,14 +188,9 @@ pub(super) fn component<'a>(
                 {
                     return Err(error("S1000", "invalid link mode", *span));
                 }
-                let mut doc = json!({"expression":expression,"link":link});
-                if use_v2 {
-                    doc["modified"] = json!(modified);
-                    doc["replaceable"] = json!(replaceable);
-                    doc["network_exposed"] = json!(network_exposed);
-                    doc["grant"] = json!(grant);
-                }
-                license = Some(doc);
+                license = Some(
+                    json!({"expression":expression,"link":link,"modified":modified,"replaceable":replaceable,"network_exposed":network_exposed,"grant":grant}),
+                );
             }
             SystemClause::Isolation(value) => {
                 if isolation.is_some() {
@@ -263,7 +246,7 @@ pub(super) fn component<'a>(
                 if !external || kind != "c" || prefix.is_empty() {
                     return Err(error("S1000", "invalid extern C ABI", item.span));
                 }
-                if use_v3 && !c_identifier(prefix) {
+                if manifest_rules && !c_identifier(prefix) {
                     return Err(error(
                         "S1400",
                         "foreign ABI prefix is not a bounded C identifier",
@@ -312,7 +295,7 @@ pub(super) fn component<'a>(
                 }
             }
             SystemClause::Golden { path, tolerances } => {
-                if use_v3 && !manifest_relative_file(path) {
+                if manifest_rules && !manifest_relative_file(path) {
                     return Err(error(
                         "S1400",
                         "golden path must be relative to manifest",
@@ -337,7 +320,7 @@ pub(super) fn component<'a>(
                 if shim.is_some() {
                     return Err(error("S1000", "duplicate shim clause", item.span));
                 }
-                if use_v3 && !manifest_relative_file(value) {
+                if manifest_rules && !manifest_relative_file(value) {
                     return Err(error(
                         "S1400",
                         "shim path must be relative to manifest",
@@ -366,7 +349,7 @@ pub(super) fn component<'a>(
             item.span,
         ));
     }
-    if use_v3 && external {
+    if manifest_rules && external {
         if config.is_none() || shim.is_none() {
             return Err(error(
                 "S1400",
@@ -395,19 +378,11 @@ pub(super) fn component<'a>(
     port_docs.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
     golden.sort_by(|left, right| left.0.cmp(&right.0));
     properties.sort();
-    let golden = if use_v3 {
-        golden
-            .into_iter()
-            .map(|(path, tolerances)| json!({"path":path,"tolerances":tolerances}))
-            .collect::<Vec<_>>()
-    } else {
-        golden.into_iter().map(|(path, _)| json!(path)).collect()
-    };
-    let mut document = json!({"id":name,"name":name,"external":external,"ports":port_docs,"params":params,"resources":resource_doc,"license":license,"isolation":isolation,"wcet":wcet,"deadline":deadline,"implementation":implementation,"abi":abi,"lifecycle":lifecycle,"golden":golden,"properties":properties,"shim":shim});
-    if use_v3 {
-        document["config"] = config.unwrap_or(Value::Null);
-        document["inputs"] = json!(inputs);
-    }
+    let golden: Vec<_> = golden
+        .into_iter()
+        .map(|(path, tolerances)| json!({"path":path,"tolerances":tolerances}))
+        .collect();
+    let document = json!({"id":name,"name":name,"external":external,"ports":port_docs,"params":params,"resources":resource_doc,"license":license,"isolation":isolation,"wcet":wcet,"deadline":deadline,"implementation":implementation,"abi":abi,"lifecycle":lifecycle,"golden":golden,"properties":properties,"shim":shim,"config":config,"inputs":inputs});
     Ok(Component {
         item,
         external,

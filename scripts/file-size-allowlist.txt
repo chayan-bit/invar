@@ -27,7 +27,7 @@
 810 src/general_net/path_sum/range.rs
 1373 src/general_net/provenance.rs
 1247 src/histogram_source/bounded.rs
-1052 src/main.rs
+1027 src/main.rs
 1059 src/mir_eval/bulk.rs
 1002 src/mir_eval/histogram.rs
 818 src/mir_eval/region/tests.rs
@@ -36,7 +36,7 @@
 813 src/schedule/metal.rs
 883 src/schedule/mod.rs
 926 src/summary_source.rs
-1171 src/system/ros2.rs
+1159 src/system/ros2.rs
 1728 src/system/substep_admission.rs
 940 src/system/urdf.rs
 854 tests/gnet_p4a_path_sum.rs
