@@ -1,3 +1,6 @@
+#[path = "../../test-support/term_oracle.rs"]
+mod term;
+
 mod corpus;
 mod issue_m1_01;
 mod issue_m1_01_owned_return_fuel;
