@@ -1,6 +1,6 @@
 # General-net v0.1 benchmark preparation
 
-`manifest.json` pins 15 ordinary Invar source fixtures for reference-engine checking. `parity-spec.json` records the proposed general GPU and handwritten-performance obligations. Neither is a device result or an accepted release manifest. The scope authority is [the GNET contract](../../src/general_net/CONTRACT.md#semantic-obligations) and [ordinary-source parity](../../docs/performance-acceptance.md#ordinary-source-parity); the original 2026-09-28 amendments are `docs/general-gpu-v01.md` and `docs/cuda-parity-v01.md` at commit `85dc53f`. `spec/bootstrap.md` governs the executable current-source subset.
+`manifest.json` pins 15 ordinary Invar source fixtures for reference-engine checking. `parity-spec.json` records the proposed general GPU and handwritten-performance obligations. Neither is a device result or an accepted release manifest. The scope authority is [the GNET contract](../../src/general_net/CONTRACT.md#semantic-obligations) and [ordinary-source parity](../../docs/performance-acceptance.md#ordinary-source-parity); the original 2026-09-28 amendments are `docs/general-gpu-v01.md` and `docs/cuda-parity-v01.md` at commit `85dc53f`. `docs/spec/invar-v0.1.md` governs the executable current-source subset.
 
 ## Owned arrays and resumable CPU continuation
 
