@@ -14,8 +14,7 @@ ports plus boundaries, and completed rewrite steps. Invalid graphs and budget
 exhaustion return explicit errors; a step-limit result leaves a valid partial
 net and does not assert divergence.
 
-Rule revision 1 is exactly the six-rule table in
-[interaction-design.md](research/interaction-design.md): crossed gamma-gamma,
+Rule revision 1 is exactly six rules: crossed gamma-gamma,
 aligned delta-delta, epsilon-epsilon annihilation, epsilon-gamma and
 epsilon-delta erasure (two fresh erasers), and gamma-delta commutation (two
 fresh agents of each kind, with the stated eight wires). The implementation

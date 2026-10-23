@@ -1,8 +1,8 @@
 # Invar v0.1 compact language specification (draft for AI-02)
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
-Counts: statements=268 citations=285
-Size record: tokens=25533 estimator=bytes/3 limit=30000
+Counts: statements=268 citations=284
+Size record: tokens=25459 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -11,9 +11,9 @@ Size record: tokens=25533 estimator=bytes/3 limit=30000
 Note: this file is machine checked by `tests/issue_ai_02_spec_examples.rs`; the checks are described in 1.2.
 [N1.1.1] A line starting with `[N` and an identifier is a normative statement and is a requirement on conforming implementations of Invar v0.1. `tests/issue_ai_02_spec_examples.rs::check_spec_text`
 [N1.1.2] Every normative statement cites at least one repository file, and a `path::name` citation names text that occurs in that file. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_normative_statements_cite_existing_sources`
-[N1.1.3] A line starting with `Note:` is informative and carries no requirement. `docs/issues/next/AI-02-spec-examples-docs.md`
-[N1.1.4] Where this specification and the implementation disagree, the test fails and the disagreement is fixed or escalated, never papered over. `docs/issues/next/AI-02-spec-examples-docs.md`
-[N1.1.5] Planned work appears only in clearly labelled roadmap text, open v0.1 gaps appear only in Appendix A, and v0.2 features that are on `main` appear only in Appendix B. `docs/issues/next/AI-02-spec-examples-docs.md`
+[N1.1.3] A line starting with `Note:` is informative and carries no requirement. `tests/issue_ai_02_spec_examples.rs`
+[N1.1.4] Where this specification and the implementation disagree, the test fails and the disagreement is fixed or escalated, never papered over. `tests/issue_ai_02_spec_examples.rs`
+[N1.1.5] Planned work appears only in clearly labelled roadmap text, open v0.1 gaps appear only in Appendix A, and v0.2 features that are on `main` appear only in Appendix B. `tests/issue_ai_02_spec_examples.rs`
 
 ### 1.2 Executable blocks and outcome tags
 
@@ -265,7 +265,7 @@ fn main() -> i32 {
 
 [N5.1.1] A `module` has `pub` and private items, `import m::name;` brings a public item into scope, and forward references inside the file are allowed. `tests/issue_l1_01_language_core.rs::issue_l1_01_language_core_forward_module_resolution_agrees_across_engines`
 [N5.1.2] Duplicate names, invalid visibility, malformed imports and import cycles are source errors, and there are at most 32 modules and 256 imports. `src/check/modules.rs::MAX_MODULES`
-[N5.1.3] Module resolution is deterministic and the whole program is one file. `docs/issues/next/L1-01-modules-records-result.md`
+[N5.1.3] Module resolution is deterministic and the whole program is one file. `tests/issue_l1_01_language_core.rs`
 
 ```invar outcome=value:21
 import math::triple;
@@ -492,12 +492,12 @@ fn main() -> i32 {
 
 ### 5.8 f32 and decimal literals
 
-[N5.8.1] The compiler accepts `f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons. `docs/m4-source.md`
+[N5.8.1] The compiler accepts `f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons. `docs/numeric.md`
 [N5.8.2] The numeric policy is `strict-f32-v1`: IEEE 754 binary32, round to nearest even, no reassociation or contraction, and subnormals preserved. `src/numeric_contract.rs`
 [N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
 [N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
-[N5.8.5] `trunc_i32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric-v1.md::trunc_i32`
-[N5.8.6] `sqrt`, `sin` and `cos` on `f32` are correctly rounded under the default math contract `invar-math-cr-v1` (Appendix B.4), which supersedes `invar-trig-f32-v1`, and every engine returns the same 32-bit word. `docs/design/v02-f64math.md`
+[N5.8.5] `trunc_i32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::trunc_i32`
+[N5.8.6] `sqrt`, `sin` and `cos` on `f32` are correctly rounded under the default math contract `invar-math-cr-v1` (Appendix B.4), which supersedes `invar-trig-f32-v1`, and every engine returns the same 32-bit word. `src/math.rs`
 
 ```invar outcome=value:7
 fn nudge(x: f32) -> f32 { return x + 0.2; }
@@ -1031,7 +1031,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 11.3 CPU parallel and admitted regions
 
-[N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain-v1.md`
+[N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
 [N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
 [N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/issue_m2_03.rs::issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws`
 [N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers`
@@ -1059,13 +1059,13 @@ fn main() -> i32 {
 
 ### 11.5 GPU targets
 
-[N11.5.1] Forced `cuda` or `metal` fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for missing hardware, an ineligible region or a false guard, and never returns a CPU result as a device pass. `docs/explain-device-v1.md`
+[N11.5.1] Forced `cuda` or `metal` fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for missing hardware, an ineligible region or a false guard, and never returns a CPU result as a device pass. `docs/explain.md`
 [N11.5.2] CUDA admits NVRTC 12.4 or newer in the 12.x series and compute capability 5.0 or newer, compiled for the explicit `sm` of device zero. `docs/cuda-target-v1.md`
 [N11.5.3] Metal needs Apple7 or newer with MSL 3.1, a kernel needing more than 31 buffer arguments is Metal-ineligible, and the general-net task cascade additionally needs MSL 3.2 and otherwise uses its staged form. `docs/gnet-task-v01.md`
 [N11.5.4] The device IR admits `u32` maps (fused chains of 2 to 16 stages), reductions and affine scans through one verifier, and only a verified plan reaches code emission. `tests/issue_m3_04_cuda_reductions_scans.rs::issue_m3_04_cuda_reductions_scans_graph_plans_lower_to_shared_ir`
 [N11.5.5] Unknown completion is `CUDA_PENDING` or `METAL_PENDING`, permits no CPU replay, and keeps loans and quarantine. `tests/issue_m3_05_guarded_gpu_integration.rs::issue_m3_05_gpu_failure_prefix_and_quarantine`
-[N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain-device-v1.md`
-[N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md` `docs/remaining-work.md`
+[N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain.md`
+[N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md`
 [N11.5.8] Map DAGs, wrapping reductions and affine scans admit up to 2^28 `u32` elements on the device. `docs/cuda-target-v1.md`
 [N11.5.9] A device schedule is selected from at most 32 enumerated bounded candidates, each passing the physical device verifier, and the existing measured cost model breaks equal costs by enumeration order. `docs/bounded-schedule-dispatch.md`
 
@@ -1089,7 +1089,7 @@ fn main() -> i32 {
 
 [N13.1.1] Diagnostics use the frozen schema `invar-diagnostics-v1` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v1.schema.json`
 [N13.1.2] A diagnostic has a stable `code`, a `severity`, a message, a primary span with byte offsets and one-based line and column, secondary spans, notes and suggested fixes. `tests/issue_ai_01_machine_diagnostics/contracts.rs::issue_ai_01_machine_diagnostics_positions_and_fix`
-[N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `docs/issues/next/AI-01-machine-diagnostics-explain-schema.md`
+[N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `schema/diagnostic-codes-v1.json`
 [N13.1.4] The status is one of `ok`, `source_error`, `tool_error`, `trap` and `evaluation_limit`, with exit codes 0, 1, 2, 3 and 4. `schema/invar-diagnostics-v1.schema.json`
 [N13.1.5] Version 2 of the diagnostics schema exists for the unit-conversion trap, and the v1 file stays committed. `schema/invar-diagnostics-v2.schema.json`
 
@@ -1097,18 +1097,18 @@ fn main() -> i32 {
 
 [N13.2.1] Every emitted code is in a committed registry, `schema/diagnostic-codes-v1.json` plus the extension files, and a test scans the source in both directions. `tests/issue_ai_01_machine_diagnostics/registry.rs::issue_ai_01_machine_diagnostics_registry_covers_emitted_literals`
 [N13.2.2] Each code declares `reachability` of `source`, `invariant` or `external`, and checked source never emits an `invariant` code. `tests/issue_ai_01_machine_diagnostics/documents.rs::issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes`
-[N13.2.3] A code is never reused or renamed, and only `source` codes carry fixes. `docs/issues/next/AI-01-machine-diagnostics-explain-schema.md`
+[N13.2.3] A code is never reused or renamed, and only `source` codes carry fixes. `schema/diagnostic-codes-v1.json`
 [N13.2.4] The `S1xxx` ranges are 1000 system dialect, 1100 to 1399 graph checks, 1400 foreign manifests, 1500 ROS 2, 1600 robot and cell, 1700 vocabulary, 1800 acceptance and 1900 reserved. `schema/diagnostic-codes-v1.json`
 [N13.2.5] The schema files are pinned by digest, so a change without a version bump fails. `tests/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_schema_digests_are_frozen`
 
 ### 13.3 Explain
 
-[N13.3.1] `invar explain PATH --format json` emits `invar-explain-v1` with `source_identity` and `regions`, and success is exit 0 even when every region is rejected. `docs/explain-v1.md`
+[N13.3.1] `invar explain PATH --format json` emits `invar-explain-v1` with `source_identity` and `regions`, and success is exit 0 even when every region is rejected. `docs/explain.md`
 [N13.3.2] Each region has `function`, `span`, `status`, `first_rejected_obligation`, `rule_revision`, `numeric_policy`, `chosen_plan`, `fallback_plan`, `runtime_guard`, `facts`, `execution` and ordered `obligations`. `schema/explain-v1.schema.json`
-[N13.3.3] Obligation evidence is `checked_invariant`, `trusted_rule`, `runtime_guard` or `unknown`, and unknown evidence rejects admission. `docs/explain-v1.md`
+[N13.3.3] Obligation evidence is `checked_invariant`, `trusted_rule`, `runtime_guard` or `unknown`, and unknown evidence rejects admission. `docs/explain.md`
 [N13.3.4] `explain --engine cuda|metal|auto` adds `device_execution` described by `invar-explain-device-v1`. `schema/invar-explain-device-v1.schema.json`
-[N13.3.5] Persisted admission documents are descriptive, and validation re-analyses current MIR and source bytes. `docs/explain-v1.md`
-[N13.3.6] `source_identity` is `fnv1a64:` over the source bytes and establishes identity and not authenticity. `docs/explain-v1.md`
+[N13.3.5] Persisted admission documents are descriptive, and validation re-analyses current MIR and source bytes. `docs/explain.md`
+[N13.3.6] `source_identity` is `fnv1a64:` over the source bytes and establishes identity and not authenticity. `docs/explain.md`
 
 ```invar outcome=value:0
 fn main() -> i32 { return 0; }
@@ -1123,7 +1123,7 @@ fn main() -> i32 { return 0; }
 [N14.1.5] The reference array entry copies, the GIL is not released, and external array owners, scheduled host arrays and `take` buffers are unavailable. `crates/invar-python/src/lib.rs::external_array_owners`
 [N14.1.6] Exports accept `read` and `mut` `Array<i32>`, `Array<u32>` and `Array<f32>` parameters, which `native-serial` passes zero-copy at the NumPy address with rollback on failure and the reference path copies. `crates/invar-python/src/lib.rs::array_export_paths`
 [N14.1.8] `CheckedModule.run_main` runs `main` on any engine of `reference`, `native-serial`, `cpu-parallel`, `auto`, `cuda` and `metal`, and `receipt()` returns the receipt of the last successful `run_main`. `crates/invar-python/src/module.rs::run_main`
-[N14.1.7] The private wheel qualification is Linux x86_64 with glibc 2.41 and CPython 3.12 only. `docs/python-native-wheel.md`
+[N14.1.7] The private wheel qualification is Linux x86_64 with glibc 2.41 and CPython 3.12 only. `crates/invar-python/README.md`
 
 ## 15. Example library and coverage
 
@@ -1136,7 +1136,7 @@ fn main() -> i32 { return 0; }
 
 Note: the open content in this appendix is not current behaviour, and no statement above relies on it.
 Note: AI-02 depends on L1-06, S1-06 and M5-03, none of which is closed, so the spec must be re-verified after each of them closes.
-Note: the open set is every open `release:v0.1` issue plus the GNET slices #47, #45 and #51, and `docs/remaining-work.md` records each item's evidence, remaining gate and blocker.
+Note: the open set is every open `release:v0.1` issue plus the GNET slices #47, #45 and #51, and each GitHub issue records its evidence, remaining gate and blocker.
 
 | Issue | Open content | Spec sections that change when it closes |
 | --- | --- | --- |
@@ -1197,7 +1197,7 @@ fn main() -> i32 {
 [NB.2.1] `sort(xs)`, `sort_by_key(keys, values)`, `argsort(xs)` and `segmented_sort(xs, offsets)` are stable, sort keys of `i32`, `u32` or `f32`, and `argsort` returns an owned `Array<u32>` of original indices. `spec/bootstrap.md`
 [NB.2.2] Float keys use IEEE totalOrder after each NaN becomes `0x7fc00000`, signed zeros stay distinct, and payloads, which may also be `Array<Bool>`, keep their bits. `spec/bootstrap.md`
 [NB.2.3] A key and value length mismatch or invalid segment offsets trap with `INDEX_OUT_OF_BOUNDS` at the call span before any write. `spec/bootstrap.md`
-[NB.2.4] A report with an explicit sort site uses `invar-explain-v3`, which names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain-v3.md`
+[NB.2.4] A report with an explicit sort site uses `invar-explain-v3`, which names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain.md`
 
 ```invar outcome=value:7
 fn main() -> i32 {
@@ -1222,12 +1222,12 @@ fn main() -> i32 {
 
 ### B.3 Spatial grid queries
 
-[NB.3.1] `voxel_grid_build(xs, ys, zs, cell)` copies read-borrowed `Array<f32>` coordinates into an opaque affine `VoxelGrid`, and a point with any non-finite coordinate is excluded and counted by `grid_excluded(grid)`. `docs/design/v02-spatial.md`
+[NB.3.1] `voxel_grid_build(xs, ys, zs, cell)` copies read-borrowed `Array<f32>` coordinates into an opaque affine `VoxelGrid`, and a point with any non-finite coordinate is excluded and counted by `grid_excluded(grid)`. `src/spatial/runtime.rs`
 [NB.3.2] `radius_neighbors(grid, qx, qy, qz, radius, max_k)` returns `Neighbors { counts, idx }` with true counts that are never clipped to the stride, using strict f32 `d2 <= radius * radius`. `spec/bootstrap.md`
 [NB.3.3] `knn(grid, qx, qy, qz, k)` returns `Knn { idx, d2 }` ordered by squared distance and then original index, and pads missing slots with `u32::MAX` and positive infinity. `spec/bootstrap.md`
 [NB.3.4] A nonpositive or non-finite cell or an out-of-range cell index traps with `INTEGER_OVERFLOW`, and coordinate arrays of different lengths trap with `INDEX_OUT_OF_BOUNDS`. `spec/bootstrap.md`
 [NB.3.5] A `VoxelGrid` parameter is `read` or `take` and never `mut`, and query result arrays leave their record only through `move result.field`. `spec/bootstrap.md`
-[NB.3.6] A report with a spatial site uses `invar-explain-v4`, whose sites name the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain-v4.md`
+[NB.3.6] A report with a spatial site uses `invar-explain-v4`, whose sites name the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain.md`
 
 ```invar outcome=value:3
 fn main() -> i32 {
@@ -1256,12 +1256,12 @@ fn main() -> i32 {
 
 ### B.4 Binary64 and the correctly rounded math library
 
-[NB.4.1] `f64` is a primitive beside `f32` under `strict-f64-v1`, with `Array<f64>`, record and payload fields, round to nearest even, gradual underflow and no contraction except an explicit `fma`. `docs/design/v02-f64math.md`
+[NB.4.1] `f64` is a primitive beside `f32` under `strict-f64-v1`, with `Array<f64>`, record and payload fields, round to nearest even, gradual underflow and no contraction except an explicit `fma`. `src/numeric_contract/binary64.rs`
 [NB.4.2] A decimal literal may carry an `f32` or `f64` suffix, and an unsuffixed literal takes its float type from context and otherwise defaults to `f32`. `spec/grammar.ebnf`
-[NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `docs/design/v02-f64math.md`
-[NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded. `docs/design/v02-f64math.md`
-[NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `docs/design/v02-f64math.md`
-[NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `docs/design/v02-f64math.md`
+[NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `src/eval/floating.rs::i32_from_f64`
+[NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded. `src/math.rs`
+[NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `src/math.rs`
+[NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `src/engine.rs::metal-no-f64`
 [NB.4.7] An `extern c fn` of N7.3.1 also accepts `f64` as a value argument, the result `T` stays `i32`, `u32`, `Bytes` or `String`, and an `f64` result or any `f32` argument or result is `TYPE_MISMATCH`. `tests/issue_l1_04_bytes_strings_cabi.rs::v02_f64_foreign_scalar_argument_matches_its_oracle` `src/check.rs::valid_result`
 [NB.4.8] An `f64` argument has tag `INV_TAG_F64_V1` (5) and mode `INV_MODE_VALUE_V1`, and its `scalar` holds the binary64 encoding, which C reads with `memcpy` into a `double`. `include/invar_foreign_v1.h` `tests/fixtures/l1_04/foreign.c`
 Note: the binary64 CUDA kernels whose CORE-MATH sources declare an anonymous struct inside a union (`cos`, `tan`, `atan2`, `log`, `log10` and `pow`) need NVRTC 12.9 or newer, every other CUDA unit keeps the 12.4 floor of N11.5.2, and a rewrite for NVRTC 12.4 and 12.6 is deferred to the Jetson Orin target (#21).
@@ -1291,4 +1291,4 @@ fn main() -> i32 {
 [NB.5.3] Placement owns `--engine auto` only when one of those flags is given or the live host's default profile is not a matching provisional one, and every other auto run keeps the established path of N11.5.6, whose documents take the versions of NB.5.6. `src/auto_command.rs::placement_requested` `tests/v02_placement.rs::auto_stays_on_the_established_path_unless_placement_is_asked_for`
 [NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/v02_placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
-[NB.5.6] A placement run receipt is `invar-diagnostics-v3` with a `placement` object, and `explain --engine auto` under placement emits `invar-explain-v5`, which is v4 plus `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run emits the same versions without `placement`, recording `auto_path` as `established`. `docs/explain-v5.md` `schema/explain-v5.schema.json`
+[NB.5.6] A placement run receipt is `invar-diagnostics-v3` with a `placement` object, and `explain --engine auto` under placement emits `invar-explain-v5`, which is v4 plus `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run emits the same versions without `placement`, recording `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`

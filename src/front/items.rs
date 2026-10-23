@@ -1,6 +1,6 @@
 //! Item prefixes the parser looks ahead at: a foreign function, and the
 //! `#[numeric(fold = "tier")]` attribute with an optional `pub`
-//! (`docs/numeric-v2.md`).
+//! (`docs/numeric.md`).
 
 use super::*;
 use crate::numeric_contract::FoldTier;

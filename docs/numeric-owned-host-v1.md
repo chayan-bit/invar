@@ -100,7 +100,7 @@ not claim direct named-source array-return comparison.
 Nominal-owned numeric extensions, continuation/resume, speculation, device
 execution, external owner arguments and public C/Python array APIs remain outside
 this host. CPU continuation/resume of the same direct owners is a separate ABI11
-host; see [remaining work](remaining-work.md). Existing ABI8 and ABI9 hosts and their admission rules are unchanged.
+host. Existing ABI8 and ABI9 hosts and their admission rules are unchanged.
 No CUDA/Metal/robot hardware qualification or performance claim follows from
 these CPU checks. Global allocator aborts, OS kills, and malicious native code
 are not recoverable guarantees of this interface.

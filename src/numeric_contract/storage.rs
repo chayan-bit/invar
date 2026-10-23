@@ -1,4 +1,4 @@
-//! Storage-only narrow types of numeric policy v2 (`docs/numeric-v2.md`).
+//! Storage-only narrow types of numeric policy v2 (`docs/numeric.md`).
 //!
 //! `f16` (IEEE binary16) and `bf16` widen exactly to binary32 and narrow by
 //! one round-to-nearest-even; `i8` and `u8` widen exactly and narrow with an
