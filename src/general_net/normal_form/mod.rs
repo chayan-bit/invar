@@ -1,5 +1,5 @@
 //! P1b: law-directed parallel normal form (PNF) with checked law certificates
-//! (`docs/design/net-parallel-laws-v01.md` sections 2, 3 and 6; v0.1 law set L1-L7, L9-L15, L19, L20), plus the
+//! (`docs/net-normal-form-v01.md`; v0.1 law set L1-L7, L9-L15, L19, L20), plus the
 //! cost-gated L8 and large-k L5 of #59 (see [`COST_UNCALIBRATED`]).
 //!
 //! [`extract`] derives the PNF from the region partition of a verified net. Every

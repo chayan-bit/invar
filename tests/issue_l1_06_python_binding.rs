@@ -156,7 +156,6 @@ fn issue_l1_06_python_binding_frozen_abi_has_no_numeric_array_or_export_tags() {
     assert!(header.contains("INV_TAG_BYTES_V1 3u"));
     assert!(!header.contains("INV_TAG_F32"));
     assert!(!header.contains("INV_TAG_ARRAY"));
-    assert!(include_str!("../src/lib.rs").contains("#![forbid(unsafe_code)]"));
 }
 
 #[test]

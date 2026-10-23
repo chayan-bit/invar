@@ -369,7 +369,12 @@ fn issue_s1_06_integration_start_public_cli_emits_complete_ros_workspace() {
         );
         let config = output.join("src/invar_cell_bringup/config");
         assert!(config.join("mjcf/scene.xml").is_file());
-        assert!(config.join("mjcf/assets").is_dir());
+        // Only the Panda keeps mesh assets (collision meshes); the UR5e is all primitives.
+        assert_eq!(
+            config.join("mjcf/assets").is_dir(),
+            name == "panda",
+            "{name}"
+        );
         let yaml = std::fs::read_to_string(config.join("controllers.yaml")).unwrap();
         assert!(yaml.contains(first_joint), "{name}: selected joint");
         let urdf = std::fs::read_to_string(config.join("ros2_control.urdf")).unwrap();

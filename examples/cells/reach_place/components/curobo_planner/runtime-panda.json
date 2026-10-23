@@ -154,7 +154,7 @@
       ]
     },
     "reference_implementation_sha256": "20d3f960b14212c09eace96bc98500272c1296c013db3600d2b81f1eba172142",
-    "reference_model_sha256": "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b",
+    "reference_model_sha256": "93a8d8e137ae43a33e7499ff627c1f633fb27d94f58ea7545b97c8f65027db1d",
     "schema": "invar-tool-projection-v1",
     "source_scene_sha256": "4b08c2e5108f0ed67fa689e096e58850210130c3e6ef889b1e22822d369fd8c3"
   }

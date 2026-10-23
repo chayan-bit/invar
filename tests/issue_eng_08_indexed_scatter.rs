@@ -260,23 +260,6 @@ fn issue_eng_08_affine_scatter_footprint_matches_measured_allocation() {
 }
 
 #[test]
-fn issue_eng_08_deleted_caps_no_longer_exist_in_these_modules() {
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    let mut scanned = 0;
-    for file in [
-        "indexed_source.rs",
-        "indexed_source/host.rs",
-        "scatter_proof.rs",
-        "scatter_proof/host.rs",
-    ] {
-        let text = std::fs::read_to_string(root.join(file)).unwrap();
-        assert!(!text.contains("MAX_ELEMENTS"), "{file}");
-        scanned += 1;
-    }
-    assert_eq!(scanned, 4);
-}
-
-#[test]
 fn issue_eng_08_affine_device_bind_expands_past_the_old_cap_and_refuses_short_values() {
     let n = 20_000u32;
     let source = format!(

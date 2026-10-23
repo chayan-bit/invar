@@ -26,7 +26,7 @@ pub(crate) const BINARY64: Format = Format {
     precision: 53,
     max_exponent: 1023,
 };
-/// IEEE binary16, a storage-only format (`docs/numeric-v2.md`).
+/// IEEE binary16, a storage-only format (`docs/numeric.md`).
 pub(crate) const BINARY16: Format = Format {
     precision: 11,
     max_exponent: 15,

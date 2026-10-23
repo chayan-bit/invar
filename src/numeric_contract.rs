@@ -18,7 +18,7 @@ pub use fold::{FoldTier, LoweredFolds};
 /// explicit `tc_mul_add` contraction contract (D5 as amended); its reference
 /// and bound live in `invar_device::tc`, and every strict consumer compares
 /// against `STRICT_F32` or `STRICT_F64` and so refuses it. Version 2
-/// (`docs/numeric-v2.md`) adds the binary32 fold tiers `TREE_F32`,
+/// (`docs/numeric.md`) adds the binary32 fold tiers `TREE_F32`,
 /// `EXACT_F32` and `RELAXED_F32`; strict v2 spellings resolve to the v1
 /// constants, so a strict program has one identity.
 #[derive(Clone, Copy, PartialEq, Eq)]

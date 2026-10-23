@@ -7,7 +7,7 @@
 //! Both harnesses also count how often the baseline differs from the
 //! correctly rounded result.
 //!
-//! `cargo test --release [--features cuda] --test issue_v02_math_bench --
+//! `cargo test --release [--features cuda] --bench v02_math_bench --
 //! --ignored --nocapture --test-threads 1`
 use invar::{
     math::{MathFn, eval_f32, eval_f64},

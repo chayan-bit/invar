@@ -3,7 +3,7 @@
 Usage: python3 deep_select.py PROTOTYPE_DIR [CORPUS_DIR] > deep.json
 
 PROTOTYPE_DIR holds `engine.py` and `laws.py` from Appendix C of the normal-form design
-(`docs/design/net-parallel-laws-v01.md`).
+(`docs/design/net-parallel-laws-v01.md`, in git history up to commit `85dc53f`).
 For every program with a ladder (divide, compose divide-of-branch and
 forkjoin), each chain is walked in ascending order and the first rung whose
 law-directed average parallelism W/S (model c) reaches TARGET is a
