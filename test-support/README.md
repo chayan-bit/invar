@@ -79,3 +79,15 @@ Product limits are intentionally unchanged: `src/native.rs`,
 and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
 real contract; GPU completion polling and semantic timing fixtures are not
 compiled-child harness watchdogs.
+
+## Corpus sample
+
+`corpus_sample.rs` walks the source corpus and picks the deterministic sample that pull-request CI runs for the exhaustive corpus sweeps: the device CPU-model corpus, the GNET v0.1 corpus denominators and the #54 selection-parity passes (which also keep every example, since the examples reach every family).
+A program is kept when the 64-bit FNV-1a hash of its path falls in bucket 0 of 8, and each directory category the hash misses keeps its lowest-hash program, which the sampler asserts.
+Count floors written for the whole corpus are divided by 8 for the sample; agreement checks are unchanged.
+`INVAR_FULL_CORPUS=1` runs every program; `just test` and CI on pushes to main set it.
+
+## Term oracle
+
+`term_oracle.rs` is test support, included by path, with no production API.
+It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `issue_m1_04`, `issue_m1_05` and `issue_m4_07_typed_bounded_scan` use as independent oracles.

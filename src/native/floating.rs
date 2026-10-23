@@ -209,7 +209,7 @@ impl Ir<'_> {
         let first = float_format(arg_types.first().and_then(Option::as_ref));
         // C4 interim: f32 sin, cos and sqrt stay on the invar-trig-f32-v1
         // helpers lowered by the ordinary call arms.
-        let trig = matches!(name, "sin" | "cos" | "sqrt") || crate::math::trig_f32_v1(name);
+        let trig = matches!(name, "sin" | "cos" | "sqrt");
         if trig && matches!(arg_types.first(), Some(Some(Type::F32))) {
             return Ok(None);
         }

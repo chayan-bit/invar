@@ -36,9 +36,7 @@ static_assert(CHAR_BIT==8 && sizeof(gnet_u)==8 && sizeof(gnet_w)==8 && ULLONG_MA
             _ => None,
         })
         .collect::<Vec<_>>();
-    let trig = calls
-        .iter()
-        .any(|n| matches!(crate::math::f32_trig_base(n), "sin" | "cos"));
+    let trig = calls.iter().any(|n| matches!(*n, "sin" | "cos"));
     let root = calls.contains(&"sqrt");
     if trig || root {
         w.push(match p.target {
@@ -97,11 +95,11 @@ pub(super) fn operation(
         }
         O::Call { name, args }
             if matches!(
-                crate::math::f32_trig_base(name),
+                name.as_str(),
                 "fma" | "f32_from_i32" | "f32_from_u32" | "sin" | "cos" | "sqrt"
             ) =>
         {
-            let name = crate::math::f32_trig_base(name);
+            let name = name.as_str();
             let helper = match name {
                 "fma" => "gnet_f32_fma",
                 "f32_from_i32" => "gnet_f32_from_i32",

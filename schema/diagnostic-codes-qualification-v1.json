@@ -5,7 +5,6 @@
     {
       "code": "M5_ADAPTER_OUTPUT",
       "meaning": "device qualification adapter returned an output of the wrong kind",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; an adapter whose output type differs from its case is refused.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -13,7 +12,6 @@
     {
       "code": "M5_CORPUS_DUPLICATE",
       "meaning": "device qualification corpus contains a duplicate invocation id",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The bounded device corpus is assembled from family generators, not from checked source; a repeated invocation id is refused.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_corpus_all_families_prepare"
@@ -21,7 +19,6 @@
     {
       "code": "M5_CORPUS_LIMIT",
       "meaning": "device qualification corpus exceeds its case bound",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The bounded device corpus is assembled from family generators, not from checked source; a corpus above its case bound is refused.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_corpus_all_families_prepare"
@@ -29,7 +26,6 @@
     {
       "code": "M5_DEVICE_COMPLETION_UNKNOWN",
       "meaning": "device completion was not confirmed",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; unconfirmed completion is reported, never counted as a pass.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -37,7 +33,6 @@
     {
       "code": "M5_DEVICE_DISAGREEMENT",
       "meaning": "device output words differ from the independent expectation",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; any word that differs from the independent expectation fails the row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -45,7 +40,6 @@
     {
       "code": "M5_DEVICE_FEATURE_REQUIRED",
       "meaning": "the requested qualification target needs its Cargo feature and host",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a binary built without the cuda or metal feature, or on another host, refuses the target.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -53,7 +47,6 @@
     {
       "code": "M5_DEVICE_INPUT_LIMIT",
       "meaning": "device qualification input exceeds a device limit",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; inputs above the device admission limits are refused.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -61,7 +54,6 @@
     {
       "code": "M5_DEVICE_LAUNCH",
       "meaning": "device kernel launch failed",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a failed launch is reported as such.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -69,7 +61,6 @@
     {
       "code": "M5_DEVICE_NOT_REQUESTED",
       "meaning": "the device rows were not requested in this CPU qualification run",
-      "deprecated": false,
       "reachability": "external",
       "justification": "A CPU-only qualification run records every device row as unavailable by request; this is an environment outcome, not source behaviour.",
       "boundary_test": "issue_ai_01_machine_diagnostics_qualification_device_rows_not_requested"
@@ -77,23 +68,13 @@
     {
       "code": "M5_DEVICE_OOM",
       "meaning": "device allocation failed",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; device memory exhaustion is reported, never retried on the CPU as a pass.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
     },
     {
-      "code": "M5_DEVICE_PREREQUISITES_PENDING",
-      "meaning": "retired spelling of M5_DEVICE_NOT_REQUESTED",
-      "deprecated": true,
-      "reachability": "external",
-      "justification": "Retired when the device adapters landed; the committed CPU qualification report still carries it on its device rows, so it stays registered.",
-      "boundary_test": "issue_ai_01_machine_diagnostics_qualification_retired_code_stays_in_evidence"
-    },
-    {
       "code": "M5_DEVICE_REFUSAL",
       "meaning": "device path refused the work",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a typed device refusal is reported per row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -101,7 +82,6 @@
     {
       "code": "M5_DEVICE_TOOLCHAIN",
       "meaning": "device toolchain failed or mismatched",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a device compiler or library mismatch is reported per row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -109,7 +89,6 @@
     {
       "code": "M5_DEVICE_UNAVAILABLE",
       "meaning": "no usable qualification device could be opened",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a host without the GPU refuses the target.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -117,7 +96,6 @@
     {
       "code": "M5_F32_ORACLE",
       "meaning": "the strict f32 CPU oracle refused a device case",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The strict f32 oracle evaluates generated device cases outside checked source; a case it refuses cannot be qualified.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_corpus_all_families_prepare"
@@ -125,7 +103,6 @@
     {
       "code": "M5_FREEZE_PREREQUISITES_PENDING",
       "meaning": "bounded adapters cannot close the frozen-shape prerequisites",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification is bounded; criterion (c) and the frozen shapes stay pending until the M5-01 freeze, outside any source program.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -133,7 +110,6 @@
     {
       "code": "M5_GPU_UNAVAILABLE",
       "meaning": "a GPU-required qualification report has rows without device execution",
-      "deprecated": false,
       "reachability": "external",
       "justification": "The --require-gpu gate is an environment outcome: rows that did not execute on the requested device fail it.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -141,7 +117,6 @@
     {
       "code": "M5_INDEPENDENT_EXPECTATION",
       "meaning": "a case's independent expectation could not be computed",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Independent expectations are computed by host code outside checked source; a case without one is refused.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_corpus_all_families_prepare"
@@ -149,7 +124,6 @@
     {
       "code": "M5_INTERACTION",
       "meaning": "the interaction-net encoding or verification of a qualified program failed",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "The harness encodes only programs that already passed the checker and MIR verifier, so a failing encoding is a harness or engine defect.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
@@ -157,7 +131,6 @@
     {
       "code": "M5_INVALID_DIAGNOSTIC_SPAN",
       "meaning": "a refusal carries a span outside the refused input",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "The front end bounds every refusal span by the input it refused; a span past the input end or reversed is a front-end defect the fuzz denominator would expose.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_refusal_shape_faults"
@@ -165,7 +138,6 @@
     {
       "code": "M5_LIBRARY_DISAGREEMENT",
       "meaning": "a library baseline output differs from its reference",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a library fixture whose full output is not exact fails its row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_metal_gpu"
@@ -173,7 +145,6 @@
     {
       "code": "M5_LIBRARY_FAMILY_API_MISSING",
       "meaning": "no library baseline exists for this family on this target",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Library baselines are external fixtures; a family with no fixture API on a target is recorded as unavailable.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_metal_gpu"
@@ -181,7 +152,6 @@
     {
       "code": "M5_LIBRARY_NUMERIC_POLICY_PENDING",
       "meaning": "the library baseline's numeric policy is not yet ruled",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Library baselines are external fixtures; a matrix baseline awaiting its numeric policy ruling is recorded as pending.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_metal_gpu"
@@ -189,7 +159,6 @@
     {
       "code": "M5_LIBRARY_REFUSAL",
       "meaning": "a library baseline fixture was refused by its runner",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a fixture refused by the family baseline runner fails its row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_metal_gpu"
@@ -197,7 +166,6 @@
     {
       "code": "M5_LIBRARY_RUNNER_REQUIRED",
       "meaning": "no library fixture directory was supplied",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Library baselines are external fixtures; without an absolute fixture directory the library rows stay pending.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_metal_gpu"
@@ -205,7 +173,6 @@
     {
       "code": "M5_MATRIX",
       "meaning": "matrix device case could not be prepared or emitted",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a matrix contract that cannot be emitted for the device fails its row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -213,7 +180,6 @@
     {
       "code": "M5_MISSING_REFUSAL",
       "meaning": "a device path accepted input it must refuse",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a device path that accepts a deliberately invalid input fails the boundary check.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -221,7 +187,6 @@
     {
       "code": "M5_MUTATION_SETUP",
       "meaning": "a mutation control could not build its unmutated baseline",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "Mutation controls start from fixed valid programs that always encode and verify; a baseline that fails to build is a harness defect.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_mutation_setup_fault"
@@ -229,7 +194,6 @@
     {
       "code": "M5_MUTATION_SURVIVED",
       "meaning": "a deliberate wrong-result mutation was not detected",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Mutation controls run inside the qualification harness, outside checked source; a surviving mutation fails the harness.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -237,7 +201,6 @@
     {
       "code": "M5_NATIVE",
       "meaning": "the native engine failed to compile or run a qualified program",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "The native engine runs only MIR that already verified and agreed with the reference; a build, link or host failure is an engine defect.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_native_fault"
@@ -245,7 +208,6 @@
     {
       "code": "M5_NET",
       "meaning": "the executable-net lowering or verification of a qualified program failed",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "The harness lowers only programs that already passed the checker, so a net that fails to lower, verify or compile is an engine defect.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
@@ -253,7 +215,6 @@
     {
       "code": "M5_NET_ORACLE",
       "meaning": "the net oracle refused a verified candidate",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "The oracle runs only the net and proof the harness just verified, so a refusal means a stale or mismatched proof, an engine defect.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
@@ -261,7 +222,6 @@
     {
       "code": "M5_NVRTC_REQUIRED",
       "meaning": "the CUDA target needs an absolute NVRTC helper path",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; CUDA qualification refuses to run without an absolute existing NVRTC helper.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -269,7 +229,6 @@
     {
       "code": "M5_PREFLIGHT_MISMATCH",
       "meaning": "the device is not the pinned qualification target",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; any device other than the pinned target is refused before any work.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -277,7 +236,6 @@
     {
       "code": "M5_QUARANTINE",
       "meaning": "unconfirmed device work was not quarantined",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; the quarantine check fails a row whose unconfirmed work escaped quarantine.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -285,7 +243,6 @@
     {
       "code": "M5_REPORT_INVALID",
       "meaning": "a qualification report is missing required rows or fields",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Qualification reports are harness documents, not source output; an incomplete report is refused.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -293,7 +250,6 @@
     {
       "code": "M5_REPORT_IO",
       "meaning": "a qualification report could not be written without replacing an existing one",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Report publication touches the host filesystem; a missing directory, a full disk or an existing report is refused and never overwritten.",
       "boundary_test": "issue_ai_01_machine_diagnostics_qualification_report_boundaries"
@@ -301,7 +257,6 @@
     {
       "code": "M5_REPORT_LIMIT",
       "meaning": "a qualification report exceeds its 4 MiB bound",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Reports are harness documents bounded by the publisher, not by checked source; an oversized report is refused before any file is created.",
       "boundary_test": "issue_ai_01_machine_diagnostics_qualification_report_boundaries"
@@ -309,7 +264,6 @@
     {
       "code": "M5_SEMANTIC_DISAGREEMENT",
       "meaning": "two engines disagree on a program's observable semantics",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "Every engine must reproduce the reference observation exactly; a disagreement is an engine defect, never a property of the source program.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
@@ -317,7 +271,6 @@
     {
       "code": "M5_SOURCE_DEVICE_INELIGIBLE",
       "meaning": "the source program has no device-eligible region",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a source case with no device-eligible region is reported as ineligible, not as a pass.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -325,7 +278,6 @@
     {
       "code": "M5_STENCIL",
       "meaning": "stencil device case could not be prepared",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a stencil contract outside its device bounds fails its row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -333,7 +285,6 @@
     {
       "code": "M5_STRICT_F32_CPU_FALLBACK",
       "meaning": "a strict f32 device case fell back to the CPU for subnormal handling",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a device that must hand subnormal work back to the CPU records that row as a fallback, never as a device pass.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -341,7 +292,6 @@
     {
       "code": "M5_SUMMARY",
       "meaning": "bounded summary device case could not be prepared",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a bounded summary contract that cannot run on the device fails its row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -349,7 +299,6 @@
     {
       "code": "M5_TARGET_NOT_EXECUTED",
       "meaning": "the target's device rows were not executed",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device rows are recorded as not executed when no hardware run was requested; this is an environment outcome, not source behaviour.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls"
@@ -357,7 +306,6 @@
     {
       "code": "M5_TC_BOUND",
       "meaning": "Tensor Core output exceeds its error bound",
-      "deprecated": false,
       "reachability": "external",
       "justification": "Device qualification runs on real GPU hardware outside checked Invar source; a tc-f16-f32-v1 result outside the amended D5 bound fails its row.",
       "boundary_test": "issue_m5_02_full_pipeline_qualification_cuda_gpu"
@@ -365,7 +313,6 @@
     {
       "code": "M5_UNEXPECTED_REFUSAL",
       "meaning": "the front end refused a corpus program the corpus did not expect to be refused",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "Corpus programs state their expected outcome; an unexpected refusal means the corpus and the front end disagree, a harness defect.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
@@ -373,7 +320,6 @@
     {
       "code": "M5_UNTYPED_REFUSAL",
       "meaning": "a refusal lacks a code or a source span",
-      "deprecated": false,
       "reachability": "invariant",
       "justification": "The front end gives every refusal a code and every source error a span; an untyped refusal is a front-end defect the fuzz denominator would expose.",
       "fault_test": "issue_ai_01_machine_diagnostics_qualification_refusal_shape_faults"
@@ -381,7 +327,6 @@
     {
       "code": "NATIVE_FEATURE_REQUIRED",
       "meaning": "the native qualification rows need a binary built with the native feature",
-      "deprecated": false,
       "reachability": "external",
       "justification": "A qualification binary built without the native feature records the native rows as unavailable; this is a build outcome, not source behaviour.",
       "boundary_test": "issue_ai_01_machine_diagnostics_qualification_native_rows_follow_the_feature"

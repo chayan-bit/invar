@@ -167,7 +167,7 @@ fn issue_m5_02_full_pipeline_qualification_missing_gpu_and_report_failure_are_at
     let failure = json!({"status":"failed"});
     assert!(qualification::publish(&path, &failure).is_err());
     assert!(!path.exists());
-    let complete = json!({"status":"cpu_semantics_passed_device_qualification_pending","programs":[{"frontend":"accepted","id":"control","rows":[{"engine":"cuda-generated","status":"unavailable","diagnostic":"M5_DEVICE_PREREQUISITES_PENDING"}]}]});
+    let complete = json!({"status":"cpu_semantics_passed_device_qualification_pending","programs":[{"frontend":"accepted","id":"control","rows":[{"engine":"cuda-generated","status":"unavailable","diagnostic":"M5_DEVICE_NOT_REQUESTED"}]}]});
     assert_eq!(
         qualification::require_gpu(&complete).unwrap_err().code,
         "M5_GPU_UNAVAILABLE"

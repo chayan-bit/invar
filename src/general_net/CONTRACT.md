@@ -120,7 +120,7 @@ primitive agents using at most 64 heap frames, without recursive host calls or
 calling either existing evaluator. Scalar operators use explicit checked or
 wrapping arithmetic, including MIN%-1 = 0, and source operator spans.
 
-Fuel charges retained MIR Tick agents. Per `spec/bootstrap.md`, evaluating a bare
+Fuel charges retained MIR Tick agents. Per spec N3.6.1, evaluating a bare
 owner name in a consuming return context charges its expression step before
 transferring the owner slot. The source evaluator charges before taking the slot;
 the MIR builder retains Tick before Move, and checked-source net lowering does

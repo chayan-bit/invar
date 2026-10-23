@@ -17,6 +17,9 @@ env:
   CARGO_INCREMENTAL: 0
   # Test-only scheduling allowance for shared runners; semantic fuel and product bounds stay fixed.
   INVAR_TEST_TIMEOUT_SCALE: 8
+  # Pull requests run a deterministic 1-in-8 sample of the corpus sweeps
+  # (test-support/corpus_sample.rs); pushes to main run the whole corpus.
+  INVAR_FULL_CORPUS: ${{ github.event_name == 'push' && '1' || '0' }}
 
 jobs:
   lint:
@@ -56,9 +59,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # One test, issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles every corpus program to C++ three times (about 1 h on a
-        # 2-vCPU runner). It runs alone in its own job, built from its own test binary only, and is
-        # excluded from the four shards below; no test is skipped overall.
+        # One test, issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles each corpus program to C++ three times
+        # (about 3 min on the pull-request sample, about 20 min on the whole corpus). It runs alone in its own job, built from
+        # its own test binary only, and is excluded from the four shards below; no test is skipped overall.
+        # "Test (CPU-model corpus)" is a required status check, so the job keeps its name.
         include:
           - name: shard 1/4
             args: --partition count:1/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
