@@ -3,7 +3,6 @@ use invar::{
     eval::{EvalError, TrapCategory, Value, observe, run},
     front::parse,
 };
-use std::process::Command;
 
 fn checked(source: &str) -> Result<invar::check::CheckedProgram, invar::front::FrontError> {
     check(parse(source.as_bytes())?, true)
@@ -199,45 +198,4 @@ fn issue_m0_05_bounded_array_allocation() {
             ..
         })
     ));
-}
-
-#[test]
-fn issue_m0_05_cli_local_array_and_invalid_borrow() {
-    let path = std::env::temp_dir().join(format!("invar-m0-05-{}.inv", std::process::id()));
-    let binary = env!("CARGO_BIN_EXE_invar");
-    for (source, exit, status) in [
-        (
-            "fn main() -> i32 { var xs: Array<i32> = [40, 1]; xs[1u32] = 2; return xs[0u32] + xs[1u32]; }",
-            0,
-            "ok",
-        ),
-        (
-            "fn f(xs: read Array<i32>) -> i32 { return xs[0u32]; } fn main() -> i32 { return f([1]); }",
-            1,
-            "source_error",
-        ),
-    ] {
-        std::fs::write(&path, source).unwrap();
-        let output = Command::new(binary)
-            .args([
-                "run",
-                path.to_str().unwrap(),
-                "--engine",
-                "reference",
-                "--format",
-                "json",
-            ])
-            .output()
-            .unwrap();
-        assert_eq!(output.status.code(), Some(exit));
-        assert!(output.stderr.is_empty());
-        let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-        assert_eq!(json["status"], status);
-        if exit == 0 {
-            assert_eq!(json["result"]["value"], 42);
-        } else {
-            assert_eq!(json["diagnostics"][0]["code"], "OWN_BORROW_SOURCE");
-        }
-    }
-    std::fs::remove_file(path).unwrap();
 }

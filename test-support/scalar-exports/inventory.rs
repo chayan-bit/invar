@@ -319,7 +319,7 @@ pub fn enumerate() -> Value {
         let relative = path.strip_prefix(root).unwrap().display().to_string();
         if matches!(
             relative.as_str(),
-            "tests/issue_l1_06_scalar_export_corpus.rs" | "src/eval/named.rs"
+            "tests/exports/issue_l1_06_scalar_export_corpus.rs" | "src/eval/named.rs"
         ) {
             continue;
         }
