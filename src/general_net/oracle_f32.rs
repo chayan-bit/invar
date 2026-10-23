@@ -8,7 +8,7 @@ use crate::{
 
 pub(super) fn supports_intrinsic(name: &str) -> bool {
     matches!(
-        crate::math::f32_trig_base(name),
+        name,
         "fma" | "tc_mul_add" | "sin" | "cos" | "sqrt" | "f32_from_i32" | "f32_from_u32"
     )
 }
@@ -17,7 +17,6 @@ pub(super) fn call(
     args: &[crate::mir::ValueId],
     frame: &super::Frame,
 ) -> Result<Scalar, OracleError> {
-    let name = crate::math::f32_trig_base(name);
     Ok(match (name, args) {
         ("fma" | "tc_mul_add", [a, b, c]) => {
             let (Scalar::F32(a), Scalar::F32(b), Scalar::F32(c)) =
