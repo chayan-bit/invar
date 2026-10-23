@@ -225,7 +225,7 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
 }
 
 /// The whole corpus: the examples, the benchmark corpora and the test fixtures.
-pub const CORPUS: &[&str] = &["examples", "bench", "tests", "demo"];
+pub const CORPUS: &[&str] = &["examples", "bench", "tools", "tests", "demo"];
 
 /// Every tracked `.inv` program under `dirs` with a `main` that checks, lowers
 /// and has an A0 report, one per distinct source, mapped through `f` on up to

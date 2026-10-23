@@ -27,4 +27,4 @@ sha2 = "=0.11.0"
 
 [[example]]
 name = "sort-baseline"
-path = "../../bench/sort-baselines/metal.rs"
+path = "../../tools/bench/sort-baselines/metal.rs"

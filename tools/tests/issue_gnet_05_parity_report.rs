@@ -1,5 +1,7 @@
 #[path = "../bench/hash.rs"]
 mod hash;
+#[path = "support/invar_bin.rs"]
+mod invar_bin;
 
 use serde_json::{Value, json};
 use std::{
@@ -10,7 +12,10 @@ use std::{
 };
 
 fn root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .to_path_buf()
 }
 
 fn revision() -> String {
@@ -63,7 +68,7 @@ fn gnet_validates_all_current_source_observations_with_fresh_binary() {
         Path::new("--spec"),
         &spec,
         Path::new("--invar"),
-        Path::new(env!("CARGO_BIN_EXE_invar")),
+        &invar_bin::invar_bin("invar"),
         Path::new("--source-revision"),
         Path::new(&revision),
         Path::new("--report"),
@@ -115,7 +120,7 @@ fn gnet_validates_all_current_source_observations_with_fresh_binary() {
             Path::new("--spec"),
             &spec,
             Path::new("--invar"),
-            Path::new(env!("CARGO_BIN_EXE_invar")),
+            &invar_bin::invar_bin("invar"),
             Path::new("--source-revision"),
             Path::new(&revision),
             Path::new("--report"),

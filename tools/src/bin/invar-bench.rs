@@ -8,7 +8,7 @@ mod corpus;
 mod domains;
 #[path = "../../bench/family_references.rs"]
 mod family_references;
-#[path = "../../bench/general-net-v01/cli.rs"]
+#[path = "../../bench/general_net_cli.rs"]
 mod general_net;
 #[path = "../../bench/hash.rs"]
 mod hash;

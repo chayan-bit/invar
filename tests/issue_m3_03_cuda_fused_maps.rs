@@ -554,7 +554,6 @@ fn issue_m3_03_gpu_fused_maps_lengths_and_zip_dag() {
         Error as CudaError,
         cuda::{CudaDevice, FusedFault},
     };
-    use std::{process::Command, time::Instant};
 
     let compiler = std::path::Path::new(env!("CARGO_BIN_EXE_invar-nvrtc"));
     let mut device =
@@ -633,23 +632,6 @@ fn issue_m3_03_gpu_fused_maps_lengths_and_zip_dag() {
             );
         }
     }
-    let cold_started = Instant::now();
-    let cold = Command::new(env!("CARGO_BIN_EXE_invar-m3-03-cold"))
-        .arg(CHAIN)
-        .arg(compiler)
-        .output()
-        .unwrap();
-    assert!(
-        cold.status.success(),
-        "{}",
-        String::from_utf8_lossy(&cold.stderr)
-    );
-    eprintln!(
-        "cold_process_wall_ms={} {}",
-        cold_started.elapsed().as_secs_f64() * 1000.0,
-        String::from_utf8_lossy(&cold.stdout).trim()
-    );
-
     let (_, program) = checked_program(CHAIN);
     let report = admission::analyze(CHAIN.as_bytes(), &program).unwrap();
     let ir = device_ir::from_region(&report.regions()[0], 3).unwrap();

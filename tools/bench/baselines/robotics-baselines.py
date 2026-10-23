@@ -21,9 +21,9 @@ import pathlib
 import subprocess
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[3]
 CORPUS = ROOT / "bench/general-net-v01/gnet05/robotics"
-KERNELS = ROOT / "bench/baselines/robotics-kernels.h"
+KERNELS = ROOT / "tools/bench/baselines/robotics-kernels.h"
 # Calibration target per sample: 1 ms of GPU time with a 5x margin, because the GPU
 # performance state moves a small case's per-call time by up to about 4x between sessions.
 TARGET_MS = 5.0

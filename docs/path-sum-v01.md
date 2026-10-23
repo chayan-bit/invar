@@ -99,7 +99,7 @@ Consumed:
   `DropLaneFlags` removes the device flag publication; the CPU model has no group reduction, so the Metal and CUDA differentials must catch it.
 * `the_partition_is_proven_statically_only_where_it_holds` pins the proof to the four gate programs, `l9-pathsum` and `l10-range`, and refuses it for the `geometry` fixture.
 * `metal_kernels_agree_with_the_net_oracle` and `cuda_kernels_agree_with_the_net_oracle` repeat the differential on hardware.
-* `src/bin/invar-pathsum-gate.rs` reruns the P4a profile protocol against the handwritten baselines in `bench/p4a-gate/handwritten/`.
+* `tools/src/bin/invar-pathsum-gate.rs` reruns the P4a profile protocol against the handwritten baselines in `tools/bench/p4a-gate/handwritten/`.
   Its `breakdown` subcommand times the host-only part of the guarded call (`plan`, `arg_bytes`, `finish`) that the baseline does not run.
 
 ## Known limits
