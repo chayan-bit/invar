@@ -2,6 +2,8 @@ use std::process::Command;
 
 use invar::{check, eval, front, mir, mir_eval};
 
+use crate::engines::agree;
+
 #[cfg(feature = "native")]
 fn compile_foreign_fixture() -> (std::path::PathBuf, std::path::PathBuf) {
     use std::sync::atomic::{AtomicU64, Ordering};
@@ -159,17 +161,7 @@ fn issue_l1_04_bytes_strings_cabi_large_bounded_value() {
         "fn main() -> i32 {{ let data: Bytes = b\"{}\"; if len(data) == 131072u32 {{ return 7; }} return 0; }}",
         "x".repeat(131_072)
     );
-    let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = eval::run(&checked, 10_000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(7));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 10_000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, native) = invar::native::run_program(&lowered, 10_000).unwrap();
-        assert_eq!(status, 0, "{native}");
-        assert_eq!(native["result"]["value"], 7);
-    }
+    agree(&source, 10_000, 7);
 }
 
 #[test]

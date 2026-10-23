@@ -1,6 +1,6 @@
 #![cfg(unix)]
 #![forbid(unsafe_code)]
-#[path = "support/executable.rs"]
+#[path = "../support/executable.rs"]
 mod executable;
 
 use std::{fs, os::unix::fs::DirBuilderExt, process::Command};

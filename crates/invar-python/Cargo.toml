@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [[test]]
 name = "issue_l1_06_python_binding"
-path = "../../tests/issue_l1_06_python_binding.rs"
+path = "../../tests/exports/issue_l1_06_python_binding.rs"
 
 [features]
 extension-module = ["pyo3/extension-module"]

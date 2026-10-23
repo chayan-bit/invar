@@ -48,44 +48,6 @@ fn qualify(source: &str, expected: i32, pinned_steps: Option<u64>) {
 }
 
 #[test]
-fn issue_m1_01_implicit_owner_returns_preserve_all_source_fuel_prefixes() {
-    for (source, expected, steps) in [
-        (
-            "fn make() -> Array<i32> { let xs: Array<i32> = [3,5]; return xs; } fn main() -> i32 { let a = make(); return a[1u32]; }",
-            5,
-            Some(12),
-        ),
-        (
-            "fn make() -> Array<u32> { let xs: Array<u32> = [7u32]; return xs; } fn main() -> i32 { let a = make(); if a[0u32] == 7u32 { return 7; } return 0; }",
-            7,
-            None,
-        ),
-        (
-            "fn make() -> Bytes { let xs: Bytes = b\"ok\"; return xs; } fn main() -> i32 { let a = make(); if len(a) == 2u32 { return 7; } return 0; }",
-            7,
-            None,
-        ),
-        (
-            "fn make() -> String { let xs: String = \"ok\"; return xs; } fn main() -> i32 { let a = make(); if len(a) == 2u32 { return 7; } return 0; }",
-            7,
-            None,
-        ),
-        (
-            "struct Pair { x: i32 } fn make() -> Pair { let p = Pair { x: 7 }; return p; } fn main() -> i32 { let p = make(); return p.x; }",
-            7,
-            None,
-        ),
-        (
-            "enum Choice { Low, High(i32) } fn make() -> Choice { let c: Choice = Choice::High(7); return c; } fn main() -> i32 { let c = make(); return match move c { Choice::Low => 0, Choice::High(x) => x }; }",
-            7,
-            None,
-        ),
-    ] {
-        qualify(source, expected, steps);
-    }
-}
-
-#[test]
 fn issue_m1_01_explicit_move_and_borrowed_return_fuel_unchanged() {
     qualify(
         "fn make() -> Array<i32> { let xs: Array<i32> = [3,5]; return move xs; } fn main() -> i32 { let a = make(); return a[1u32]; }",

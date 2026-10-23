@@ -8,7 +8,7 @@ const MAX_NESTING: usize = 32;
 /// Syntactic nesting is capped at [`MAX_NESTING`], but left-associative
 /// operator chains and `else if` chains deepen the tree without nesting, and
 /// every later pass walks it recursively. This keeps those walkers stack-safe
-/// on a 2 MiB thread in Debug builds (see `tests/robustness_limits.rs`).
+/// on a 2 MiB thread in Debug builds (see `tests/limits/robustness_limits.rs`).
 const MAX_TREE_HEIGHT: usize = 192;
 
 fn tree_height(child_height: usize) -> Result<usize, FrontError> {
