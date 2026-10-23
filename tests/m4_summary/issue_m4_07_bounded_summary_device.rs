@@ -2,7 +2,7 @@
 //! `issue_m4_07_bounded_summary_families`. Hardware runs are in
 //! `issue_m4_07_gpu` (CUDA) and `issue_m4_07_metal_gpu` (Metal).
 #![forbid(unsafe_code)]
-#[path = "issue_m4_07_device/corpus.rs"]
+#[path = "../issue_m4_07_device/corpus.rs"]
 mod corpus;
 
 use corpus::{cases, contract, independent, prepare};

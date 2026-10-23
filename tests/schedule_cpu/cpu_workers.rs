@@ -27,7 +27,7 @@ fn cpu_worker_selection_env() {
         ("invalid", "error".into()),
     ] {
         let output = std::process::Command::new(std::env::current_exe().unwrap())
-            .args(["--exact", "cpu_worker_selection_env"])
+            .args(["--exact", "cpu_workers::cpu_worker_selection_env"])
             .env("INVAR_CPU_WORKERS", value)
             .env("INVAR_EXPECT_CPU_WORKERS", expected)
             .output()

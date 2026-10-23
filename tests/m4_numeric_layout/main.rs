@@ -1,0 +1,7 @@
+mod issue_m4_01_decimal_literals;
+mod issue_m4_01_layout_oracle;
+mod issue_m4_01_numeric_layout_contracts;
+mod issue_m4_01_numeric_oracle;
+mod issue_m4_01_source_f32;
+mod issue_m4_01_tensor_cache;
+mod issue_m4_01_tensor_host;

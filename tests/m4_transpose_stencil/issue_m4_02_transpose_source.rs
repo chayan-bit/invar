@@ -1,7 +1,5 @@
 #![forbid(unsafe_code)]
-#[allow(dead_code)]
-#[path = "../test-support/child_deadline.rs"]
-mod child_deadline;
+use crate::child_deadline;
 use invar::{
     check, eval, front,
     general_net::{self, oracle},
