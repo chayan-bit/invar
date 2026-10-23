@@ -1,9 +1,9 @@
 #![forbid(unsafe_code)]
 
-use invar::eval::EvalError;
+use invar::eval::{self, EvalError};
 use invar::general_net::{
     law_collective::{Error, LawRepr, Layout, Representation, cuda, msl},
-    normal_form::Rep,
+    normal_form::{self, Rep},
 };
 use law_support as ls;
 use ls::oracle_result;

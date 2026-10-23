@@ -1,6 +1,7 @@
 //! Physical Metal qualification of the law-collective emitters; the CPU tests stay in `tests/net_law_collective.rs`.
 #[path = "../support/law_collective.rs"]
 mod law_support;
+use invar::eval;
 use invar::general_net::{
     law_collective::{Layout, Representation, msl},
     normal_form::Rep,
