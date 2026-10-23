@@ -70,7 +70,6 @@ fn cxx(args: &[&str]) {
 fn host_build(directory: &Path, name: &str, source: &str) -> PathBuf {
     let (unit, driver) = (
         directory.join(format!("{name}.cpp")),
-        // Per-function name: builds run on parallel threads in one directory.
         directory.join(format!("{name}-driver.cpp")),
     );
     std::fs::write(&unit, source).unwrap();

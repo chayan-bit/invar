@@ -71,7 +71,7 @@ For contrast, `cost::digit_padding` reports the padded share of the P4a spike's 
 
 - `tests/net_task_region.rs`: CPU model (ASan and UBSan) against the CPU net oracle on the C1 family and generated trap-heavy fork-joins, under a wide plan and a tight plan that fills the arena; every named mutation (`task::Mutation`) must be caught; refusals.
 - `tests/net_task_region_metal.rs` and `tests/net_task_region_cuda.rs` (ignored): the same corpora on the devices.
-- `tests/net_task_region_bench.rs` and the bench tests in `tests/net_task_region_cuda.rs` (ignored): the D5 residual-tier bench against handwritten B-form kernels (`bench/task-region-v01/c1_handwritten.inc`).
+- `bench/net_task_region_bench.rs` and the bench tests in `tests/net_task_region_cuda.rs` (ignored): the D5 residual-tier bench against handwritten B-form kernels (`bench/task-region-v01/c1_handwritten.inc`).
 
 ## D5 residual tier (not met; refused to the native path)
 
