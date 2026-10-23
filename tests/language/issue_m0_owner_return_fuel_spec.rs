@@ -193,7 +193,7 @@ fn issue_m0_owner_return_fuel_spec_actual_project_native() {
     }
 }
 
-#[path = "support/owner_return_cpu.rs"]
+#[path = "../support/owner_return_cpu.rs"]
 mod cpu_process;
 
 #[test]

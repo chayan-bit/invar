@@ -1,0 +1,9 @@
+mod issue_l1_06_export_failure_contract;
+mod issue_l1_06_export_lineage;
+mod issue_l1_06_native_arrays;
+mod issue_l1_06_native_f32_arrays;
+mod issue_l1_06_python_binding;
+mod issue_l1_06_scalar_export_core;
+mod issue_l1_06_scalar_export_corpus;
+mod issue_numeric_host_mut_reference;
+mod issue_numeric_host_read_reference;

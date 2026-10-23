@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-#[path = "../test-support/term_oracle.rs"]
+#[path = "../../test-support/term_oracle.rs"]
 mod term;
 
 use invar::{

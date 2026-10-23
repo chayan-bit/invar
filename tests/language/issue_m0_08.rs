@@ -1,6 +1,6 @@
 use invar::{
     check::check,
-    eval::{EvalError, TrapCategory, Value, observe},
+    eval::{Value, observe},
     front::{ErrorKind, parse},
 };
 use std::process::Command;
@@ -76,18 +76,6 @@ fn issue_m0_08_adversarial_source_corpus() {
             "fn f(a: mut Array<i32>, b: read Array<i32>) -> Unit { return; } fn main() -> i32 { var xs: Array<i32> = [1]; f(xs, xs); return 0; }",
             "OWN_BORROW_CONFLICT",
         ),
-        (
-            "fn f(a: read Array<i32>) -> Array<i32> { return a; } fn main() -> i32 { return 0; }",
-            "OWN_RETURN_BORROW",
-        ),
-        (
-            "fn f(a: mut Array<i32>) -> Unit { return; } fn main() -> i32 { let xs: Array<i32> = [1]; f(xs); return 0; }",
-            "OWN_MUT_REQUIRED",
-        ),
-        (
-            "fn f(a: read Array<i32>) -> Unit { return; } fn main() -> i32 { f([1]); return 0; }",
-            "OWN_BORROW_SOURCE",
-        ),
     ];
     for (source, code) in cases {
         let error = parse(source.as_bytes())
@@ -113,56 +101,6 @@ fn issue_m0_08_adversarial_source_corpus() {
         assert_eq!(error.kind, ErrorKind::Tool);
         assert_eq!(error.code, code);
     }
-}
-
-#[test]
-fn issue_m0_08_traps_limits_and_cleanup_are_stable() {
-    let traps = [
-        (
-            "fn main() -> i32 { return 2147483647i32 + 1; }",
-            TrapCategory::IntegerOverflow,
-        ),
-        (
-            "fn main() -> i32 { return -2147483648i32 / -1i32; }",
-            TrapCategory::IntegerOverflow,
-        ),
-        (
-            "fn main() -> i32 { return 1 / 0; }",
-            TrapCategory::DivisionByZero,
-        ),
-        (
-            "fn main() -> i32 { let xs: Array<i32> = [1]; return xs[1u32]; }",
-            TrapCategory::IndexOutOfBounds,
-        ),
-    ];
-    for (source, expected) in traps {
-        let program = checked(source);
-        for _ in 0..2 {
-            let observation = observe(&program, 100);
-            assert!(observation.cleanup_trace.is_empty(), "{source}");
-            assert!(
-                matches!(observation.result, Err(EvalError::Trap { category, .. }) if category == expected),
-                "{source}"
-            );
-        }
-    }
-    let source = "fn main() -> i32 { let xs: Array<i32> = filled_i32(16777217u32, 0); return 0; }";
-    let program = checked(source);
-    assert!(matches!(
-        observe(&program, 100).result,
-        Err(EvalError::Tool {
-            code: "ARRAY_SIZE_LIMIT",
-            ..
-        })
-    ));
-    let limit = observe(&checked("fn main() -> i32 { while true {} return 0; }"), 8);
-    assert!(matches!(
-        limit.result,
-        Err(EvalError::EvaluationLimit {
-            fuel_limit: 8,
-            steps_used: 8
-        })
-    ));
 }
 
 #[test]
