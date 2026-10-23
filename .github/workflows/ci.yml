@@ -76,7 +76,7 @@ jobs:
           - name: CPU-model corpus
             args: --test issue_gnet_03_device -E 'test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
     env:
-      # tests/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
+      # tests/limits/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
       INVAR_CI_PROFILE: debug
     steps:
       - name: Free runner disk

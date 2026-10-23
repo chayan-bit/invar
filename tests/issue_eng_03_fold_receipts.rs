@@ -1,7 +1,7 @@
-//! ENG-03 step 7 (D12): the newest documents that carry `numeric_contracts`
-//! (explain-v5 and invar-diagnostics-v3) record each declared fold tier a
-//! lowered fold used and the algorithm that ran. Older versions never carry
-//! it, and a program without a lowered fold is unchanged.
+//! ENG-03 step 7 (D12): placement documents (explain-v5 and
+//! invar-diagnostics-v3) record in `numeric_contracts` each declared fold tier
+//! a lowered fold used and the algorithm that ran, and a program without a
+//! lowered fold is unchanged.
 
 use invar::{check, front, math, mir};
 use serde_json::{Value, json};
@@ -134,8 +134,7 @@ fn issue_eng_03_only_placement_documents_carry_the_fold_receipt() {
                 document["execution"].get("numeric_contracts").is_none(),
                 "{document}"
             );
-            // The established documents (explain v1, diagnostics v1) never
-            // carry it: their frozen schemas are unchanged (D12).
+            // Non-placement documents never carry it.
             let established: &[&str] = if command == "run" {
                 &[
                     "run",

@@ -10,8 +10,7 @@
     "status",
     "diagnostics",
     "source_identity",
-    "regions",
-    "auto_path"
+    "regions"
   ],
   "properties": {
     "schema": {
@@ -1086,6 +1085,7 @@
       "type": "object"
     },
     "auto_path": {
+      "description": "Present on --engine auto explains only: which auto path ran.",
       "enum": [
         "established",
         "placement"
@@ -1185,6 +1185,9 @@
     }
   },
   "if": {
+    "required": [
+      "auto_path"
+    ],
     "properties": {
       "auto_path": {
         "const": "placement"
