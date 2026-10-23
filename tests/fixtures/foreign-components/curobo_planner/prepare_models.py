@@ -25,7 +25,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[3] / "examples/cells/reach_place/components/curobo_planner"))
 from planner_server import HELD_COVER_SPHERES  # noqa: E402
 PANDA_SPHERES = HERE / "panda_spheres.json"
-PANDA_SPHERES_SHA = "87ec3dbe5ba36e259abf3d79601214d9bbcc137d3884b39b2595d481358ae4a9"
+PANDA_SPHERES_SHA = "9a162c9c2fa334df9d472c8b25a7ea6893d38c5964006b57f821a377982dde0c"
 PANDA_FIT_MODEL = HERE.parents[3] / "examples/cells/reach_place/assets/menagerie/franka_emika_panda/panda.xml"
 FRANKA_ASSETS = "curobo/content/assets/robot/franka_description"
 JOINTS = ("shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
