@@ -834,9 +834,6 @@ fn active_docs() -> Vec<(String, String)> {
                 .to_str()
                 .unwrap()
                 .to_owned();
-            if relative == "docs/archive" {
-                continue;
-            }
             if path.is_dir() {
                 visit(&path, out);
             } else if relative.ends_with(".md") {

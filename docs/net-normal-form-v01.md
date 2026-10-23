@@ -1,9 +1,8 @@
 # Net normal form v0.1 (P1a regions, P1b laws and certificates)
 
-Status: implemented on `feat/v01-net-normal-form` for the v0.1 law set adopted on 2026-10-15 ([normal-form design](design/net-parallel-laws-v01.md) decisions M1, L1-L4, E1).
+This is the net normal form for the v0.1 law set.
 This document is the contract that the lowering phases (P2, P3, P4a, P4b and P8) consume.
 Lowering itself is out of scope here.
-The law catalogue, the soundness argument and the plan behind these layers are in the design [net-parallel-laws-v01](design/net-parallel-laws-v01.md).
 
 ## 1. Layers
 

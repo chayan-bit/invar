@@ -1,5 +1,5 @@
 //! A walk over the span-carrying nodes of a function body, shared by the
-//! numeric checks and the storage lowering (`docs/numeric-v2.md`).
+//! numeric checks and the storage lowering (`docs/numeric.md`).
 
 use super::*;
 

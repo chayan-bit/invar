@@ -1,4 +1,4 @@
-//! Fold tiers of numeric policy v2 (`docs/numeric-v2.md`) and their oracle.
+//! Fold tiers of numeric policy v2 (`docs/numeric.md`) and their oracle.
 //!
 //! A tiered fold has `init` and then the reached addends in source order as
 //! its summands. Strict, Tree and Exact each name one result; Relaxed admits

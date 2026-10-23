@@ -7,7 +7,7 @@
 [![CI](https://github.com/chayan-bit/invar/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chayan-bit/invar/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Rust 1.95](https://img.shields.io/badge/rust-1.95-orange.svg)](rust-toolchain.toml)
-[![Status: pre-release](https://img.shields.io/badge/status-pre--release-yellow.svg)](docs/remaining-work.md)
+[![Status: pre-release](https://img.shields.io/badge/status-pre--release-yellow.svg)](https://github.com/chayan-bit/invar/issues)
 
 </div>
 
@@ -44,8 +44,8 @@ Invar is a pre-release development snapshot, not a complete v0.1 release.
 Contributions are welcome.
 
 Implemented on `main`: source checking, reference and MIR evaluators, typed interaction nets, LLVM native CPU execution, bounded modules/records/variants/`Result`, borrowed views, generics and closures, bytes and UTF-8 strings, an explicit C ABI, and integer units and nominal frames.
-Guarded CUDA and Metal code generation exists for admitted program families, including the v0.2 [explicit stable sorting](docs/design/v02-sort.md) and [spatial grid queries](docs/design/v02-spatial.md).
-Integration, full automatic parallelism and GPU performance acceptance remain in progress; see [remaining work](docs/remaining-work.md) and the [roadmap](docs/roadmap.md).
+Guarded CUDA and Metal code generation exists for admitted program families, including the v0.2 explicit stable sorting and spatial grid queries (Appendix B of the [specification](docs/spec/invar-v0.1.md)).
+Integration, full automatic parallelism and GPU performance acceptance remain in progress; open work is tracked in [GitHub issues](https://github.com/chayan-bit/invar/issues).
 No safety theorem, native performance result, parallel speedup, or AI-authoring advantage is claimed.
 
 ## Quick start
@@ -100,16 +100,20 @@ CUDA and Metal suites are ignored by default and are not run in CI; see [CONTRIB
 | [v0.1 language specification](docs/spec/invar-v0.1.md) | Compact specification whose every code block and cited statement is checked by the test suite |
 | [Bootstrap specification](spec/bootstrap.md) | Detailed normative text for the implemented language |
 | [Grammar](spec/grammar.ebnf) | Complete syntax for that scope |
+| [Placement](spec/placement-v1.md) | Placement profiles and receipts for `--engine auto` |
 | [Examples](examples/README.md) | Verified example library with an index of expected results |
 | [Architecture](docs/architecture.md) | Long-term design and trusted boundaries |
-| [Implementation plan](docs/implementation-plan.md) | Compiler pipeline, mathematical laws, contracts and delivery sequence |
 | [Parallelism foundations](docs/parallelism-foundation.md) | Interaction calculus, structured operations, and automatic GPU generation |
+| [Numeric contracts](docs/numeric.md) | f32 semantics, fold tiers and storage types |
+| [Explain JSON](docs/explain.md) | `invar explain` documents and device execution reports |
+| [System integration](docs/system-integration-v1.md) | Invar as the robot system description |
 | [CUDA-class acceptance](docs/performance-acceptance.md) | Frozen workload families, fair baselines and hardware performance gates |
 | [Rust engineering](docs/rust-engineering.md) | Project-wide Rust code, API, error, safety, and test rules |
 | [Validation](docs/validation.md) | Conformance cases, CI and evidence gates |
-| [Roadmap](docs/roadmap.md) | Reference core, native and interaction core, CPU/GPU parallelism |
-| [Remaining work](docs/remaining-work.md) | The v0.1 acceptance ledger |
-| [Implementation issues](docs/issues/README.md) | Ordered, bounded work items |
+| [Debugging](docs/debugging.md) | Source-level debugging of native programs |
+
+Other files in `docs/` specify individual contracts (native toolchain, CUDA target, layouts, normal form and families).
+Planned work and open gaps are tracked in [GitHub issues](https://github.com/chayan-bit/invar/issues).
 
 ## Contributing
 

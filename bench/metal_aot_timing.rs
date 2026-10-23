@@ -3,7 +3,7 @@
 //! calls, for the map, scan and general-net routes. Prints one JSON line per
 //! row. Kernel constants are unique per run so a "first-ever" runtime compile
 //! cannot be served by the macOS Metal shader cache.
-//! Run: `cargo test --release --features metal --test issue_metal_aot_timing -- --ignored --nocapture --test-threads 1`.
+//! Run: `cargo test --release --features metal --bench metal_aot_timing -- --ignored --nocapture --test-threads 1`.
 #![cfg(all(feature = "metal", target_os = "macos"))]
 
 use invar::{admission, check, device_ir, front, mir, plan::Execution};

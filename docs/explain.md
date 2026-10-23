@@ -78,7 +78,7 @@ Two objects are required when `auto_path` is `"placement"` and absent when it is
 - `execution`: the run document of the same execution, an `invar-diagnostics-v3` receipt.
 
 `explicit_sorts`, `explicit_spatial` and `numeric_contracts` stay optional and unchanged, so the intrinsic sites stay visible under placement.
-`numeric_contracts` may also carry `fold`, which the top-level explain document and the `invar-diagnostics-v3` receipt of `invar run --engine auto` add: each declared fold tier a lowered fold used, to the algorithm that ran ([numeric-v2](numeric-v2.md#receipts)).
+`numeric_contracts` may also carry `fold`, which the top-level explain document and the `invar-diagnostics-v3` receipt of `invar run --engine auto` add: each declared fold tier a lowered fold used, to the algorithm that ran ([numeric contracts](numeric.md#receipts)).
 The receipt embedded as `execution` carries no `numeric_contracts`.
 The device execution may carry the placement reasons `measured-cpu-cost` and `measured-device-cost` and the optional `normal_form` route.
 

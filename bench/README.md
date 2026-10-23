@@ -203,4 +203,4 @@ nvcc -std=c++17 -O2 -arch=sm_XX bench/baselines/cuda-families.cu -o cuda-familie
 cargo run --locked --release --bin invar-bench -- --manifest bench/manifest-v1.json --track library-assisted --require-gpu --baseline-executable ./FIXTURE --baseline-family stencil --baseline-elements 65536 --report NEW_REPORT.json
 ```
 
-Timings from these fixtures are baseline samples only. Performance runs and their measurement conditions are listed in [remaining work](../docs/remaining-work.md).
+Timings from these fixtures are baseline samples only. Performance runs and their measurement conditions are tracked in the M5 GitHub issues.

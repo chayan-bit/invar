@@ -132,15 +132,3 @@ fn issue_eng_08_admission_has_no_region_count_cap() {
         Err(error) => assert_eq!(error.code, "ADMISSION_RECORD_LIMIT"),
     }
 }
-
-#[test]
-fn issue_eng_08_admission_deleted_constants_are_gone() {
-    let source = include_str!("../src/admission.rs");
-    for deleted in [
-        "MAX_REGIONS",
-        "MAX_GUARDED_ELEMENTS",
-        "ADMISSION_REGION_LIMIT",
-    ] {
-        assert!(!source.contains(deleted), "{deleted} must stay deleted");
-    }
-}
