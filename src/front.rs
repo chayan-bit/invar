@@ -68,7 +68,7 @@ impl FrontError {
         self
     }
 
-    /// Deterministic version-1 diagnostic document for this front-end result.
+    /// Compact, source-free summary; the schema-valid form is [`Self::to_diagnostics_json`].
     pub fn to_json(&self, path: &str) -> Value {
         let span = self
             .span
