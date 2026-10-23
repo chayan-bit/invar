@@ -134,89 +134,8 @@ fn validate_output(shape: &Shape, values: &[u32]) -> Result<(), Error> {
 /// integer helper
 /// omits modify-stack-limit=false, so it cannot compile this sealed plan.
 pub fn compile_transpose_cubin(source: &str, caps: Capabilities) -> Result<CompiledCubin, Error> {
-    let mut options = plan_options(source, caps)?;
-    // SAFETY: optional-library presence probe precedes every NVRTC symbol access.
-    if !unsafe { nvrtc_sys::is_culib_present() } {
-        return Err(Error::Unavailable);
-    }
-    let (mut major, mut minor) = (0, 0);
-    // SAFETY: NVRTC writes initialized local i32s; its library is present.
-    unsafe { nvrtc_sys::nvrtcVersion(&mut major, &mut minor) }
-        .result()
-        .map_err(|e| Error::Compile(e.to_string()))?;
-    let Capabilities::Cuda {
-        major: wanted_major,
-        minor: wanted_minor,
-        sm,
-    } = caps
-    else {
-        return Err(Error::Unavailable);
-    };
-    if (major, minor) != (wanted_major as i32, wanted_minor as i32) {
-        return Err(Error::Compile(format!(
-            "NVRTC {major}.{minor}; expected {wanted_major}.{wanted_minor}"
-        )));
-    }
-    options[1] = format!("--gpu-architecture=sm_{sm}");
-    let text = CString::new(source).map_err(|_| Error::Limit)?;
-    let program = NvrtcProgram(
-        nvrtc_result::create_program(&text, Some(c"invar_transpose_bits_v1.cu"))
-            .map_err(|e| Error::Compile(e.to_string()))?,
-    );
-    let options: Vec<&str> = options.iter().map(String::as_str).collect();
-    // SAFETY: program owns the live handle and source; options contain no NULs.
-    let compiled = unsafe { nvrtc_result::compile_program(program.0, &options) };
-    let log = program_log(&program)?;
-    if let Err(error) = compiled {
-        return Err(Error::Compile(format!("{error}: {log}")));
-    }
-    let mut bytes = 0usize;
-    // SAFETY: live successfully compiled program; valid writable local size.
-    unsafe { nvrtc_sys::nvrtcGetCUBINSize(program.0, &mut bytes) }
-        .result()
-        .map_err(|e| Error::Compile(e.to_string()))?;
-    if bytes == 0 || bytes > MAX_CUBIN_BYTES {
-        return Err(Error::Limit);
-    }
-    let mut image = Vec::new();
-    image
-        .try_reserve_exact(bytes)
-        .map_err(|_| Error::OutOfMemory)?;
-    image.resize(bytes, 0);
-    // SAFETY: image owns exactly the size returned by the live NVRTC program.
-    unsafe { nvrtc_sys::nvrtcGetCUBIN(program.0, image.as_mut_ptr().cast()) }
-        .result()
-        .map_err(|e| Error::Compile(e.to_string()))?;
-    Ok(CompiledCubin { image, log })
-}
-
-fn program_log(program: &NvrtcProgram) -> Result<String, Error> {
-    let mut bytes = 0usize;
-    // SAFETY: program retains its live NVRTC handle; bytes is a writable local.
-    unsafe { nvrtc_sys::nvrtcGetProgramLogSize(program.0, &mut bytes) }
-        .result()
-        .map_err(|e| Error::Compile(e.to_string()))?;
-    if bytes == 0 {
-        return Ok(String::new());
-    }
-    if bytes > 64 * 1024 {
-        return Err(Error::Limit);
-    }
-    let mut log = Vec::new();
-    log.try_reserve_exact(bytes)
-        .map_err(|_| Error::OutOfMemory)?;
-    log.resize(bytes, 0u8);
-    // SAFETY: log owns the complete reported size; no truncated foreign buffer.
-    unsafe { nvrtc_sys::nvrtcGetProgramLog(program.0, log.as_mut_ptr().cast()) }
-        .result()
-        .map_err(|e| Error::Compile(e.to_string()))?;
-    log.truncate(
-        log.iter()
-            .position(|&c| c == 0)
-            .unwrap_or(log.len())
-            .min(MAX_ERROR_BYTES),
-    );
-    Ok(String::from_utf8_lossy(&log).into_owned())
+    let options = plan_options(source, caps)?;
+    super::floating::compile_strict(source, caps, options, c"invar_transpose_bits_v1.cu")
 }
 
 pub(super) fn compile_bounded(
@@ -388,7 +307,7 @@ pub(super) fn pinned(
     Ok(host)
 }
 
-fn admit_before_storage<T>(
+pub(super) fn admit_before_storage<T>(
     admission: impl FnOnce() -> Result<(), Error>,
     allocation: impl FnOnce() -> Result<T, Error>,
 ) -> Result<T, Error> {
