@@ -167,14 +167,14 @@ fn issue_gnet_05_provenance_numeric_stale_mutations_and_unsupported_modes_reject
         ),
         Err(Error::Compiler(compiled::Error::UnsupportedType))
     ));
-    assert!(matches!(
+    assert!(
         numeric_with(
             b"struct Numeric{x:f32} fn calc() -> i32 { return 7; }",
             compiled::Target::Cpu,
             Limits::default()
-        ),
-        Err(_)
-    ));
+        )
+        .is_err()
+    );
     assert!(matches!(
         numeric_with(
             b"fn calc() -> f32 { return 1u32; }",
