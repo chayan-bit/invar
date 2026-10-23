@@ -579,7 +579,7 @@ fn issue_s1_06_integration_start_declares_the_gripper_home_hold() {
             .replace(" on table\n        exclude (menagerie::universal_robots_ur5e::base, menagerie::universal_robots_ur5e::shoulder_link)", ""),
     );
     let unheld: serde_json::Value = serde_json::from_str(&unheld.canonical_json()).unwrap();
-    assert_eq!(unheld["schema"], "invar-system-v10");
+    assert_eq!(unheld["schema"], "invar-system-v12");
 }
 
 #[test]

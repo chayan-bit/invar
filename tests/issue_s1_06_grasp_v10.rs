@@ -68,8 +68,8 @@ fn explicit_grasp_is_versioned_and_legacy_weld_is_preserved() {
             assert_eq!(weld.attribute("active"), Some("false"));
             if explicit {
                 let mut old = doc.clone();
-                old["schema"] = "invar-system-v9".into();
-                old["version"] = 9.into();
+                old["schema"] = "invar-system-v11".into();
+                old["version"] = 11.into();
                 assert!(system::SystemIr::from_json(&serde_json::to_vec(&old).unwrap()).is_err());
             }
         }

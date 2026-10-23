@@ -93,7 +93,7 @@ fn issue_s1_04_ros2_target_parameter_range_uses_versioned_ir() {
     .unwrap();
     let program = invar::front::parse_system(source.as_bytes()).unwrap();
     let ir = invar::system::compile(program).unwrap();
-    assert_eq!(ir.checked_document().unwrap()["schema"], "invar-system-v4");
+    assert_eq!(ir.checked_document().unwrap()["schema"], "invar-system-v12");
     let exposure = &ir.checked_document().unwrap()["components"][0]["params"]["exposure"];
     assert_eq!(exposure["value"], "3");
     assert_eq!(exposure["range"]["min"], "1");

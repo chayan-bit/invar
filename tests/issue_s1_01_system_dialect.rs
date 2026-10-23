@@ -36,7 +36,7 @@ fn issue_s1_01_system_dialect_emits_checked_canonical_ir() {
         String::from_utf8(command.stdout.clone()).unwrap(),
         include_str!("fixtures/s1_01/basic-cell.ir.json")
     );
-    assert_eq!(ir["schema"], "invar-system-v1");
+    assert_eq!(ir["schema"], "invar-system-v12");
     assert_eq!(ir["system"]["name"], "cell");
     assert_eq!(ir["system"]["product"], "SimCell");
     assert_eq!(ir["connections"].as_array().unwrap().len(), 2);
