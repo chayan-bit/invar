@@ -60,9 +60,9 @@ changes only the bench-owned numerical comparator and current docs; it reuses
 the three existing numeric tests. No root, array/core or test adapter edit occurs.
 
 ```sh
-INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-numeric-debug \
+INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-numeric-debug \
   cargo test --offline --locked --test issue_gnet_v01_corpus_expansion numeric_ -- --nocapture
-INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-numeric-release \
+INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-numeric-release \
   cargo test --offline --locked --release --test issue_gnet_v01_corpus_expansion numeric_ -- --nocapture
 cargo fmt --all -- --check
 cargo clippy --offline --locked --all-targets -- -D warnings
