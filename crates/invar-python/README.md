@@ -178,7 +178,7 @@ A successful receipt contains `requested_engine`, the actual published `backends
 Scheduled receipts also carry per-region `choices` and cache/hint counts.
 An empty choice list reports `mir-serial`, never a GPU or parallel execution claim.
 Python `explain()` remains the schema-valid static AI-01 report until execution.
-After successful `auto`/`cuda`/`metal` execution it includes that run's frozen `invar-explain-device-v1` document; it does not rerun the program.
+After successful `auto`/`cuda`/`metal` execution it includes that run's `invar-explain-device-v5` document; it does not rerun the program.
 Receipts and explain output are bounded to one million bytes.
 
 Missing features, missing devices, ineligible programs and false device guards raise `EngineError` carrying the original `CUDA_UNAVAILABLE`, `METAL_UNAVAILABLE` or other Invar code in `diagnostics` / `diagnostic_json`.
@@ -225,8 +225,8 @@ it, then run:
 
 ```sh
 maturin develop --manifest-path crates/invar-python/Cargo.toml --locked --offline
-cargo test --locked --test issue_l1_06_python_binding issue_l1_06_python_binding
-cargo test --locked --release --test issue_l1_06_python_binding issue_l1_06_python_binding
+cargo test --locked --test exports issue_l1_06_python_binding
+cargo test --locked --release --test exports issue_l1_06_python_binding
 cargo clippy --manifest-path crates/invar-python/Cargo.toml --locked --offline --all-targets -- -D warnings
 python -m pytest crates/invar-python/tests -q
 # With a native-enabled core and the LLVM 21 toolchain, qualify both engines:

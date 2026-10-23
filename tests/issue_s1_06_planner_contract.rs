@@ -51,24 +51,14 @@ fn cli(args: &[&Path]) -> std::process::Output {
         .output()
         .unwrap()
 }
-fn exercise(n: usize, projected: bool) {
-    let root = if projected {
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("target")
-            .join(format!(
-                "invar-planner-contract-{}-{n}-v2",
-                std::process::id()
-            ))
-    } else {
-        std::env::temp_dir().join(format!("invar-planner-contract-{}-{n}", std::process::id()))
-    };
+fn exercise(n: usize) {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("target")
+        .join(format!("invar-planner-contract-{}-{n}", std::process::id()));
     // CARGO_TARGET_DIR may place Cargo outputs outside the repository.
     // Preserve a unique fixture root while creating its missing parent.
     fs::create_dir_all(root.parent().unwrap()).unwrap();
     fs::create_dir(&root).unwrap();
-    if !projected {
-        fs::create_dir(root.join(".git")).unwrap();
-    }
     for file in ["model.xml", "model.urdf", "robot.yml", "scene.yml", "child"] {
         fs::write(root.join(file), "CPU fixture; never hardware\n").unwrap();
     }
@@ -80,7 +70,7 @@ fn exercise(n: usize, projected: bool) {
         "universal_robots_ur5e"
     };
     let cell_path = repo.join("examples/cells/reach_place").join(cell_name);
-    let projection = if projected {
+    let projection = {
         fs::copy(
             repo.join("examples/cells/reach_place/assets/menagerie")
                 .join(model_name)
@@ -93,19 +83,17 @@ fn exercise(n: usize, projected: bool) {
             cell_path.parent().unwrap(),
         )
         .unwrap();
-        Some(invar::system::tool_projection::selected(&ir).unwrap())
-    } else {
-        None
+        invar::system::tool_projection::selected(&ir).unwrap()
     };
     // v3 runtimes and requests must carry the cell-derived table, cube and exclusions.
-    let scene = projection.as_ref().map(|_| {
+    let scene = {
         let ir = invar::system::compile_at(
             invar::front::parse_system(&fs::read(&cell_path).unwrap()).unwrap(),
             cell_path.parent().unwrap(),
         )
         .unwrap();
         invar::system::planner_scene::selected(&ir).unwrap()
-    });
+    };
     fs::write(
         root.join("wire.h"),
         invar::robotics::planner::header(n as u32).unwrap(),
@@ -202,20 +190,13 @@ extern component fixture_planner {{
 extension=std::env::consts::DLL_EXTENSION,
 fk_record=fk_evidence.strip_prefix(&root).unwrap().to_str().unwrap()
 )).unwrap();
-    if projected {
+    {
         let p = root.join("planner.inv");
         let source = fs::read_to_string(&p).unwrap();
         fs::write(&p,source.replace("input \"wire.h\";",&format!("input \"../../examples/cells/reach_place/{cell_name}\"; input \"../../examples/cells/reach_place/assets/menagerie/{model_name}/scene.xml\"; input \"wire.h\";"))).unwrap();
     }
-    if projected {
-        assert!(
-            fs::read_to_string(root.join("planner.inv"))
-                .unwrap()
-                .contains(&format!("../../examples/cells/reach_place/{cell_name}"))
-        );
-    }
     let pose = json!([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]);
-    let mut golden = json!({"schema":"invar-planner-endpoint-goldens-v1","joint_count":n,"seed":123,
+    let mut golden = json!({"schema":"invar-planner-endpoint-goldens-v3","joint_count":n,"seed":123,
         "metrics":{"translation":"euclidean-m","orientation":"sign-invariant-geodesic-rad","translation_max_m":0.002,"orientation_max_rad":std::f64::consts::PI/180.0,"start_max_rad":1e-6},
         "joint_mapping":names.iter().map(|s|json!([s,s])).collect::<Vec<_>>(),
         // Every planner world phase; vector 1 is held. The fixture moves q0 to the
@@ -229,15 +210,14 @@ fk_record=fk_evidence.strip_prefix(&root).unwrap().to_str().unwrap()
             }
             v
         }).collect::<Vec<_>>())});
-    if let Some(p) = &projection {
-        golden["schema"] = json!("invar-planner-endpoint-goldens-v3");
+    {
+        let p = &projection;
         golden["tool_projection"] = p.value();
         let raw_target = invar::system::tool_projection::Pose {
             translation_m: [0.1, 0.0, 0.0],
             quaternion_xyzw: [0.0, 0.0, 0.0, 1.0],
         };
         let target = p.fk_to_source(raw_target).unwrap();
-        let scene = scene.as_ref().unwrap();
         let flat = invar::system::planner_scene::flat;
         // The fixture FK puts the tool at (q0, 0, 0); both vectors start at q = 0.
         let start_tool = p
@@ -304,15 +284,14 @@ int fixture_planner_shutdown(void **context) {{ free(*context);*context=NULL;ret
             ("fk_manifest", root.join("fk.inv")),
             ("fk_evidence", fk_evidence.clone()),
         ];
-        let mut runtime = json!({"schema":"invar-planner-runtime-v1","qualification":"cpu-diagnostic",
+        let mut runtime = json!({"schema":"invar-planner-runtime-v3","qualification":"cpu-diagnostic",
             "artifacts":bindings.iter().map(|(r,p)|(*r,json!({"path":p,"sha256":hash(p)}))).collect::<std::collections::BTreeMap<_,_>>(),
             "config":{"joint_names":names,"joint_limits_rad":vec![[-2.0,2.0];n],"velocity_limits_rad_s":vec![2.0;n],"table_pose":pose,"table_half_extents_m":[0.5,0.5,0.05],"cube_edge_m":0.05,"base_frame":"base","tool_frame":"tool"}});
-        if let Some(p) = &projection {
-            runtime["schema"] = json!("invar-planner-runtime-v3");
+        {
+            let p = &projection;
             runtime["tool_projection"] = p.value();
             runtime["cell_source"] = json!({"path":cell_path,"sha256":hash(&cell_path)});
             runtime["config"]["tool_frame"] = json!(p.planner_reference_frame);
-            let scene = scene.as_ref().unwrap();
             runtime["config"]["table_pose"] =
                 json!(invar::system::planner_scene::flat(scene.table_pose));
             runtime["config"]["table_half_extents_m"] = json!(scene.table_half_extents_m);
@@ -345,16 +324,9 @@ int fixture_planner_shutdown(void **context) {{ free(*context);*context=NULL;ret
             assert_eq!(report["status"], "diagnostic");
             let path = PathBuf::from(report["evidence"].as_str().unwrap());
             let record: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
-            assert_eq!(
-                record["schema"],
-                if projected {
-                    "invar-planner-diagnostic-v3"
-                } else {
-                    "invar-planner-diagnostic-v1"
-                }
-            );
+            assert_eq!(record["schema"], "invar-planner-diagnostic-v3");
             let mut relabelled = record.clone();
-            relabelled["schema"] = json!("invar-planner-contract-evidence-v1");
+            relabelled["schema"] = json!("invar-planner-contract-evidence-v3");
             relabelled["status"] = json!("pass");
             let forgery = root.join("relabelled-diagnostic.json");
             write(&forgery, &relabelled);
@@ -376,7 +348,7 @@ int fixture_planner_shutdown(void **context) {{ free(*context);*context=NULL;ret
             assert_eq!(record["results"]["vectors"][4]["goal_error_rad"], 0.0);
             assert_eq!(record["results"]["vectors"][0]["final_q_rad"][0], 0.1);
             first_diagnostic = Some((path.clone(), hash(&path)));
-            if projected {
+            {
                 // The held cube must follow FK and the declared grasp, not a free pose.
                 let pristine = golden.clone();
                 let x = golden["vectors"][1]["cube_base_pose"][0].as_f64().unwrap();
@@ -522,24 +494,18 @@ int fixture_planner_shutdown(void **context) {{ free(*context);*context=NULL;ret
             }
         }
     }
-    assert_eq!(failures, if projected { 12 } else { 10 });
+    assert_eq!(failures, 12);
     assert_eq!(endpoint_failures, 2);
     fs::remove_dir_all(root).unwrap();
 }
 
 #[test]
 fn issue_s1_06_planner_contract_cpu_six_joint_faults_and_no_pass() {
-    exercise(6, false);
+    exercise(6);
 }
 #[test]
 fn issue_s1_06_planner_contract_cpu_seven_joint_faults_and_no_pass() {
-    exercise(7, false);
-}
-
-#[test]
-fn issue_s1_06_planner_contract_cell_projection_cpu_both_arms() {
-    exercise(6, true);
-    exercise(7, true);
+    exercise(7);
 }
 
 #[test]
@@ -549,19 +515,19 @@ fn issue_s1_06_planner_contract_preparation_binds_source_requests_and_refuses_un
     let source_path = root.join("tests/fixtures/foreign-components/pinocchio_goldens.json");
     let source: Value = serde_json::from_slice(&fs::read(&source_path).unwrap()).unwrap();
     for (arm, n, manifest_name) in [
-        ("panda", 7, "manifest.inv"),
-        ("ur5e", 6, "manifest-ur5e.inv"),
+        ("panda", 7, "manifest-source-panda-v3.inv"),
+        ("ur5e", 6, "manifest-source-ur5e-v3.inv"),
     ] {
         let manifest = invar::system::compile_manifest(
             invar::front::parse_system(&fs::read(directory.join(manifest_name)).unwrap()).unwrap(),
         )
         .unwrap();
         let golden: Value = serde_json::from_slice(
-            &fs::read(directory.join(format!("endpoint-{arm}.json"))).unwrap(),
+            &fs::read(directory.join(format!("endpoint-source-{arm}-v3.json"))).unwrap(),
         )
         .unwrap();
         let runtime: Value = serde_json::from_slice(
-            &fs::read(directory.join(format!("runtime-{arm}.json"))).unwrap(),
+            &fs::read(directory.join(format!("runtime-source-{arm}-v3.json"))).unwrap(),
         )
         .unwrap();
         let reference = source["arms"]
@@ -629,7 +595,7 @@ fn issue_s1_06_planner_contract_preparation_binds_source_requests_and_refuses_un
             Path::new("test"),
             &directory.join(manifest_name),
             Path::new("--planner-runtime"),
-            &directory.join(format!("runtime-{arm}.json")),
+            &directory.join(format!("runtime-source-{arm}-v3.json")),
             Path::new("--output"),
             &output,
         ]);
@@ -662,36 +628,10 @@ fn issue_s1_06_planner_contract_preparation_binds_source_requests_and_refuses_un
             cell_path.parent().unwrap(),
         )
         .unwrap();
-        let projection = invar::system::tool_projection::selected(&ir)
-            .unwrap()
-            .legacy();
+        // The vectors themselves are regenerated in issue_s1_06_planner_requests.
+        let projection = invar::system::tool_projection::selected(&ir).unwrap();
         assert_eq!(runtime["tool_projection"], projection.value());
         assert_eq!(golden["tool_projection"], projection.value());
-        let vectors = golden["vectors"].as_array().unwrap();
-        assert_eq!(vectors.len(), 4);
-        for v in vectors {
-            let start = &reference["vectors"][v["source_start_vector"].as_u64().unwrap() as usize];
-            let goal = &reference["vectors"][v["source_goal_vector"].as_u64().unwrap() as usize];
-            assert_eq!(v["start_q_rad"], start["q_rad"]);
-            let target = v["target_base_from_tool"].as_array().unwrap();
-            let q = goal["quaternion_wxyz"].as_array().unwrap();
-            let pose = invar::system::tool_projection::Pose {
-                translation_m: std::array::from_fn(|i| goal["translation_m"][i].as_f64().unwrap()),
-                quaternion_xyzw: [
-                    q[1].as_f64().unwrap(),
-                    q[2].as_f64().unwrap(),
-                    q[3].as_f64().unwrap(),
-                    q[0].as_f64().unwrap(),
-                ],
-            }
-            .compose(projection.reference_from_cell)
-            .unwrap();
-            for (actual, expected) in target.iter().take(3).zip(pose.translation_m) {
-                assert!((actual.as_f64().unwrap() - expected).abs() < 1e-12);
-            }
-            for (actual, expected) in target.iter().skip(3).zip(pose.quaternion_xyzw) {
-                assert!((actual.as_f64().unwrap() - expected).abs() < 1e-12);
-            }
-        }
+        assert_eq!(golden["vectors"].as_array().unwrap().len(), 10);
     }
 }

@@ -15,7 +15,11 @@ use crate::{
 
 mod fold_hint;
 
-pub const SCHEMA_VERSION: u32 = 1;
+/// `invar explain` documents: the admission report plus the explain fields.
+pub const SCHEMA: &str = "invar-explain-v5";
+pub const SCHEMA_VERSION: u32 = 5;
+/// The `device_execution` object of an explain document.
+pub const DEVICE_SCHEMA: &str = "invar-explain-device-v5";
 pub const RULE_REVISION: &str = "counted-wrapping-map-v1";
 /// Largest serialized admission record or report: an interchange-format bound on the document, not
 /// on analysis memory, so it stays (`ADMISSION_RECORD_LIMIT`).

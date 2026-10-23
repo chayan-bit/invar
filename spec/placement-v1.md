@@ -30,7 +30,7 @@ trust, the engine that actually published, and reached-loop decisions. Each deci
 records family/numeric contract and region identity, page/residency observation,
 verified byte/work/launch facts, fixed and work costs, page-in, transfers, launch and
 total costs, 5% margin, legality and stable refusal codes. Unknown costs are null.
-Auto explain uses `invar-explain-v5` (explain v4 plus the placement receipt), includes that same object, and retains the established `device_execution`
+Auto explain (`invar-explain-v5`) includes that same object, and retains the established `device_execution`
 schema alongside it. CPU replay is permitted only after confirmed device quiescence;
 unknown completion remains a tool error. Rejected publication records CPU and
 `TUNING_GUARD_FALSE` in the receipt.

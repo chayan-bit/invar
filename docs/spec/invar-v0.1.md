@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=302 citations=323
-Size record: tokens=28095 estimator=bytes/3 limit=30000
+Counts: statements=302 citations=324
+Size record: tokens=27916 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -804,8 +804,8 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 8.2 The invar-system IR
 
-[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-vN`, byte-identical for identical input, with one schema file per version in `schema/`. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
-[N8.2.2] The checker emits the lowest version that can represent the source: v2 when a bus, identity transform or license detail is used, v3 for typed config, input paths or golden tolerances, v4 for parameter ranges, v5 for robot and cell models, v6 for tool and dynamic objects, v7 and v8 for planner records and config, v9 and v10 for the planner frame policy and grasp, v11 for an actuator `hold` command and v12 for a cell mount surface. `src/system/compiler.rs::use_v2`
+[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-v12`, byte-identical for identical input, and validated by `schema/invar-system-v12.schema.json`. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
+[N8.2.2] Every source emits v12, and the `robots` and `cells` arrays appear only when the source declares a robot or cell model. `src/system/compiler.rs::models`
 [N8.2.3] An unknown version is rejected, and relabelling a document does not make it valid. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
 [N8.2.4] Permuting module order of the same system gives byte-identical IR. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_module_permutation_is_byte_identical`
 [N8.2.5] Deserializing an IR does not establish a source check, and only a source-compiled model can pass the graph checks. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
@@ -820,7 +820,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ## 9. Graph checks
 
-[N9.0.1] Graph checks run when the IR is v2 or later, and a v1-shaped source gets only S1-01 checks and reports `checks_pending` with `system-v2-graph-checks`. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_v1_remains_readable_with_graph_work_pending`
+[N9.0.1] Graph checks run on every source-compiled system. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
 [N9.0.2] Diagnostics are ordered by family and then span, and the same input gives the same output. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_diagnostic_families_keep_stable_order`
 [N9.0.3] The checker proves structure only, and deadlines and WCET are declared budgets and not measurements. `docs/system-integration-v1.md`
 
@@ -1131,10 +1131,10 @@ fn main() -> i32 {
 
 ### 13.3 Explain
 
-[N13.3.1] `invar explain PATH --format json` emits `invar-explain-v1` with `source_identity` and `regions`, and success is exit 0 even when every region is rejected. `docs/explain.md`
-[N13.3.2] Each region has `function`, `span`, `status`, `first_rejected_obligation`, `rule_revision`, `numeric_policy`, `chosen_plan`, `fallback_plan`, `runtime_guard`, `facts`, `execution` and ordered `obligations`. `schema/explain-v1.schema.json`
+[N13.3.1] `invar explain PATH --format json` emits `invar-explain-v5` with `source_identity` and `regions`, and success is exit 0 even when every region is rejected. `docs/explain.md`
+[N13.3.2] Each region has `function`, `span`, `status`, `first_rejected_obligation`, `rule_revision`, `numeric_policy`, `chosen_plan`, `fallback_plan`, `runtime_guard`, `facts`, `execution` and ordered `obligations`. `schema/explain-v5.schema.json`
 [N13.3.3] Obligation evidence is `checked_invariant`, `trusted_rule`, `runtime_guard` or `unknown`, and unknown evidence rejects admission. `docs/explain.md`
-[N13.3.4] `explain --engine cuda|metal|auto` adds `device_execution` described by `invar-explain-device-v1`. `schema/invar-explain-device-v1.schema.json`
+[N13.3.4] `explain --engine cuda|metal|auto` adds `device_execution` described by `invar-explain-device-v5`. `schema/invar-explain-device-v5.schema.json`
 [N13.3.5] Persisted admission documents are descriptive, and validation re-analyses current MIR and source bytes. `docs/explain.md`
 [N13.3.6] `source_identity` is `fnv1a64:` over the source bytes and establishes identity and not authenticity. `docs/explain.md`
 
@@ -1202,7 +1202,7 @@ fn main() -> i32 {
 [NB.2.3] A key and value length mismatch or invalid segment offsets trap with `INDEX_OUT_OF_BOUNDS` at the call span before any write. `src/eval/sorting.rs`
 [NB.2.5] Segment offsets have `segments + 1` entries, first 0, last `len(xs)` and non-decreasing, `[0]` is valid only for an empty input, duplicate boundaries are empty segments, and no source loop is implicitly replaced by a sort. `src/eval/sorting.rs`
 [NB.2.6] `sort(xs)` takes a call-scoped mutable loan, `sort_by_key(keys, values)` takes call-scoped mutable loans of two distinct named arrays and has no closure form, `argsort(xs)` takes a read loan and leaves the key bits unchanged, `segmented_sort(xs, offsets)` takes a mutable key loan and a read `Array<u32>` offset loan, and every sort except `argsort` returns `Unit`. `src/check.rs::sort_modes`
-[NB.2.4] A report with an explicit sort site uses `invar-explain-v3`, which names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain.md`
+[NB.2.4] A report with an explicit sort site names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain.md`
 
 ```invar outcome=value:7
 fn main() -> i32 {
@@ -1232,7 +1232,7 @@ fn main() -> i32 {
 [NB.3.3] `knn(grid, qx, qy, qz, k)` returns `Knn { idx, d2 }` ordered by squared distance and then original index, and pads missing slots with `u32::MAX` and positive infinity. `src/spatial.rs`
 [NB.3.4] A nonpositive or non-finite cell or an out-of-range cell index traps with `INTEGER_OVERFLOW`, and coordinate arrays of different lengths trap with `INDEX_OUT_OF_BOUNDS`. `src/spatial.rs`
 [NB.3.5] A `VoxelGrid` parameter is `read` or `take` and never `mut`, and query result arrays leave their record only through `move result.field`. `src/spatial.rs`
-[NB.3.6] A report with a spatial site uses `invar-explain-v4`, whose sites name the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain.md`
+[NB.3.6] A report with a spatial site names the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain.md`
 [NB.3.7] Squared distances are strict f32 left to right, a positive infinite radius is allowed, a query count times stride beyond `u32` traps with `INTEGER_OVERFLOW`, and read loans hold through all scalar arguments. `src/spatial.rs`
 [NB.3.8] A negative or NaN radius matches nothing, a query with any non-finite coordinate has no neighbours, cell indices are the exact `floor(coord / cell)` converted to `i32`, and query records bind to a name because tuple binding is unsupported. `src/spatial/runtime.rs::finite`
 
@@ -1299,4 +1299,4 @@ fn main() -> i32 {
 [NB.5.3] Placement owns `--engine auto` only when one of those flags is given or the live host's default profile is not a matching provisional one, and every other auto run keeps the established path of N11.5.6, whose documents take the versions of NB.5.6. `src/auto_command.rs::placement_requested` `tests/v02_placement.rs::auto_stays_on_the_established_path_unless_placement_is_asked_for`
 [NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/v02_placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
-[NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement emits `invar-explain-v5`, which is v4 plus `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run emits the same versions without `placement`, recording `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`
+[NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement adds `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run has no `placement` and records `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`

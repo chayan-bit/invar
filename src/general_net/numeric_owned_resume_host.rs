@@ -1,10 +1,10 @@
 //! Source-issued loaded CPU ABI11 owned numeric continuation with an exclusive
 //! opaque native task. Snapshots are validation evidence only: native state is
-//! never imported or restored from caller bytes. Terminal packets use the
-//! unchanged ABI10 decoder; pending packets never reach it.
+//! never imported or restored from caller bytes. Terminal packets go
+//! through the owned-numeric decoder; pending packets never reach it.
 use super::compiler_child::bounded;
 use super::{
-    compiled, coverage, numeric_owned_host, oracle,
+    compiled, coverage, oracle, owned_numeric_decode,
     owned_numeric_task::{
         self, Advance, History, PENDING, Row, TaskError, TaskShape, TaskWords, TokenKey,
     },
@@ -15,9 +15,8 @@ use crate::{
     eval,
     front::{Span, Type},
 };
-use invar_foreign::{
-    numeric_owned,
-    numeric_owned_resume::{self as numeric, Driver, MAX_BYTES, OUTPUT_WORDS, Snapshot},
+use invar_foreign::numeric_owned_resume::{
+    self as numeric, Driver, MAX_BYTES, OUTPUT_WORDS, Snapshot,
 };
 #[cfg(test)]
 use owned_numeric_task::word;
@@ -48,7 +47,7 @@ const OPTIONS: &[&str] = &[
 pub enum Error {
     Provenance(provenance::Error),
     Loader(numeric::Error),
-    Decode(numeric_owned_host::Error),
+    Decode(owned_numeric_decode::Error),
     Load {
         cause: numeric::Error,
         evidence: PathBuf,
@@ -648,16 +647,16 @@ impl Run<'_> {
         self.complete()
     }
     /// Decode only an actually completed, validated ABI11 task with the
-    /// unchanged ABI10 terminal decoder. No native call is made here.
+    /// owned-numeric terminal decoder. No native call is made here.
     fn complete(&mut self) -> Result<Progress, Error> {
         let s = &mut self.snapshot;
-        let raw = numeric_owned::Invocation {
+        let raw = numeric::Invocation {
             output: s.output,
             trace: std::mem::take(&mut s.trace),
             heap: std::mem::take(&mut s.heap),
             cleanup: std::mem::take(&mut s.cleanup),
         };
-        let decoded = numeric_owned_host::decode(
+        let decoded = owned_numeric_decode::decode(
             self.plan.artifact.artifact().result(),
             self.plan.artifact.source().len(),
             &self.plan.sites,
@@ -671,7 +670,7 @@ impl Run<'_> {
         s.cleanup = raw.cleanup;
         match decoded {
             Ok(observation) => Ok(Progress::Complete(observation)),
-            Err(numeric_owned_host::Error::Allocation) => Err(Error::Allocation),
+            Err(owned_numeric_decode::Error::Allocation) => Err(Error::Allocation),
             Err(e) => {
                 retain(self.plan, &self.snapshot, "terminal decoder");
                 self.failed = true;
@@ -1099,13 +1098,13 @@ mod tests {
             }
             sync_task(&mut s, frame_bytes);
             let accepted = validate(&p, l, &old, &s, 5).and_then(|_| {
-                let raw = numeric_owned::Invocation {
+                let raw = numeric::Invocation {
                     output: s.output,
                     trace: s.trace,
                     heap: s.heap,
                     cleanup: s.cleanup,
                 };
-                numeric_owned_host::decode(
+                owned_numeric_decode::decode(
                     p.artifact.artifact().result(),
                     p.artifact.source().len(),
                     &p.sites,

@@ -28,8 +28,8 @@ fn issue_s1_05_robot_cell_mujoco_checks_v5_tree_and_schema() {
     let ir = system::compile(parse_system(PLANAR).unwrap()).unwrap();
     let bytes = ir.canonical_json();
     let document: serde_json::Value = serde_json::from_str(&bytes).unwrap();
-    assert_eq!(document["schema"], "invar-system-v5");
-    assert_eq!(document["version"], 5);
+    assert_eq!(document["schema"], "invar-system-v12");
+    assert_eq!(document["version"], 12);
     assert_eq!(document["robots"][0]["links"].as_array().unwrap().len(), 2);
     assert_eq!(document["cells"][0]["objects"].as_array().unwrap().len(), 2);
     assert_eq!(document["robots"][0]["links"][1]["mass"]["value"], "0.5");

@@ -234,7 +234,8 @@ fn issue_m0_owner_return_fuel_spec_actual_compiled_cpu_and_resumption() {
                 let emitter = match (id, resumable) {
                     ("record" | "variant", false) => compiled::emit_aggregates,
                     ("record" | "variant", true) => compiled::emit_resumable_aggregates,
-                    (_, false) => compiled::emit_owned_numeric,
+                    // ABI11 owner continuations are the only CPU numeric artifacts.
+                    (_, false) => continue,
                     (_, true) => compiled::emit_resumable_owned_numeric,
                 };
                 let artifact = emitter(

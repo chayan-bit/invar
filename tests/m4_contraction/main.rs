@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 #[path = "../issue_m4_03_device/corpus.rs"]
 mod corpus;
 

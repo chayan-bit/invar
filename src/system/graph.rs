@@ -379,11 +379,7 @@ fn resource_checks(document: &Value, issues: &mut Vec<Issue>) {
     }
 }
 
-fn transform_pairs<'a>(
-    ty: &'a str,
-    request_consumers: bool,
-    pairs: &mut Vec<(&'a str, &'a str, bool)>,
-) {
+fn transform_pairs<'a>(ty: &'a str, pairs: &mut Vec<(&'a str, &'a str, bool)>) {
     let Some((head, args)) = crate::robotics::generic_parts(ty) else {
         return;
     };
@@ -392,32 +388,25 @@ fn transform_pairs<'a>(
         ("std::robotics::Pose", [_, parent, child]) => pairs.push((child, parent, true)),
         ("std::robotics::PlannerRequest", [_, _, base, tool, object]) => {
             // A requested pose consumes measured frames; it does not publish
-            // their current transform. Earlier serialized versions retain
-            // their original publisher interpretation.
+            // their current transform.
             pairs.extend([
-                (*tool, *base, !request_consumers),
-                (*object, *base, !request_consumers),
-                (*object, *tool, !request_consumers),
+                (*tool, *base, false),
+                (*object, *base, false),
+                (*object, *tool, false),
             ]);
         }
         _ => {}
     }
     for arg in args {
-        transform_pairs(arg, request_consumers, pairs);
+        transform_pairs(arg, pairs);
     }
 }
 
 fn frame_checks(document: &Value, issues: &mut Vec<Issue>) {
-    let request_consumers = matches!(
-        document["schema"].as_str(),
-        Some("invar-system-v9" | "invar-system-v10" | "invar-system-v11" | "invar-system-v12")
-    );
-    if (request_consumers && document["planner_frame_policy"] != "request-consumer-v1")
-        || (!request_consumers && document.get("planner_frame_policy").is_some())
-    {
+    if document["planner_frame_policy"] != "request-consumer-v1" {
         issues.push(issue(
             "S1200",
-            "planner frame policy disagrees with system IR version",
+            "planner frame policy is not request-consumer-v1",
             document["system"]["id"].as_str().unwrap_or(""),
         ));
         return;
@@ -476,7 +465,7 @@ fn frame_checks(document: &Value, issues: &mut Vec<Issue>) {
                 continue;
             };
             let mut pairs = Vec::new();
-            transform_pairs(ty, request_consumers, &mut pairs);
+            transform_pairs(ty, &mut pairs);
             for (from, to, publishes) in pairs {
                 if !parents.contains_key(from) || !parents.contains_key(to) {
                     issues.push(issue(

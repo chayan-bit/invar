@@ -222,7 +222,7 @@ fn issue_l1_06_python_binding_engine_names_and_guarded_receipts() {
     assert_eq!(receipt["result"], 42);
     assert_eq!(receipt["backends"], serde_json::json!(["mir-serial"]));
     let schema = serde_json::from_str(include_str!(
-        "../../schema/invar-explain-device-v1.schema.json"
+        "../../schema/invar-explain-device-v5.schema.json"
     ))
     .unwrap();
     assert!(jsonschema::is_valid(

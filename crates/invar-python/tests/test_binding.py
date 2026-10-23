@@ -68,7 +68,7 @@ def test_compile_signatures_explain_and_capabilities(module):
     assert any(f["name"] == "main" and not f["callable"] for f in functions["source_functions"])
     assert any(f["name"] == "c_bytes" and f["callable"] for f in functions["c_imports"])
     assert not next(f for f in functions["c_imports"] if f["name"] == "c_take")["callable"]
-    jsonschema.validate(module.explain(), json.loads((ROOT / "schema/explain-v1.schema.json").read_text()))
+    jsonschema.validate(module.explain(), json.loads((ROOT / "schema/explain-v5.schema.json").read_text()))
     caps = inv.capabilities()
     assert caps["scalar_artifact_exports"] == ["i32", "u32"]
     assert caps["compiled_c_exports"] == "native-serial requires invar/native at build time"

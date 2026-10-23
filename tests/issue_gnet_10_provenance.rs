@@ -16,7 +16,7 @@ fn storage() -> compiled::OwnedLimits {
     }
 }
 fn compile(source: &[u8]) -> provenance::ProvenancedArtifact {
-    provenance::compile_owned_numeric(
+    provenance::compile_resumable_owned_numeric(
         source,
         "make",
         compiled::Target::Cpu,
@@ -31,7 +31,7 @@ fn owned_numeric_provenance_binds_ten_word_layout_kind_source_and_storage() {
     let b = compile(SOURCE);
     assert_eq!(a.id(), b.id());
     assert_eq!(a.manifest(), b.manifest());
-    assert_eq!(a.artifact().abi_version(), 10);
+    assert_eq!(a.artifact().abi_version(), 11);
     assert_eq!(a.manifest()["numeric"]["semantic_id"], "strict-f32-v1");
     assert_eq!(a.manifest()["numeric"]["output_words"], 10);
     assert_eq!(a.manifest()["storage"]["output_words"], 10);
@@ -44,7 +44,7 @@ fn owned_numeric_provenance_binds_ten_word_layout_kind_source_and_storage() {
         a.manifest()["numeric"]["array_f32"]["external_owner_inputs"],
         false
     );
-    assert!(a.artifact().continuation_layout().is_none());
+    assert!(a.artifact().continuation_layout().is_some());
     assert!(a.artifact().device_layout().is_none());
     assert!(a.artifact().aggregate_layout().is_none());
     assert!(a.artifact().speculation_layout().is_none());
@@ -61,7 +61,7 @@ fn owned_numeric_provenance_binds_ten_word_layout_kind_source_and_storage() {
     assert_eq!(a.verify_source(&changed), Err(Error::SourceMismatch));
     let mut smaller = storage();
     smaller.elements -= 1;
-    let other = provenance::compile_owned_numeric(
+    let other = provenance::compile_resumable_owned_numeric(
         SOURCE,
         "make",
         compiled::Target::Cpu,
@@ -127,26 +127,17 @@ fn owned_numeric_oracle_receipt_freezes_exact_array_bits_and_failure_prefixes() 
     }
 }
 #[test]
-fn owned_numeric_provenance_preserves_old_profiles_and_negative_admission() {
-    for target in [compiled::Target::Cuda, compiled::Target::Metal] {
-        assert!(matches!(
-            provenance::compile_owned_numeric(SOURCE, "make", target, Limits::default(), storage()),
-            Err(Error::Compiler(compiled::Error::NumericTarget))
-        ));
-    }
-    assert!(
-        provenance::compile_numeric(SOURCE, "make", compiled::Target::Cpu, Limits::default())
-            .is_err()
-    );
-    assert!(
-        provenance::compile_resumable_numeric(
+fn owned_numeric_provenance_negative_admission() {
+    assert!(matches!(
+        provenance::compile_resumable_owned_numeric(
             SOURCE,
             "make",
-            compiled::Target::Cpu,
-            Limits::default()
-        )
-        .is_err()
-    );
+            compiled::Target::Metal,
+            Limits::default(),
+            storage()
+        ),
+        Err(Error::Compiler(compiled::Error::NumericTarget))
+    ));
     assert!(
         provenance::compile_owned(
             SOURCE,
@@ -162,7 +153,7 @@ fn owned_numeric_provenance_preserves_old_profiles_and_negative_admission() {
         b"struct Numeric{x:f32} fn make()->i32{return 7;}".as_slice(),
     ] {
         assert!(matches!(
-            provenance::compile_owned_numeric(
+            provenance::compile_resumable_owned_numeric(
                 source,
                 "make",
                 compiled::Target::Cpu,
@@ -172,13 +163,4 @@ fn owned_numeric_provenance_preserves_old_profiles_and_negative_admission() {
             Err(Error::Compiler(compiled::Error::UnsupportedType))
         ));
     }
-    let scalar = provenance::compile_numeric(
-        b"fn make(x:f32)->f32{return x;}",
-        "make",
-        compiled::Target::Cpu,
-        Limits::default(),
-    )
-    .unwrap();
-    assert_eq!(scalar.manifest()["numeric"]["output_words"], 8);
-    assert!(scalar.manifest()["numeric"].get("array_f32").is_none());
 }

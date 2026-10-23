@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 use frontier_source::{Budget, Contract, Discovery, Error};
 use invar::frontier_source;
-use invar::{array_limits, budget, check, eval, front, general_net, mir, mir_eval};
+use invar::{budget, check, eval, front, general_net, mir, mir_eval};
 
 const FROZEN_A: &str = include_str!("../../bench/general-net-v01/current/frontier_graph_a.inv");
 const FROZEN_B: &str = include_str!("../../bench/general-net-v01/current/frontier_graph_b.inv");
