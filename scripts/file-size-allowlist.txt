@@ -27,11 +27,11 @@
 1247 src/histogram_source/bounded.rs
 1027 src/main.rs
 1033 src/mir_eval/bulk.rs
-1002 src/mir_eval/histogram.rs
+988 src/mir_eval/histogram.rs
 818 src/mir_eval/region/tests.rs
 901 src/placement/calibration.rs
 830 src/schedule/mod.rs
-926 src/summary_source.rs
+863 src/summary_source.rs
 1159 src/system/ros2.rs
 1728 src/system/substep_admission.rs
 940 src/system/urdf.rs

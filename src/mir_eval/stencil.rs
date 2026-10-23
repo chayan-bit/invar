@@ -50,21 +50,7 @@ impl Interpreter<'_> {
         {
             return Ok(false);
         }
-        let Some(Operation::Binary {
-            op: BinaryOp::Lt,
-            left,
-            right,
-            ..
-        }) = head
-            .instructions
-            .iter()
-            .find(|i| i.output.as_ref().is_some_and(|(id, _)| *id == condition))
-            .map(|i| &i.kind)
-        else {
-            return Ok(false);
-        };
-        if !matches!(frame.value(*left), Ok(Value::U32(0)))
-            || !matches!(frame.value(*right), Ok(Value::U32(n)) if n == dimensions[0])
+        if live_trips(head, condition, frame) != Some(dimensions[0])
             || ticks > self.fuel_limit.saturating_sub(self.steps_used)
         {
             return Ok(false);

@@ -34,25 +34,11 @@ impl Interpreter<'_> {
             // accounting or fallible allocation can release reached context.
             let pending = Pending {
                 resources: Some(Quarantined {
-                    frame: std::mem::replace(
-                        frame,
-                        Frame {
-                            slots: HashMap::new(),
-                            values: HashMap::new(),
-                        },
-                    ),
+                    frame: std::mem::take(frame),
                     _payload: completion.payload.clone(),
                 }),
             };
-            if let Ok(mut slot) = completion.quarantine.try_borrow_mut() {
-                if slot.is_none() {
-                    *slot = Some(pending);
-                } else {
-                    std::mem::forget(pending);
-                }
-            } else {
-                std::mem::forget(pending);
-            }
+            park(&completion.quarantine, pending);
             return Err(failure("HISTOGRAM_UNKNOWN_COMPLETION"));
         }
         if completion.status != FenceObservation::Complete {
