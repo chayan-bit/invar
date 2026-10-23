@@ -3,7 +3,7 @@
 use super::{EvalError, MAX_ARRAY_LEN, Value, admit_live};
 use crate::{
     front::{BinaryOp, Span, Type},
-    math::{MathFn, TRIG_F32_COS, TRIG_F32_SIN},
+    math::MathFn,
     numeric_contract::{
         Comparison, F32Bits, F64Bits, NumericTrap,
         storage::{Bf16Bits, F16Bits, narrow_i8, narrow_u8},
@@ -66,7 +66,6 @@ pub(crate) fn literal(raw: &str, ty: Option<&Type>) -> Result<Value, EvalError> 
 /// Whether `name` is a float intrinsic this module evaluates.
 pub(crate) fn handles(name: &str) -> bool {
     matches!(name, "filled_f32" | "filled_f64" | "fma" | "tc_mul_add")
-        || crate::math::trig_f32_v1(name)
         || crate::check::conversion(name).is_some()
         || MathFn::from_name(name).is_some()
 }
@@ -86,8 +85,8 @@ pub(crate) fn intrinsic(
     // C4 interim: f32 sin, cos and sqrt keep main's invar-trig-f32-v1;
     // invar-math-cr-v1 covers f64 and every other library function.
     match (name, values) {
-        ("sin" | TRIG_F32_SIN, [Value::F32(a)]) => return Ok(Value::F32(a.sin())),
-        ("cos" | TRIG_F32_COS, [Value::F32(a)]) => return Ok(Value::F32(a.cos())),
+        ("sin", [Value::F32(a)]) => return Ok(Value::F32(a.sin())),
+        ("cos", [Value::F32(a)]) => return Ok(Value::F32(a.cos())),
         ("sqrt", [Value::F32(a)]) => return Ok(Value::F32(a.sqrt())),
         _ => {}
     }
@@ -120,8 +119,6 @@ pub(crate) fn intrinsic(
         ("u32_from_f32", [Value::F32(a)]) => a.trunc_u32().map(Value::U32).map_err(trap),
         ("i32_from_f64", [Value::F64(a)]) => a.trunc_i32().map(Value::I32).map_err(trap),
         ("u32_from_f64", [Value::F64(a)]) => a.trunc_u32().map(Value::U32).map_err(trap),
-        // v0.1 spelling of `i32_from_f32`, kept for existing sources.
-        ("trunc_i32", [Value::F32(a)]) => a.trunc_i32().map(Value::I32).map_err(trap),
         // Stores into storage arrays (`check::storage`, ENG-03).
         ("store-f16", [Value::F32(a)]) => Ok(Value::F32(F16Bits::round(*a).widen())),
         ("store-bf16", [Value::F32(a)]) => Ok(Value::F32(Bf16Bits::round(*a).widen())),

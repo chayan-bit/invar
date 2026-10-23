@@ -120,9 +120,6 @@ impl Guard {
     }
 
     /// The current graph map rewrites every element, so partial loops must stay serial.
-    pub fn covers_whole_arrays(&self, lengths: &[(&str, usize)]) -> bool {
-        self.covers_whole_arrays_within(lengths, &ByteBudget::standard())
-    }
     pub fn covers_whole_arrays_within(
         &self,
         lengths: &[(&str, usize)],
@@ -141,16 +138,6 @@ impl Guard {
         matches!(upper, Some(hi) if self.fits(hi, budget)
             && len(&self.output) == Some(hi)
             && self.inputs.iter().all(|name| len(name) == Some(hi)))
-    }
-
-    pub fn upper_len(&self, lengths: &[(&str, usize)]) -> Option<usize> {
-        match &self.upper {
-            Upper::Constant(n) => Some(*n as usize),
-            Upper::Length(name) => lengths
-                .iter()
-                .find(|(key, _)| *key == name)
-                .map(|(_, n)| *n),
-        }
     }
 
     fn json(&self) -> Value {

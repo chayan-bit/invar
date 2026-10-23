@@ -344,7 +344,7 @@ fn trig_helpers(program: &mir::Program, header: &str) -> String {
                 })
         })
     };
-    let trig = called(&["sin", "cos", crate::math::TRIG_F32_SIN, crate::math::TRIG_F32_COS]);
+    let trig = called(&["sin", "cos"]);
     let root = called(&["sqrt"]);
     let mut text = String::new();
     if trig && !header.contains("declare float @llvm.fma.f32(") {

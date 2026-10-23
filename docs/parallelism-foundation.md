@@ -1,8 +1,8 @@
 # Interaction foundations and automatic GPU compilation
 
-Design decision: 2026-09-22; M1 scope revised 2026-09-23. The three-agent
-reference reducer and typed production graph are separate. M1 no longer
-requires a source-to-three-agent encoding. This is an architecture and a list
+Design decision: 2026-09-22; M1 scope revised 2026-09-23; the untyped
+reference reducer was removed in 2026-10 (it had no callers). M1 does not
+require a source-to-primitive-agent encoding. This is an architecture and a list
 of implementation obligations, not a performance guarantee.
 
 ## The intended user experience
@@ -17,10 +17,9 @@ GPU execution and interaction combinators are different concepts. A compiler can
 
 Invar's automatic-parallelization architecture must include:
 
-1. A genuine minimal interaction-combinator reference calculus, with explicit ports, agents, active pairs, and rewrite rules. Source-to-minimal-calculus encoding is a separate research milestone, not an M1 acceptance claim.
-2. A typed, demand-aware interaction representation that preserves ownership and carries structured bulk operations. It is an extension with separate semantic obligations, not literally the minimal calculus with renamed nodes.
-3. Extraction from that representation into structured loops/tasks/kernels, with source provenance and admission evidence retained.
-4. Differential tests and rewrite-law checks relating reference source, interaction execution, and extracted execution for the supported fragment.
+1. A typed, demand-aware interaction representation that preserves ownership and carries structured bulk operations. Source-to-primitive-agent encoding is a separate research milestone, not an M1 acceptance claim.
+2. Extraction from that representation into structured loops/tasks/kernels, with source provenance and admission evidence retained.
+3. Differential tests and rewrite-law checks relating reference source, interaction execution, and extracted execution for the supported fragment.
 
 The production automatic-parallelization route, including GPU candidates, must pass through the typed interaction region contract and validated extraction. This must be an actual typed connectivity representation with checked rules, not an unused graph attached to a conventional optimizer. Simple scalar functions and unsupported/effectful regions can remain ordinary sequential control flow. That fallback is part of the semantics-preserving design, not permission to delete the required interaction subsystem.
 
@@ -113,7 +112,7 @@ This is more powerful than merely scheduling prewritten kernels. It is also narr
 
 ## Required acceptance gates
 
-- M1: freeze the reference reducer and typed graph separately; test typed
+- M1: freeze the typed graph; test typed
   source demand, affine ownership, real connectivity, beta/map rewrites,
   extraction, and native MIR differential execution. Do not claim primitive
   source encoding or automatic map recognition.
