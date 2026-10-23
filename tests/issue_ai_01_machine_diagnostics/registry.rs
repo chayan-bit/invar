@@ -344,7 +344,6 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|entry| entry["deprecated"] == false)
         .map(|entry| entry["code"].as_str().unwrap().to_owned())
         .collect::<HashSet<_>>();
     assert_eq!(

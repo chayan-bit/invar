@@ -1,6 +1,6 @@
 //! ABI4 emitted CPU execution and ABI5/13 CPU workgroup models. No device launch
 //! or driver fence is inferred from these source-derived reference checks.
-use super::child_deadline;
+use super::{child_deadline, corpus_sample};
 
 use super::{corpus_cpu as base, corpus_owned as owned};
 use invar::{
