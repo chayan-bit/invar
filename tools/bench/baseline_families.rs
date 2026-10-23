@@ -367,7 +367,7 @@ pub fn run(executable: &Path, family: &str, n: usize, backend: Backend) -> Resul
 // Fake fixtures are executed while other test threads fork; the shared writer never
 // leaves a writable descriptor for a sibling fork to inherit (ETXTBSY).
 #[cfg(all(test, unix))]
-#[path = "../tests/support/executable.rs"]
+#[path = "../../tests/support/executable.rs"]
 pub(crate) mod executable;
 
 #[cfg(all(test, unix))]

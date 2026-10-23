@@ -8,7 +8,7 @@ The oracles in `oracle.rs` are plain Rust; the only shared pieces are the langua
 The split unit is the kernel: a seeded 25% of each suite's kernels (rounded up) is held out, with every variant of a held-out kernel.
 `manifest-v3-proposal.json` records the programs, hashes and split.
 It is a proposal, not a freeze: the freeze is gated by #52.
-Regenerate it with `invar-bench --write-domain-proposal bench/manifest-v3-proposal.json`; the test fails when it drifts.
+Regenerate it with `invar-bench --write-domain-proposal bench/manifest-v3-proposal.json` from `tools/`; the test fails when it drifts.
 
 `invar-bench --domain-report <ml|games|robotics|all>` prints per-program results, the worst five held-out programs and how many programs reached a parallel lowering on `cpu-parallel`, with the refusal reasons.
 It times nothing.

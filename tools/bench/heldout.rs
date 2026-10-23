@@ -490,7 +490,7 @@ fn frontier(state: &mut u64, ordinal: usize) -> Result<(String, Value), String> 
             }
         }
     }
-    let leaf = include_str!("general-net-v01/current/frontier_graph_a.inv")
+    let leaf = include_str!("../../bench/general-net-v01/current/frontier_graph_a.inv")
         .split("\nfn main()")
         .next()
         .unwrap()

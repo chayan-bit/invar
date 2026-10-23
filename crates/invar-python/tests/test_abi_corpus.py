@@ -56,7 +56,7 @@ def outcome(module, name, values):
 
 
 def corpus():
-    for base in ("tests/fixtures", "bench", "examples"):
+    for base in ("tests/fixtures", "bench", "tools/bench", "examples"):
         yield from sorted((ROOT / base).rglob("*.inv"))
 
 

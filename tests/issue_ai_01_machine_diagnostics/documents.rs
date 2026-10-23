@@ -326,27 +326,10 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
         assert!(!output.exists(), "{}", path.display());
         document_codes(&document, &registered, &mut reached);
     }
-    let output = Command::new(env!("CARGO_BIN_EXE_invar-qualify"))
-        .arg("--unknown")
-        .output()
-        .unwrap();
-    assert_eq!(output.status.code(), Some(2));
-    assert!(output.stdout.is_empty());
-    let diagnostic: Value = serde_json::from_slice(&output.stderr).unwrap();
-    assert_eq!(diagnostic["diagnostic"], "M5_USAGE");
-    document_codes(&diagnostic, &registered, &mut reached);
-    // A relative qualification library directory is refused before any run.
-    let output = Command::new(env!("CARGO_BIN_EXE_invar-qualify"))
-        .args(["--device", "cuda", "--libraries", "not-absolute"])
-        .output()
-        .unwrap();
-    assert_eq!(output.status.code(), Some(2));
-    assert!(output.stdout.is_empty());
-    let diagnostic: Value = serde_json::from_slice(&output.stderr).unwrap();
-    assert_eq!(diagnostic["diagnostic"], "M5_LIBRARY_PATH");
-    document_codes(&diagnostic, &registered, &mut reached);
-
     let mut required = source_codes();
+    // `invar-qualify` lives in the `invar-tools` package; tools/tests/qualify_cli.rs reaches these.
+    required.remove("M5_USAGE");
+    required.remove("M5_LIBRARY_PATH");
     #[cfg(not(feature = "native"))]
     required.remove("NATIVE_TRACE_LIMIT");
     #[cfg(feature = "native")]

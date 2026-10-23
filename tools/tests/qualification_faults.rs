@@ -1,3 +1,17 @@
+//! Fault and boundary controls for the M5-02 qualification harness (`qualification/`). The harness is
+//! compiled into this test to inject its faults; it expects these names at the crate root. The
+//! diagnostic registry (`tests/issue_ai_01_machine_diagnostics`) cites these tests by name.
+#![forbid(unsafe_code)]
+use invar::front::Span;
+#[allow(unused_imports)]
+use invar::{check, front, mir, schedule};
+pub use invar::{general_net, hex, layout_contract, numeric_contract, tensor_cache};
+use serde_json::json;
+
+#[path = "../qualification/mod.rs"]
+#[allow(dead_code)]
+mod qualification;
+
 fn qualification_case(
     source: &[u8],
     fuel: u64,
