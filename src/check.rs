@@ -493,7 +493,7 @@ fn check_impl(
         program.functions.push(instance);
     }
     checker.check_generic_graph()?;
-    numeric::finish(&numeric_sites, &mut program, &checker)?;
+    numeric::finish(&numeric_sites, &checker)?;
     storage::lower(
         &mut program,
         &mut checker.expression_types,

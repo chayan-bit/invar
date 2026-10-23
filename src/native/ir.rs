@@ -549,7 +549,7 @@ impl Ir<'_> {
                         if self.exporting { return Err(error("TC native export is unsupported")); }
                         self.line(format!("{value} = call i64 @invar_tc_step_v1(i64 {a}, i64 {b}, i64 {c})"));
                     }
-                    ("sin" | "cos" | "sqrt" | crate::math::TRIG_F32_SIN | crate::math::TRIG_F32_COS, [a]) => {
+                    ("sin" | "cos" | "sqrt", [a]) => {
                         // invar-trig-f32-v1 helpers over binary32 words; see
                         // `trig_helpers` for their single-source definitions.
                         let word = self.tmp();
@@ -560,7 +560,7 @@ impl Ir<'_> {
                             _ => format!(
                                 "@{}(i32 {word}, i32 {})",
                                 invar_device::trig_f32::SIN_HELPER,
-                                u8::from(matches!(name.as_str(), "cos" | crate::math::TRIG_F32_COS))
+                                u8::from(name.as_str() == "cos")
                             ),
                         };
                         self.line(format!("{result} = call i32 {call}"));
