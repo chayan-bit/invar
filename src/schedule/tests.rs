@@ -6,18 +6,9 @@ const TWO_LOOPS: &str = "fn main() -> i32 { var a = filled_u32(4u32, 0u32); for 
 
 fn plan(iterations: usize, owner: &str, values: Vec<u32>) -> LoopOverride {
     LoopOverride {
-        histogram: None,
-        scatter: None,
-        gather: None,
         iterations,
-        input_lengths: Vec::new(),
-        scalar: None,
         array: Some((owner.into(), values)),
-        tensor: None,
-        transpose: None,
-        stencil: None,
-        summary: None,
-        region: None,
+        ..Default::default()
     }
 }
 

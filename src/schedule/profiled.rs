@@ -259,15 +259,7 @@ pub fn run(
                     iterations: live.iterations,
                     input_lengths: vec![(m.inputs[0].clone(), input.len())],
                     array: Some((m.output.clone(), values)),
-                    scalar: None,
-                    histogram: None,
-                    scatter: None,
-                    gather: None,
-                    summary: None,
-                    region: None,
-                    tensor: None,
-                    transpose: None,
-                    stencil: None,
+                    ..Default::default()
                 });
             }
         }
