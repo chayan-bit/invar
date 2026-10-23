@@ -3,7 +3,6 @@
 # file is back under 800 lines. Never raise one: split the file instead.
 952 bench/acceptance.rs
 1211 bench/general-net-v01/corpus_children.rs
-908 bench/general-net-v01/corpus_numeric.rs
 959 bench/general-net-v01/gnet05/generate.rs
 1314 bench/heldout.rs
 963 crates/invar-cuda/src/cuda.rs
@@ -64,6 +63,6 @@
 927 tests/pnf_family_admission.rs
 1451 tests/support/cuda_owned_numeric_host_cpu_model.rs
 817 tests/support/cuda_owned_numeric_host_lifecycle.rs
-839 tests/support/gnet_device.rs
+831 tests/support/gnet_device.rs
 1852 tests/support/substep_admission_cases.rs
 930 tests/v02_placement.rs

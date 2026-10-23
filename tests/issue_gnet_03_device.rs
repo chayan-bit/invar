@@ -162,15 +162,31 @@ fn issue_gnet_03_device_emitted_code_is_program_specific_without_interpreter() {
 #[test]
 fn issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle() {
     // Emitted CUDA bodies at full fuel; emitted Metal bodies at full fuel and
-    // one source step short. Both run every admitted runnable program.
+    // one source step short. Both run the same deterministic corpus sample
+    // (every admitted runnable program under INVAR_FULL_CORPUS=1).
     // Four shards per runner bound compiler contention across the shared CI pool.
     // The CUDA and Metal halves run at once: 2 x 4 shard threads fill the
     // test's 8-thread nextest reservation.
     let (cuda, metal): (Denominator, Denominator) = std::thread::scope(|scope| {
-        let cuda = scope
-            .spawn(|| device::sharded(Target::Cuda, "cpu-model-cuda", CpuModel::default, false, 4));
+        let cuda = scope.spawn(|| {
+            device::sharded(
+                Target::Cuda,
+                "cpu-model-cuda",
+                CpuModel::default,
+                false,
+                4,
+                true,
+            )
+        });
         let metal = scope.spawn(|| {
-            device::sharded(Target::Metal, "cpu-model-metal", CpuModel::default, true, 4)
+            device::sharded(
+                Target::Metal,
+                "cpu-model-metal",
+                CpuModel::default,
+                true,
+                4,
+                true,
+            )
         });
         let join = |half: std::thread::ScopedJoinHandle<'_, Denominator>| {
             half.join()
@@ -182,7 +198,7 @@ fn issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle() {
     metal.print("cpu-model-metal");
     for d in [&cuda, &metal] {
         assert_eq!(d.fallback, 0);
-        assert!(d.executed_total() >= 250, "{d:?}");
+        assert!(d.executed_total() >= device::sample::floor(250), "{d:?}");
         assert!(d.executed["agree_trap"] > 0 && d.executed["agree_value"] > 0);
     }
     assert_eq!(cuda.executed, metal.executed);
