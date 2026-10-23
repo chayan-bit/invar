@@ -3,14 +3,11 @@
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
 use super::agree;
 use super::{Failure, digest, semantic};
-use invar::eval;
+use invar::{contraction_source, eval};
 use invar_device::{Capabilities, indexed, segmented, stencil::Boundary};
 use serde_json::{Value, json};
 use std::path::Path;
 
-#[allow(dead_code)]
-#[path = "../../src/contraction_source.rs"]
-mod contraction_source;
 #[path = "../../tests/issue_m4_01_device/ops.rs"]
 mod floating;
 #[allow(dead_code)]
