@@ -13,7 +13,7 @@ capability 5.0 or newer. The `invar-math-cr-v1` CUDA kernels whose CORE-MATH
 source declares an anonymous struct inside a union, such as binary64 `cos`,
 `tan`, `atan2`, `log`, `log10` and `pow`, need NVRTC 12.9 or newer, because
 NVRTC 12.4 rejects that construct; they are refused with a message naming
-both versions before compilation ([v02-f64math](design/v02-f64math.md)). The runtime detects device zero and the loaded NVRTC
+both versions before compilation. The runtime detects device zero and the loaded NVRTC
 version, compiles for that device's explicit `sm` target, and rejects a plan
 whose capabilities differ from the live device before submission. An absent
 driver/compiler, unsupported target, or compile failure is a failure, never a
