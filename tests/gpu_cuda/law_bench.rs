@@ -1,6 +1,8 @@
 //! Physical CUDA law-collective calibration and sessions; the CPU statistics stay in `tests/net_law_collective_bench.rs`.
 #[path = "../support/law_bench.rs"]
 mod bench;
+#[path = "../support/law_collective.rs"]
+mod support;
 #[test]
 #[ignore = "physical sm_120 CUDA, INVAR_GPU_EXCLUSIVE=1, records the cost-model calibration"]
 fn p8_calibrate_cuda() {

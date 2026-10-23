@@ -1,5 +1,6 @@
 //! Metal adapters for the pair-reduction tests shared with CUDA.
-use invar::{device_ir::Ir, mir, schedule::metal};
+use invar::{mir, schedule::metal};
+use invar_device::Ir;
 use invar_metal::MetalDevice;
 
 #[path = "../support/pair_reduction.rs"]

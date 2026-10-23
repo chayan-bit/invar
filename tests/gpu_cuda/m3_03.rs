@@ -2,9 +2,9 @@
 use invar::{admission, device_ir};
 use invar_device::{Capabilities, Error as VerifyError, Layout, Provenance};
 
-#[path = "../support/m3_03_chain.rs"]
-mod m3_03_chain;
-use m3_03_chain::CHAIN;
+#[path = "../support/m3_03_programs.rs"]
+mod m3_03_programs;
+use m3_03_programs::{CHAIN, LARGE_CHAIN, ZIP_DAG, checked_program};
 
 #[test]
 #[ignore = "requires a CUDA GPU and NVRTC 12.4+"]

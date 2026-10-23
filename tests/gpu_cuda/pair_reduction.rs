@@ -1,6 +1,7 @@
 //! CUDA adapters for the pair-reduction tests shared with Metal.
-use invar::{device_ir::Ir, mir, schedule::cuda};
+use invar::{mir, schedule::cuda};
 use invar_cuda::cuda::CudaDevice;
+use invar_device::Ir;
 use std::path::Path;
 
 #[path = "../support/pair_reduction.rs"]
