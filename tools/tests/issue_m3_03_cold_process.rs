@@ -1,5 +1,5 @@
 //! M3-03 fresh-process forced CUDA timing control (the in-process fused-map suite is
-//! `tests/issue_m3_03_cuda_fused_maps.rs` in the `invar` package).
+//! `tests/gpu_cuda/m3_03.rs` in the `invar` package).
 #![cfg(feature = "cuda")]
 #[path = "support/invar_bin.rs"]
 mod invar_bin;

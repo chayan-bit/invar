@@ -30,6 +30,16 @@ pub(super) struct Slot {
     pub(super) owned: bool,
 }
 
+/// Parks unknown work in its run's quarantine slot. When the slot is held or
+/// already occupied the work is leaked instead: unknown work is never released.
+pub(super) fn park<P>(slot: &RefCell<Option<P>>, pending: P) {
+    match slot.try_borrow_mut() {
+        Ok(mut slot) if slot.is_none() => *slot = Some(pending),
+        _ => std::mem::forget(pending),
+    }
+}
+
+#[derive(Default)]
 pub(super) struct Frame {
     pub(super) slots: HashMap<String, Slot>,
     pub(super) values: HashMap<ValueId, Value>,
