@@ -1,4 +1,4 @@
-//! Tree and Exact folds (`docs/numeric-v2.md`). In a function declared
+//! Tree and Exact folds (`docs/numeric.md`). In a function declared
 //! `#[numeric(fold = "tree" | "exact")]`, an update `acc = acc + term` directly
 //! in a counted `for` body, the only use there of an f32 accumulator declared
 //! at the loop's own depth, becomes a term buffer and one `sum_tree` or

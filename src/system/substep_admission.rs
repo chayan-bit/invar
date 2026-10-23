@@ -74,8 +74,8 @@ impl Digest {
 }
 
 // Rendered model and asset-set identities qualified by the P5 suite. Both asset
-// sets are unchanged since the P5 qualification commit 7ef6a553
-// (evidence/s1-06-p5-contact-visibility). The Panda model was requalified after
+// sets were unchanged from the P5 qualification commit 7ef6a553 until the visual
+// strip below (evidence/s1-06-p5-contact-visibility). The Panda model was requalified after
 // the 2026-10-13 decisions (principal inertias, source-declared gripper hold
 // 253); the prior value was 46a6e125. See evidence/s1-06-p5-residuals. The UR5e
 // model was requalified after the 2026-10-14 mount decision: its only change is
@@ -86,15 +86,17 @@ impl Digest {
 // Both models were requalified after the 2026-10-15 decision D1 (gravity
 // compensation generated on the arm bodies): their only change is `gravcomp="1"`
 // on every body of the robot subtree; the prior values were Panda d1dd553c and
-// UR5e 635a4b0d.
+// UR5e 635a4b0d. Both models and asset sets were requalified after the 2026-10-23
+// strip of visual-only robot geoms and meshes; the Panda home capture was
+// regenerated (prior: Panda 1cc33d8a/5808f22e, UR5e 557f4a32/df5cbffd).
 const QUALIFIED_PANDA_MODEL_XML: &str =
-    "1cc33d8ac212a4de749985c1c58c3167dc9a660bfc30dc72ed812dcda1d8bfc8";
+    "c5e4c42605bd020aff70f43d7f8ef8a1c9924db69a00cf6fb60e119750dbf1a7";
 const QUALIFIED_PANDA_ASSETS: &str =
-    "5808f22ebc73d732d9fa6277b82b84377a80adb3829b60a70330639c3b74dc48";
+    "96ad2495bebc523c972277150aa9931b276a4def8921753b093fb1fd38810375";
 const QUALIFIED_UR5E_MODEL_XML: &str =
-    "557f4a3243a3fa6d560c5c06140d3cf38ef5366fedc20a2086b503d1fccd9d31";
+    "f56abc0688946104c90b50789ffb480fb12eab588d7e82e21a315d5d016d0496";
 const QUALIFIED_UR5E_ASSETS: &str =
-    "df5cbffd8fd326d5317757185126b27da1bd98971f112c81e16552ba3a12c7a7";
+    "4603249908b3f2991057aa8c6b9bb251c2cb05d1aa45b58095ea9d74b187a950";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Layout {
@@ -110,13 +112,11 @@ impl Layout {
     }
     /// Effective collision role of each robot geom in binder walk order, from
     /// the vendored models with every default resolved: `c` is contype =
-    /// conaffinity = 1, `v` is visual-only contype = conaffinity = 0.
+    /// conaffinity = 1, `v` is visual-only contype = conaffinity = 0 (none remain).
     fn robot_geoms(self) -> &'static str {
         match self {
-            Self::SevenArmTendon => {
-                "vvvvvvvvvvvcvcvcvvvvcvvvvcvvvcccvvvvvvvvvvvvvvvvvcvvvvvvvvcvvvvvcvvccccccvvcccccc"
-            }
-            Self::SixArm => "vvvvvcvvvvccvvvvccvvvcvvvccvc",
+            Self::SevenArmTendon => "ccccccccccccccccccccccc",
+            Self::SixArm => "ccccccccc",
         }
     }
     /// SHA-256 of the qualified rendered model (`Identity::model_xml`) and of

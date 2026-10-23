@@ -3,26 +3,36 @@
   "generator": {
     "name": "capture_panda_home.py",
     "sha256": "e75414cb928e301fcee84abd0247259c4742f1673f3590c8fe306453e451c4f8",
-    "command": "capture_panda_home.py SCENE 1cc33d8ac212a4de749985c1c58c3167dc9a660bfc30dc72ed812dcda1d8bfc8 panda-home-diagnostic.json",
+    "command": "capture_panda_home.py SCENE c5e4c42605bd020aff70f43d7f8ef8a1c9924db69a00cf6fb60e119750dbf1a7 panda-home-diagnostic.json",
     "scene": "invar system gen mjcf examples/cells/reach_place/cell.inv (scene.xml equals the qualified policy model_xml)",
     "environment": "x86_64 Route 1 user-space environment (examples/cells/env/userspace, MuJoCo 3.12.0, NumPy 2.5.3)"
   },
-  "decisions": "2026-10-13: principal Panda inertias and source-declared gripper hold 253; candidates step down from the hold. 2026-10-15 D1: generated gravity compensation (gravcomp=\"1\") on every robot body; the source hold 253 stays violation-free (select_panda_hold.py now also admits 254, margin 2.6e-7 m; 253 keeps 5.1e-7 m)",
+  "decisions": "2026-10-13: principal Panda inertias and source-declared gripper hold 253; candidates step down from the hold. 2026-10-15 D1: generated gravity compensation (gravcomp=\"1\") on every robot body; the source hold 253 stays violation-free (select_panda_hold.py now also admits 254, margin 2.6e-7 m; 253 keeps 5.1e-7 m). 2026-10-23: visual-only robot geoms and meshes stripped from the vendored MJCF; the recapture equals the prior one in every state and witness, and its contact geom ids shift down by the 58 removed robot geoms.",
   "fixture": {
     "name": "panda-home-diagnostic.json",
     "bytes": 1649971,
-    "sha256": "129892a6b0a91248a638cc7f7f79eabbbb3acf97d505750fb1f3b511a71fa309"
+    "sha256": "f7264e8e95ec56637374e8a8a5136b5aeea4f74994eeaa11e5d442574814ac22"
   },
   "steps": 1000,
   "states": 1001,
   "predictions": 1000,
   "rejections": 0,
-  "superseded": {
-    "sha256": "c2c90fd80e376fc938714e9a5d16953f20c6b5b856a049cf37472a7f29ad7ea0",
-    "model_xml_sha256": "d1dd553c05cb1ff090e9219777be8f8bd7cefab327a44005a6de340039936865",
-    "source_commit": "ba9263565276ea2b5a38ff4057227bd626499eb9",
-    "predictions": 1000,
-    "rejections": 0,
-    "note": "Capture of the model before D1 gravity compensation; retained in git history."
-  }
+  "superseded": [
+    {
+      "sha256": "c2c90fd80e376fc938714e9a5d16953f20c6b5b856a049cf37472a7f29ad7ea0",
+      "model_xml_sha256": "d1dd553c05cb1ff090e9219777be8f8bd7cefab327a44005a6de340039936865",
+      "source_commit": "ba9263565276ea2b5a38ff4057227bd626499eb9",
+      "predictions": 1000,
+      "rejections": 0,
+      "note": "Capture of the model before D1 gravity compensation; retained in git history."
+    },
+    {
+      "sha256": "129892a6b0a91248a638cc7f7f79eabbbb3acf97d505750fb1f3b511a71fa309",
+      "model_xml_sha256": "1cc33d8ac212a4de749985c1c58c3167dc9a660bfc30dc72ed812dcda1d8bfc8",
+      "source_commit": "85dc53f062f684db30bff23ed51b18a4c1d2e42c",
+      "predictions": 1000,
+      "rejections": 0,
+      "note": "Capture of the model with its visual-only robot geoms; retained in git history. Every q, dq, force, control and witness equals the current capture; only contact geom ids differ."
+    }
+  ]
 }
