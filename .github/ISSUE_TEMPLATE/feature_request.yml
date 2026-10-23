@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose a language, compiler, tooling or documentation improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should change? A short example program or command helps.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Effect on semantics
+      description: Does this change evaluation order, traps, ownership or the specification? Invar preserves these in every build mode.

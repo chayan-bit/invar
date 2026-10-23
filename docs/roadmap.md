@@ -28,4 +28,4 @@ Rust-owned implementation, required interaction foundations, source semantics an
 
 Multiple GPU vendors, public proof/recipe packages, generic dynamic GPU net execution and comprehensive mechanized verification require separate proposals and evidence. They are not hidden prerequisites for implementing the current issue graph. CPU fallback stays functional for unsupported transformations. A performance gate failure remains visible until corrected or explicitly revised before a new measurement cycle; do not quietly lower a target after seeing results.
 
-No paid machine, GPU job, release, package publication, deployment, merge or visibility change is implied by this roadmap. Existing host and cost rules continue to apply.
+No paid machine, GPU job, release, package publication, deployment, merge or visibility change is implied by this roadmap. GPU suites are not run in CI and are run by contributors on matching hardware.

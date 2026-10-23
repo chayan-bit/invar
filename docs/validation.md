@@ -63,6 +63,13 @@ M2 must mutate plan inputs/rule IDs/hashes/evidence to prove rejection; unknown 
 
 Every milestone acceptance records commit, host/architecture, compiler/toolchain versions, configuration, exact commands, test count, seeds, results, unavailable checks, and remaining limitations. Performance adds algorithms, baselines, sample count, uncertainty, data layout/residency, and timed boundaries. Do not sum cumulative telemetry or call a process exit a scientific acceptance result.
 
+## Continuous integration
+
+GitHub Actions runs CPU-only checks on GitHub-hosted Linux runners: Lint, Check, Hygiene, four Test shards and the CPU-model corpus test.
+The workflow is [ci.yml](../.github/workflows/ci.yml).
+CUDA and Metal suites are not run in CI.
+Run them locally on a CUDA-capable Linux host or an Apple Silicon Mac when a change touches a device path, and record the hardware and result in the pull request.
+
 ## Later implementation and hardware acceptance
 
 After M0, use [the detailed plan](implementation-plan.md), its shared executable acceptance interface, and each [issue contract](issues/README.md). List filtered tests and require a nonzero relevant count before running them in Debug/Release. Default CPU CI and real CUDA qualification are distinct: skipped, mock-only or unavailable-device checks cannot close a hardware issue. [Performance acceptance](performance-acceptance.md) defines independent baselines, numerical policy and the frozen per-family targets; no performance claim follows from this specification or the standalone recurrence probe.
