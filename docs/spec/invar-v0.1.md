@@ -2,7 +2,7 @@
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
 Counts: statements=266 citations=282
-Size record: tokens=25310 estimator=bytes/3 limit=30000
+Size record: tokens=25314 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -496,7 +496,7 @@ fn main() -> i32 {
 [N5.8.2] The numeric policy is `strict-f32-v1`: IEEE 754 binary32, round to nearest even, no reassociation or contraction, and subnormals preserved. `src/numeric_contract.rs`
 [N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
 [N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
-[N5.8.5] `trunc_i32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::trunc_i32`
+[N5.8.5] `i32_from_f32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::i32_from_f32`
 [N5.8.6] `sqrt`, `sin` and `cos` on `f32` are correctly rounded under the default math contract `invar-math-cr-v1` (Appendix B.4), which supersedes `invar-trig-f32-v1`, and every engine returns the same 32-bit word. `src/math.rs`
 
 ```invar outcome=value:7
@@ -519,7 +519,7 @@ fn main() -> i32 {
 fn main() -> i32 {
     let root: f32 = sqrt(2.25);
     if root == 1.5 and sin(0.0) == 0.0 and cos(0.0) == 1.0 {
-        return trunc_i32(9.75);
+        return i32_from_f32(9.75);
     }
     return 0;
 }
@@ -528,7 +528,7 @@ fn main() -> i32 {
 ```invar outcome=trap:INTEGER_OVERFLOW
 fn main() -> i32 {
     let big: f32 = 3000000000.0;
-    return trunc_i32(big);
+    return i32_from_f32(big);
 }
 ```
 

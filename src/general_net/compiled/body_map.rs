@@ -84,9 +84,6 @@ impl Compiled {
     pub fn device_source(&self) -> &str {
         self.lanes.source()
     }
-    pub fn frame_source(&self) -> &str {
-        self.frame.source()
-    }
     pub fn groups(lanes: usize) -> Result<usize, Error> {
         if lanes == 0 {
             return Err(Error::Limit);

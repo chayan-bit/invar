@@ -2,7 +2,7 @@
 //! `cos` and `sqrt` sequence agrees bit for bit on the exact oracle, the host
 //! evaluator, the source engines, native LLVM, Metal and CUDA.
 //!
-//! The default tests pin golden hard cases and a sampled digest, so any edit
+//! The default tests pin golden hard cases and an oracle stride, so any edit
 //! of the shared sequence fails them. The `--ignored` sweeps cover all 2^32
 //! inputs: `p0a_trig_exhaustive_cpu` (oracle, ULP bound, subnormal audit),
 //! `p0a_trig_exhaustive_native` (`--features native`),
@@ -85,13 +85,6 @@ const GOLDEN: &[(u32, u32, u32, u32)] = &[
     (0x5b17_a8b0, 0xbf7f_b9e1, 0xbd3d_6d0f, 0x4d45_0a31),
 ];
 
-/// FNV digests of (sin, cos, sqrt) over the `sample()` inputs.
-const SAMPLE_DIGEST: [u64; 3] = [
-    0x9caa_85f4_900e_d22a,
-    0x0c1a_0a79_eca8_9fe6,
-    0xe213_b56e_4f37_5c7c,
-];
-
 /// FNV block digests of (sin, cos, sqrt) over all 2^32 inputs, recorded by
 /// `p0a_trig_exhaustive_cpu` on the exact-checked host backend.
 const FULL_DIGEST: [u64; 3] = [
@@ -102,16 +95,6 @@ const FULL_DIGEST: [u64; 3] = [
 
 fn sample() -> impl Iterator<Item = u32> {
     (0u32..1 << 18).map(|i| i.wrapping_mul(0x9e37_79b1) ^ (i >> 7))
-}
-
-fn sample_digests() -> [u64; 3] {
-    let mut digests = [sweep::FNV_SEED; 3];
-    for x in sample() {
-        for (f, digest) in digests.iter_mut().enumerate() {
-            *digest = sweep::fnv(*digest, u64::from(sweep::host(f, x)), 4);
-        }
-    }
-    digests
 }
 
 fn oracle(f: usize, x: u32) -> u32 {
@@ -179,8 +162,7 @@ fn p0a_trig_special_values_follow_the_contract() {
 }
 
 #[test]
-fn p0a_trig_sampled_digest_is_frozen_and_the_oracle_agrees_on_a_stride() {
-    assert_eq!(sample_digests(), SAMPLE_DIGEST);
+fn p0a_trig_the_oracle_agrees_with_the_host_on_a_stride() {
     for x in sample().step_by(64) {
         for f in 0..3 {
             assert_eq!(

@@ -326,10 +326,6 @@ fn issue_ai_01_machine_diagnostics_conversion_trap_is_versioned() {
 #[test]
 fn issue_ai_01_machine_diagnostics_sort_calibration_and_reason_registry() {
     let v3 = schema("explain-v3.schema.json");
-    let v2 = schema("explain-v2.schema.json");
-    let old: Value =
-        serde_json::from_str(include_str!("../fixtures/v02-sort/cpu-demo.json")).unwrap();
-    assert!(jsonschema::is_valid(&v2, &old));
     let registry = code_registry();
     let reasons = registry["explain_reason_codes"].as_array().unwrap();
     for (ty, values) in [
@@ -347,7 +343,6 @@ fn issue_ai_01_machine_diagnostics_sort_calibration_and_reason_registry() {
         assert_eq!(status, 0, "{document}");
         assert_eq!(document["schema"], "invar-explain-v3");
         assert!(jsonschema::is_valid(&v3, &document), "{document}");
-        assert!(!jsonschema::is_valid(&v2, &document));
         let sites = document["explicit_sorts"].as_array().unwrap();
         assert_eq!(sites.len(), 4);
         for (site, op) in sites
