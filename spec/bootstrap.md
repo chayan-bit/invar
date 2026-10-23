@@ -267,8 +267,7 @@ The pose is object-from-grasp: its translation and rotation are relative to the
 object, independently of the object's initial/target poses and the robot TCP.
 The clause requires an `object` with positive dynamic mass and collision geometry;
 duplicate clauses, wrong translation units and zero quaternions fail source
-checking. Explicit grasp sources serialize as additive `invar-system-v10`.
-Unannotated sources retain their prior IR version and centred identity grasp.
+checking. Unannotated sources keep the centred identity grasp.
 MJCF places the object's weld site at the declared grasp. The checked task binding
 derives the grasp tool goal as cube pose times object-from-grasp, with the existing
 100 mm world-Z pregrasp offset. Place uses the observed attachment relation and

@@ -1,8 +1,8 @@
 # Invar v0.1 compact language specification (draft for AI-02)
 
 Status: DRAFT covering behaviour present on `main` at 99b8ffb7, with Appendix A reconciled at 7634aff8, B.4 and B.5 at df9bf05c, and the f64 foreign argument in B.4 at 6437321f; AI-02 is formally the last v0.1 issue, so open v0.1 gaps are listed only in Appendix A and v0.2 features already on `main` only in Appendix B.
-Counts: statements=266 citations=283
-Size record: tokens=25375 estimator=bytes/3 limit=30000
+Counts: statements=266 citations=284
+Size record: tokens=25238 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -785,8 +785,8 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 8.2 The invar-system IR
 
-[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-vN`, byte-identical for identical input, with one schema file per version in `schema/`. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
-[N8.2.2] The checker emits the lowest version that can represent the source: v2 when a bus, identity transform or license detail is used, v3 for typed config, input paths or golden tolerances, v4 for parameter ranges, v5 for robot and cell models, v6 for tool and dynamic objects, v7 and v8 for planner records and config, v9 and v10 for the planner frame policy and grasp, v11 for an actuator `hold` command and v12 for a cell mount surface. `src/system/compiler.rs::use_v2`
+[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-v12`, byte-identical for identical input, and validated by `schema/invar-system-v12.schema.json`. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
+[N8.2.2] Every source emits v12, and the `robots` and `cells` arrays appear only when the source declares a robot or cell model. `src/system/compiler.rs::models`
 [N8.2.3] An unknown version is rejected, and relabelling a document does not make it valid. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
 [N8.2.4] Permuting module order of the same system gives byte-identical IR. `tests/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_module_permutation_is_byte_identical`
 [N8.2.5] Deserializing an IR does not establish a source check, and only a source-compiled model can pass the graph checks. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
@@ -801,7 +801,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ## 9. Graph checks
 
-[N9.0.1] Graph checks run when the IR is v2 or later, and a v1-shaped source gets only S1-01 checks and reports `checks_pending` with `system-v2-graph-checks`. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_v1_remains_readable_with_graph_work_pending`
+[N9.0.1] Graph checks run on every source-compiled system. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
 [N9.0.2] Diagnostics are ordered by family and then span, and the same input gives the same output. `tests/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_diagnostic_families_keep_stable_order`
 [N9.0.3] The checker proves structure only, and deadlines and WCET are declared budgets and not measurements. `docs/system-integration-v1.md`
 
