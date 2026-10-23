@@ -140,6 +140,8 @@ jobs:
         run: >
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
           --test issue_m1_02 --test issue_gnet_02_native --test issue_dx_20_debug_command --test issue_dx_20_debug_info
+          --test issue_l1_06_native_arrays --test issue_l1_06_native_f32_arrays --test issue_l1_06_scalar_export_core
+          --test issue_eng_03_tier_engines --test issue_l1_06_export_failure_contract
 
   cuda:
     name: Build (cuda, compile only)
