@@ -1,13 +1,17 @@
 use std::collections::BTreeMap;
 
+#[path = "../test-support/term_oracle.rs"]
+mod term;
+
 use invar::{
     check::check,
     eval,
     front::{self, BinaryOp},
     mir, mir_eval, mir_net,
-    term::{self, Kind, Term},
     typed_net::{self, Effect, Error, Limits, MapOp, Net, Node, Op, Type},
 };
+
+use term::{Kind, Term};
 
 #[test]
 fn issue_m1_05_rewrite_extraction_equivalence_public_mir_graph_differential() {
@@ -270,11 +274,11 @@ fn issue_m1_05_rewrite_extraction_equivalence_beta_changes_extracted_body() {
         }
     ));
     assert_eq!(
-        direct.run_term(RUN).unwrap().result,
-        extracted.run_term(RUN).unwrap().result
+        term::run_term(&direct, RUN).unwrap().result,
+        term::run_term(&extracted, RUN).unwrap().result
     );
     assert_eq!(
-        extracted.run_term(RUN).unwrap().result,
+        term::run_term(&extracted, RUN).unwrap().result,
         Ok(term::Value::Nat(41))
     );
     net.rule_history[0] = "stale-beta-v0";
@@ -361,7 +365,7 @@ fn issue_m1_05_rewrite_extraction_equivalence_beta_changes_extracted_body() {
     assert_eq!(net.rewrite_beta(LIMITS).unwrap(), None);
     let original = net.extract(&net.verify(LIMITS).unwrap()).unwrap();
     assert_eq!(
-        original.run_term(RUN).unwrap().result,
+        term::run_term(&original, RUN).unwrap().result,
         Err(term::Error::Trap {
             at: 34,
             label: "arg"
@@ -396,7 +400,7 @@ fn issue_m1_05_rewrite_extraction_equivalence_beta_changes_extracted_body() {
     assert_eq!(net.rewrite_beta(LIMITS).unwrap(), None);
     let proof = net.verify(LIMITS).unwrap();
     assert_eq!(
-        net.observe(&proof, RUN).unwrap(),
+        term::observe_net(&net, &proof, RUN).unwrap(),
         term::observe(&term::Program::default(), &outer, RUN)
     );
 }
@@ -414,7 +418,7 @@ fn issue_m1_05_rewrite_extraction_equivalence_fusion_changes_loop_count() {
             .collect();
         assert_eq!(direct.run_array().unwrap(), expected);
         assert_eq!(
-            net.observe_array(&proof, RUN).unwrap().result,
+            term::observe_array_net(&net, &proof, RUN).unwrap().result,
             Ok(expected.clone())
         );
         let rewrite = net.rewrite_map_fusion(LIMITS).unwrap().unwrap();
@@ -424,7 +428,10 @@ fn issue_m1_05_rewrite_extraction_equivalence_fusion_changes_loop_count() {
         let extracted = net.extract(&proof).unwrap();
         assert_eq!(extracted.loop_count(), 1);
         assert_eq!(extracted.run_array().unwrap(), expected);
-        assert_eq!(net.observe_array(&proof, RUN).unwrap().result, Ok(expected));
+        assert_eq!(
+            term::observe_array_net(&net, &proof, RUN).unwrap().result,
+            Ok(expected)
+        );
     }
 }
 
