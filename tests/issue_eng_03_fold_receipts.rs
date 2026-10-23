@@ -1,7 +1,7 @@
-//! ENG-03 step 7 (D12): the newest documents that carry `numeric_contracts`
-//! (explain-v5 and invar-diagnostics-v3) record each declared fold tier a
-//! lowered fold used and the algorithm that ran. Older versions never carry
-//! it, and a program without a lowered fold is unchanged.
+//! ENG-03 step 7 (D12): placement documents (explain-v5 and
+//! invar-diagnostics-v3) record in `numeric_contracts` each declared fold tier
+//! a lowered fold used and the algorithm that ran, and a program without a
+//! lowered fold is unchanged.
 
 use invar::{check, front, math, mir};
 use serde_json::{Value, json};
