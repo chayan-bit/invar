@@ -39,11 +39,6 @@
 940 src/system/urdf.rs
 854 tests/gnet_p4a_path_sum.rs
 1171 tests/issue_ai_02_spec_examples.rs
-1724 tests/gnet_provenance/issue_gnet_05_provenance_owned.rs
-850 tests/gnet05_corpus/issue_gnet_05_robotics_array.rs
-918 tests/gnet_numeric_host/issue_gnet_10_f32_arrays.rs
-902 tests/gnet_numeric_host/issue_gnet_11_numeric_owned_state.rs
-928 tests/gnet_device_model/issue_gnet_resume_device_model.rs
 943 tests/issue_m2_05.rs
 876 tests/issue_m4_02_stencil_source.rs
 858 tests/issue_m4_06_bounded_schedule_tuning.rs
