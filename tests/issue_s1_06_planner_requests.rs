@@ -1,5 +1,4 @@
-//! Generator for the pinned v3 planner requests and runtime scene fields, and for the
-//! cell-tool-dependent fields of the legacy v2 requests.
+//! Generator for the pinned v3 planner requests and runtime scene fields.
 //!
 //! The fixed requests come from the Pinocchio goldens (start joints, goal tool poses
 //! projected into the cell tool frame) and from the checked cell (cube pose, grasp, table
@@ -49,59 +48,6 @@ fn checked_ir(cell_path: &Path) -> invar::system::SystemIr {
         cell_path.parent().unwrap(),
     )
     .unwrap()
-}
-
-fn wire_pose(value: &Value) -> Pose {
-    let f = |i: usize| value[i].as_f64().unwrap();
-    Pose {
-        translation_m: [f(0), f(1), f(2)],
-        quaternion_xyzw: [f(3), f(4), f(5), f(6)],
-    }
-}
-
-/// The legacy v2 (endpoint, runtime). Only the child pin and the cell-tool-dependent
-/// fields are generated: the legacy projection, the goal tool poses (golden composed
-/// with reference_from_cell) and the cube in the start tool frame. Ids, start joints
-/// and the fixed cube pose are the committed v2 requests.
-fn generate_v2(arm: &str, cell: &str) -> (Value, Value) {
-    let repo = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let component = repo.join(COMPONENT);
-    let read = |name: String| -> Value {
-        serde_json::from_slice(&fs::read(component.join(name)).unwrap()).unwrap()
-    };
-    let projection = invar::system::tool_projection::selected(&checked_ir(
-        &repo.join("examples/cells/reach_place").join(cell),
-    ))
-    .unwrap()
-    .legacy();
-    let source: Value = serde_json::from_slice(&fs::read(repo.join(GOLDENS)).unwrap()).unwrap();
-    let reference = source["arms"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|a| a["arm"] == arm)
-        .unwrap();
-    let cell_tool = |index: &Value| {
-        golden_pose(&reference["vectors"][index.as_u64().unwrap() as usize])
-            .compose(projection.reference_from_cell)
-            .unwrap()
-    };
-    let mut endpoint = read(format!("endpoint-{arm}.json"));
-    endpoint["tool_projection"] = projection.value();
-    for vector in endpoint["vectors"].as_array_mut().unwrap() {
-        let start = cell_tool(&vector["source_start_vector"]);
-        let cube = wire_pose(&vector["cube_base_pose"]);
-        vector["target_base_from_tool"] = json!(planner_scene::flat(cell_tool(
-            &vector["source_goal_vector"]
-        )));
-        vector["tool_from_cube"] = json!(planner_scene::flat(
-            start.inverse().unwrap().compose(cube).unwrap()
-        ));
-    }
-    let mut runtime = read(format!("runtime-{arm}.json"));
-    runtime["artifacts"]["child"]["sha256"] = json!(child_hash());
-    runtime["tool_projection"] = projection.value();
-    (endpoint, runtime)
 }
 
 /// Generated (endpoint, runtime) for one arm; `pair` is the (start, goal) golden pair.
@@ -204,12 +150,9 @@ fn issue_s1_06_planner_source_requests_are_generated_from_goldens_and_cell() {
         ("ur5e", 6, "cell-ur5e.inv", (0, 2)),
     ] {
         let (endpoint, runtime) = generate(arm, n, cell, pair);
-        let (v2_endpoint, v2_runtime) = generate_v2(arm, cell);
         for (name, value) in [
             (format!("endpoint-source-{arm}-v3.json"), endpoint),
             (format!("runtime-source-{arm}-v3.json"), runtime),
-            (format!("endpoint-{arm}.json"), v2_endpoint),
-            (format!("runtime-{arm}.json"), v2_runtime),
         ] {
             if let Some(directory) = &output {
                 fs::create_dir_all(directory).unwrap();
