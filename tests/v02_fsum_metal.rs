@@ -17,7 +17,7 @@ use std::process::Command;
 const OPS: [Op; 4] = [Op::SumTree, Op::DotTree, Op::SumExact, Op::DotExact];
 
 fn device_schema() -> serde_json::Value {
-    let schema = include_str!("../schema/invar-explain-device-v1.schema.json");
+    let schema = include_str!("../schema/invar-explain-device-v5.schema.json");
     serde_json::from_str(schema).unwrap()
 }
 

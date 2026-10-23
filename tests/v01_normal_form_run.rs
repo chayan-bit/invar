@@ -369,20 +369,8 @@ fn issue_54_every_normal_form_schema_accepts_the_typed_fallback() {
             "/properties/normal_form",
         ),
         (
-            "invar-diagnostics-v3.schema.json",
-            "/properties/normal_form",
-        ),
-        (
-            "invar-explain-device-v1.schema.json",
-            "/properties/normal_form",
-        ),
-        (
             "invar-explain-device-v5.schema.json",
             "/properties/normal_form",
-        ),
-        (
-            "explain-v1.schema.json",
-            "/properties/device_execution/properties/normal_form",
         ),
         (
             "explain-v5.schema.json",

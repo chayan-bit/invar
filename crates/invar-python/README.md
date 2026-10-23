@@ -178,7 +178,7 @@ A successful receipt contains `requested_engine`, the actual published `backends
 Scheduled receipts also carry per-region `choices` and cache/hint counts.
 An empty choice list reports `mir-serial`, never a GPU or parallel execution claim.
 Python `explain()` remains the schema-valid static AI-01 report until execution.
-After successful `auto`/`cuda`/`metal` execution it includes that run's frozen `invar-explain-device-v1` document; it does not rerun the program.
+After successful `auto`/`cuda`/`metal` execution it includes that run's `invar-explain-device-v5` document; it does not rerun the program.
 Receipts and explain output are bounded to one million bytes.
 
 Missing features, missing devices, ineligible programs and false device guards raise `EngineError` carrying the original `CUDA_UNAVAILABLE`, `METAL_UNAVAILABLE` or other Invar code in `diagnostics` / `diagnostic_json`.

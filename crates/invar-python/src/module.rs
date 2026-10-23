@@ -305,12 +305,12 @@ impl CheckedModule {
         let report = invar::admission::analyze(&self.source, &lowered)
             .map_err(|error| boundary_error(py, Class::Check, error.code, &error.message))?;
         let mut document = report.to_json();
-        document["schema"] = json!("invar-explain-v1");
+        document["schema"] = json!(invar::admission::SCHEMA);
         if let Some(receipt) = &self.last_execution
             && matches!(self.engine, "auto" | "cuda" | "metal")
         {
             document["device_execution"] = invar::engine::device_document(receipt);
-            document["device_schema"] = json!("invar-explain-device-v1");
+            document["device_schema"] = json!(invar::admission::DEVICE_SCHEMA);
         }
         if document.to_string().len() > 1_000_000 {
             return Err(boundary_error(

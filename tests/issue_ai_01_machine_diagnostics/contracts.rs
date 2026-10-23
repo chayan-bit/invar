@@ -183,8 +183,8 @@ fn issue_ai_01_machine_diagnostics_reject_invalid_contracts() {
         ],
     );
     assert_eq!(ordered["diagnostics"][0]["code"], "NAME_UNKNOWN");
-    let mut explain = json!({"schema":"invar-explain-v1","schema_version":1,"status":"ok","diagnostics":[],"source_identity":"fnv1a64:0","regions":[]});
-    let explain_schema = schema("explain-v1.schema.json");
+    let mut explain = json!({"schema":"invar-explain-v5","schema_version":5,"status":"ok","diagnostics":[],"source_identity":"fnv1a64:0","regions":[]});
+    let explain_schema = schema("explain-v5.schema.json");
     assert!(jsonschema::is_valid(&explain_schema, &explain));
     explain["new_field_without_version_bump"] = json!(1);
     assert!(!jsonschema::is_valid(&explain_schema, &explain));

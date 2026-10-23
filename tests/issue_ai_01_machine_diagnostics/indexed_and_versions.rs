@@ -325,11 +325,7 @@ fn issue_ai_01_machine_diagnostics_conversion_trap_is_versioned() {
 
 #[test]
 fn issue_ai_01_machine_diagnostics_sort_calibration_and_reason_registry() {
-    let v3 = schema("explain-v3.schema.json");
-    let v2 = schema("explain-v2.schema.json");
-    let old: Value =
-        serde_json::from_str(include_str!("../fixtures/v02-sort/cpu-demo.json")).unwrap();
-    assert!(jsonschema::is_valid(&v2, &old));
+    let v5 = schema("explain-v5.schema.json");
     let registry = code_registry();
     let reasons = registry["explain_reason_codes"].as_array().unwrap();
     for (ty, values) in [
@@ -345,9 +341,8 @@ fn issue_ai_01_machine_diagnostics_sort_calibration_and_reason_registry() {
         let (status, document) = cli(&["explain", path.to_str().unwrap(), "--format", "json"]);
         std::fs::remove_file(path).unwrap();
         assert_eq!(status, 0, "{document}");
-        assert_eq!(document["schema"], "invar-explain-v3");
-        assert!(jsonschema::is_valid(&v3, &document), "{document}");
-        assert!(!jsonschema::is_valid(&v2, &document));
+        assert_eq!(document["schema"], "invar-explain-v5");
+        assert!(jsonschema::is_valid(&v5, &document), "{document}");
         let sites = document["explicit_sorts"].as_array().unwrap();
         assert_eq!(sites.len(), 4);
         for (site, op) in sites
@@ -365,10 +360,10 @@ fn issue_ai_01_machine_diagnostics_sort_calibration_and_reason_registry() {
             .as_object_mut()
             .unwrap()
             .remove("calibration_id");
-        assert!(!jsonschema::is_valid(&v3, &missing));
+        assert!(!jsonschema::is_valid(&v5, &missing));
         let mut wrong = document;
         wrong["explicit_sorts"][0]["calibration_id"] = "sort.sort.f64".into();
-        assert!(!jsonschema::is_valid(&v3, &wrong));
+        assert!(!jsonschema::is_valid(&v5, &wrong));
     }
 }
 
@@ -379,11 +374,11 @@ fn issue_ai_01_machine_diagnostics_sorting_f64_program_records_numeric_contracts
     let (status, document) = cli(&["explain", path.to_str().unwrap(), "--format", "json"]);
     std::fs::remove_file(path).unwrap();
     assert_eq!(status, 0, "{document}");
-    assert_eq!(document["schema"], "invar-explain-v3");
+    assert_eq!(document["schema"], "invar-explain-v5");
     assert_eq!(document["numeric_contracts"]["binary64"], "strict-f64-v1");
     assert_eq!(document["numeric_contracts"]["math"], "invar-math-cr-v1");
     assert!(
-        jsonschema::is_valid(&schema("explain-v3.schema.json"), &document),
+        jsonschema::is_valid(&schema("explain-v5.schema.json"), &document),
         "{document}"
     );
 }
