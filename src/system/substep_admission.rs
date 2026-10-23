@@ -90,11 +90,11 @@ impl Digest {
 // strip of visual-only robot geoms and meshes; the Panda home capture was
 // regenerated (prior: Panda 1cc33d8a/5808f22e, UR5e 557f4a32/df5cbffd).
 const QUALIFIED_PANDA_MODEL_XML: &str =
-    "1cc33d8ac212a4de749985c1c58c3167dc9a660bfc30dc72ed812dcda1d8bfc8";
+    "c5e4c42605bd020aff70f43d7f8ef8a1c9924db69a00cf6fb60e119750dbf1a7";
 const QUALIFIED_PANDA_ASSETS: &str =
     "96ad2495bebc523c972277150aa9931b276a4def8921753b093fb1fd38810375";
 const QUALIFIED_UR5E_MODEL_XML: &str =
-    "557f4a3243a3fa6d560c5c06140d3cf38ef5366fedc20a2086b503d1fccd9d31";
+    "f56abc0688946104c90b50789ffb480fb12eab588d7e82e21a315d5d016d0496";
 const QUALIFIED_UR5E_ASSETS: &str =
     "4603249908b3f2991057aa8c6b9bb251c2cb05d1aa45b58095ea9d74b187a950";
 
