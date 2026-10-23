@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use crate::engines::agree;
+
 #[test]
 fn issue_r1_01_units_frames_quantity_erasure_is_byte_identical() {
     let typed = "fn main() -> i32 { let x: Quantity<i32,m> = quantity::<m>(1i32); let y: Quantity<i32,m> = quantity::<m>(1i32); if x == y { return 1; } return 0; }";
@@ -110,19 +112,11 @@ fn issue_r1_01_units_frames_device_text_is_byte_identical() {
 
 #[test]
 fn issue_r1_01_units_frames_quantities_erase_and_engines_agree() {
-    let source = include_str!("fixtures/r1_01_quantity_basic.inv");
-    let checked =
-        invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = invar::eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, invar::eval::Value::I32(1));
-    let lowered = invar::mir::lower(&checked).unwrap();
-    assert_eq!(invar::mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 1);
-    }
+    agree(
+        include_str!("../fixtures/r1_01_quantity_basic.inv"),
+        1000,
+        1,
+    );
 }
 
 #[test]
@@ -156,19 +150,7 @@ fn issue_r1_01_units_frames_quantity_source_errors() {
 
 #[test]
 fn issue_r1_01_units_frames_transform_chain_agrees() {
-    let source = include_str!("fixtures/r1_01_frame_values.inv");
-    let checked =
-        invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = invar::eval::run(&checked, 10000).unwrap();
-    assert_eq!(reference.value, invar::eval::Value::I32(1));
-    let lowered = invar::mir::lower(&checked).unwrap();
-    assert_eq!(invar::mir_eval::run(&lowered, 10000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 10000).unwrap();
-        assert_eq!(status, 0, "{document}");
-        assert_eq!(document["result"]["value"], 1);
-    }
+    agree(include_str!("../fixtures/r1_01_frame_values.inv"), 10000, 1);
 }
 
 #[test]
@@ -214,22 +196,7 @@ fn issue_r1_01_units_frames_twenty_kinematics_programs_agree() {
                  return 0;
              }}"
         );
-        let checked = invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true)
-            .unwrap_or_else(|error| panic!("case {case}: {error:?}"));
-        let reference = invar::eval::run(&checked, 10000).unwrap();
-        assert_eq!(reference.value, invar::eval::Value::I32(1), "case {case}");
-        let lowered = invar::mir::lower(&checked).unwrap();
-        assert_eq!(
-            invar::mir_eval::run(&lowered, 10000).unwrap(),
-            reference,
-            "case {case}"
-        );
-        #[cfg(feature = "native")]
-        {
-            let (status, document) = invar::native::run_program(&lowered, 10000).unwrap();
-            assert_eq!(status, 0, "case {case}: {document}");
-            assert_eq!(document["result"]["value"], 1, "case {case}");
-        }
+        agree(&source, 10000, 1);
     }
 }
 
@@ -261,7 +228,7 @@ fn issue_r1_01_units_frames_quantity_chain_respects_two_mib_stack() {
 
 #[test]
 fn issue_r1_01_units_frames_generated_traps_have_source_spans() {
-    let source = include_str!("fixtures/r1_01/frame-overflow.inv");
+    let source = include_str!("../fixtures/r1_01/frame-overflow.inv");
     let checked =
         invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
     let lowered = invar::mir::lower(&checked).unwrap();
@@ -303,7 +270,7 @@ fn issue_r1_01_units_frames_generated_traps_have_source_spans() {
 
 #[test]
 fn issue_r1_01_units_frames_scale_fix_applies_through_cli() {
-    let source = include_str!("fixtures/r1_01/mismatched-units.inv");
+    let source = include_str!("../fixtures/r1_01/mismatched-units.inv");
     let path = std::env::temp_dir().join(format!("invar-r1-unit-fix-{}.inv", std::process::id()));
     std::fs::write(&path, source).unwrap();
     let output = Command::new(env!("CARGO_BIN_EXE_invar"))
@@ -337,7 +304,7 @@ fn issue_r1_01_units_frames_scale_fix_applies_through_cli() {
 
 #[test]
 fn issue_r1_01_units_frames_record_fields_preserve_units() {
-    let source = include_str!("fixtures/r1_01_record_quantity.inv");
+    let source = include_str!("../fixtures/r1_01_record_quantity.inv");
     let checked =
         invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
     assert_eq!(
@@ -348,36 +315,16 @@ fn issue_r1_01_units_frames_record_fields_preserve_units() {
 
 #[test]
 fn issue_r1_01_units_frames_dimension_products_quotients_and_rates() {
-    let source = include_str!("fixtures/r1_01_dimension_algebra.inv");
-    let checked =
-        invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = invar::eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, invar::eval::Value::I32(1));
-    let lowered = invar::mir::lower(&checked).unwrap();
-    assert_eq!(invar::mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 1);
-    }
+    agree(
+        include_str!("../fixtures/r1_01_dimension_algebra.inv"),
+        1000,
+        1,
+    );
 }
 
 #[test]
 fn issue_r1_01_units_frames_exact_scale_conversion_agrees() {
-    let source = include_str!("fixtures/r1_01_conversion.inv");
-    let checked =
-        invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = invar::eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, invar::eval::Value::I32(1));
-    let lowered = invar::mir::lower(&checked).unwrap();
-    assert_eq!(invar::mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 1);
-    }
+    agree(include_str!("../fixtures/r1_01_conversion.inv"), 1000, 1);
 }
 
 #[test]
@@ -385,12 +332,12 @@ fn issue_r1_01_units_frames_scale_traps_agree() {
     use invar::eval::{EvalError, TrapCategory};
     for (source, category, code) in [
         (
-            include_str!("fixtures/r1_01/inexact-conversion.inv"),
+            include_str!("../fixtures/r1_01/inexact-conversion.inv"),
             TrapCategory::UnitConversionInexact,
             "UNIT_CONVERSION_INEXACT",
         ),
         (
-            include_str!("fixtures/r1_01/overflow-conversion.inv"),
+            include_str!("../fixtures/r1_01/overflow-conversion.inv"),
             TrapCategory::IntegerOverflow,
             "INTEGER_OVERFLOW",
         ),
@@ -417,25 +364,13 @@ fn issue_r1_01_units_frames_scale_traps_agree() {
 
 #[test]
 fn issue_r1_01_units_frames_certified_angle_conversion_agrees() {
-    let source = include_str!("fixtures/r1_01_angles.inv");
-    let checked =
-        invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = invar::eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, invar::eval::Value::I32(1));
-    let lowered = invar::mir::lower(&checked).unwrap();
-    assert_eq!(invar::mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 1);
-    }
+    agree(include_str!("../fixtures/r1_01_angles.inv"), 1000, 1);
 }
 
 #[test]
 fn issue_r1_01_units_frames_angle_overflow_agrees() {
     use invar::eval::{EvalError, TrapCategory};
-    let source = include_str!("fixtures/r1_01/angle-overflow.inv");
+    let source = include_str!("../fixtures/r1_01/angle-overflow.inv");
     let checked =
         invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
     assert!(matches!(

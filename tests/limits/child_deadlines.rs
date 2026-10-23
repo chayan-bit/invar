@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "../test-support/child_deadline.rs"]
+#[path = "../../test-support/child_deadline.rs"]
 mod child_deadline;
 
 use std::{process::Command, time::Duration};
@@ -24,7 +24,7 @@ fn scale_is_explicit_bounded_and_cannot_disable_deadlines() {
         command
             .args([
                 "--exact",
-                "scale_is_explicit_bounded_and_cannot_disable_deadlines",
+                "child_deadlines::scale_is_explicit_bounded_and_cannot_disable_deadlines",
             ])
             .env_remove("INVAR_TEST_TIMEOUT_SCALE")
             .env(
@@ -39,7 +39,7 @@ fn scale_is_explicit_bounded_and_cannot_disable_deadlines() {
     let output = Command::new(std::env::current_exe().unwrap())
         .args([
             "--exact",
-            "scale_is_explicit_bounded_and_cannot_disable_deadlines",
+            "child_deadlines::scale_is_explicit_bounded_and_cannot_disable_deadlines",
         ])
         .env("INVAR_DEADLINE_EXPECT_SECONDS", "10")
         .env("INVAR_TEST_TIMEOUT_SCALE", "0")
@@ -73,7 +73,7 @@ fn hung_child_is_killed_even_when_it_ignores_term() {
     let output = Command::new(std::env::current_exe().unwrap())
         .args([
             "--exact",
-            "hung_child_is_killed_even_when_it_ignores_term",
+            "child_deadlines::hung_child_is_killed_even_when_it_ignores_term",
             "--nocapture",
         ])
         .env("INVAR_TEST_TIMEOUT_SCALE", "2")
