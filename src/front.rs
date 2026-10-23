@@ -68,9 +68,7 @@ impl FrontError {
         self
     }
 
-    /// Compact, source-free summary of this front-end result. It has no line or
-    /// column data, so it is not a schema document; the CLI emits the
-    /// `invar-diagnostics-v3` form from [`Self::to_diagnostics_json`].
+    /// Compact, source-free summary; the schema-valid form is [`Self::to_diagnostics_json`].
     pub fn to_json(&self, path: &str) -> Value {
         let span = self
             .span
