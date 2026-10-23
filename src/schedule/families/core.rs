@@ -179,18 +179,10 @@ pub(super) mod metal {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths,
-                            scalar: None,
                             array: Some((map.output.clone(), values)),
+                            ..Default::default()
                         },
                         kind: PlanKind::Map,
                         chunks: Vec::new(),
@@ -238,19 +230,11 @@ pub(super) mod metal {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths,
-                            scalar: None,
                             array: (!pair.elide_intermediate)
                                 .then_some((pair.intermediate.clone(), first)),
+                            ..Default::default()
                         },
                         kind: PlanKind::FusedMap,
                         chunks: Vec::new(),
@@ -291,18 +275,10 @@ pub(super) mod metal {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths,
-                            scalar: None,
                             array: Some((first.clone(), values.remove(0))),
+                            ..Default::default()
                         },
                         kind: PlanKind::FusedMap,
                         chunks: Vec::new(),
@@ -334,21 +310,13 @@ pub(super) mod metal {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            region: None,
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths: lengths(&candidate.inputs, &borrowed),
                             scalar: Some(vec![
                                 (candidate.states[0].clone(), seeds[0], total.a),
                                 (candidate.states[1].clone(), seeds[1], total.b),
                             ]),
-                            array: None,
+                            ..Default::default()
                         },
                         kind: PlanKind::Reduction,
                         chunks: Vec::new(),
@@ -370,21 +338,13 @@ pub(super) mod metal {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths: lengths(
                                 std::slice::from_ref(&candidate.input),
                                 &borrowed,
                             ),
                             scalar: Some(vec![(candidate.state.clone(), seed, result.final_state)]),
-                            array: None,
+                            ..Default::default()
                         },
                         kind: PlanKind::Reduction,
                         chunks: Vec::new(),
@@ -415,18 +375,11 @@ pub(super) mod metal {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths: lengths(&candidate.arrays, &borrowed),
                             scalar: Some(vec![(candidate.state.clone(), seed, result.final_state)]),
                             array: output.map(|name| (name.to_owned(), result.prefixes)),
+                            ..Default::default()
                         },
                         kind: PlanKind::Scan,
                         chunks: Vec::new(),
@@ -598,18 +551,10 @@ pub(super) mod cuda {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths,
-                            scalar: None,
                             array: Some((map.output.clone(), values)),
+                            ..Default::default()
                         },
                         kind: PlanKind::Map,
                         chunks: Vec::new(),
@@ -657,19 +602,11 @@ pub(super) mod cuda {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths,
-                            scalar: None,
                             array: (!pair.elide_intermediate)
                                 .then_some((pair.intermediate.clone(), first)),
+                            ..Default::default()
                         },
                         kind: PlanKind::FusedMap,
                         chunks: Vec::new(),
@@ -710,18 +647,10 @@ pub(super) mod cuda {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths,
-                            scalar: None,
                             array: Some((first.clone(), values.remove(0))),
+                            ..Default::default()
                         },
                         kind: PlanKind::FusedMap,
                         chunks: Vec::new(),
@@ -753,21 +682,13 @@ pub(super) mod cuda {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            region: None,
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths: lengths(&candidate.inputs, &borrowed),
                             scalar: Some(vec![
                                 (candidate.states[0].clone(), seeds[0], total.a),
                                 (candidate.states[1].clone(), seeds[1], total.b),
                             ]),
-                            array: None,
+                            ..Default::default()
                         },
                         kind: PlanKind::Reduction,
                         chunks: Vec::new(),
@@ -795,21 +716,13 @@ pub(super) mod cuda {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths: lengths(
                                 std::slice::from_ref(&candidate.input),
                                 &borrowed,
                             ),
                             scalar: Some(vec![(candidate.state.clone(), seed, result.final_state)]),
-                            array: None,
+                            ..Default::default()
                         },
                         kind: PlanKind::Reduction,
                         chunks: Vec::new(),
@@ -840,18 +753,11 @@ pub(super) mod cuda {
                 Ok((
                     Step {
                         plan: LoopOverride {
-                            histogram: None,
-                            scatter: None,
-                            gather: None,
-                            summary: None,
-                            region: None,
-                            tensor: None,
-                            transpose: None,
-                            stencil: None,
                             iterations: len,
                             input_lengths: lengths(&candidate.arrays, &borrowed),
                             scalar: Some(vec![(candidate.state.clone(), seed, result.final_state)]),
                             array: output.map(|name| (name.to_owned(), result.prefixes)),
+                            ..Default::default()
                         },
                         kind: PlanKind::Scan,
                         chunks: Vec::new(),
