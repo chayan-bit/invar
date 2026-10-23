@@ -74,11 +74,12 @@ fn bounded(program: &Path, args: &[OsString]) -> Output {
 /// `<climits>` include and `CHAR_BIT`/`ULLONG_MAX` assertion (NVRTC does not
 /// supply standard headers by default; the proposal replaces that assertion).
 fn emitted_helpers() -> String {
-    let artifact = provenance::compile_numeric(
+    let artifact = provenance::compile_resumable_owned_numeric(
         b"fn calc(a: f32, b: f32, c: f32, x: i32, y: u32) -> f32 { let sum = fma(a, b, c) + a * b - c / a; if a == b or a < c { return sum + f32_from_i32(x); } return sum + f32_from_u32(y); }",
         "calc",
         compiled::Target::Cpu,
         provenance::Limits::default(),
+        compiled::OwnedLimits::default(),
     )
     .unwrap();
     let source = artifact.artifact().source();

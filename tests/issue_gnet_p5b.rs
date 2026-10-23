@@ -168,12 +168,21 @@ fn cuda_reachability_and_numeric_helpers_match_oracle() {
 fn call_closure_matches_3000_trap_heavy_inputs() {
     use invar::{
         eval::Value,
-        general_net::{numeric_host, oracle},
+        general_net::{
+            compiled::OwnedLimits,
+            numeric_owned_resume_host::{Plan, Progress},
+            oracle,
+        },
     };
-    let mut plan = numeric_host::Plan::from_source(
+    let mut plan = Plan::from_source(
         REACHABLE.as_bytes(),
         "run",
         Default::default(),
+        OwnedLimits {
+            elements: 128,
+            allocations: 128,
+            cleanup_events: 128,
+        },
         std::path::Path::new("c++"),
     )
     .unwrap();
@@ -196,7 +205,10 @@ fn call_closure_matches_3000_trap_heavy_inputs() {
         let args = [Value::I32(x), Value::I32(d)];
         let (net, proof) = plan.artifact().checked_net();
         let expected = oracle::observe_call(net, proof, "run", &args, limits).unwrap();
-        let got = plan.run(&args, limits).unwrap();
+        let Progress::Complete(got) = plan.start(&args, limits).unwrap().resume(1_000_000).unwrap()
+        else {
+            panic!("case {case} must finish in one maximal quantum")
+        };
         traps += usize::from(expected.semantic.result.is_err());
         assert_eq!(got.semantic.result, expected.semantic.result, "case {case}");
         assert_eq!(

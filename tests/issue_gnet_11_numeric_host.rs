@@ -366,3 +366,39 @@ fn issue_gnet_11_loaded_refuses_non_abi11_admission() {
     );
     assert!(matches!(missing, Err(Error::Input)));
 }
+
+#[cfg(unix)]
+#[test]
+fn issue_gnet_11_loader_refuses_changed_library_bytes_and_identity() {
+    use invar_foreign::numeric_owned_resume::{Driver, Error as Loader, file_digest};
+    let dir = std::env::temp_dir().join(format!("gnet11-loader-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let (cpp, lib) = (dir.join("id.cpp"), dir.join("id.so"));
+    std::fs::write(&cpp, "#include <cstddef>\nextern \"C\" unsigned int invar_fault_identity(unsigned char* p,std::size_t n){if(n!=32)return 2;for(int i=0;i<32;i++)p[i]=0;return 0;}").unwrap();
+    let shared = if cfg!(target_os = "macos") {
+        "-dynamiclib"
+    } else {
+        "-shared"
+    };
+    let out = std::process::Command::new("c++")
+        .args(["-fPIC", shared])
+        .arg(&cpp)
+        .arg("-o")
+        .arg(&lib)
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let hash = file_digest(&lib).unwrap();
+    let load = |path: &Path, id| {
+        Driver::load(path, hash, id, "invar_fault", vec![], 144 + 64, [4, 4]).map(drop)
+    };
+    // A wrong embedded identity and changed library bytes are both refused.
+    assert!(matches!(load(&lib, [17; 32]), Err(Loader::Identity)));
+    std::fs::write(&lib, b"forged library").unwrap();
+    assert!(matches!(load(&lib, [0; 32]), Err(Loader::Identity)));
+    std::fs::remove_dir_all(&dir).unwrap();
+}
