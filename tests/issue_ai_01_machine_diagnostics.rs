@@ -105,7 +105,7 @@ fn source_codes() -> HashSet<String> {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|entry| entry["reachability"] == "source" && entry["deprecated"] == false)
+        .filter(|entry| entry["reachability"] == "source")
         .map(|entry| entry["code"].as_str().unwrap().to_owned())
         .collect()
 }
