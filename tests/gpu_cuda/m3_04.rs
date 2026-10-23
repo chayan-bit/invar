@@ -330,7 +330,7 @@ fn issue_m3_04_gpu_cold_process() {
     let started = std::time::Instant::now();
     let child = std::process::Command::new(std::env::current_exe().unwrap())
         .arg("--exact")
-        .arg("issue_m3_04_gpu_cold_process")
+        .arg("m3_04::issue_m3_04_gpu_cold_process")
         .arg("--ignored")
         .arg("--nocapture")
         .env("INVAR_M3_04_COLD_CHILD", "1")
@@ -341,6 +341,12 @@ fn issue_m3_04_gpu_cold_process() {
         child.status.success(),
         "{}",
         String::from_utf8_lossy(&child.stderr)
+    );
+    // A filter that matches no test also exits successfully, so require that the child ran one.
+    assert!(
+        String::from_utf8_lossy(&child.stdout).contains("1 passed"),
+        "the cold-process child ran no test: {}",
+        String::from_utf8_lossy(&child.stdout)
     );
     eprintln!(
         "cold_process_wall_ms={cold_process_ms} child_stdout={:?} child_stderr={:?}",

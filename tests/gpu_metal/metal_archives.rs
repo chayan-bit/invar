@@ -23,11 +23,16 @@ fn scratch(label: &str) -> PathBuf {
 }
 fn child(cache: &Path, image: Option<&Path>, msl: Option<&Path>, label: &str) -> Command {
     let mut cmd = Command::new(std::env::current_exe().unwrap());
-    cmd.args(["--ignored", "--exact", "archive_child", "--nocapture"])
-        .env("INVAR_METAL_ARCHIVE_DIR", cache)
-        .env("INVAR_P5B_CHILD", label)
-        .env_remove("INVAR_P5B_OTHER")
-        .env("INVAR_P5B_LOG", cache.parent().unwrap());
+    cmd.args([
+        "--ignored",
+        "--exact",
+        "metal_archives::archive_child",
+        "--nocapture",
+    ])
+    .env("INVAR_METAL_ARCHIVE_DIR", cache)
+    .env("INVAR_P5B_CHILD", label)
+    .env_remove("INVAR_P5B_OTHER")
+    .env("INVAR_P5B_LOG", cache.parent().unwrap());
     if let Some(image) = image {
         cmd.env("INVAR_P5B_IMAGE", image)
             .env(invar_metal::SOURCE_TRIPWIRE, "1");
