@@ -1,6 +1,7 @@
-//! Physical robotics checks on the pinned corpus, with explicit compiler budgets.
-#[path = "support/gnet_device.rs"]
-mod device;
+//! Device checks of two robotics programs of the pinned corpus against the oracle, with explicit compiler budgets.
+
+use crate::support as device;
+
 use invar::{
     eval::Value,
     general_net::{
@@ -12,8 +13,8 @@ use invar::{
 use std::{fs, path::PathBuf};
 
 fn cases<B: Backend>(backend: &mut B, target: Target) {
-    let root = PathBuf::from(std::env::var_os("INVAR_P5B_CORPUS").expect("pinned corpus"))
-        .join("robotics");
+    let root =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("bench/general-net-v01/gnet05/robotics");
     let manifest: serde_json::Value =
         serde_json::from_slice(&fs::read(root.join("manifest.json")).unwrap()).unwrap();
     let mut count = 0;
@@ -98,7 +99,7 @@ fn cases<B: Backend>(backend: &mut B, target: Target) {
 }
 
 #[test]
-#[ignore = "explicit pinned robotics corpus and CPU group model"]
+#[ignore = "CPU group model over the pinned robotics corpus (slow)"]
 fn robotics_cpu_model() {
     cases(
         &mut invar::general_net::device_host::cpu::CpuModel::default(),
@@ -107,7 +108,7 @@ fn robotics_cpu_model() {
 }
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
-#[ignore = "physical Metal and explicit pinned robotics corpus"]
+#[ignore = "physical Metal over the pinned robotics corpus"]
 fn robotics_metal() {
     cases(
         &mut invar::general_net::device_host::metal::Metal::open_runtime_source().unwrap(),
@@ -116,7 +117,7 @@ fn robotics_metal() {
 }
 #[cfg(feature = "cuda")]
 #[test]
-#[ignore = "physical CUDA and explicit pinned robotics corpus"]
+#[ignore = "physical CUDA over the pinned robotics corpus"]
 fn robotics_cuda() {
     let compiler = std::env::current_exe()
         .unwrap()
@@ -129,51 +130,4 @@ fn robotics_cuda() {
         &mut invar::general_net::device_host::cuda_nvrtc::CudaNvrtc::open(&compiler).unwrap(),
         Target::Cuda,
     );
-}
-
-#[test]
-#[ignore = "explicit robotics snapshot; structural admission diagnosis"]
-fn robotics_structural_usage() {
-    use invar::{
-        check, front,
-        general_net::{self, Net},
-    };
-    use std::collections::BTreeSet;
-    let root = PathBuf::from(std::env::var_os("INVAR_P5B_CORPUS").expect("pinned corpus"))
-        .join("robotics");
-    let manifest: serde_json::Value =
-        serde_json::from_slice(&fs::read(root.join("manifest.json")).unwrap()).unwrap();
-    for row in manifest["programs"].as_array().unwrap() {
-        let source = fs::read(root.join(row["file"].as_str().unwrap())).unwrap();
-        let checked = check::check(front::parse(&source).unwrap(), false).unwrap();
-        let net = Net::lower(&checked, general_net::Limits::default()).unwrap();
-        let proof = net.verify().unwrap();
-        let mir = net.compiled_mir(&proof).unwrap();
-        let mut values = 0;
-        let mut places = 0;
-        let mut states = 0;
-        for function in &mir.functions {
-            let ids = function
-                .blocks
-                .iter()
-                .flat_map(|b| {
-                    b.params
-                        .iter()
-                        .chain(b.instructions.iter().filter_map(|i| i.output.as_ref()))
-                })
-                .map(|(id, _)| *id)
-                .collect::<BTreeSet<_>>();
-            values = values.max(ids.len());
-            places = places.max(function.locals.len());
-            states += function
-                .blocks
-                .iter()
-                .map(|b| b.instructions.len() + 1)
-                .sum::<usize>();
-        }
-        println!(
-            "P5B_ROBOTICS_USAGE {}",
-            serde_json::json!({"id":row["id"],"values":values,"places":places,"states":states,"frame_bytes":(values+places+4)*compiled::MAX_FRAMES*8})
-        );
-    }
 }

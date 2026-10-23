@@ -1,49 +1,11 @@
-//! P5b measurements and exactness checks. Corpus input is an immutable snapshot
-//! of the corpus owner's branch, supplied explicitly by the evidence runner.
+//! P5b exactness checks: reachability, numeric helpers and returned owners against the net oracle.
+
+use crate::entry;
+
 use invar::general_net::{
     compiled::Target,
     device_host::{Limits, Plan},
 };
-use std::{fs, path::PathBuf};
-
-#[test]
-#[ignore = "explicit corpus snapshot and output directory required"]
-fn measure_corpus_sources() {
-    let root = PathBuf::from(std::env::var_os("INVAR_P5B_CORPUS").expect("corpus snapshot"));
-    let output = PathBuf::from(std::env::var_os("INVAR_P5B_OUTPUT").expect("private output"));
-    fs::create_dir_all(&output).unwrap();
-    let mut count = 0;
-    for group in ["", "robotics"] {
-        let directory = root.join(group);
-        let manifest: serde_json::Value =
-            serde_json::from_slice(&fs::read(directory.join("manifest.json")).unwrap()).unwrap();
-        for row in manifest["programs"].as_array().unwrap() {
-            let id = row["id"].as_str().unwrap();
-            let source = fs::read(directory.join(row["file"].as_str().unwrap())).unwrap();
-            for (target, extension) in [(Target::Metal, "msl"), (Target::Cuda, "cu")] {
-                let measured = match Plan::from_source(&source, "run", target, Limits::default()) {
-                    Ok(plan) => {
-                        let artifact = plan.artifact();
-                        fs::write(output.join(format!("{id}.{extension}")), artifact.source())
-                            .unwrap();
-                        serde_json::json!({"bytes":artifact.source().len(),"states":artifact.states(),"emitted_states":artifact.emitted_states(),"frame_bytes":artifact.frame_bytes(),"abi":artifact.abi_version()})
-                    }
-                    Err(error) => serde_json::json!({"refusal":format!("{error:?}")}),
-                };
-                println!(
-                    "P5B {}",
-                    serde_json::json!({"id":id,"target":extension,"measurement":measured})
-                );
-            }
-            count += 1;
-        }
-    }
-    println!("P5B programs={count}");
-    assert!(count >= 108);
-}
-
-#[path = "support/gnet_entry.rs"]
-mod entry;
 
 const REACHABLE: &str = "
 fn unused(x:i32)->i32{return x / 912341;}
@@ -287,116 +249,6 @@ fn returned_owner_cases<B: invar::general_net::device_host::Backend>(
         }
     }
     println!("P5B returned owners: 12 oracle cases on {target:?}");
-}
-
-#[test]
-#[ignore = "explicit robotics corpus snapshot and output directory required"]
-fn measure_robotics_admission() {
-    let root = PathBuf::from(std::env::var_os("INVAR_P5B_CORPUS").expect("corpus snapshot"))
-        .join("robotics");
-    let output = PathBuf::from(std::env::var_os("INVAR_P5B_OUTPUT").expect("private output"));
-    fs::create_dir_all(&output).unwrap();
-    let manifest: serde_json::Value =
-        serde_json::from_slice(&fs::read(root.join("manifest.json")).unwrap()).unwrap();
-    for row in manifest["programs"].as_array().unwrap() {
-        let id = row["id"].as_str().unwrap();
-        let source = fs::read(root.join(row["file"].as_str().unwrap())).unwrap();
-        for (target, extension) in [(Target::Metal, "msl"), (Target::Cuda, "cu")] {
-            let mut limits = entry::limits();
-            limits.compiler = invar::general_net::compiled::Limits {
-                values: 4096,
-                places: 512,
-                states: 16384,
-                frame_bytes: 2 * 1024 * 1024,
-                source_bytes: 4 * 1024 * 1024,
-            };
-            let measured = match Plan::from_source(&source, "run", target, limits) {
-                Ok(plan) => {
-                    fs::write(
-                        output.join(format!("{id}.{extension}")),
-                        plan.artifact().source(),
-                    )
-                    .unwrap();
-                    serde_json::json!({"bytes":plan.artifact().source().len(),"frame_bytes":plan.artifact().frame_bytes(),"states":plan.artifact().states()})
-                }
-                Err(e) => serde_json::json!({"refusal":format!("{e:?}")}),
-            };
-            println!(
-                "P5B_ROBOTICS {}",
-                serde_json::json!({"id":id,"target":extension,"admission":measured})
-            );
-        }
-    }
-}
-
-#[test]
-#[ignore = "explicit corpus snapshot and D5 output directory required"]
-fn prepare_d5_measurements() {
-    use invar::{
-        eval::Value,
-        general_net::{compiled::DeviceConfig, normal_form, oracle},
-    };
-    let root = PathBuf::from(std::env::var_os("INVAR_P5B_CORPUS").expect("corpus snapshot"));
-    let output = PathBuf::from(std::env::var_os("INVAR_P5B_OUTPUT").expect("private output"));
-    fs::create_dir_all(&output).unwrap();
-    let config = DeviceConfig {
-        fuel: 1_000_000,
-        transitions: 1_000_000,
-        trace_events: 1_000_000,
-        quantum: 1_000_000,
-        rounds: 1,
-        capacity: 0,
-    };
-    let mut rows = String::new();
-    for id in ["divide-00", "compose-00"] {
-        let source = fs::read(root.join(format!("programs/gnet05-{id}.inv"))).unwrap();
-        let mut limits = entry::limits();
-        limits.compiler = invar::general_net::compiled::Limits {
-            values: 2048,
-            places: 512,
-            frame_bytes: 2 * 1024 * 1024,
-            ..Default::default()
-        };
-        let plan = Plan::from_source(&source, "run", Target::Metal, limits)
-            .unwrap_or_else(|e| panic!("{id}: {e:?}"));
-        let form = normal_form::extract(plan.net(), plan.proof()).unwrap();
-        normal_form::certificate::check_all(plan.net(), plan.proof(), &form).unwrap();
-        fs::write(output.join(format!("{id}.msl")), plan.artifact().source()).unwrap();
-        let bytes = plan
-            .artifact()
-            .device_layout()
-            .unwrap()
-            .buffer_bytes(config)
-            .unwrap();
-        for (a, b) in [(32, 3), (256, 8)] {
-            let reference = oracle::observe_call(
-                plan.net(),
-                plan.proof(),
-                "run",
-                &[Value::I32(a), Value::I32(b)],
-                oracle::Limits {
-                    fuel: config.fuel,
-                    transitions: config.transitions,
-                    trace_events: config.trace_events,
-                    array_elements: 2048,
-                },
-            )
-            .unwrap_or_else(|e| panic!("{id}({a},{b}): {e:?}"));
-            let Value::I32(expected) = reference.semantic.result.unwrap() else {
-                panic!("integer result");
-            };
-            rows.push_str(&format!(
-                "{id}\t{a}\t{b}\t{expected}\t{}\t{}\n",
-                if form.is_flat() { "flat" } else { "residual" },
-                bytes
-                    .iter()
-                    .map(usize::to_string)
-                    .collect::<Vec<_>>()
-                    .join(",")
-            ));
-        }
-    }
-    fs::write(output.join("cases.tsv"), rows).unwrap();
 }
 
 /// A net whose emitted source lies between the default 1 MiB budget and

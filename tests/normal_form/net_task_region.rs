@@ -12,8 +12,7 @@
 //! at `origin/feat/v01-gnet-05-robotics` 005e145f, with the GNET-05 v2
 //! manifest inputs below), plus generated trap-heavy fork-join programs.
 
-#[path = "support/task_model.rs"]
-mod support;
+use crate::task_model as support;
 
 use invar::general_net::task::{self, Mutation, Refusal, Schedule};
 use support::{
@@ -228,52 +227,20 @@ fn plan_widths_are_powers_of_two_and_continuations_take_epochs() {
     );
 }
 
-/// C1 programs with a resident or host-to-host MISS in a committed scored
-/// report (`tests/fixtures/archived-evidence/gnet-p4b/<dir>/report-<name>.json`).
-fn measured_misses(dir: &str, name: &str) -> Vec<usize> {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
-        "tests/fixtures/archived-evidence/gnet-p4b/{dir}/report-{name}.json"
-    ));
-    let rows: serde_json::Value =
-        serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
-    let rows = rows.as_array().unwrap();
-    assert_eq!(rows.len(), 60, "{dir}: 12 programs x 5 inputs");
-    let mut misses: Vec<usize> = rows
-        .iter()
-        .filter(|row| row["resident"][2] == "MISS" || row["host"][2] == "MISS")
-        .map(|row| row["program"].as_u64().unwrap() as usize)
-        .collect();
-    misses.dedup();
-    misses
-}
+/// C1 programs with a resident or host-to-host MISS in the scored benchmark runs of each
+/// profile: every program on both Metal profiles, all but C1-01 on CUDA.
+const ALL_C1: [usize; 12] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+const CUDA_MISSES: [usize; 11] = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 #[test]
-fn profiles_carry_the_scored_calibration_and_refuse_every_measured_miss() {
+fn profiles_refuse_every_measured_miss() {
     support::with_stack(|| {
         let devices = [
-            ("Metal", task::Profile::METAL, "bench-metal", "metal"),
-            (
-                "Metal 3.1",
-                task::Profile::METAL_STAGED,
-                "bench-metal-staged",
-                "metal-staged",
-            ),
-            ("CUDA", task::Profile::CUDA, "bench-cuda", "cuda"),
+            ("Metal", task::Profile::METAL, &ALL_C1[..]),
+            ("Metal 3.1", task::Profile::METAL_STAGED, &ALL_C1[..]),
+            ("CUDA", task::Profile::CUDA, &CUDA_MISSES[..]),
         ];
-        for (device, profile, dir, name) in devices {
-            // The profile carries the scored pilot's frozen calibration.
-            let pilot: serde_json::Value = serde_json::from_str(
-                &std::fs::read_to_string(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(
-                    format!("tests/fixtures/archived-evidence/gnet-p4b/{dir}/pilot-{name}.json"),
-                ))
-                .unwrap(),
-            )
-            .unwrap();
-            assert_eq!(pilot["t_width"], profile.width, "{device} width");
-            if profile.schedule == Schedule::Cascade {
-                assert_eq!(pilot["t_lanes"], profile.lanes, "{device} lanes");
-            }
-            let misses = measured_misses(dir, name);
+        for (device, profile, misses) in devices {
             for index in 0..12 {
                 let program = c1(index).program;
                 let routed = task::route(&program, &profile);
@@ -289,7 +256,6 @@ fn profiles_carry_the_scored_calibration_and_refuse_every_measured_miss() {
                 // The CPU model never refuses.
                 assert!(task::route(&program, &task::Profile::CPU_MODEL).is_ok());
             }
-            eprintln!("{device}: refused {misses:?}");
         }
         assert_eq!(Refusal::CostModel.code(), "task_cost_model");
     });

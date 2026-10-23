@@ -3,8 +3,7 @@
 //! carry boundaries, live-ins and live-outs, effects and ownership, and
 //! `verify` rejects any partition that differs from the one re-derived.
 
-#[path = "support/normal_form.rs"]
-mod support;
+use crate::support;
 
 use invar::general_net::regions::{self, Counting, RegionKind};
 

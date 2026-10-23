@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
-#[path = "support/gnet_entry.rs"]
-mod entry;
+
+use crate::entry;
+
 use invar::{
     eval::Value,
     general_net::{

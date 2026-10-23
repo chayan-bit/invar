@@ -6,8 +6,7 @@
 //! The independent checker must accept every certificate and the completeness
 //! of every normal form.
 
-#[path = "support/normal_form.rs"]
-mod support;
+use crate::support;
 
 use invar::general_net::normal_form::{self, Recursion, certificate};
 use serde_json::Value as Json;

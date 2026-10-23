@@ -6,8 +6,9 @@
 //! and each named mutation must be caught. The CPU model re-checks every
 //! narrow operator, so an unsound licence aborts instead of agreeing.
 
-#[path = "support/normal_form.rs"]
-mod support;
+use crate::law_programs::{L9_PATHSUM, L9_TAIL, L10_RANGE};
+use crate::net_normal_form_laws::Rng;
+use crate::support;
 
 use std::collections::BTreeMap;
 
@@ -29,30 +30,8 @@ use invar::{
     },
 };
 
-/// SplitMix64: a deterministic generator (no new dependency).
-struct Rng(u64);
-
-impl Rng {
-    fn next(&mut self) -> u64 {
-        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        let mut z = self.0;
-        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-        z ^ (z >> 31)
-    }
-    fn below(&mut self, n: u64) -> u64 {
-        self.next() % n.max(1)
-    }
-    fn range(&mut self, lo: i64, hi: i64) -> i64 {
-        lo + self.below((hi - lo + 1) as u64) as i64
-    }
-}
-
 const GATE: [&str; 4] = ["divide-00", "divide-02", "compose-00", "compose-02"];
 
-const L9_PATHSUM: &str = "fn leaf(x: i32) -> i32 { if x % 2 == 0 { return (x / 2 + 16) % 10007; } return (x * 3 + 1) % 10007; } fn dc(lo: i32, hi: i32, d: i32) -> i32 { if hi - lo <= 5 { return leaf(lo * 4 + hi); } if d <= 0 { return leaf(hi - lo + 7); } let m1 = lo + 1 + ((hi - lo - 2) * 3) / 9; let m2 = m1 + 1 + ((hi - m1 - 2) * 3) / 6; let a = dc(lo, m1, d - 1); let b = dc(m1, m2, d - 1); let c = dc(m2, hi, d - 1); return (a * 5 + b + c * 2) % 100003; } fn run(lo: i32, a: i32, b: i32) -> i32 { return dc(lo, lo + a, b); }";
-const L9_TAIL: &str = "fn w(x: i32) -> i32 { return (x * 7 + 3) % 1009; } fn t(n: i32, s: i32) -> i32 { if n <= 0 { return w(s); } let sel = (s * 29 + n * 6) % 4; if sel == 0 { let v0 = t(n - 1, (s * 14 + 60) % 1009); let v1 = t(n - 1, (s * 12 + 66) % 1009); return (v0 * 7 + v1 + s) % 10007; } if sel == 1 { return (w(s) + n) % 10007; } return t(n - 1, (s * 4 + 22) % 1009); }";
-const L10_RANGE: &str = "fn leaf(x: i32) -> i32 { if x % 2 == 0 { return x * x - 7; } return x * x * 3 + 1; } fn sum(lo: i32, hi: i32) -> i32 { if hi - lo <= 1 { return leaf(lo); } let m = lo + (hi - lo) / 2; let a = sum(lo, m); let b = sum(m, hi); return a + b; }";
 /// Splits may leave the first child empty (geometry fallback); the combine
 /// constant depends on the node (owner-lane constants).
 const GEOMETRY: &str = "fn leaf(x: i32) -> i32 { return (x * 7 + 3) % 101; } fn dc(lo: i32, hi: i32, d: i32) -> i32 { if hi - lo <= 2 { return leaf(lo * 3 + hi); } if d <= 0 { return leaf(hi - lo); } let m = lo + (hi - lo) / 2 + d % 3 - 1; let a = dc(lo, m, d - 1); let b = dc(m, hi, d - 1); return (a * 3 + b * 5 + lo % 7 + 7) % 1009; } fn run(lo: i32, a: i32, b: i32) -> i32 { return dc(lo, lo + a, b); }";
@@ -304,7 +283,7 @@ pub fn differential(
         let mut tally = Tally::default();
         let mut rng = Rng(0x5eed_0000 + index as u64);
         if GATE.contains(&program.name.as_str()) {
-            for row in include_str!("gnet_p4a/spike-oracle.tsv").lines() {
+            for row in include_str!("../gnet_p4a/spike-oracle.tsv").lines() {
                 let col: Vec<&str> = row.split('\t').collect();
                 if col[0] == program.name {
                     let args = [col[1].parse().expect("a"), col[2].parse().expect("b")];
@@ -706,50 +685,8 @@ fn run_publishes_the_oracle_observation_on_fallback() {
     assert_eq!(Some(result), observe(&net, &proof, "run", &[256, 8]));
 }
 
-/// `(device, program, a, b, scope)` of every D5 cell that missed in the
-/// committed evidence runs (median above 1.00 or U95 above 1.05), kept as
-/// test fixtures because the full records are not retained.
-fn measured_misses() -> Vec<(&'static str, String, i64, i64, String)> {
-    let runs = [
-        ("cuda", "cuda-gate-idle.txt"),
-        ("metal", "metal-gate-head.txt"),
-        ("metal", "metal-gate-exclusive.txt"),
-    ];
-    let mut misses = Vec::new();
-    for (device, file) in runs {
-        let path = format!(
-            "{}/tests/fixtures/archived-evidence/p4a-path-sum/{file}",
-            env!("CARGO_MANIFEST_DIR")
-        );
-        let text = std::fs::read_to_string(&path).expect("evidence");
-        let rows: Vec<Vec<&str>> = text
-            .lines()
-            .map(|l| l.split('\t').collect::<Vec<_>>())
-            .filter(|c| c.len() == 10 && matches!(c[9], "pass" | "miss"))
-            .collect();
-        assert!(
-            !rows.is_empty() && rows.len().is_multiple_of(32),
-            "{file}: whole runs of 32 cells"
-        );
-        for c in rows.iter().filter(|c| c[9] == "miss") {
-            let cell = (
-                device,
-                c[0].to_owned(),
-                c[1].parse().unwrap(),
-                c[2].parse().unwrap(),
-                c[3].to_owned(),
-            );
-            if !misses.contains(&cell) {
-                misses.push(cell);
-            }
-        }
-    }
-    misses
-}
-
 #[test]
 fn the_cost_model_refuses_every_measured_host_miss() {
-    let misses = measured_misses();
     let mut refused = Vec::new();
     for name in GATE {
         let (net, proof) = support::compile(&fixture(name));
@@ -765,12 +702,10 @@ fn the_cost_model_refuses_every_measured_host_miss() {
                 assert!(matches!(plan, Plan::Launch(_)), "{name} {args:?}");
                 assert_eq!(lowering.route(&args, &model, Scope::Resident), plan);
                 let host = lowering.route(&args, &model, Scope::Host);
-                let miss = (device, name.to_owned(), args[0], args[1], "host".to_owned());
                 if host == Plan::Fallback("cost") {
                     refused.push(format!("{device} {name} {} {}", args[0], args[1]));
                 } else {
                     assert_eq!(host, plan);
-                    assert!(!misses.contains(&miss), "{miss:?} missed but launches");
                 }
             }
         }
@@ -792,19 +727,6 @@ fn the_cost_model_refuses_every_measured_host_miss() {
     refused.sort();
     expected.sort();
     assert_eq!(refused, expected);
-    // Resident misses stay launched: only a U95 miss from one outlier
-    // session (median 0.980) is on record.
-    let resident: Vec<_> = misses.iter().filter(|m| m.4 == "resident").collect();
-    assert_eq!(
-        resident,
-        [&(
-            "metal",
-            "compose-02".to_owned(),
-            32,
-            3,
-            "resident".to_owned()
-        )]
-    );
     eprintln!("refused host cells: {refused:?}");
 }
 

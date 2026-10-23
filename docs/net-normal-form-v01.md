@@ -186,11 +186,11 @@ Every consumer should call `certificate::check_all` (or `check_with` on its own 
 
 ## 8. Corpus classification against the net-laws prototype
 
-`tests/net_normal_form_corpus.rs` classifies every GNET-05 program (60) and every M5-01 held-out candidate (140) and compares each loop's class and law list, and each function's recursion law and modulus, with `tests/net_normal_form_fixtures/prototype.json`.
+`tests/normal_form/net_normal_form_corpus.rs` classifies every GNET-05 program (60) and every M5-01 held-out candidate (140) and compares each loop's class and law list, and each function's recursion law and modulus, with `tests/net_normal_form_fixtures/prototype.json`.
 All 200 programs match the prototype with zero differences, and the checker accepts every normal form in full (`check_all`).
 
 ## 9. Tests
 
 - `tests/net_normal_form_laws.rs`: differential tests against the CPU net oracle, at least 3,000 randomised cases per law with trapping cases, a caught mutation per law, and forged-certificate rejection.
-- `tests/net_normal_form_corpus.rs`: corpus classification and checker acceptance.
+- `tests/normal_form/net_normal_form_corpus.rs`: corpus classification and checker acceptance.
 - Unit tests in `general_net::normal_form::poly` and `general_net::regions`.

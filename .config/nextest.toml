@@ -31,7 +31,7 @@ threads-required = 8
 
 [[profile.default.overrides]]
 # Four source groups retain per-source caches and original report ordering.
-filter = 'binary(issue_gnet_v01_corpus_expansion) & (test(=cpu_tests::child_extraction_full_denominator) | test(=cpu_tests::full_owned_and_resumable_denominator))'
+filter = 'binary(gnet_slices) & (test(=cpu_tests::child_extraction_full_denominator) | test(=cpu_tests::full_owned_and_resumable_denominator))'
 threads-required = 4
 priority = 95
 
@@ -56,7 +56,7 @@ priority = 90
 # The rest of the tests above 120 s in Debug or Release on main.
 # The split GNET-03 adversarial tests replace one test that took 1863 s in Debug and 210 s in Release.
 [[profile.default.overrides]]
-filter = '(binary(issue_gnet_03_device) & test(/^issue_gnet_03_device_adversarial_cpu_model_agrees_with_oracle::(cuda|metal)::/)) | test(=issue_m4_03_matrix_contraction_tensor_core_device_emitted_kernels_match_oracle_on_host) | test(=issue_m4_03_matrix_contraction_tensor_core_tc_reference_is_the_rounded_exact_sum) | test(=every_law_agrees_with_the_net_oracle)'
+filter = '(binary(issue_gnet_03_device) & test(/^issue_gnet_03_device_adversarial_cpu_model_agrees_with_oracle::(cuda|metal)::/)) | test(=issue_m4_03_matrix_contraction_tensor_core_device_emitted_kernels_match_oracle_on_host) | test(=issue_m4_03_matrix_contraction_tensor_core_tc_reference_is_the_rounded_exact_sum) | test(=net_normal_form_laws::cases::every_law_agrees_with_the_net_oracle)'
 priority = 90
 
 # Real 2^28-live-element fixtures retain about 1 GiB per engine. Give each the
