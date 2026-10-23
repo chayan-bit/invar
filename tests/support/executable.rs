@@ -3,20 +3,12 @@ use std::{
     fs,
     io::{self, Write},
     os::unix::fs::{DirBuilderExt, PermissionsExt},
-    path::{Path, PathBuf},
+    path::Path,
     process::{Command, Stdio},
     sync::atomic::{AtomicU64, Ordering},
 };
 
 static NEXT: AtomicU64 = AtomicU64::new(0);
-
-// Each integration test imports only the helpers it needs.
-#[allow(dead_code)]
-pub fn fixture(name: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/executables")
-        .join(name)
-}
 
 /// The writer is a child, so unrelated forks cannot inherit its writable fd.
 /// Wait for that child, sync through a read-only fd, then atomically publish.

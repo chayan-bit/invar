@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 //! ABI11 owned-numeric continuations: real emitted C++ under UBSan compared
-//! word-for-word with ABI10 and against the independent graph oracle.
+//! word-for-word across quanta and against the independent graph oracle.
 #[allow(dead_code)]
 #[path = "../test-support/child_deadline.rs"]
 mod child_deadline;
@@ -139,7 +139,6 @@ int main(){
   std::cout<<"e\n";}
 }
 "#;
-const ABI10_BODY: &str = r#"  if(mode!="run")return 2;calls=1;gnet_run(input.data(),output,trace,fuel,trans,cap,heap,cleanup);"#;
 const ABI11_BODY: &str = r#"
   auto task=std::make_unique<GnetTask>();std::memset(task.get(),0,sizeof(GnetTask));bool done=false;
   if(mode=="run"){
@@ -312,9 +311,8 @@ impl Drop for Cpu {
     }
 }
 
-/// Paired ABI10 and ABI11 natives for one entry and storage profile.
+/// One ABI11 native for one entry and storage profile.
 struct Pair {
-    abi10: Cpu,
     abi11: Cpu,
     layout: compiled::OwnedLayout,
 }
@@ -323,10 +321,9 @@ impl Pair {
         let proof = n.verify().unwrap();
         let cpu = compiled::Target::Cpu;
         let limits = compiled::Limits::default();
-        let ten = compiled::emit_owned_numeric(n, &proof, entry, cpu, limits, s).unwrap();
         let eleven =
             compiled::emit_resumable_owned_numeric(n, &proof, entry, cpu, limits, s).unwrap();
-        assert_eq!((ten.abi_version(), eleven.abi_version()), (10, 11));
+        assert_eq!(eleven.abi_version(), 11);
         assert_eq!(eleven.numeric_policy(), Some(NumericPolicy::STRICT_F32));
         assert!(
             eleven.speculation_layout().is_none()
@@ -338,36 +335,22 @@ impl Pair {
         assert_eq!(c.task_bytes(), eleven.frame_bytes() + 18 * 8);
         assert_eq!(c.kernel_name(), "invar_gnet_resume_v3");
         let layout = eleven.owned_layout().unwrap().clone();
-        let base = ten.owned_layout().unwrap();
-        assert_eq!(
-            (
-                layout.heap_words(),
-                layout.cleanup_words(),
-                layout.output_words()
-            ),
-            (base.heap_words(), base.cleanup_words(), 10)
-        );
-        assert_eq!(
-            (ten.params(), ten.result()),
-            (eleven.params(), eleven.result())
-        );
+        assert_eq!(layout.output_words(), 10);
         assert!(eleven.source().contains("GNET ABI11 layout mismatch"));
-        assert!(!ten.source().contains("GNET ABI11 layout mismatch"));
         Self {
-            abi10: Cpu::build(&ten, ABI10_BODY),
             abi11: Cpu::build(&eleven, ABI11_BODY),
             layout,
         }
     }
-    /// Runs every row once through ABI10 and once per quantum through ABI11,
-    /// returning the shared terminal packet (without the call count).
+    /// Runs every row once per quantum; every quantum must publish the same
+    /// terminal packet, trace, cleanup and heap words as the single-slice run.
     fn run(&self, rows: &[(oracle::Limits, Vec<i64>)]) -> Vec<Vec<i64>> {
         let base: Vec<_> = rows
             .iter()
-            .map(|(l, x)| ("run", *l, 1, x.clone()))
+            .map(|(l, x)| ("run", *l, 1_000_000, x.clone()))
             .collect();
         let expected: Vec<Vec<i64>> = self
-            .abi10
+            .abi11
             .batch(&base)
             .into_iter()
             .map(|w| w.unwrap()[1..].to_vec())
@@ -449,7 +432,7 @@ fn events(o: &oracle::Observation) -> Vec<i64> {
         .collect()
 }
 /// Independent oracle comparison of status, counters, trace, cleanup lengths
-/// and root carriers. Full storage equality is checked against ABI10.
+/// and root carriers. Full storage equality is checked across quanta.
 fn compare(layout: &compiled::OwnedLayout, o: &oracle::Observation, w: &[i64]) {
     assert_eq!((w[0], w[2], w[3]), status(o), "{o:?}");
     assert_eq!(
@@ -490,7 +473,7 @@ fn compare(layout: &compiled::OwnedLayout, o: &oracle::Observation, w: &[i64]) {
 }
 
 #[test]
-fn issue_gnet_11_every_fuel_prefix_matches_abi10_and_oracle_across_quanta() {
+fn issue_gnet_11_every_fuel_prefix_matches_oracle_across_quanta() {
     let names = [
         "literals.inv",
         "filled_empty.inv",
@@ -547,7 +530,9 @@ fn issue_gnet_11_every_fuel_prefix_matches_abi10_and_oracle_across_quanta() {
             comparisons += QUANTA.len();
         }
     }
-    eprintln!("ABI11: {comparisons} quantum/fuel observations equal to ABI10 and oracle");
+    eprintln!(
+        "ABI11: {comparisons} quantum/fuel observations equal across quanta and to the oracle"
+    );
 }
 
 #[test]
@@ -632,7 +617,7 @@ fn issue_gnet_11_storage_trace_and_transition_budgets_across_quanta() {
         },
     );
     compare(&pair.layout, &o, &pair.run(&[(heap_limited, vec![])])[0]);
-    // Private backend storage failures: ABI11 must stop exactly where ABI10 does.
+    // Private backend storage failures stop identically at every quantum.
     for (s, code) in [
         (
             compiled::OwnedLimits {
@@ -710,17 +695,6 @@ fn issue_gnet_11_identity_admission_and_legacy_profiles_unchanged() {
     let l = compiled::Limits::default();
     let abi = |r: Result<compiled::Artifact, compiled::Error>| r.unwrap().abi_version();
     assert_eq!(
-        abi(compiled::emit_owned_numeric(
-            &n,
-            &proof,
-            "main",
-            cpu,
-            l,
-            storage()
-        )),
-        10
-    );
-    assert_eq!(
         abi(compiled::emit_resumable_owned_numeric(
             &n,
             &proof,
@@ -761,7 +735,6 @@ fn issue_gnet_11_identity_admission_and_legacy_profiles_unchanged() {
     );
     // No other profile is widened to numeric owners.
     for r in [
-        compiled::emit_resumable_numeric(&n, &proof, "main", cpu, l),
         compiled::emit_resumable(&n, &proof, "main", cpu, l, storage()),
         compiled::emit_resumable_aggregates(&n, &proof, "main", cpu, l, storage()),
     ] {
@@ -803,15 +776,6 @@ fn issue_gnet_11_identity_admission_and_legacy_profiles_unchanged() {
             compiled::emit_resumable_aggregates(&scalar, &p, "run", cpu, l, storage()),
             7,
         ),
-        (compiled::emit_numeric(&scalar, &p, "run", cpu, l), 8),
-        (
-            compiled::emit_resumable_numeric(&scalar, &p, "run", cpu, l),
-            9,
-        ),
-        (
-            compiled::emit_owned_numeric(&scalar, &p, "run", cpu, l, storage()),
-            10,
-        ),
         (
             compiled::emit_resumable_owned_numeric(&scalar, &p, "run", cpu, l, storage()),
             11,
@@ -824,7 +788,7 @@ fn issue_gnet_11_identity_admission_and_legacy_profiles_unchanged() {
             version == 11
         );
     }
-    // Storage limits are validated exactly as ABI10.
+    // Storage limits are validated before emission.
     assert_eq!(
         compiled::emit_resumable_owned_numeric(
             &n,
@@ -880,8 +844,8 @@ fn issue_gnet_11_cpu_worklist_independent_roots_slices_and_lane_isolation() {
         },
     ] {
         let rows: Vec<_> = inputs.iter().map(|x| (l, x.clone())).collect();
-        // Separate single-root ABI10 runs (and ABI11 at every quantum) are
-        // the reference for each lane.
+        // Separate single-root runs (identical at every quantum) are the
+        // reference for each lane.
         let single = pair.run(&rows);
         for q in [1u64, 3, 17, 1_000_000] {
             let resumed: Vec<_> = inputs.iter().map(|x| ("run", l, q, x.clone())).collect();
