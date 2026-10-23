@@ -113,7 +113,7 @@ pub fn sources() -> Vec<String> {
     }
     cases.push("fn kernel(a:read Array<u32>,n:u32)->Array<f32> {var out=filled_f32(n,0.0);for i in 0u32..n {out[i]=f32_from_u32(a[i]);}return out;} fn main()->i32 {let a: Array<u32> = [16777217u32,4294967295u32];let out=kernel(a,2u32);if out[0u32]==16777216.0 and out[1u32]==4294967296.0{return 7;}return 0;}".into());
     cases.push("fn kernel(a:read Array<i32>,n:u32)->Array<f32> {var out=filled_f32(n,0.0);for i in 0u32..n {out[i]=f32_from_i32(a[i]);}return out;} fn main()->i32 {let a: Array<i32> = [-7i32,16777217i32];let out=kernel(a,2u32);if out[0u32]==-7.0 and out[1u32]==16777216.0{return 7;}return 0;}".into());
-    cases.push("fn kernel(a:read Array<f32>,n:u32)->Array<i32> {var out=filled_i32(n,0);for i in 0u32..n {out[i]=trunc_i32(a[i]);}return out;} fn main()->i32 {let a:Array<f32> = [-7.9,0.0,2147483520.0];let out=kernel(a,3u32);if out[0u32]==-7 and out[2u32]==2147483520{return 7;}return 0;}".into());
+    cases.push("fn kernel(a:read Array<f32>,n:u32)->Array<i32> {var out=filled_i32(n,0);for i in 0u32..n {out[i]=i32_from_f32(a[i]);}return out;} fn main()->i32 {let a:Array<f32> = [-7.9,0.0,2147483520.0];let out=kernel(a,3u32);if out[0u32]==-7 and out[2u32]==2147483520{return 7;}return 0;}".into());
     for op in ["==", "!=", "<", "<=", ">", ">="] {
         cases.push(format!("fn kernel(a:read Array<f32>,b:read Array<f32>,n:u32)->Array<u32>{{var out=filled_u32(n,0u32);for i in 0u32..n{{if a[i] {op} b[i]{{out[i]=1u32;}}else{{out[i]=0u32;}}}}return out;}} fn main()->i32{{let a:Array<f32> = [1.0,0.0/0.0,-0.0];let b:Array<f32> = [2.0,0.0/0.0,0.0];let out=kernel(a,b,3u32);for i in 0u32..3u32{{if a[i] {op} b[i]{{if out[i]!=1u32{{return 0;}}}}else{{if out[i]!=0u32{{return 0;}}}}}}return 7;}}"));
     }

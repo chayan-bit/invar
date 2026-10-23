@@ -18,8 +18,8 @@ Decimal literals contain at most 256 digits and unary negation is separate, incl
 `fma(a: f32, b: f32, c: f32) -> f32` computes the exact product plus addend with one rounding.
 `f32_from_u32` and `f32_from_i32` round the exact integer to nearest even.
 `sin`, `cos` and `sqrt` (each `f32 -> f32`) follow the frozen [`invar-trig-f32-v1`](trig-f32-v1.md) contract: `sqrt` is correctly rounded, and `sin` and `cos` are a fixed sequence of the operations above that is bit-identical on every engine but not correctly rounded.
-`trunc_i32(value: f32) -> i32` first requires a finite value in the closed interval `[i32::MIN, i32::MAX]`, then truncates toward zero.
-An invalid `trunc_i32` traps `INTEGER_OVERFLOW` at the source call, before publication of any subsequent result.
+`i32_from_f32(value: f32) -> i32` first requires a finite value in the closed interval `[i32::MIN, i32::MAX]`, then truncates toward zero.
+An invalid `i32_from_f32` traps `INTEGER_OVERFLOW` at the source call, before publication of any subsequent result.
 `Quantity<f32, Unit>` checks units before erasing the unit tag to f32 and must generate identical code to the equivalent bare f32 program.
 
 ### Strict semantics
