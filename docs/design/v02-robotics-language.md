@@ -192,8 +192,8 @@ This section records where the merged or merging workstreams differ from, or sha
   Spatial emits v4, which adds `explicit_spatial` and keeps the v3 sort entries when a program also sorts.
   f64math took no new number: with maintainer approval it extended v1 and v3 in place (see C14 in this list).
   Placement emits v5: v4 plus the placement receipt and its run document, only when placement owns `--engine auto`.
-- **C3.** Main already has `trunc_i32(f32) -> i32` with the C3 rule (`docs/numeric-v1.md`: finite and in range, else `INTEGER_OVERFLOW`, truncation toward zero).
-  f64math treats it as the same operation as `i32_from_f32`.
+- **C3.** Main has `i32_from_f32(f32) -> i32` with the C3 rule (`docs/numeric-v1.md`: finite and in range, else `INTEGER_OVERFLOW`, truncation toward zero).
+  f64math uses the same operation.
 - **C6.** `grid_excluded` is part of the spatial surface (row added to section 4.1).
 - **C14.** The maintainers approved extending the frozen v1 documents in place (2026-10-19).
   Explain v1/v3 and diagnostics v1/v2 gain the optional `numeric_contracts` object, and the device reason enums gain `metal-no-f64`.
