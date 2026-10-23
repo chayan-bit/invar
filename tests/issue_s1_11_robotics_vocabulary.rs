@@ -302,7 +302,7 @@ fn issue_s1_11_robotics_vocabulary_joint_state_external_boundary() {
             serde_json::json!([])
         );
         assert!(jsonschema::is_valid(
-            &serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            &serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap(),
             &document
         ));

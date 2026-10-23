@@ -8,8 +8,7 @@
     "schema",
     "schema_version",
     "status",
-    "diagnostics",
-    "auto_path"
+    "diagnostics"
   ],
   "properties": {
     "schema": {
@@ -513,6 +512,7 @@
       ]
     },
     "auto_path": {
+      "description": "Present on --engine auto runs only: which auto path ran.",
       "enum": [
         "established",
         "placement"
@@ -822,6 +822,9 @@
     }
   },
   "if": {
+    "required": [
+      "auto_path"
+    ],
     "properties": {
       "auto_path": {
         "const": "placement"

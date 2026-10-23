@@ -23,11 +23,9 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
     assert!(!files.is_empty());
     let invariants = invariant_codes();
     let registered = registry_codes();
-    let diagnostic_schema = schema("invar-diagnostics-v1.schema.json");
-    let diagnostic_schema_v2 = schema("invar-diagnostics-v2.schema.json");
+    let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
     let explain_schema = schema("explain-v1.schema.json");
     let diagnostic_validator = jsonschema::validator_for(&diagnostic_schema).unwrap();
-    let diagnostic_validator_v2 = jsonschema::validator_for(&diagnostic_schema_v2).unwrap();
     let explain_validator = jsonschema::validator_for(&explain_schema).unwrap();
     let explain_validator_v3 =
         jsonschema::validator_for(&schema("explain-v3.schema.json")).unwrap();
@@ -76,8 +74,6 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
                 &explain_validator_v3
             } else if document["schema"] == "invar-explain-v4" {
                 &explain_validator_v4
-            } else if document["schema"] == "invar-diagnostics-v2" {
-                &diagnostic_validator_v2
             } else {
                 &diagnostic_validator
             };
@@ -368,7 +364,7 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
 
 #[test]
 fn issue_ai_01_machine_diagnostics_cli_documents_validate() {
-    let diagnostic_schema = schema("invar-diagnostics-v1.schema.json");
+    let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
     let explain_schema = schema("explain-v1.schema.json");
     let placement_explain_schema = schema("explain-v5.schema.json");
     let placement_device_schema = schema("invar-explain-device-v5.schema.json");
@@ -523,7 +519,7 @@ fn issue_ai_01_machine_diagnostics_cli_documents_validate() {
 
 #[test]
 fn issue_ai_01_machine_diagnostics_source_error_fixtures_validate() {
-    let schema = schema("invar-diagnostics-v1.schema.json");
+    let schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     for (name, source, expected) in [
         (
@@ -694,7 +690,7 @@ fn issue_ai_01_machine_diagnostics_source_error_fixtures_validate() {
 
 #[test]
 fn issue_ai_01_machine_diagnostics_runtime_fixtures_validate() {
-    let schema = schema("invar-diagnostics-v1.schema.json");
+    let schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     for (name, source, exit, expected) in [
         (

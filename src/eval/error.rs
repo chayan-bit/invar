@@ -127,7 +127,7 @@ impl EvalError {
     pub fn to_json(&self, path: &str) -> JsonValue {
         match self {
             Self::Trap { category, span } => json!({
-                "schema_version": if *category == TrapCategory::UnitConversionInexact { 2 } else { 1 },
+                "schema_version": 3,
                 "status": "trap",
                 "diagnostics": [],
                 "trap": {"category": category.code(), "span": {"start": span.start, "end": span.end}}
@@ -136,14 +136,14 @@ impl EvalError {
                 fuel_limit,
                 steps_used,
             } => json!({
-                "schema_version": 1,
+                "schema_version": 3,
                 "status": "evaluation_limit",
                 "diagnostics": [],
                 "fuel_limit": fuel_limit,
                 "steps_used": steps_used
             }),
             Self::Tool { code, message } => json!({
-                "schema_version": 1,
+                "schema_version": 3,
                 "status": "tool_error",
                 "diagnostics": [{"code": code, "message": message, "path": path, "span": null, "notes": []}]
             }),
@@ -165,10 +165,6 @@ impl EvalError {
                     )],
                 );
                 document["trap"] = json!({"category": category.code(), "span": {"start": span.start, "end": span.end}});
-                if *category == TrapCategory::UnitConversionInexact {
-                    document["schema"] = json!("invar-diagnostics-v2");
-                    document["schema_version"] = json!(2);
-                }
                 document
             }
             Self::EvaluationLimit {

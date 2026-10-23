@@ -58,7 +58,7 @@ fn issue_ai_01_machine_diagnostics_fault_fixtures_validate() {
         "DIAGNOSTIC_COUNT_LIMIT"
     );
 
-    let schema = schema("invar-diagnostics-v1.schema.json");
+    let schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     for document in [invalid_fuel, invalid_mir, resource_limit, count_limit] {
         assert!(jsonschema::is_valid(&schema, &document), "{document}");
@@ -115,7 +115,7 @@ fn issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate() {
             "ADMISSION_RECORD_LIMIT",
         ),
     ];
-    let schema = schema("invar-diagnostics-v1.schema.json");
+    let schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     for (error, expected) in cases {
         assert_eq!(error.code, expected);
@@ -201,7 +201,7 @@ fn issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate() {
         (array_copy, array.as_slice(), "INTERNAL_ARRAY_COPY"),
         (invalid_borrow, borrowed.as_slice(), "INTERNAL_BORROW"),
     ];
-    let schema = schema("invar-diagnostics-v1.schema.json");
+    let schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     for (program, source, expected) in cases {
         let document = invar::eval::observe(&program, 100)
@@ -217,7 +217,7 @@ fn issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate() {
 #[cfg(feature = "native")]
 #[test]
 fn issue_ai_01_machine_diagnostics_native_documents_validate() {
-    let schema = schema("invar-diagnostics-v1.schema.json");
+    let schema = schema("invar-diagnostics-v3.schema.json");
     let codes = registry_codes();
     let path = fixture("native", b"fn main() -> i32 { return 12; }");
     for (source, exit) in [
@@ -288,7 +288,7 @@ fn issue_ai_01_machine_diagnostics_target_unknown_fault() {
     );
     assert_eq!(document["diagnostics"][0]["code"], "TARGET_UNKNOWN");
     assert!(
-        jsonschema::is_valid(&schema("invar-diagnostics-v1.schema.json"), &document),
+        jsonschema::is_valid(&schema("invar-diagnostics-v3.schema.json"), &document),
         "{document}"
     );
     assert!(codes_registered(&document, &registry_codes()), "{document}");

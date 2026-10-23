@@ -145,7 +145,7 @@ fn issue_l1_06_python_binding_real_source_diagnostics_and_reference_smoke() {
         .unwrap_err()
         .to_diagnostics_json("<python>", source);
     let schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json")).unwrap();
     assert!(jsonschema::is_valid(&schema, &document));
     assert_eq!(document["diagnostics"][0]["code"], "DIVISION_BY_ZERO");
 }
@@ -204,7 +204,7 @@ fn issue_l1_06_python_binding_scalar_artifact_values_trap_and_recovery() {
     );
     assert_eq!(document["diagnostics"][0]["path"], "binding-snapshot.inv");
     let schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json")).unwrap();
     assert!(jsonschema::is_valid(&schema, &document));
     assert_eq!(
         artifact

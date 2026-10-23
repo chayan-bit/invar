@@ -4,7 +4,7 @@ use serde_json::{Value, json};
 
 use crate::front::Span;
 
-pub const SCHEMA: &str = "invar-diagnostics-v1";
+pub const SCHEMA: &str = "invar-diagnostics-v3";
 
 /// Convert a half-open byte range to a source location. Invalid ranges are
 /// omitted rather than being replaced with a plausible but false location.
@@ -84,7 +84,7 @@ pub fn document_in_order(status: &str, diagnostics: Vec<Value>) -> Value {
     if diagnostics.len() > 64 {
         return json!({
             "schema": SCHEMA,
-            "schema_version": 1,
+            "schema_version": 3,
             "status": status,
             "diagnostics": [diagnostic(
                 "DIAGNOSTIC_COUNT_LIMIT",
@@ -97,7 +97,7 @@ pub fn document_in_order(status: &str, diagnostics: Vec<Value>) -> Value {
     }
     json!({
         "schema": SCHEMA,
-        "schema_version": 1,
+        "schema_version": 3,
         "status": status,
         "diagnostics": diagnostics,
     })

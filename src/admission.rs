@@ -787,7 +787,7 @@ mod ai_01_fault_tests {
             )],
         );
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         assert!(jsonschema::is_valid(&schema, &document), "{document}");
     }

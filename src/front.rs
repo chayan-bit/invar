@@ -74,7 +74,7 @@ impl FrontError {
             .span
             .map(|span| json!({"start": span.start, "end": span.end}));
         json!({
-            "schema_version": 1,
+            "schema_version": 3,
             "status": match self.kind { ErrorKind::Source => "source_error", ErrorKind::Tool => "tool_error" },
             "diagnostics": [{
                 "code": self.code,
