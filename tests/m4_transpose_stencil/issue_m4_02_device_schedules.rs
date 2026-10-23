@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-#[path = "support/m402.rs"]
+#[path = "../support/m402.rs"]
 mod support;
 use invar::{eval, stencil_source};
 use invar_device::{Capabilities, Provenance, stencil::Boundary, stencil_u32, transpose};

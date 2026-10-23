@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=323
-Size record: tokens=28058 estimator=bytes/3 limit=30000
+Size record: tokens=28095 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -512,8 +512,8 @@ fn main() -> i32 {
 
 [N5.8.1] The compiler accepts `f32`, `Array<f32>`, bounded exact decimal literals, unary negation, `+ - * /` and IEEE comparisons. `docs/numeric.md`
 [N5.8.2] The numeric policy is `strict-f32-v1`: IEEE 754 binary32, round to nearest even, no reassociation or contraction, and subnormals preserved. `src/numeric_contract.rs`
-[N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
-[N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
+[N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/m4_numeric_layout/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
+[N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/m4_numeric_layout/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
 [N5.8.5] `i32_from_f32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::i32_from_f32`
 [N5.8.6] On `f32`, `sqrt`, `sin` and `cos` follow `invar-trig-f32-v1` on every engine today, where `sqrt` is correctly rounded and `sin` and `cos` are a fixed operation sequence with the same 32-bit word everywhere, and moving them to `invar-math-cr-v1` is tracked by issue #48. `src/math.rs` `docs/trig-f32-v1.md`
 
@@ -1061,9 +1061,9 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 ### 11.3 CPU parallel and admitted regions
 
 [N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
-[N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
-[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/issue_m2_03.rs::issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws`
-[N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers`
+[N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/schedule_cpu/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
+[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/schedule_cpu/issue_m2_03.rs::issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws`
+[N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/schedule_cpu/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers`
 [N11.3.5] The worker count is bounded by `MAX_WORKERS` (64) and by the available hardware. `src/schedule/workers.rs::MAX_WORKERS`
 
 ```invar outcome=value:7
@@ -1080,10 +1080,10 @@ fn main() -> i32 {
 
 ### 11.4 Source families
 
-[N11.4.1] The library recognizes ordinary source for transpose, five-point stencil, segmented reduction and map, stable compaction, gather, histogram, ordered affine pair reduction, bounded summary, matrix contraction and bounded frontier families, each through a `from_checked` or `from_source` contract that rejects near matches. `tests/issue_m4_02_stencil_source.rs`
+[N11.4.1] The library recognizes ordinary source for transpose, five-point stencil, segmented reduction and map, stable compaction, gather, histogram, ordered affine pair reduction, bounded summary, matrix contraction and bounded frontier families, each through a `from_checked` or `from_source` contract that rejects near matches. `tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs`
 [N11.4.2] Ordinary `invar run` offers every reached loop to a family registry in precedence order `core`, `tensor`, `grid`, `segmented` and `indexed`, the first match at a span wins, and a loop no family takes runs as serial MIR, except that under `cpu-parallel`, and `auto` without a device feature, a program no parallel path claims first goes through the checked normal form. `src/schedule/families.rs::families` `src/engine.rs::serial_only`
-[N11.4.3] A recognizer reparses exact source bytes and compares annotations, and a stale or forged checked program is refused. `tests/issue_m4_05_gather_preflight.rs`
-[N11.4.4] `invar source-device PATH tensor|transpose ENTRY cpu-model|cuda|metal FUEL` runs the matrix or transpose source and labels the CPU model completion. `tests/issue_m4_source_device_cli.rs::source_device_command_runs_real_source_and_labels_model_completion`
+[N11.4.3] A recognizer reparses exact source bytes and compares annotations, and a stale or forged checked program is refused. `tests/m4_indexed/issue_m4_05_gather_preflight.rs`
+[N11.4.4] `invar source-device PATH tensor|transpose ENTRY cpu-model|cuda|metal FUEL` runs the matrix or transpose source and labels the CPU model completion. `tests/cli/issue_m4_source_device_cli.rs::source_device_command_runs_real_source_and_labels_model_completion`
 [N11.4.5] The ordered affine pair law is `(a,b) then (c,d) = (c*a, c*b+d)` modulo 2^32 with identity `(1,0)`, applied left then right. `docs/pair-reduction-v1.md`
 
 ### 11.5 GPU targets

@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "support/summary_source_host.rs"]
+#[path = "../support/summary_source_host.rs"]
 mod reached_host;
 use invar::{
     bounded_summary::Budget,

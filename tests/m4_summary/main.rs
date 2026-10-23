@@ -1,0 +1,4 @@
+mod issue_m4_07_bounded_summary_device;
+mod issue_m4_07_bounded_summary_families;
+mod issue_m4_07_summary_source;
+mod issue_m4_07_typed_bounded_scan;

@@ -1,6 +1,4 @@
-#[allow(dead_code)]
-#[path = "../test-support/child_deadline.rs"]
-mod child_deadline;
+use crate::child_deadline;
 
 use invar::{
     check, eval, front,

@@ -47,12 +47,11 @@
 956 tests/issue_gnet_10_f32_arrays.rs
 938 tests/issue_gnet_11_numeric_owned_state.rs
 928 tests/issue_gnet_resume_device_model.rs
-943 tests/issue_m2_05.rs
-876 tests/issue_m4_02_stencil_source.rs
 858 tests/issue_m4_06_bounded_schedule_tuning.rs
-806 tests/issue_m4_07_summary_source.rs
 879 tests/issue_p0a_trig_f32.rs
 856 tests/issue_s1_06_sequencer_binding.rs
+806 tests/m4_summary/issue_m4_07_summary_source.rs
+874 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
 1067 tests/net_law_collective.rs
 1085 tests/net_normal_form_laws.rs
 901 tests/pnf_family_admission.rs
