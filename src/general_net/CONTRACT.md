@@ -12,7 +12,7 @@ The following interfaces are frozen at `CONTRACT_VERSION = 1`; any change to the
 - Net verification and the net to compiled boundary: `Net::verify` and `Net::compiled_mir(proof)`.
 - Rule interface: the 33-rule inventory in `coverage.rs` (`ALL_RULES`, `operation`, `terminator`, `operands`, `Observation`), with `F64` appended last and refused by the oracle, pinned by `issue_gnet_01_all_current_mir_variants_have_explicit_inventory_entries`.
 - Observations: `oracle::Event` (`Demand`/`Complete`, frame, activation, token, rule), `oracle::Observation` and the typed `ToolFailure` classes below.
-- Coverage: the table below, which `tests/issue_gnet_02_corpus.rs` checks against every runnable fixture and example.
+- Coverage: the table below, which `tests/gnet_net/issue_gnet_02_corpus.rs` checks against every runnable fixture and example.
 This freeze does not change any acceptance gate, and it is not GNET-03/04/05 evidence.
 
 ## Checked boundaries
@@ -77,7 +77,7 @@ is implemented by this slice.
 The source inventory below is over the actual current `spec/grammar.ebnf`, `front::ExprKind`, `front::StmtKind` and MIR.
 Structural lowering preserves every form the existing checked source and MIR support.
 This does not narrow the required v0.1 GPU coverage denominator.
-`tests/issue_gnet_02_corpus.rs` runs every runnable source under `tests/fixtures` and `examples` through the reference evaluator, the MIR evaluator and the CPU oracle.
+`tests/gnet_net/issue_gnet_02_corpus.rs` runs every runnable source under `tests/fixtures` and `examples` through the reference evaluator, the MIR evaluator and the CPU oracle.
 
 | Source form | Checked structural rules/elaboration | Independent CPU oracle |
 | --- | --- | --- |
@@ -173,9 +173,9 @@ the event test checks nested demand/completion and selected-branch behavior.
 These checks are evidence, not a completed mathematical simulation proof.
 
 GNET-02 evidence for owners, loans, aggregates, views, text, units, cleanup and all ordinary source:
-- `tests/issue_gnet_02_corpus.rs`: every runnable fixture and example agrees in all three engines on result, source steps and cleanup, at full fuel and one step short of its own use.
-- `tests/issue_gnet_02_generated.rs`: 240 seeded well-typed compositions of 16 fragment kinds (traps of every integer category, the 64-frame limit, untaken traps, short-circuiting, borrowed mutation through views, scoped cleanup, early returns) agree in all three engines, plus every fuel prefix of a sampled subset.
-- `tests/issue_gnet_02_native.rs` (`native` feature): the LLVM 21 native CPU lowering of `compiled_mir` agrees with the oracle on status, value, trap category and span, tool code, steps and cleanup for the corpus and the generated programs; a native-only resource bound (for example `NATIVE_TRACE_LIMIT`) is counted as an explicit refusal.
+- `tests/gnet_net/issue_gnet_02_corpus.rs`: every runnable fixture and example agrees in all three engines on result, source steps and cleanup, at full fuel and one step short of its own use.
+- `tests/gnet_net/issue_gnet_02_generated.rs`: 240 seeded well-typed compositions of 16 fragment kinds (traps of every integer category, the 64-frame limit, untaken traps, short-circuiting, borrowed mutation through views, scoped cleanup, early returns) agree in all three engines, plus every fuel prefix of a sampled subset.
+- `tests/gnet_net/issue_gnet_02_native.rs` (`native` feature): the LLVM 21 native CPU lowering of `compiled_mir` agrees with the oracle on status, value, trap category and span, tool code, steps and cleanup for the corpus and the generated programs; a native-only resource bound (for example `NATIVE_TRACE_LIMIT`) is counted as an explicit refusal.
 Foreign-visible prefixes remain outside the oracle (host boundary).
 These are differential evidence, not a completed mathematical simulation proof. Before
 GNET-03, establish program-specific compiled CPU/device simulation, live-frame
@@ -269,7 +269,7 @@ Forced CUDA without `--artifact` refuses; the CUDA hardware suites build each pl
 `issue_gnet_cuda_aot_gpu` runs the production command with every NVRTC library name resolving to a tripwire that exits the process on load, checks the oracle's exact result and that `ldd` lists no NVRTC, and uses `invar build` under the same tripwire as the positive control.
 Other CUDA routes (M3/M4 `run --engine cuda`, tensor and transpose source routes) still compile with NVRTC at run time; this section covers the general-net route only.
 
-Evidence (`tests/issue_gnet_03_device.rs` by default, `issue_gnet_03_gpu` and `issue_gnet_03_metal_gpu` on hardware, all over `tests/support/gnet_device.rs`):
+Evidence (`tests/gnet_device_model/issue_gnet_03_device.rs` by default, `issue_gnet_03_gpu` and `issue_gnet_03_metal_gpu` on hardware, all over `tests/support/gnet_device.rs`):
 every one of the 326 runnable corpus programs is either device-executed with exact agreement with the CPU net oracle (status, value, trap span, source steps, transitions, frame peak, every Demand/Complete event and the cleanup prefix) at full fuel and one step short, or refused with a typed class.
 Adversarial ordinary-source cases with runtime inputs cover data-dependent trip counts, divergent recursive frontiers up to width 8, a worklist wider than its bound, an early trap in one lane behind a slower or fuel-exhausted older call, fuel cut inside rounds and epochs, device owners with traps and heap exhaustion, allocation-identity exhaustion, cancellation after submission, and unfenced reclaim quarantine.
 The general corpus is mostly sequential (only one of its admitted programs has an independent call site), so the parallel slice `tests/fixtures/gnet_parallel` adds six ordinary-source programs with four runtime inputs each: eight independent calls, divide and conquer, a four-way branch tree, a frontier discovered at run time, mixed owner/scalar fan-out and a trap behind slower siblings.

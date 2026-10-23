@@ -78,7 +78,7 @@ are not a proof that arbitrary hostile native code executed the source program.
 
 ## Executed test scope
 
-`tests/issue_gnet_11_numeric_host.rs` and the host's unit tests exercise real loaded libraries:
+`tests/gnet_numeric_host/issue_gnet_11_numeric_host.rs` and the host's unit tests exercise real loaded libraries:
 
 - Array fixtures driven at quanta 1, 2, 3, 17 and 1,000,000 against the graph oracle
 - Recursion, loans, budget failures and fresh terminal owners on every retrieval
@@ -86,7 +86,7 @@ are not a proof that arbitrary hostile native code executed the source program.
 - Receipt identity binding, and loader refusal of changed library bytes or a wrong identity
 - Exact task storage at each quantum, malformed pending and terminal state, returning faults, destruction failure and compiler deadline/log caps
 
-`tests/issue_gnet_11_numeric_owned_state.rs` compares every fuel prefix of the generated machine across quanta.
+`tests/gnet_numeric_host/issue_gnet_11_numeric_owned_state.rs` compares every fuel prefix of the generated machine across quanta.
 The bench denominator (`bench/general-net-v01/corpus_numeric`) runs its owner and array rows through this host.
 
 ## Remaining work and unchanged boundaries

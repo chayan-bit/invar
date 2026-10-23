@@ -59,22 +59,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # One test, issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles each corpus program to C++ three times
+        # One test, issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles each corpus program to C++ three times
         # (about 3 min on the pull-request sample, about 20 min on the whole corpus). It runs alone in its own job, built from
         # its own test binary only, and is excluded from the four shards below; no test is skipped overall.
         # "Test (CPU-model corpus)" is a required status check, so the job keeps its name.
         include:
           - name: shard 1/4
-            args: --partition count:1/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:1/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
             doctests: true
           - name: shard 2/4
-            args: --partition count:2/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:2/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
           - name: shard 3/4
-            args: --partition count:3/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:3/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
           - name: shard 4/4
-            args: --partition count:4/4 -E 'not test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:4/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
           - name: CPU-model corpus
-            args: --test issue_gnet_03_device -E 'test(=issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --test gnet_device_model -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
     env:
       # tests/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
       INVAR_CI_PROFILE: debug
@@ -143,9 +143,10 @@ jobs:
       - name: Native backend tests
         run: >
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
-          --test issue_m1_02 --test issue_gnet_02_native --test issue_dx_20_debug_command --test issue_dx_20_debug_info
+          --test issue_m1_02 --test gnet_net --test issue_dx_20_debug_command --test issue_dx_20_debug_info
           --test issue_l1_06_native_arrays --test issue_l1_06_native_f32_arrays --test issue_l1_06_scalar_export_core
           --test issue_eng_03_tier_engines --test issue_l1_06_export_failure_contract
+          -E 'not binary(gnet_net) | test(/^issue_gnet_02_native::/)'
 
   cuda:
     name: Build (cuda, compile only)
