@@ -4,7 +4,7 @@ pub(super) fn product(
     item: &SystemItem,
     name: &str,
     clauses: &[SystemClause],
-    use_v5: bool,
+    models: bool,
 ) -> Result<Value, FrontError> {
     let mut distribution = None;
     let mut commercial = None;
@@ -29,7 +29,7 @@ pub(super) fn product(
                 if robot.is_some() {
                     return Err(error("S1000", "duplicate robot clause", item.span));
                 }
-                if !use_v5
+                if !models
                     && !matches!(
                         value.as_str(),
                         "menagerie::franka_emika_panda" | "menagerie::universal_robots_ur5e"
@@ -37,7 +37,7 @@ pub(super) fn product(
                 {
                     return Err(error("S1001", "undefined robot model reference", item.span));
                 }
-                robot = Some(if use_v5 {
+                robot = Some(if models {
                     qualified(item.module.as_deref(), value)
                 } else {
                     value.clone()
@@ -68,7 +68,7 @@ pub(super) fn product(
 pub(super) fn validate_port_types(
     mut program: Program,
     type_probes: Vec<(Type, Span)>,
-    use_v2: bool,
+    graph_frame_codes: bool,
     fallback_span: Span,
 ) -> Result<(), FrontError> {
     if type_probes.len().saturating_add(program.functions.len()) > 128 {
@@ -100,7 +100,7 @@ pub(super) fn validate_port_types(
         program.functions.push(function);
     }
     crate::check::check_port_types(program).map_err(|failure| {
-        let code = if use_v2
+        let code = if graph_frame_codes
             && matches!(
                 failure.code,
                 "FRAME_ROOTS" | "FRAME_CYCLE" | "FRAME_PARENT_UNKNOWN"

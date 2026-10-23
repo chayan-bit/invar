@@ -21,7 +21,7 @@ pub fn compile_manifest(program: Program) -> Result<Value, FrontError> {
             item.span,
         ));
     };
-    let manifest = component(item, name, true, clauses, &BTreeSet::new(), true, true)?;
+    let manifest = component(item, name, true, clauses, &BTreeSet::new(), true)?;
     let type_probes = manifest
         .ports
         .values()
@@ -105,11 +105,7 @@ pub(super) fn compile_with_source_dir(
             }
         }
     }
-    let use_v8 = items.iter().any(|item| {
-        let SystemItemKind::Component { clauses, .. } = &item.kind else { return false };
-        clauses.iter().any(|clause| matches!(clause, SystemClause::Config(name) if name == "inv_planner_config_v1"))
-    });
-    let use_v7 = items.iter().any(|item| {
+    let planner_ports = items.iter().any(|item| {
         let SystemItemKind::Component { clauses, .. } = &item.kind else {
             return false;
         };
@@ -122,40 +118,32 @@ pub(super) fn compile_with_source_dir(
             _ => false,
         })
     });
-    let use_v6 = items.iter().any(|item| match &item.kind {
-        SystemItemKind::RobotModel(model) => model.tool.is_some(),
-        SystemItemKind::CellModel(model) => {
-            model.objects.iter().any(|object| object.dynamic.is_some())
-        }
-        _ => false,
-    });
-    let use_v5 = items.iter().any(|item| {
+    // Robot and cell models: `robots`/`cells` in the IR and product robots
+    // that name a declared model.
+    let models = items.iter().any(|item| {
         matches!(
             item.kind,
             SystemItemKind::RobotModel(_) | SystemItemKind::CellModel(_)
         )
     });
-    let use_v4 = items.iter().any(|item| {
-        let SystemItemKind::Component { clauses, .. } = &item.kind else {
-            return false;
-        };
-        clauses
-            .iter()
-            .any(|clause| matches!(clause, SystemClause::Param { range: Some(_), .. }))
-    });
-    let use_v3 = items.iter().any(|item| {
+    // The S1-02 foreign-manifest rules (C layouts, identifiers, manifest
+    // relative paths, config and shim) apply once a source uses typed config,
+    // input paths, golden tolerances, parameter ranges, planner records or models.
+    let manifest_rules = items.iter().any(|item| {
         let SystemItemKind::Component { clauses, .. } = &item.kind else {
             return false;
         };
         clauses.iter().any(|clause| match clause {
             SystemClause::Config(_) | SystemClause::Input(_) => true,
             SystemClause::Golden { tolerances, .. } => !tolerances.is_empty(),
+            SystemClause::Param { range: Some(_), .. } => true,
             _ => false,
         })
-    }) || use_v7
-        || use_v4
-        || use_v5;
-    let use_v2 = items.iter().any(|item| {
+    }) || planner_ports
+        || models;
+    // Frame-tree failures report as graph checks (S1200) once a source uses a
+    // bus, an identity transform, a license detail or a manifest rule feature.
+    let graph_frame_codes = items.iter().any(|item| {
         let SystemItemKind::Component { clauses, .. } = &item.kind else {
             return false;
         };
@@ -176,7 +164,7 @@ pub(super) fn compile_with_source_dir(
             }
             _ => false,
         })
-    }) || use_v3;
+    }) || manifest_rules;
     let mut origins = BTreeMap::new();
     for frame in &program.frames {
         origins.insert(frame.name.clone(), frame.span);
@@ -221,8 +209,7 @@ pub(super) fn compile_with_source_dir(
                         *external,
                         clauses,
                         &function_names,
-                        use_v2,
-                        use_v3,
+                        manifest_rules,
                     )?,
                 );
             }
@@ -230,7 +217,7 @@ pub(super) fn compile_with_source_dir(
                 let id = qualified(module, name);
                 origins.insert(id.clone(), item.span);
                 if products
-                    .insert(id.clone(), product(item, &id, clauses, use_v5)?)
+                    .insert(id.clone(), product(item, &id, clauses, models)?)
                     .is_some()
                 {
                     return Err(error("S1000", "duplicate product", item.span));
@@ -294,11 +281,11 @@ pub(super) fn compile_with_source_dir(
             }
         }
     }
-    if use_v5 {
+    if models {
         if robots.is_empty() {
             return Err(error(
                 "S1600",
-                "v5 needs a robot declaration",
+                "a cell model needs a robot declaration",
                 items[0].span,
             ));
         }
@@ -357,19 +344,17 @@ pub(super) fn compile_with_source_dir(
     if !products.contains_key(&product_name) {
         return Err(error("S1001", "undefined system product", system_item.span));
     }
-    if use_v5 {
+    if models {
         let selected = products[&product_name]["robot"].as_str().unwrap_or("");
         let model = robots
             .get(selected)
             .ok_or_else(|| error("S1601", "product robot does not resolve", system_item.span))?;
         robot::check_license(model, &products[&product_name], system_item.span)?;
-        if use_v6
-            && cells.values().any(|cell| {
-                cell["objects"].as_array().is_some_and(|objects| {
-                    objects.iter().any(|object| !object["dynamic"].is_null())
-                })
-            })
-            && model["tool"].is_null()
+        if cells.values().any(|cell| {
+            cell["objects"]
+                .as_array()
+                .is_some_and(|objects| objects.iter().any(|object| !object["dynamic"].is_null()))
+        }) && model["tool"].is_null()
         {
             return Err(error(
                 "S1601",
@@ -427,7 +412,7 @@ pub(super) fn compile_with_source_dir(
             }
         }
     }
-    validate_port_types(program, type_probes, use_v2, system_item.span)?;
+    validate_port_types(program, type_probes, graph_frame_codes, system_item.span)?;
 
     let mut connected = BTreeSet::new();
     let mut connection_docs = Vec::new();
@@ -555,44 +540,10 @@ pub(super) fn compile_with_source_dir(
             component_docs.push(component.json.clone());
         }
     }
-    let mut document = json!({"schema":if use_v6 {"invar-system-v6"} else if use_v5 {"invar-system-v5"} else if use_v4 {"invar-system-v4"} else if use_v3 {"invar-system-v3"} else if use_v2 {"invar-system-v2"} else {"invar-system-v1"},"version":if use_v6 {6} else if use_v5 {5} else if use_v4 {4} else if use_v3 {3} else if use_v2 {2} else {1},"system":{"id":system_name,"name":system_name,"product":product_name,"instances":instance_docs},"frames":frame_docs,"components":component_docs,"extern_components":extern_docs,"connections":connection_docs,"flows":flow_docs,"products":products.values().cloned().collect::<Vec<_>>()});
-    if use_v7 || use_v8 {
-        document["schema"] = json!("invar-system-v9");
-        document["version"] = json!(9);
-        document["planner_contract"] = json!("invar-planner-wire-v1");
-        document["planner_frame_policy"] = json!("request-consumer-v1");
-    }
-    if use_v5 {
+    let mut document = json!({"schema":"invar-system-v12","version":12,"system":{"id":system_name,"name":system_name,"product":product_name,"instances":instance_docs},"frames":frame_docs,"components":component_docs,"extern_components":extern_docs,"connections":connection_docs,"flows":flow_docs,"products":products.values().cloned().collect::<Vec<_>>(),"planner_contract":"invar-planner-wire-v1","planner_frame_policy":"request-consumer-v1"});
+    if models {
         document["robots"] = json!(robots.values().collect::<Vec<_>>());
         document["cells"] = json!(cells.values().collect::<Vec<_>>());
-    }
-    if cells.values().any(|c| {
-        c["objects"]
-            .as_array()
-            .is_some_and(|objects| objects.iter().any(|o| !o["grasp"].is_null()))
-    }) {
-        document["schema"] = json!("invar-system-v10");
-        document["version"] = json!(10);
-        document["planner_contract"] = json!("invar-planner-wire-v1");
-        document["planner_frame_policy"] = json!("request-consumer-v1");
-    }
-    // v11 adds only the optional source-declared actuator `hold` command.
-    if robots.values().any(|robot| {
-        robot["actuators"]
-            .as_array()
-            .is_some_and(|actuators| actuators.iter().any(|a| !a["hold"].is_null()))
-    }) {
-        document["schema"] = json!("invar-system-v11");
-        document["version"] = json!(11);
-        document["planner_contract"] = json!("invar-planner-wire-v1");
-        document["planner_frame_policy"] = json!("request-consumer-v1");
-    }
-    // v12 adds only the optional cell `mount_surface` (mount fixture and contact exclusions).
-    if cells.values().any(|cell| !cell["mount_surface"].is_null()) {
-        document["schema"] = json!("invar-system-v12");
-        document["version"] = json!(12);
-        document["planner_contract"] = json!("invar-planner-wire-v1");
-        document["planner_frame_policy"] = json!("request-consumer-v1");
     }
     if document.to_string().len() > MAX_IR_BYTES {
         return Err(error(
