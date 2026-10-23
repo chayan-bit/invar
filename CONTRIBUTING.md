@@ -67,7 +67,9 @@ Every pull request runs [ci.yml](.github/workflows/ci.yml) on GitHub-hosted Linu
 - **Check**: `cargo check --all-targets`.
 - **Hygiene**: the file-size ratchet, the native host bundle check and the script self-tests.
 - **Test shards 1 to 4**: the full suite split four ways, plus doctests.
-- **Test (CPU-model corpus)**: one long corpus test that runs alone.
+- **Test (CPU-model corpus)**: the device CPU-model corpus test, run alone.
+
+Pull requests run a deterministic 1-in-8 sample of the corpus sweeps that keeps every corpus directory; pushes to main and `just test` run the whole corpus (`INVAR_FULL_CORPUS=1`).
 
 CI must pass before review.
 CUDA and Metal suites are not run in CI.

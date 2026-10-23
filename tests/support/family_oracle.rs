@@ -7,6 +7,9 @@
 use invar::{admission, check, front, mir, plan::PlanKind};
 use std::path::{Path, PathBuf};
 
+#[path = "../../test-support/corpus_sample.rs"]
+pub mod sample;
+
 /// Every family, by module. Each one's production selection is a normal-form
 /// lowering; its recognizer survives only here, as the oracle.
 pub const FAMILIES: &[&str] = &["core", "tensor", "grid", "segmented", "indexed"];
@@ -226,8 +229,8 @@ pub const CORPUS: &[&str] = &["examples", "bench", "tests", "demo"];
 
 /// Every tracked `.inv` program under `dirs` with a `main` that checks, lowers
 /// and has an A0 report, one per distinct source, mapped through `f` on up to
-/// `THREADS` threads.
-pub fn each<T: Send>(dirs: &[&str], f: impl Fn(&Program) -> T + Sync) -> Vec<T> {
+/// `THREADS` threads. `sampled` keeps only the deterministic `sample`.
+pub fn each<T: Send>(dirs: &[&str], sampled: bool, f: impl Fn(&Program) -> T + Sync) -> Vec<T> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let mut paths = Vec::new();
     for dir in dirs {
@@ -245,6 +248,7 @@ pub fn each<T: Send>(dirs: &[&str], f: impl Fn(&Program) -> T + Sync) -> Vec<T> 
                 .then_some((id, source))
         })
         .collect();
+    let sources = sample::keep(sources, sampled, |(id, _)| id);
     let next = std::sync::atomic::AtomicUsize::new(0);
     let mut out: Vec<(usize, T)> = std::thread::scope(|scope| {
         let workers: Vec<_> = (0..THREADS)
