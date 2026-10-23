@@ -101,8 +101,6 @@ pub(crate) fn conversion(name: &str) -> Option<(Type, Type)> {
         "u32_from_f32" => (Type::F32, Type::U32),
         "i32_from_f64" => (Type::F64, Type::I32),
         "u32_from_f64" => (Type::F64, Type::U32),
-        // v0.1 spelling of `i32_from_f32`, kept for existing sources.
-        "trunc_i32" => (Type::F32, Type::I32),
         _ => return storage::store(name),
     })
 }

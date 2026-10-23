@@ -170,7 +170,7 @@ fn expression(
                     ("fma", [a, b, c]) => Node::Fma(*a, *b, *c),
                     ("f32_from_u32", [a]) => Node::FromU32(*a),
                     ("f32_from_i32", [a]) => Node::FromI32(*a),
-                    ("trunc_i32", [a]) => Node::TruncI32(*a),
+                    ("i32_from_f32", [a]) => Node::TruncI32(*a),
                     ("sin", [a]) => Node::Sin(*a),
                     ("cos", [a]) => Node::Cos(*a),
                     ("sqrt", [a]) => Node::Sqrt(*a),

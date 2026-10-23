@@ -120,8 +120,6 @@ pub(crate) fn intrinsic(
         ("u32_from_f32", [Value::F32(a)]) => a.trunc_u32().map(Value::U32).map_err(trap),
         ("i32_from_f64", [Value::F64(a)]) => a.trunc_i32().map(Value::I32).map_err(trap),
         ("u32_from_f64", [Value::F64(a)]) => a.trunc_u32().map(Value::U32).map_err(trap),
-        // v0.1 spelling of `i32_from_f32`, kept for existing sources.
-        ("trunc_i32", [Value::F32(a)]) => a.trunc_i32().map(Value::I32).map_err(trap),
         // Stores into storage arrays (`check::storage`, ENG-03).
         ("store-f16", [Value::F32(a)]) => Ok(Value::F32(F16Bits::round(*a).widen())),
         ("store-bf16", [Value::F32(a)]) => Ok(Value::F32(Bf16Bits::round(*a).widen())),

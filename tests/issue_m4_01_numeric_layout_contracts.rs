@@ -171,7 +171,7 @@ fn issue_m4_01_numeric_layout_contracts_rank1_fuel_traps_and_mutation_order() {
             &reference,
         );
     }
-    let source = "fn kernel(a:read Array<f32>,n:u32)->Array<i32>{var out=filled_i32(n,0);for i in 0u32..n{out[i]=trunc_i32(a[i]);}return out;} fn main()->i32 {let a:Array<f32> = [1.0,2147483648.0];let out=kernel(a,2u32);return 7;}";
+    let source = "fn kernel(a:read Array<f32>,n:u32)->Array<i32>{var out=filled_i32(n,0);for i in 0u32..n{out[i]=i32_from_f32(a[i]);}return out;} fn main()->i32 {let a:Array<f32> = [1.0,2147483648.0];let out=kernel(a,2u32);return 7;}";
     let expected = ops::reference(source);
     assert!(matches!(expected.result, Err(eval::EvalError::Trap { .. })));
     #[cfg(feature = "native")]
