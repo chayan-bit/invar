@@ -101,8 +101,6 @@ pub(crate) fn conversion(name: &str) -> Option<(Type, Type)> {
         "u32_from_f32" => (Type::F32, Type::U32),
         "i32_from_f64" => (Type::F64, Type::I32),
         "u32_from_f64" => (Type::F64, Type::U32),
-        // v0.1 spelling of `i32_from_f32`, kept for existing sources.
-        "trunc_i32" => (Type::F32, Type::I32),
         _ => return storage::store(name),
     })
 }
@@ -190,16 +188,6 @@ pub(crate) fn sort_modes(name: &str) -> Option<&'static [Mode]> {
 /// `require_main` is false for library-style `check`, true for an executable entrypoint.
 pub fn check(program: Program, require_main: bool) -> Result<CheckedProgram, FrontError> {
     check_impl(program, require_main, false, None)
-}
-
-/// Check a program whose recognized matrix contraction steps (call spans)
-/// may use `tc_mul_add`. Every other `tc_mul_add` remains a source error, so
-/// callers can pin admission to a particular recognized entry.
-pub fn check_contraction(
-    program: Program,
-    tc_steps: &[Span],
-) -> Result<CheckedProgram, FrontError> {
-    check_impl(program, false, false, Some(tc_steps))
 }
 
 /// Check wire-only robotics declarations without producing an executable program.
