@@ -178,18 +178,6 @@ impl Program {
     pub fn entry_result(&self) -> Type {
         self.functions[&self.entry].tree.result.clone()
     }
-    /// Names of the machine functions (explain output).
-    pub fn machine_functions(&self) -> Vec<&str> {
-        self.functions
-            .values()
-            .filter(|f| f.machine)
-            .map(|f| f.tree.name.as_str())
-            .collect()
-    }
-    /// L20 fork sites lowered as task forks.
-    pub fn fork_sites(&self) -> usize {
-        self.functions.values().map(|f| f.forks.len()).sum()
-    }
     /// Largest sibling count of a fork site (the expansion radix).
     pub fn max_siblings(&self) -> usize {
         self.siblings
