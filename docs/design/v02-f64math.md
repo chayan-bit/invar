@@ -137,14 +137,14 @@ The v0.2 release notes must state the sin/cos bit change against trig-f32-v1.
 | Metal vs the upstream build on the same inputs as CUDA (f32), the exact functions vs the strict oracles, and a mutated coefficient | `tests/issue_v02_math_msl.rs::metal` (ignored, Metal GPU) |
 | MSL transform rules (literals, hoisting, shadowed tables, address spaces) | `crates/invar-math/src/msl.rs` unit tests |
 | Metal refuses f64 with `metal-no-f64` | `tests/issue_v02_fk_panda.rs::v02_f64_on_metal_runs_on_the_cpu_with_metal_no_f64` |
-| Performance next to libm, CUDA `__nv_*` and `metal::precise` | `tests/issue_v02_math_bench.rs` (ignored), numbers in section 8 |
+| Performance next to libm, CUDA `__nv_*` and `metal::precise` | `bench/v02_math_bench.rs` (ignored), numbers in section 8 |
 
 The Panda example reproduces the four Pinocchio 4.1.0 golden poses of `examples/cells/reach_place/components/pinocchio_fk/golden/panda_fk.json` with every rotation and translation entry within 1e-12; a host double model of the same chain differs from the goldens by at most 4.2e-15.
 
 ## 8. Performance (ruling C13)
 
 Correct rounding costs speed; there is no gate in this workstream, and the numbers are reported as measured.
-Each figure is the median of five timed repeats after one warm-up, from `tests/issue_v02_math_bench.rs` (ignored), with the host's one-minute load average beside it.
+Each figure is the median of five timed repeats after one warm-up, from `bench/v02_math_bench.rs` (ignored), with the host's one-minute load average beside it.
 
 ### Metal, binary32, against `metal::precise`
 

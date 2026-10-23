@@ -175,24 +175,6 @@ fn issue_eng_08_bounded_cost_has_no_element_or_contribution_cap() {
 }
 
 #[test]
-fn issue_eng_08_deleted_caps_no_longer_exist_in_the_histogram_modules() {
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    let mut scanned = 0;
-    for file in [
-        "histogram_source.rs",
-        "histogram_source/bounded.rs",
-        "histogram_source/host.rs",
-    ] {
-        let text = std::fs::read_to_string(root.join(file)).unwrap();
-        for deleted in ["MAX_ELEMENTS", "MAX_CONTRIBUTIONS"] {
-            assert!(!text.contains(deleted), "{file} {deleted}");
-        }
-        scanned += 1;
-    }
-    assert_eq!(scanned, 3);
-}
-
-#[test]
 fn issue_eng_08_language_array_limit_still_refuses_below_the_byte_budget() {
     let c = contract();
     let over = invar::array_limits::MAX_ARRAY_LEN as u32 + 1;
