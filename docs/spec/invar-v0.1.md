@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=302 citations=322
-Size record: tokens=27687 estimator=bytes/3 limit=30000
+Counts: statements=304 citations=325
+Size record: tokens=27960 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1177,7 +1177,7 @@ Note: the statements here are checked and their blocks executed exactly like the
 [NB.1.6] For `n = len(xs)`, `n = 0` gives `+0`, leaf `k` folds `xs[8k .. min(8k+8, n))` left to right from its first element, node `(L, j)` adds nodes `(L-1, 2j)` and `(L-1, 2j+1)` or keeps the first when the second is absent, and the result is node `(H, 0)` for the least `H` with `2^H` at least the leaf count. `src/fsum.rs`
 [NB.1.7] `dot_tree` rounds each product separately, and for `sum_exact` and `dot_exact` an empty input is `+0`, a NaN, an infinity times zero or both infinities is NaN, another infinity wins, and a zero sum is `-0` only when every term is `-0`. `src/fsum.rs`
 [NB.1.8] A call charges one step plus one per operand, forced `cuda` and `metal` run every reached nonempty call on the device, and every reached device or `auto` call leaves a receipt with its backend and a registered reason. `src/fsum.rs` `calibration/fsum-v1.json`
-[NB.1.9] A device that flushes subnormals discards every result that could differ and lets the CPU produce it, and the CPU picks one worker when the measured cost does not repay more. `src/fsum.rs`
+[NB.1.9] A device that flushes subnormals discards every result that could differ and lets the CPU produce it, and the CPU picks one worker, reported as backend `cpu-serial`, when the measured cost does not repay more. `src/fsum.rs` `src/schedule/reductions.rs::SERIAL_BACKEND`
 
 ```invar outcome=value:0
 fn main() -> i32 {
@@ -1203,6 +1203,7 @@ fn main() -> i32 {
 [NB.2.2] Float keys use IEEE totalOrder after each NaN becomes `0x7fc00000`, signed zeros stay distinct, and payloads, which may also be `Array<Bool>`, keep their bits. `src/eval/sorting.rs`
 [NB.2.3] A key and value length mismatch or invalid segment offsets trap with `INDEX_OUT_OF_BOUNDS` at the call span before any write. `src/eval/sorting.rs`
 [NB.2.5] Segment offsets have `segments + 1` entries, first 0, last `len(xs)` and non-decreasing, `[0]` is valid only for an empty input, duplicate boundaries are empty segments, and no source loop is implicitly replaced by a sort. `src/eval/sorting.rs`
+[NB.2.6] `sort(xs)` takes a call-scoped mutable loan, `sort_by_key(keys, values)` takes call-scoped mutable loans of two distinct named arrays and has no closure form, `argsort(xs)` takes a read loan and leaves the key bits unchanged, `segmented_sort(xs, offsets)` takes a mutable key loan and a read `Array<u32>` offset loan, and every sort except `argsort` returns `Unit`. `src/check.rs::sort_modes`
 [NB.2.4] A report with an explicit sort site uses `invar-explain-v3`, which names each site's calibration family `sort.<op>.<type>`, and automatic sort placement still selects the CPU. `docs/explain.md`
 
 ```invar outcome=value:7
@@ -1235,6 +1236,7 @@ fn main() -> i32 {
 [NB.3.5] A `VoxelGrid` parameter is `read` or `take` and never `mut`, and query result arrays leave their record only through `move result.field`. `src/spatial.rs`
 [NB.3.6] A report with a spatial site uses `invar-explain-v4`, whose sites name the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain.md`
 [NB.3.7] Squared distances are strict f32 left to right, a positive infinite radius is allowed, a query count times stride beyond `u32` traps with `INTEGER_OVERFLOW`, and read loans hold through all scalar arguments. `src/spatial.rs`
+[NB.3.8] A negative or NaN radius matches nothing, a query with any non-finite coordinate has no neighbours, cell indices are the exact `floor(coord / cell)` converted to `i32`, and query records bind to a name because tuple binding is unsupported. `src/spatial/runtime.rs::finite`
 
 ```invar outcome=value:3
 fn main() -> i32 {
@@ -1265,7 +1267,7 @@ fn main() -> i32 {
 
 [NB.4.1] `f64` is a primitive beside `f32` under `strict-f64-v1`, with `Array<f64>`, record and payload fields, round to nearest even, gradual underflow and no contraction except an explicit `fma`. `src/numeric_contract/binary64.rs`
 [NB.4.2] A decimal literal may carry an `f32` or `f64` suffix, and an unsuffixed literal takes its float type from context and otherwise defaults to `f32`. `spec/grammar.ebnf`
-[NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `src/eval/floating.rs::i32_from_f64`
+[NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, `filled_f64(n, x)` builds an owned array of `n` copies, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `src/eval/floating.rs::i32_from_f64`
 [NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded, except the `f32` functions of N5.8.6. `src/math.rs`
 [NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `src/math.rs`
 [NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `src/engine.rs::metal-no-f64`
