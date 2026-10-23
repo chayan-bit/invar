@@ -1,6 +1,6 @@
 //! Actual ABI2/3 CPU execution. Caller-owned heaps/tasks retain their full
 //! denominator; source and backend budgets are accounted separately.
-use super::child_deadline;
+use super::{child_deadline, corpus_sample};
 
 use super::corpus_cpu::{
     self as base, cleanup, compiled_rejection, digest, document, equal, expectation, recorded,

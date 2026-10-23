@@ -200,7 +200,7 @@ pub enum HostReadArgument<'a> {
 }
 
 /// One exclusively borrowed host buffer for a `mut` parameter. The callee may
-/// update elements but never resize (`spec/bootstrap.md:27`; a `mut`
+/// update elements but never resize (spec N3.2.6; a `mut`
 /// parameter cannot be reassigned).
 #[derive(Debug)]
 pub enum HostMutArray<'a> {

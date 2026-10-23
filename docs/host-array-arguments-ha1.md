@@ -80,13 +80,13 @@ not change the language, MIR, Value layout or any ABI.
 | L1-06:23 | `unsafe` only in `crates/invar-python` |
 | L1-06:31 | same buffer address on both sides |
 | L1-06:37 | negative cases: aliasing, freed or resized buffers |
-| `spec/bootstrap.md:49` | `read`/`mut`/`take` parameter modes |
-| `spec/bootstrap.md:53` | read loans may coexist; a mutable loan excludes all other access |
-| `spec/bootstrap.md:55–57` | loans last for the outer call; incompatible aliasing is rejected at the caller |
-| `spec/bootstrap.md:81` | traps perform no language-level cleanup |
-| `spec/bootstrap.md:117` | an `Err` is an ordinary value, distinct from traps, limits and tool failures |
-| `spec/bootstrap.md:121` | `View`/`MutView` are non-owning views (relevant to §5.3) |
-| `spec/bootstrap.md:143` | foreign boundary |
+| spec N4.2.1 | `read`/`mut`/`take` parameter modes |
+| spec N4.2.2 | read loans may coexist; a mutable loan excludes all other access |
+| spec N4.2.3, N4.2.7 | loans last for the outer call; incompatible aliasing is rejected at the caller |
+| spec N3.4.7 | traps perform no language-level cleanup |
+| spec N5.4.3 | an `Err` is an ordinary value, distinct from traps, limits and tool failures |
+| spec N5.5.1 | `View`/`MutView` are non-owning views (relevant to §5.3) |
+| spec 7.3 | foreign boundary |
 | `docs/native-toolchain-v1.md:59`; `src/eval.rs:20,23` | array length ≤ 1,000,000; live array elements ≤ 2,000,000 |
 | `docs/scalar-exports-v1.md:39` | Python bindings retain the GIL throughout the call |
 | `docs/rust-engineering.md:38` | fallible reservation where allocation failure is part of the contract |
@@ -163,10 +163,10 @@ The binding (later slice) maps these codes as follows:
 
 | Pair | Rule |
 |---|---|
-| read / read, exact alias | admitted; the reference engine shares **one** private owner, exactly like an in-source call passing one owner to both parameters (`spec/bootstrap.md:53`) |
+| read / read, exact alias | admitted; the reference engine shares **one** private owner, exactly like an in-source call passing one owner to both parameters (spec N4.2.2) |
 | read / read, partial overlap (same type) | admitted; union accounting (§5); see §5.3 |
 | any cross-type overlap | **refused** (`HOST_ARRAY_ALIAS`): one memory region would be two element types, which the Value model cannot represent and which would be a reinterpretation |
-| any overlap involving `mut` (with `mut`, `read`, an output or `take`), including exact aliases | **refused** (`spec/bootstrap.md:53, 57`; L1-06:37) |
+| any overlap involving `mut` (with `mut`, `read`, an output or `take`), including exact aliases | **refused** (spec N4.2.2, N4.2.7; L1-06:37) |
 
 From NumPy only owning arrays are admitted, so a partial overlap is
 impossible through Python and any alias is exact. Partial overlaps arise only
@@ -194,7 +194,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
 
 ### 5.3 Partial overlaps: plan without shared layout changes
 - **No in-source counterpart.** The source language has no partially
-  overlapping owners (`spec/bootstrap.md:49–57`). Union accounting is therefore
+  overlapping owners (spec 4.2). Union accounting is therefore
   an HA-1 *definition*, not an equivalence.
 - **Reference engine (implemented):**
   - one private owner per argument, holding a copy of that argument's
@@ -217,7 +217,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
     `{ storage: Rc<RefCell<Vec<T>>>, offset, len }`, read through the existing
     checked index paths of `Value::Array*`, behind its own approved
     contract.
-  - Mapping overlaps to language views (`spec/bootstrap.md:121`) is not
+  - Mapping overlaps to language views (spec N5.5.1) is not
     possible without changing signatures, because a `read Array<T>` parameter
     is not a `View<T>`.
 
@@ -270,7 +270,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
   copied into a fallibly pre-reserved snapshot within the staging budget (§6).
 - **Outcomes:**
   - **Normal return**, including returning `Result::Err` (an ordinary value,
-    `spec/bootstrap.md:117`): the buffer holds the final contents and the
+    spec N5.4.3): the buffer holds the final contents and the
     result is returned.
   - **Any non-normal outcome:** trap, fuel exhaustion, tool limit, internal
     error, or a Rust panic reaching the boundary. The buffer is restored to
@@ -311,7 +311,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
 - **Encoding:** the result is the evaluator's exact value, `Value::Variant`:
   tag 0 is `Ok`, tag 1 is `Err`, and the payload is the scalar.
 - **Commit:** a returned `Result::Err` is an ordinary value
-  (`spec/bootstrap.md:117`). It is a normal return and commits `mut`
+  (spec N5.4.3). It is a normal return and commits `mut`
   buffers.
 
 ## 8. GIL, pinning, concurrency, termination (binding; not implemented here)
@@ -330,7 +330,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
   - no native code writes a `read` buffer.
 
   Violations are outside Invar's soundness claims, as for foreign code
-  (`spec/bootstrap.md:143`).
+  (spec 7.3).
 - **Admitted memory:** only NumPy-owned, process-private memory
   (`validation.rs:74–75, 114`).
 - **Termination:** no guarantee across process kill, abort, or allocator

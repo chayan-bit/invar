@@ -68,10 +68,10 @@ directory; it requires no root adapter edit. Core-only checkouts need main's
 production module and existing root adapter before running these tests.
 
 ```sh
-INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-child-debug \
+INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-child-debug \
   cargo test -p invar -p invar-tools --offline --locked --test issue_gnet_v01_corpus_expansion \
   --test issue_gnet_05_parity_report -- --nocapture
-INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-child-release \
+INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-child-release \
   cargo test -p invar -p invar-tools --offline --locked --release --test issue_gnet_v01_corpus_expansion \
   --test issue_gnet_05_parity_report -- --nocapture
 cargo fmt --all -- --check

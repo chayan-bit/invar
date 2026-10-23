@@ -9,10 +9,11 @@ check: fmt lint test
 test-quick:
     NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" cargo nextest run --locked --profile quick --lib --test 'issue_m0_0[2-9]' --test 'issue_l1_0[1-3]*' --test issue_gnet_01
 
-# Full coverage, including tests intentionally excluded from the quick loop.
+# Full coverage, including tests intentionally excluded from the quick loop and the
+# whole corpus where pull-request CI runs a deterministic 1-in-8 sample.
 test:
-    NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" cargo nextest run --locked --profile ci -p invar -p invar-tools
-    NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" cargo nextest run --locked --profile ci --release -p invar -p invar-tools
+    NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" INVAR_FULL_CORPUS="${INVAR_FULL_CORPUS-1}" cargo nextest run --locked --profile ci -p invar -p invar-tools
+    NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" INVAR_FULL_CORPUS="${INVAR_FULL_CORPUS-1}" cargo nextest run --locked --profile ci -p invar -p invar-tools --release
     cargo test --locked --doc
 
 # CUDA hardware suites; needs an NVIDIA GPU with no other heavy work running.
