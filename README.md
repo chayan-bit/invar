@@ -93,15 +93,6 @@ The full suite is large; `cargo nextest run --locked --profile ci` runs it in pa
 CI runs CPU-only checks on GitHub-hosted runners.
 CUDA and Metal suites are ignored by default and are not run in CI; see [CONTRIBUTING.md](CONTRIBUTING.md) for how to run them on matching hardware.
 
-## Commitments
-
-- Defined evaluation, arithmetic, trap, and cleanup behavior in every build mode.
-- Moves and borrows; no mandatory tracing GC, hidden deep copies, or model service.
-- Ordinary native execution without a mandatory graph runtime or task pool.
-- Automatic parallelism only for admitted transformations. Unknown legality means fallback.
-- Structured diagnostics and local interfaces for humans and external coding tools.
-- Honest separation of compiler trust, bounded testing, and actual proof.
-
 ## Documentation
 
 | Document | Purpose |
