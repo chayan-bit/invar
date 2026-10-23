@@ -203,7 +203,7 @@ This section records where the merged or merging workstreams differ from, or sha
 - **Library names.** The 29 `invar-math-cr-v1` names are reserved for `fn`; a variable may share one, and a call still resolves to the library.
 - **Placement** builds on the GNET P1 and P8 stack and M4-06 residency, so it lands after them.
   It owns `--engine auto` only when asked for (`--profile`, `--host-class`, `--trust-provisional`) or when the live host's default path holds a profile other than a matching provisional one.
-  A frozen, mismatched or malformed default then reports its refusal or typed error instead of being skipped ([explain-v5](../explain-v5.md)).
+  A frozen, mismatched or malformed default then reports its refusal or typed error instead of being skipped ([explain](../explain.md)).
   Every other auto run keeps the established receipts byte for byte; unifying the two paths is #50.
 - **Metal** runs compiled-ahead libraries (`invar build PATH --target metal --output FILE`, then `--artifact FILE`); each workstream adds its kernels to the image of programs that use them.
 - **CUDA** for the workstreams was measured on an RTX 5070 Ti (sm_120) on earlier branch heads.
