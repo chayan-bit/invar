@@ -9,13 +9,28 @@ use invar::{
     numeric_contract::F32Bits,
 };
 const SOURCE: &[u8] = b"fn echo(x:f32)->f32{return x;} fn neg(x:f32)->f32{return -x;}";
+/// The only CPU numeric profile: the ABI11 owned-numeric continuation.
+fn compile_numeric(
+    source: &[u8],
+    entry: &str,
+    target: Target,
+    limits: Limits,
+) -> Result<provenance::ProvenancedArtifact, Error> {
+    provenance::compile_resumable_owned_numeric(
+        source,
+        entry,
+        target,
+        limits,
+        invar::general_net::compiled::OwnedLimits::default(),
+    )
+}
 #[test]
 fn numeric_compile_receipt_binds_exact_source_policy_types_limits_and_emitted_bytes() {
-    let a = provenance::compile_numeric(SOURCE, "echo", Target::Cpu, Limits::default()).unwrap();
-    let b = provenance::compile_numeric(SOURCE, "echo", Target::Cpu, Limits::default()).unwrap();
+    let a = compile_numeric(SOURCE, "echo", Target::Cpu, Limits::default()).unwrap();
+    let b = compile_numeric(SOURCE, "echo", Target::Cpu, Limits::default()).unwrap();
     assert_eq!(a.id(), b.id());
     assert_eq!(a.manifest(), b.manifest());
-    assert_eq!(a.artifact().abi_version(), 8);
+    assert_eq!(a.artifact().abi_version(), 11);
     assert_eq!(a.manifest()["numeric"]["semantic_id"], "strict-f32-v1");
     assert_eq!(a.manifest()["numeric"]["policy"]["version"], 1);
     assert_eq!(a.manifest()["params"][0], "F32");
@@ -36,13 +51,13 @@ fn numeric_compile_receipt_binds_exact_source_policy_types_limits_and_emitted_by
     assert_eq!(a.verify_source(&changed), Err(Error::SourceMismatch));
     assert_ne!(
         a.id(),
-        provenance::compile_numeric(&changed, "echo", Target::Cpu, Limits::default())
+        compile_numeric(&changed, "echo", Target::Cpu, Limits::default())
             .unwrap()
             .id()
     );
     assert_ne!(
         a.id(),
-        provenance::compile_numeric(SOURCE, "neg", Target::Cpu, Limits::default())
+        compile_numeric(SOURCE, "neg", Target::Cpu, Limits::default())
             .unwrap()
             .id()
     );
@@ -50,14 +65,14 @@ fn numeric_compile_receipt_binds_exact_source_policy_types_limits_and_emitted_by
     limits.compiler.frame_bytes /= 2;
     assert_ne!(
         a.id(),
-        provenance::compile_numeric(SOURCE, "echo", Target::Cpu, limits)
+        compile_numeric(SOURCE, "echo", Target::Cpu, limits)
             .unwrap()
             .id()
     );
 }
 #[test]
 fn numeric_oracle_receipt_snapshots_exact_f32_bits_and_source_failure_prefixes() {
-    let a = provenance::compile_numeric(SOURCE, "echo", Target::Cpu, Limits::default()).unwrap();
+    let a = compile_numeric(SOURCE, "echo", Target::Cpu, Limits::default()).unwrap();
     for bits in [
         0, 0x80000000, 1, 0x7f800000, 0xff800000, 0x7fc00123, 0xffc00123,
     ] {
@@ -93,16 +108,14 @@ fn numeric_oracle_receipt_snapshots_exact_f32_bits_and_source_failure_prefixes()
 #[test]
 fn numeric_provenance_keeps_legacy_and_unsupported_owner_device_gates_explicit() {
     assert!(provenance::compile(SOURCE, "echo", Target::Cpu, Limits::default()).is_err());
-    for target in [Target::Cuda, Target::Metal] {
-        assert!(matches!(
-            provenance::compile_numeric(SOURCE, "echo", target, Limits::default()),
-            Err(Error::Compiler(
-                invar::general_net::compiled::Error::NumericTarget
-            ))
-        ));
-    }
-    let array = b"fn owner()->Array<f32>{return filled_f32(1u32,0.0);}";
-    assert!(provenance::compile_numeric(array, "owner", Target::Cpu, Limits::default()).is_err());
+    assert!(matches!(
+        compile_numeric(SOURCE, "echo", Target::Metal, Limits::default()),
+        Err(Error::Compiler(
+            invar::general_net::compiled::Error::NumericTarget
+        ))
+    ));
+    let nominal = b"struct Numeric{x:f32} fn owner()->i32{return 7;}";
+    assert!(compile_numeric(nominal, "owner", Target::Cpu, Limits::default()).is_err());
     let legacy = provenance::compile(
         b"fn id(x:u32)->u32{return x;}",
         "id",

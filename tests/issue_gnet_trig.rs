@@ -67,12 +67,18 @@ fn scalar(f: usize) -> compiled::Artifact {
     let source = format!("fn run(x:f32)->f32{{return {}(x);}}", FUNCTIONS[f]);
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), false).unwrap();
     let net = general_net::Net::lower(&checked, Default::default()).unwrap();
-    compiled::emit_numeric(
+    // Scalar programs need no array storage; one descriptor slot is the minimum.
+    compiled::emit_resumable_owned_numeric(
         &net,
         &net.verify().unwrap(),
         "run",
         Target::Cpu,
         Default::default(),
+        compiled::OwnedLimits {
+            elements: 0,
+            allocations: 1,
+            cleanup_events: 1,
+        },
     )
     .unwrap()
 }
@@ -138,8 +144,8 @@ int main(int argc,char** argv) {
   if(argc!=3)return 2;
   std::ifstream in(argv[1],std::ios::binary); std::ofstream out(argv[2],std::ios::binary);
   unsigned x; while(in.read((char*)&x,4)) {
-    gnet_w a[1]={x},o[8]={};gnet_u trace[224]={};
-    gnet_run(a,o,trace,1000,1000,32);
+    gnet_w a[1]={x},o[10]={},heap[4]={};gnet_u trace[224]={},cleanup[4]={};GnetTask task={};
+    if(!gnet_resume(a,o,trace,1000,1000,32,heap,cleanup,&task,1000000))return 4;
     if(o[0]!=0)return 3;
     unsigned y=(unsigned)o[1];out.write((char*)&y,4);
   } return !in.eof() || !out.good();
@@ -227,6 +233,7 @@ fn metal_stratified_and_entry_fk() {
                 "typedef long gnet_w; typedef ulong gnet_u;",
             )
             .replace("#include <climits>", "")
+            .replace("#include <cstddef>", "")
             .replace("CHAR_BIT", "8")
             .replace("ULLONG_MAX", "18446744073709551615ULL")
             .replace(
@@ -259,9 +266,8 @@ using namespace metal;
 {body}
 kernel void invar_f32_ops_v2(device const uint* A [[buffer(0)]],device const uint* B [[buffer(1)]],device uint* C [[buffer(2)]],device atomic_uint* F [[buffer(3)]],uint i [[thread_position_in_grid]],uint threads [[threads_per_grid]]) {{
   atomic_fetch_and_explicit(F,3u,memory_order_relaxed);
-  for(;i<{len}u;i+=threads){{long input[1]={{A[i]}},output[8]={{}};ulong trace[224]={{}};
-  gnet_run(input,output,trace,1000,1000,32);
-  if(output[0]!=0)atomic_store_explicit(F,1u,memory_order_relaxed);
+  for(;i<{len}u;i+=threads){{long input[1]={{A[i]}},output[10]={{}},heap[4]={{}};ulong trace[224]={{}},cleanup[4]={{}};GnetTask task={{}};
+  if(!gnet_resume(input,output,trace,1000,1000,32,heap,cleanup,&task,1000000)||output[0]!=0)atomic_store_explicit(F,1u,memory_order_relaxed);
   C[i]=(uint)output[1];}}
 }}"#
             );
@@ -271,9 +277,12 @@ kernel void invar_f32_ops_v2(device const uint* A [[buffer(0)]],device const uin
                 .replace("gnet_f32_", "gf_")
                 .replace("invar_trig_f32_v1", "it")
                 .replace("invar_sqrt_f32_v1", "is");
+            // The host loader's offsetof layout assertion has no MSL spelling;
+            // the sizeof(GnetTask) assertion still pins the task layout.
             let source = source
                 .lines()
                 .filter(|line| !line.trim_start().starts_with("//"))
+                .filter(|line| !line.contains("GNET ABI11 layout mismatch"))
                 .map(str::trim)
                 .collect::<Vec<_>>()
                 .join("\n");
