@@ -36,17 +36,12 @@ fn returns_seven(source: &str) {
 
 #[test]
 fn sort_contract_explain_schema_and_registered_reasons() {
-    let v3: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/explain-v3.schema.json")).unwrap();
-    // #50: an auto explain is the unified v5, the same sort sites as v3.
     let v5: serde_json::Value =
         serde_json::from_str(include_str!("../schema/explain-v5.schema.json")).unwrap();
     let device_schema: serde_json::Value = serde_json::from_str(include_str!(
         "../schema/invar-explain-device-v5.schema.json"
     ))
     .unwrap();
-    let old_schema: serde_json::Value =
-        serde_json::from_str(include_str!("../schema/explain-v1.schema.json")).unwrap();
     let registry: serde_json::Value =
         serde_json::from_str(include_str!("../schema/diagnostic-codes-v1.json")).unwrap();
     for engine in [None, Some("auto")] {
@@ -59,18 +54,13 @@ fn sort_contract_explain_schema_and_registered_reasons() {
         let output = command.output().unwrap();
         assert!(output.status.success(), "{output:?}");
         let document: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-        let (schema, version) = if engine.is_some() { (&v5, 5) } else { (&v3, 3) };
-        assert_eq!(document["schema"], format!("invar-explain-v{version}"));
-        assert_eq!(document["schema_version"], version);
-        assert!(jsonschema::is_valid(schema, &document), "{document}");
-        assert!(!jsonschema::is_valid(&old_schema, &document));
-        let mut old_identity = document.clone();
-        old_identity["schema"] = "invar-explain-v1".into();
-        old_identity["schema_version"] = 1.into();
-        if engine.is_some() {
-            old_identity["device_schema"] = "invar-explain-device-v1".into();
-        }
-        assert!(!jsonschema::is_valid(&old_schema, &old_identity));
+        assert_eq!(document["schema"], "invar-explain-v5");
+        assert_eq!(document["schema_version"], 5);
+        assert!(jsonschema::is_valid(&v5, &document), "{document}");
+        let mut relabelled = document.clone();
+        relabelled["schema"] = "invar-explain-v1".into();
+        relabelled["schema_version"] = 1.into();
+        assert!(!jsonschema::is_valid(&v5, &relabelled));
         let sites = document["explicit_sorts"].as_array().unwrap();
         assert_eq!(sites.len(), 4);
         for site in sites {
@@ -103,7 +93,7 @@ fn sort_contract_explain_schema_and_registered_reasons() {
                 }
                 _ => site["extra"] = true.into(),
             }
-            assert!(!jsonschema::is_valid(schema, &malformed), "{bad}");
+            assert!(!jsonschema::is_valid(&v5, &malformed), "{bad}");
         }
     }
 }
