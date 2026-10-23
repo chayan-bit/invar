@@ -29,7 +29,7 @@ Imported historical evidence is evidence for its recorded revision only.
 
 | Candidate | License and maintenance | Decision |
 | --- | --- | --- |
-| P8 `general_net::law_collective::cost` and `bench/law_bench.rs` | Existing project code, maintained on the P8 branch | Reuse the recorded-pass validation, best-of-five protocol, 5% band, and determinism tests; the v0.2 strict CPU tie rule remains authoritative. |
+| P8 `general_net::law_collective::cost` and `tests/support/law_bench.rs` | Existing project code, maintained on the P8 branch | Reuse the recorded-pass validation, best-of-five protocol, 5% band, and determinism tests; the v0.2 strict CPU tie rule remains authoritative. |
 | M4-06 `schedule::tuning` and `tuning_resident` | Existing project code, maintained on the M4-06 branch | Reuse residency, verified-plan facts, transfer accounting, and completion/quiescence rules. |
 | `serde_json` 1.0.151 | MIT OR Apache-2.0; existing direct locked dependency | Reuse for bounded profile parsing and output; do not write another JSON parser. |
 | `inkwell` 0.8.0 with LLVM 21 | Apache-2.0; existing optional locked dependency | Reuse the actual LLVM CPU execution path; do not label a Rust fold or MIR interpreter as compiled Invar CPU. |

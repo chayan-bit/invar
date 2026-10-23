@@ -64,11 +64,6 @@ name = "sort"
 path = "bench/sort.rs"
 harness = false
 
-# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release --bench net_law_collective_bench -- --ignored`.
-[[bench]]
-name = "net_law_collective_bench"
-path = "bench/net_law_collective_bench.rs"
-
 # Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release --bench net_task_region_bench -- --ignored`.
 [[bench]]
 name = "net_task_region_bench"
