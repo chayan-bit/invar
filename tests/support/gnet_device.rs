@@ -16,9 +16,12 @@ use invar::{
 };
 use std::{
     collections::BTreeMap,
-    path::{Path, PathBuf},
+    path::Path,
     time::{Duration, Instant},
 };
+
+#[path = "../../test-support/corpus_sample.rs"]
+pub mod sample;
 
 pub const FUEL: u64 = 100_000;
 const TRANSITIONS: u64 = 1_000_000;
@@ -33,28 +36,13 @@ pub struct Source {
     pub checked: check::CheckedProgram,
 }
 
-fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-    let mut entries: Vec<_> = std::fs::read_dir(dir)
-        .unwrap()
-        .map(|entry| entry.unwrap().path())
-        .collect();
-    entries.sort();
-    for path in entries {
-        if path.is_dir() {
-            walk(&path, out);
-        } else if path.extension().is_some_and(|e| e == "inv") {
-            out.push(path);
-        }
-    }
-}
-
 /// The GNET-02 runnable corpus: every source under tests/fixtures and examples
 /// that parses and checks as an executable program, with its exact bytes.
 pub fn corpus() -> Vec<Source> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let mut files = Vec::new();
-    walk(&root.join("tests/fixtures"), &mut files);
-    walk(&root.join("examples"), &mut files);
+    sample::walk(&root.join("tests/fixtures"), &mut files);
+    sample::walk(&root.join("examples"), &mut files);
     files
         .into_iter()
         .filter_map(|path| {
@@ -352,16 +340,17 @@ fn outcome(reference: &oracle::Observation) -> &'static str {
 /// Run the whole corpus on one backend kind. `fuel_short` additionally replays
 /// every admitted program one source step short of its own use, which must end
 /// in the exact fuel limit with only completed cleanup observable.
-/// Shard `(index, count)` of the corpus; shards run on separate threads.
+/// Shard `(index, count)` of the corpus, or of its `sample` if `sampled`.
 pub fn corpus_denominator<B: Backend>(
     target: Target,
     label: &str,
     mut backend: impl FnMut() -> B,
     fuel_short: bool,
     shard: (usize, usize),
+    sampled: bool,
 ) -> Denominator {
     let mut d = Denominator::default();
-    for (_, source) in corpus()
+    for (_, source) in sample::keep(corpus(), sampled, |source| &source.name)
         .into_iter()
         .enumerate()
         .filter(|(i, _)| i % shard.1 == shard.0)
@@ -727,13 +716,15 @@ pub fn bounded_pool<T: Sync, R: Send>(
 }
 
 /// Run `shards` corpus shards concurrently (each with a 64 MiB stack for the
-/// recursive reference evaluator) and merge their denominators.
+/// recursive reference evaluator) and merge their denominators. `sampled`
+/// runs the deterministic `sample` instead of the whole corpus.
 pub fn sharded<B: Backend>(
     target: Target,
     label: &str,
     backend: fn() -> B,
     fuel_short: bool,
     shards: usize,
+    sampled: bool,
 ) -> Denominator {
     std::thread::scope(|scope| {
         let handles: Vec<_> = (0..shards)
@@ -741,7 +732,8 @@ pub fn sharded<B: Backend>(
                 std::thread::Builder::new()
                     .stack_size(64 * 1024 * 1024)
                     .spawn_scoped(scope, move || {
-                        corpus_denominator(target, label, backend, fuel_short, (i, shards))
+                        let shard = (i, shards);
+                        corpus_denominator(target, label, backend, fuel_short, shard, sampled)
                     })
                     .unwrap()
             })

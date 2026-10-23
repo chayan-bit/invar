@@ -1,5 +1,8 @@
 //! Independent source groups run concurrently; receipts retain manifest order.
+//! Every row is checked against its source and oracle expectations; only the
+//! sampled sources (`corpus_sample`) also compile and run the CPU backends.
 use super::*;
+use std::collections::BTreeSet;
 
 type Cache = BTreeMap<(String, String, u8, usize), Harness>;
 
@@ -8,17 +11,18 @@ pub(super) fn run() {
     let runtime = base::document("runtime-vectors.json");
     let added = base::document("child-vectors.json");
     let queues = queues([&ordinary, &runtime, &added]);
+    let keep = sample(&queues);
     let mut results = std::thread::scope(|scope| {
         let workers = queues
             .into_iter()
             .map(|queue| {
-                let ordinary = &ordinary;
+                let (ordinary, keep) = (&ordinary, &keep);
                 scope.spawn(move || {
                     let mut cache = Cache::new();
                     queue
                         .into_iter()
                         .map(|(index, kind, case)| {
-                            let (row, comparisons) = row(kind, case, ordinary, &mut cache);
+                            let (row, comparisons) = row(kind, case, ordinary, keep, &mut cache);
                             (index, row, comparisons)
                         })
                         .collect::<Vec<_>>()
@@ -45,6 +49,17 @@ pub(super) fn run() {
         rows,
         json!({"retained_ordinary":52,"retained_runtime":67,"new_runtime_and_main":39,"matched_cpu_model_observations":comparisons}),
     );
+}
+
+/// The sampled source paths; a category is the case kind and source directory.
+fn sample(queues: &[Vec<(usize, &str, &Json)>]) -> BTreeSet<String> {
+    corpus_sample::paths(queues.iter().flatten().map(|(_, kind, case)| {
+        let path = case["source"].as_str().unwrap();
+        (
+            path.to_owned(),
+            format!("{kind}:{}", corpus_sample::category(path)),
+        )
+    }))
 }
 
 fn queues(documents: [&Json; 3]) -> [Vec<(usize, &str, &Json)>; 4] {
@@ -148,7 +163,13 @@ fn observe<'a>(kind: &'a str, case: &'a Json, checked: check::CheckedProgram) ->
     }
 }
 
-fn row(kind: &str, case: &Json, ordinary: &Json, cache: &mut Cache) -> (Json, usize) {
+fn row(
+    kind: &str,
+    case: &Json,
+    ordinary: &Json,
+    keep: &BTreeSet<String>,
+    cache: &mut Cache,
+) -> (Json, usize) {
     let bytes = source_bytes(case, ordinary);
     let checked = match checked(&bytes) {
         Ok(c) => c,
@@ -179,6 +200,9 @@ fn row(kind: &str, case: &Json, ordinary: &Json, cache: &mut Cache) -> (Json, us
         };
         match emit(&context.net, context.entry, target, private(), owned) {
             Err(error) => row[key] = rejected(error),
+            Ok(_) if !keep.contains(case["source"].as_str().unwrap()) => {
+                row[key] = json!({"status":"sampled_out"});
+            }
             Ok(artifact) => {
                 let harness = cache
                     .entry((

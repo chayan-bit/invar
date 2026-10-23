@@ -74,7 +74,7 @@ The command name is `invar` and source files use `.inv`.
 
 Foreign programs require an explicit absolute `--c-library PATH`; the [versioned C header](include/invar_foreign_v1.h) defines their narrow scalar/buffer ABI.
 The optional `native` feature adds [LLVM CPU build and run](docs/native-toolchain-v1.md).
-The [bootstrap specification](spec/bootstrap.md) records the supported subsets and limits.
+The [language specification](docs/spec/invar-v0.1.md) records the supported subsets and limits.
 
 The parser accepts at most 1 MiB of UTF-8 source and nesting depth 32.
 The reference evaluator limits call depth to 64 and fuel to the positive decimal CLI value (default 1,000,000 steps).
@@ -97,8 +97,7 @@ CUDA and Metal suites are ignored by default and are not run in CI; see [CONTRIB
 
 | Document | Purpose |
 | --- | --- |
-| [v0.1 language specification](docs/spec/invar-v0.1.md) | Compact specification whose every code block and cited statement is checked by the test suite |
-| [Bootstrap specification](spec/bootstrap.md) | Detailed normative text for the implemented language |
+| [v0.1 language specification](docs/spec/invar-v0.1.md) | Normative specification whose every code block and cited statement is checked by the test suite |
 | [Grammar](spec/grammar.ebnf) | Complete syntax for that scope |
 | [Placement](spec/placement-v1.md) | Placement profiles and receipts for `--engine auto` |
 | [Examples](examples/README.md) | Verified example library with an index of expected results |
