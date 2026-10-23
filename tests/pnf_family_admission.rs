@@ -453,11 +453,10 @@ fn focused() -> Vec<(String, String)> {
 fn corpus_agreement_with_existing_recognizers() {
     let mut corpus = focused();
     let mut paths = Vec::new();
-    files(
-        &root().join("tests/net_normal_form_fixtures/gnet05"),
-        &mut paths,
-    );
-    files(&root().join("tests/pnf_family_fixtures/corpus"), &mut paths);
+    files(&support::gnet05().join("programs"), &mut paths);
+    files(&support::gnet05().join("robotics/programs"), &mut paths);
+    // 72 generated GNET-05 programs and 48 robotics programs.
+    assert_eq!(paths.len(), 120);
     for p in paths {
         corpus.push((
             p.strip_prefix(root()).unwrap().display().to_string(),
@@ -504,31 +503,6 @@ fn corpus_agreement_with_existing_recognizers() {
         "{} PNF/recognizer disagreements; see INVAR_P3_REPORT for complete programs",
         differences.len()
     );
-}
-
-#[test]
-fn snapshot_lineage_is_exact() {
-    use sha2::{Digest, Sha256};
-    let lineage: Json = serde_json::from_str(
-        &fs::read_to_string(root().join("tests/pnf_family_fixtures/lineage.json")).unwrap(),
-    )
-    .unwrap();
-    assert_eq!(lineage["files"].as_array().unwrap().len(), 60);
-    for row in lineage["files"].as_array().unwrap() {
-        let bytes = fs::read(
-            root()
-                .join("tests/pnf_family_fixtures/corpus")
-                .join(row["file"].as_str().unwrap()),
-        )
-        .unwrap();
-        assert_eq!(
-            Sha256::digest(bytes)
-                .iter()
-                .map(|b| format!("{b:02x}"))
-                .collect::<String>(),
-            row["sha256"].as_str().unwrap()
-        );
-    }
 }
 
 fn report(source: &str) -> family::Report {
