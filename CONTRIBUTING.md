@@ -6,7 +6,7 @@ Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) in every project space.
 
 ## Before you start
 
-Read the [bootstrap specification](spec/bootstrap.md), the [v0.1 language specification](docs/spec/invar-v0.1.md) and [Rust engineering](docs/rust-engineering.md).
+Read the [v0.1 language specification](docs/spec/invar-v0.1.md), the [grammar](spec/grammar.ebnf) and [Rust engineering](docs/rust-engineering.md).
 Larger work items are tracked in [GitHub issues](https://github.com/chayan-bit/invar/issues).
 For a substantial change, open an issue first so the design can be agreed before you invest in it.
 
