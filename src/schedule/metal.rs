@@ -6,13 +6,11 @@ pub use invar_metal::Fault;
 use invar_metal::MetalDevice;
 
 use super::*;
-use crate::{
-    device_cache::HintState,
-    plan::{DeviceCost, DeviceCostModel},
-    schedule::reductions::{self, Reduction},
-};
+use crate::{device_cache::HintState, plan::DeviceCostModel, schedule::reductions};
 
 pub(crate) mod reduce;
+
+pub use super::device::{AutoRun, Choice, Run};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Error {
@@ -150,37 +148,6 @@ pub fn family_kernels(
     };
     mir_eval::observe_engine(program, fuel, Some(&mut provider), None);
     Ok(kernels)
-}
-
-pub struct Run {
-    pub observation: Observation,
-    pub executed: Vec<Executed>,
-    /// Every reached float reduction, in execution order.
-    pub reductions: Vec<Reduction>,
-    pub cache_hits: usize,
-    pub hint_hits: usize,
-    pub hint_invalids: usize,
-}
-
-#[derive(Clone, Debug)]
-pub struct Choice {
-    pub function: String,
-    pub span: crate::front::Span,
-    pub backend: &'static str,
-    pub reason: &'static str,
-    pub cost: Option<DeviceCost>,
-    pub record: Option<tuning::CostRecord>,
-}
-
-pub struct AutoRun {
-    pub observation: Observation,
-    pub executed: Vec<Executed>,
-    pub choices: Vec<Choice>,
-    /// Every reached float reduction and where it ran, in execution order.
-    pub reductions: Vec<Reduction>,
-    pub cache_hits: usize,
-    pub hint_hits: usize,
-    pub hint_invalids: usize,
 }
 
 /// Run the graph-extracted plan on a live Metal context; every reached eligible
@@ -354,31 +321,7 @@ fn run_auto_source_inner(
             crate::sorting::run_cpu_with(source, program, fuel, workers, &mut reducer)
         }
         .map_err(|e| Error::mismatch(format!("intrinsic CPU fallback: {e:?}")))?;
-        let choices = cpu
-            .executed
-            .iter()
-            .map(|step| Choice {
-                function: step.function.clone(),
-                span: step.span,
-                backend: "cpu-parallel",
-                reason: if step.kind == crate::plan::PlanKind::Sort {
-                    "sort-cost-unmeasured"
-                } else {
-                    crate::spatial::placement::UNMEASURED
-                },
-                cost: None,
-                record: None,
-            })
-            .collect();
-        return Ok(AutoRun {
-            observation: cpu.observation,
-            executed: cpu.executed,
-            reductions: receipts,
-            choices,
-            cache_hits: 0,
-            hint_hits: 0,
-            hint_invalids: 0,
-        });
+        return Ok(super::device::intrinsic_cpu_auto(cpu, receipts));
     }
     let regions = families::analyze(source, program)
         .map_err(|error| Error::mismatch(format!("admission failed: {error:?}")))?;
@@ -535,17 +478,7 @@ fn run_auto_source_inner(
     let (observation, published) =
         mir_eval::observe_engine(program, fuel, Some(&mut provider), Some(&mut reducer));
     let executed = super::keep_published(executed, &published);
-    // Offered choices are exactly the non-serial ones, in offer order.
-    let mut outcomes = published.iter();
-    for choice in choices
-        .iter_mut()
-        .filter(|choice| choice.backend != "mir-serial")
-    {
-        if outcomes.next() != Some(&true) {
-            choice.backend = "mir-serial";
-            choice.reason = "publication-guard-false";
-        }
-    }
+    super::device::settle_choices(&mut choices, &published);
     Ok(AutoRun {
         observation,
         executed,
