@@ -3,7 +3,7 @@
 #![forbid(unsafe_code)]
 
 use crate::{
-    check::{self, CheckedProgram},
+    check::CheckedProgram,
     front::{self, BinaryOp, Expr, ExprKind, Mode, Place, Span, StmtKind, Type, named, ungroup},
     general_net, mir,
 };
@@ -61,73 +61,10 @@ fn expr_ticks(e: &Expr) -> Option<u64> {
     }
 }
 
-// CheckedProgram has public annotations. Re-run the checker on the actual AST
-// and require the current annotations; stale caller edits are not authentication.
-fn recheck(source: &CheckedProgram) -> Result<CheckedProgram, Error> {
-    let p = &source.program;
-    if p.functions.len() > mir::MAX_FUNCTIONS {
-        return Err(Error::Bounds);
-    }
-    let checked = check::check(
-        front::Program {
-            functions: p.functions.clone(),
-            foreign_functions: p.foreign_functions.clone(),
-            closures: p.closures.clone(),
-            frames: p
-                .frames
-                .iter()
-                .map(|f| front::FrameDecl {
-                    name: f.name.clone(),
-                    parent: f.parent.clone(),
-                    span: f.span,
-                })
-                .collect(),
-            modules: p
-                .modules
-                .iter()
-                // check::check injects this reserved standard module each time.
-                // Rebuild it, then require exact equality with the checked AST;
-                // caller mutation of standard declarations is still rejected.
-                .filter(|m| m.name != "std::robotics")
-                .map(|m| front::ModuleDecl {
-                    name: m.name.clone(),
-                    span: m.span,
-                })
-                .collect(),
-            imports: p
-                .imports
-                .iter()
-                .map(|i| front::Import {
-                    owner: i.owner.clone(),
-                    module: i.module.clone(),
-                    item: i.item.clone(),
-                    span: i.span,
-                })
-                .collect(),
-            records: p
-                .records
-                .iter()
-                .filter(|r| r.module.as_deref() != Some("std::robotics"))
-                .cloned()
-                .collect(),
-            variants: p.variants.clone(),
-            system_items: p.system_items.clone(),
-        },
-        false,
-    )
-    .map_err(Error::Source)?;
-    if &checked.program != p
-        || checked.expression_types != source.expression_types
-        || checked.function_expression_types != source.function_expression_types
-    {
-        return Err(Error::CheckedMismatch);
-    }
-    Ok(checked)
-}
-
 impl Contract {
     pub fn from_checked(source: &CheckedProgram, entry: &str) -> Result<Self, Error> {
-        let checked = recheck(source)?;
+        let checked =
+            crate::tensor::recheck(source, Error::Bounds, Error::CheckedMismatch, Error::Source)?;
         let net = general_net::Net::lower(&checked, general_net::Limits::default())
             .map_err(Error::Net)?;
         let proof = net.verify().map_err(Error::Net)?;
