@@ -1,0 +1,93 @@
+name: regen-schema (temporary)
+
+on:
+  push:
+    branches: [refactor/system-v12-only]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  INVAR_TEST_TIMEOUT_SCALE: 8
+
+jobs:
+  regen:
+    name: regen (${{ matrix.side }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [branch, main]
+    steps:
+      - name: Free runner disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af
+          df -h /
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ matrix.side == 'main' && 'main' || github.sha }}
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
+        with:
+          tool: nextest@0.9.146
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: regen-${{ matrix.side }}
+      - name: Build
+        run: cargo build --locked
+      - name: Check every system source
+        run: |
+          mkdir -p out/check
+          find examples tests/fixtures -name '*.inv' | sort | while read -r f; do
+            key=$(echo "$f" | tr '/' '_')
+            set +e
+            target/debug/invar system check "$f" --format json > "out/check/$key.json" 2>/dev/null
+            echo "$? $f" >> out/check/status.txt
+            set -e
+          done
+      - name: Regenerate goldens
+        if: matrix.side == 'branch'
+        run: |
+          set -eu
+          B=target/debug/invar
+          for n in basic-cell module-cell optional-port; do
+            $B system ir tests/fixtures/s1_01/$n.inv > tests/fixtures/s1_01/$n.ir.json
+          done
+          $B system ir tests/fixtures/s1_03/cell-12.inv > tests/fixtures/s1_03/cell-12.ir.json
+          $B system report tests/fixtures/s1_03/cell-12.inv > tests/fixtures/s1_03/cell-12.report.md
+          rm -rf /tmp/ros2 && $B system gen ros2 tests/fixtures/s1_03/cell-12.inv --out /tmp/ros2
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          root = "/tmp/ros2"
+          files = {}
+          for d, _, names in os.walk(root):
+              for n in names:
+                  p = os.path.join(d, n)
+                  files[os.path.relpath(p, root)] = hashlib.sha256(open(p, "rb").read()).hexdigest()
+          with open("tests/fixtures/s1_04/cell-12-golden-sha256.json", "w") as f:
+              f.write(json.dumps(dict(sorted(files.items())), indent=2) + "\n")
+          index = json.load(open("examples/index.json"))
+          for e in index["examples"]:
+              if "ir_sha256" in e.get("expect", {}):
+                  out = subprocess.run(["target/debug/invar", "system", "ir", e["path"]], capture_output=True, check=True).stdout
+                  e["expect"]["ir_sha256"] = hashlib.sha256(out).hexdigest()
+          with open("examples/index.json", "w") as f:
+              f.write(json.dumps(index, indent=2) + "\n")
+          PY
+          mkdir -p out/golden
+          cp --parents tests/fixtures/s1_01/*.ir.json tests/fixtures/s1_03/cell-12.ir.json tests/fixtures/s1_03/cell-12.report.md tests/fixtures/s1_04/cell-12-golden-sha256.json examples/index.json out/golden/
+      - name: System tests against the regenerated goldens
+        if: matrix.side == 'branch'
+        continue-on-error: true
+        run: cargo nextest run --locked --no-fail-fast -E 'binary(/^issue_s1_/) | binary(=issue_ai_02_spec_examples) | binary(=issue_ai_01_machine_diagnostics)' 2>&1 | tee out/tests.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: regen-${{ matrix.side }}
+          path: out
