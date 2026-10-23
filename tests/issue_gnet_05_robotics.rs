@@ -58,7 +58,7 @@ pub const TOL_MODEL: f64 = 1e-9;
 /// Reference evaluator fuel (never reached by any recorded input).
 const FUEL: u64 = 1 << 40;
 
-const TABLES: &str = "bench/baselines/robotics-tables.h";
+const TABLES: &str = "tools/bench/baselines/robotics-tables.h";
 
 fn repo() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))

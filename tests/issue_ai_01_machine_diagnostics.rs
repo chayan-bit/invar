@@ -1,16 +1,7 @@
 use std::{collections::HashSet, path::PathBuf, process::Command};
 
 use invar::{diagnostics, front::Span};
-// The qualification harness is compiled into this test to inject its faults;
-// it expects these names at the crate root.
-#[allow(unused_imports)]
-use invar::{check, front, mir, schedule};
-pub use invar::{general_net, hex, layout_contract, numeric_contract, tensor_cache};
 use serde_json::{Value, json};
-
-#[path = "../qualification/mod.rs"]
-#[allow(dead_code)]
-mod qualification;
 
 fn schema(name: &str) -> Value {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -112,13 +103,12 @@ fn source_codes() -> HashSet<String> {
 
 // The tests live in the sibling files of this directory, spliced in with
 // `include!` so every test keeps its flat name and one test binary.
-const OWN_SOURCES: [&str; 6] = [
+const OWN_SOURCES: [&str; 5] = [
     include_str!("issue_ai_01_machine_diagnostics/registry.rs"),
     include_str!("issue_ai_01_machine_diagnostics/documents.rs"),
     include_str!("issue_ai_01_machine_diagnostics/fault_fixtures.rs"),
     include_str!("issue_ai_01_machine_diagnostics/contracts.rs"),
     include_str!("issue_ai_01_machine_diagnostics/indexed_and_versions.rs"),
-    include_str!("issue_ai_01_machine_diagnostics/qualification.rs"),
 ];
 
 include!("issue_ai_01_machine_diagnostics/registry.rs");
@@ -126,4 +116,3 @@ include!("issue_ai_01_machine_diagnostics/documents.rs");
 include!("issue_ai_01_machine_diagnostics/fault_fixtures.rs");
 include!("issue_ai_01_machine_diagnostics/contracts.rs");
 include!("issue_ai_01_machine_diagnostics/indexed_and_versions.rs");
-include!("issue_ai_01_machine_diagnostics/qualification.rs");

@@ -4,7 +4,7 @@
 //! reference before any sample is taken.
 //!
 //! Ported from the reviewed benchmark branch (`c19c5264`, "sample verified
-//! u32 generated collectives"), which `src/bin/invar-bench.rs` already calls;
+//! u32 generated collectives"), which `tools/src/bin/invar-bench.rs` already calls;
 //! the only change is that a chunked scan reports its real dispatch count.
 
 use super::*;

@@ -429,7 +429,13 @@ pub fn long_leaves_expected(n: i32, s: i32, m: i32) -> i32 {
 }
 
 pub fn c1_source(index: usize) -> String {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!(
+    // The package root, or the repository root when an `invar-tools` bench includes this file.
+    let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let root = manifest
+        .ancestors()
+        .find(|dir| dir.join("tests/net_task_fixtures").is_dir())
+        .unwrap();
+    let path = root.join(format!(
         "tests/net_task_fixtures/c1/gnet05-forkjoin-{index:02}.inv"
     ));
     fs::read_to_string(path).unwrap()

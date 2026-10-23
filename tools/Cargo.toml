@@ -1,0 +1,62 @@
+# Acceptance, qualification and benchmark tooling. The compiler, its CLI and the
+# runtime helpers it spawns (`invar-nvrtc`, `invar-sequencer`) stay in the `invar`
+# package; everything here depends on `invar` as a library.
+[package]
+name = "invar-tools"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license.workspace = true
+
+[features]
+native = ["invar/native"]
+cuda = ["invar/cuda", "invar-cuda/runtime"]
+metal = ["invar/metal", "dep:invar-metal"]
+
+[[bin]]
+name = "invar-m3-03-cold"
+path = "src/bin/invar-m3-03-cold.rs"
+required-features = ["cuda"]
+
+[dependencies]
+invar = { path = ".." }
+invar-cuda = { path = "../crates/invar-cuda" }
+invar-device = { path = "../crates/invar-device" }
+invar-math = { path = "../crates/invar-math" }
+invar-metal = { path = "../crates/invar-metal", optional = true }
+serde_json = "1.0"
+sha2 = "=0.11.0"
+
+[dev-dependencies]
+rayon = "=1.11.0"
+jsonschema = { version = "=0.57.0", default-features = false }
+
+[[bench]]
+name = "sort"
+path = "bench/sort.rs"
+harness = false
+
+# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release -p invar-tools --bench net_task_region_bench -- --ignored`.
+[[bench]]
+name = "net_task_region_bench"
+path = "bench/net_task_region_bench.rs"
+
+# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release -p invar-tools --bench v02_math_bench -- --ignored`.
+[[bench]]
+name = "v02_math_bench"
+path = "bench/v02_math_bench.rs"
+
+# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release -p invar-tools --bench metal_aot_timing -- --ignored`.
+[[bench]]
+name = "metal_aot_timing"
+path = "bench/metal_aot_timing.rs"
+
+# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release -p invar-tools --bench m5_01_bench_cuda_map -- --ignored`.
+[[bench]]
+name = "m5_01_bench_cuda_map"
+path = "bench/m5_01_bench_cuda_map.rs"
+
+[[example]]
+name = "sort-report"
+path = "bench/sort-report.rs"
