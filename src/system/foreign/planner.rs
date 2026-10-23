@@ -155,43 +155,30 @@ pub(super) fn verify_evidence(
     let inputs = record["inputs"]
         .as_array()
         .ok_or("missing planner inputs")?;
-    if matches!(
-        record["schema"].as_str(),
-        Some("invar-planner-contract-evidence-v2" | "invar-planner-contract-evidence-v3")
-    ) {
-        crate::system::tool_projection::verify_value(&record["tool_projection"])?;
-        let projection_schema = if record["schema"] == "invar-planner-contract-evidence-v3" {
-            "invar-tool-projection-v2"
-        } else {
-            "invar-tool-projection-v1"
-        };
-        if record["tool_projection"]["schema"] != projection_schema {
-            return Err("projection and evidence coordinate versions disagree");
-        }
-        if !sha(&record["cell_source"]["sha256"])
-            || record["cell_source"]["path"]
+    if record["schema"] != "invar-planner-contract-evidence-v3" {
+        return Err("unsupported planner evidence version");
+    }
+    crate::system::tool_projection::verify_value(&record["tool_projection"])?;
+    if !sha(&record["cell_source"]["sha256"])
+        || record["cell_source"]["path"]
+            .as_str()
+            .is_none_or(str::is_empty)
+        || !inputs
+            .iter()
+            .any(|i| i["role"] == "input" && i["sha256"] == record["cell_source"]["sha256"])
+        || !inputs.iter().any(|i| {
+            i["role"] == "input" && i["sha256"] == record["tool_projection"]["source_scene_sha256"]
+        })
+        || !crate::system::tool_projection::same_kinematics(
+            record["tool_projection"]["reference_model_sha256"]
                 .as_str()
-                .is_none_or(str::is_empty)
-            || !inputs
-                .iter()
-                .any(|i| i["role"] == "input" && i["sha256"] == record["cell_source"]["sha256"])
-            || !inputs.iter().any(|i| {
-                i["role"] == "input"
-                    && i["sha256"] == record["tool_projection"]["source_scene_sha256"]
-            })
-            || !crate::system::tool_projection::same_kinematics(
-                record["tool_projection"]["reference_model_sha256"]
-                    .as_str()
-                    .unwrap_or_default(),
-                record["artifacts"]["fk_model"]["sha256"]
-                    .as_str()
-                    .unwrap_or_default(),
-            )
-        {
-            return Err("unbound cell tool projection");
-        }
-    } else if !record["tool_projection"].is_null() || !record["cell_source"].is_null() {
-        return Err("cell projection requires evidence v2");
+                .unwrap_or_default(),
+            record["artifacts"]["fk_model"]["sha256"]
+                .as_str()
+                .unwrap_or_default(),
+        )
+    {
+        return Err("unbound cell tool projection");
     }
     if inputs.is_empty()
         || inputs.len() > 66
@@ -322,47 +309,36 @@ mod tests {
             vectors.push(v);
         }
         let expected_hash = "b".repeat(64);
-        let record = json!({"status":"pass","component":"unit_fixture","manifest_hash":expected_hash,"runtime_sha256":runtime_hash,"library_sha256":artifacts["library"]["sha256"],"fk_manifest_hash":"c".repeat(64),"library_version":"invar-planner-component-v2/6/INVP-v3","fk_library_version":"invar-component-v1/invar-pinocchio-reference-abi-1/pinocchio-4.1.0","host":{"os":"linux","arch":"unit-fixture","nvidia_smi":"580.65.06, SYNTHETIC UNIT FIXTURE"},"seed":123,"metrics":{"translation":"euclidean-m","orientation":"sign-invariant-geodesic-rad","translation_max_m":0.002,"orientation_max_rad":std::f64::consts::PI/180.0,"start_max_rad":1e-6},"scope":"endpoint_and_start_only; collision/live_S1_acceptance_remains_separate","artifacts":artifacts,"inputs":inputs,"results":{"layout":"pass","lifecycle":"pass","invalid_inputs":"checked-boundary","vectors":vectors}});
-        assert!(verify_evidence(&record, &expected_hash).is_ok());
-        // Additive v2 structural specimen, still never emitted as hardware evidence.
+        let mut record = json!({"schema":"invar-planner-contract-evidence-v3","status":"pass","component":"unit_fixture","manifest_hash":expected_hash,"runtime_sha256":runtime_hash,"library_sha256":artifacts["library"]["sha256"],"fk_manifest_hash":"c".repeat(64),"library_version":"invar-planner-component-v2/6/INVP-v3","fk_library_version":"invar-component-v1/invar-pinocchio-reference-abi-1/pinocchio-4.1.0","host":{"os":"linux","arch":"unit-fixture","nvidia_smi":"580.65.06, SYNTHETIC UNIT FIXTURE"},"seed":123,"metrics":{"translation":"euclidean-m","orientation":"sign-invariant-geodesic-rad","translation_max_m":0.002,"orientation_max_rad":std::f64::consts::PI/180.0,"start_max_rad":1e-6},"scope":"endpoint_and_start_only; collision/live_S1_acceptance_remains_separate","artifacts":artifacts,"inputs":inputs,"results":{"layout":"pass","lifecycle":"pass","invalid_inputs":"checked-boundary","vectors":vectors}});
+        // Structural specimen from the shipped source-base runtime, never emitted as hardware evidence.
         let runtime: Value = serde_json::from_str(include_str!(
-            "../../../examples/cells/reach_place/components/curobo_planner/runtime-ur5e.json"
+            "../../../examples/cells/reach_place/components/curobo_planner/runtime-source-ur5e-v3.json"
         ))
         .unwrap();
-        let mut projected = record.clone();
-        projected["schema"] = json!("invar-planner-contract-evidence-v2");
-        projected["tool_projection"] = runtime["tool_projection"].clone();
-        projected["cell_source"] = runtime["cell_source"].clone();
-        let old = projected["artifacts"]["fk_model"]["sha256"].clone();
-        projected["artifacts"]["fk_model"]["sha256"] =
+        record["tool_projection"] = runtime["tool_projection"].clone();
+        record["cell_source"] = runtime["cell_source"].clone();
+        let old = record["artifacts"]["fk_model"]["sha256"].clone();
+        record["artifacts"]["fk_model"]["sha256"] =
             runtime["tool_projection"]["reference_model_sha256"].clone();
-        for i in projected["inputs"].as_array_mut().unwrap() {
+        for i in record["inputs"].as_array_mut().unwrap() {
             if i["sha256"] == old {
                 i["sha256"] = runtime["tool_projection"]["reference_model_sha256"].clone();
             }
         }
-        projected["inputs"].as_array_mut().unwrap().extend([json!({"role":"input","path":"unit-fixture/cell","sha256":runtime["cell_source"]["sha256"]}),json!({"role":"input","path":"unit-fixture/scene","sha256":runtime["tool_projection"]["source_scene_sha256"]})]);
-        assert!(verify_evidence(&projected, &expected_hash).is_ok());
-        let source_runtime: Value = serde_json::from_str(include_str!(
-            "../../../examples/cells/reach_place/components/curobo_planner/runtime-source-ur5e-v3.json"
-        )).unwrap();
-        let mut source_projected = projected.clone();
-        source_projected["schema"] = json!("invar-planner-contract-evidence-v3");
-        source_projected["tool_projection"] = source_runtime["tool_projection"].clone();
-        assert!(verify_evidence(&source_projected, &expected_hash).is_ok());
-        source_projected["schema"] = json!("invar-planner-contract-evidence-v2");
-        assert!(verify_evidence(&source_projected, &expected_hash).is_err());
-        let mut wrongly_relabelled = projected.clone();
-        wrongly_relabelled["schema"] = json!("invar-planner-contract-evidence-v3");
-        assert!(verify_evidence(&wrongly_relabelled, &expected_hash).is_err());
-        for case in 0..4 {
-            let mut changed = projected.clone();
+        record["inputs"].as_array_mut().unwrap().extend([json!({"role":"input","path":"unit-fixture/cell","sha256":runtime["cell_source"]["sha256"]}),json!({"role":"input","path":"unit-fixture/scene","sha256":runtime["tool_projection"]["source_scene_sha256"]})]);
+        assert!(verify_evidence(&record, &expected_hash).is_ok());
+        for case in 0..5 {
+            let mut changed = record.clone();
             match case {
-                0 => changed["schema"] = json!("invar-planner-contract-evidence-v1"),
+                0 => changed["schema"] = json!("invar-planner-contract-evidence-v2"),
                 1 => changed["cell_source"]["sha256"] = json!("0".repeat(64)),
                 2 => {
                     changed["tool_projection"]["reference_from_cell"]["quaternion_xyzw"] =
                         json!([0.0, 0.0, 0.0, 1.0])
+                }
+                3 => {
+                    changed["tool_projection"]["source_base_from_reference_base"]["translation_m"] =
+                        json!([0.0, 0.0, 0.1])
                 }
                 _ => changed["inputs"]
                     .as_array_mut()

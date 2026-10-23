@@ -167,10 +167,6 @@ fn named<'a>(tree: &'a Element, tag: &str, name: &str, found: &mut Vec<&'a Eleme
 /// Derive from a checked robot, the pinned scene convention and its actual
 /// reference body/site. Unknown models are refused instead of guessing by DOF.
 pub fn derive(robot: &Value) -> Result<Projection, &'static str> {
-    derive_version(robot, true)
-}
-
-fn derive_version(robot: &Value, source_base: bool) -> Result<Projection, &'static str> {
     let panda_scene = include_bytes!(
         "../../examples/cells/reach_place/assets/menagerie/franka_emika_panda/scene.xml"
     );
@@ -294,7 +290,7 @@ fn derive_version(robot: &Value, source_base: bool) -> Result<Projection, &'stat
         .map_err(|_| "invalid cell quaternion width")?;
     let reference_from_cell = body_from_reference.inverse()?.compose(source_pose(p, q)?)?;
     let root_name = if reference == "hand" { "link0" } else { "base" };
-    let base = if source_base {
+    let base = {
         let mut roots = Vec::new();
         named(&tree, "body", root_name, &mut roots);
         if roots.len() != 1
@@ -345,16 +341,9 @@ fn derive_version(robot: &Value, source_base: bool) -> Result<Projection, &'stat
             return Err("source reference root differs from pinned convention");
         }
         actual
-    } else {
-        Pose::IDENTITY
     };
     Ok(Projection {
-        schema: if source_base {
-            "invar-tool-projection-v2"
-        } else {
-            "invar-tool-projection-v1"
-        }
-        .into(),
+        schema: "invar-tool-projection-v2".into(),
         reference_frame: reference.into(),
         planner_reference_frame: planner.into(),
         anchor_body: body.into(),
@@ -388,19 +377,8 @@ pub fn selected(ir: &super::SystemIr) -> Result<Projection, &'static str> {
 }
 
 impl Projection {
-    /// Explicit compatibility for records that used the reference-base v1 convention.
-    pub fn legacy(mut self) -> Self {
-        self.schema = "invar-tool-projection-v1".into();
-        self.source_base_from_reference_base = Pose::IDENTITY;
-        self
-    }
     pub fn value(&self) -> Value {
-        let mut value = json!({"schema":self.schema,"reference_frame":self.reference_frame,"planner_reference_frame":self.planner_reference_frame,"anchor_body":self.anchor_body,"source_scene_sha256":self.source_scene_sha256,"reference_model_sha256":self.reference_model_sha256,"reference_implementation_sha256":self.reference_implementation_sha256,"cell_tool":self.cell_tool,"reference_from_cell":{"translation_m":self.reference_from_cell.translation_m,"quaternion_xyzw":self.reference_from_cell.quaternion_xyzw}});
-        if self.schema == "invar-tool-projection-v2" {
-            value["reference_base_frame"] = json!(self.reference_base_frame);
-            value["source_base_from_reference_base"] = json!({"translation_m":self.source_base_from_reference_base.translation_m,"quaternion_xyzw":self.source_base_from_reference_base.quaternion_xyzw});
-        }
-        value
+        json!({"schema":self.schema,"reference_frame":self.reference_frame,"planner_reference_frame":self.planner_reference_frame,"anchor_body":self.anchor_body,"source_scene_sha256":self.source_scene_sha256,"reference_model_sha256":self.reference_model_sha256,"reference_implementation_sha256":self.reference_implementation_sha256,"cell_tool":self.cell_tool,"reference_from_cell":{"translation_m":self.reference_from_cell.translation_m,"quaternion_xyzw":self.reference_from_cell.quaternion_xyzw},"reference_base_frame":self.reference_base_frame,"source_base_from_reference_base":{"translation_m":self.source_base_from_reference_base.translation_m,"quaternion_xyzw":self.source_base_from_reference_base.quaternion_xyzw}})
     }
     pub fn fk_to_source(&self, raw: Pose) -> Result<Pose, &'static str> {
         self.source_base_from_reference_base
@@ -444,13 +422,11 @@ pub fn verify_value(value: &Value) -> Result<(), &'static str> {
             .ok_or("missing pinned site")?;
         children.push(json!({"tag":"site","attrs":{"name":"attachment_site","pos":site.attribute("pos").ok_or("missing pinned position")?,"quat":site.attribute("quat").ok_or("missing pinned orientation")?},"children":[]}));
     }
-    let source_base = match value["schema"].as_str() {
-        Some("invar-tool-projection-v1") => false,
-        Some("invar-tool-projection-v2") => true,
-        _ => return Err("unsupported tool projection version"),
-    };
+    if value["schema"] != "invar-tool-projection-v2" {
+        return Err("unsupported tool projection version");
+    }
     let anchor = json!({"tag":"body","attrs":{"name":body},"children":children});
-    let tree = if source_base {
+    let tree = {
         let doc = roxmltree::Document::parse(
             std::str::from_utf8(model).map_err(|_| "invalid pinned model")?,
         )
@@ -461,11 +437,9 @@ pub fn verify_value(value: &Value) -> Result<(), &'static str> {
             .find(|n| n.has_tag_name("body") && n.attribute("name") == Some(root_name))
             .ok_or("missing pinned root")?;
         json!({"tag":"mujoco","attrs":{},"children":[{"tag":"worldbody","attrs":{},"children":[{"tag":"body","attrs":{"name":root_name,"pos":root.attribute("pos").unwrap_or("0 0 0"),"quat":root.attribute("quat").unwrap_or("1 0 0 0")},"children":[anchor]}]}]})
-    } else {
-        anchor
     };
     let robot = json!({"asset":{"sha256":scene},"tool":value["cell_tool"],"source_tree":tree});
-    if derive_version(&robot, source_base)?.value() != *value {
+    if derive(&robot)?.value() != *value {
         return Err("malformed, inverted or stale tool projection");
     }
     Ok(())
