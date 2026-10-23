@@ -5,15 +5,11 @@
 //! compared bit for bit with the independent F32Bits oracle.
 #![forbid(unsafe_code)]
 
-#[allow(dead_code)]
-#[path = "../src/contraction_source.rs"]
-mod contraction_source;
-#[path = "issue_m4_03_device/corpus.rs"]
-mod corpus;
+use crate::corpus;
+use invar::contraction_source;
 
 use contraction_source::{Contract, DeviceEmission, Error};
 use corpus::{DIRECT, LARGEST, NONFINITE, NORMAL, SHAPES, SUBNORMAL};
-use invar::{check, front, general_net, hex, layout_contract, mir, numeric_contract, tensor_cache};
 use invar_device::{Capabilities, Provenance, floating, gemm};
 use std::{
     fs,

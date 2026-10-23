@@ -5,15 +5,12 @@
 //! `|r - exact| <= 2 * K * 2^-23 * sum |a_ik * b_kj|` (decided 2026-10-14).
 #![forbid(unsafe_code)]
 
-#[allow(dead_code)]
-#[path = "../src/contraction_source.rs"]
-mod contraction_source;
-#[path = "issue_m4_03_device/corpus.rs"]
-mod corpus;
+use crate::corpus;
+use invar::contraction_source;
 
 use contraction_source::{Contract, DeviceEmission, Error};
 use corpus::{DIRECT, SHAPES, TC_DIRECT};
-use invar::{check, front, general_net, hex, layout_contract, mir, numeric_contract, tensor_cache};
+use invar::{check, front, numeric_contract};
 use invar_device::{Capabilities, Provenance, floating, gemm, tc};
 use num_bigint::BigInt;
 use num_rational::BigRational;

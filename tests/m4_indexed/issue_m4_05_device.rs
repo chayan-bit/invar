@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#[path = "support/m4_05_device.rs"]
+#[path = "../support/m4_05_device.rs"]
 mod corpus;
 use invar::indexed_device::{self, Plan};
 use invar_device::{

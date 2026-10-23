@@ -5,7 +5,7 @@
 //! the ignored `gpu_cuda::m4_04` and `gpu_metal::m4_04` suites.
 #![forbid(unsafe_code)]
 
-#[path = "support/m4_04_cases.rs"]
+#[path = "../support/m4_04_cases.rs"]
 mod cases;
 
 use cases::{Kind, function, word};
