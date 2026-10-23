@@ -2,6 +2,7 @@
 //! P1 corpus classification: every GNET-05 program and every M5-01
 //! held-out candidate gets a normal form, compared loop by loop with the net-laws
 //! prototype classification recorded in `tests/net_normal_form_fixtures/prototype.json`.
+//! The GNET-05 sources are read in place from `support::GNET05`.
 //! The independent checker must accept every certificate and the completeness
 //! of every normal form.
 
@@ -80,8 +81,8 @@ fn gnet05_corpus_matches_prototype_classification() {
     let mut counted = 0;
     for row in proto["gnet05"].as_array().expect("rows") {
         let id = row["id"].as_str().expect("id");
-        let source = fs::read_to_string(fixtures().join("gnet05").join(format!("{id}.inv")))
-            .expect("source");
+        let path = support::gnet05().join("programs").join(format!("{id}.inv"));
+        let source = fs::read_to_string(path).expect("source");
         let form = diff(id, &source, row, &mut differences);
         let fclass = row["fclass"].as_object().expect("fclass");
         for function in &form.functions {

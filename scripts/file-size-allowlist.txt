@@ -42,7 +42,7 @@
 1171 src/system/ros2.rs
 1728 src/system/substep_admission.rs
 940 src/system/urdf.rs
-857 tests/gnet_p4a_path_sum.rs
+854 tests/gnet_p4a_path_sum.rs
 1171 tests/issue_ai_02_spec_examples.rs
 2031 tests/issue_gnet_05_provenance_owned.rs
 850 tests/issue_gnet_05_robotics_array.rs
@@ -60,7 +60,7 @@
 856 tests/issue_s1_06_sequencer_binding.rs
 1067 tests/net_law_collective.rs
 1085 tests/net_normal_form_laws.rs
-927 tests/pnf_family_admission.rs
+901 tests/pnf_family_admission.rs
 1451 tests/support/cuda_owned_numeric_host_cpu_model.rs
 817 tests/support/cuda_owned_numeric_host_lifecycle.rs
 831 tests/support/gnet_device.rs
