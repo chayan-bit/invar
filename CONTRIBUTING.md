@@ -52,8 +52,8 @@ Without `just`, the equivalent commands are:
 ```sh
 cargo fmt --all -- --check
 cargo clippy --locked --all-targets -- -D warnings
-cargo nextest run --locked --profile ci
-cargo nextest run --locked --profile ci --release
+INVAR_FULL_CORPUS=1 cargo nextest run --locked --profile ci
+INVAR_FULL_CORPUS=1 cargo nextest run --locked --profile ci --release
 cargo test --locked --doc
 ```
 

@@ -41,16 +41,20 @@ pub fn floor(full_floor: usize) -> usize {
     }
 }
 
-/// 64-bit FNV-1a: the same on every host, toolchain and run.
+/// 64-bit FNV-1a over the `/`-separated path: the same on every host,
+/// toolchain and run.
 fn hash(path: &str) -> u64 {
-    path.bytes().fold(0xcbf2_9ce4_8422_2325, |h, b| {
-        (h ^ u64::from(b)).wrapping_mul(0x0100_0000_01b3)
-    })
+    path.bytes()
+        .map(|b| if b == b'\\' { b'/' } else { b })
+        .fold(0xcbf2_9ce4_8422_2325, |h, b| {
+            (h ^ u64::from(b)).wrapping_mul(0x0100_0000_01b3)
+        })
 }
 
 /// A program's category: its first three directories, such as
 /// `tests/fixtures/s1_03` or `examples/cells/reach_place`.
 pub fn category(path: &str) -> String {
+    let path = path.replace('\\', "/");
     let dir = path.rsplit_once('/').map_or("", |(dir, _)| dir);
     dir.split('/').take(3).collect::<Vec<_>>().join("/")
 }
