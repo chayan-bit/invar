@@ -101,6 +101,106 @@ jobs:
         if: matrix.doctests
         run: cargo test --locked --doc
 
+  # The jobs below compile the feature-gated code that the default-feature jobs never build.
+  native:
+    name: Build (native)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # llvm-sys 211 (inkwell llvm21-1-force-dynamic) links the LLVM 21 shared library under this prefix.
+      LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
+      INVAR_CI_PROFILE: debug
+    steps:
+      - name: Free runner disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install LLVM 21 (apt.llvm.org)
+        run: |
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/keyrings/apt.llvm.org.asc >/dev/null
+          echo "deb [signed-by=/etc/apt/keyrings/apt.llvm.org.asc] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+          sudo apt-get update
+          sudo apt-get install -y llvm-21-dev libpolly-21-dev libzstd-dev zlib1g-dev
+          "$LLVM_SYS_211_PREFIX/bin/llvm-config" --version
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
+        with:
+          tool: nextest@0.9.146
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: native
+      - name: Clippy (native)
+        run: cargo clippy --locked --all-targets --features native -- -D warnings
+      - name: Native backend tests
+        run: >
+          cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
+          --test issue_m1_02 --test issue_gnet_02_native --test issue_dx_20_debug_command --test issue_dx_20_debug_info
+
+  cuda:
+    name: Build (cuda, compile only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: cuda
+      # cudarc loads the driver and NVRTC dynamically, so no CUDA toolkit or GPU is needed to compile.
+      - name: Check (cuda)
+        run: cargo check --locked --all-targets --features cuda
+
+  metal:
+    name: Build (metal)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: metal
+      - name: Check (metal)
+        run: cargo check --locked --all-targets --features metal
+
+  python:
+    name: Build (python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: crates/invar-python
+          key: python
+      - name: Build and install the extension (maturin pinned by pyproject.toml)
+        working-directory: crates/invar-python
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          . "$RUNNER_TEMP/venv/bin/activate"
+          pip install maturin==1.9.6
+          maturin develop --locked --extras test
+      - name: Python tests (reference engine)
+        working-directory: crates/invar-python
+        run: |
+          . "$RUNNER_TEMP/venv/bin/activate"
+          pytest
+
   hygiene:
     name: Hygiene
     runs-on: ubuntu-latest
