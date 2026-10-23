@@ -191,6 +191,6 @@ All 200 programs match the prototype with zero differences, and the checker acce
 
 ## 9. Tests
 
-- `tests/net_normal_form_laws.rs`: differential tests against the CPU net oracle, at least 3,000 randomised cases per law with trapping cases, a caught mutation per law, and forged-certificate rejection.
+- `tests/normal_form/net_normal_form_laws.rs`: differential tests against the CPU net oracle, at least 3,000 randomised cases per law with trapping cases, a caught mutation per law, and forged-certificate rejection.
 - `tests/normal_form/net_normal_form_corpus.rs`: corpus classification and checker acceptance.
 - Unit tests in `general_net::normal_form::poly` and `general_net::regions`.
