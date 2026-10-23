@@ -305,24 +305,25 @@ impl RuntimeValue {
         }
     }
 
-    fn into_term(self, net: &Net) -> Result<Value, typed_net::Error> {
+    fn into_term(self, net: &Net, proof: &Proof) -> Result<Value, typed_net::Error> {
         Ok(match self {
             Self::Unit => Value::Unit,
             Self::Bool(value) => Value::Bool(value),
             Self::Nat(value) => Value::Nat(value),
-            Self::Pair(a, b) => {
-                Value::Pair(Box::new(a.into_term(net)?), Box::new(b.into_term(net)?))
-            }
+            Self::Pair(a, b) => Value::Pair(
+                Box::new(a.into_term(net, proof)?),
+                Box::new(b.into_term(net, proof)?),
+            ),
             Self::Closure {
                 binder,
                 body,
                 captures,
             } => Value::Closure {
                 binder,
-                body: Box::new(net.decode_term(body)?),
+                body: Box::new(net.decode_subterm(proof, body)?),
                 captures: captures
                     .into_iter()
-                    .map(|(id, value)| value.into_term(net).map(|value| (id, value)))
+                    .map(|(id, value)| value.into_term(net, proof).map(|value| (id, value)))
                     .collect::<Result<_, _>>()?,
             },
             Self::ArrayU32(_) => return Err(typed_net::Error::Type(net.entry)),
@@ -629,7 +630,7 @@ pub fn observe_net(
     };
     let result = machine.evaluate(net.entry, &mut BTreeMap::new(), 1);
     let result = match result {
-        Ok(value) => Ok(value.into_term(net)?),
+        Ok(value) => Ok(value.into_term(net, proof)?),
         Err(error) => Err(error),
     };
     Ok(Observation {
