@@ -1,7 +1,7 @@
 //! Test support, included by path: the independent call-by-value oracle for the finite term
 //! fragment (`invar::term` syntax) and the demand-ordered observation of verified typed graphs.
 //! Never use this module in production code.
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
 use std::collections::{BTreeMap, BTreeSet};
 
