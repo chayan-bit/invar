@@ -1,6 +1,6 @@
 # Invar system check: cell
 
-- IR: invar-system-v2
+- IR: invar-system-v12
 - Instances: 12
 - Connections: 11
 - Flows: 1
