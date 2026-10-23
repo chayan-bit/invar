@@ -2,7 +2,7 @@
 //! run kernels) on the actual device against the CPU net oracle, over the C1
 //! fork-join family and generated trap-heavy fork-joins, and the D5 bench
 //! against handwritten B-form kernels (`pilot`, `session`, `report`; see
-//! `tests/net_task_region_bench.rs`). Run with
+//! `bench/net_task_region_bench.rs`). Run with
 //! `cargo test --features cuda --test net_task_region_cuda -- --ignored`.
 #![cfg(feature = "cuda")]
 #![forbid(unsafe_code)]
