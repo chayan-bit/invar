@@ -31,7 +31,7 @@ threads-required = 8
 
 [[profile.default.overrides]]
 # Four source groups retain per-source caches and original report ordering.
-filter = 'binary(gnet_slices) & (test(=cpu_tests::child_extraction_full_denominator) | test(=cpu_tests::full_owned_and_resumable_denominator))'
+filter = 'binary(normal_form) & (test(=cpu_tests::child_extraction_full_denominator) | test(=cpu_tests::full_owned_and_resumable_denominator))'
 threads-required = 4
 priority = 95
 

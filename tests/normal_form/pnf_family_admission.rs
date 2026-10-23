@@ -4,13 +4,12 @@
 //! refusal derived by production analysis. INVAR_P3_REPORT exports both; no
 //! case-name, source-hash or expected-failure allowlist participates.
 
-use crate::agree;
 use crate::contraction_source;
 use crate::frontier_source;
 use crate::support;
 
 use invar::{
-    admission, array_limits, budget, check, eval, front, general_net,
+    admission, check, eval, front, general_net,
     general_net::{
         normal_form::{self, Node, Rep, Ring, certificate, exec},
         regions::{
@@ -18,9 +17,8 @@ use invar::{
             family::{self, Family},
         },
     },
-    hex, layout_contract, mir, numeric_contract,
+    mir, numeric_contract,
     plan::Execution,
-    tensor_cache,
 };
 use serde_json::{Value as Json, json};
 use std::{

@@ -7,10 +7,19 @@ mod contraction_source;
 #[allow(dead_code)]
 #[path = "../../src/frontier_source.rs"]
 mod frontier_source;
-#[path = "../support/normal_form.rs"]
-mod support;
 #[path = "../support/task_model.rs"]
 mod task_model;
+
+#[path = "../../bench/general-net-v01/cpu_tests.rs"]
+mod cpu_tests;
+
+// The `src/*_source.rs` oracles above resolve these through `crate::`.
+#[allow(unused_imports)]
+use invar::{
+    array_limits, budget, check, front, general_net, hex, layout_contract, mir, numeric_contract,
+    tensor_cache,
+};
+use task_model::normal_form_support as support;
 
 mod gnet_p4a_path_sum;
 mod law_programs;

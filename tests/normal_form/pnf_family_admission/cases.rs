@@ -332,7 +332,7 @@ fn strict_f32_family_bodies_match_cpu_net_bits_and_trap_spans() {
 
 #[test]
 fn serial_round_wrapper_consumes_checked_frontier_children() {
-    let frozen = include_str!("../../bench/general-net-v01/current/frontier_graph_a.inv");
+    let frozen = include_str!("../../../bench/general-net-v01/current/frontier_graph_a.inv");
     let mut count = 0;
     for n in 1..=5u32 {
         let source = frozen.replace("5u32", &format!("{n}u32"));
