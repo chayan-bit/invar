@@ -3,9 +3,10 @@
   "id": "general-net-cuda-parity-v01",
   "status": "proposed_unmeasured",
   "authority": [
-    "design/general-gpu-v01.md@2026-09-28",
-    "design/cuda-parity-v01.md@2026-09-28",
-    "design/compiled-first-v01.md@2026-09-28"
+    "src/general_net/CONTRACT.md#semantic-obligations",
+    "docs/performance-acceptance.md#ordinary-source-parity",
+    "docs/general-gpu-v01.md@85dc53f",
+    "docs/cuda-parity-v01.md@85dc53f"
   ],
   "source_corpus": "expanded-manifest.json",
   "source_corpus_role": "reference_smoke_only_until_runtime_input_buffers_exist",
