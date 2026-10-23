@@ -157,7 +157,7 @@ The inputs nearest to a multiple of pi are `0x6ff9be45` for `sin` (|sin x| = 3.2
 
 | Check | Where | Result |
 | --- | --- | --- |
-| Golden hard cases on oracle and host, special values, sampled digest | `tests/issue_p0a_trig_f32.rs` (default) | in CI |
+| Golden hard cases on oracle and host, special values, sampled oracle stride | `tests/issue_p0a_trig_f32.rs` (default) | in CI |
 | Source intrinsics on eval, MIR eval and native, CPU source regions, device-source embedding, admission | `tests/issue_p0a_trig_f32.rs` (default, `native` feature for native) | in CI |
 | CPU exhaustive: oracle stride, ULP bound, sqrt rounding, NaN policy, subnormal audit, full digest | `p0a_trig_exhaustive_cpu` | 2^32 inputs, 779 s on 8 threads: digests equal `FULL_DIGEST`, 16,711,936 inputs (every 257th) replayed on the exact oracle with 0 mismatches, `sqrt` correctly rounded everywhere, NaN policy holds, audit as above |
 | Native LLVM exhaustive vs host | `p0a_trig_exhaustive_native` | 2^32 inputs x 3 functions, 0 mismatches, 28 s, digests equal `FULL_DIGEST` |

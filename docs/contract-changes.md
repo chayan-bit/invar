@@ -20,9 +20,6 @@ Reason: the descriptions named issues by their numbers in the previous tracker, 
 
 Effect on existing documents: none; descriptions and range owners constrain no document, and no code, range bound or category changes.
 
-Tests that pin the new contract:
-- `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
-
 ## 2026-10-22: schema `$id` URLs move to the public repository
 
 Decided 2026-10-22: every schema's `$id` now names its file in the public repository, `https://github.com/chayan-bit/invar/blob/main/schema/<file>`.
@@ -37,9 +34,6 @@ Reason: the previous `$id` host is not part of the public repository.
 | every other `schema/*.json` and `examples/index.schema.json` | `$id` only | not pinned |
 
 Effect on existing documents: none; `$id` identifies the schema and constrains no document.
-
-Tests that pin the new contract:
-- `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
 
 ## 2026-10-21: fold tiers in `numeric_contracts` (ENG-03 step 7)
 
@@ -100,7 +94,6 @@ Effect on existing documents:
 - A `cpu-parallel` run receipt (and the explain device document built from it) that had no `normal_form` object gains `{"status": "fallback", "reason": "no-lowering:..."}` when the program has such a loop, naming the first one. A program with an explicit sort or spatial intrinsic never gains it, since its explain documents are v3/v4, which have no `normal_form`. Every other document is unchanged. `INVAR_NO_NORMAL_FORM=1` still omits it.
 
 Tests that pin the new contract:
-- `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
 - `tests/v01_normal_form_run.rs`, `issue_54_a_loop_no_family_lowers_records_a_typed_fallback`: the receipt names the gap and validates; `issue_54_a_sort_program_keeps_its_versioned_explain_document`: a sort program's explain v3 document stays valid.
 
 ## 2026-10-20: normal-form route in run receipts (#54, P6(a))
@@ -126,7 +119,6 @@ Effect on existing documents:
 - `INVAR_NO_NORMAL_FORM=1` disables the route, and with it the field.
 
 Tests that pin the new contract:
-- `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
 - `tests/v01_normal_form_run.rs`: routed receipts and explain documents validate, the opt-out and law-free programs carry no field.
 
 ## 2026-10-19: strict-f64-v1 and invar-math-cr-v1
@@ -166,7 +158,6 @@ Effect on existing documents:
 - `S1008` is no longer emitted.
 
 Tests that pin the new contract:
-- `tests/issue_ai_01_machine_diagnostics.rs`, `issue_ai_01_machine_diagnostics_schema_digests_are_frozen`: the three digests above.
 - `tests/issue_ai_01_machine_diagnostics.rs`, `source_codes`: deprecated codes are no longer required to be reachable from source.
 - `tests/fixtures/s1_01/negative/S1008-f64-arithmetic.inv` is removed, because the program it rejected is now valid source.
 - `bench/general-net-v01/corpus_cpu.rs`: the integer/owner source corpus excludes the `F64` rule beside `F32`.

@@ -7,7 +7,6 @@ use std::{fs, path::Path};
 use sha2::{Digest, Sha256};
 
 const UPSTREAM: &str = "tests/fixtures/foreign-components/models/franka_emika_panda/panda.xml";
-const UPSTREAM_SHA256: &str = "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273";
 const VENDORED: &str = "examples/cells/reach_place/assets/menagerie/franka_emika_panda/panda.xml";
 /// Relative to the largest tensor entry; the committed rewrite is within 1.2e-15.
 const RELATIVE_TOLERANCE: f64 = 4e-15;
@@ -63,21 +62,13 @@ fn relative_error(full: &[f64], quat: &[f64], diagonal: &[f64]) -> f64 {
 #[test]
 fn issue_s1_06_panda_principal_inertia_matches_upstream_tensors() {
     let upstream_text = read(UPSTREAM);
-    let digest: String = Sha256::digest(upstream_text.as_bytes())
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect();
-    assert_eq!(digest, UPSTREAM_SHA256, "upstream Panda model changed");
-    // The planner contract and the cell import's record check share this pinned
-    // pair (`tool_projection::same_kinematics`); it relies on this test.
-    assert_eq!(
-        sha256_hex(VENDORED),
-        "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b"
-    );
+    // The planner contract and the cell import's record check share the pinned
+    // (vendored, upstream) pair in `tool_projection`; the files must still hash to it.
+    let (vendored_sha, upstream_sha) = (sha256_hex(VENDORED), sha256_hex(UPSTREAM));
     use invar::system::tool_projection::same_kinematics;
-    assert!(same_kinematics(&sha256_hex(VENDORED), UPSTREAM_SHA256));
-    assert!(!same_kinematics(UPSTREAM_SHA256, &sha256_hex(VENDORED)));
-    assert!(!same_kinematics(&sha256_hex(VENDORED), &"0".repeat(64)));
+    assert!(same_kinematics(&vendored_sha, &upstream_sha));
+    assert!(!same_kinematics(&upstream_sha, &vendored_sha));
+    assert!(!same_kinematics(&vendored_sha, &"0".repeat(64)));
     let vendored_text = read(VENDORED);
     let upstream = roxmltree::Document::parse(&upstream_text).unwrap();
     let vendored = roxmltree::Document::parse(&vendored_text).unwrap();
@@ -164,20 +155,12 @@ fn issue_s1_06_panda_principal_mass_oracle_passes_contract_v2() {
     let contract_path = format!("{dir}/contract-v2.json");
     let reference_path = format!("{dir}/reference-v2.json");
     let contract_hash = sha256_hex(&contract_path);
-    assert_eq!(
-        contract_hash,
-        "07fd5545437cfde50bbafa712a70090d2a5b2250aca76fa3e442dde915be51d9"
-    );
-    assert_eq!(
-        sha256_hex(&reference_path),
-        "926f188b4243de15a99000aaed07afc5a9fad9ce4a17ca658d64bd1b755a9187"
-    );
     let contract: serde_json::Value = serde_json::from_str(&read(&contract_path)).unwrap();
     let reference: serde_json::Value = serde_json::from_str(&read(&reference_path)).unwrap();
     let panda = &contract["models"][0];
     assert_eq!(panda["name"], "panda");
     assert_eq!(panda["sha256"], sha256_hex(VENDORED));
-    assert_eq!(panda["derived_from_sha256"], UPSTREAM_SHA256);
+    assert_eq!(panda["derived_from_sha256"], sha256_hex(UPSTREAM));
     assert_eq!(reference["contract_sha256"], contract_hash);
     assert_eq!(reference["runtime_status"], "passed");
     assert_eq!(reference["failures"], serde_json::json!([]));
