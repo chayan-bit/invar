@@ -49,7 +49,7 @@ fn issue_s1_03_graph_checks_twelve_component_cell_and_golden_report() {
     assert_eq!(ir.stdout, run("ir", &path).stdout);
     assert_eq!(ir.stdout, include_bytes!("fixtures/s1_03/cell-12.ir.json"));
     let document: serde_json::Value = serde_json::from_slice(&ir.stdout).unwrap();
-    let schema: serde_json::Value = serde_json::from_str(invar::system::SCHEMA_V2_JSON).unwrap();
+    let schema: serde_json::Value = serde_json::from_str(invar::system::SCHEMA_JSON).unwrap();
     assert!(jsonschema::is_valid(&schema, &document));
     let model = invar::system::SystemIr::from_json(&ir.stdout).unwrap();
     assert_eq!(
@@ -73,14 +73,13 @@ fn issue_s1_03_graph_checks_twelve_component_cell_and_golden_report() {
     .unwrap();
     assert!(invalid.checked_document().is_err());
     let mut unsupported = document.clone();
-    unsupported["schema"] = serde_json::json!("invar-system-v7");
-    // V7 is now admitted, but relabeling a legacy document without the new
-    // version/contract fields must still fail structural validation.
+    unsupported["schema"] = serde_json::json!("invar-system-v11");
     assert_eq!(
         invar::system::SystemIr::from_json(unsupported.to_string().as_bytes()).unwrap_err(),
-        "invalid system IR model"
+        "unsupported system IR version"
     );
-    unsupported["schema"] = serde_json::json!("invar-system-v9");
+    unsupported["schema"] = serde_json::json!("invar-system-v12");
+    unsupported["version"] = serde_json::json!(11);
     assert_eq!(
         invar::system::SystemIr::from_json(unsupported.to_string().as_bytes()).unwrap_err(),
         "invalid system IR model"
@@ -112,31 +111,6 @@ fn issue_s1_03_graph_checks_rejects_unsupported_transform_constant_form() {
     let diagnostics: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(diagnostics["diagnostics"][0]["code"], "S1000");
     assert!(diagnostics["diagnostics"][0]["span"].is_object());
-}
-
-#[test]
-fn issue_s1_03_graph_checks_v1_remains_readable_with_graph_work_pending() {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/s1_01/basic-cell.inv");
-    let check = run("check", &path);
-    assert!(check.status.success());
-    let document: serde_json::Value = serde_json::from_slice(&check.stdout).unwrap();
-    assert_eq!(
-        document["checks_pending"],
-        serde_json::json!(["system-v2-graph-checks"])
-    );
-    let ir = run("ir", &path);
-    assert!(ir.status.success());
-    assert_eq!(
-        ir.stdout,
-        include_bytes!("fixtures/s1_01/basic-cell.ir.json")
-    );
-    let model = invar::system::SystemIr::from_json(&ir.stdout).unwrap();
-    assert!(!model.graph_ready());
-    assert!(model.checked_document().is_err());
-    let report = run("report", &path);
-    assert_eq!(report.status.code(), Some(2));
-    let error: serde_json::Value = serde_json::from_slice(&report.stdout).unwrap();
-    assert_eq!(error["diagnostics"][0]["code"], "UNSUPPORTED_FEATURE");
 }
 
 #[test]

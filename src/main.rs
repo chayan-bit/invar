@@ -390,20 +390,10 @@ fn system_gen_ros2(path: &OsString, output: &OsString) -> i32 {
         .into_iter()
         .map(|(name, content)| (name, content.into_bytes()))
         .collect();
-    if ir.checked_document().is_ok_and(|document| {
-        document["schema"] == "invar-system-v6"
-            || (matches!(
-                document["schema"].as_str(),
-                Some(
-                    "invar-system-v7"
-                        | "invar-system-v8"
-                        | "invar-system-v9"
-                        | "invar-system-v10"
-                        | "invar-system-v11"
-                        | "invar-system-v12"
-                )
-            ) && document["robots"].is_array())
-    }) {
+    if ir
+        .checked_document()
+        .is_ok_and(|document| document["robots"].is_array())
+    {
         let model_files = match invar::system::generate_ros2_mjcf(&ir) {
             Ok(files) => files,
             Err(error) => return report_front(error, path, true),
@@ -556,16 +546,6 @@ fn system_command(path: &OsString, action: SystemAction<'_>) -> i32 {
         Ok(ir) => ir,
         Err(error) => return report_front(error, path, true),
     };
-    if matches!(action, SystemAction::Report(_)) && !ir.graph_ready() {
-        return report_front(
-            invar::front::FrontError::tool(
-                "UNSUPPORTED_FEATURE",
-                "system report requires invar-system-v2 metadata",
-            ),
-            path,
-            true,
-        );
-    }
     let path_name = path.to_string_lossy();
     let graph_issues = ir.graph_issues();
     if !graph_issues.is_empty() {
@@ -636,12 +616,7 @@ fn system_command(path: &OsString, action: SystemAction<'_>) -> i32 {
                 diagnostic
             }))
             .collect();
-        let mut document = invar::diagnostics::document("ok", warnings);
-        if !ir.graph_ready() {
-            document["checks_completed"] = serde_json::json!(["system-v1-well-formedness"]);
-            document["checks_pending"] = serde_json::json!(["system-v2-graph-checks"]);
-        }
-        println!("{document}");
+        println!("{}", invar::diagnostics::document("ok", warnings));
     }
     0
 }

@@ -19,22 +19,10 @@ pub(super) fn generate_mjcf_target(
         .map_err(|message| error("S1600", message, span))?;
     substep_admission::ensure_export_supported(document)
         .map_err(|message| error("S1504", message, span))?;
-    if !matches!(
-        document["schema"].as_str(),
-        Some(
-            "invar-system-v5"
-                | "invar-system-v6"
-                | "invar-system-v7"
-                | "invar-system-v8"
-                | "invar-system-v9"
-                | "invar-system-v10"
-                | "invar-system-v11"
-                | "invar-system-v12"
-        )
-    ) {
+    if !document["robots"].is_array() {
         return Err(error(
             "S1600",
-            "MJCF generation needs a checked v5 robot model",
+            "MJCF generation needs a checked robot model",
             span,
         ));
     }
@@ -89,22 +77,10 @@ pub fn generate_urdf(ir: &SystemIr) -> Result<BTreeMap<String, Vec<u8>>, FrontEr
     let document = ir
         .checked_document()
         .map_err(|message| error("S1600", message, span))?;
-    if !matches!(
-        document["schema"].as_str(),
-        Some(
-            "invar-system-v5"
-                | "invar-system-v6"
-                | "invar-system-v7"
-                | "invar-system-v8"
-                | "invar-system-v9"
-                | "invar-system-v10"
-                | "invar-system-v11"
-                | "invar-system-v12"
-        )
-    ) {
+    if !document["robots"].is_array() {
         return Err(error(
             "S1600",
-            "URDF generation needs a checked v5 robot model",
+            "URDF generation needs a checked robot model",
             span,
         ));
     }

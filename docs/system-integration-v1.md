@@ -7,8 +7,8 @@ Context: a robot platform integrates many external libraries (ROS 2, ros2_contro
 ## Vocabulary
 
 - System description: Invar source that declares components, their ports and connections, frames and products.
-- `invar-system-v1`: the single checked, versioned intermediate representation (IR) of a system description, serialized as canonical JSON.
-- Integration target: a generator from `invar-system-v1` to a file set (ROS 2 packages, MJCF, later Nix modules, AADL).
+- `invar-system-v12`: the single checked, versioned intermediate representation (IR) of a system description, serialized as canonical JSON.
+- Integration target: a generator from `invar-system-v12` to a file set (ROS 2 packages, MJCF, later Nix modules, AADL).
 - Foreign component: a component implemented outside Invar (C or C++ behind a C shim) and described by an `extern component` manifest.
 
 ## 1. Dialect boundary
@@ -26,26 +26,26 @@ The added declarations are:
 
 For the v5 robot/cell extension, `cell NAME { robot R; ... }` checks `R` as the cell's standalone default. The selected product's `robot` overrides that default during generation, so changing one product reference selects a different arm while keeping the cell mount, objects and I/O unchanged. A generated scene accepts one cell; multiple cells without a selection are rejected.
 
-S1-06 adds v6 source clauses `tool LINK pose xyz (...) quat (...);` on a robot and `dynamic mass M kg attachable;` on a cell object. The selected robot's tool link must resolve, and an attachable object needs positive mass and collision geometry. MJCF generation adds a tool site, a freejoint and mass for the object, and a disabled site-to-site weld for the sequencer to activate. The checked v5 schema and its existing source output remain unchanged.
+S1-06 adds source clauses `tool LINK pose xyz (...) quat (...);` on a robot and `dynamic mass M kg attachable;` on a cell object. The selected robot's tool link must resolve, and an attachable object needs positive mass and collision geometry. MJCF generation adds a tool site, a freejoint and mass for the object, and a disabled site-to-site weld for the sequencer to activate.
 
-IR v12 adds an optional mount relation: `mount POSE on FIXTURE exclude (ROBOT::LINK, ...);`.
+The IR has an optional mount relation: `mount POSE on FIXTURE exclude (ROBOT::LINK, ...);`.
 FIXTURE must be a cell fixture with exactly one collision box, and the mount must lie on that box's top face with its z axis along the face normal (exact rational check, S1608 otherwise).
 Each excluded link is robot-qualified, so one cell source still serves both arms; it must resolve (S1601) and be mounted to the surface (S1608): the root link, or a link whose chain to the root has only fixed joints and revolute joints whose axis is parallel to the normal.
 Such a link only rotates about the normal, so its distance to the fixture is the same in every configuration and the exclusion cannot hide a motion-dependent collision.
 MJCF generation emits `<contact><exclude>` for the selected robot's excluded links, and the substep contact gate accepts exactly those pairs.
 Planner preparation receives the exclusion through the runtime binding; cuRobo 0.8.0 has no per-link world-collision mask, so the excluded links get an exact-cap sphere cover and preparation refuses if that cover still intersects the fixture.
 
-System declarations are evaluated at compile time by the reference evaluator into one `invar-system-v1` document.
+System declarations are evaluated at compile time by the reference evaluator into one `invar-system-v12` document.
 They have no runtime semantics of their own; runtime behaviour comes from the generated targets and from component implementations.
 Evaluation is bounded by the existing fuel and size limits, and a system that exceeds them is rejected with a diagnostic, never truncated.
 Proven: the IR is well formed and every `connect` agrees on type, unit and frame.
 Not claimed: anything about runtime behaviour beyond what sections 4 and 6 state.
 
 Numbers before M4-01: the integration track lands before floating point (M4-01) in the v0.1 order.
-Compile-time constants in system declarations (rates, budgets, limits, inertias, camera intrinsics, parameters) are therefore exact decimal literals with a unit, evaluated as exact rationals by the reference evaluator and serialized as canonical decimal strings in `invar-system-v1`.
+Compile-time constants in system declarations (rates, budgets, limits, inertias, camera intrinsics, parameters) are therefore exact decimal literals with a unit, evaluated as exact rationals by the reference evaluator and serialized as canonical decimal strings in `invar-system-v12`.
 Budget sums and rate ratios in S1-03 use exact rational arithmetic, so the proofs have no rounding.
 Generators emit these decimals unchanged (shortest exact decimal form) into ROS 2 parameters, ros2_control YAML and MJCF.
-An optional `range MIN UNIT .. MAX UNIT` on a `Quantity<dec,U>` parameter supplies inclusive ROS 2 bounds; parameters are read-only by default, and a parameter without a range emits no bound. This extension uses `invar-system-v4` and preserves v1-v3 schema bytes.
+An optional `range MIN UNIT .. MAX UNIT` on a `Quantity<dec,U>` parameter supplies inclusive ROS 2 bounds; parameters are read-only by default, and a parameter without a range emits no bound.
 Vocabulary record types (S1-11) are generic over their scalar `T`; port types name `f64` or `f32` as the wire type, which the system dialect uses only as a type and never computes with before M4-01.
 
 ## 2. Units, frames, rates and latency in the core type system
@@ -79,10 +79,10 @@ An ordinary source component port may use `std::robotics::JointPositions<f64,rob
 The S1-06 cell's `joint_states: joint_state_broadcaster` component maps its `q` output to ros2_control's `/joint_states` topic in the ROS generator. The generated Pinocchio node subscribes there using the selected robot's ordered position-joint names.
 The approved additive planner wire types are `PlannerRequest<f64,N,base,tool,object>`
 and `PlannerTrajectory<f64,N>` for N=6/7 and at most 256 waypoints, over the existing
-INVP v2 process boundary. New planner graphs use IR v9 with
+INVP v2 process boundary. Planner graphs carry
 `planner_frame_policy: request-consumer-v1`: request poses consume measured/static
 frame sources and add no frame publishers. Pose/Transform output publishers
-retain duplicate/source-closure checks; v7/v8 interpretation is preserved.
+retain duplicate/source-closure checks.
 `invar component test MANIFEST --planner-runtime PATH` adds the independently
 checked planner endpoint harness. It calls a separately bound current Pinocchio
 FK component on returned final joints and enforces Euclidean position <=2 mm,
@@ -126,7 +126,7 @@ Not claimed: that declared licenses are correct; this is an engineering check, n
 
 ## 5. Integration targets
 
-Every generator is a pure function from the checked `invar-system-v1` IR to a file set.
+Every generator is a pure function from the checked `invar-system-v12` IR to a file set.
 Output is byte-identical for identical input: each target has a double-run hashing test and a golden-file test.
 Generators never read the source text, the environment, the clock or the network, and they order all output deterministically.
 Failures and warnings go through `invar-diagnostics-v3` with stable `S1xxx` reason codes registered in the AI-01 registry:
@@ -145,7 +145,7 @@ Failures and warnings go through `invar-diagnostics-v3` with stable `S1xxx` reas
 | S1800-S1899 | S1-06 acceptance run and evidence report |
 | S1900-S1999 | reserved for later targets (S1-09, S1-10) |
 
-S1-05 camera sensors use inline exact intrinsics: `intrinsics (width W px, height H px, fx FX px, fy FY px, cx CX px, cy CY px, distortion none);`. Width and height are positive integer pixels, focal lengths are positive, and v5 IR embeds the S1-11 camera model. MuJoCo `principalpixel` receives the exact center-relative offsets `cx - width/2` and `cy - height/2`. `sensorsize` uses the same two numbers as a normalized pixel pitch; the absolute physical sensor size is not declared. Other distortion models fail with S1607.
+S1-05 camera sensors use inline exact intrinsics: `intrinsics (width W px, height H px, fx FX px, fy FY px, cx CX px, cy CY px, distortion none);`. Width and height are positive integer pixels, focal lengths are positive, and the IR embeds the S1-11 camera model. MuJoCo `principalpixel` receives the exact center-relative offsets `cx - width/2` and `cy - height/2`. `sensorsize` uses the same two numbers as a normalized pixel pitch; the absolute physical sensor size is not declared. Other distortion models fail with S1607.
 
 The standard URDF target emits the shared link, joint, inertia, and supported geometry subset alongside the checked `scene.xml` referenced by `mujoco_ros2_control`. Omitted sensor metadata is listed with S1604 in `urdf-warnings.txt`. MJCF tendon, equality, and keyframe semantics, capsule collision geometry, and actuator contracts that URDF cannot preserve fail with S1607.
 
@@ -206,7 +206,7 @@ with the source-derived `reference_from_cell`; planner goals use its inverse and
 attachment poses its forward direction. The adapters emit explicit pinned-source
 metadata, check finite unit transforms and refuse unsupported anchors/models.
 The endpoint harness's additive v2 runtime/golden/evidence formats bind the cell
-source and projection; legacy v1 retains its reference-frame meaning. IR v7/v8/v9,
+source and projection; legacy v1 retains its reference-frame meaning. The IR,
 C/INVP/ROS layouts and metric limits do not change. This CPU-tested adapter does
 not establish live ROS/cuRobo, collision or complete integration-start acceptance.
 
@@ -274,12 +274,12 @@ The plan gate requires the last waypoint within 1e-6 rad of those joints and its
 Every IVSQ/2 snapshot reply starts with the task phase label (`move/state/world=<phase>`, `attach`, `release`, `settle`, `complete`).
 The task node logs a JSON line and publishes the label on its `phase` topic (`std_msgs/String`) whenever it changes, so the MCAP records each phase change; the request topic also carries the planner world phase.
 
-Explicit object-relative `grasp pose ...;` uses additive IRv10 and checked binding
+Explicit object-relative `grasp pose ...;` uses checked binding
 v2. The source controls the cube-from-grasp pose and generated weld site. Grasp is
 initial cube pose times that pose; pregrasp adds 100 mm in world Z. External task
 pose candidates do not override these source-derived goals. The target cube
 declares +25 mm Z and Rx(pi), preserving its initial and final poses and the TCP.
-Legacy sources keep centred identity weld behavior. Source-certified geometry,
+A source without it keeps the centred identity weld. Source-certified geometry,
 collision-free trajectories, measured attachment and every original metric remain
 separate acceptance requirements.
 
