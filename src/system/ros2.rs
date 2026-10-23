@@ -769,19 +769,7 @@ pub fn generate(ir: &SystemIr) -> Result<BTreeMap<String, String>, GenerateError
     let instances = document["system"]["instances"]
         .as_array()
         .ok_or_else(|| invalid("S1500", "missing checked instances"))?;
-    let cell_robot = if document["schema"] == "invar-system-v6"
-        || (matches!(
-            document["schema"].as_str(),
-            Some(
-                "invar-system-v7"
-                    | "invar-system-v8"
-                    | "invar-system-v9"
-                    | "invar-system-v10"
-                    | "invar-system-v11"
-                    | "invar-system-v12"
-            )
-        ) && document["robots"].is_array())
-    {
+    let cell_robot = if document["robots"].is_array() {
         let product_id = required(&document["system"], "product")?;
         let product = document["products"]
             .as_array()

@@ -36,7 +36,7 @@ fn issue_s1_01_system_dialect_emits_checked_canonical_ir() {
         String::from_utf8(command.stdout.clone()).unwrap(),
         include_str!("fixtures/s1_01/basic-cell.ir.json")
     );
-    assert_eq!(ir["schema"], "invar-system-v1");
+    assert_eq!(ir["schema"], "invar-system-v12");
     assert_eq!(ir["system"]["name"], "cell");
     assert_eq!(ir["system"]["product"], "SimCell");
     assert_eq!(ir["connections"].as_array().unwrap().len(), 2);
@@ -53,6 +53,8 @@ fn issue_s1_01_system_dialect_emits_checked_canonical_ir() {
     let document: serde_json::Value = serde_json::from_slice(&check.stdout).unwrap();
     assert_eq!(document["schema"], "invar-diagnostics-v3");
     assert_eq!(document["diagnostics"], serde_json::json!([]));
+    // Graph checks run on every source; nothing is left pending.
+    assert!(document.get("checks_pending").is_none());
     let second = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(["system", "ir", FIXTURE])
         .output()

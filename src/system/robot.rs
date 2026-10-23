@@ -1,4 +1,4 @@
-//! Checked robot and cell declarations for the v5 system IR.
+//! Checked robot and cell declarations for the system IR.
 
 use std::{
     collections::{BTreeMap, BTreeSet},
