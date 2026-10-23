@@ -1,47 +1,29 @@
 use std::process::Command;
 
-use invar::{check, eval, front, mir, mir_eval};
+use invar::{check, eval, front};
+
+use crate::engines::agree;
 
 #[test]
 fn issue_l1_03_bounded_generics_closures_monomorphized_functions_agree() {
-    let source = include_str!("fixtures/l1_03_generics.inv");
+    let source = include_str!("../fixtures/l1_03_generics.inv");
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     assert_eq!(checked.program.functions.len(), 4);
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(12));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 12);
-        assert_eq!(document["steps_used"], reference.steps_used);
-    }
+    agree(source, 1000, 12);
 }
 
 #[test]
 fn issue_l1_03_bounded_generics_closures_array_type_substitution_agrees() {
-    let source = include_str!("fixtures/l1_03_generic_array.inv");
-    let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(17));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 17);
-    }
+    agree(
+        include_str!("../fixtures/l1_03_generic_array.inv"),
+        1000,
+        17,
+    );
 }
 
 #[test]
 fn issue_l1_03_bounded_generics_closures_affine_capture_engines_agree() {
-    let source = include_str!("fixtures/l1_03_closures.inv");
-    let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(10));
+    let reference = agree(include_str!("../fixtures/l1_03_closures.inv"), 1000, 10);
     assert_eq!(
         reference.cleanup_trace,
         vec![
@@ -55,39 +37,21 @@ fn issue_l1_03_bounded_generics_closures_affine_capture_engines_agree() {
             },
         ]
     );
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
-    #[cfg(feature = "native")]
-    {
-        let (status, document) = invar::native::run_program(&lowered, 1000).unwrap();
-        assert_eq!(status, 0);
-        assert_eq!(document["result"]["value"], 10);
-        assert_eq!(document["steps_used"], reference.steps_used);
-        assert_eq!(
-            document["cleanup_trace"],
-            serde_json::json!([{"name":"ys","length":1},{"name":"xs","length":2}])
-        );
-    }
 }
 
 #[test]
 fn issue_l1_03_bounded_generics_closures_module_identity_and_unused_take_cleanup() {
-    let source = include_str!("fixtures/l1_03_module_closure.inv");
-    let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(6));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
+    agree(
+        include_str!("../fixtures/l1_03_module_closure.inv"),
+        1000,
+        6,
+    );
 
     let source = "fn main() -> i32 { let xs: Array<i32> = [9i32]; let c = closure [take xs: Array<i32>]() -> i32 { return xs[0u32]; }; return 3i32; }";
-    let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
-    let reference = eval::run(&checked, 1000).unwrap();
-    assert_eq!(reference.value, eval::Value::I32(3));
+    let reference = agree(source, 1000, 3);
     assert_eq!(reference.cleanup_trace.len(), 1);
     assert_eq!(reference.cleanup_trace[0].length, 1);
     assert!(reference.cleanup_trace[0].name.starts_with("$cap@"));
-    let lowered = mir::lower(&checked).unwrap();
-    assert_eq!(mir_eval::run(&lowered, 1000).unwrap(), reference);
 }
 
 #[test]

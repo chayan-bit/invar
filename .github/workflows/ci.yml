@@ -76,7 +76,7 @@ jobs:
           - name: CPU-model corpus
             args: --test gnet_device_model -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
     env:
-      # tests/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
+      # tests/limits/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
       INVAR_CI_PROFILE: debug
     steps:
       - name: Free runner disk
@@ -143,10 +143,9 @@ jobs:
       - name: Native backend tests
         run: >
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
-          --test issue_m1_02 --test gnet_net --test issue_dx_20_debug_command --test issue_dx_20_debug_info
-          --test issue_l1_06_native_arrays --test issue_l1_06_native_f32_arrays --test issue_l1_06_scalar_export_core
-          --test issue_eng_03_tier_engines --test issue_l1_06_export_failure_contract
-          -E 'not binary(gnet_net) | test(/^issue_gnet_02_native::/)'
+          --test mir --test exports --test gnet_net --test issue_dx_20_debug_command --test issue_dx_20_debug_info
+          --test issue_eng_03_tier_engines
+          -E 'not (((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/)) | (binary(=gnet_net) & not test(/^issue_gnet_02_native::/)))'
 
   cuda:
     name: Build (cuda, compile only)

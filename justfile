@@ -7,7 +7,7 @@ check: fmt lint test
 
 # Fast inner loop; build only the binaries selected by the quick profile.
 test-quick:
-    NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" cargo nextest run --locked --profile quick --lib --test 'issue_m0_0[2-9]' --test 'issue_l1_0[1-3]*' --test gnet_net
+    NEXTEST_TEST_THREADS="${NEXTEST_TEST_THREADS-8}" INVAR_TEST_TIMEOUT_SCALE="${INVAR_TEST_TIMEOUT_SCALE-8}" cargo nextest run --locked --profile quick --lib --test language --test gnet_net
 
 # Full coverage, including tests intentionally excluded from the quick loop and the
 # whole corpus where pull-request CI runs a deterministic 1-in-8 sample.
