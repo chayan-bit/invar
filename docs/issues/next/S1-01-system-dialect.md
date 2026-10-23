@@ -47,7 +47,7 @@ system cell for SimCell { planner: Planner; controller: Controller; ... }
 - `frame`, `product`, `system` as above; the `system` names exactly one product and instantiates components by name.
 - `dec` is the exact decimal scalar for compile-time constants; `f32` and `f64` are admitted as wire element types of ports with IEEE layouts but no arithmetic before M4-01.
 - Evaluation: the reference evaluator evaluates the `system` at compile time (bounded by the existing fuel and size limits) into `invar-system-v1`, serialized as canonical JSON (sorted keys, no insignificant whitespace, UTF-8, decimals as shortest exact strings, stable ids from declaration paths).
-- The JSON Schema `schema/invar-system-v1.schema.json` is committed and frozen at v0.1 (any change bumps the version).
+- The JSON Schema `schema/invar-system-v1.schema.json` is committed.
 - CLI: `invar system check PATH --format json` emits `invar-diagnostics-v1`; `invar system ir PATH` writes the canonical IR to stdout.
 - Checker for well-formedness and agreement: every `connect` joins an `out` to an `in` of the identical type (unit and frame included), each `in` port has at most one producer, names resolve, every component instantiated by the `system` is defined, the product and robot reference resolve, parameter defaults check against their types.
 

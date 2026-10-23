@@ -15,15 +15,15 @@ Each diagnostic carries a severity (`error`, `warning`, `note`), a primary span,
 A span is byte offsets (`start`, `end`, half-open, UTF-8) plus 1-based `line` and `column` for both ends, and the source path.
 A suggested fix is a list of text edits (`span`, `replacement`) plus a short description; edits within one fix never overlap.
 The JSON Schema for diagnostics is committed as `schema/invar-diagnostics-v1.schema.json`.
-The `explain` document emitted at this commit (including the device execution fields present at this commit; M4 and M5 now land after AI-01, so their explain fields arrive through explain schema version bumps with new schema files, as the semantics below require) is frozen as a versioned JSON Schema file `schema/explain-vN.schema.json`, where N is the explain schema version it emits.
+The `explain` document emitted at this commit (including the device execution fields present at this commit; M4 and M5 now land after AI-01, so their explain fields arrive through explain schema version bumps with new schema files, as the semantics below require) is committed as a versioned JSON Schema file `schema/explain-vN.schema.json`, where N is the explain schema version it emits.
 
 ## Semantics
 
-A reason code is never reused for a different meaning and never renamed; retiring a code marks it deprecated in the registry.
+A retired reason code is removed from the registry.
 Messages may change wording; codes, span semantics and fix edits are the contract.
 Output ordering is deterministic (source order, then code).
 The existing `schema_version: 1` diagnostic document either becomes `invar-diagnostics-v1` or is documented as its predecessor with a mapping; the exit codes (0 ok, 1 source error, 2 tool error, 3 trap, 4 evaluation limit) do not change.
-Any change to the diagnostics or explain schema requires a schema version bump and a new schema file; the old file stays committed.
+Before release only the latest diagnostics and explain schema is kept, and it is edited in place.
 
 ## Acceptance tests
 
@@ -37,7 +37,6 @@ Positive cases:
 - every emitted diagnostics and explain document validates against its committed schema, using a maintained JSON Schema validator crate selected by a reuse survey;
 - for every fix-bearing code (only `source` codes may carry fixes), a test applies the fix edits to the fixture source and proves the edited program then checks, and, where it runs, matches the reference evaluator;
 - line and column agree with byte offsets for ASCII, multi-byte UTF-8 and CRLF sources;
-- a schema compatibility test pins the frozen explain and diagnostics schema digests, so any schema change without a version bump fails.
 
 ## Negative cases
 
