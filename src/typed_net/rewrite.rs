@@ -37,24 +37,8 @@ impl Net {
             candidate.node_mut(id)?.op = Op::Let { binder };
             candidate.node_mut(id)?.inputs = vec![*argument_id, body_id];
             candidate.nodes[*function_id] = None;
-            let (op, inputs) = {
-                let node = candidate.node(id)?;
-                (node.op.clone(), node.inputs.clone())
-            };
-            candidate.node_mut(id)?.effect = effect_for(&candidate, &op, &inputs);
-            let before = self.revision;
-            candidate.revision = candidate
-                .revision
-                .checked_add(1)
-                .ok_or(Error::RuleRejected)?;
-            candidate.rule_history.push(BETA_RULE);
-            candidate.verify(limits)?;
-            *self = candidate;
-            return Ok(Some(Rewrite {
-                rule: BETA_RULE,
-                before,
-                after: self.revision,
-            }));
+            candidate.retype(id)?;
+            return self.commit(candidate, BETA_RULE, limits);
         }
         Ok(None)
     }
@@ -92,24 +76,8 @@ impl Net {
                 };
                 candidate.node_mut(id)?.inputs = inner.inputs.clone();
                 candidate.nodes[inner_id] = None;
-                let (op, inputs) = {
-                    let node = candidate.node(id)?;
-                    (node.op.clone(), node.inputs.clone())
-                };
-                candidate.node_mut(id)?.effect = effect_for(&candidate, &op, &inputs);
-                let before = self.revision;
-                candidate.revision = candidate
-                    .revision
-                    .checked_add(1)
-                    .ok_or(Error::RuleRejected)?;
-                candidate.rule_history.push(MAP_FUSION_RULE);
-                candidate.verify(limits)?;
-                *self = candidate;
-                return Ok(Some(Rewrite {
-                    rule: MAP_FUSION_RULE,
-                    before,
-                    after: self.revision,
-                }));
+                candidate.retype(id)?;
+                return self.commit(candidate, MAP_FUSION_RULE, limits);
             }
             let mut operations = match &inner.op {
                 Op::Map(op) => vec![*op],
@@ -125,24 +93,8 @@ impl Net {
             candidate.node_mut(id)?.op = Op::FusedMap(operations);
             candidate.node_mut(id)?.inputs = vec![input];
             candidate.nodes[inner_id] = None;
-            let (op, inputs) = {
-                let node = candidate.node(id)?;
-                (node.op.clone(), node.inputs.clone())
-            };
-            candidate.node_mut(id)?.effect = effect_for(&candidate, &op, &inputs);
-            let before = self.revision;
-            candidate.revision = candidate
-                .revision
-                .checked_add(1)
-                .ok_or(Error::RuleRejected)?;
-            candidate.rule_history.push(MAP_FUSION_RULE);
-            candidate.verify(limits)?;
-            *self = candidate;
-            return Ok(Some(Rewrite {
-                rule: MAP_FUSION_RULE,
-                before,
-                after: self.revision,
-            }));
+            candidate.retype(id)?;
+            return self.commit(candidate, MAP_FUSION_RULE, limits);
         }
         Ok(None)
     }
@@ -197,21 +149,40 @@ impl Net {
                 };
                 node.inputs[side] = grandchild;
                 candidate.nodes[child_id] = None;
-                let before = self.revision;
-                candidate.revision = candidate
-                    .revision
-                    .checked_add(1)
-                    .ok_or(Error::RuleRejected)?;
-                candidate.rule_history.push(MAP_FUSION_RULE);
-                candidate.verify(limits)?;
-                *self = candidate;
-                return Ok(Some(Rewrite {
-                    rule: MAP_FUSION_RULE,
-                    before,
-                    after: self.revision,
-                }));
+                return self.commit(candidate, MAP_FUSION_RULE, limits);
             }
         }
         Ok(None)
+    }
+
+    /// Seal one rule application: bump the revision, record the rule and
+    /// reverify the candidate before it replaces this net.
+    fn commit(
+        &mut self,
+        mut candidate: Net,
+        rule: &'static str,
+        limits: Limits,
+    ) -> Result<Option<Rewrite>, Error> {
+        let before = self.revision;
+        candidate.revision = candidate
+            .revision
+            .checked_add(1)
+            .ok_or(Error::RuleRejected)?;
+        candidate.rule_history.push(rule);
+        candidate.verify(limits)?;
+        *self = candidate;
+        Ok(Some(Rewrite {
+            rule,
+            before,
+            after: self.revision,
+        }))
+    }
+
+    /// Recompute a rewritten node's effect from its new op and inputs.
+    fn retype(&mut self, id: NodeId) -> Result<(), Error> {
+        let node = self.node(id)?;
+        let effect = effect_for(self, &node.op, &node.inputs);
+        self.node_mut(id)?.effect = effect;
+        Ok(())
     }
 }

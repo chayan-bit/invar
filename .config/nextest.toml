@@ -56,13 +56,13 @@ priority = 90
 # The rest of the tests above 120 s in Debug or Release on main.
 # The split GNET-03 adversarial tests replace one test that took 1863 s in Debug and 210 s in Release.
 [[profile.default.overrides]]
-filter = '(binary(issue_gnet_03_device) & test(/^issue_gnet_03_device_adversarial_cpu_model_agrees_with_oracle::(cuda|metal)::/)) | test(=issue_m4_03_matrix_contraction_tensor_core_device_emitted_kernels_match_oracle_on_host) | test(=issue_m4_03_matrix_contraction_tensor_core_tc_reference_is_the_rounded_exact_sum) | test(=net_normal_form_laws::cases::every_law_agrees_with_the_net_oracle)'
+filter = '(binary(issue_gnet_03_device) & test(/^issue_gnet_03_device_adversarial_cpu_model_agrees_with_oracle::(cuda|metal)::/)) | test(=issue_m4_03_matrix_contraction_tensor_core_device::issue_m4_03_matrix_contraction_tensor_core_device_emitted_kernels_match_oracle_on_host) | test(=issue_m4_03_matrix_contraction_tensor_core_tc::issue_m4_03_matrix_contraction_tensor_core_tc_reference_is_the_rounded_exact_sum) | test(=net_normal_form_laws::cases::every_law_agrees_with_the_net_oracle)'
 priority = 90
 
 # Real 2^28-live-element fixtures retain about 1 GiB per engine. Give each the
 # runner so source/MIR/oracle comparisons cannot overlap other large fixtures.
 [[profile.default.overrides]]
-filter = 'test(=issue_gnet_02_aggregates_source_global_live_limit_counts_record_shell) | test(=issue_m2_02_fused_map_extraction_elides_unobservable_intermediate) | test(=issue_m4_04_segmented_flattening_compaction_library_caller_live_owners_refuse) | test(=issue_m4_05_gather_scatter_frontier_preflight_traps_and_language_limits) | test(=issue_m4_05_gather_scatter_frontier_runtime_refusal_trap_spans_and_limits) | test(=issue_m4_05_gather_scatter_frontier_scatter_runtime_source_limits_and_errors) | test(=robustness_limits::live_array_elements_are_capped_in_aggregate) | test(=schedule::families::segmented::tests::compact_two_regions_preserve_all_predicates_and_source_fuel)'
+filter = 'test(=issue_gnet_02_aggregates_source_global_live_limit_counts_record_shell) | test(=issue_m2_02::issue_m2_02_fused_map_extraction_elides_unobservable_intermediate) | test(=issue_m4_04_compaction_allocation::issue_m4_04_segmented_flattening_compaction_library_caller_live_owners_refuse) | test(=issue_m4_05_gather_preflight::issue_m4_05_gather_scatter_frontier_preflight_traps_and_language_limits) | test(=issue_m4_05_gather_runtime::issue_m4_05_gather_scatter_frontier_runtime_refusal_trap_spans_and_limits) | test(=issue_m4_05_static_scatter_runtime::issue_m4_05_gather_scatter_frontier_scatter_runtime_source_limits_and_errors) | test(=robustness_limits::live_array_elements_are_capped_in_aggregate) | test(=schedule::families::segmented::tests::compact_two_regions_preserve_all_predicates_and_source_fuel)'
 threads-required = "num-test-threads"
 
 [profile.default]
