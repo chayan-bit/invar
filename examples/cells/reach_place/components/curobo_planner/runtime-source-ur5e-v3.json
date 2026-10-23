@@ -39,7 +39,7 @@
   },
   "cell_source": {
     "path": "../../cell-ur5e.inv",
-    "sha256": "6cf8eaa0aedf0080e744fe236af758c14f863e31008e40f1c0f6dc26bec9f83a"
+    "sha256": "56e4cf63b43dfdf7154ff465ae9b3df12472c2f32b4bb1e6a92634dbef0d4391"
   },
   "config": {
     "base_frame": "base_link",
@@ -156,7 +156,7 @@
       ]
     },
     "reference_implementation_sha256": "20d3f960b14212c09eace96bc98500272c1296c013db3600d2b81f1eba172142",
-    "reference_model_sha256": "ffd0a7b336d3c2d27c35a15cc0d4aaa95196769aca190ac8d6522d3318c345a0",
+    "reference_model_sha256": "43b30279ed0f3e590de8a948504fb28582258a36014f5577971b8e0744644fdd",
     "schema": "invar-tool-projection-v2",
     "source_base_from_reference_base": {
       "quaternion_xyzw": [

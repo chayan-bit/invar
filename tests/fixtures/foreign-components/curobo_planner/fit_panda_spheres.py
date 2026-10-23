@@ -30,7 +30,7 @@ import curobo
 from curobo._src.types.device_cfg import DeviceCfg
 from curobo.sphere_fit import SphereFitType, fit_spheres_to_mesh
 
-MODEL_SHA = "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b"
+MODEL_SHA = "93a8d8e137ae43a33e7499ff627c1f633fb27d94f58ea7545b97c8f65027db1d"
 URDF_LINKS = {"link0": "panda_link0", "link1": "panda_link1", "link2": "panda_link2",
               "link3": "panda_link3", "link4": "panda_link4", "link5": "panda_link5",
               "link6": "panda_link6", "link7": "panda_link7", "hand": "panda_hand",
