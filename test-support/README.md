@@ -79,3 +79,8 @@ Product limits are intentionally unchanged: `src/native.rs`,
 and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
 real contract; GPU completion polling and semantic timing fixtures are not
 compiled-child harness watchdogs.
+
+## Term oracle
+
+`term_oracle.rs` is test support, included by path, with no production API.
+It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `issue_m1_04`, `issue_m1_05` and `issue_m4_07_typed_bounded_scan` use as independent oracles.

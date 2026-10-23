@@ -1,4 +1,7 @@
 #![forbid(unsafe_code)]
+#[path = "../test-support/term_oracle.rs"]
+mod term;
+
 use invar::{
     bounded_summary::{Budget, Error as BudgetError},
     typed_net::{
@@ -134,17 +137,17 @@ fn issue_m4_07_typed_bounded_scan_graph_runtime_matches_independent_ordered_acti
                 assert_eq!(n.extract(&proof).unwrap(), plan);
                 assert!(plan.run_array().is_err());
                 assert!(n.decode(&proof).is_err());
-                let term_observation = n
-                    .observe(
-                        &proof,
-                        invar::term::Limits {
-                            nodes: 16,
-                            depth: 8,
-                            steps: 16,
-                        },
-                    )
-                    .unwrap();
-                assert_eq!(term_observation.result, Err(invar::term::Error::Type(3)));
+                let term_observation = term::observe_net(
+                    &n,
+                    &proof,
+                    term::Limits {
+                        nodes: 16,
+                        depth: 8,
+                        steps: 16,
+                    },
+                )
+                .unwrap();
+                assert_eq!(term_observation.result, Err(term::Error::Type(3)));
                 let (coeff, seed) = data(family, steps);
                 let expected = sequential(family, &coeff, &seed);
                 let observation = plan
