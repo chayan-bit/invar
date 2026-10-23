@@ -2,7 +2,8 @@
 # The overrides below restore every such constraint the tests rely on.
 
 [test-groups]
-# tests/issue_m3_06_metal/main.rs serializes Metal GPU tests with GPU_LOCK.
+# tests/gpu_metal/m3_06/mod.rs serializes the Metal GPU tests of that module with GPU_LOCK;
+# the group keeps every test of the gpu_metal binary from sharing the device.
 metal-gpu = { max-threads = 1 }
 
 [profile.ci]
@@ -21,7 +22,7 @@ threads-required = "num-test-threads"
 priority = 100
 
 [[profile.default.overrides]]
-filter = 'binary(issue_m3_06_metal)'
+filter = 'binary(gpu_metal)'
 test-group = 'metal-gpu'
 
 [[profile.default.overrides]]

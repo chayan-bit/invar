@@ -12,33 +12,23 @@
 //! - on Metal, the same upstream comparison, the exact functions against the
 //!   strict oracles, and a mutated polynomial coefficient that must be caught.
 //!
+//! The Metal half lives in `tests/gpu_metal/v02_math_msl.rs`.
 //! `INVAR_COREMATH_UPSTREAM=<core-math clone> cargo test --release --features
-//! metal --test issue_v02_math_msl -- --ignored --nocapture --test-threads 1`.
+//! metal --test issue_v02_math_msl -- --ignored --nocapture --test-threads 1`
+//! runs the CPU half; `--test gpu_metal v02_math_msl::` runs the Metal half.
 
-#[path = "support/coremath.rs"]
-mod coremath;
-
-use coremath::{build, records, tempdir, transcendental};
-use invar::{
-    math::{MathFn, eval_f32, msl_map_source},
-    numeric_contract::F32Bits,
-};
+use invar::math::{MathFn, msl_map_source};
 use std::{
-    io::{Read, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
+use v02_math_msl_common::coremath::{build, tempdir, transcendental};
 
-const RANDOM: u64 = 1_000_000;
-const STRIDE: u64 = 256;
-const CHUNK: usize = 1 << 20;
+#[path = "support/v02_math_msl_common.rs"]
+mod v02_math_msl_common;
+use v02_math_msl_common::{MUTATION, RANDOM, against_upstream, oracle, samples};
+
 const PRELUDE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/crates/invar-math/src");
-/// The leading coefficient of sinf's `a` table, 0x1.921fb54442d17p-3, with
-/// bit 40 flipped (a relative change near 2^-12).
-const MUTATION: (&str, &str) = (
-    "D::raw(0x3fc921fb54442d17ul)",
-    "D::raw(0x3fc920fb54442d17ul)",
-);
 
 const HOST_DRIVER: &str = r#"#include <cstdio>
 extern "C" void invar_math_map_host(const unsigned long *, const unsigned long *, unsigned long *, unsigned long);
@@ -114,69 +104,6 @@ fn host_run(binary: &Path, x: &[u64], y: &[u64]) -> Vec<u64> {
         .chunks_exact(8)
         .map(|w| u64::from_le_bytes(w.try_into().unwrap()))
         .collect()
-}
-
-fn oracle(f: MathFn, x: u64, y: u64) -> u64 {
-    let args = [F32Bits::from_bits(x as u32), F32Bits::from_bits(y as u32)];
-    u64::from(eval_f32(f, &args[..f.arity()]).to_bits())
-}
-
-/// Binary32 specials plus `n` pseudo-random encodings, as (x, y) columns.
-fn samples(n: usize) -> (Vec<u64>, Vec<u64>) {
-    let specials: [f32; 14] = [
-        0.0,
-        -0.0,
-        0.5,
-        -0.5,
-        1.5,
-        -2.5,
-        3.0,
-        f32::INFINITY,
-        f32::NEG_INFINITY,
-        f32::NAN,
-        1e-40,
-        -1e-45,
-        f32::MAX,
-        8388609.0,
-    ];
-    let mut x: Vec<u64> = specials.iter().map(|v| u64::from(v.to_bits())).collect();
-    let mut state = 0x9e37_79b9_7f4a_7c15u64;
-    for _ in 0..n {
-        state ^= state << 13;
-        state ^= state >> 7;
-        state ^= state << 17;
-        x.push(state >> 32);
-    }
-    let y = x.iter().rev().copied().collect();
-    (x, y)
-}
-
-/// (inputs, mismatches, first mismatch) of `run` against the upstream
-/// driver's records for binary32 `f`.
-fn against_upstream(
-    driver: &Path,
-    f: MathFn,
-    random: u64,
-    mut run: impl FnMut(&[u64], &[u64]) -> Vec<u64>,
-) -> (u64, u64, String) {
-    let (mut total, mut wrong, mut first) = (0u64, 0u64, String::new());
-    records(driver, f, false, random, STRIDE, CHUNK, |batch| {
-        let x: Vec<u64> = batch.iter().map(|r| r[0]).collect();
-        let y: Vec<u64> = batch.iter().map(|r| r[1]).collect();
-        for (record, got) in batch.iter().zip(run(&x, &y)) {
-            total += 1;
-            if !coremath::same(false, got, record[2]) {
-                wrong += 1;
-                if first.is_empty() {
-                    first = format!(
-                        "x={:#x} y={:#x} got={got:#x} upstream={:#x}",
-                        record[0], record[1], record[2]
-                    );
-                }
-            }
-        }
-    });
-    (total, wrong, first)
 }
 
 #[test]
@@ -299,112 +226,4 @@ fn v02_math_msl_host_build_matches_upstream_core_math() {
     }
     std::fs::remove_dir_all(directory).unwrap();
     assert!(failures.is_empty(), "{failures:?}");
-}
-
-#[cfg(all(feature = "metal", target_os = "macos"))]
-mod metal {
-    use super::*;
-    use invar::math::CUDA_KERNEL;
-    use invar_metal::{BitsMap, MetalDevice};
-
-    fn load(device: &mut MetalDevice, source: &str) -> BitsMap {
-        device
-            .load_bits_map(source, CUDA_KERNEL)
-            .unwrap_or_else(|e| {
-                let path = std::env::temp_dir().join("invar-math-failed.metal");
-                std::fs::write(&path, source).unwrap();
-                panic!("{e:?}\nsource kept at {}", path.display())
-            })
-    }
-
-    fn run(
-        device: &mut MetalDevice,
-        map: &BitsMap,
-        x: &[u64],
-        y: &[u64],
-        ms: &mut f64,
-    ) -> Vec<u64> {
-        let mut output = Vec::with_capacity(x.len());
-        for (x, y) in x.chunks(1 << 18).zip(y.chunks(1 << 18)) {
-            let result = device.run_bits_map(map, x, y).unwrap();
-            *ms += result.kernel_ms;
-            output.extend(result.output);
-        }
-        output
-    }
-
-    #[test]
-    #[ignore = "requires a Metal GPU and INVAR_COREMATH_UPSTREAM"]
-    fn v02_math_metal_matches_upstream_core_math_bit_for_bit() {
-        let directory = tempdir("metal");
-        let driver = build(&directory, None);
-        let mut device = MetalDevice::open_runtime_source().expect("METAL_UNAVAILABLE");
-        let mut failures = Vec::new();
-        for f in transcendental() {
-            let map = load(&mut device, &msl_map_source(f));
-            let mut ms = 0.0;
-            let (total, wrong, first) = against_upstream(&driver, f, RANDOM, |x, y| {
-                run(&mut device, &map, x, y, &mut ms)
-            });
-            println!(
-                "metal {} f32 inputs={total} mismatches={wrong} compile_ms={:.0} kernel_ms={ms:.2} {first}",
-                f.name(),
-                map.compile_ms
-            );
-            if wrong != 0 || total < RANDOM {
-                failures.push(f.name());
-            }
-        }
-        std::fs::remove_dir_all(directory).unwrap();
-        assert!(failures.is_empty(), "{failures:?}");
-    }
-
-    #[test]
-    #[ignore = "requires a Metal GPU and INVAR_COREMATH_UPSTREAM"]
-    fn v02_math_metal_catches_a_mutated_polynomial_coefficient() {
-        let directory = tempdir("metal-mutation");
-        let driver = build(&directory, None);
-        let source = msl_map_source(MathFn::Sin);
-        assert_eq!(source.matches(MUTATION.0).count(), 1);
-        let mut device = MetalDevice::open_runtime_source().expect("METAL_UNAVAILABLE");
-        let map = load(&mut device, &source.replace(MUTATION.0, MUTATION.1));
-        let mut ms = 0.0;
-        let (total, wrong, first) = against_upstream(&driver, MathFn::Sin, 0, |x, y| {
-            run(&mut device, &map, x, y, &mut ms)
-        });
-        println!("mutant metal sin f32: inputs={total} mismatches={wrong} {first}");
-        std::fs::remove_dir_all(directory).unwrap();
-        assert!(
-            wrong > 0,
-            "the mutated coefficient went undetected over {total} inputs"
-        );
-    }
-
-    #[test]
-    #[ignore = "requires a Metal GPU"]
-    fn v02_math_metal_exact_functions_match_the_strict_oracles() {
-        let mut device = MetalDevice::open_runtime_source().expect("METAL_UNAVAILABLE");
-        let (x, y) = samples(RANDOM as usize);
-        let mut failures = Vec::new();
-        for f in MathFn::ALL
-            .into_iter()
-            .filter(|f| invar::math::core_math(*f).is_none())
-        {
-            let map = load(&mut device, &msl_map_source(f));
-            let mut ms = 0.0;
-            let got = run(&mut device, &map, &x, &y, &mut ms);
-            let wrong = (0..x.len())
-                .filter(|&i| got[i] != oracle(f, x[i], y[i]))
-                .count();
-            println!(
-                "metal {} f32 inputs={} mismatches={wrong} kernel_ms={ms:.2}",
-                f.name(),
-                x.len()
-            );
-            if wrong != 0 {
-                failures.push(f.name());
-            }
-        }
-        assert!(failures.is_empty(), "{failures:?}");
-    }
 }

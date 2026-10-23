@@ -53,7 +53,6 @@
 806 tests/issue_m4_07_summary_source.rs
 879 tests/issue_p0a_trig_f32.rs
 856 tests/issue_s1_06_sequencer_binding.rs
-1067 tests/net_law_collective.rs
 1085 tests/net_normal_form_laws.rs
 901 tests/pnf_family_admission.rs
 1451 tests/support/cuda_owned_numeric_host_cpu_model.rs

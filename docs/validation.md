@@ -79,7 +79,7 @@ After M0, use each GitHub issue's acceptance contract. List filtered tests and r
 
 The [pair-reduction contract](pair-reduction-v1.md) defines the sealed modular law and its source/CPU/device boundaries.
 Run `cargo test --locked --test issue_v01_pair_reduction` in Debug and Release on the authorized CPU host.
-Run the ignored `issue_v01_pair_reduction_gpu` target with `--features cuda` on qualified NVIDIA hardware, and the ignored `issue_v01_pair_reduction_metal_gpu` target with `--features metal` on an Apple GPU.
+Run the ignored `pair_reduction::` tests of the `gpu_cuda` target with `--features cuda` on qualified NVIDIA hardware, and of the `gpu_metal` target with `--features metal` on an Apple GPU.
 Require nonzero listed counts and retain profile/host separation.
 Pair source/reference/MIR/fuel/cleanup agreement, atomic two-scalar publication, maximum resource bounds and operator-order/non-associative-admission mutation failures are required.
 Unsupported min/argmin and floating pair laws are not covered by this affine contract.
