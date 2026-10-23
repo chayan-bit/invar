@@ -2,7 +2,7 @@
 //! over the whole runnable corpus with typed refusals, program-specific emitted
 //! CUDA/Metal structure, and the emitted device bodies executed by the CPU
 //! group model against the bounded CPU net oracle. The model is never a GPU
-//! claim; `issue_gnet_03_gpu` and `issue_gnet_03_metal_gpu` run the same
+//! claim; `gpu_cuda::gnet_03` and `gpu_metal::gnet_03` run the same
 //! harness on actual devices.
 #![forbid(unsafe_code)]
 

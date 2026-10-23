@@ -225,32 +225,6 @@ fn issue_m3_01_cuda_runtime_quiescent_launch_failure_can_release() {
     assert_eq!(runtime.quarantine_len(), 0);
 }
 
-#[cfg(feature = "cuda")]
-#[test]
-#[ignore = "requires a CUDA GPU and NVRTC 12.4+"]
-fn issue_m3_01_gpu_round_trip() {
-    use invar_cuda::cuda::CudaDevice;
-    use std::time::{Duration, Instant};
-
-    let device = CudaDevice::open().expect("CUDA_UNAVAILABLE: requires CUDA GPU and NVRTC 12.4+");
-    eprintln!("device={} caps={:?}", device.name(), device.capabilities());
-    let mut runtime = Runtime::new(device, 8);
-    let bytes = (0u16..4096).map(|v| v as u8).collect::<Vec<_>>();
-    let mut submitted = runtime.prepare(&bytes).unwrap().submit().unwrap();
-    let deadline = Instant::now() + Duration::from_secs(10);
-    loop {
-        if let Some(actual) = submitted.poll().unwrap() {
-            assert_eq!(actual, bytes);
-            break;
-        }
-        assert!(
-            Instant::now() < deadline,
-            "CUDA_PENDING: transfer did not complete"
-        );
-        std::thread::yield_now();
-    }
-}
-
 #[test]
 fn issue_m3_01_cuda_runtime_quarantine_bounds_reaps_and_poisons_on_overflow() {
     use invar_cuda::Quarantine;
