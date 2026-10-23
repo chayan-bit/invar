@@ -521,6 +521,13 @@ fn issue_gnet_05_corpus_compiler_sources_never_name_the_corpus() {
     .map(String::from)
     .to_vec();
     forbidden.extend(generate::generate().into_iter().map(|p| p.id));
+    // The robotics corpus is held to the same rule.
+    forbidden.extend(["gnet05r", "robotics/programs", "gnet05-robotics"].map(String::from));
+    forbidden.extend(
+        crate::robotics::corpus::generate(repo)
+            .into_iter()
+            .map(|p| p.id),
+    );
     assert!(files.len() > 20, "scan scope");
     for file in &files {
         let text = fs::read_to_string(file).unwrap();

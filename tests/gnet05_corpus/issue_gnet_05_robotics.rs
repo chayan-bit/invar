@@ -412,29 +412,6 @@ fn issue_gnet_05_robotics_compiler_decisions_ignore_names_hashes_and_ids() {
     assert!(compiled > 0, "the CPU comparison must cover emitted code");
 }
 
-#[test]
-fn issue_gnet_05_robotics_compiler_sources_never_name_the_corpus() {
-    let mut files = Vec::new();
-    for dir in ["src/general_net", "src/front", "src/check", "src/mir"] {
-        guard::walk(&repo().join(dir), &mut files);
-    }
-    assert!(files.len() > 20);
-    let mut forbidden: Vec<String> = ["gnet05r", "robotics/programs", "gnet05-robotics"]
-        .map(String::from)
-        .to_vec();
-    forbidden.extend(corpus::generate(repo()).into_iter().map(|p| p.id));
-    for file in &files {
-        let text = fs::read_to_string(file).unwrap();
-        for word in &forbidden {
-            assert!(
-                !text.contains(word.as_str()),
-                "{} mentions {word}",
-                file.display()
-            );
-        }
-    }
-}
-
 /// Compare every scored baseline output file with its frozen digest. A missing
 /// file fails: a partial or interrupted run must never read as a pass.
 fn check_baseline_outputs(dir: &Path, recorded: &Json) -> Result<usize, String> {
