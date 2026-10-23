@@ -95,13 +95,6 @@ pub enum Source {
 }
 
 impl Plan {
-    pub fn run_term(&self, limits: term::Limits) -> Result<term::Observation, Error> {
-        let Self::Term { program, entry, .. } = self else {
-            return Err(Error::Type(0));
-        };
-        Ok(term::observe(program, entry, limits))
-    }
-
     pub fn run_array(&self) -> Result<Vec<u32>, Error> {
         match self {
             Self::Array { input, stages, .. } => {

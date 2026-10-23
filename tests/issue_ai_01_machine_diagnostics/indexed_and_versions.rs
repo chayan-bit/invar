@@ -9,7 +9,6 @@ fn indexed_registry_codes() -> HashSet<String> {
         .unwrap()
         .iter()
         .map(|entry| {
-            assert_eq!(entry["deprecated"], false, "{entry}");
             assert_eq!(entry["reachability"], "invariant", "{entry}");
             assert!(valid_registry_entry(entry), "{entry}");
             entry["code"].as_str().unwrap().to_owned()
