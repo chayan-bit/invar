@@ -94,7 +94,7 @@ This follows the M4-01 underflow-guard precedent instead of software-emulating g
 ### Explain hint
 
 When a loop body stores `acc + e` into the `f32` local `acc`, `invar explain` adds the obligation `FLOAT_FOLD_HINT` (evidence `hint`) to the rejected region, naming `sum_tree` and `sum_exact`.
-It lives in the region's obligations so the frozen `invar-explain-v1` schema needs no bump, and the code is registered in `schema/diagnostic-codes-fsum-v1.json` (ruling C14).
+It lives in the region's obligations so the explain schema needs no bump, and the code is registered in `schema/diagnostic-codes-fsum-v1.json` (ruling C14).
 It is a hint only: the loop keeps its serial plan.
 Only the direct body block is scanned; a fold under a nested `if` gets no hint yet.
 
@@ -103,7 +103,7 @@ Only the direct body block is scanned; a fold under a nested `if` gets no hint y
 The tree shape depends only on the length, so the worker count and the device are free choices that never change the bits; the cost model routes losing shapes and never relaxes a gate.
 CPU: `reductions::cpu_workers` splits a call over W workers only when `spawn_ns_per_worker * W + ns_per_term * n / W < ns_per_term * n`, else it runs on one worker.
 Every engine that reaches the CPU uses it (cpu-parallel, Metal and CUDA fallbacks, `auto`); the receipt records the chosen worker count, and a call kept on one of several workers reports backend `cpu-serial` with reason `measured-cpu-cost`.
-The frozen `invar-explain-device-v1` schema (digest-checked) has a closed reason enum and no worker field, so the refusal is carried by the backend name rather than a new reason; `kind` carries the family id.
+The `invar-explain-device-v5` schema has a closed reason enum and no worker field, so the refusal is carried by the backend name rather than a new reason; `kind` carries the family id.
 Metal: `auto` places a call on Metal only from `metal_min_terms`.
 End to end (upload into a new shared buffer, kernel, host finish), Metal on an Apple M4 lost to the better of one and ten CPU workers at every size from 2^10 to 2^26 for all four families (for example 34.95 ms against 6.09 ms for `sum_tree` at 2^26, where the resident kernel takes 2.6 ms), so the recorded crossover is `null`: never.
 The copy into a fresh buffer, not the kernel, is what loses; a zero-copy upload would move the crossover and must be re-measured.

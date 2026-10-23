@@ -33,7 +33,7 @@ fn explicit_grasp_is_versioned_and_legacy_weld_is_preserved() {
             };
             let ir = compile(&source).unwrap();
             let doc = ir.checked_document().unwrap();
-            assert_eq!(doc["version"], if explicit { 10 } else { 6 });
+            assert_eq!(doc["version"], 12);
             assert_eq!(
                 system::SystemIr::from_json(ir.canonical_json().as_bytes())
                     .unwrap()

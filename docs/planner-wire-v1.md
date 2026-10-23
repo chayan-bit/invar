@@ -59,15 +59,12 @@ RPC protocol or hidden runtime is introduced.
 
 ## Versioning and evidence
 
-Graphs using these records select `invar-system-v7`, version 7, with required
-`planner_contract: invar-planner-wire-v1`. The new schema permits standalone
-wire/manifest graphs and graphs with robot/cell declarations. V1–v6 schema files
-are unchanged, and graphs without planner records retain their prior version.
-The existing source frame/flow/resource/license checks still apply.
-
-Graphs containing the planner config select additive `invar-system-v8`, version
-8. V7 is unchanged; only v8 admits the config descriptor's bounded hash, pose,
-limit-array and borrowed-text fields. A v8 planner graph relabeled v7 is rejected.
+Graphs using these records carry the required
+`planner_contract: invar-planner-wire-v1` in `invar-system-v12`. The schema
+permits standalone wire/manifest graphs and graphs with robot/cell declarations,
+and admits the config descriptor's bounded hash, pose, limit-array and
+borrowed-text fields. The existing source frame/flow/resource/license checks
+still apply.
 
 ## Checked lifecycle and transport
 

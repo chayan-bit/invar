@@ -184,10 +184,8 @@ digit         = "0" .. "9" ;
    i64 nanosecond stamps are type-only.
    System declaration quantities use exact decimal text with explicit units;
    ports use f32/f64 wire types, and only f32 has arithmetic.
-   System items evaluate at compile time into checked invar-system-v1, v2 when
-   S1-03 bus, license, or identity metadata is present, and v3 when S1-02 typed
-   config or golden tolerances are present. Earlier schemas remain frozen. Unknown
-   The v2 identity transform constant is a typed direct tree-edge source only;
+   System items evaluate at compile time into checked invar-system-v12. Unknown
+   The identity transform constant is a typed direct tree-edge source only;
    nonidentity exact-decimal transforms are required by S1-05/S1-06 geometry.
    clauses and all limits fail with registered S10xx source diagnostics.
    px is a nominal camera unit, distinct from one and every SI unit, with no mixed algebra.
