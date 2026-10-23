@@ -1,6 +1,6 @@
 //! ENG-03: numeric policy v2 fold tiers and their oracle.
 
-#[path = "support/normal_form.rs"]
+#[path = "../support/normal_form.rs"]
 mod support;
 
 use invar::numeric_contract::{

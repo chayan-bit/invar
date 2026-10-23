@@ -4,8 +4,7 @@
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};
 use invar::histogram_source::{self, Budget, Contract, Cost, Error};
 
-#[path = "support/eng_08.rs"]
-mod eng_08;
+use crate::eng_08;
 use eng_08::{agree_on_every_cpu_engine, allocated_during, checked, permutation, program};
 
 const HIST: &str = "fn hist(a: read Array<u32>, ix: read Array<u32>, n: u32) -> Array<u32> { var out = filled_u32(n,0u32); for i in 0u32..len(ix) { out[ix[i]] = wrapping_add(out[ix[i]],a[i]); } return out; }";

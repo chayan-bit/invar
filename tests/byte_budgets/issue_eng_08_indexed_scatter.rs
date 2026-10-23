@@ -5,8 +5,7 @@ use invar::budget::{BudgetExceeded, ByteBudget, Resource};
 use invar::indexed_source::{self, Contract, Error, Family};
 use invar::scatter_proof;
 
-#[path = "support/eng_08.rs"]
-mod eng_08;
+use crate::eng_08;
 use eng_08::{agree_on_every_cpu_engine, allocated_during, checked, permutation, program};
 
 const GATHER: &str = "fn gather(a: read Array<u32>, ix: read Array<u32>) -> Array<u32> { var out = filled_u32(len(ix),0u32); for i in 0u32..len(ix) { out[i] = a[ix[i]]; } return out; }";

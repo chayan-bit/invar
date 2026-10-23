@@ -6,17 +6,13 @@
 //! Device rows are not run here.
 #![forbid(unsafe_code)]
 
-#[allow(dead_code)]
-#[path = "../src/contraction_source.rs"]
-mod contraction_source;
-#[path = "issue_m4_03_device/corpus.rs"]
-mod corpus;
+use crate::corpus;
+use invar::contraction_source;
 
 use std::collections::BTreeMap;
 
 use contraction_source::{Contract, DeviceEmission};
 use corpus::{DIRECT, SHAPES, TC_DIRECT, tc_cases};
-use invar::{check, front, general_net, hex, layout_contract, mir, numeric_contract, tensor_cache};
 use invar_device::contraction::{self, Error, atoms, gemm_tiled_v1};
 use invar_device::moves::{Axis, Move, Refusal};
 use invar_device::target::Registry;

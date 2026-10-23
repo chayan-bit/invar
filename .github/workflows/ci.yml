@@ -144,8 +144,8 @@ jobs:
         run: >
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
           --test mir --test exports --test issue_gnet_02_native --test issue_dx_20_debug_command --test issue_dx_20_debug_info
-          --test issue_eng_03_tier_engines
-          -E 'not ((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/))'
+          --test numeric_tiers
+          -E 'not ((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/)) & not (binary(=numeric_tiers) & not test(/^issue_eng_03_tier_engines::/))'
 
   cuda:
     name: Build (cuda, compile only)
