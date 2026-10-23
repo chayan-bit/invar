@@ -118,7 +118,7 @@ It supersedes `invar-trig-f32-v1` from P0a and its compiled GNET device path, wh
 `invar explain --format json` and the `invar run --format json` receipt record `numeric_contracts` (`binary64: strict-f64-v1`, `math: invar-math-cr-v1`) whenever a program uses f64 or a library function; programs that use neither keep their previous documents byte for byte.
 The MIR program's `numeric_policy` stays `strict-f32-v1` for binary32 and its identity hash is unchanged.
 The v0.2 release notes must state the sin/cos bit change against trig-f32-v1.
-`--numeric-contract trig-f32-v1` is kept for one release by C4, but trig-f32-v1 is not on main (P0a is unmerged), so the flag lands with whichever of P0a or this workstream merges second.
+There is no `--numeric-contract` flag: trig-f32-v1 stays the f32 default until #48 makes `invar-math-cr-v1` the default.
 
 ## 7. Acceptance evidence
 
