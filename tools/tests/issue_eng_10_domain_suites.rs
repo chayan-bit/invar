@@ -327,7 +327,10 @@ fn issue_eng_10_held_out_programs_are_refused_on_every_tuning_path() {
 #[test]
 fn issue_eng_10_no_compiler_file_keys_on_a_suite() {
     let needles = domains::keying::needles().unwrap();
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    // The scan covers the compiler (`src/`, `crates/`) next to this package, not the harness.
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap();
     let found = domains::keying::scan(root, &needles).unwrap();
     assert!(found.is_empty(), "{found:?}");
     // A planted violation is detected, in each rule.
@@ -369,19 +372,7 @@ fn issue_eng_10_no_compiler_file_keys_on_a_suite() {
         let found = domains::keying::scan(&dir, &needles).unwrap();
         assert!(!found.is_empty(), "{what} not detected");
     }
-    // The harness may include the suites by path, but nothing else.
     std::fs::create_dir_all(dir.join("src/bin")).unwrap();
-    std::fs::write(
-        dir.join("src/bin/invar-bench.rs"),
-        "#[path = \"../../bench/domains/mod.rs\"]\nmod domains;",
-    )
-    .unwrap();
-    assert!(
-        domains::keying::scan(&dir, &needles)
-            .unwrap()
-            .iter()
-            .all(|f| !f.contains("invar-bench"))
-    );
     std::fs::write(
         dir.join("src/bin/invar-bench.rs"),
         format!("const K: &str = \"{}\";", first.id),

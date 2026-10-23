@@ -8,7 +8,6 @@ use serde_json::Value;
 use std::{fs, io, path::Path};
 
 const FIXTURE_DIR: &str = "bench/domains";
-const HARNESS: &str = "src/bin/invar-bench";
 
 pub struct Needles {
     exact: Vec<String>,
@@ -89,11 +88,6 @@ pub fn scan(root: &Path, needles: &Needles) -> io::Result<Vec<String>> {
             .display()
             .to_string();
         for needle in &needles.exact {
-            // The bench harness includes the suites by path; that is the one
-            // reference a harness binary may make. Every other needle applies.
-            if needle == FIXTURE_DIR && shown.starts_with(HARNESS) {
-                continue;
-            }
             if text.contains(needle.as_str()) {
                 found.push(format!("{shown}: {needle}"));
             }

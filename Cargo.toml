@@ -7,7 +7,7 @@ publish = false
 license.workspace = true
 
 [workspace]
-members = ["crates/invar-cuda", "crates/invar-device", "crates/invar-foreign", "crates/invar-math", "crates/invar-metal"]
+members = ["crates/invar-cuda", "crates/invar-device", "crates/invar-foreign", "crates/invar-math", "crates/invar-metal", "tools"]
 
 [workspace.package]
 license = "Apache-2.0"
@@ -36,11 +36,6 @@ name = "invar-nvrtc"
 path = "src/bin/invar-nvrtc.rs"
 required-features = ["cuda"]
 
-[[bin]]
-name = "invar-m3-03-cold"
-path = "src/bin/invar-m3-03-cold.rs"
-required-features = ["cuda"]
-
 [dependencies]
 invar-cuda = { path = "crates/invar-cuda" }
 invar-device = { path = "crates/invar-device" }
@@ -59,34 +54,8 @@ roxmltree = "=0.21.1"
 [target.'cfg(unix)'.dependencies]
 libc = "=0.2.189"
 
-[[bench]]
-name = "sort"
-path = "bench/sort.rs"
-harness = false
-
-# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release --bench net_task_region_bench -- --ignored`.
-[[bench]]
-name = "net_task_region_bench"
-path = "bench/net_task_region_bench.rs"
-
-# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release --bench v02_math_bench -- --ignored`.
-[[bench]]
-name = "v02_math_bench"
-path = "bench/v02_math_bench.rs"
-
-# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release --bench metal_aot_timing -- --ignored`.
-[[bench]]
-name = "metal_aot_timing"
-path = "bench/metal_aot_timing.rs"
-
-# Hardware timing harness (all `#[ignore]`d tests): run with `cargo test --release --bench m5_01_bench_cuda_map -- --ignored`.
-[[bench]]
-name = "m5_01_bench_cuda_map"
-path = "bench/m5_01_bench_cuda_map.rs"
-
 [dev-dependencies]
 half = "=2.7.1"
-rayon = "=1.11.0"
 invar-cuda = { path = "crates/invar-cuda" }
 # tests/issue_dx_20_debug_info.rs reads the native backend's DWARF back.
 gimli = { version = "=0.34.0", default-features = false, features = ["read", "std"] }
@@ -94,10 +63,6 @@ object = { version = "=0.40.0", default-features = false, features = ["read_core
 
 [build-dependencies]
 sha2 = "=0.11.0"
-
-[[example]]
-name = "sort-report"
-path = "bench/sort-report.rs"
 
 # CI Debug suites. Same checks as `dev` (debug assertions, overflow checks), but optimised enough that
 # Rust-bound tests run several times faster than at opt-level 0. Selected with `--cargo-profile ci-debug`

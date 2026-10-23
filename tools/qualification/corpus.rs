@@ -238,13 +238,13 @@ pub fn corpus(seed: u64) -> Vec<Case> {
     cases.push(trap("bad-index", source, "a[2u32]", "INDEX_OUT_OF_BOUNDS"));
     cases.push(trap(
         "unit-inexact",
-        include_str!("../tests/fixtures/r1_01/inexact-conversion.inv"),
+        include_str!("../../tests/fixtures/r1_01/inexact-conversion.inv"),
         "to::<m>(mm)",
         "UNIT_CONVERSION_INEXACT",
     ));
     cases.push(trap(
         "unit-overflow",
-        include_str!("../tests/fixtures/r1_01/overflow-conversion.inv"),
+        include_str!("../../tests/fixtures/r1_01/overflow-conversion.inv"),
         "to::<mm>(metres)",
         "INTEGER_OVERFLOW",
     ));
@@ -368,19 +368,19 @@ pub fn corpus(seed: u64) -> Vec<Case> {
     cases.push(case(
         "affine-closure",
         "language",
-        include_bytes!("../tests/fixtures/l1_03_closures.inv").to_vec(),
+        include_bytes!("../../tests/fixtures/l1_03_closures.inv").to_vec(),
         Expected::Value(10),
     ));
     cases.push(case(
         "result-propagation",
         "language",
-        include_bytes!("../tests/fixtures/l1_01/result-propagation.inv").to_vec(),
+        include_bytes!("../../tests/fixtures/l1_01/result-propagation.inv").to_vec(),
         Expected::Value(28),
     ));
     cases.push(case(
         "utf8-blobs",
         "language",
-        include_bytes!("../tests/fixtures/l1_04/basic.inv").to_vec(),
+        include_bytes!("../../tests/fixtures/l1_04/basic.inv").to_vec(),
         Expected::Value(7),
     ));
     let mut state = seed;

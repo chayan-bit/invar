@@ -231,7 +231,7 @@ pub fn manifest(root: &Path, programs: &[Program]) -> serde_json::Value {
     })
 }
 
-/// `bench/baselines/robotics-tables.h`: the binary32 model tables as bit
+/// `tools/bench/baselines/robotics-tables.h`: the binary32 model tables as bit
 /// patterns, for the handwritten baselines (generated data, not code).
 pub fn baseline_tables(root: &Path) -> String {
     let (panda, ur5e) = arms(root);

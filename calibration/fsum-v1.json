@@ -24,7 +24,7 @@
     },
     {
       "host_class": "linux-x86_64-32-core",
-      "status": "pending quiet window: the shared host's load average stayed between 12 and 28 (32 cores) on 2026-10-18; bench/fsum-cpu calibrate runs once it is under 8"
+      "status": "pending quiet window: the shared host's load average stayed between 12 and 28 (32 cores) on 2026-10-18; tools/bench/fsum-cpu calibrate runs once it is under 8"
     }
   ]
 }

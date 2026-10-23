@@ -40,10 +40,10 @@ The new split avoids its correlation between reduction-law parity and held-out m
 Run CPU commands with a private target directory and bounded memory, swap and runtime.
 
 ```sh
-cargo run --locked --bin invar-heldout -- --write-proposal bench/heldout-v1-proposal.json
-cargo run --locked --bin invar-heldout -- --check-proposal bench/heldout-v1-proposal.json
-cargo test --locked --test issue_m5_01_heldout_generators
-cargo test --locked --release --test issue_m5_01_heldout_generators
+cargo run --locked -p invar-tools --bin invar-heldout -- --write-proposal tools/bench/heldout-v1-proposal.json
+cargo run --locked -p invar-tools --bin invar-heldout -- --check-proposal tools/bench/heldout-v1-proposal.json
+cargo test --locked -p invar-tools --test issue_m5_01_heldout_generators
+cargo test --locked --release -p invar-tools --test issue_m5_01_heldout_generators
 ```
 
 The write command exclusively creates a new file and refuses overwrite.
