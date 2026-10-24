@@ -34,7 +34,7 @@ int main(int argc,char **argv){
  stub::published<Plan> = [&](const Plan&p){++approved;q=p.waypoints.back().q_rad;};
  stub::published<std_msgs::msg::String> = [&](const std_msgs::msg::String&m){phases.push_back(m.data);};
  auto send=[&](std::uint64_t ns,bool attached){State s;s.simulation_ns=ns;s.step_index=++step_index;s.source_ir_sha256=source_hash;s.joint_order_sha256=order_hash;s.q_rad=q;
-  invar_tool_projection_v1::Pose tool{{q[0],q[1],q[2]},{0,0,0,1}};
+  invar_tool_projection_v1::Pose tool{{q[0],q[1],q[2]},{fk_rotation[0],fk_rotation[1],fk_rotation[2],fk_rotation[3]}};
   if(!invar_tool_projection_v1::fk_to_cell(tool.p,tool.q))std::abort();
   s.world_from_tool={tool.p[0],tool.p[1],tool.p[2],tool.q[0],tool.q[1],tool.q[2],tool.q[3]};
   s.world_from_cube=cube;s.attached=attached?1:0;s.geom_classes={0,1,2,3};
