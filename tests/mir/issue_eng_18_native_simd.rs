@@ -9,7 +9,7 @@ use invar::{
     native::{self, Build, Cpu, Fact, IntervalOp, Operand, Promise},
 };
 
-#[path = "support/scratch.rs"]
+#[path = "../support/scratch.rs"]
 mod scratch;
 
 fn lower(source: &str) -> mir::Program {
@@ -33,9 +33,9 @@ fn run(program: &mir::Program, build: &Build, fuel: u64) -> (Option<i32>, String
 }
 
 const CORPUS: &[(&str, u64)] = &[
-    (include_str!("../examples/sum.inv"), 10_000),
-    (include_str!("../examples/ownership.inv"), 10_000),
-    (include_str!("../examples/fk_panda.inv"), 1_000_000),
+    (include_str!("../../examples/sum.inv"), 10_000),
+    (include_str!("../../examples/ownership.inv"), 10_000),
+    (include_str!("../../examples/fk_panda.inv"), 1_000_000),
     ("fn main() -> i32 { return 2147483647i32 + 1i32; }", 10_000),
     (
         "fn main() -> i32 { var x: i32 = 0; for i in 0u32 .. 1000u32 { x = x + 3; } return x; }",
@@ -78,7 +78,7 @@ fn issue_eng_18_optimized_builds_observe_identically() {
 
 #[test]
 fn issue_eng_18_objects_record_machine_and_pipeline() {
-    let program = lower(include_str!("../examples/sum.inv"));
+    let program = lower(include_str!("../../examples/sum.inv"));
     let portable = native::emit_mir(&program).unwrap();
     assert_eq!(portable.machine.cpu, "generic");
     assert_eq!(portable.machine.features, "");

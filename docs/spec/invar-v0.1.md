@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27997 estimator=bytes/3 limit=30000
+Size record: tokens=28035 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1055,7 +1055,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 [N11.2.1] The reference evaluator interprets checked source and is the oracle, and the typed MIR evaluator is an independent block interpreter that must agree on value, trap, steps and cleanup. `docs/mir-v1.md`
 [N11.2.2] MIR is verified at lowering and again at evaluation, and it is an internal schema and not a serialized format. `docs/mir-v1.md`
 [N11.2.3] The `native-serial` engine needs the `native` Cargo feature and LLVM 21, and otherwise reports `NATIVE_UNAVAILABLE`. `docs/native-toolchain-v1.md`
-[N11.2.4] Native arithmetic is checked against the exact i32 and u32 range, wrapping builtins truncate, and the LLVM IR carries no `nsw`, `nuw`, `noalias`, `inbounds` or `mustprogress`. `docs/native-toolchain-v1.md`
+[N11.2.4] Native arithmetic is checked against the exact i32 and u32 range, wrapping builtins truncate, and every `nsw`, `nuw`, `noalias` or `inbounds` in emitted LLVM IR carries an `!invar.fact` the promise audit proves, while fast-math flags, `mustprogress` and `llvm.assume` are always refused. `docs/native-toolchain-v1.md`
 [N11.2.5] Native and reference runs may use different fuel and are compared only for completed runs. `docs/native-toolchain-v1.md`
 
 ### 11.3 CPU parallel and admitted regions
