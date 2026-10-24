@@ -12,9 +12,10 @@ Show
 
 Type "cat $P" Enter
 Sleep 2s
-Type "# Every engine returns 0: each result equals the correctly rounded word." Enter
-Type `for e in reference cpu-parallel auto metal; do printf '%-14s' $e; invar run $P --engine $e --format json | jq -c '{value: .result.value, contracts: .numeric_contracts}'; done` Enter
+Type "# Every engine returns 0: each sin, cos and sqrt equals the correctly rounded word." Enter
+Type `for e in reference auto metal; do printf '%-14s' $e; invar run $P --engine $e --format json | jq -c '{value: .result.value, contracts: .numeric_contracts}'; done` Enter
+Type `printf '%-14s' cpu-parallel; invar run $P --engine cpu-parallel --workers 4 --format json | jq -c '{value: .result.value, contracts: .numeric_contracts}'` Enter
 Sleep 5s
-Type "# Metal has no cr-v1 sin/cos yet, so the explain keeps main on the CPU and says why:" Enter
-Type `invar explain $P --engine metal --format json | jq -c '.device_execution.choices[] | select(.reason == "math-cr-v1-device-unavailable") | {function, backend, reason}'` Enter
+Type "# Metal runs bump; it has no cr-v1 sin/cos yet, so trig stays on the CPU and explain says why:" Enter
+Type `invar explain $P --engine metal --format json | jq -c '[.device_execution.choices[] | {function, backend, reason}]'` Enter
 Sleep 5s

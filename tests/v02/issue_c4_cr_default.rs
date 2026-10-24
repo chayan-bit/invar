@@ -111,11 +111,15 @@ fn c4_f32_sqrt_regions_complete_on_the_device_plan_with_cr_v1_words() {
     }
 }
 
-/// `wave` calls f32 `sin`, `turn` only f64 `cos` and `main` neither.
+/// `wave` calls f32 `sin`, `turn` only f64 `cos` and `main` neither; `bump`
+/// is a u32 map a forced device runs, so the device request has a region.
 const SITES: &str = "fn wave(x: f32) -> f32 { let y = x * 2.0; return sin(y); }\n\
                      fn turn(x: f64) -> f64 { return cos(x); }\n\
-                     fn main() -> i32 { var s: f32 = 0.0; for i in 0u32..4u32 { s = s + wave(f32_from_u32(i)); } \
-                     if turn(0.0f64) == 1.0 and s < 0.0 { return 7; } return 0; }\n";
+                     fn bump(xs: read Array<u32>) -> Array<u32> { var ys = filled_u32(len(xs), 0u32); \
+                     for i in 0u32..len(xs) { ys[i] = wrapping_add(xs[i], 3u32); } return ys; }\n\
+                     fn main() -> i32 { let xs: Array<u32> = filled_u32(4096u32, 7u32); let ys = bump(xs); \
+                     var s: f32 = 0.0; for k in 0u32..4u32 { s = s + wave(f32_from_u32(k)); } \
+                     if turn(0.0f64) == 1.0 and s < 0.0 and ys[4095u32] == 10u32 { return 7; } return 0; }\n";
 
 #[test]
 fn c4_cpu_kept_sites_name_each_function_calling_f32_trig() {
