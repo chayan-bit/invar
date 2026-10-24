@@ -205,7 +205,7 @@ fn v01_gnet_auto_route_schema_refuses_compiled_claims() {
     std::fs::create_dir_all(&dir).unwrap();
     let valid = [false, true].map(|explain| (schema(explain), auto(&dir, FORKED, explain)));
     std::fs::remove_dir_all(dir).unwrap();
-    let edits: [Edit; 8] = [
+    let edits: [Edit; 10] = [
         ("native with a reason", |p| {
             p["route"] = json!({"host":"native","reason":"profiled-regions"})
         }),
@@ -232,19 +232,34 @@ fn v01_gnet_auto_route_schema_refuses_compiled_claims() {
             p["route"] = json!({"host":"reference","reason":"profiled-regions"});
             cpu(p, false)
         }),
+        // Site lists follow the route (#50): native has none, reference both.
+        ("native route with site lists", |p| {
+            p["route"] = json!({"host":"native","reason":null});
+            cpu(p, true);
+            lists(p, true)
+        }),
+        ("reference route without site lists", |p| {
+            p["route"] = json!({"host":"reference","reason":"profiled-regions"});
+            cpu(p, true);
+            lists(p, false)
+        }),
     ];
     let consistent: [Edit; 3] = [
+        // A native run keeps no per-call receipts, so it carries no site lists.
         ("native", |p| {
             p["route"] = json!({"host":"native","reason":null});
-            cpu(p, true)
+            cpu(p, true);
+            lists(p, false)
         }),
         ("profiled", |p| {
             p["route"] = json!({"host":"reference","reason":"profiled-regions"});
-            cpu(p, true)
+            cpu(p, true);
+            lists(p, true)
         }),
         ("reference", |p| {
             p["route"] = json!({"host":"reference","reason":"native-feature-unavailable"});
-            cpu(p, false)
+            cpu(p, false);
+            lists(p, true)
         }),
     ];
     for (validator, valid) in &valid {
@@ -258,6 +273,18 @@ fn v01_gnet_auto_route_schema_refuses_compiled_claims() {
             let mut doc = valid.clone();
             edit(&mut doc["placement"]);
             assert!(validator.is_valid(&doc), "{name}");
+        }
+    }
+}
+
+/// Gives the placement receipt both (empty) site lists, or neither.
+fn lists(placement: &mut Value, present: bool) {
+    let placement = placement.as_object_mut().unwrap();
+    for list in ["reductions", "intrinsics"] {
+        if present {
+            placement.entry(list).or_insert(json!([]));
+        } else {
+            placement.remove(list);
         }
     }
 }
