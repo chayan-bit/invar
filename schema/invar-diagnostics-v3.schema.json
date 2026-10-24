@@ -304,6 +304,204 @@
             }
           }
         },
+        "reductions": {
+          "description": "Float reduction receipts of the run, as the established auto path records them in device_execution.choices (#50). Recorded on the reference route; absent on the native route (route.host native), whose compiled code keeps no per-call receipts.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "function": {
+                "type": "string"
+              },
+              "span": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              },
+              "backend": {
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "cuda-failed-before-publication",
+                  "cuda-feature-unavailable",
+                  "device-plan-ineligible",
+                  "device-unavailable",
+                  "forced-device",
+                  "live-guard-false",
+                  "measured-cpu-cost",
+                  "measured-device-cost",
+                  "metal-buffer-slot-limit",
+                  "metal-failed-before-publication",
+                  "metal-no-f64",
+                  "publication-guard-false",
+                  "sort-cost-unmeasured",
+                  "spatial-cost-unmeasured",
+                  "spatial-host-work",
+                  "staged-consumer",
+                  "toolchain-unavailable"
+                ]
+              },
+              "kind": {
+                "type": "string"
+              },
+              "cost_ms": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpu": {
+                        "type": "number"
+                      },
+                      "device": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "cpu",
+                      "device"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "implementation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "family_id": {
+                "enum": [
+                  "spatial.voxel_grid_build.f32",
+                  "spatial.radius_neighbors.f32",
+                  "spatial.knn.f32",
+                  "spatial.grid_excluded.f32"
+                ]
+              }
+            },
+            "required": [
+              "function",
+              "span",
+              "backend",
+              "reason"
+            ]
+          }
+        },
+        "intrinsics": {
+          "description": "Sort and spatial sites of the run, run on the established CPU engines and recorded as the established auto path records them in device_execution.choices (#50). Recorded on the reference route; absent on the native route (route.host native), whose compiled code keeps no per-call receipts.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "function": {
+                "type": "string"
+              },
+              "span": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              },
+              "backend": {
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "cuda-failed-before-publication",
+                  "cuda-feature-unavailable",
+                  "device-plan-ineligible",
+                  "device-unavailable",
+                  "forced-device",
+                  "live-guard-false",
+                  "measured-cpu-cost",
+                  "measured-device-cost",
+                  "metal-buffer-slot-limit",
+                  "metal-failed-before-publication",
+                  "metal-no-f64",
+                  "publication-guard-false",
+                  "sort-cost-unmeasured",
+                  "spatial-cost-unmeasured",
+                  "spatial-host-work",
+                  "staged-consumer",
+                  "toolchain-unavailable"
+                ]
+              },
+              "kind": {
+                "type": "string"
+              },
+              "cost_ms": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpu": {
+                        "type": "number"
+                      },
+                      "device": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "cpu",
+                      "device"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "implementation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "family_id": {
+                "enum": [
+                  "spatial.voxel_grid_build.f32",
+                  "spatial.radius_neighbors.f32",
+                  "spatial.knn.f32",
+                  "spatial.grid_excluded.f32"
+                ]
+              }
+            },
+            "required": [
+              "function",
+              "span",
+              "backend",
+              "reason"
+            ]
+          }
+        },
         "legality": {
           "type": "object",
           "additionalProperties": false,
@@ -507,6 +705,66 @@
                 }
               }
             }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "route"
+            ],
+            "properties": {
+              "route": {
+                "properties": {
+                  "host": {
+                    "const": "native"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "reductions"
+                  ]
+                },
+                {
+                  "required": [
+                    "intrinsics"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "route",
+              "engine"
+            ],
+            "properties": {
+              "route": {
+                "properties": {
+                  "host": {
+                    "const": "reference"
+                  }
+                }
+              },
+              "engine": {
+                "not": {
+                  "const": "none"
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reductions",
+              "intrinsics"
+            ]
           }
         }
       ]

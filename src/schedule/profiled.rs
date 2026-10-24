@@ -9,6 +9,10 @@ use std::path::Path;
 pub struct Run {
     pub observation: Observation,
     pub choices: Vec<Json>,
+    /// Float reductions, run and labelled as the established CPU path does (#50).
+    pub reductions: Vec<reductions::Reduction>,
+    /// Sort and spatial sites, run on the established CPU engines (#50).
+    pub intrinsics: Vec<Executed>,
 }
 
 /// Resource identity and plan verification remain independent of cost hints.
@@ -267,7 +271,48 @@ pub fn run(
         choices.push(receipt);
         Ok(step)
     };
-    let (observation, published) = mir_eval::observe_offers(program, fuel, Some(&mut provider));
+    // Placement does not price reductions yet (#49): they take the established
+    // CPU path's workers, cost model and receipts. No device is offered one.
+    let workers = auto_workers().map_err(|e| EvalError::Tool {
+        code: e.code(),
+        message: format!("CPU worker selection failed: {e:?}"),
+    })?;
+    let reason = if cfg!(any(
+        feature = "cuda",
+        all(feature = "metal", target_os = "macos")
+    )) {
+        "device-unavailable"
+    } else {
+        "cuda-feature-unavailable"
+    };
+    let mut reduced = Vec::new();
+    let mut reducer = |call: &mir_eval::ReduceCall<'_>| {
+        let bits = reductions::cpu(call, workers).map_err(|e| EvalError::Tool {
+            code: e.code(),
+            message: format!("CPU reduction failure: {e:?}"),
+        })?;
+        let mut receipt = reductions::cpu_receipt(call, workers, reason);
+        if receipt.backend == reductions::SERIAL_BACKEND {
+            receipt.reason = "measured-cpu-cost";
+        }
+        reduced.push(receipt);
+        Ok(Some(bits))
+    };
+    let hooks = crate::schedule::Hooks::default();
+    let mut cpu = crate::spatial::CpuIntrinsics::new(program, workers, &hooks);
+    let mut sorts =
+        |function: &str,
+         name: &str,
+         args: &[crate::eval::Value],
+         span: crate::front::Span,
+         live: &mut usize| { cpu.invoke(function, name, args, span, live) };
+    let (observation, published) = mir_eval::observe_all(
+        program,
+        fuel,
+        Some(&mut provider),
+        Some(&mut sorts),
+        Some(&mut reducer),
+    );
     let mut outcomes = published.iter();
     for choice in &mut choices {
         if choice["offered"] == true {
@@ -282,6 +327,8 @@ pub fn run(
     Ok(Run {
         observation,
         choices,
+        reductions: reduced,
+        intrinsics: cpu.executed,
     })
 }
 

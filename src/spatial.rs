@@ -118,7 +118,7 @@ pub(crate) fn run_cpu_with(
 ) -> Result<crate::schedule::Run, crate::schedule::Error> {
     use crate::{
         plan::PlanKind,
-        schedule::{Error, Executed, Run},
+        schedule::{Error, Run},
     };
     let checked = crate::front::parse(source)
         .and_then(|p| crate::check::check(p, true))
@@ -127,38 +127,16 @@ pub(crate) fn run_cpu_with(
     if lowered.contract_digest() != program.contract_digest() {
         return Err(Error::Candidate);
     }
-    let joined = std::cell::Cell::new(0);
-    let mut executed = Vec::new();
+    let mut cpu = CpuIntrinsics::new(program, workers, hooks);
     let mut provider =
         |function: &str, name: &str, args: &[crate::eval::Value], span, live: &mut usize| {
-            let before = joined.get();
-            let spatial = result(name).is_some();
-            let value = if spatial {
-                runtime::invoke_counted(name, args, span, live, workers, &joined, hooks)?
-            } else {
-                crate::sorting::invoke(name, args, span, live, 1)?
-            };
-            executed.push(Executed {
-                function: function.into(),
-                span,
-                kind: if spatial {
-                    PlanKind::Spatial
-                } else {
-                    PlanKind::Sort
-                },
-                published_array: None,
-                implementation: Some(if !spatial {
-                    "cpu-lsd-radix-4x8"
-                } else if joined.get() == before {
-                    "cpu-sorted-grid-serial"
-                } else {
-                    "cpu-sorted-grid-parallel-queries"
-                }),
-            });
-            Ok(value)
+            cpu.invoke(function, name, args, span, live)
         };
     let observation =
         crate::mir_eval::observe_all(program, fuel, None, Some(&mut provider), Some(reducer)).0;
+    let CpuIntrinsics {
+        joined, executed, ..
+    } = cpu;
     let plan = if executed.iter().any(|step| step.kind == PlanKind::Spatial) {
         PlanKind::Spatial
     } else if executed.is_empty() {
@@ -176,4 +154,87 @@ pub(crate) fn run_cpu_with(
         executed,
         reductions: Vec::new(),
     })
+}
+
+/// The CPU engines of the explicit intrinsics as one MIR provider, as the
+/// established CPU run of the program uses them: spatial queries on `workers`,
+/// sorts serially in a spatial program and on the counted sort engine
+/// otherwise. Each reached site is recorded with the implementation that ran
+/// it (placement records them too, #50).
+pub(crate) struct CpuIntrinsics<'a> {
+    workers: usize,
+    spatial: bool,
+    hooks: &'a crate::schedule::Hooks,
+    pub joined: std::cell::Cell<usize>,
+    pub executed: Vec<crate::schedule::Executed>,
+}
+
+impl<'a> CpuIntrinsics<'a> {
+    pub(crate) fn new(
+        program: &crate::mir::Program,
+        workers: usize,
+        hooks: &'a crate::schedule::Hooks,
+    ) -> Self {
+        Self {
+            workers,
+            spatial: contains(program),
+            hooks,
+            joined: std::cell::Cell::new(0),
+            executed: Vec::new(),
+        }
+    }
+
+    pub(crate) fn invoke(
+        &mut self,
+        function: &str,
+        name: &str,
+        args: &[crate::eval::Value],
+        span: crate::front::Span,
+        live: &mut usize,
+    ) -> Result<crate::eval::Value, crate::eval::EvalError> {
+        use crate::plan::PlanKind;
+        let (before, joined, workers) = (self.joined.get(), &self.joined, self.workers);
+        let spatial = result(name).is_some();
+        let (value, implementation) = if spatial {
+            let value =
+                runtime::invoke_counted(name, args, span, live, workers, joined, self.hooks)?;
+            let parallel = joined.get() != before;
+            (
+                value,
+                if parallel {
+                    "cpu-sorted-grid-parallel-queries"
+                } else {
+                    "cpu-sorted-grid-serial"
+                },
+            )
+        } else if self.spatial {
+            (
+                crate::sorting::invoke(name, args, span, live, 1)?,
+                "cpu-lsd-radix-4x8",
+            )
+        } else {
+            let value = crate::sorting::invoke_counted(name, args, span, live, workers, joined)?;
+            let parallel = joined.get() != before;
+            (
+                value,
+                if parallel {
+                    "cpu-parallel-lsd-radix-4x8"
+                } else {
+                    "cpu-lsd-radix-4x8"
+                },
+            )
+        };
+        self.executed.push(crate::schedule::Executed {
+            function: function.into(),
+            span,
+            kind: if spatial {
+                PlanKind::Spatial
+            } else {
+                PlanKind::Sort
+            },
+            published_array: None,
+            implementation: Some(implementation),
+        });
+        Ok(value)
+    }
 }
