@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27997 estimator=bytes/3 limit=30000
+Size record: tokens=28007 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1149,7 +1149,7 @@ fn main() -> i32 { return 0; }
 [N14.1.3] Selected exports have at most eight scalar parameters of `i32` or `u32`, and calls validate names, types, arity and fuel before any source work. `docs/scalar-exports-v1.md`
 [N14.1.4] `capabilities()` reports what this build supports, and it is the authority for the binding surface. `crates/invar-python/src/lib.rs::capabilities`
 [N14.1.5] The reference array entry copies, the GIL is not released, and external array owners, scheduled host arrays and `take` buffers are unavailable. `crates/invar-python/src/lib.rs::external_array_owners`
-[N14.1.6] Exports accept `read` and `mut` `Array<i32>`, `Array<u32>` and `Array<f32>` parameters, which `native-serial` passes zero-copy at the NumPy address with rollback on failure and the reference path copies. `crates/invar-python/src/lib.rs::array_export_paths`
+[N14.1.6] Exports accept `read` and `mut` `Array<i32>`, `Array<u32>`, `Array<f32>`, `Array<f64>` and `Array<Bool>` parameters, which `native-serial` passes zero-copy at the NumPy address with rollback on failure and the reference path copies. `crates/invar-python/src/lib.rs::array_export_paths`
 [N14.1.8] `CheckedModule.run_main` runs `main` on any engine of `reference`, `native-serial`, `cpu-parallel`, `auto`, `cuda` and `metal`, and `receipt()` returns the receipt of the last successful `run_main`. `crates/invar-python/src/module.rs::run_main`
 [N14.1.7] The private wheel qualification is Linux x86_64 with glibc 2.41 and CPython 3.12 only. `crates/invar-python/README.md`
 
