@@ -115,7 +115,7 @@ fn c4_f32_sqrt_regions_complete_on_the_device_plan_with_cr_v1_words() {
 const SITES: &str = "fn wave(x: f32) -> f32 { let y = x * 2.0; return sin(y); }\n\
                      fn turn(x: f64) -> f64 { return cos(x); }\n\
                      fn main() -> i32 { var s: f32 = 0.0; for i in 0u32..4u32 { s = s + wave(f32_from_u32(i)); } \
-                     if turn(0.0f64) == 1.0 and s > 0.0 { return 7; } return 0; }\n";
+                     if turn(0.0f64) == 1.0 and s < 0.0 { return 7; } return 0; }\n";
 
 #[test]
 fn c4_cpu_kept_sites_name_each_function_calling_f32_trig() {
