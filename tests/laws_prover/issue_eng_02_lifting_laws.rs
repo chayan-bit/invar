@@ -5,8 +5,7 @@
 //! oracle (value or first source-order trap); they stay serial with
 //! `law_cost_uncalibrated` until the cost model is calibrated (#52).
 
-#[path = "../support/normal_form.rs"]
-mod support;
+use crate::support;
 
 use invar::{
     eval::{self, EvalError},

@@ -3,8 +3,7 @@
 //! terms, the net side of a lifting certificate. Each derived step is checked
 //! against a hand-written form with the in-repo prover.
 
-#[path = "../support/normal_form.rs"]
-mod support;
+use crate::support;
 
 use invar::{
     general_net::{
