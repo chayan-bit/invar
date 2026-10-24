@@ -192,12 +192,12 @@ Traps and fuel/resource exhaustion raise `TrapError` and `ResourceError`.
 `capabilities()["engine_features"]` reports compiled features, not live device availability.
 
 Build the binding with `--features native`, `--features cuda` or `--features metal` as needed.
-`run_main(artifact=path)` takes a compiled-ahead Metal library, as the CLI's `--artifact` does, for `metal` and `auto` (#46).
-Build it with `invar build PATH --target metal --output FILE`; `path` is a `str` or `os.PathLike` naming that file.
-The binding passes it to the same `invar::engine::run_mir` parameter, so validation and refusals match the CLI.
-A missing, unreadable or corrupt file raises `EngineError` / `DEVICE_TOOLCHAIN_MISMATCH` for `metal` and `auto`.
+`run_main(artifact=...)` takes a compiled-ahead Metal library, as the CLI's `--artifact` does, for `metal` and `auto` (#46).
+Build it with `invar build PATH --target metal --output FILE`; `artifact` is a `str` or `os.PathLike` naming that file, or the file's contents as `bytes` or `bytearray`.
+The binding decodes it (`invar::engine::metal_image` for a path, `metal_image_from_bytes` for bytes, the same size bound and checks) and passes the decoded image to `invar::engine::run_mir`, so validation and refusals match the CLI.
+A missing, unreadable or corrupt file, or corrupt, truncated or oversized bytes, raise `EngineError` / `DEVICE_TOOLCHAIN_MISMATCH` for `metal` and `auto`.
 A library built from another program raises the same error for `metal` and `auto`, including where `auto` runs a sort or spatial program on the CPU alone.
-In-memory bytes and bytes paths raise `ValidationError` / `TYPE_MISMATCH`.
+Any other type, including a path whose `__fspath__` returns `bytes`, a `memoryview`, a number or a list, raises `ValidationError` / `TYPE_MISMATCH`.
 Other engines refuse `artifact` with `EngineError` / `PY_ENGINE_UNAVAILABLE`.
 A build without Metal on macOS refuses it with `EngineError` / `METAL_UNAVAILABLE` before any backend is chosen, as the CLI does.
 Without `artifact`, forced `metal` raises `METAL_UNAVAILABLE` and `auto` stays on the CPU, unless the developer flag `INVAR_METAL_RUNTIME_SOURCE=1` allows runtime MSL compilation.
@@ -205,6 +205,7 @@ Without `artifact`, forced `metal` raises `METAL_UNAVAILABLE` and `auto` stays o
 ```python
 module = inv.compile_source(source, engine="metal")
 receipt = module.run_main(artifact="map.metallibc", observe=True)
+receipt = module.run_main(artifact=open("map.metallibc", "rb").read(), observe=True)
 ```
 
 `tests/test_metal_artifact.py` and the Metal case of `tests/test_engines.py` build their libraries with the CLI named by `INVAR_CLI` (built with `--features metal`).

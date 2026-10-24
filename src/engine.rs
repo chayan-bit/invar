@@ -49,15 +49,16 @@ fn auto_workers() -> Result<usize, EvalError> {
 /// Reference/native artifacts have separate entry points and are refused here.
 /// The CPU scheduler retains its documented serial guard path; `fallback_reason`
 /// discloses it. Callers that require a published parallel result must refuse it.
-/// `metal_artifact` names a compiled-ahead Metal library; without one, Metal
-/// compiles runtime source only under the developer flag.
+/// `metal_artifact` is a decoded compiled-ahead Metal library (`metal_image`
+/// or `metal_image_from_bytes`); without one, Metal compiles runtime source
+/// only under the developer flag.
 pub fn run_mir(
     source: &[u8],
     program: &crate::mir::Program,
     engine: Engine,
     fuel: u64,
     workers: usize,
-    metal_artifact: Option<&std::path::Path>,
+    metal_artifact: Option<&crate::metal_aot::Image>,
 ) -> Result<serde_json::Value, EvalError> {
     let mut receipt = match engine {
         Engine::CpuParallel => run_cpu(
@@ -187,18 +188,31 @@ fn run_cuda(
 
 /// The compiled-ahead container named by `artifact`, read privately and
 /// validated.
-#[cfg(all(feature = "metal", target_os = "macos"))]
 pub fn metal_image(
     artifact: Option<&std::path::Path>,
 ) -> Result<Option<crate::metal_aot::Image>, EvalError> {
-    artifact
-        .map(|file| {
-            crate::metal_aot::build::read(file).map_err(|e| EvalError::Tool {
-                code: "DEVICE_TOOLCHAIN_MISMATCH",
-                message: format!("compiled-ahead Metal library refused: {e:?}"),
-            })
-        })
-        .transpose()
+    artifact.map(metal_image_from_path).transpose()
+}
+
+/// The compiled-ahead container in `file`, read privately and validated.
+pub fn metal_image_from_path(file: &std::path::Path) -> Result<crate::metal_aot::Image, EvalError> {
+    crate::metal_aot::build::read(file).map_err(refused_image)
+}
+
+/// The compiled-ahead container held in memory, validated like a file: the
+/// same size bound, checks and refusal as `metal_image`.
+pub fn metal_image_from_bytes(bytes: &[u8]) -> Result<crate::metal_aot::Image, EvalError> {
+    if bytes.len() > crate::metal_aot::MAX_CONTAINER_BYTES {
+        return Err(refused_image(crate::metal_aot::Error::Size));
+    }
+    crate::metal_aot::decode(bytes).map_err(refused_image)
+}
+
+fn refused_image(error: crate::metal_aot::Error) -> EvalError {
+    EvalError::Tool {
+        code: "DEVICE_TOOLCHAIN_MISMATCH",
+        message: format!("compiled-ahead Metal library refused: {error:?}"),
+    }
 }
 
 /// The kernels a Metal run uses: the compiled-ahead image when one is given,
@@ -219,10 +233,9 @@ fn run_metal(
     program: &crate::mir::Program,
     engine: &str,
     fuel: u64,
-    artifact: Option<&std::path::Path>,
+    image: Option<&crate::metal_aot::Image>,
 ) -> Result<serde_json::Value, EvalError> {
-    let image = metal_image(artifact)?;
-    let kernels = metal_kernels(image.as_ref());
+    let kernels = metal_kernels(image);
     if engine == "metal" {
         let run = crate::schedule::metal::run_source(source, program, fuel, kernels).map_err(
             |error| EvalError::Tool {
@@ -278,7 +291,7 @@ fn run_metal(
     _: &crate::mir::Program,
     _: &str,
     _: u64,
-    _: Option<&std::path::Path>,
+    _: Option<&crate::metal_aot::Image>,
 ) -> Result<serde_json::Value, EvalError> {
     Err(EvalError::Tool {
         code: "METAL_UNAVAILABLE",
