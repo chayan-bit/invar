@@ -120,17 +120,16 @@ fn v02_math_library_is_correctly_rounded_on_every_cpu_engine() {
 }
 
 #[test]
-fn v02_numeric_contracts_name_trig_for_f32_sin_cos_and_sqrt() {
-    // C4 interim: f32 sin, cos and sqrt are invar-trig-f32-v1; f64 and every
-    // other library function are invar-math-cr-v1.
+fn v02_numeric_contracts_name_math_for_every_library_call() {
+    // f32 sin, cos and sqrt are invar-math-cr-v1 like every library call (#48).
     for (source, expected) in [
         (
             "fn main() -> i32 { let x: f32 = sin(1.0) + cos(1.0) + sqrt(2.0); return 0; }",
-            serde_json::json!({"trig": "invar-trig-f32-v1"}),
+            serde_json::json!({"math": "invar-math-cr-v1"}),
         ),
         (
             "fn main() -> i32 { let x: f32 = sin(1.0) + exp(1.0); return 0; }",
-            serde_json::json!({"math": "invar-math-cr-v1", "trig": "invar-trig-f32-v1"}),
+            serde_json::json!({"math": "invar-math-cr-v1"}),
         ),
         (
             "fn main() -> i32 { let x: f64 = sin(1.0f64); return 0; }",

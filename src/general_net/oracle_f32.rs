@@ -44,11 +44,8 @@ pub(super) fn call(
             let Scalar::F32(a) = frame.get(*a)? else {
                 return Err(internal());
             };
-            Scalar::F32(match name {
-                "sin" => a.sin(),
-                "cos" => a.cos(),
-                _ => a.sqrt(),
-            })
+            let f = crate::math::MathFn::from_name(name).ok_or_else(internal)?;
+            Scalar::F32(crate::math::eval_f32(f, &[a]))
         }
         ("f32_from_i32", [a]) => {
             let Scalar::I32(a) = frame.get(*a)? else {

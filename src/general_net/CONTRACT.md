@@ -401,9 +401,8 @@ Build and load derive the same inventory from the admitted artifact and reject m
 ABI5 keeps its one-library container.
 The container format and production prohibition on runtime source compilation are unchanged.
 
-The compiled C++, CUDA and MSL numeric bodies admit `sin`, `cos` and `sqrt`, including ABI13 entries.
-`trig_f32.rs` generates the frozen operation sequence over the existing exact integer f32 helpers; its integer square-root primitive rounds correctly without device float arithmetic.
-NaNs, signed zeros, infinities, subnormals and huge trig arguments follow `invar-trig-f32-v1`.
+The compiled C++, CUDA and MSL numeric bodies admit `sqrt`, including ABI13 entries, as the correctly rounded `invar-math-cr-v1` result computed by an integer square root without device float arithmetic.
+They refuse `sin` and `cos` (`UnsupportedCall`): no device lowers their `invar-math-cr-v1` kernels yet, so such programs run on the CPU.
 The launch, speculation and scheduling structure is unchanged.
 
 ## Host-frame body capsules (protocol v1)

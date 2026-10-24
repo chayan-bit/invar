@@ -50,6 +50,7 @@
               "device-unavailable",
               "forced-device",
               "live-guard-false",
+              "math-cr-v1-device-unavailable",
               "measured-cpu-cost",
               "measured-device-cost",
               "metal-buffer-slot-limit",

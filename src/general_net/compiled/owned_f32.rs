@@ -81,8 +81,6 @@ pub(super) fn validate(program: &mir::Program, entry: &str, target: Target) -> R
                                     | "fma"
                                     | "f32_from_i32"
                                     | "f32_from_u32"
-                                    | "sin"
-                                    | "cos"
                                     | "sqrt"
                             ) =>
                     {
