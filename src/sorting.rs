@@ -178,7 +178,7 @@ pub(crate) fn failure(error: Error, span: Span) -> EvalError {
         },
     }
 }
-fn invoke_counted(
+pub(crate) fn invoke_counted(
     name: &str,
     args: &[Value],
     span: Span,
@@ -276,27 +276,17 @@ pub(crate) fn run_cpu_with(
     if !binds(source, program) {
         return Err(crate::schedule::Error::Candidate);
     }
-    let joined = Cell::new(0);
-    let mut executed = Vec::new();
+    let hooks = crate::schedule::Hooks::default();
+    let mut cpu = crate::spatial::CpuIntrinsics::new(program, workers, &hooks);
     let mut provider =
         |function: &str, name: &str, args: &[Value], span: Span, live: &mut usize| {
-            let before = joined.get();
-            let result = invoke_counted(name, args, span, live, workers, &joined)?;
-            executed.push(crate::schedule::Executed {
-                function: function.into(),
-                span,
-                kind: crate::plan::PlanKind::Sort,
-                published_array: None,
-                implementation: Some(if joined.get() == before {
-                    "cpu-lsd-radix-4x8"
-                } else {
-                    "cpu-parallel-lsd-radix-4x8"
-                }),
-            });
-            Ok(result)
+            cpu.invoke(function, name, args, span, live)
         };
     let observation =
         crate::mir_eval::observe_all(program, fuel, None, Some(&mut provider), Some(reducer)).0;
+    let crate::spatial::CpuIntrinsics {
+        joined, executed, ..
+    } = cpu;
     Ok(crate::schedule::Run {
         observation,
         plan: if executed.is_empty() {
