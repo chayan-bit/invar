@@ -37,10 +37,14 @@ pub(super) fn export_parameter(p: &crate::front::Param) -> Result<ExportParamete
         (Some(Mode::Mut), Type::ArrayU32) => (Some(ScalarType::U32), Some(ArrayMode::Mut)),
         (Some(Mode::Read), Type::ArrayF32) => (Some(ScalarType::F32), Some(ArrayMode::Read)),
         (Some(Mode::Mut), Type::ArrayF32) => (Some(ScalarType::F32), Some(ArrayMode::Mut)),
+        (Some(Mode::Read), Type::ArrayF64) => (Some(ScalarType::F64), Some(ArrayMode::Read)),
+        (Some(Mode::Mut), Type::ArrayF64) => (Some(ScalarType::F64), Some(ArrayMode::Mut)),
+        (Some(Mode::Read), Type::ArrayBool) => (Some(ScalarType::Bool), Some(ArrayMode::Read)),
+        (Some(Mode::Mut), Type::ArrayBool) => (Some(ScalarType::Bool), Some(ArrayMode::Mut)),
         _ => {
             return Err(boundary(
                 "NATIVE_ABI",
-                "export parameters must copy i32/u32 values or borrow read/mut Array<i32|u32|f32>",
+                "export parameters must copy i32/u32 values or borrow read/mut Array<i32|u32|f32|f64|bool>",
             ));
         }
     };
@@ -58,6 +62,8 @@ pub(super) fn parameter_tag(p: &ExportParameter) -> u32 {
         ScalarType::I32 => host::ELEMENT_I32,
         ScalarType::U32 => host::ELEMENT_U32,
         ScalarType::F32 => host::ELEMENT_F32,
+        ScalarType::F64 => host::ELEMENT_F64,
+        ScalarType::Bool => host::ELEMENT_BOOL,
     };
     match p.array {
         None => p.ty.tag(),
@@ -69,7 +75,7 @@ pub(super) fn parameter_tag(p: &ExportParameter) -> u32 {
 fn scalar(ty: &Type) -> bool {
     matches!(
         ty,
-        Type::I32 | Type::U32 | Type::F32 | Type::Bool | Type::Unit
+        Type::I32 | Type::U32 | Type::F32 | Type::F64 | Type::Bool | Type::Unit
     )
 }
 
@@ -80,7 +86,12 @@ fn admitted_arrays(f: &mir::Function, selected: bool) -> HashMap<&str, bool> {
     }
     f.params
         .iter()
-        .filter(|p| matches!(p.ty, Type::ArrayI32 | Type::ArrayU32 | Type::ArrayF32))
+        .filter(|p| {
+            matches!(
+                p.ty,
+                Type::ArrayI32 | Type::ArrayU32 | Type::ArrayF32 | Type::ArrayF64 | Type::ArrayBool
+            )
+        })
         .filter_map(|p| match p.mode {
             Some(Mode::Read) => Some((p.name.as_str(), false)),
             Some(Mode::Mut) => Some((p.name.as_str(), true)),
@@ -91,7 +102,7 @@ fn admitted_arrays(f: &mir::Function, selected: bool) -> HashMap<&str, bool> {
 
 /// Admit the complete reachable MIR of the selection: the scalar fragment,
 /// plus, in selected functions only, element reads, lengths and element
-/// stores of their own `read`/`mut` `Array<i32|u32|f32>` parameters. An array
+/// stores of their own `read`/`mut` `Array<i32|u32|f32|f64|bool>` parameters. An array
 /// value may only feed `Index`; it is never passed, bound, stored or returned.
 pub(super) fn admit(
     program: &mir::Program,
@@ -160,6 +171,7 @@ pub(super) fn admit(
                     | Op::I32(_)
                     | Op::U32(_)
                     | Op::F32(_)
+                    | Op::F64(_)
                     | Op::Bool(_)
                     | Op::Read(_)
                     | Op::Drop(_)
@@ -250,6 +262,22 @@ impl CompiledExports {
                     HostArgument::Mut(M::F32(_) | M::Float32(_)),
                     Some(ArrayMode::Mut),
                     ScalarType::F32
+                ) | (
+                    HostArgument::Read(R::Float64(_)),
+                    Some(ArrayMode::Read),
+                    ScalarType::F64
+                ) | (
+                    HostArgument::Mut(M::Float64(_)),
+                    Some(ArrayMode::Mut),
+                    ScalarType::F64
+                ) | (
+                    HostArgument::Read(R::Bool(_)),
+                    Some(ArrayMode::Read),
+                    ScalarType::Bool
+                ) | (
+                    HostArgument::Mut(M::Bool(_)),
+                    Some(ArrayMode::Mut),
+                    ScalarType::Bool
                 ) | (HostArgument::I32(_), None, ScalarType::I32)
                     | (HostArgument::U32(_), None, ScalarType::U32)
                     | (
@@ -367,6 +395,10 @@ mod native {
                 HostArgument::Mut(M::U32(v)) => arrays.push(HostArray::MutU32(v)),
                 HostArgument::Read(R::Float32(v)) => arrays.push(HostArray::ReadF32(v)),
                 HostArgument::Mut(M::Float32(v)) => arrays.push(HostArray::MutF32(v)),
+                HostArgument::Read(R::Float64(v)) => arrays.push(HostArray::ReadF64(v)),
+                HostArgument::Mut(M::Float64(v)) => arrays.push(HostArray::MutF64(v)),
+                HostArgument::Read(R::Bool(v)) => arrays.push(HostArray::ReadBool(v)),
+                HostArgument::Mut(M::Bool(v)) => arrays.push(HostArray::MutBool(v)),
                 _ => {
                     return Err(boundary(
                         "NATIVE_ABI",

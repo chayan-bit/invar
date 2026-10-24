@@ -2,8 +2,8 @@
 
 `call_reference` takes an exact built-in `float` for f64, NumPy `float64` arrays and NumPy `bool_` arrays (every byte
 0 or 1), read or mut, and returns f64 as a `float` and arrays as new NumPy arrays. Every refusal is typed, raised before
-execution with `steps_used == 0`, and leaves the inputs byte-identical. Exports (`exports=[...]`) still refuse the
-types at artifact admission.
+execution with `steps_used == 0`, and leaves the inputs byte-identical. Exports (`exports=[...]`) admit only f64 and
+Bool arrays as parameters (`test_native_f64_bool_arrays.py`); scalar f64 and returned arrays are refused at admission.
 """
 import struct
 
@@ -300,11 +300,18 @@ def test_capabilities_name_the_new_types():
     assert "read Array<f64>" in caps["reference_v02_types"]
 
 
-# --- exports still refuse the types (native ABI is a separate step) -------
+# --- exports refuse scalar f64 and returned arrays (arrays as parameters are admitted) -------
 
-@pytest.mark.parametrize("name", ["twice", "half", "width", "grid", "count", "flags"])
-def test_exports_refuse_the_v02_types(name):
+@pytest.mark.parametrize("name", ["twice", "half", "summed", "grid", "flags"])
+def test_exports_refuse_scalar_f64_and_returned_arrays(name):
     export_refused(name)
+
+
+@pytest.mark.parametrize("name", ["width", "count", "copy_f64", "mark"])
+def test_exports_admit_f64_and_bool_array_parameters(name):
+    module = ip.compile_source(SOURCE, path="v02_types.inv", exports=[name], engine="reference")
+    (descriptor,) = module.exports()
+    assert descriptor["name"] == name
 
 
 def test_f64_c_import_is_listed_but_not_callable(c_library):

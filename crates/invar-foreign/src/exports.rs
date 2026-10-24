@@ -28,9 +28,12 @@ type CallArraysFn = unsafe extern "C" fn(
     *mut InvResult,
 ) -> i32;
 
-/// Private HA-1.2 descriptor tags of `read`/`mut` `Array<i32|u32>` parameters
-/// (`0x100 | element << 4 | mode`). They never appear in an `inv_arg_v1`.
-pub(crate) const ARRAY_TAGS: [u32; 6] = [0x111, 0x113, 0x121, 0x123, 0x131, 0x133];
+/// Private HA-1.2 descriptor tags of `read`/`mut` `Array<i32|u32|f32|f64|bool>`
+/// parameters (`0x100 | element << 4 | mode`). They never appear in an
+/// `inv_arg_v1`.
+pub(crate) const ARRAY_TAGS: [u32; 10] = [
+    0x111, 0x113, 0x121, 0x123, 0x131, 0x133, 0x141, 0x143, 0x151, 0x153,
+];
 
 fn is_array_tag(tag: u32) -> bool {
     ARRAY_TAGS.contains(&tag)

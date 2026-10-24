@@ -341,12 +341,14 @@ pub unsafe extern "C" fn call_arrays(
 /// Validate a private record against its signature tag (integer metadata only).
 fn entry_for(tag: u32, record: HostArray) -> Option<Entry> {
     let (element, mode) = ((tag >> 4) & 0xf, tag & 0xf);
-    let shaped = tag & !0xff == 0x100 && matches!(element, 1 | 2 | 3) && matches!(mode, 1 | 3);
+    let shaped = tag & !0xff == 0x100 && matches!(element, 1..=5) && matches!(mode, 1 | 3);
+    // HA-1.4: i32/u32/f32 are four bytes, f64 eight, bool one; alignment equals size.
+    let size: usize = match element { 4 => 8, 5 => 1, _ => 4 };
     let address = record.data as usize;
     let valid = shaped && record.element == element && record.mode == mode
         && record.len <= MAX_ELEMENTS && record.data.is_null() == (record.len == 0)
-        && address.is_multiple_of(4)
-        && address.checked_add(record.len as usize * 4).is_some();
+        && address.is_multiple_of(size)
+        && address.checked_add(record.len as usize * size).is_some();
     valid.then_some(Entry { data: record.data, len: record.len, element, mutable: mode == 3 })
 }
 
@@ -410,15 +412,20 @@ pub unsafe extern "C" fn array_index(handle: i64, index: i64, start: u32, end: u
     let Some(entry) = lookup(handle) else { tool(1); return 1; };
     if out.is_null() || !aligned(out) { tool(1); return 1; }
     let Some(index) = element_index(entry, index, start, end) else { return 1; };
-    // SAFETY: the record was validated (non-null, 4-aligned, len elements in
+    // SAFETY: the record was validated (non-null, element-aligned, len elements in
     // the caller's live borrowed slice) and index < len; read at the caller's address.
     let value = unsafe {
         match entry.element {
             1 => i64::from(ptr::read(entry.data.cast::<i32>().add(index))),
+            // Binary64 is the raw bit carrier, never a numeric conversion.
+            4 => ptr::read(entry.data.cast::<i64>().add(index)),
+            5 => i64::from(ptr::read(entry.data.cast::<u8>().add(index))),
             // Binary32 is a zero-extended bit carrier, never a numeric conversion.
             _ => i64::from(ptr::read(entry.data.cast::<u32>().add(index))),
         }
     };
+    // A bool byte other than 0 or 1 is never published as a value (HA-1.4).
+    if entry.element == 5 && value > 1 { tool(1); return 1; }
     // SAFETY: generated code passes its own aligned i64 frame slot.
     unsafe { ptr::write(out, value) };
     0
@@ -426,13 +433,21 @@ pub unsafe extern "C" fn array_index(handle: i64, index: i64, start: u32, end: u
 #[unsafe(export_name = "inv_private_namespacearray_store_v1")]
 pub unsafe extern "C" fn array_store(handle: i64, index: i64, value: i64, start: u32, end: u32) -> i32 {
     let Some(entry) = lookup(handle) else { tool(1); return 1; };
-    if !entry.mutable || !valid_scalar(if entry.element == 3 { 2 } else { entry.element }, value) { tool(1); return 1; }
+    let storable = match entry.element {
+        1 => valid_scalar(1, value),
+        2 | 3 => valid_scalar(2, value),
+        4 => true,
+        _ => value == 0 || value == 1,
+    };
+    if !entry.mutable || !storable { tool(1); return 1; }
     let Some(index) = element_index(entry, index, start, end) else { return 1; };
     // SAFETY: a mut record was validated as above; the caller's exclusive
     // borrow covers len elements and index < len; write at the caller's address.
     unsafe {
         match entry.element {
             1 => ptr::write(entry.data.cast::<i32>().add(index), value as i32),
+            4 => ptr::write(entry.data.cast::<i64>().add(index), value),
+            5 => ptr::write(entry.data.cast::<u8>().add(index), value as u8),
             _ => ptr::write(entry.data.cast::<u32>().add(index), value as u32),
         }
     }
