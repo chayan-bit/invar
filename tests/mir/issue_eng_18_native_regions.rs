@@ -91,6 +91,13 @@ fn issue_eng_18_map_kernels_match_the_plan_interpreter() {
             vec![],
             vec![0, 1],
         ),
+        // The same IR as the plan above on other slots: a separate kernel.
+        live(
+            vec![vec![], vec![]],
+            Some(ZipOp::WrappingAdd),
+            vec![],
+            vec![0, 0],
+        ),
         live(
             vec![vec![Mul(5), Add(1)], vec![Add(9)]],
             Some(ZipOp::WrappingMul),

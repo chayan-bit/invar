@@ -330,7 +330,9 @@ pub fn compiled_count() -> usize {
 
 fn compiled(kernel: Kernel, slots: Vec<usize>) -> Option<std::sync::Arc<Compiled>> {
     let mut cache = cache().lock().ok()?;
-    if let Some(entry) = cache.get(&kernel.ir) {
+    // The IR does not encode the input slots, so they are part of the key.
+    let key = format!("{slots:?}\n{}", kernel.ir);
+    if let Some(entry) = cache.get(&key) {
         return entry.clone();
     }
     if cache.len() >= MAX_CACHED {
@@ -344,7 +346,7 @@ fn compiled(kernel: Kernel, slots: Vec<usize>) -> Option<std::sync::Arc<Compiled
         *last = Some(error.clone());
     }
     let entry = built.ok().map(std::sync::Arc::new);
-    cache.insert(kernel.ir, entry.clone());
+    cache.insert(key, entry.clone());
     entry
 }
 
