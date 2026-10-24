@@ -42,9 +42,7 @@ pub enum Node {
     FromU32(usize),
     FromI32(usize),
     TruncI32(usize),
-    /// `invar-trig-f32-v1` (`crate::trig_f32`).
-    Sin(usize),
-    Cos(usize),
+    /// Correctly rounded `sqrt` (`invar-math-cr-v1`), see [`sqrt_helper`].
     Sqrt(usize),
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -96,7 +94,7 @@ impl Program {
             let ty = match *node {
                 Node::Input(slot) => *self.inputs.get(slot).ok_or(v2::Error::Bounds)?,
                 Node::Constant(_, ty) => ty,
-                Node::Neg(a) | Node::Sin(a) | Node::Cos(a) | Node::Sqrt(a) => {
+                Node::Neg(a) | Node::Sqrt(a) => {
                     float(a)?;
                     Scalar::F32
                 }
@@ -232,38 +230,48 @@ pub fn probe_ops(p: &Program) -> Vec<crate::f32_probe::Op> {
     ops
 }
 
-/// Floating operations the `invar-trig-f32-v1` helpers of `p` execute. The
-/// helpers never read or produce a subnormal (exhaustively audited), so a
-/// device admits them when every probe case of these operations is exact
-/// except the subnormal-dependent ones; see [`admits_trig`].
-pub fn trig_ops(p: &Program) -> Vec<crate::f32_probe::Op> {
+/// Device admission for the `sqrt` helper of `p`: it reads a subnormal only
+/// through exact integer paths, so every probe mismatch of the operations it
+/// uses (`Mul`, `FromU32`, `Sqrt`) must depend on gradual underflow. A program
+/// without `sqrt` is admitted trivially.
+pub fn admits_sqrt(p: &Program, report: &crate::f32_probe::Report) -> bool {
     use crate::f32_probe::Op;
-    let trig = p
-        .nodes
-        .iter()
-        .any(|n| matches!(n, Node::Sin(_) | Node::Cos(_)));
-    let root = p.nodes.iter().any(|n| matches!(n, Node::Sqrt(_)));
-    let mut ops = Vec::new();
-    if trig {
-        ops.extend([Op::Mul, Op::Add, Op::Sub, Op::Fma]);
-    }
-    if root {
-        ops.extend([Op::Mul, Op::FromU32, Op::Sqrt]);
-    }
-    ops.sort_by_key(|op| op.code());
-    ops.dedup();
-    ops
+    !p.nodes.iter().any(|n| matches!(n, Node::Sqrt(_)))
+        || report.mismatches().iter().all(|&i| {
+            let case = &crate::f32_probe::CASES[i];
+            !matches!(case.op, Op::Mul | Op::FromU32 | Op::Sqrt) || case.subnormal
+        })
 }
 
-/// Device admission for the trig and sqrt helpers of `p`: every mismatching
-/// probe case of their operations depends on gradual underflow, which the
-/// helpers never exercise. A program without them is admitted trivially.
-pub fn admits_trig(p: &Program, report: &crate::f32_probe::Report) -> bool {
-    let ops = trig_ops(p);
-    report.mismatches().iter().all(|&i| {
-        let case = &crate::f32_probe::CASES[i];
-        !ops.contains(&case.op) || case.subnormal
-    })
+/// Correctly rounded binary32 `sqrt` over words, `invar_sqrt_f32(x)`. A
+/// subnormal operand is scaled exactly by 2^150 into an integer, whose root
+/// rounds once and scales back exactly by 2^-75, so flushing never changes
+/// the bits; NaN results are the canonical quiet NaN.
+pub fn sqrt_helper(cuda: bool) -> String {
+    let (q, u, root, twice, product) = if cuda {
+        (
+            "__device__ static inline",
+            "unsigned",
+            "__float_as_uint(__fsqrt_rn(__uint_as_float(x)))",
+            "__fsqrt_rn(__uint2float_rn(a << 1))",
+            "__float_as_uint(__fmul_rn(r, __uint_as_float(0x1a000000u)))",
+        )
+    } else {
+        (
+            "static inline",
+            "uint",
+            "as_type<uint>(sqrt(as_type<float>(x)))",
+            "sqrt(float(a << 1))",
+            "as_type<uint>(r * as_type<float>(0x1a000000u))",
+        )
+    };
+    format!(
+        "{q} {u} invar_sqrt_f32({u} x) {{ const {u} a = x & 0x7fffffffu; \
+if (a > 0x7f800000u || ((x >> 31) != 0u && a != 0u)) return 0x7fc00000u; \
+if (a == 0u) return x; \
+if (a < 0x00800000u) {{ const float r = {twice}; return {product}; }} \
+return {root}; }}\n"
+    )
 }
 
 /// Integer-only IEEE comparisons and checked truncation cannot read a
@@ -319,18 +327,8 @@ pub fn emit(plan: &v2::Verified) -> Result<String, v2::Error> {
     }
     s.push_str(&floating::guard_helpers(cuda));
     s.push_str(&word_helpers(cuda));
-    let trig = p
-        .nodes
-        .iter()
-        .any(|n| matches!(n, Node::Sin(_) | Node::Cos(_)));
-    let root = p.nodes.iter().any(|n| matches!(n, Node::Sqrt(_)));
-    if trig || root {
-        let lang = if cuda {
-            crate::trig_f32::Lang::Cuda
-        } else {
-            crate::trig_f32::Lang::Msl
-        };
-        s.push_str(&crate::trig_f32::helpers(lang, trig, root));
+    if p.nodes.iter().any(|n| matches!(n, Node::Sqrt(_))) {
+        s.push_str(&sqrt_helper(cuda));
     }
     if cuda {
         writeln!(s, "extern \"C\" __global__ void {KERNEL_NAME}(const unsigned* A, const unsigned* B, unsigned* C) {{ unsigned start = blockIdx.x * blockDim.x + threadIdx.x; unsigned threads = gridDim.x * blockDim.x; unsigned flag = 0u;").map_err(|_| v2::Error::Bounds)?;
@@ -420,12 +418,9 @@ pub fn emit(plan: &v2::Verified) -> Result<String, v2::Error> {
                 Compare::Le => format!("invar_lt(v{a},v{b}) | invar_eq(v{a},v{b})"),
                 Compare::Ge => format!("invar_lt(v{b},v{a}) | invar_eq(v{a},v{b})"),
             },
-            // No dispatch guard: the helpers never read or produce a subnormal
-            // (subnormal inputs take exact integer paths), so flushing cannot
-            // change their bits. Later nodes still guard their own operands.
-            Node::Sin(a) => format!("{}(v{a}, 0u)", crate::trig_f32::SIN_HELPER),
-            Node::Cos(a) => format!("{}(v{a}, 1u)", crate::trig_f32::SIN_HELPER),
-            Node::Sqrt(a) => format!("{}(v{a})", crate::trig_f32::SQRT_HELPER),
+            // No dispatch guard: the helper never reads a subnormal float (see
+            // `sqrt_helper`). Later nodes still guard their own operands.
+            Node::Sqrt(a) => format!("invar_sqrt_f32(v{a})"),
             Node::FromU32(a) => bits(&if cuda {
                 format!("__uint2float_rn(v{a})")
             } else {

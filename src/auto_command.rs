@@ -360,10 +360,12 @@ pub fn command(args: &[OsString]) -> i32 {
                 report["auto_path"] = json!("placement");
                 // Retain the established device-explain schema; detailed profile
                 // costs live in the shared placement receipt beside it.
-                let mut choices=doc["placement"]["choices"].as_array().into_iter().flatten().map(|c|json!({
+                // f32 sin and cos come first: no device lowers their cr-v1 kernels (#48).
+                let mut choices = invar::engine::cpu_kept_choices(&program, false);
+                choices.extend(doc["placement"]["choices"].as_array().into_iter().flatten().map(|c|json!({
                     "function":c["function"],"span":c["span"],"backend":c["engine"],
                     "reason":if c["engine"]=="cpu" {"measured-cpu-cost"} else {"measured-device-cost"}
-                })).collect::<Vec<_>>();
+                })));
                 for receipts in ["intrinsics", "reductions"] {
                     let receipts = doc["placement"][receipts].as_array().into_iter().flatten();
                     choices.extend(receipts.cloned());

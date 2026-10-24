@@ -31,7 +31,7 @@ Persisted documents are descriptive admission inputs.
 A checksum or successful validation does not prove semantic equivalence by itself.
 Later extraction and execution must recheck the obligations at their own boundary.
 
-`f64` programs add the optional `numeric_contracts` object and the device reason `metal-no-f64`.
+Programs that use `f64` or a library function add the optional `numeric_contracts` object; the device reasons `metal-no-f64` and `math-cr-v1-device-unavailable` mark functions kept on the CPU.
 
 ## Explicit sorts
 
@@ -134,6 +134,7 @@ The container digest gives integrity, not authenticity.
 
 A region whose Metal kernel would bind more than 31 buffer arguments (the Apple GPU limit) is Metal-ineligible at planning time: `auto` records reason `metal-buffer-slot-limit` and runs it on CPU.
 Metal has no binary64, and Invar does not emulate it: under `--engine metal` or `auto` on Metal, every function that computes an `f64` value is listed once, at its first such instruction, with backend `mir-serial` and reason `metal-no-f64`, and runs on the CPU.
+Under `--engine cuda`, `--engine metal` or `auto` on either, every function that calls f32 `sin` or `cos` is listed the same way with reason `math-cr-v1-device-unavailable`: no device lowers their `invar-math-cr-v1` kernels yet, so they run on the CPU instead of changing bits.
 Forced CUDA or Metal fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for missing hardware, ineligible regions or false live guards; compilation/verification mismatch uses `DEVICE_TOOLCHAIN_MISMATCH`.
 Unknown completion uses `CUDA_PENDING` or `METAL_PENDING` and permits no CPU replay.
 `auto` can fall back to a fresh CPU result only before device submission or after confirmed quiescence.

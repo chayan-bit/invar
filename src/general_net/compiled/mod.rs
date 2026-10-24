@@ -351,12 +351,7 @@ impl<'a> Program<'a> {
                                 || program.numeric.is_some()
                                     && matches!(
                                         name.as_str(),
-                                        "fma"
-                                            | "f32_from_i32"
-                                            | "f32_from_u32"
-                                            | "sin"
-                                            | "cos"
-                                            | "sqrt"
+                                        "fma" | "f32_from_i32" | "f32_from_u32" | "sqrt"
                                     )
                                 || program.owned.is_some()
                                     && (matches!(name.as_str(), "filled_i32" | "filled_u32")

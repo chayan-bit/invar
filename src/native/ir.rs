@@ -549,23 +549,6 @@ impl Ir<'_> {
                         if self.exporting { return Err(error("TC native export is unsupported")); }
                         self.line(format!("{value} = call i64 @invar_tc_step_v1(i64 {a}, i64 {b}, i64 {c})"));
                     }
-                    ("sin" | "cos" | "sqrt", [a]) => {
-                        // invar-trig-f32-v1 helpers over binary32 words; see
-                        // `trig_helpers` for their single-source definitions.
-                        let word = self.tmp();
-                        let result = self.tmp();
-                        self.line(format!("{word} = trunc i64 {a} to i32"));
-                        let call = match name.as_str() {
-                            "sqrt" => format!("@{}(i32 {word})", invar_device::trig_f32::SQRT_HELPER),
-                            _ => format!(
-                                "@{}(i32 {word}, i32 {})",
-                                invar_device::trig_f32::SIN_HELPER,
-                                u8::from(name.as_str() == "cos")
-                            ),
-                        };
-                        self.line(format!("{result} = call i32 {call}"));
-                        self.line(format!("{value} = zext i32 {result} to i64"));
-                    }
                     ("filled_f32", [len,item]) => {
                         self.line(format!("{value} = call i64 @invar_array_fill_v1(i32 2, i64 {len}, i64 {item})"));
                     }

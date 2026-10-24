@@ -82,14 +82,6 @@ pub(crate) fn intrinsic(
         category: crate::eval::TrapCategory::IntegerOverflow,
         span,
     };
-    // C4 interim: f32 sin, cos and sqrt keep main's invar-trig-f32-v1;
-    // invar-math-cr-v1 covers f64 and every other library function.
-    match (name, values) {
-        ("sin", [Value::F32(a)]) => return Ok(Value::F32(a.sin())),
-        ("cos", [Value::F32(a)]) => return Ok(Value::F32(a.cos())),
-        ("sqrt", [Value::F32(a)]) => return Ok(Value::F32(a.sqrt())),
-        _ => {}
-    }
     if let Some(f) = MathFn::from_name(name) {
         return math(f, values);
     }

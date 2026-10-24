@@ -140,7 +140,6 @@ fn llvm_ir_debug(
              declare hidden i32 @invar_array_store_v1(i64, i64, i64, i32, i32)\n\n",
         );
     }
-    output.push_str(&trig_helpers(program, &output));
     let mut next_blob = 0;
     for (function_id, function) in program.functions.iter().enumerate() {
         if function.foreign_oracle.is_some()
@@ -326,40 +325,4 @@ fn locate(ir: &mut Ir, debug: Option<&mut debug::Module>, scope: Option<usize>, 
     if let (Some(debug), Some(scope)) = (debug, scope) {
         ir.location = format!(", !dbg !{}", debug.location(span, scope, ir.helper));
     }
-}
-
-/// `invar-trig-f32-v1` helper definitions (from `invar_device::trig_f32`, the
-/// operation sequence's single source of truth) for the intrinsics `program`
-/// calls, with any LLVM declarations `header` lacks. Empty when unused, so
-/// programs without these intrinsics keep byte-identical IR.
-fn trig_helpers(program: &mir::Program, header: &str) -> String {
-    let called = |names: &[&str]| {
-        program.functions.iter().any(|function| {
-            function
-                .blocks
-                .iter()
-                .flat_map(|block| block.instructions.iter())
-                .any(|instruction| {
-                    matches!(&instruction.kind, Operation::Call { name, .. } if names.contains(&name.as_str()))
-                })
-        })
-    };
-    let trig = called(&["sin", "cos"]);
-    let root = called(&["sqrt"]);
-    let mut text = String::new();
-    if trig && !header.contains("declare float @llvm.fma.f32(") {
-        text.push_str("declare float @llvm.fma.f32(float, float, float)\n");
-    }
-    if root && !header.contains("declare float @llvm.sqrt.f32(") {
-        text.push_str("declare float @llvm.sqrt.f32(float)\n");
-    }
-    if trig || root {
-        text.push_str(&invar_device::trig_f32::helpers(
-            invar_device::trig_f32::Lang::Llvm,
-            trig,
-            root,
-        ));
-        text.push('\n');
-    }
-    text
 }

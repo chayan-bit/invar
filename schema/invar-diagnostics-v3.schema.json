@@ -787,9 +787,6 @@
         "math": {
           "const": "invar-math-cr-v1"
         },
-        "trig": {
-          "const": "invar-trig-f32-v1"
-        },
         "fold": {
           "description": "Each declared fold tier a lowered fold used, to the algorithm that ran. A Strict function's reassoc_add folds record as relaxed.",
           "type": "object",

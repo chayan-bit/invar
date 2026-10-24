@@ -212,16 +212,9 @@ pub fn contracts(program: &crate::mir::Program) -> Option<serde_json::Value> {
     };
     let binary64 =
         instructions().any(|i| matches!(i.output, Some((_, Type::F64 | Type::ArrayF64))));
-    // C4 interim: f32 sin, cos and sqrt are invar-trig-f32-v1.
-    let trig_f32 = |i: &crate::mir::Instruction| {
-        matches!(&i.kind, Operation::Call { name, .. } if matches!(name.as_str(), "sin" | "cos" | "sqrt"))
-            && matches!(i.output, Some((_, Type::F32)))
-    };
-    let trig = instructions().any(trig_f32);
-    let math = instructions().any(|i| {
-        matches!(&i.kind, Operation::Call { name, .. } if MathFn::from_name(name).is_some())
-            && !trig_f32(i)
-    });
+    let math = instructions().any(
+        |i| matches!(&i.kind, Operation::Call { name, .. } if MathFn::from_name(name).is_some()),
+    );
     let mut record = serde_json::Map::new();
     if binary64 {
         record.insert(
@@ -233,9 +226,6 @@ pub fn contracts(program: &crate::mir::Program) -> Option<serde_json::Value> {
     }
     if math {
         record.insert("math".into(), CONTRACT.into());
-    }
-    if trig {
-        record.insert("trig".into(), invar_device::trig_f32::CONTRACT.into());
     }
     (!record.is_empty()).then_some(serde_json::Value::Object(record))
 }
@@ -294,6 +284,32 @@ pub fn f64_sites(program: &crate::mir::Program) -> Vec<(String, crate::front::Sp
                 .iter()
                 .flat_map(|b| &b.instructions)
                 .find(|i| matches!(i.output, Some((_, Type::F64 | Type::ArrayF64))))
+                .map(|i| (function.name.clone(), i.span))
+        })
+        .collect()
+}
+
+/// Explain reason for f32 `sin` and `cos` under a CUDA or Metal request: no
+/// device lowers their `invar-math-cr-v1` kernels yet, so placement keeps each
+/// function that calls them on the CPU rather than change their bits.
+pub const MATH_CR_V1_DEVICE_UNAVAILABLE: &str = "math-cr-v1-device-unavailable";
+
+/// One `(function, span)` per function that calls f32 `sin` or `cos`, at its
+/// first such call: the sites `math-cr-v1-device-unavailable` keeps on the CPU.
+pub fn cr_v1_device_sites(program: &crate::mir::Program) -> Vec<(String, crate::front::Span)> {
+    use crate::{front::Type, mir::Operation};
+    program
+        .functions
+        .iter()
+        .filter_map(|function| {
+            function
+                .blocks
+                .iter()
+                .flat_map(|b| &b.instructions)
+                .find(|i| {
+                    matches!(&i.kind, Operation::Call { name, .. } if matches!(name.as_str(), "sin" | "cos"))
+                        && matches!(i.output, Some((_, Type::F32)))
+                })
                 .map(|i| (function.name.clone(), i.span))
         })
         .collect()

@@ -1,6 +1,7 @@
 // Shared fixtures, each loaded once and used by several modules below.
 #[path = "../support/fsum_cases.rs"]
 mod fsum_cases_support;
+mod issue_c4_cr_default;
 mod issue_v02_f64_oracle;
 mod issue_v02_f64_source;
 mod issue_v02_fk_panda;

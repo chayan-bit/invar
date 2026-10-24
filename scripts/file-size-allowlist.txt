@@ -5,7 +5,6 @@
 959 bench/general-net-v01/gnet05/generate.rs
 963 crates/invar-cuda/src/cuda.rs
 993 crates/invar-device/src/segmented.rs
-1386 crates/invar-device/src/trig_f32.rs
 1720 src/check.rs
 992 src/component_test/planner.rs
 801 src/eval/engine.rs
@@ -33,7 +32,6 @@
 940 src/system/urdf.rs
 1171 tests/issue_ai_02_spec_examples.rs
 858 tests/issue_m4_06_bounded_schedule_tuning.rs
-879 tests/issue_p0a_trig_f32.rs
 806 tests/m4_summary/issue_m4_07_summary_source.rs
 874 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
 850 tests/robotics/issue_s1_06_sequencer_binding.rs
