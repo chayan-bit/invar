@@ -42,6 +42,12 @@
 //!   allocates. It excludes allocator overhead, resident-set size and the
 //!   storage of the checked source, AST, net and MIR unless a family charges
 //!   them as analysis bytes.
+//! - The CPU map and fused-chain passes and the admission guard are bounded by
+//!   host bytes only (#57). `laws::MAX_ELEMENTS` still bounds scans,
+//!   reductions and the segmented, compaction and pair-reduction families,
+//!   whose proofs assume it; device back ends keep their own plan-size bounds
+//!   (`typed_net::MAX_DAG_MAPS`, `invar_device::MAX_ELEMENTS`) and fall back to
+//!   the CPU pass past them.
 
 use crate::array_limits::{MAX_DEVICE_BYTES, MAX_LIVE_ELEMENTS};
 use std::fmt;

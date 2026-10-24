@@ -10,7 +10,10 @@ use std::{
     thread,
 };
 
-use crate::laws::{self, Affine, Law};
+use crate::{
+    budget::{ByteBudget, Footprint, array_bytes},
+    laws::{self, Affine, Law},
+};
 
 /// Bound scoped thread creation even on very large hosts or explicit requests.
 pub const MAX_WORKERS: usize = 64;
@@ -365,6 +368,20 @@ pub(super) fn scan_output(
         }
     }
     Ok((result, ranges, joined))
+}
+
+/// Whether a CPU map pass over `len` elements fits the standard host budget: `arrays` live `u32`
+/// arrays of that length (inputs, destinations, chunk results, joined values and staged copies).
+/// It replaces the old fixed `laws::MAX_ELEMENTS` for maps (#57) and agrees with `admission::Guard`.
+pub(super) fn map_pass_fits(len: usize, arrays: usize) -> bool {
+    host_fits(&ByteBudget::standard(), len, arrays)
+}
+
+pub(super) fn host_fits(budget: &ByteBudget, len: usize, arrays: usize) -> bool {
+    let bytes = array_bytes::<u32>(len).and_then(|array| array.checked_mul(arrays));
+    budget
+        .admit("cpu_map", &Footprint::ZERO.host(bytes))
+        .is_ok()
 }
 
 #[cfg(test)]

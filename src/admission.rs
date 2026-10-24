@@ -7,7 +7,7 @@ use serde_json::{Value, json};
 use crate::{
     budget::{ByteBudget, Footprint, array_bytes},
     front::{BinaryOp, Mode, Span, Type},
-    laws, loops,
+    loops,
     mir::{self, BlockId, Function, Operation, Terminator, ValueId},
     plan::{self, Execution},
     typed_net::{MapOp, ZipOp},
@@ -78,11 +78,11 @@ impl Guard {
             array_bytes::<u32>(len).and_then(|array| array.checked_mul(self.inputs.len() + 3)),
         )
     }
-    /// `len` is within the length the CPU scheduler and the device IR execute
-    /// (`laws::MAX_ELEMENTS`; they refuse a longer map and run it serially) and the peak
-    /// footprint fits `budget`.
+    /// The peak footprint fits `budget`: the rule the CPU scheduler applies to a map pass
+    /// (`schedule::workers::map_pass_fits`). A device back end applies its own, tighter length
+    /// bound and falls back to the CPU pass.
     fn fits(&self, len: usize, budget: &ByteBudget) -> bool {
-        len <= laws::MAX_ELEMENTS && budget.admit("admission", &self.footprint(len)).is_ok()
+        budget.admit("admission", &self.footprint(len)).is_ok()
     }
     /// Guard inputs must remain unchanged until the selected plan completes.
     pub fn evaluate(&self, lengths: &[(&str, usize)]) -> bool {
