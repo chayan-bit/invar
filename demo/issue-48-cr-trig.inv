@@ -1,0 +1,11 @@
+// #48: f32 sin, cos and sqrt are invar-math-cr-v1 (correctly rounded) on every engine.
+// Each literal is the correctly rounded binary32 result, from mpmath at 300 bits.
+fn main() -> i32 {
+    let x: f32 = 100000.0;
+    if sin(x) != 0.0357488 { return 1; }
+    if cos(x) != -0.9993608 { return 2; }
+    if sin(3.0) != 0.14112 { return 3; }
+    if cos(0.5) != 0.87758255 { return 4; }
+    if sqrt(3.0) != 1.7320508 { return 5; }
+    return 0;
+}

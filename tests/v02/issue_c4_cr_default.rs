@@ -133,6 +133,7 @@ fn explain(args: &[&str]) -> serde_json::Value {
     std::fs::write(dir.join("sites.inv"), SITES).unwrap();
     let output = std::process::Command::new(env!("CARGO_BIN_EXE_invar"))
         .current_dir(&dir)
+        .env("INVAR_METAL_RUNTIME_SOURCE", "1")
         .args(["explain", "sites.inv"])
         .args(args)
         .args(["--format", "json"])
