@@ -3,6 +3,7 @@
 
 use std::{
     collections::HashMap,
+    fmt::Write as _,
     fs,
     io::Read,
     path::{Path, PathBuf},
