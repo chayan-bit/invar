@@ -51,18 +51,26 @@ pub(super) fn slot() -> Slot {
 }
 
 /// A compile needs a reserve for itself and every compile already running.
-/// Without a memory reading (no `/proc`) compiles are not bounded.
-fn admits(active: usize, available: Option<u64>) -> bool {
+/// A reserve above the hard capacity can never be met, so the first compile
+/// then starts at once instead of waiting it out. Without a memory reading (no
+/// `/proc`) compiles are not bounded.
+fn admits(active: usize, reading: Option<(u64, u64)>) -> bool {
     let needed = (active as u64 + 1).saturating_mul(COMPILE_RESERVE_BYTES);
-    available.is_none_or(|bytes| bytes >= needed)
+    reading.is_none_or(|(available, capacity)| {
+        available >= needed || (active == 0 && capacity < needed)
+    })
 }
 
-/// Bytes this process may still allocate: the host's `MemAvailable`, lowered
-/// by the room left under each enclosing cgroup v2 `memory.max`. A build job's
-/// cgroup charges its page cache, so reclaimable inactive file pages count as
-/// room there.
-fn available() -> Option<u64> {
-    let host = mem_available(&fs::read_to_string("/proc/meminfo").ok()?)?;
+/// Bytes this process may still allocate, and the most it could ever have:
+/// the host's `MemAvailable` and `MemTotal`, lowered by the room left under
+/// and the `memory.max` of each enclosing cgroup v2. A build job's cgroup
+/// charges its page cache, so reclaimable inactive file pages count as room.
+fn available() -> Option<(u64, u64)> {
+    let meminfo = fs::read_to_string("/proc/meminfo").ok()?;
+    let host = (
+        meminfo_bytes(&meminfo, "MemAvailable:")?,
+        meminfo_bytes(&meminfo, "MemTotal:")?,
+    );
     let cgroup = fs::read_to_string("/proc/self/cgroup").unwrap_or_default();
     let path = cgroup.lines().find_map(|line| line.strip_prefix("0::"));
     let rooms = path.into_iter().flat_map(|path| {
@@ -77,21 +85,19 @@ fn available() -> Option<u64> {
             })
             .collect::<Vec<_>>()
     });
-    Some(rooms.fold(host, u64::min))
+    Some(rooms.fold(host, |(room, cap), (r, c)| (room.min(r), cap.min(c))))
 }
 
-/// `MemAvailable` from `/proc/meminfo`, in bytes.
-fn mem_available(meminfo: &str) -> Option<u64> {
-    let line = meminfo
-        .lines()
-        .find_map(|l| l.strip_prefix("MemAvailable:"))?;
+/// The `key` line of `/proc/meminfo`, in bytes.
+fn meminfo_bytes(meminfo: &str, key: &str) -> Option<u64> {
+    let line = meminfo.lines().find_map(|l| l.strip_prefix(key))?;
     let kib = line.trim().strip_suffix("kB")?.trim().parse::<u64>().ok()?;
     kib.checked_mul(1024)
 }
 
 /// Room left under one cgroup's `memory.max`, counting its `inactive_file`
-/// pages as reclaimable; `max` means no limit there.
-fn cgroup_room(max: &str, current: &str, stat: &str) -> Option<u64> {
+/// pages as reclaimable, and that limit; `max` means no limit there.
+fn cgroup_room(max: &str, current: &str, stat: &str) -> Option<(u64, u64)> {
     let max = max.trim().parse::<u64>().ok()?;
     let current = current.trim().parse::<u64>().ok()?;
     let reclaimable = stat
@@ -99,7 +105,7 @@ fn cgroup_room(max: &str, current: &str, stat: &str) -> Option<u64> {
         .find_map(|line| line.strip_prefix("inactive_file "))
         .and_then(|bytes| bytes.trim().parse::<u64>().ok())
         .unwrap_or(0);
-    Some(max.saturating_sub(current.saturating_sub(reclaimable)))
+    Some((max.saturating_sub(current.saturating_sub(reclaimable)), max))
 }
 
 #[cfg(test)]
@@ -110,15 +116,16 @@ mod tests {
 
     #[test]
     fn every_compile_needs_a_reserve_for_itself_and_each_running_one() {
+        let roomy = |available| Some((available, 64 * GIB));
         assert!(
-            !admits(0, Some(0)),
+            !admits(0, roomy(0)),
             "a known-low reading holds the first compile too"
         );
-        assert!(!admits(0, Some(COMPILE_RESERVE_BYTES - 1)));
-        assert!(admits(0, Some(COMPILE_RESERVE_BYTES)));
-        assert!(!admits(1, Some(2 * COMPILE_RESERVE_BYTES - 1)));
-        assert!(admits(1, Some(2 * COMPILE_RESERVE_BYTES)));
-        assert!(!admits(4, Some(5 * COMPILE_RESERVE_BYTES - 1)));
+        assert!(!admits(0, roomy(COMPILE_RESERVE_BYTES - 1)));
+        assert!(admits(0, roomy(COMPILE_RESERVE_BYTES)));
+        assert!(!admits(1, roomy(2 * COMPILE_RESERVE_BYTES - 1)));
+        assert!(admits(1, roomy(2 * COMPILE_RESERVE_BYTES)));
+        assert!(!admits(4, roomy(5 * COMPILE_RESERVE_BYTES - 1)));
         assert!(
             admits(0, None) && admits(7, None),
             "no reading leaves compiles unbounded"
@@ -126,20 +133,32 @@ mod tests {
     }
 
     #[test]
+    fn a_reserve_above_the_hard_capacity_does_not_hold_the_first_compile() {
+        let small = COMPILE_RESERVE_BYTES / 2;
+        assert!(admits(0, Some((0, small))), "the wait could never succeed");
+        assert!(
+            !admits(1, Some((0, small))),
+            "later compiles still wait for running ones"
+        );
+        assert!(!admits(0, Some((0, COMPILE_RESERVE_BYTES))));
+    }
+
+    #[test]
     fn readings_parse_meminfo_and_cgroup_limits() {
         let meminfo = "MemTotal:       131072000 kB\nMemAvailable:    5242880 kB\n";
-        assert_eq!(mem_available(meminfo), Some(5 * GIB));
-        assert_eq!(mem_available("MemTotal: 1 kB\n"), None);
+        assert_eq!(meminfo_bytes(meminfo, "MemAvailable:"), Some(5 * GIB));
+        assert_eq!(meminfo_bytes(meminfo, "MemTotal:"), Some(125 * GIB));
+        assert_eq!(meminfo_bytes("MemTotal: 1 kB\n", "MemAvailable:"), None);
         assert_eq!(cgroup_room("max\n", "123\n", ""), None);
         assert_eq!(
             cgroup_room("8589934592\n", "6442450944\n", ""),
-            Some(2 * GIB)
+            Some((2 * GIB, 8 * GIB))
         );
-        assert_eq!(cgroup_room("100\n", "200\n", ""), Some(0));
+        assert_eq!(cgroup_room("100\n", "200\n", ""), Some((0, 100)));
         let stat = "anon 1073741824\nactive_file 5\ninactive_file 4294967296\n";
         assert_eq!(
             cgroup_room("8589934592\n", "8589934592\n", stat),
-            Some(4 * GIB),
+            Some((4 * GIB, 8 * GIB)),
             "inactive page cache is reclaimable room"
         );
     }
