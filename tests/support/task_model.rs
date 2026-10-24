@@ -16,7 +16,7 @@ use invar::{
     general_net::{
         Net, Proof,
         compiled::Target,
-        normal_form::{self, NormalForm},
+        normal_form,
         oracle,
         task::{self, Mutation, Plan, Profile, Program, Schedule},
     },
@@ -28,7 +28,6 @@ pub mod normal_form_support;
 pub struct Admitted {
     pub net: Net,
     pub proof: Proof,
-    pub form: NormalForm,
     pub program: Program,
 }
 
@@ -39,7 +38,6 @@ pub fn admit(source: &str) -> Result<Admitted, task::Refusal> {
     Ok(Admitted {
         net,
         proof,
-        form,
         program,
     })
 }
