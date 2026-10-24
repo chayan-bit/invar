@@ -318,36 +318,33 @@ pub(super) fn generate(
         .iter()
         .map(|j| required(j, "name").map(str::to_owned))
         .collect::<Result<Vec<_>, _>>()?;
-    let mut config = json!({"schema":"invar-sequencer-binding-v1","source_ir_sha256":hash,"joint_order_sha256":descriptor["joint_order_sha256"],"joint_count":n,"joint_names":names,
+    // An object without a `grasp` clause is grasped at its centre, matching the generated identity weld.
+    let cube_from_grasp = match cube.get("grasp") {
+        Some(grasp) => source_pose(grasp)?,
+        None => crate::system::tool_projection::Pose::IDENTITY,
+    };
+    let world_goal = source_pose(&cube["pose"])?
+        .compose(cube_from_grasp)
+        .map_err(|m| invalid("S1504", m))?;
+    let mut world_pregrasp = world_goal;
+    world_pregrasp.translation_m[2] += 0.1;
+    let inverse = mount.inverse().map_err(|m| invalid("S1504", m))?;
+    let grasp_tool = inverse
+        .compose(world_goal)
+        .map_err(|m| invalid("S1504", m))?;
+    let pregrasp_tool = inverse
+        .compose(world_pregrasp)
+        .map_err(|m| invalid("S1504", m))?;
+    let config = json!({"schema":"invar-sequencer-binding-v2","source_ir_sha256":hash,"joint_order_sha256":descriptor["joint_order_sha256"],"joint_count":n,"joint_names":names,
         "home_q_rad":home(robot,&names)?,"world_from_base":flat(mount),"final_cube_base":flat(final_cube),"joint_limits_rad":limits,"velocity_limits_rad_s":speeds,
         "robot_joints":descriptor["robot_joints"],"robot_joint_order_sha256":descriptor["robot_joint_order_sha256"],"home_robot_q_si":home(robot,&full_names)?,
-        "fk_prefix":fk["abi"]["prefix"],"tool_projection":projection.value(),"deadlines":"deadlines are declared, not measured"});
-    if let Some(grasp) = cube.get("grasp") {
-        let cube_from_grasp = source_pose(grasp)?;
-        let world_goal = source_pose(&cube["pose"])?
-            .compose(cube_from_grasp)
-            .map_err(|m| invalid("S1504", m))?;
-        let mut world_pregrasp = world_goal;
-        world_pregrasp.translation_m[2] += 0.1;
-        let inverse = mount.inverse().map_err(|m| invalid("S1504", m))?;
-        config["schema"] = json!("invar-sequencer-binding-v2");
-        config["cube_from_grasp"] = json!(flat(cube_from_grasp));
-        config["grasp_tool_base"] = json!(flat(
-            inverse
-                .compose(world_goal)
-                .map_err(|m| invalid("S1504", m))?
-        ));
-        config["pregrasp_tool_base"] = json!(flat(
-            inverse
-                .compose(world_pregrasp)
-                .map_err(|m| invalid("S1504", m))?
-        ));
-    }
+        "fk_prefix":fk["abi"]["prefix"],"tool_projection":projection.value(),"deadlines":"deadlines are declared, not measured",
+        "cube_from_grasp":flat(cube_from_grasp),"grasp_tool_base":flat(grasp_tool),"pregrasp_tool_base":flat(pregrasp_tool)});
     let config = format!("{config}\n");
     let config_hash = super::sha256_hex(config.as_bytes());
     insert(
         files,
-        "src/invar_cell_bringup/config/sequencer-binding-v1.json",
+        "src/invar_cell_bringup/config/sequencer-binding.json",
         config,
         hash,
     )?;
@@ -400,6 +397,6 @@ pub(super) fn generate(
     for arg in ["runtime", "task", "task_sha256", "recording_path"] {
         launch_args.push_str(&format!("    actions.append(DeclareLaunchArgument('{name}_{arg}', description='Required bounded task runtime input'))\n"));
     }
-    launch_args.push_str(&format!("    recording_action = ExecuteProcess(cmd=['ros2', 'bag', 'record', '-s', 'mcap', '-o', LaunchConfiguration('{name}_recording_path'), '-a'], output='screen', sigterm_timeout='10.0', sigkill_timeout='5.0')\n    task_action = Node(package='{package}', executable='{name}_task', name='{name}', namespace='{name}', parameters=[{{'use_sim_time': True, 'runtime_path': LaunchConfiguration('{name}_runtime'), 'binding_path': str(share / 'config/sequencer-binding-v1.json'), 'task_path': LaunchConfiguration('{name}_task'), 'task_sha256': LaunchConfiguration('{name}_task_sha256')}}], output='screen')\n    def required_exit(event, context):\n        if context.is_shutdown:\n            return []\n        if event.action is task_action and event.returncode == 0:\n            return [EmitEvent(event=Shutdown(reason='Invar task completed; finalize MCAP'))]\n        raise RuntimeError('S1406: required Invar task/recorder exited: ' + str(event.returncode))\n    actions.extend([RegisterEventHandler(OnProcessExit(target_action=task_action, on_exit=required_exit)), RegisterEventHandler(OnProcessExit(target_action=recording_action, on_exit=required_exit)), recording_action, task_action])\n"));
+    launch_args.push_str(&format!("    recording_action = ExecuteProcess(cmd=['ros2', 'bag', 'record', '-s', 'mcap', '-o', LaunchConfiguration('{name}_recording_path'), '-a'], output='screen', sigterm_timeout='10.0', sigkill_timeout='5.0')\n    task_action = Node(package='{package}', executable='{name}_task', name='{name}', namespace='{name}', parameters=[{{'use_sim_time': True, 'runtime_path': LaunchConfiguration('{name}_runtime'), 'binding_path': str(share / 'config/sequencer-binding.json'), 'task_path': LaunchConfiguration('{name}_task'), 'task_sha256': LaunchConfiguration('{name}_task_sha256')}}], output='screen')\n    def required_exit(event, context):\n        if context.is_shutdown:\n            return []\n        if event.action is task_action and event.returncode == 0:\n            return [EmitEvent(event=Shutdown(reason='Invar task completed; finalize MCAP'))]\n        raise RuntimeError('S1406: required Invar task/recorder exited: ' + str(event.returncode))\n    actions.extend([RegisterEventHandler(OnProcessExit(target_action=task_action, on_exit=required_exit)), RegisterEventHandler(OnProcessExit(target_action=recording_action, on_exit=required_exit)), recording_action, task_action])\n"));
     Ok(())
 }

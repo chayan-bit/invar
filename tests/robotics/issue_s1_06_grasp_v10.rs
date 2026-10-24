@@ -1,10 +1,9 @@
 //! Checked explicit grasp semantics; generation/CPU evidence, not live acceptance.
-use super::sequencer_binding_support as support;
+use super::sequencer_binding_support::{self as support, GRASP};
 use invar::{front, system};
 use serde_json::Value;
 use std::{fs, path::Path};
 
-const GRASP: &str = "        grasp pose xyz(0 m, 0 m, 0.025 m) quat(0, 1, 0, 0);\n";
 /// The source-declared gripper hold raises the IR to v11; this test isolates
 /// the grasp versioning, so it compiles the cells without the hold.
 const HOLD: &str = "            hold 253 one;\n";
@@ -93,31 +92,41 @@ fn malformed_or_inapplicable_grasps_fail_before_generation() {
 }
 
 #[test]
-fn checked_binding_uses_source_grasp_and_preserves_cube_target() {
+fn checked_binding_uses_source_grasp_or_the_centre_and_preserves_cube_target() {
     for n in [6, 7] {
-        let source = support::source(n).replace(
-            "        dynamic mass 0.1 kg attachable;\n",
-            &format!("        dynamic mass 0.1 kg attachable;\n{GRASP}"),
-        );
-        let ir = compile(&source).unwrap();
-        let workspace = system::ros2::generate(&ir).unwrap();
-        let binding: Value = serde_json::from_str(
-            &workspace["src/invar_cell_bringup/config/sequencer-binding-v1.json"],
-        )
-        .unwrap();
-        assert_eq!(binding["schema"], "invar-sequencer-binding-v2");
-        assert_eq!(
-            binding["tool_projection"]["schema"],
-            "invar-tool-projection-v2"
-        );
-        for (key, expected) in [
-            ("cube_from_grasp", [0., 0., 0.025, 1., 0., 0., 0.]),
-            ("grasp_tool_base", [0.3, 0., 0.05, 1., 0., 0., 0.]),
-            ("pregrasp_tool_base", [0.3, 0., 0.15, 1., 0., 0., 0.]),
-            ("final_cube_base", [0.5, 0.2, 0.025, 0., 0., 0., 1.]),
+        for (source, grasp, z) in [
+            (support::source(n), [0., 0., 0.025, 1., 0., 0., 0.], 0.05),
+            // Without a grasp clause the cube is grasped at its centre.
+            (
+                support::source(n).replace(GRASP, ""),
+                [0., 0., 0., 0., 0., 0., 1.],
+                0.025,
+            ),
         ] {
-            for (actual, expected) in binding[key].as_array().unwrap().iter().zip(expected) {
-                assert!((actual.as_f64().unwrap() - expected).abs() < 1e-12);
+            let ir = compile(&source).unwrap();
+            let workspace = system::ros2::generate(&ir).unwrap();
+            let binding: Value = serde_json::from_str(
+                &workspace["src/invar_cell_bringup/config/sequencer-binding.json"],
+            )
+            .unwrap();
+            assert_eq!(binding["schema"], "invar-sequencer-binding-v2");
+            assert_eq!(
+                binding["tool_projection"]["schema"],
+                "invar-tool-projection-v2"
+            );
+            let q = &grasp[3..];
+            for (key, expected) in [
+                ("cube_from_grasp", grasp),
+                ("grasp_tool_base", [0.3, 0., z, q[0], q[1], q[2], q[3]]),
+                (
+                    "pregrasp_tool_base",
+                    [0.3, 0., z + 0.1, q[0], q[1], q[2], q[3]],
+                ),
+                ("final_cube_base", [0.5, 0.2, 0.025, 0., 0., 0., 1.]),
+            ] {
+                for (actual, expected) in binding[key].as_array().unwrap().iter().zip(expected) {
+                    assert!((actual.as_f64().unwrap() - expected).abs() < 1e-12, "{key}");
+                }
             }
         }
     }
