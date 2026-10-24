@@ -47,3 +47,17 @@ fn a_mid_run_fallback_keeps_each_later_publication_label() {
     assert_eq!(executed, [second]);
     assert_eq!(executed[0].published_array.as_deref(), Some("b"));
 }
+
+#[test]
+fn issue_eng_08_map_pass_is_bounded_by_host_bytes() {
+    use super::workers::host_fits;
+    use crate::budget::ByteBudget;
+    let budget = ByteBudget::standard().with_host_bytes(4 * 4 * 50);
+    assert!(host_fits(&budget, 50, 4));
+    assert!(!host_fits(&budget, 51, 4));
+    assert!(!host_fits(&budget, 50, 5));
+    // Overflow is a refusal, not a panic or a wrap.
+    assert!(!host_fits(&ByteBudget::standard(), usize::MAX, 1));
+    assert!(!host_fits(&ByteBudget::standard(), usize::MAX / 2, 4));
+    assert!(host_fits(&ByteBudget::standard(), 0, 4));
+}

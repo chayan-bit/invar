@@ -35,7 +35,7 @@ pub use lowering::{
     Dispatched, Gap, Selection, has_family_region, regions, selection, serial_only,
 };
 pub use workers::{Error, Fault, Hooks, LiveArrays, MAX_WORKERS, Snapshot, auto_workers};
-use workers::{pair_reduction_output, reduction_output, scan_output};
+use workers::{map_pass_fits, pair_reduction_output, reduction_output, scan_output};
 pub(crate) use workers::{parallel_chunks, parallel_chunks_with_limit};
 
 /// One region whose staged result was published by the scheduler.
@@ -106,7 +106,9 @@ fn live_pass(
 ) -> Result<Option<Pass>, Error> {
     let len = live.iterations;
     let covers = |name: &str| live.lengths.get(name).is_some_and(|n| *n >= len);
-    if len > laws::MAX_ELEMENTS || !covers(output) || !inputs.iter().all(|name| covers(name)) {
+    // Inputs, destination, chunk results and joined values, plus a staged capture and its copy.
+    let arrays = inputs.len() + 3 + 2 * usize::from(capture.is_some());
+    if !map_pass_fits(len, arrays) || !covers(output) || !inputs.iter().all(|name| covers(name)) {
         return Ok(None);
     }
     if inputs.iter().any(|name| live.same_object(output, name)) {
@@ -128,7 +130,7 @@ fn live_pass(
         .zip(&slices)
         .map(|(name, values)| (name.clone(), values.len()))
         .collect();
-    let (parts, chunks, joined) = parallel_chunks(len, workers, hooks, |range| {
+    let (parts, chunks, joined) = parallel_chunks_with_limit(len, workers, hooks, len, |range| {
         plan.live_values(&slices, range, capture)
             .map_err(|_| Error::Candidate)
     })?;
@@ -312,7 +314,8 @@ fn dag_producer_step(
     let Some(first_output) = chain.outputs.first() else {
         return Err(Error::Candidate);
     };
-    if len > laws::MAX_ELEMENTS
+    // Inputs, plus each stage's destination, chunk results and joined values.
+    if !map_pass_fits(len, chain.inputs.len() + 3 * chain.outputs.len())
         || live.lengths.get(first_output).is_none_or(|n| *n < len)
         || chain
             .inputs
@@ -343,7 +346,7 @@ fn dag_producer_step(
         .zip(&slices)
         .map(|(name, values)| (name.clone(), values.len()))
         .collect::<Vec<_>>();
-    let (parts, chunks, joined) = parallel_chunks(len, workers, hooks, |range| {
+    let (parts, chunks, joined) = parallel_chunks_with_limit(len, workers, hooks, len, |range| {
         chain
             .plan
             .run_dag(&slices, range)
