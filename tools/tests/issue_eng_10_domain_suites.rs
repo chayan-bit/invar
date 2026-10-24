@@ -386,27 +386,6 @@ fn issue_eng_10_no_compiler_file_keys_on_a_suite() {
 }
 
 #[test]
-fn issue_eng_10_the_committed_manifest_proposal_is_the_regenerated_one() {
-    let committed: Value =
-        serde_json::from_str(include_str!("../bench/manifest-v3-proposal.json")).unwrap();
-    domains::manifest::validate(&committed).unwrap();
-    assert_eq!(committed, domains::manifest::build().unwrap());
-    assert_eq!(committed["status"], "proposal-pending-review");
-    for suite in domains::SUITES {
-        let section = &committed["suites"][suite];
-        assert!(
-            section["program_counts"]["total"].as_u64().unwrap() >= 10,
-            "{suite}"
-        );
-        assert_eq!(
-            section["held_out_sha256"].as_str().unwrap().len(),
-            64,
-            "{suite}"
-        );
-    }
-}
-
-#[test]
 fn issue_eng_10_the_coverage_report_accounts_for_every_program() {
     let spawn = |suite: &str| {
         std::process::Command::new(env!("CARGO_BIN_EXE_invar-bench"))

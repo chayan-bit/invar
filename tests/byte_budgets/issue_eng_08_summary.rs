@@ -5,8 +5,7 @@
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};
 use invar::summary_source::{Contract, Error, Family, matcher_footprint};
 
-#[path = "support/eng_08.rs"]
-mod eng_08;
+use crate::eng_08;
 use eng_08::{agree_on_every_cpu_engine, checked, program};
 
 fn matrix_source(d: usize) -> String {

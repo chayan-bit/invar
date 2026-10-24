@@ -4,11 +4,10 @@
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};
 use invar::frontier_source::{self, Budget, Contract, Error};
 
-#[path = "support/eng_08.rs"]
-mod eng_08;
+use crate::eng_08;
 use eng_08::{agree_on_every_cpu_engine, allocated_during, array, checked};
 
-const FROZEN_A: &str = include_str!("../bench/general-net-v01/current/frontier_graph_a.inv");
+const FROZEN_A: &str = include_str!("../../bench/general-net-v01/current/frontier_graph_a.inv");
 
 fn function(n: u32, rounds: u32) -> String {
     FROZEN_A
