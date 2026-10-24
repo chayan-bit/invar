@@ -3,8 +3,7 @@
 //! sessions skip, by name, where the debugger is missing or may not attach.
 #![cfg(feature = "native")]
 
-#[path = "../support/scratch.rs"]
-mod scratch;
+use super::scratch_support as scratch;
 
 const TRAP: &str = "fn main() -> i32 {\n    let x: i32 = 2147483647;\n    return x + 1;\n}\n";
 

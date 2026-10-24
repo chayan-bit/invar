@@ -1,6 +1,4 @@
-#[path = "../support/spatial_oracle.rs"]
-#[allow(dead_code)]
-mod oracle;
+use super::spatial_oracle_support as oracle;
 use invar::numeric_contract::F32Bits as F;
 use sha2::{Digest, Sha256};
 
@@ -15,7 +13,7 @@ fn sha256(bytes: &[u8]) -> String {
 fn real_pcl_radius_demo_matches_independent_block_oracle() {
     let bytes = include_bytes!("../../test-support/data/spatial/pcl4096-f32-soa.bin");
     let lineage: serde_json::Value = serde_json::from_slice(include_bytes!(
-        "../test-support/data/spatial/pcl4096-lineage.json"
+        "../../test-support/data/spatial/pcl4096-lineage.json"
     ))
     .unwrap();
     assert_eq!(bytes.len(), 3 * 4096 * 4);

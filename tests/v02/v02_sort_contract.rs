@@ -5,8 +5,7 @@ use std::{fs, process::Command};
 
 #[path = "../support/gnet_agree.rs"]
 mod agree;
-#[path = "../support/language_limits.rs"]
-mod language_limits;
+use super::language_limits_support as language_limits;
 
 fn checked(source: &str) -> check::CheckedProgram {
     let program = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
@@ -39,7 +38,7 @@ fn sort_contract_explain_schema_and_registered_reasons() {
     let v5: serde_json::Value =
         serde_json::from_str(include_str!("../../schema/explain-v5.schema.json")).unwrap();
     let device_schema: serde_json::Value = serde_json::from_str(include_str!(
-        "../schema/invar-explain-device-v5.schema.json"
+        "../../schema/invar-explain-device-v5.schema.json"
     ))
     .unwrap();
     let registry: serde_json::Value =

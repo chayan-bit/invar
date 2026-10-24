@@ -3,8 +3,7 @@
 //! independently here: a top-down recursive tree and an exact big-rational sum
 //! rounded by binary search over binary32 encodings.
 
-#[path = "../support/fsum_cases.rs"]
-mod cases;
+use super::fsum_cases_support as cases;
 
 use cases::{CANONICAL_NAN, Rng, adversarial_vectors, bits};
 use invar::{

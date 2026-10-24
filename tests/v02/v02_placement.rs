@@ -2,6 +2,8 @@ use invar::placement::{self, Engine, Facts, PageState, Profile};
 use invar::schedule::tuning::Residency;
 use serde_json::{Value, json};
 
+const DIAGNOSTICS_V3: &str = include_str!("../../schema/invar-diagnostics-v3.schema.json");
+
 fn coefficients(_cpu: bool, work_ms: f64) -> Value {
     json!({"fixed_ms": 0.0, "per_work_ms": work_ms,
         "link_bytes_per_ms": json!(1000.0),
@@ -616,7 +618,7 @@ fn placement_documents_record_numeric_contracts() {
         let schema: Value = serde_json::from_str(if explain {
             include_str!("../../schema/explain-v5.schema.json")
         } else {
-            include_str!("../../schema/invar-diagnostics-v3.schema.json")
+            DIAGNOSTICS_V3
         })
         .unwrap();
         assert!(jsonschema::is_valid(&schema, &document), "{document}");
@@ -674,7 +676,7 @@ fn real_cli_profile_trust_identity_contract_and_cpu_decision() {
         let schema: Value = serde_json::from_str(if explain {
             include_str!("../../schema/explain-v5.schema.json")
         } else {
-            include_str!("../../schema/invar-diagnostics-v3.schema.json")
+            DIAGNOSTICS_V3
         })
         .unwrap();
         let validator = jsonschema::validator_for(&schema).unwrap();
@@ -687,10 +689,7 @@ fn real_cli_profile_trust_identity_contract_and_cpu_decision() {
                 .collect::<Vec<_>>()
         );
         if explain {
-            let schema: Value = serde_json::from_str(include_str!(
-                "../../schema/invar-diagnostics-v3.schema.json"
-            ))
-            .unwrap();
+            let schema: Value = serde_json::from_str(DIAGNOSTICS_V3).unwrap();
             assert!(jsonschema::is_valid(&schema, &trusted["execution"]));
         }
 

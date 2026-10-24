@@ -323,7 +323,7 @@ fn sort_auto_unknown_cost_stays_on_cpu_without_opening_cuda() {
     let schema: serde_json::Value =
         serde_json::from_str(include_str!("../../schema/explain-v5.schema.json")).unwrap();
     let device_schema: serde_json::Value = serde_json::from_str(include_str!(
-        "../schema/invar-explain-device-v5.schema.json"
+        "../../schema/invar-explain-device-v5.schema.json"
     ))
     .unwrap();
     assert!(jsonschema::is_valid(&schema, &json), "{json}");

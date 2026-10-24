@@ -2,8 +2,7 @@
 //! every engine built into this binary returns the oracle bits, traps and
 //! fuel agree, and the checker rejects malformed calls.
 
-#[path = "../support/fsum_cases.rs"]
-mod cases;
+use super::fsum_cases_support as cases;
 #[path = "../support/fsum_source.rs"]
 mod source;
 

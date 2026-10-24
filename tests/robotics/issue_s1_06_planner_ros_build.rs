@@ -1,6 +1,5 @@
 //! CPU preparation plus an explicit, separately selected pinned ROS build gate.
-#[path = "../support/planner_ros_build.rs"]
-mod support;
+use super::planner_ros_build_support as support;
 
 use serde_json::{Value, json};
 use std::{fs, path::Path, process::Command};

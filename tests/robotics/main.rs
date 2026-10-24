@@ -1,3 +1,4 @@
+// Shared fixtures, each loaded once and used by several modules below.
 mod file_hash;
 mod issue_s1_01_system_dialect;
 mod issue_s1_02_foreign_manifests;
@@ -24,4 +25,10 @@ mod issue_s1_06_sequencer_binding;
 mod issue_s1_06_sequencer_preparation;
 mod issue_s1_06_tool_projection;
 mod issue_s1_11_robotics_vocabulary;
+#[allow(dead_code)]
+#[path = "../support/planner_ros_build.rs"]
+mod planner_ros_build_support;
+#[allow(dead_code)]
+#[path = "../support/sequencer_binding.rs"]
+mod sequencer_binding_support;
 mod substep_admission_source;

@@ -9,10 +9,7 @@ use invar::{
 use serde_json::{Value, json};
 use std::{fs, path::Path, process::Command};
 
-// Shared fixture also supplies hash/build helpers used by other tests.
-#[allow(dead_code)]
-#[path = "../support/planner_ros_build.rs"]
-mod planner_ros_build;
+use super::planner_ros_build_support as planner_ros_build;
 
 fn ir(arm: &str) -> system::SystemIr {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place");

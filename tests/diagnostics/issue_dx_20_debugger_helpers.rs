@@ -4,8 +4,7 @@
 //! name, where gdb is not installed.
 #![cfg(all(feature = "native", target_os = "linux"))]
 
-#[path = "../support/scratch.rs"]
-mod scratch;
+use super::scratch_support as scratch;
 
 const SOURCE: &str = "\
 struct Pair { left: i32, right: u32, scale: f32 }

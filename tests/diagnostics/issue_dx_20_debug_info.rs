@@ -498,8 +498,7 @@ fn issue_dx_20_debug_info_escapes_file_names() {
     );
 }
 
-#[path = "../support/scratch.rs"]
-mod scratch;
+use super::scratch_support as scratch;
 
 const TRAP: &str = "fn main() -> i32 {\n    let x: i32 = 2147483647;\n    return x + 1;\n}\n";
 const LOOP: &str = "fn main() -> i32 {\n    var n: i32 = 0;\n    for i in 0u32..1000u32 {\n        n = n + 1;\n    }\n    return n;\n}\n";

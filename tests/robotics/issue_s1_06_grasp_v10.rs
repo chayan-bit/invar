@@ -1,7 +1,5 @@
 //! Checked explicit grasp semantics; generation/CPU evidence, not live acceptance.
-#[path = "../support/sequencer_binding.rs"]
-#[allow(dead_code)]
-mod support;
+use super::sequencer_binding_support as support;
 use invar::{front, system};
 use serde_json::Value;
 use std::{fs, path::Path};

@@ -1,6 +1,5 @@
 //! Actual generated binding / private Rust process. CPU doubles, no ROS/cuRobo claim.
-#[path = "../support/sequencer_binding.rs"]
-mod support;
+use super::sequencer_binding_support as support;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{

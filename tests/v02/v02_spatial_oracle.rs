@@ -1,5 +1,4 @@
-#[path = "../support/spatial_oracle.rs"]
-mod oracle;
+use super::spatial_oracle_support as oracle;
 
 use invar::numeric_contract::F32Bits as F;
 use oracle::{

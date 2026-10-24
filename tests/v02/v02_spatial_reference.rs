@@ -1,9 +1,6 @@
 //! Source-to-reference differential against the independent all-pairs oracle.
-#[path = "../support/language_limits.rs"]
-mod language_limits;
-#[path = "../support/spatial_oracle.rs"]
-#[allow(dead_code)]
-mod oracle;
+use super::language_limits_support as language_limits;
+use super::spatial_oracle_support as oracle;
 
 use invar::{check, eval, front, numeric_contract::F32Bits as F, ownership};
 use oracle::Cloud;
