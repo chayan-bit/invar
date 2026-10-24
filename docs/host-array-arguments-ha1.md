@@ -37,7 +37,7 @@ not change the language, MIR, Value layout or any ABI.
 - The public C ABI v1 is unchanged; element 3 is private and is never a public scalar or array tag.
 - Returned arrays remain on the explicitly copying reference path; `take` remains refused.
 
-**HA-1.4 (2026-10-21), decided under #53; reference path only:**
+**HA-1.4 (2026-10-21), decided under #53:**
 - The admitted element types gain `f64` (IEEE binary64, 8 bytes) and `Bool` (NumPy `bool_`, 1 byte).
   Scalar `f64` is admitted at both host-call entry points.
 - `Array<Bool>` maps onto NumPy `bool_`, one byte per element.
@@ -54,7 +54,12 @@ not change the language, MIR, Value layout or any ABI.
 - In Python an `f64` argument is an exact built-in `float`; an `int`, a `float` subclass (including `numpy.float64`) and anything else is `TYPE_MISMATCH`.
   An `f64` result is a `float`, which carries every bit.
   `Array<f64>` is a native-endian NumPy `float64` array validated exactly like the other numeric arrays, and its elements keep every bit, NaN payloads and signed zero included.
-- Native-serial exports with these types are not part of HA-1.4 (`NATIVE_ABI`), and the §12 record is unchanged.
+- Native-serial exports take `read`/`mut` `Array<f64>` and `Array<Bool>` parameters through the §12 record, with element tag 4 for `f64` and 5 for `Bool`.
+  The record layout and the public C ABI are unchanged, and descriptor tags are `0x100 | element << 4 | mode` as before (`0x141`, `0x143`, `0x151`, `0x153`).
+  The generated host checks element alignment (8 for `f64`, none for `Bool`) and refuses a `Bool` byte other than 0 or 1 both when it reads one and when it would store one.
+  `f64` travels in the existing `i64` carrier as raw bits, so no numeric conversion can change a payload.
+- Scalar `f64` and `Bool` parameters and results, and returned arrays, stay refused at export admission (`NATIVE_ABI`), like scalar `f32`.
+  Only the call-level array and element types grow; function bodies may use `f64` arithmetic and comparisons.
 
 **Implementation status:**
 
@@ -64,7 +69,7 @@ not change the language, MIR, Value layout or any ABI.
 | Stage 1, reference `mut`: `observe_host_call` | implemented (§7, §7.1, §9) |
 | Rollback snapshots for native `mut` (§6, §7) | implemented (HA-1.2): `HostArrayCall::invoke` consumes the guard |
 | Python/NumPy binding (§8) | implemented: `call_reference` (copying) and, for selected exports, `call` (HA-1.2) |
-| Native engines with array arguments, `read` or `mut` (§10) | implemented for native-serial exports (HA-1.2 subset, §13); HA-1.3 adds `f32` arrays; returned arrays stay copying-reference only |
+| Native engines with array arguments, `read` or `mut` (§10) | implemented for native-serial exports (HA-1.2 subset, §13); HA-1.3 adds `f32` arrays and HA-1.4 `f64` and `Bool` arrays; returned arrays stay copying-reference only |
 | Rust reference `take` (`db558b8`) | provisional, unexposed (§9) |
 
 ## Sources

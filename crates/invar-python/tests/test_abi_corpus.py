@@ -2,7 +2,7 @@
 
 Every checked `.inv` program under tests/fixtures, bench and examples is
 scanned. A function is expressible when each parameter is an exact i32/u32
-value or a read/mut Array<i32|u32|f32> and its result is i32/u32 (byte strings
+value or a read/mut Array<i32|u32|f32|f64|Bool> and its result is i32/u32 (byte strings
 cross only through C imports, which have their own suite). Expressible
 functions are exported natively; those whose bodies the native export
 fragment refuses are counted, never silently dropped. Each admitted export is
@@ -20,7 +20,10 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 SCALARS = {"i32", "u32"}
-ARRAYS = {"Array<i32>": np.int32, "Array<u32>": np.uint32, "Array<f32>": np.float32}
+ARRAYS = {"Array<i32>": np.int32, "Array<u32>": np.uint32, "Array<f32>": np.float32,
+          "Array<f64>": np.float64, "Array<Bool>": np.bool_}
+# Element types counted on their own besides the i32/u32 baseline (HA-1.3 f32, HA-1.4 f64 and Bool).
+KINDS = {"f32": "Array<f32>", "f64": "Array<f64>", "bool": "Array<Bool>"}
 FUEL = 200_000
 
 
@@ -65,7 +68,7 @@ def test_native_exports_equal_the_reference_on_the_abi_corpus_subset(scalar_engi
         pytest.skip("reference-equivalence of native exports requires --scalar-engine native-serial")
     counts = {"files": 0, "checked_files": 0, "functions": 0, "expressible": 0,
               "admitted": 0, "refused_by_native_fragment": 0, "compared_calls": 0,
-              "f32_expressible": 0, "f32_admitted": 0, "f32_compared_calls": 0}
+              **{f"{kind}_{step}": 0 for kind in KINDS for step in ("expressible", "admitted", "compared_calls")}}
     refused = {}
     for path in corpus():
         counts["files"] += 1
@@ -80,8 +83,9 @@ def test_native_exports_equal_the_reference_on_the_abi_corpus_subset(scalar_engi
         counts["functions"] += len(functions)
         for function in filter(expressible, functions):
             counts["expressible"] += 1
-            has_f32 = any(p["type"] == "Array<f32>" for p in function["parameters"])
-            counts["f32_expressible"] += int(has_f32)
+            present = {kind for kind, array in KINDS.items() if any(p["type"] == array for p in function["parameters"])}
+            for kind in present:
+                counts[f"{kind}_expressible"] += 1
             name = function["name"]
             try:
                 native = inv.compile_source(source, path=relative, engine="native-serial", exports=[name])
@@ -91,14 +95,16 @@ def test_native_exports_equal_the_reference_on_the_abi_corpus_subset(scalar_engi
                 refused[f"{relative}::{name}"] = error.diagnostics["diagnostics"][0]["message"]
                 continue
             counts["admitted"] += 1
-            counts["f32_admitted"] += int(has_f32)
+            for kind in present:
+                counts[f"{kind}_admitted"] += 1
             reference = inv.compile_source(source, path=relative, engine="reference", exports=[name])
             for seed in (0, 1, 2):
                 expected = outcome(reference, name, inputs(function, seed))
                 actual = outcome(native, name, inputs(function, seed))
                 assert actual == expected, f"{relative}::{name} seed {seed}"
                 counts["compared_calls"] += 1
-                counts["f32_compared_calls"] += int(has_f32)
+                for kind in present:
+                    counts[f"{kind}_compared_calls"] += 1
     summary = {"counts": counts, "refused": refused}
     if os.environ.get("INVAR_CORPUS_SUMMARY"):
         pathlib.Path(os.environ["INVAR_CORPUS_SUMMARY"]).write_text(json.dumps(summary, indent=1, sort_keys=True))
@@ -106,4 +112,5 @@ def test_native_exports_equal_the_reference_on_the_abi_corpus_subset(scalar_engi
     assert counts["admitted"] > 0 and counts["compared_calls"] == 3 * counts["admitted"]
 
     assert counts["f32_admitted"] > 0
-    assert counts["f32_compared_calls"] == 3 * counts["f32_admitted"]
+    for kind in KINDS:
+        assert counts[f"{kind}_compared_calls"] == 3 * counts[f"{kind}_admitted"], kind

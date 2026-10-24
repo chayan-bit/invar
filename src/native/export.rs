@@ -173,14 +173,16 @@ pub(crate) fn build(
 }
 
 fn has_array_parameters(function: &mir::Function) -> bool {
-    function
-        .params
-        .iter()
-        .any(|p| matches!(p.ty, Type::ArrayI32 | Type::ArrayU32 | Type::ArrayF32))
+    function.params.iter().any(|p| {
+        matches!(
+            p.ty,
+            Type::ArrayI32 | Type::ArrayU32 | Type::ArrayF32 | Type::ArrayF64 | Type::ArrayBool
+        )
+    })
 }
 
 /// Public scalar tag, or the private HA-1.2 descriptor tag of an admitted
-/// `read`/`mut` `Array<i32|u32>` parameter (never a public `inv_arg_v1` tag).
+/// `read`/`mut` `Array<i32|u32|f32|f64|bool>` parameter (never a public `inv_arg_v1` tag).
 pub(crate) fn parameter_tag(param: &mir::Parameter) -> Result<u32, String> {
     use crate::front::Mode;
     use invar_foreign::host_array as host;
@@ -188,6 +190,8 @@ pub(crate) fn parameter_tag(param: &mir::Parameter) -> Result<u32, String> {
         Type::ArrayI32 => host::ELEMENT_I32,
         Type::ArrayU32 => host::ELEMENT_U32,
         Type::ArrayF32 => host::ELEMENT_F32,
+        Type::ArrayF64 => host::ELEMENT_F64,
+        Type::ArrayBool => host::ELEMENT_BOOL,
         _ => return foreign_tag(&param.ty),
     };
     let mode = match param.mode {
@@ -227,6 +231,26 @@ fn f32_record_metadata() {
         HostArray { data: ptr::without_provenance_mut(usize::MAX - 3), len: 2, ..record },
     ] { assert!(entry_for(0x131, bad).is_none()); }
     assert!(entry_for(0x131, HostArray { data: ptr::null_mut(), len: 0, ..record }).is_some());
+}
+#[test]
+fn f64_and_bool_record_metadata() {
+    let mut words = [0u64; 4];
+    let f64_record = HostArray { element: 4, mode: 1, data: words.as_mut_ptr().cast(), len: 4 };
+    assert!(entry_for(0x141, f64_record).is_some());
+    assert!(entry_for(0x143, HostArray { mode: 3, ..f64_record }).is_some());
+    assert!(entry_for(0x143, f64_record).is_none());
+    assert!(entry_for(0x131, f64_record).is_none());
+    // f64 needs 8-byte alignment; a 4-aligned address is refused.
+    let skewed = HostArray { data: ptr::without_provenance_mut(4), ..f64_record };
+    assert!(entry_for(0x141, skewed).is_none());
+    let mut bytes = [0u8; 9];
+    let bool_record = HostArray { element: 5, mode: 1, data: bytes.as_mut_ptr().wrapping_add(1), len: 3 };
+    assert!(entry_for(0x151, bool_record).is_some());
+    assert!(entry_for(0x153, HostArray { mode: 3, ..bool_record }).is_some());
+    assert!(entry_for(0x141, bool_record).is_none());
+    assert!(entry_for(0x151, HostArray { len: 1_000_001, ..bool_record }).is_none());
+    assert!(entry_for(0x151, HostArray { len: 0, ..bool_record }).is_none());
+    assert!(entry_for(0x151, HostArray { data: ptr::null_mut(), len: 0, ..bool_record }).is_some());
 }
 "#,
     );
