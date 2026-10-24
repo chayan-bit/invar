@@ -1,8 +1,8 @@
 #![forbid(unsafe_code)]
-#[path = "support/normal_form.rs"]
-mod nf;
-#[path = "support/gnet_device.rs"]
-mod support;
+
+use crate::nf;
+use crate::support;
+
 use invar::{
     eval::Value,
     general_net::{
@@ -588,5 +588,5 @@ fn p2_first_in_callee_stops_before_native_caller_continues() {
 }
 
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
-#[path = "support/gnet_p2_perf.rs"]
+#[path = "../support/gnet_p2_perf.rs"]
 mod performance;

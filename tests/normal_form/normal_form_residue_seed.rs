@@ -3,8 +3,7 @@
 //! integers) must agree with the reference on seeds outside `[0, P)` and on
 //! coefficients whose product overflows, where `a s + b` itself traps.
 
-#[path = "support/normal_form.rs"]
-mod support;
+use crate::support;
 
 use invar::{
     eval::{self, EvalError, TrapCategory},

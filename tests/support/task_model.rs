@@ -23,7 +23,7 @@ use invar::{
 };
 
 #[path = "normal_form.rs"]
-mod normal_form_support;
+pub mod normal_form_support;
 
 pub struct Admitted {
     pub net: Net,

@@ -1,4 +1,4 @@
-//! The no-keying rule (#56, extending `tests/pnf_family_admission.rs`): no
+//! The no-keying rule (#56, extending `tests/normal_form/pnf_family_admission.rs`): no
 //! file under `src/` or `crates/` may contain a suite program id, a kernel
 //! name as a string, a suite fixture path, a held-out hash, or a domain word
 //! as a string literal (the only way to use one as a dispatch key). The compiler must treat these programs like any

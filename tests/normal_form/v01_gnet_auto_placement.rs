@@ -1,6 +1,7 @@
 //! GNET-04 D1(a)/D2(a) (#47): a placement run records the legal engine set of
 //! its general net, keeps the CPU route and says why (`uncalibrated`), and labels
 //! which host ran: LLVM native, or the reference evaluator and why.
+
 use invar::placement::Route;
 use serde_json::{Value, json};
 
@@ -40,9 +41,9 @@ type Edit = (&'static str, fn(&mut Value));
 
 fn schema(explain: bool) -> jsonschema::Validator {
     let schema: Value = serde_json::from_str(if explain {
-        include_str!("../schema/explain-v5.schema.json")
+        include_str!("../../schema/explain-v5.schema.json")
     } else {
-        include_str!("../schema/invar-diagnostics-v3.schema.json")
+        include_str!("../../schema/invar-diagnostics-v3.schema.json")
     })
     .unwrap();
     jsonschema::validator_for(&schema).unwrap()

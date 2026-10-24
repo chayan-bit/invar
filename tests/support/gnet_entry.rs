@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 #[path = "gnet_device.rs"]
-mod device;
+pub mod device;
 use invar::{
     eval::Value,
     general_net::{

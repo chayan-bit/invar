@@ -5,8 +5,7 @@
 //! are reported as unverified unless a named analysis the caller supplies
 //! re-derives them.
 
-#[path = "support/normal_form.rs"]
-mod support;
+use crate::support;
 
 use invar::{
     front::Span,
