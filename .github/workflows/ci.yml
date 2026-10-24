@@ -145,7 +145,11 @@ jobs:
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
           --test mir --test exports --test gnet_net --test diagnostics
           --test numeric_tiers
-          -E 'not ((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|eng_18_native_simd|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/)) & not (binary(=numeric_tiers) & not test(/^issue_eng_03_tier_engines::/)) & not (binary(=gnet_net) & not test(/^issue_gnet_02_native::/)) & not (binary(=diagnostics) & not test(/^issue_dx_20_/))'
+          -E 'not ((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|eng_18_native_(simd|regions)|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/)) & not (binary(=numeric_tiers) & not test(/^issue_eng_03_tier_engines::/)) & not (binary(=gnet_net) & not test(/^issue_gnet_02_native::/)) & not (binary(=diagnostics) & not test(/^issue_dx_20_/))'
+      - name: Foreign boundary (invar-foreign) clippy and tests
+        run: |
+          cargo clippy --locked -p invar-foreign --all-targets -- -D warnings
+          cargo nextest run --locked --profile ci --cargo-profile ci-debug -p invar-foreign
 
   cuda:
     name: Build (cuda, compile only)

@@ -107,6 +107,7 @@ include!("native/floating.rs");
 mod debug;
 pub(crate) mod export;
 mod optimize;
+pub mod region;
 pub use debug::{Source as DebugSource, canonical_ir, run_program_debug};
 pub use optimize::{
     Build, Cpu, Fact, IntervalOp, Machine, Operand, PIPELINE, Promise, audit, compile_ir,
