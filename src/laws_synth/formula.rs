@@ -5,7 +5,7 @@
 //! [`Sort::Bv32`]).
 
 use std::{
-    collections::BTreeSet,
+    collections::{BTreeMap, BTreeSet},
     fmt::Write,
     ops::{Add, Mul, Neg, Sub},
 };
@@ -44,6 +44,15 @@ pub enum Cond {
 }
 
 impl Cond {
+    fn subst(&self, map: &BTreeMap<String, Term>) -> Self {
+        match self {
+            Self::Le(a, b) => Self::Le(a.subst(map), b.subst(map)),
+            Self::Lt(a, b) => Self::Lt(a.subst(map), b.subst(map)),
+            Self::Eq(a, b) => Self::Eq(a.subst(map), b.subst(map)),
+            Self::Not(c) => Self::Not(Box::new(c.subst(map))),
+        }
+    }
+
     fn vars(&self, out: &mut BTreeSet<String>) {
         match self {
             Self::Le(a, b) | Self::Lt(a, b) | Self::Eq(a, b) => {
@@ -79,6 +88,47 @@ impl Cond {
 impl Term {
     pub fn var(name: &str) -> Self {
         Self::Var(name.to_owned())
+    }
+
+    /// Every variable the term reads.
+    pub fn free_vars(&self) -> BTreeSet<String> {
+        let mut out = BTreeSet::new();
+        self.vars(&mut out);
+        out
+    }
+
+    /// Simultaneous substitution of the variables `map` names.
+    pub fn subst(&self, map: &BTreeMap<String, Term>) -> Self {
+        let two = |a: &Term, b: &Term| (Box::new(a.subst(map)), Box::new(b.subst(map)));
+        match self {
+            Self::Var(name) => map.get(name).cloned().unwrap_or_else(|| self.clone()),
+            Self::Lit(_) => self.clone(),
+            Self::Add(a, b) => {
+                let (a, b) = two(a, b);
+                Self::Add(a, b)
+            }
+            Self::Sub(a, b) => {
+                let (a, b) = two(a, b);
+                Self::Sub(a, b)
+            }
+            Self::Mul(a, b) => {
+                let (a, b) = two(a, b);
+                Self::Mul(a, b)
+            }
+            Self::Max(a, b) => {
+                let (a, b) = two(a, b);
+                Self::Max(a, b)
+            }
+            Self::Min(a, b) => {
+                let (a, b) = two(a, b);
+                Self::Min(a, b)
+            }
+            Self::Neg(a) => Self::Neg(Box::new(a.subst(map))),
+            Self::Ite(c, a, b) => {
+                let (a, b) = two(a, b);
+                Self::Ite(Box::new(c.subst(map)), a, b)
+            }
+        }
     }
 
     pub fn max(self, other: Self) -> Self {

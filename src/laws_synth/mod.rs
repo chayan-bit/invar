@@ -5,6 +5,7 @@
 //! proposes; the checker re-derives a certificate's formula from the net and
 //! re-decides it with [`prove::decide`].
 
+pub mod certificate;
 pub mod formula;
 mod linear;
 pub mod prove;
