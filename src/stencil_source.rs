@@ -3,7 +3,7 @@
 //! loop only through a completed, fenced CPU ticket with an exact fuel debit;
 //! repeated source calls implement multi-step ping-pong.
 use crate::{
-    check::{self, CheckedProgram},
+    check::CheckedProgram,
     front::{self, ElseArm, Expr, ExprKind, Mode, Place, Span, Stmt, StmtKind, Type, ungroup},
     general_net, mir,
 };
@@ -261,76 +261,14 @@ fn same_stmt(a: &Stmt, b: &Stmt) -> bool {
         _ => false,
     }
 }
-// CheckedProgram has public annotations. Re-run the checker on the actual AST
-// and require the current annotations; stale caller edits are not authentication.
-fn recheck(source: &CheckedProgram) -> Result<CheckedProgram, Error> {
-    let p = &source.program;
-    if p.functions.len() > mir::MAX_FUNCTIONS {
-        return Err(Error::Bounds);
-    }
-    let checked = check::check(
-        front::Program {
-            functions: p.functions.clone(),
-            foreign_functions: p.foreign_functions.clone(),
-            closures: p.closures.clone(),
-            frames: p
-                .frames
-                .iter()
-                .map(|f| front::FrameDecl {
-                    name: f.name.clone(),
-                    parent: f.parent.clone(),
-                    span: f.span,
-                })
-                .collect(),
-            modules: p
-                .modules
-                .iter()
-                // check::check injects this reserved standard module each time.
-                // Rebuild it, then require exact equality with the checked AST;
-                // caller mutation of standard declarations is still rejected.
-                .filter(|m| m.name != "std::robotics")
-                .map(|m| front::ModuleDecl {
-                    name: m.name.clone(),
-                    span: m.span,
-                })
-                .collect(),
-            imports: p
-                .imports
-                .iter()
-                .map(|i| front::Import {
-                    owner: i.owner.clone(),
-                    module: i.module.clone(),
-                    item: i.item.clone(),
-                    span: i.span,
-                })
-                .collect(),
-            records: p
-                .records
-                .iter()
-                .filter(|r| r.module.as_deref() != Some("std::robotics"))
-                .cloned()
-                .collect(),
-            variants: p.variants.clone(),
-            system_items: p.system_items.clone(),
-        },
-        false,
-    )
-    .map_err(Error::Source)?;
-    if &checked.program != p
-        || checked.expression_types != source.expression_types
-        || checked.function_expression_types != source.function_expression_types
-    {
-        return Err(Error::CheckedMismatch);
-    }
-    Ok(checked)
-}
 
 impl Contract {
     /// Recognizes the operation structurally, with arbitrary function, parameter,
     /// loop and temporary names. No caller policy/proof flag grants admission.
     /// Unknown expressions, calls, effects or grouping of the sum are refused.
     pub fn from_checked(source: &CheckedProgram, entry: &str) -> Result<Self, Error> {
-        let checked = recheck(source)?;
+        let checked =
+            crate::tensor::recheck(source, Error::Bounds, Error::CheckedMismatch, Error::Source)?;
         let net = general_net::Net::lower(&checked, general_net::Limits::default())
             .map_err(Error::Net)?;
         let proof = net.verify().map_err(Error::Net)?;

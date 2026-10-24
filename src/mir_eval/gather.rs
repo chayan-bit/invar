@@ -42,25 +42,11 @@ impl Interpreter<'_> {
             // owners. Unknown work never causes release, publication or replay.
             let pending = Pending {
                 resources: Some(Quarantined {
-                    frame: std::mem::replace(
-                        frame,
-                        Frame {
-                            slots: HashMap::new(),
-                            values: HashMap::new(),
-                        },
-                    ),
+                    frame: std::mem::take(frame),
                     _payload: completion.payload.clone(),
                 }),
             };
-            if let Ok(mut slot) = completion.quarantine.try_borrow_mut() {
-                if slot.is_none() {
-                    *slot = Some(pending);
-                } else {
-                    std::mem::forget(pending);
-                }
-            } else {
-                std::mem::forget(pending);
-            }
+            park(&completion.quarantine, pending);
             return Err(failure("GATHER_UNKNOWN_COMPLETION"));
         }
         if completion.status != FenceObservation::Complete {
@@ -76,26 +62,8 @@ impl Interpreter<'_> {
         {
             return Err(failure("GATHER_SOURCE_BINDING"));
         }
-        let (left, right) = head
-            .instructions
-            .iter()
-            .find_map(|i| {
-                if i.output.as_ref().is_some_and(|(id, _)| *id == condition)
-                    && let Operation::Binary {
-                        op: BinaryOp::Lt,
-                        left,
-                        right,
-                        ..
-                    } = &i.kind
-                {
-                    return Some((*left, *right));
-                }
-                None
-            })
-            .ok_or_else(|| failure("GATHER_LOOP_BINDING"))?;
         let n = p.indices.len();
-        if !matches!(frame.value(left), Ok(Value::U32(0)))
-            || !matches!(frame.value(right),Ok(Value::U32(v)) if v as usize==n)
+        if live_trips(head, condition, frame).is_none_or(|v| v as usize != n)
             || p.plan.loop_ticks(n) != Some(p.ticks)
             || p.ticks > self.fuel_limit.saturating_sub(self.steps_used)
         {

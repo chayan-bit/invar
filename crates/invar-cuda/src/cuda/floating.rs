@@ -2,6 +2,7 @@
 //! The root owns source-loop admission and publication; this module returns only
 //! completed finite physical C storage. It never invokes the integer cache.
 
+use super::transpose::{PendingWork, admit_before_storage, finish};
 use super::*;
 use cudarc::driver::{CudaModule, DevicePtr};
 use invar_device::{f32_probe, floating as ir, tc};
@@ -200,7 +201,9 @@ pub fn compile_floating_probe_cubin(
     compile_strict(source, caps, options, c"invar_f32_probe_v1.cu")
 }
 
-fn compile_strict(
+/// Compile `source` under pinned `options` once NVRTC matches `caps` exactly;
+/// shared by the floating, probe, tensor-core and transpose helpers.
+pub(super) fn compile_strict(
     source: &str,
     caps: Capabilities,
     mut options: Vec<String>,
@@ -334,60 +337,6 @@ fn compile_child(
     super::compiler_child::compile(&mut command, source, MAX_CUBIN_BYTES, timeout, false)
 }
 
-/// One completion algorithm used by real CUDA work and deterministic fault
-/// tests. The guard quarantines on failure, cancellation or unwinding before
-/// confirmed quiescence. No host read is permitted by this path before then.
-trait PendingWork {
-    fn submit(&mut self) -> Result<(), Error>;
-    fn complete(&self) -> Result<bool, Error>;
-    fn read(&self) -> Result<Vec<u32>, Error>;
-}
-struct Pending<W, H: FnOnce(Box<W>)> {
-    work: Option<Box<W>>,
-    hold: Option<H>,
-    quiescent: bool,
-}
-impl<W, H: FnOnce(Box<W>)> Drop for Pending<W, H> {
-    fn drop(&mut self) {
-        if !self.quiescent
-            && let (Some(work), Some(hold)) = (self.work.take(), self.hold.take())
-        {
-            hold(work);
-        }
-    }
-}
-fn finish<W: PendingWork, H: FnOnce(Box<W>)>(
-    work: Box<W>,
-    hold: H,
-    timeout: Duration,
-    mut stop: impl FnMut() -> Option<Error>,
-) -> Result<Vec<u32>, Error> {
-    let mut pending = Pending {
-        work: Some(work),
-        hold: Some(hold),
-        quiescent: false,
-    };
-    pending
-        .work
-        .as_deref_mut()
-        .ok_or(Error::Poisoned)?
-        .submit()?;
-    let started = Instant::now();
-    loop {
-        if let Some(error) = stop() {
-            return Err(error);
-        }
-        if started.elapsed() >= timeout {
-            return Err(Error::Timeout);
-        }
-        if pending.work.as_deref().ok_or(Error::Poisoned)?.complete()? {
-            pending.quiescent = true;
-            return pending.work.as_deref().ok_or(Error::Poisoned)?.read();
-        }
-        std::thread::sleep(Duration::from_millis(1));
-    }
-}
-
 struct FloatingWork {
     _context: Arc<CudaContext>,
     _module: Arc<CudaModule>,
@@ -480,14 +429,6 @@ fn pinned(
         unsafe { std::ptr::copy_nonoverlapping(values.as_ptr(), ptr, values.len()) };
     }
     Ok(host)
-}
-
-fn admit_before_storage<T>(
-    admission: impl FnOnce() -> Result<(), Error>,
-    allocation: impl FnOnce() -> Result<T, Error>,
-) -> Result<T, Error> {
-    admission()?;
-    allocation()
 }
 
 impl CudaDevice {
