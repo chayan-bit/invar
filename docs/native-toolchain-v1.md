@@ -93,8 +93,8 @@ Each fact is bound to the site that carries it, so a stale or misplaced attachme
 
 | Promise | Fact | Check |
 | --- | --- | --- |
-| `noalias` | `Disjoint { params, owners }` | on a `define` line; every `noalias` parameter there is in `params`; at least two owners, all distinct (affine ownership), no more params than owners |
-| `inbounds` | `InBounds { base, elements, guard }` | on a `getelementptr inbounds` whose base pointer is `base`; a named runtime guard ran before the call; `elements` keeps byte offsets of 16-byte elements inside `isize` |
+| `noalias` | `Disjoint { params, owners }` | on a `define` line, on parameters only (a return-value `noalias` is refused); every `noalias` parameter there is in `params`; at least two owners, all distinct (affine ownership), no more params than owners |
+| `inbounds` | `InBounds { base, index, elements, guard }` | on a `getelementptr inbounds` whose base pointer is `base` and whose only index is `index.value`; `index.range` lies in `0..elements` (a constant index in its own range); a named runtime guard ran before the call; `elements` keeps byte offsets of 16-byte elements inside `isize` |
 | `nsw`, `nuw` | `Interval { op, bits, lhs, rhs }` | on `%r = op [flags] i<bits> lhs, rhs` with exactly these operand names; a constant operand lies in its own range; operands and the exact result of `op` on the interval box (checked i128 arithmetic) fit the signed or unsigned `bits`-wide range |
 
 Metadata attachments other than `!dbg` and `!invar.fact` (and debug records' `!DI...` nodes) are refused too, since `!nonnull`, `!range`, `!noundef` and loop access groups are promises.

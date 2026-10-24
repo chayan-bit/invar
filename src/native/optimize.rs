@@ -142,11 +142,14 @@ pub enum Fact {
         params: Vec<String>,
         owners: Vec<String>,
     },
-    /// The `getelementptr inbounds` on `base` stays inside its buffer: `guard`
-    /// is the runtime check that ran before the call, and no buffer holds more
-    /// than `elements` elements, so offsets cannot wrap the address space.
+    /// The `getelementptr inbounds` on `base` with the single index `index`
+    /// stays inside its buffer: `guard` is the runtime check that ran before
+    /// the call (every buffer holds at least the elements the index reaches),
+    /// the index lies in `0..elements`, and no buffer holds more than
+    /// `elements` elements, so offsets cannot wrap the address space.
     InBounds {
         base: String,
+        index: Operand,
         elements: u64,
         guard: String,
     },
@@ -160,19 +163,25 @@ pub enum Fact {
     },
 }
 
-/// Which pointer parameters a definition line marks `noalias`.
+/// Which pointer parameters a definition line marks `noalias`, or nothing when
+/// a `noalias` comes before the function name (a return-value promise, which
+/// no fact covers).
 fn noalias_params<'a>(words: &[&'a str]) -> Vec<&'a str> {
+    let Some(name) = words.iter().position(|word| word.starts_with('@')) else {
+        return Vec::new();
+    };
     words
         .iter()
         .enumerate()
         .filter(|(_, word)| **word == "noalias")
-        .filter_map(|(at, _)| {
-            words[at..]
-                .iter()
-                .find(|word| word.starts_with('%'))
+        .map(|(at, _)| {
+            (at > name)
+                .then(|| words[at..].iter().find(|word| word.starts_with('%')))
+                .flatten()
                 .copied()
         })
-        .collect()
+        .collect::<Option<Vec<_>>>()
+        .unwrap_or_default()
 }
 
 impl Fact {
@@ -208,6 +217,7 @@ impl Fact {
             (
                 Self::InBounds {
                     base,
+                    index,
                     elements,
                     guard,
                 },
@@ -218,17 +228,40 @@ impl Fact {
                     return Err(format!("unguarded or oversized bounds fact ({elements})"));
                 }
                 let gep = words.iter().position(|word| *word == "getelementptr");
-                let pointer = gep
+                let at = gep
                     .filter(|at| words.get(at + 1) == Some(&"inbounds"))
                     .and_then(|at| {
                         words[at..]
                             .iter()
                             .position(|word| *word == "ptr")
                             .map(|p| at + p + 1)
-                    })
-                    .and_then(|at| words.get(at));
+                    });
+                let pointer = at.and_then(|at| words.get(at));
                 if pointer != Some(&base.as_str()) {
                     return Err(format!("bounds fact covers {base}, not {pointer:?}"));
+                }
+                // `ptr BASE, iN INDEX` and then only metadata: one index, the fact's.
+                let site = at.map_or(&[][..], |at| &words[at + 1..]);
+                let single = site.len() >= 2
+                    && site[0].starts_with('i')
+                    && site[1] == index.value
+                    && site.get(2).is_none_or(|word| word.starts_with('!'));
+                if !single {
+                    return Err(format!(
+                        "bounds fact for index {} does not name this access's only index",
+                        index.value
+                    ));
+                }
+                let constant = index.value.parse::<i128>().ok();
+                if index.range.is_empty()
+                    || *index.range.start() < 0
+                    || *index.range.end() >= i128::from(*elements)
+                    || constant.is_some_and(|value| !index.range.contains(&value))
+                {
+                    return Err(format!(
+                        "index {} in {:?} outside 0..{elements}",
+                        index.value, index.range
+                    ));
                 }
                 Ok(())
             }

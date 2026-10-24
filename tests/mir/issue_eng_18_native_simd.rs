@@ -207,9 +207,11 @@ done:
 }
 
 fn bounds(base: &str) -> Fact {
+    let elements = invar::array_limits::MAX_ARRAY_LEN as u64;
     Fact::InBounds {
         base: base.into(),
-        elements: invar::array_limits::MAX_ARRAY_LEN as u64,
+        index: operand("%i", 0..=i128::from(elements) - 1),
+        elements,
         guard: "caller: n <= len(xs) and n <= len(out)".into(),
     }
 }
@@ -298,6 +300,17 @@ fn issue_eng_18_planted_unproven_promises_fail() {
             "ptr noalias %out, i64 %n",
             "ptr noalias %out, ptr noalias %other, i64 %n",
         ),
+        // A return-position noalias names no parameter the fact covers.
+        ("define void @map(", "define noalias ptr @map("),
+        // The bounds fact names the access's only index, never another one.
+        (
+            "ptr %in, i64 %i, !invar.fact !101",
+            "ptr %in, i64 4294967296, !invar.fact !101",
+        ),
+        (
+            "ptr %out, i64 %i, !invar.fact !103",
+            "ptr %out, i64 %n, !invar.fact !103",
+        ),
     ] {
         let moved = ir.replace(from, to);
         assert_ne!(moved, ir, "{from}");
@@ -318,6 +331,16 @@ fn issue_eng_18_planted_unproven_promises_fail() {
     };
     let error = native::audit(&ir, &narrow).unwrap_err();
     assert!(error.contains("does not name"), "{error}");
+    // An index range that reaches past the element bound proves nothing.
+    let mut past = facts();
+    if let Fact::InBounds {
+        index, elements, ..
+    } = &mut past[1]
+    {
+        index.range = 0..=i128::from(*elements);
+    }
+    let error = native::audit(&ir, &past).unwrap_err();
+    assert!(error.contains("outside"), "{error}");
     // A fact of the wrong form, and a fact index nobody recorded.
     let error = native::audit(&ir, &facts()[..3]).unwrap_err();
     assert!(error.contains("unrecorded fact"), "{error}");
