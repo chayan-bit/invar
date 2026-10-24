@@ -15,6 +15,7 @@ pub mod certificate;
 pub mod exec;
 mod fsm;
 mod gate;
+pub mod lift;
 mod linear;
 mod loops;
 mod poly;
