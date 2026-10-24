@@ -233,9 +233,9 @@ same-state FK agreement within the unchanged 1e-6 m gate.
 The sequencer checks each complete returned trajectory and performs independent
 FK on its returned last joints before publishing the identical accepted message
 to the controller. Existing endpoint/start thresholds persist. Attachment needs
-both service acknowledgement and a later observed state. Explicit hash-bound
-legacy task inputs supply candidate grasp/pregrasp poses and the pinned FK library/model;
-candidate inputs do not establish geometric feasibility. The private IVSQ/2
+both service acknowledgement and a later observed state. The explicit hash-bound
+task input supplies only the pinned FK library/model; every grasp and pregrasp goal
+comes from the checked binding. The private IVSQ/2
 framing, watchdogs and evidence scope are documented in the binding evidence.
 
 ### Task phases (decisions D1 to D5, 2026-10-15)
@@ -274,12 +274,13 @@ The plan gate requires the last waypoint within 1e-6 rad of those joints and its
 Every IVSQ/2 snapshot reply starts with the task phase label (`move/state/world=<phase>`, `attach`, `release`, `settle`, `complete`).
 The task node logs a JSON line and publishes the label on its `phase` topic (`std_msgs/String`) whenever it changes, so the MCAP records each phase change; the request topic also carries the planner world phase.
 
-Explicit object-relative `grasp pose ...;` uses checked binding
-v2. The source controls the cube-from-grasp pose and generated weld site. Grasp is
-initial cube pose times that pose; pregrasp adds 100 mm in world Z. External task
-pose candidates do not override these source-derived goals. The target cube
-declares +25 mm Z and Rx(pi), preserving its initial and final poses and the TCP.
-A source without it keeps the centred identity weld. Source-certified geometry,
+The generated `config/sequencer-binding.json` is always `invar-sequencer-binding-v2`.
+An object-relative `grasp pose ...;` sets the cube-from-grasp pose and the generated weld site.
+A cube without one is grasped at its centre with the identity pose, the same pose as its generated weld.
+Grasp is initial cube pose times cube-from-grasp; pregrasp adds 100 mm in world Z.
+The task input carries no grasp goals.
+The example cubes declare +25 mm Z and Rx(pi), preserving their initial and final poses and the TCP.
+Source-certified geometry,
 collision-free trajectories, measured attachment and every original metric remain
 separate acceptance requirements.
 
