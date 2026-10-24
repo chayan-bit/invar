@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27997 estimator=bytes/3 limit=30000
+Size record: tokens=28016 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1035,7 +1035,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 10.4 Grasp poses and tool projection
 
-[N10.4.1] An attachable dynamic object may declare one `grasp pose xyz(...) quat(...);`, its object-from-grasp pose, which needs positive dynamic mass and collision geometry, and a duplicate, wrong translation unit or zero quaternion is a source error. `src/system/robot.rs`
+[N10.4.1] An attachable dynamic object may declare one `grasp pose xyz(...) quat(...);`, its object-from-grasp pose, which needs positive dynamic mass and collision geometry, and a duplicate, wrong translation unit or zero quaternion is a source error; without one the object-from-grasp pose is the identity. `src/system/robot.rs`
 [N10.4.2] MJCF places the weld site at the grasp, the tool goal is cube pose times object-from-grasp with a 100 mm world-Z pregrasp, and place uses the observed attachment and the unchanged final cube pose. `src/system/ros2/sequencer_node.rs::pregrasp`
 [N10.4.3] `invar-tool-projection-v2` records source-base from reference-base `B` and reference-tool from declared-tool `T`, so FK is `B * FK * T`, a goal becomes `inverse(B) * goal * inverse(T)`, a cube pose `inverse(B) * cube` and attachment `T * tool_from_cube`. `src/system/tool_projection.rs`
 

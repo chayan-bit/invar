@@ -23,12 +23,24 @@ fn transform(v: &Value) -> invar::system::tool_projection::Pose {
         quaternion_xyzw: std::array::from_fn(|i| v["quaternion_xyzw"][i].as_f64().unwrap()),
     }
 }
+/// The FK stand-in's fixed raw orientation: the one that projects onto the binding's grasp.
+fn fk_rotation(binding: &Value) -> [f64; 4] {
+    let p = transform(&binding["tool_projection"]["reference_from_cell"]);
+    let b = transform(&binding["tool_projection"]["source_base_from_reference_base"]);
+    let goal = &binding["grasp_tool_base"];
+    let goal = invar::system::tool_projection::Pose {
+        translation_m: std::array::from_fn(|i| goal[i].as_f64().unwrap()),
+        quaternion_xyzw: std::array::from_fn(|i| goal[3 + i].as_f64().unwrap()),
+    };
+    let raw = b.inverse().unwrap().compose(goal).unwrap();
+    raw.compose(p.inverse().unwrap()).unwrap().quaternion_xyzw
+}
 fn projected(binding: &Value, q: &[f64]) -> Vec<f64> {
     let p = transform(&binding["tool_projection"]["reference_from_cell"]);
     let b = transform(&binding["tool_projection"]["source_base_from_reference_base"]);
     let raw = invar::system::tool_projection::Pose {
         translation_m: [q[0], q[1], q[2]],
-        quaternion_xyzw: [0., 0., 0., 1.],
+        quaternion_xyzw: fk_rotation(binding),
     };
     let result = b.compose(raw).unwrap().compose(p).unwrap();
     pose(result.translation_m, result.quaternion_xyzw)
@@ -164,6 +176,10 @@ impl Fixture {
             bytes("source_ir_sha256"),
             bytes("joint_order_sha256")
         );
+        let rotation = fk_rotation(&self.binding)
+            .map(|x| format!("{x:.17e}"))
+            .join(",");
+        let data = format!("{data}inline const std::array<double,4> fk_rotation{{{rotation}}};\n");
         fs::write(self.root.join("probe_data.hpp"), data).unwrap();
         let names = self.binding["robot_joints"].as_array().unwrap();
         let indices = self.binding["joint_names"]
@@ -308,9 +324,12 @@ for action in [task,recorder]: assert call(types.SimpleNamespace(action=action,r
         );
     }
     fn new(n: usize, label: &str) -> Self {
-        let files = support::generate(&support::source(n)).unwrap();
+        Self::with_source(n, label, &support::source(n))
+    }
+    fn with_source(n: usize, label: &str, source: &str) -> Self {
+        let files = support::generate(source).unwrap();
         let binding: Value =
-            serde_json::from_str(&files["src/invar_cell_bringup/config/sequencer-binding-v1.json"])
+            serde_json::from_str(&files["src/invar_cell_bringup/config/sequencer-binding.json"])
                 .unwrap();
         let root = std::env::temp_dir().join(format!(
             "invar-bound-task-{}-{n}-{label}",
@@ -319,18 +338,19 @@ for action in [task,recorder]: assert call(types.SimpleNamespace(action=action,r
         fs::create_dir(&root).unwrap();
         fs::write(
             root.join("binding.json"),
-            &files["src/invar_cell_bringup/config/sequencer-binding-v1.json"],
+            &files["src/invar_cell_bringup/config/sequencer-binding.json"],
         )
         .unwrap();
+        let rotation = fk_rotation(&binding).map(|x| format!("{x:.17e}"));
         fs::write(root.join("fk.c"),r#"
 /* CPU protocol fixture; not Pinocchio or physical FK qualification. */
 #include <stdlib.h>
 const char *invar_pinocchio_bridge_v1_version(void){return "invar-component-v1/invar-pinocchio-reference-abi-1/pinocchio-4.1.0";}
 int invar_pinocchio_bridge_v1_init(void **c,const unsigned char *p,unsigned n){(void)p;(void)n;*c=calloc(1,1);return *c?0:3;}
 int invar_pinocchio_bridge_v1_configure(void *c,const void *v){(void)v;return c?0:2;}
-int invar_pinocchio_bridge_v1_step(void *c,const void *v,void *out){if(!c)return 2;const double *q=v;double *p=out;p[0]=q[0];p[1]=q[1];p[2]=q[2];p[3]=p[4]=p[5]=0;p[6]=1;return 0;}
+int invar_pinocchio_bridge_v1_step(void *c,const void *v,void *out){if(!c)return 2;const double *q=v;double *p=out;p[0]=q[0];p[1]=q[1];p[2]=q[2];p[3]=@QX@;p[4]=@QY@;p[5]=@QZ@;p[6]=@QW@;return 0;}
 int invar_pinocchio_bridge_v1_shutdown(void **c){free(*c);*c=0;return 0;}
-"#).unwrap();
+"#.replace("@QX@", &rotation[0]).replace("@QY@", &rotation[1]).replace("@QZ@", &rotation[2]).replace("@QW@", &rotation[3])).unwrap();
         let lib = root.join(format!("fk.{}", std::env::consts::DLL_EXTENSION));
         let output = Command::new("cc")
             .args([
@@ -363,18 +383,7 @@ int invar_pinocchio_bridge_v1_shutdown(void **c){free(*c);*c=0;return 0;}
             } else {
                 "universal_robots_ur5e/ur5e.xml"
             });
-        let home = binding["home_q_rad"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|x| x.as_f64().unwrap())
-            .collect::<Vec<_>>();
-        let mut grasp = projected(&binding, &home);
-        grasp[0] += 0.1;
-        grasp[2] -= 0.1;
-        let mut pregrasp = grasp.clone();
-        pregrasp[2] += 0.1;
-        let task = json!({"schema":"invar-sequencer-task-v1","source_ir_sha256":binding["source_ir_sha256"],"fk_model_path":model,"fk_library_path":lib,"fk_library_sha256":hash(&fs::read(&lib).unwrap()),"pregrasp_tool":pregrasp,"grasp_tool":grasp,"qualification":"CPU_double_only"});
+        let task = json!({"schema":"invar-sequencer-task-v1","source_ir_sha256":binding["source_ir_sha256"],"fk_model_path":model,"fk_library_path":lib,"fk_library_sha256":hash(&fs::read(&lib).unwrap()),"qualification":"CPU_double_only"});
         fs::write(root.join("task.json"), task.to_string()).unwrap();
         Self {
             root,
@@ -500,24 +509,12 @@ impl Drop for Fixture {
 }
 
 #[test]
-fn issue_s1_06_binding_checked_source_goals_override_task_candidates() {
+fn issue_s1_06_binding_unannotated_cube_targets_its_centre() {
     for n in [6, 7] {
-        let mut fixture = Fixture::new(n, "source-grasp-v2");
-        let source = support::source(n).replace(
-            "        dynamic mass 0.1 kg attachable;\n",
-            "        dynamic mass 0.1 kg attachable;\n        grasp pose xyz(0 m, 0 m, 0.025 m) quat(0, 1, 0, 0);\n",
-        );
-        let files = support::generate(&source).unwrap();
-        let binding_text = &files["src/invar_cell_bringup/config/sequencer-binding-v1.json"];
-        fixture.binding = serde_json::from_str(binding_text).unwrap();
-        assert_eq!(fixture.binding["schema"], "invar-sequencer-binding-v2");
-        fixture.task["source_ir_sha256"] = fixture.binding["source_ir_sha256"].clone();
-        // These candidates must not override the checked source goals.
-        fixture.task["pregrasp_tool"] = json!([99.0, 99.0, 99.0, 0.0, 0.0, 0.0, 1.0]);
-        fixture.task["grasp_tool"] = fixture.task["pregrasp_tool"].clone();
-        fs::write(fixture.root.join("binding.json"), binding_text).unwrap();
-        fs::write(fixture.root.join("task.json"), fixture.task.to_string()).unwrap();
-        let q = fixture.binding["home_q_rad"]
+        let source = support::source(n).replace(support::GRASP, "");
+        let fixture = Fixture::with_source(n, "centre-grasp", &source);
+        let binding = &fixture.binding;
+        let q = binding["home_q_rad"]
             .as_array()
             .unwrap()
             .iter()
@@ -534,9 +531,7 @@ fn issue_s1_06_binding_checked_source_goals_override_task_candidates() {
                     .try_into()
                     .unwrap(),
             );
-            assert!(
-                (value - fixture.binding["pregrasp_tool_base"][i].as_f64().unwrap()).abs() < 1e-12
-            );
+            assert!((value - binding["pregrasp_tool_base"][i].as_f64().unwrap()).abs() < 1e-12);
         }
     }
 }
