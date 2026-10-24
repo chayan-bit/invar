@@ -52,8 +52,8 @@ pub struct Profile {
     pub arena: u32,
     /// Fingerprints (hex) of the regions the scored D5 bench measured above
     /// the residual tier on this device; [`route`] refuses them to the native
-    /// path. Calibrated with the width and checked against the committed
-    /// reports by `tests/net_task_region.rs`.
+    /// path. Calibrated with the width and checked against the scored
+    /// runs' misses by `tests/normal_form/net_task_region.rs`.
     pub refused: &'static [&'static str],
 }
 

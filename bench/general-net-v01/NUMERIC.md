@@ -58,15 +58,15 @@ limits remain separate from completing source semantics.
 ## Reproduction
 
 The integration basis3027091 contains the private named-source API and the
-unchanged `tests/issue_gnet_v01_corpus_expansion.rs` adapter. This continuation
+unchanged `tests/gnet_slices/main.rs` adapter. This continuation
 changes only the bench-owned numerical comparator and current docs; it reuses
 the three existing numeric tests. No root, array/core or test adapter edit occurs.
 
 ```sh
 INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-numeric-debug \
-  cargo test --offline --locked --test issue_gnet_v01_corpus_expansion numeric_ -- --nocapture
+  cargo test --offline --locked --test gnet_slices numeric_ -- --nocapture
 INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-numeric-release \
-  cargo test --offline --locked --release --test issue_gnet_v01_corpus_expansion numeric_ -- --nocapture
+  cargo test --offline --locked --release --test gnet_slices numeric_ -- --nocapture
 cargo fmt --all -- --check
 cargo clippy --offline --locked --all-targets -- -D warnings
 ```

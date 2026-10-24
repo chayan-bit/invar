@@ -20,7 +20,7 @@ The original inputs remain recoverable from commit
 child. CI selects `8` for the shared runners. For a loaded host, for example:
 
 ```sh
-INVAR_TEST_TIMEOUT_SCALE=8 cargo test --locked --offline --test issue_gnet_v01_corpus_expansion
+INVAR_TEST_TIMEOUT_SCALE=8 cargo test --locked --offline --test gnet_slices
 ```
 
 Run Cargo through the host's required resource wrapper. This setting adds

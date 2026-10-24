@@ -1,11 +1,13 @@
 #![forbid(unsafe_code)]
 //! P6(a) (#54): `invar run` executes serial-only programs through the checked
 //! parallel normal form. Every law program of the P1b differential harness
-//! (`tests/net_normal_form_laws.rs`, read from that file so the corpus cannot
-//! drift) is wrapped in a `main` with seeded inputs and run through the CPU
+//! (`law_programs.rs`, shared with the harness so the corpus cannot drift)
+//! is wrapped in a `main` with seeded inputs and run through the CPU
 //! engine; each result, first trap and fuel exhaustion must equal the
 //! reference evaluator (`eval::run`), at the default fuel and at the exact
 //! fuel boundary.
+
+use crate::law_programs::LAW_PROGRAMS;
 
 use invar::{
     engine::{self, Engine},
@@ -13,8 +15,6 @@ use invar::{
 };
 use serde_json::Value as Json;
 use std::{collections::BTreeMap, path::PathBuf, process::Command};
-
-const LAWS: &str = include_str!("net_normal_form_laws.rs");
 
 /// SplitMix64, as in the law harness.
 struct Rng(u64);
@@ -39,14 +39,11 @@ impl Rng {
     }
 }
 
-/// The `const L..: &str = "...";` law programs of the P1b harness.
+/// The law programs of the P1b harness.
 fn law_programs() -> Vec<(String, String)> {
-    LAWS.lines()
-        .filter_map(|line| {
-            let rest = line.strip_prefix("const L")?;
-            let (name, source) = rest.split_once(": &str = \"")?;
-            Some((format!("L{name}"), source.strip_suffix("\";")?.to_owned()))
-        })
+    LAW_PROGRAMS
+        .iter()
+        .map(|&(name, source)| (name.to_owned(), source.to_owned()))
         .collect()
 }
 

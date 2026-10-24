@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
-#[path = "support/normal_form.rs"]
-mod support;
+
+use crate::support;
 
 use invar::{
     eval,

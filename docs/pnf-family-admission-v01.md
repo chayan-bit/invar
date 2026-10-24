@@ -44,7 +44,7 @@ P3 constructs no completion, MIR override or device receipt.
 
 ## Verification and current gaps
 
-`tests/pnf_family_admission.rs` compares admissions by function and exact source
+`tests/normal_form/pnf_family_admission.rs` compares admissions by function and exact source
 span with the existing recognizers. It reads the 72 GNET-05 programs and the 48
 GNET-05 robotics programs in place under `bench/general-net-v01/gnet05`, plus the
 140 M5-01 fixtures; no source generator is rerun. Focused
