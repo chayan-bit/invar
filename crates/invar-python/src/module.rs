@@ -286,7 +286,9 @@ impl CheckedModule {
             .map(|(parameter, value)| match parameter.ty {
                 ScalarType::I32 => scalar_i32(py, &value).map(ScalarValue::I32),
                 ScalarType::U32 => scalar_u32(py, &value).map(ScalarValue::U32),
-                ScalarType::F32 => Err(invalid(py, Failure::Dtype)),
+                ScalarType::F32 | ScalarType::F64 | ScalarType::Bool => {
+                    Err(invalid(py, Failure::Dtype))
+                }
             })
             .collect::<PyResult<Vec<_>>>()?;
         let value = artifact

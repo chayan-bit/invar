@@ -27,6 +27,10 @@ pub enum ScalarType {
     U32,
     /// Array element only; public scalar f32 parameters/results remain refused.
     F32,
+    /// Array element only (HA-1.4); public scalar f64 remains refused.
+    F64,
+    /// Array element only (HA-1.4): one byte, exactly 0 or 1.
+    Bool,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScalarValue {
@@ -94,8 +98,11 @@ impl ScalarType {
         match self {
             Self::I32 => 1,
             Self::U32 => 2,
-            // Only used as a private array element; signature admission excludes scalar f32.
+            // Only used as a private array element; signature admission excludes
+            // scalar f32, f64 and bool.
             Self::F32 => 3,
+            Self::F64 => 4,
+            Self::Bool => 5,
         }
     }
 }

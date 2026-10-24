@@ -1,4 +1,4 @@
-//! HA-1.2 artifact calls with `read`/`mut` `Array<i32|u32>` parameters.
+//! HA-1.2 artifact calls with `read`/`mut` `Array<i32|u32|f32|f64|bool>` parameters.
 //!
 //! Every argument is validated, every overlap involving a `mut` array is
 //! refused, NumPy borrow guards (strong references) are taken and metadata is
@@ -49,19 +49,26 @@ impl CheckedModule {
                 ScalarType::I32 => Dtype::I32,
                 ScalarType::U32 => Dtype::U32,
                 ScalarType::F32 => Dtype::F32,
+                ScalarType::F64 => Dtype::F64,
+                ScalarType::Bool => Dtype::Bool,
             };
             match param.array {
                 None if dtype == Dtype::I32 => {
                     scalar_i32(py, value)?;
                 }
-                None => {
+                None if dtype == Dtype::U32 => {
                     scalar_u32(py, value)?;
                 }
+                // Signature admission excludes scalar f32, f64 and bool.
+                None => return Err(invalid(py, Failure::Dtype)),
                 Some(mode) => {
                     let mutable = mode == ArrayMode::Mut;
                     let meta = metadata(py, value)?;
                     validation::validate(meta, dtype, None, mutable)
                         .map_err(|failure| invalid(py, failure))?;
+                    if dtype == Dtype::Bool {
+                        check_bool_bytes(py, value)?;
+                    }
                     arrays.push((index, meta, mutable));
                 }
             }
@@ -128,17 +135,21 @@ impl CheckedModule {
                 let argument = match (param.array, param.ty) {
                     (None, ScalarType::I32) => HostArgument::I32(scalar_i32(py, value)?),
                     (None, ScalarType::U32) => HostArgument::U32(scalar_u32(py, value)?),
-                    (None, ScalarType::F32) => return Err(invalid(py, Failure::Dtype)),
+                    (None, _) => return Err(invalid(py, Failure::Dtype)),
                     (Some(ArrayMode::Read), _) => match r.next() {
                         Some(ReadSlice::I32(v)) => HostArgument::Read(HostReadArray::I32(v)),
                         Some(ReadSlice::U32(v)) => HostArgument::Read(HostReadArray::U32(v)),
                         Some(ReadSlice::F32(v)) => HostArgument::Read(HostReadArray::Float32(v)),
+                        Some(ReadSlice::F64(v)) => HostArgument::Read(HostReadArray::Float64(v)),
+                        Some(ReadSlice::Bool(v)) => HostArgument::Read(HostReadArray::Bool(v)),
                         _ => return Err(invalid(py, Failure::Ownership)),
                     },
                     (Some(ArrayMode::Mut), _) => match w.next() {
                         Some(WriteSlice::I32(v)) => HostArgument::Mut(HostMutArray::I32(v)),
                         Some(WriteSlice::U32(v)) => HostArgument::Mut(HostMutArray::U32(v)),
                         Some(WriteSlice::F32(v)) => HostArgument::Mut(HostMutArray::Float32(v)),
+                        Some(WriteSlice::F64(v)) => HostArgument::Mut(HostMutArray::Float64(v)),
+                        Some(WriteSlice::Bool(v)) => HostArgument::Mut(HostMutArray::Bool(v)),
                         _ => return Err(invalid(py, Failure::Ownership)),
                     },
                 };
