@@ -124,4 +124,4 @@ Breakpoints set in the `.inv` file then bind like breakpoints in any other sourc
 
 - macOS only lets lldb launch a process when Developer Mode is on (`sudo DevToolsSecurity -enable`) or the session is interactive. Batch runs over ssh are refused with "cannot get permission to debug processes".
 - Debug builds need a little-endian target (x86_64, aarch64), because scalars are read from the low bytes of their stack slot.
-- Debug info does not change the generated code. `tests/issue_dx_20_debug_info.rs` compares the stripped IR and the `.text` bytes with those of a plain build.
+- Debug info does not change the generated code. `tests/diagnostics/issue_dx_20_debug_info.rs` compares the stripped IR and the `.text` bytes with those of a plain build.

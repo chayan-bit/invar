@@ -178,7 +178,7 @@ sequencer, followed by live controller/ROS/curobo qualification.
 
 ## Pinned ROS build/hash preparation
 
-`issue_s1_06_planner_ros_build` adds a build-only probe using each real robot's
+`robotics::issue_s1_06_planner_ros_build` adds a build-only probe using each real robot's
 checked limits, generated planner node, controller bridge and all six planner
 message definitions. The CPU test validates deterministic preparation and rejects
 missing, duplicated, wrongly named and mismatched ROS hash entries. It does not
@@ -191,8 +191,8 @@ ID and a new absolute evidence directory:
 ```sh
 INVAR_S1_06_ROS_IMAGE_ID=sha256:<reviewed-image-id> \
 INVAR_S1_06_ROS_BUILD_DIR=/absolute/new-evidence-directory \
-cargo test --offline --locked --test issue_s1_06_planner_ros_build \
-  issue_s1_06_planner_ros_build_env_both_counts_and_hash_parity -- --ignored --exact
+cargo test --offline --locked --test robotics \
+  issue_s1_06_planner_ros_build::issue_s1_06_planner_ros_build_env_both_counts_and_hash_parity -- --ignored --exact
 ```
 
 Require one executed passing test, not a zero-test exit. The runner neither pulls images nor installs dependencies. It

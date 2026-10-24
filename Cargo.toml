@@ -57,7 +57,7 @@ libc = "=0.2.189"
 [dev-dependencies]
 half = "=2.7.1"
 invar-cuda = { path = "crates/invar-cuda" }
-# tests/issue_dx_20_debug_info.rs reads the native backend's DWARF back.
+# tests/diagnostics/issue_dx_20_debug_info.rs reads the native backend's DWARF back.
 gimli = { version = "=0.34.0", default-features = false, features = ["read", "std"] }
 object = { version = "=0.40.0", default-features = false, features = ["read_core", "elf", "macho", "std"] }
 
