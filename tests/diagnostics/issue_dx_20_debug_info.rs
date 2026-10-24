@@ -443,7 +443,8 @@ fn issue_dx_20_debug_info_is_code_neutral() {
     );
     for (path, source) in &programs {
         let program = lower(source).unwrap();
-        let plain = native::emit_mir(&program).unwrap();
+        // Debug builds are unoptimized, so the plain build they match is too.
+        let plain = native::emit_mir_for(&program, &native::Build::UNOPTIMIZED).unwrap();
         let debug = debug_object(source, path).unwrap();
         assert_ne!(plain.ir, debug.ir, "{path}: no debug metadata");
         let difference = first_difference(
