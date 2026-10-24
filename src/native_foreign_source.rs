@@ -7,13 +7,14 @@
 //! drift, otherwise visible only under the `native` feature) fails default CI.
 
 const LIBRARY: &str = include_str!("../crates/invar-foreign/src/lib.rs");
-const SEPARATE_MODULES: [&str; 6] = [
+const SEPARATE_MODULES: [&str; 7] = [
     "component",
     "device",
     "exports",
     "host_array",
     "numeric",
     "numeric_owned_resume",
+    "region",
 ];
 
 /// `invar-foreign/src/lib.rs` without its separately loaded module declarations.

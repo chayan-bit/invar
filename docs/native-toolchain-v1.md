@@ -101,6 +101,15 @@ Metadata attachments other than `!dbg` and `!invar.fact` (and debug records' `!D
 Other poison or UB promises have no fact form and are always refused: `nusw`, `exact`, `disjoint`, `nneg`, `samesign`, `nonnull`, `noundef`, `dereferenceable`, `mustprogress`, `willreturn`, `llvm.assume` and every fast-math flag (`contract` and `reassoc` are never strict; the others wait for #100 contracts).
 The MIR lowering itself emits no promise (arrays are host handles), so its objects carry no facts.
 
+### Compiled cpu-parallel regions
+
+`--engine cpu-parallel` runs admitted wrapping `u32` map regions (`Plan::LiveArray`: per-input operations, an optional zip, then stage operations) and lawful `u32` reductions (`WrappingSum`, `WrappingProduct`) through native kernels from `src/native/region.rs`.
+Each kernel is emitted with `noalias` on the map output (a fresh buffer, distinct from every input owner), `inbounds` on every access and `nuw` on the index step, each tied to its fact; it is audited, optimized for the live CPU (`Build::HOST`), linked with `cc -shared`, checked by SHA-256 and loaded through `invar_foreign::region`.
+That module is the only unsafe code involved: it checks every slice length and the kernel's arity before the call, and each worker passes the kernel its own chunk.
+Chunks, their join order, the fixed combine order of reduction partials and the fuel rule are those of the interpreter, so observations are identical; wrapping `u32` add and multiply are associative modulo 2^32, so any vector regrouping of a reduction gives the left fold.
+A fused-map capture, a missing or short slice, more than `u32::MAX` elements, or any compile, link or load failure selects the plan interpreter.
+`INVAR_NATIVE_REGIONS=never|always` (default: regions of at least 2^23 elements, since building one kernel took about 40 ms on a Linux x86_64 test machine) and `native::region::set_policy` choose when kernels are used; kernels are compiled once per plan and process (at most 256).
+
 Not yet measured: the R <= 1.10 (clang -O3) and R <= 1.15 (ISPC) timing gates; they need a quiet host under the M5-01 protocol.
 
 ## Acceptance evidence
@@ -116,4 +125,4 @@ real CLI `build` and `run` paths execute a linked object and reject an
 existing output. No Linux/Windows native run or Miri result is claimed;
 default Linux CI exercises the non-native path only.
 
-ENG-18 (#101), `tests/mir/issue_eng_18_native_simd.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target.
+ENG-18 (#101), `tests/mir/issue_eng_18_native_simd.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target. `tests/mir/issue_eng_18_native_regions.rs` checks map kernels against `Plan::live_values` on edge ranges and aliased slots, reduce kernels against the left fold, vector code in the kernels, and identical cpu-parallel observations with kernels on and off at 1, 2 and 7 workers and on fuel prefixes, including a checked overflow that traps in source order.

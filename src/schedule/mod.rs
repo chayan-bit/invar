@@ -132,7 +132,21 @@ fn live_pass(
         .zip(&slices)
         .map(|(name, values)| (name.clone(), values.len()))
         .collect();
+    // ENG-18 (#101): a compiled kernel computes the chunk when one is
+    // available (never for a fused capture); otherwise the plan interpreter.
+    #[cfg(feature = "native")]
+    let kernel = capture
+        .is_none()
+        .then(|| crate::native::region::map_kernel(plan, inputs, output, len))
+        .flatten();
     let (parts, chunks, joined) = parallel_chunks_with_limit(len, workers, hooks, len, |range| {
+        #[cfg(feature = "native")]
+        if let Some(values) = kernel
+            .as_ref()
+            .and_then(|kernel| kernel.map(&slices, range.clone()))
+        {
+            return Ok((Vec::new(), values));
+        }
         plan.live_values(&slices, range, capture)
             .map_err(|_| Error::Candidate)
     })?;

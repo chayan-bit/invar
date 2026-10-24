@@ -306,7 +306,18 @@ pub(super) fn reduction_output(
     workers: usize,
     hooks: &Hooks,
 ) -> Result<Scheduled<u32>, Error> {
+    // ENG-18 (#101): a compiled kernel folds each chunk when one is
+    // available; chunks and their combine order are the same either way.
+    #[cfg(feature = "native")]
+    let kernel = crate::native::region::reduce_kernel(law, input.len());
     let (parts, ranges, joined) = parallel_chunks(input.len(), workers, hooks, |range| {
+        #[cfg(feature = "native")]
+        if let Some(part) = kernel
+            .as_ref()
+            .and_then(|kernel| kernel.reduce(&input[range.clone()]))
+        {
+            return Ok(part);
+        }
         Ok(input[range]
             .iter()
             .copied()
