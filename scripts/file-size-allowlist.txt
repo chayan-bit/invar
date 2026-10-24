@@ -30,7 +30,6 @@
 988 src/mir_eval/histogram.rs
 818 src/mir_eval/region/tests.rs
 901 src/placement/calibration.rs
-830 src/schedule/mod.rs
 863 src/summary_source.rs
 1159 src/system/ros2.rs
 1728 src/system/substep_admission.rs

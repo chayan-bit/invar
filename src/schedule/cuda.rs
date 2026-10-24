@@ -521,7 +521,7 @@ fn calibrate_with_workers(workers: usize) -> Result<DeviceCostModel, Error> {
         ));
     }
     // The same element executor and worker count auto uses for CPU regions.
-    let cpu_ms = cpu_map_ms(laws::MAX_ELEMENTS, workers).unwrap_or(f64::NAN);
+    let cpu_ms = super::device::cpu_map_ms(laws::MAX_ELEMENTS, workers).unwrap_or(f64::NAN);
     if !cpu_ms.is_finite() || cpu_ms <= 0.0 {
         return Err(Error::unavailable(
             "CPU calibration did not resolve map bandwidth",

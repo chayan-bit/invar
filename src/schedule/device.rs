@@ -82,3 +82,37 @@ pub(super) fn settle_choices(choices: &mut [Choice], published: &[bool]) {
         }
     }
 }
+
+/// Median wall milliseconds of the real cpu-parallel element executor on a
+/// one-operation map over `elements` words, used to calibrate `auto`.
+pub(crate) fn cpu_map_ms(elements: usize, workers: usize) -> Option<f64> {
+    let plan = Plan::LiveDag {
+        inputs: vec![0],
+        ops: vec![
+            crate::typed_net::DagOp::Input(0),
+            crate::typed_net::DagOp::Map {
+                input: 0,
+                op: crate::typed_net::MapOp::WrappingAdd(1),
+            },
+        ],
+        outputs: vec![1],
+        source_identity: 1,
+        graph_revision: 0,
+    };
+    let input = vec![7u32; elements];
+    let hooks = Hooks::default();
+    let mut samples = Vec::new();
+    for trial in 0..6 {
+        let started = std::time::Instant::now();
+        let parts = parallel_chunks(elements, workers, &hooks, |range| {
+            plan.run_dag(&[&input], range).map_err(|_| Error::Candidate)
+        })
+        .ok()?;
+        std::hint::black_box(&parts);
+        if trial > 0 {
+            samples.push(started.elapsed().as_secs_f64() * 1000.0);
+        }
+    }
+    samples.sort_by(f64::total_cmp);
+    samples.get(samples.len() / 2).copied()
+}
