@@ -18,7 +18,7 @@ use pyo3::{
     create_exception,
     exceptions::PyException,
     prelude::*,
-    types::{PyBytes, PyDict, PyFloat, PyInt, PyList, PyString, PyTuple},
+    types::{PyByteArray, PyBytes, PyDict, PyFloat, PyInt, PyList, PyString, PyTuple},
 };
 use serde_json::{Value, json};
 
