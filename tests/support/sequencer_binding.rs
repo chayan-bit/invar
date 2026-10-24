@@ -1,14 +1,12 @@
 //! Actual generator fixture with labelled planner/FK test doubles; not qualification.
 use invar::{front, system};
 use std::{collections::BTreeMap, fs, path::Path};
+/// The example cells' explicit cube grasp clause.
+pub const GRASP: &str = "        grasp pose xyz(0 m, 0 m, 0.025 m) quat(0, 1, 0, 0);\n";
 pub fn source(n: usize) -> String {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place");
-    let original = fs::read_to_string(root.join(if n == 6 { "cell-ur5e.inv" } else { "cell.inv" }))
-        .unwrap()
-        .replace(
-            "        grasp pose xyz(0 m, 0 m, 0.025 m) quat(0, 1, 0, 0);\n",
-            "",
-        );
+    let original =
+        fs::read_to_string(root.join(if n == 6 { "cell-ur5e.inv" } else { "cell.inv" })).unwrap();
     let planner = include_str!("../fixtures/s1_06/planner-manifest.inv")
         .lines()
         .filter(|s| !s.starts_with("frame "))

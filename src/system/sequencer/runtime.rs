@@ -231,10 +231,8 @@ pub fn command(args: Vec<OsString>) -> Result<()> {
         MAX_FRAME as u64,
     )?)
     .map_err(|_| "task JSON")?;
-    if !matches!(
-        binding["schema"].as_str(),
-        Some("invar-sequencer-binding-v1" | "invar-sequencer-binding-v2")
-    ) || task["schema"] != "invar-sequencer-task-v1"
+    if binding["schema"] != "invar-sequencer-binding-v2"
+        || task["schema"] != "invar-sequencer-task-v1"
         || task["source_ir_sha256"] != binding["source_ir_sha256"]
     {
         return Err("binding/task schema/source mismatch".into());
@@ -253,13 +251,9 @@ fn run<const N: usize>(binding: &Value, task: &Value) -> Result<()> {
         quaternion_xyzw: array(&projection_value["quaternion_xyzw"])?,
     };
     let base_value = &binding["tool_projection"]["source_base_from_reference_base"];
-    let source_base = if binding["tool_projection"]["schema"] == "invar-tool-projection-v2" {
-        Pose {
-            translation_m: array(&base_value["translation_m"])?,
-            quaternion_xyzw: array(&base_value["quaternion_xyzw"])?,
-        }
-    } else {
-        Pose::IDENTITY
+    let source_base = Pose {
+        translation_m: array(&base_value["translation_m"])?,
+        quaternion_xyzw: array(&base_value["quaternion_xyzw"])?,
     };
     let base_inverse = pose(&binding["world_from_base"])?
         .inverse()
@@ -304,16 +298,8 @@ fn run<const N: usize>(binding: &Value, task: &Value) -> Result<()> {
     let mut core = Sequencer::new(Config {
         home_q_rad: home_q,
         home_tool,
-        pregrasp_tool: pose(if binding["schema"] == "invar-sequencer-binding-v2" {
-            &binding["pregrasp_tool_base"]
-        } else {
-            &task["pregrasp_tool"]
-        })?,
-        grasp_tool: pose(if binding["schema"] == "invar-sequencer-binding-v2" {
-            &binding["grasp_tool_base"]
-        } else {
-            &task["grasp_tool"]
-        })?,
+        pregrasp_tool: pose(&binding["pregrasp_tool_base"])?,
+        grasp_tool: pose(&binding["grasp_tool_base"])?,
         final_cube: pose(&binding["final_cube_base"])?,
         joint_limits_rad: limits,
         velocity_limits_rad_s: speeds,
