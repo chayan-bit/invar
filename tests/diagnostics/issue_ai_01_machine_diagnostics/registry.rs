@@ -296,6 +296,7 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
         include_str!("../../../src/mir_eval/gather.rs"),
         include_str!("../../../src/mir_eval/scatter.rs"),
         include_str!("../../../src/mir_eval/histogram.rs"),
+        include_str!("../../../src/mir_eval/histogram/atomic_tests.rs"),
         include_str!("../../../tools/tests/qualification_faults.rs"),
     ];
     for entry in registry["codes"].as_array().unwrap() {

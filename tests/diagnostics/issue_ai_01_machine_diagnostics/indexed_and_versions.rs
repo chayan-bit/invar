@@ -58,6 +58,7 @@ fn issue_ai_01_machine_diagnostics_indexed_registry_matches_family_sources() {
             "src/mir_eval/bulk.rs",
             "src/mir_eval/gather.rs",
             "src/mir_eval/histogram.rs",
+            "src/mir_eval/histogram/atomic_tests.rs",
             "src/mir_eval/scatter.rs",
             "src/scatter_proof/host.rs",
         ]
