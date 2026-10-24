@@ -1,6 +1,6 @@
 # Invar architecture, design revision 0.4
 
-Status: implementation direction, not a proved system. The implemented language is specified in [the v0.1 specification](spec/invar-v0.1.md) and the [bootstrap specification](../spec/bootstrap.md). The [detailed implementation plan](implementation-plan.md) fixes the current delivery order and issue contracts. The archived 0.1 proposal supplies long-term context only.
+Status: implementation direction, not a proved system. The implemented language is specified in [the v0.1 specification](spec/invar-v0.1.md) and the [grammar](../spec/grammar.ebnf). Planned work is tracked in GitHub issues.
 
 ## One meaning, multiple admitted implementations
 
@@ -82,9 +82,9 @@ Foreign code is outside the safe-language theorem boundary. Safe wrappers publis
 
 ## Required interaction foundations
 
-The project's architectural direction makes interaction combinators a required foundation for automatic parallelization. The [parallelism contract](parallelism-foundation.md) defines its scope: a real minimal reference calculus, a typed demand-aware production representation with bulk operations, and validated extraction into conventional execution plans. This replaces the earlier recommendation that interaction analysis could be removed as an optional research pass.
+The project's architectural direction makes interaction combinators a required foundation for automatic parallelization. The [parallelism contract](parallelism-foundation.md) defines its scope: a typed demand-aware production representation with bulk operations, and validated extraction into conventional execution plans. This replaces the earlier recommendation that interaction analysis could be removed as an optional research pass.
 
-All production automatic-parallel candidates, including GPU candidates, pass through that typed region and extraction path. Ordinary sequential native functions may compile directly; users are not required to execute a primitive graph reducer per scalar operation. The minimal reducer is a separate reference tool; source-to-primitive expansion remains a research question. The typed graph is not the physical representation of every array element.
+All production automatic-parallel candidates, including GPU candidates, pass through that typed region and extraction path. Ordinary sequential native functions may compile directly; users are not required to execute a primitive graph reducer per scalar operation. Source-to-primitive expansion remains a research question. The typed graph is not the physical representation of every array element.
 
 Preserve demand, affine captures, cleanup, numeric behavior, and typed port connectivity. Bulk operators need reference definitions and rewrite/lowering laws; a decorative graph around opaque operations is insufficient. The exact encoding and extended rules must be frozen and validated before this stage is accepted. No source/compiler-wide proof is claimed.
 

@@ -70,17 +70,16 @@ fn cleanup_json(runtime: &Runtime) -> String {
         .join(",")
 }
 
-fn report(status: &str, extra: &str, code: i32, schema_version: u8) -> ! {
+fn report(status: &str, extra: &str, code: i32) -> ! {
     RUNTIME.with(|cell| {
         if let Ok(runtime) = cell.try_borrow() {
             println!(
-                "{{\"schema_version\":{},\"status\":\"{status}\",\"diagnostics\":[],{extra},\"steps_used\":{},\"cleanup_trace\":[{}]}}",
-                schema_version,
+                "{{\"schema_version\":3,\"status\":\"{status}\",\"diagnostics\":[],{extra},\"steps_used\":{},\"cleanup_trace\":[{}]}}",
                 runtime.steps,
                 cleanup_json(&runtime)
             );
         } else {
-            println!("{{\"schema_version\":1,\"status\":\"tool_error\",\"diagnostics\":[],\"tool_code\":\"NATIVE_ABI\",\"steps_used\":0,\"cleanup_trace\":[]}}");
+            println!("{{\"schema_version\":3,\"status\":\"tool_error\",\"diagnostics\":[],\"tool_code\":\"NATIVE_ABI\",\"steps_used\":0,\"cleanup_trace\":[]}}");
         }
     });
     process::exit(code)
@@ -97,7 +96,7 @@ fn tool(code: u32) -> ! {
         7 => "TC_INPUT_RANGE",
         _ => "NATIVE_TOOL",
     };
-    report("tool_error", &format!("\"tool_code\":\"{name}\""), 2, 1)
+    report("tool_error", &format!("\"tool_code\":\"{name}\""), 2)
 }
 
 fn trap(category: u32, start: u32, end: u32) -> ! {
@@ -115,7 +114,6 @@ fn trap(category: u32, start: u32, end: u32) -> ! {
             "\"trap\":{{\"category\":\"{category}\",\"span\":{{\"start\":{start},\"end\":{end}}}}}"
         ),
         3,
-        if category == "UNIT_CONVERSION_INEXACT" { 2 } else { 1 },
     )
 }
 
@@ -282,7 +280,6 @@ pub extern "C" fn invar_tick_v1() {
                 "evaluation_limit",
                 &format!("\"fuel_limit\":{fuel},\"steps_used_at_limit\":{steps}"),
                 4,
-                1,
             );
         }
         runtime.steps += 1;
@@ -670,7 +667,6 @@ fn main() {
         "ok",
         &format!("\"result\":{{\"type\":\"i32\",\"value\":{value}}}"),
         0,
-        1,
     );
 }
 

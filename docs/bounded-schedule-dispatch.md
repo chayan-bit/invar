@@ -23,7 +23,7 @@ the owning family supplies its implementation; they are not approximated.
 The existing analytic model does not distinguish equal-work geometry variants.
 
 The ordinary CUDA/Metal providers attach M3 cost records to their Rust `Choice`
-and use the common decision function. The frozen CLI explain schema retains its
+and use the common decision function. The CLI explain schema retains its
 compact `cost_ms` summary from that same estimate. Full records are available
 through `CostRecord::to_json` and the Rust receipt API; the CLI schema is unchanged. Their existing
 family registry cost hooks remain available for new A1 families.

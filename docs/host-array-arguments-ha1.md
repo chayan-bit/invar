@@ -1,10 +1,10 @@
 # HA-1: host array arguments (revision HA-1.3)
 
-P0b limit update (2026-10-15): the language per-array limit is now 2^24 and the live-element ceiling is 2^28, shared by source, MIR, native allocation and the net oracle. Historical 1,000,000/2,000,000 figures below describe the original HA-1 acceptance. GNET ABI13 adds a copying device entry with retained Rust leases and successful-return publication after confirmed completion; it does not establish the native/Python zero-copy requirements. The private HA-1 native host-array protocol retains its separate tool bounds: 1,000,000 elements per array, 2,000,000 live elements and 8,000,000 rollback bytes; larger host calls are typed refusals. These bounds do not cap native source-owned allocations. See [GNET entry ABI13](gnet-entry-v13.md).
+P0b limit update (2026-10-15): the language per-array limit is now 2^24 and the live-element ceiling is 2^28, shared by source, MIR, native allocation and the net oracle. Historical 1,000,000/2,000,000 figures below describe the original HA-1 acceptance. GNET ABI13 adds a copying device entry with retained Rust leases and successful-return publication after confirmed completion; it does not establish the native/Python zero-copy requirements. The private HA-1 native host-array protocol retains its separate tool bounds: 1,000,000 elements per array, 2,000,000 live elements and 8,000,000 rollback bytes; larger host calls are typed refusals. These bounds do not cap native source-owned allocations. See Entry ABI13 in `src/general_net/CONTRACT.md`.
 
 **Status: frozen.** The maintainers approved the pending decisions on 2026-10-04
 and delegated option choices to engineering judgement. HA-1 amends
-L1-06 (`docs/issues/next/L1-06-python-binding.md`) at the host boundary; it does
+the L1-06 Python binding contract at the host boundary; it does
 not change the language, MIR, Value layout or any ABI.
 
 **HA-1.1 (2026-10-05):**
@@ -32,7 +32,7 @@ not change the language, MIR, Value layout or any ABI.
 **HA-1.3 (2026-10-14), decided 2026-10-14:**
 - Extend the private section 12 record with element value 3 = `f32` (IEEE binary32), alongside 1 = `i32` and 2 = `u32`.
 - Modes remain 1 = `read` and 3 = `mut`, with unchanged size, offsets, alignment, limits, alias rules and rollback obligations.
-- Native-serial admits `read`/`mut Array<f32>` at caller addresses under `strict-f32-v1`, as defined by M4-01's `src/numeric_contract.rs` and `docs/m4-source.md`.
+- Native-serial admits `read`/`mut Array<f32>` at caller addresses under `strict-f32-v1`, as defined by M4-01's `src/numeric_contract.rs` and `docs/numeric.md`.
 - Copies, stores and rollback preserve every bit, including NaN payloads and signed zero; arithmetic follows the existing policy (NaN payload/sign are unobservable arithmetic outcomes), with gradual underflow and no FTZ, reassociation or implicit contraction.
 - The public C ABI v1 is unchanged; element 3 is private and is never a public scalar or array tag.
 - Returned arrays remain on the explicitly copying reference path; `take` remains refused.
@@ -80,13 +80,13 @@ not change the language, MIR, Value layout or any ABI.
 | L1-06:23 | `unsafe` only in `crates/invar-python` |
 | L1-06:31 | same buffer address on both sides |
 | L1-06:37 | negative cases: aliasing, freed or resized buffers |
-| `spec/bootstrap.md:49` | `read`/`mut`/`take` parameter modes |
-| `spec/bootstrap.md:53` | read loans may coexist; a mutable loan excludes all other access |
-| `spec/bootstrap.md:55–57` | loans last for the outer call; incompatible aliasing is rejected at the caller |
-| `spec/bootstrap.md:81` | traps perform no language-level cleanup |
-| `spec/bootstrap.md:117` | an `Err` is an ordinary value, distinct from traps, limits and tool failures |
-| `spec/bootstrap.md:121` | `View`/`MutView` are non-owning views (relevant to §5.3) |
-| `spec/bootstrap.md:143` | foreign boundary |
+| spec N4.2.1 | `read`/`mut`/`take` parameter modes |
+| spec N4.2.2 | read loans may coexist; a mutable loan excludes all other access |
+| spec N4.2.3, N4.2.7 | loans last for the outer call; incompatible aliasing is rejected at the caller |
+| spec N3.4.7 | traps perform no language-level cleanup |
+| spec N5.4.3 | an `Err` is an ordinary value, distinct from traps, limits and tool failures |
+| spec N5.5.1 | `View`/`MutView` are non-owning views (relevant to §5.3) |
+| spec 7.3 | foreign boundary |
 | `docs/native-toolchain-v1.md:59`; `src/eval.rs:20,23` | array length ≤ 1,000,000; live array elements ≤ 2,000,000 |
 | `docs/scalar-exports-v1.md:39` | Python bindings retain the GIL throughout the call |
 | `docs/rust-engineering.md:38` | fallible reservation where allocation failure is part of the contract |
@@ -103,7 +103,7 @@ not change the language, MIR, Value layout or any ABI.
 | 4 | hold the GIL for array calls and pin exports; refuse every overlap involving `mut`; callers must prevent concurrent native access outside the GIL (the GIL cannot make that safe); no guarantees across process kill or abort | §4, §8 |
 | 5 | NumPy-owned `take` is refused before execution; Rust reference `take` stays unexposed pending its own contract | §9 |
 | 6 | the same-address proof applies to native engines only; reference engines are explicitly copying semantic oracles | §10 |
-| — | no hidden fallback and no partial publication | §2, §7 |
+| - | no hidden fallback and no partial publication | §2, §7 |
 
 ## 1. Definitions
 
@@ -163,10 +163,10 @@ The binding (later slice) maps these codes as follows:
 
 | Pair | Rule |
 |---|---|
-| read / read, exact alias | admitted; the reference engine shares **one** private owner, exactly like an in-source call passing one owner to both parameters (`spec/bootstrap.md:53`) |
+| read / read, exact alias | admitted; the reference engine shares **one** private owner, exactly like an in-source call passing one owner to both parameters (spec N4.2.2) |
 | read / read, partial overlap (same type) | admitted; union accounting (§5); see §5.3 |
 | any cross-type overlap | **refused** (`HOST_ARRAY_ALIAS`): one memory region would be two element types, which the Value model cannot represent and which would be a reinterpretation |
-| any overlap involving `mut` (with `mut`, `read`, an output or `take`), including exact aliases | **refused** (`spec/bootstrap.md:53, 57`; L1-06:37) |
+| any overlap involving `mut` (with `mut`, `read`, an output or `take`), including exact aliases | **refused** (spec N4.2.2, N4.2.7; L1-06:37) |
 
 From NumPy only owning arrays are admitted, so a partial overlap is
 impossible through Python and any alias is exact. Partial overlaps arise only
@@ -194,7 +194,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
 
 ### 5.3 Partial overlaps: plan without shared layout changes
 - **No in-source counterpart.** The source language has no partially
-  overlapping owners (`spec/bootstrap.md:49–57`). Union accounting is therefore
+  overlapping owners (spec 4.2). Union accounting is therefore
   an HA-1 *definition*, not an equivalence.
 - **Reference engine (implemented):**
   - one private owner per argument, holding a copy of that argument's
@@ -217,7 +217,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
     `{ storage: Rc<RefCell<Vec<T>>>, offset, len }`, read through the existing
     checked index paths of `Value::Array*`, behind its own approved
     contract.
-  - Mapping overlaps to language views (`spec/bootstrap.md:121`) is not
+  - Mapping overlaps to language views (spec N5.5.1) is not
     possible without changing signatures, because a `read Array<T>` parameter
     is not a `View<T>`.
 
@@ -270,7 +270,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
   copied into a fallibly pre-reserved snapshot within the staging budget (§6).
 - **Outcomes:**
   - **Normal return**, including returning `Result::Err` (an ordinary value,
-    `spec/bootstrap.md:117`): the buffer holds the final contents and the
+    spec N5.4.3): the buffer holds the final contents and the
     result is returned.
   - **Any non-normal outcome:** trap, fuel exhaustion, tool limit, internal
     error, or a Rust panic reaching the boundary. The buffer is restored to
@@ -311,7 +311,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
 - **Encoding:** the result is the evaluator's exact value, `Value::Variant`:
   tag 0 is `Ok`, tag 1 is `Err`, and the payload is the scalar.
 - **Commit:** a returned `Result::Err` is an ordinary value
-  (`spec/bootstrap.md:117`). It is a normal return and commits `mut`
+  (spec N5.4.3). It is a normal return and commits `mut`
   buffers.
 
 ## 8. GIL, pinning, concurrency, termination (binding; not implemented here)
@@ -330,7 +330,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
   - no native code writes a `read` buffer.
 
   Violations are outside Invar's soundness claims, as for foreign code
-  (`spec/bootstrap.md:143`).
+  (spec 7.3).
 - **Admitted memory:** only NumPy-owned, process-private memory
   (`validation.rs:74–75, 114`).
 - **Termination:** no guarantee across process kill, abort, or allocator
@@ -366,7 +366,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
   | Path | Refusal |
   |---|---|
   | export compilation (`src/exports.rs:205–206`) | `NATIVE_ABI`, "export parameter is not original i32/u32" |
-  | owned-numeric host (`src/general_net/numeric_owned_host.rs:567–579`) | `Error::Input` for a non-scalar argument |
+  | owned-numeric host (`src/general_net/numeric_owned_resume_host.rs`, `encode`) | `Error::Input` for a non-scalar argument |
   | binding `call` | `PY_EXPORT_UNAVAILABLE` |
   | binding `call_foreign` | `PY_ABI_TYPE_UNAVAILABLE` |
   | public C ABI v1 | has no array tag and no `Mut` mode |
@@ -385,7 +385,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
 | 4 | empty extents never alias, including one strictly inside another buffer | read slice |
 | 5 | any overlap involving `mut` is refused with zero steps and unchanged bytes | stage 1: synthetic metadata (safe `&mut` borrows cannot overlap) plus every constructible refusal through `observe_host_call` |
 | 6 | reference `mut`: commit on normal return including `Err`, equal to the in-source owner; unchanged bytes after traps, every fuel prefix, tool limits, failed reservations, failed prechecks and caught injected panics | stage 1 |
-| 6n | native `mut`: restore after non-normal outcomes; snapshot reservation failure is a typed refusal | HA-1.3: integer suites plus `issue_l1_06_native_f32_arrays.rs`, `test_native_f32_arrays.py`, foreign guard and real native decode fault tests |
+| 6n | native `mut`: restore after non-normal outcomes; snapshot reservation failure is a typed refusal | HA-1.3: integer suites plus `tests/exports/issue_l1_06_native_f32_arrays.rs`, `test_native_f32_arrays.py`, foreign guard and real native decode fault tests |
 | 7 | native same-address `i32`/`u32`/`f32` read/mut arrays; reference disclosed as copying | HA-1.3: same files |
 | 7r | returned arrays remain copying through `call_reference`; never counted as zero-copy | `test_reference_arrays.py`, `test_native_arrays.py` |
 | 8 | NumPy `take` refused before any step; pin guard holds the export (a resize attempt raises) | binding |

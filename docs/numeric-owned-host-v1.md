@@ -1,8 +1,11 @@
-# Loaded numeric owned CPU host (ABI10)
+# Loaded numeric owned CPU host (ABI11)
 
-This is a bounded, source-issued Rust host for the existing compiled ABI10 CPU
-machine. It loads and calls generated `gnet_run`; the graph oracle is only an
-independent test comparator. It does not complete all general-net or v0.1 work.
+This is a bounded, source-issued Rust host for the compiled ABI11 CPU owned
+numeric continuation, the only CPU numeric ABI.
+It loads generated `gnet_resume` and drives one exclusive native task in caller-chosen quanta.
+The graph oracle is only an independent test comparator.
+It does not complete all general-net or v0.1 work.
+The ABI8 scalar, ABI9 continuation and ABI10 owned hosts were removed; ABI11 admits every program they admitted with bit-identical observations.
 
 The runtime baseline is main `a0f4c96c13f3c25b496d2c33b47c20809e7387ea`.
 The ARM corpus repair is separate: it keeps the numeric corpus portable across ARM and SSE hosts.
@@ -12,9 +15,10 @@ hardware qualification receipt.
 
 ## Admission and ownership
 
-`numeric_owned_host::Plan::from_source` accepts source bytes, a named entry,
+`numeric_owned_resume_host::Plan::from_source` accepts source bytes, a named entry,
 provenance limits, fixed owned-storage limits, and a trusted local C++ compiler.
-The existing `compile_owned_numeric` path must issue a CPU ABI10 artifact.
+The `compile_resumable_owned_numeric` path must issue a CPU ABI11 artifact.
+`Plan::start` captures arguments and budgets in a fresh task; `Run::resume` advances it by at most one quantum of MIR transitions.
 External arguments remain exact `i32`, `u32`, `Bool`, and `f32` scalar values.
 Arrays are created by the program. Successful scalar and `Array<i32>`,
 `Array<u32>`, and `Array<f32>` roots are supported within that existing admission.
@@ -39,7 +43,9 @@ boundary, not a sandbox for a malicious compiler or arbitrary shared library.
 - At most 128 scalar parameters; fuel in 1..=1,000,000; transitions and trace
   events at most 1,000,000, additionally subject to total storage admission
 - Initialized raw and decoded observation storage is conservatively bounded
-  before native entry; excessive requests return an error
+  before native entry (128 MiB in total); excessive requests return `Limit`,
+  so a request for 1,000,000 trace events is refused even though the
+  generated machine itself accepts it
 - A caller array-element cap tighter than the artifact's fixed native capacity
   is refused before execution. It is never silently ignored
 - Semantic traps, source fuel exhaustion and native backend storage limits are
@@ -72,40 +78,29 @@ are not a proof that arbitrary hostile native code executed the source program.
 
 ## Executed test scope
 
-The dedicated integration tests exercise real loaded libraries:
+`tests/gnet_numeric_host/issue_gnet_11_numeric_host.rs` and the host's unit tests exercise real loaded libraries:
 
-- Twelve existing array fixtures and every positive small source-fuel prefix
-- Literals, fills, empty/direct integer and floating roots, mutable/read/take
-  calls, moves, replacement, compaction, element copies and original traps
-- Runtime floating bit patterns including NaN payload copies and signed zero;
-  repeated calls return independent mutable Rust owners
-- Frame, trace, transition, heap, allocation and cleanup bounds, typed argument
-  refusal, source-compiler budgets, and recovery after ordinary resource results
-- Two simultaneously loaded artifacts, identity/symbol/digest failures,
-  returning wrapper failures, original compiler diagnostics and bad libraries
+- Array fixtures driven at quanta 1, 2, 3, 17 and 1,000,000 against the graph oracle
+- Recursion, loans, budget failures and fresh terminal owners on every retrieval
+- Dropping pending tasks, refused quanta, isolation between plans and non-ABI11 admission refusal
+- Receipt identity binding, and loader refusal of changed library bytes or a wrong identity
+- Exact task storage at each quantum, malformed pending and terminal state, returning faults, destruction failure and compiler deadline/log caps
 
-Unit tests mutate real invocation headers, descriptors, carriers, cleanup and
-trace data, shorten buffers, and inject returning malformed/protocol packets.
-Compiler deadline/log-cap tests retain partial failure logs. Send/Sync
-compile-fail checks cover both plan and driver. Public C-call packaging is
-retested after stripping the additive private module from standalone embedding.
-
-Scalar-root cases compare original-source and independent graph observations.
-The existing named source API admits scalar roots only: array-root tests use the
-independent owned graph oracle and explicit bit/ownership assertions. They do
-not claim direct named-source array-return comparison.
+`tests/gnet_numeric_host/issue_gnet_11_numeric_owned_state.rs` compares every fuel prefix of the generated machine across quanta.
+The bench denominator (`bench/general-net-v01/corpus_numeric`) runs its owner and array rows through this host.
 
 ## Remaining work and unchanged boundaries
 
-Nominal-owned numeric extensions, continuation/resume, speculation, device
-execution, external owner arguments and public C/Python array APIs remain outside
-this host. CPU continuation/resume of the same direct owners is a separate ABI11
-host; see [remaining work](remaining-work.md). Existing ABI8 and ABI9 hosts and their admission rules are unchanged.
+Nominal-owned numeric extensions, speculation, device execution, external owner
+arguments and public C/Python array APIs remain outside this host.
+Snapshots are validation evidence only; native task state is never restored from caller bytes.
 No CUDA/Metal/robot hardware qualification or performance claim follows from
 these CPU checks. Global allocator aborts, OS kills, and malicious native code
 are not recoverable guarantees of this interface.
 
-## Local qualification result
+## Historical ABI10 qualification result
+
+This record predates the collapse to ABI11 and is kept as lineage.
 
 On Linux x86_64 with Rust 1.95.0, LLVM 21.1.8 and GCC 14.2.0, the
 non-overlapping default workspace test commands pass **728 tests per profile**,

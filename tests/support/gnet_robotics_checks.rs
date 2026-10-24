@@ -2,6 +2,7 @@
 //! per output word, exact binary32 replays of the seeded inputs and of the
 //! integer/compaction logic, and the committed Pinocchio references.
 #![allow(dead_code)]
+use crate::issue_gnet_05_robotics::{TOL_COST, TOL_DISTANCE, TOL_FRAME, TOL_JACOBIAN, TOL_MASS};
 use crate::robotics::{
     arm::Arm,
     check64::{self, lcg, rational32, sincos32, stream, unit},
@@ -9,7 +10,6 @@ use crate::robotics::{
     families,
     model::{self, Model},
 };
-use crate::{TOL_COST, TOL_DISTANCE, TOL_FRAME, TOL_JACOBIAN, TOL_MASS};
 use serde_json::Value as Json;
 use std::path::Path;
 

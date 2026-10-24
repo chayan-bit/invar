@@ -1,0 +1,4 @@
+mod issue_m4_04_compaction_allocation;
+mod issue_m4_04_segmented_device_ir;
+mod issue_m4_04_segmented_flattening_compaction;
+mod issue_m4_04_stable_compaction_source;

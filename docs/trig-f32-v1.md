@@ -1,7 +1,7 @@
 # Trig contract v1 (`invar-trig-f32-v1`)
 
 This document is normative for the source intrinsics `sin`, `cos` and `sqrt` and freezes decision D6.
-It extends [`strict-f32-v1`](numeric-v1.md): every rule there still holds, and this contract only adds three intrinsics.
+It extends [`strict-f32-v1`](numeric.md): every rule there still holds, and this contract only adds three intrinsics.
 
 `sin(x: f32) -> f32`, `cos(x: f32) -> f32` and `sqrt(x: f32) -> f32` take and return IEEE 754 binary32 values without implicit conversion.
 `sin` and `cos` are a frozen software sequence of IEEE basic operations and explicit fused multiply-adds.
@@ -9,14 +9,11 @@ They are not correctly rounded and they are never a vendor or libm `sin`/`cos`.
 `sqrt` is correctly rounded on every input.
 Every engine (exact CPU oracle, reference evaluator, MIR evaluator, native LLVM, CUDA and Metal) must return the same 32-bit word for every input, including the NaN encoding.
 
-## Selecting this contract (`--numeric-contract trig-f32-v1`)
+## Default (C4 interim)
 
-Ruling C4 (#48) makes `invar-math-cr-v1` the v0.2 default for f32 `sin` and `cos` and keeps this contract for one release behind an option.
-- `invar run`, `invar explain` and `invar build` take `--numeric-contract trig-f32-v1`. It applies to every program the process checks.
-- After typing, every f32 `sin` and `cos` call then takes the name of its helper (`sin@trig-f32-v1`, `cos@trig-f32-v1`; not identifiers, so source cannot write them). MIR carries the choice, and the `numeric_contracts.trig` record of explain and run receipts names this contract.
-- `sqrt` is correctly rounded in both contracts and keeps its name. f64 calls and every other library function stay `invar-math-cr-v1`.
-- Until the default switch lands, the default already runs this contract, so the option changes no bits. The reference evaluator, MIR, cpu-parallel and native-serial run the named helpers. The device paths (GNET compiled kernels, CUDA and Metal task regions) do not recognize the named helpers yet; that is #48 part B.
-- Code: `src/cli.rs`, `math::select_trig_f32_v1`, `src/check/numeric/trig.rs`. Tests: `tests/issue_c4_trig_option.rs`.
+Ruling C4 (#48) makes `invar-math-cr-v1` the default for f32 `sin` and `cos`.
+Until that switch lands, every engine runs this contract for f32 `sin`, `cos` and `sqrt`, and the `numeric_contracts.trig` record of explain and run receipts names it.
+f64 calls and every other library function are `invar-math-cr-v1`.
 
 ## Single source of truth
 
@@ -133,7 +130,7 @@ The exhaustive CPU audit (`p0a_trig_exhaustive_cpu`) records, for every input, t
 Measured over all 2^32 inputs: the smallest such magnitude is exactly 2^-126, the smallest normal (the `sqrt` operand for input `0x00800000`), and no operation underflows to zero.
 So no floating operation of the sequence reads or produces a subnormal, and a device that flushes subnormals (FTZ or DAZ) returns the same words.
 Subnormal arguments reach `sin` and `cos` only through the integer tiny path and reach `sqrt` only through the exact integer-to-float scaling.
-This is why the CUDA and Metal emitters need no dispatch guard for these nodes, unlike strict-f32-v1 arithmetic on a flushing Metal device (see `numeric-v1.md`, device admission).
+This is why the CUDA and Metal emitters need no dispatch guard for these nodes, unlike strict-f32-v1 arithmetic on a flushing Metal device (see `numeric.md`, device admission).
 
 Device admission (`f32_ops::admits_trig`) still runs the live strict probe: every probe case that mismatches on the device for an operation the helpers use (`+`, `-`, `*`, `fma` for trig; `*`, `uint` conversion and `sqrt` for `sqrt`) must be a subnormal-class case, or the plan is refused before submission.
 CUDA additionally requires `admits_strict()` as for every strict plan.
@@ -157,7 +154,7 @@ The inputs nearest to a multiple of pi are `0x6ff9be45` for `sin` (|sin x| = 3.2
 
 | Check | Where | Result |
 | --- | --- | --- |
-| Golden hard cases on oracle and host, special values, sampled digest | `tests/issue_p0a_trig_f32.rs` (default) | in CI |
+| Golden hard cases on oracle and host, special values, sampled oracle stride | `tests/issue_p0a_trig_f32.rs` (default) | in CI |
 | Source intrinsics on eval, MIR eval and native, CPU source regions, device-source embedding, admission | `tests/issue_p0a_trig_f32.rs` (default, `native` feature for native) | in CI |
 | CPU exhaustive: oracle stride, ULP bound, sqrt rounding, NaN policy, subnormal audit, full digest | `p0a_trig_exhaustive_cpu` | 2^32 inputs, 779 s on 8 threads: digests equal `FULL_DIGEST`, 16,711,936 inputs (every 257th) replayed on the exact oracle with 0 mismatches, `sqrt` correctly rounded everywhere, NaN policy holds, audit as above |
 | Native LLVM exhaustive vs host | `p0a_trig_exhaustive_native` | 2^32 inputs x 3 functions, 0 mismatches, 28 s, digests equal `FULL_DIGEST` |

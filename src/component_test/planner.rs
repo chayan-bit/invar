@@ -150,10 +150,8 @@ struct Artifact {
 }
 
 fn bind(runtime: &Value, directory: &Path) -> Result<BTreeMap<&'static str, Artifact>, Failure> {
-    if !matches!(
-        runtime["schema"].as_str(),
-        Some("invar-planner-runtime-v1" | "invar-planner-runtime-v2" | "invar-planner-runtime-v3")
-    ) || runtime["artifacts"].as_object().map(|a| a.len()) != Some(ROLES.len())
+    if runtime["schema"] != "invar-planner-runtime-v3"
+        || runtime["artifacts"].as_object().map(|a| a.len()) != Some(ROLES.len())
     {
         return Err(fail("invalid planner runtime/artifact roles"));
     }
@@ -402,10 +400,7 @@ fn execute<const N: usize>(
                 .map_err(|e| fail(e.to_string()))
         })
         .collect::<Result<_, _>>()?;
-    let source_base = runtime["schema"] == "invar-planner-runtime-v3";
-    let projected = source_base || runtime["schema"] == "invar-planner-runtime-v2";
-    let mut cell_cube = None;
-    let projection = if projected {
+    let (projection, cell_cube) = {
         let cell = &runtime["cell_source"];
         let cell_path = runtime_path
             .parent()
@@ -426,19 +421,15 @@ fn execute<const N: usize>(
             .and_then(|p| system::compile_at(p, cell_path.parent().unwrap()))
             .map_err(|e| fail(e.message))?;
         let p = system::tool_projection::selected(&ir).map_err(fail)?;
-        let p = if source_base { p } else { p.legacy() };
-        if source_base {
-            let scene = system::planner_scene::selected(&ir).map_err(fail)?;
-            let config = &runtime["config"];
-            if config["mount_exclusion"] != scene.mount_exclusion
-                || !same_pose(&config["table_pose"], scene.table_pose)
-                || config["table_half_extents_m"] != json!(scene.table_half_extents_m)
-            {
-                return Err(fail(
-                    "runtime planner scene differs from checked cell source",
-                ));
-            }
-            cell_cube = Some((scene.cube_base_pose, scene.tool_from_cube));
+        let scene = system::planner_scene::selected(&ir).map_err(fail)?;
+        let config = &runtime["config"];
+        if config["mount_exclusion"] != scene.mount_exclusion
+            || !same_pose(&config["table_pose"], scene.table_pose)
+            || config["table_half_extents_m"] != json!(scene.table_half_extents_m)
+        {
+            return Err(fail(
+                "runtime planner scene differs from checked cell source",
+            ));
         }
         if runtime["tool_projection"] != p.value()
             || !system::tool_projection::same_kinematics(
@@ -470,12 +461,7 @@ fn execute<const N: usize>(
                 "projection source scene must be hash-bound manifest input",
             ));
         }
-        Some(p)
-    } else {
-        if !runtime["tool_projection"].is_null() || !runtime["cell_source"].is_null() {
-            return Err(fail("projection requires runtime v2"));
-        }
-        None
+        (p, (scene.cube_base_pose, scene.tool_from_cube))
     };
     if artifacts.values().any(|a| !declared.contains(&a.path)) {
         return Err(fail(
@@ -500,14 +486,7 @@ fn execute<const N: usize>(
         ));
     }
     let golden = load(&directory.join(string(&manifest["golden"][0], "path")?))?;
-    if golden["schema"]
-        != if source_base {
-            "invar-planner-endpoint-goldens-v3"
-        } else if projected {
-            "invar-planner-endpoint-goldens-v2"
-        } else {
-            "invar-planner-endpoint-goldens-v1"
-        }
+    if golden["schema"] != "invar-planner-endpoint-goldens-v3"
         || golden["joint_count"] != N
         || golden["seed"] != 123
         || golden["metrics"]
@@ -515,11 +494,8 @@ fn execute<const N: usize>(
     {
         return Err(fail("invalid endpoint metric/seed contract"));
     }
-    if projected && golden["tool_projection"] != runtime["tool_projection"] {
+    if golden["tool_projection"] != runtime["tool_projection"] {
         return Err(fail("goal and runtime tool projections disagree"));
-    }
-    if !projected && !golden["tool_projection"].is_null() {
-        return Err(fail("cell-tool goals require endpoint/runtime v2"));
     }
     let vectors = golden["vectors"]
         .as_array()
@@ -702,10 +678,7 @@ fn execute<const N: usize>(
     {
         return Err(fail("invalid fixed scene/frame configuration"));
     }
-    if projection
-        .as_ref()
-        .is_some_and(|p| p.planner_reference_frame != configured.tool_frame)
-    {
+    if projection.planner_reference_frame != configured.tool_frame {
         return Err(fail(
             "planner frame differs from checked reference convention",
         ));
@@ -737,10 +710,10 @@ fn execute<const N: usize>(
             phase: world,
         };
         // A resting cube is at its cell pose; a held one is checked against FK below.
-        if cell_cube.is_some_and(|(cube, grasp)| {
-            !same_pose(&vector["tool_from_cube"], grasp)
-                || (!phase::held(request.phase) && !same_pose(&vector["cube_base_pose"], cube))
-        }) {
+        let (cube, grasp) = cell_cube;
+        if !same_pose(&vector["tool_from_cube"], grasp)
+            || (!phase::held(request.phase) && !same_pose(&vector["cube_base_pose"], cube))
+        {
             return Err(fail("request cube differs from checked cell source"));
         }
         let bounds: [[f64; 2]; N] = limits
@@ -768,30 +741,25 @@ fn execute<const N: usize>(
         fk.configure_fk(&artifacts["fk_model"].path, N as u32)
             .map_err(foreign)?;
         for (id, request) in &requests {
+            let p = &projection;
             let mut native = *request;
-            if let Some(p) = &projection {
-                native.target_base_from_tool = project(
-                    request.target_base_from_tool,
-                    p.reference_from_cell.inverse().map_err(fail)?,
-                    false,
-                )?;
-                native.tool_from_cube =
-                    project(request.tool_from_cube, p.reference_from_cell, true)?;
-                native.target_base_from_tool = project(
-                    native.target_base_from_tool,
-                    p.source_base_from_reference_base.inverse().map_err(fail)?,
-                    true,
-                )?;
-                native.cube_base_pose = project(
-                    request.cube_base_pose,
-                    p.source_base_from_reference_base.inverse().map_err(fail)?,
-                    true,
-                )?;
-            }
-            if cell_cube.is_some() && phase::held(request.phase) {
-                let p = projection
-                    .as_ref()
-                    .ok_or_else(|| fail("missing projection"))?;
+            native.target_base_from_tool = project(
+                request.target_base_from_tool,
+                p.reference_from_cell.inverse().map_err(fail)?,
+                false,
+            )?;
+            native.tool_from_cube = project(request.tool_from_cube, p.reference_from_cell, true)?;
+            native.target_base_from_tool = project(
+                native.target_base_from_tool,
+                p.source_base_from_reference_base.inverse().map_err(fail)?,
+                true,
+            )?;
+            native.cube_base_pose = project(
+                request.cube_base_pose,
+                p.source_base_from_reference_base.inverse().map_err(fail)?,
+                true,
+            )?;
+            if phase::held(request.phase) {
                 let start = fk.step(&request.start_q_rad).map_err(foreign)?;
                 let tool = project(
                     project(start, p.reference_from_cell, false)?,
@@ -827,15 +795,11 @@ fn execute<const N: usize>(
                 return Err(Failure::new("S1403", "start continuity exceeded"));
             }
             let raw = fk.step(&last.q_rad).map_err(foreign)?;
-            let actual = if let Some(p) = &projection {
-                project(
-                    project(raw, p.reference_from_cell, false)?,
-                    p.source_base_from_reference_base,
-                    true,
-                )?
-            } else {
-                raw
-            };
+            let actual = project(
+                project(raw, p.reference_from_cell, false)?,
+                p.source_base_from_reference_base,
+                true,
+            )?;
             let (translation, orientation) = endpoint(actual, request.target_base_from_tool).map_err(|mut failure| {
                 failure.details=Some(json!({"vector":id,"final_q_rad":last.q_rad.as_slice(),"actual_translation_m":actual.translation_m,"actual_quaternion_xyzw":actual.quaternion_xyzw,"target_translation_m":request.target_base_from_tool.translation_m,"target_quaternion_xyzw":request.target_base_from_tool.quaternion_xyzw,"completed_vectors":observations}));
                 failure
@@ -912,7 +876,7 @@ fn execute<const N: usize>(
         }
     }
     Ok(
-        json!({"schema":if diagnostic {if source_base {"invar-planner-diagnostic-v3"} else if projected {"invar-planner-diagnostic-v2"} else {"invar-planner-diagnostic-v1"}} else {if source_base {"invar-planner-contract-evidence-v3"} else if projected {"invar-planner-contract-evidence-v2"} else {"invar-planner-contract-evidence-v1"}},"tool_projection":runtime["tool_projection"],"cell_source":runtime["cell_source"],"status":if diagnostic {"diagnostic"} else {"pass"},"component":manifest["name"],"manifest_hash":digest,"runtime_sha256":runtime_hash,"library_version":planner.version(),"library_sha256":artifacts["library"].hash,"host":host,"fk_manifest_hash":fk_digest,"fk_library_version":fk.version(),"seed":123,"metrics":golden["metrics"],"inputs":inputs.iter().map(|(role,path,sha)| json!({"role":role,"path":path,"sha256":sha})).collect::<Vec<_>>(),"artifacts":artifacts.iter().map(|(role,a)| (*role,json!({"path":a.path,"sha256":a.hash}))).collect::<BTreeMap<_,_>>(),"results":{"layout":"pass","lifecycle":"pass","invalid_inputs":"checked-boundary","vectors":observations},"scope":"endpoint_and_start_only; collision/live_S1_acceptance_remains_separate"}),
+        json!({"schema":if diagnostic {"invar-planner-diagnostic-v3"} else {"invar-planner-contract-evidence-v3"},"tool_projection":runtime["tool_projection"],"cell_source":runtime["cell_source"],"status":if diagnostic {"diagnostic"} else {"pass"},"component":manifest["name"],"manifest_hash":digest,"runtime_sha256":runtime_hash,"library_version":planner.version(),"library_sha256":artifacts["library"].hash,"host":host,"fk_manifest_hash":fk_digest,"fk_library_version":fk.version(),"seed":123,"metrics":golden["metrics"],"inputs":inputs.iter().map(|(role,path,sha)| json!({"role":role,"path":path,"sha256":sha})).collect::<Vec<_>>(),"artifacts":artifacts.iter().map(|(role,a)| (*role,json!({"path":a.path,"sha256":a.hash}))).collect::<BTreeMap<_,_>>(),"results":{"layout":"pass","lifecycle":"pass","invalid_inputs":"checked-boundary","vectors":observations},"scope":"endpoint_and_start_only; collision/live_S1_acceptance_remains_separate"}),
     )
 }
 

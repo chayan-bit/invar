@@ -1,7 +1,5 @@
-//! Direct binary32 array helpers for the separate CPU ABI10 owned-numeric
-//! profile frozen by main and its ABI11 continuation. ABI1–9 remain unchanged. The
-//! admission/routing contract is
-//! in sprint-12-f32-arrays/HOOK_CONTRACT.md.
+//! Direct binary32 array helpers for the CPU ABI11 owned-numeric continuation
+//! (and its ABI12 CUDA twin).
 use super::{Error, Target};
 use crate::{
     front::{Span, Type},
@@ -28,15 +26,9 @@ pub(super) fn direct_type(ty: &Type) -> bool {
 }
 /// Supplementary admission after the main verified-net/proof boundary. External
 /// owners, nominals/host rules and other device profiles stay unsupported.
-/// Callers choose ABI10 or ABI11/ABI12; continuation admission is otherwise
-/// identical. Only resumable owners (ABI12) admit CUDA; Metal is always refused.
-pub(super) fn validate(
-    program: &mir::Program,
-    entry: &str,
-    target: Target,
-    continuation: bool,
-) -> Result<(), Error> {
-    if target != Target::Cpu && !(continuation && target == Target::Cuda) {
+/// CPU emits ABI11, CUDA ABI12; Metal is always refused.
+pub(super) fn validate(program: &mir::Program, entry: &str, target: Target) -> Result<(), Error> {
+    if target != Target::Cpu && target != Target::Cuda {
         return Err(Error::NumericTarget);
     }
     if program.numeric_policy != NumericPolicy::STRICT_F32
@@ -80,7 +72,7 @@ pub(super) fn validate(
                     mir::Operation::Call { name, .. }
                         if !names.contains(name.as_str())
                             && !matches!(
-                                crate::math::f32_trig_base(name),
+                                name.as_str(),
                                 "filled_i32"
                                     | "filled_u32"
                                     | "filled_f32"

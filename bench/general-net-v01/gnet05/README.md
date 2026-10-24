@@ -1,21 +1,21 @@
 # GNET-05 source-derived acceptance corpus
 
-Ordinary Invar source for the general-net GPU track (docs/general-gpu-v01.md, GNET-05).
+Ordinary Invar source for the general-net GPU track (GNET-05; obligations in `src/general_net/CONTRACT.md`).
 It is additive: the hand-written fixture corpora elsewhere under `bench/general-net-v01` are unchanged.
 Every file here is generator output: `generate.rs` is the only hand-written input.
-Tests: `tests/issue_gnet_05_corpus.rs`.
+Tests: `tests/gnet05_corpus/issue_gnet_05_corpus.rs`.
 
 ## Files
 
 | File | Content |
 | --- | --- |
 | `generate.rs` | Seeded generator `gnet05-gen-v3` (SplitMix64, root seed `0x474e455430357631`), held-out split, normalized identity, large-input ladders, `calibrate`, per-input step budgets and the deep inputs (`DEEP_INPUTS`, `deepen`) |
-| `deep_select.py` | Record of how the deep inputs were selected with the net-laws prototype of the normal-form design (`docs/design/net-parallel-laws-v01.md`) |
+| `deep_select.py` | Record of how the deep inputs were selected with the net-laws prototype of the normal-form design (Appendix C of `docs/design/net-parallel-laws-v01.md`, in git history up to commit `85dc53f`) |
 | `programs/*.inv` | 72 programs, each with entry `run(a, b) -> i32` and a `main` calling it on one recorded input |
 | `manifest.json` | Per-program provenance: family, ordinal, seed, drawn shape, inputs, negative inputs, large-input ladder, the calibrated large input and the deep input, the declared step budget of every input, split, source and normalized SHA-256; default and maximum budgets; pinned held-out digest |
 | `validation.json` | Per-input reference status, steps and oracle outcome; per-target device admission; counted denominators; the deep inputs' outcomes, counted apart (Release run) |
 
-Regenerate with `INVAR_GNET05_WRITE=1 cargo test --release --locked --test issue_gnet_05_corpus` (Release writes `validation.json`, because the deep inputs run only there; about 40 seconds on a 32-core x86_64 host).
+Regenerate with `INVAR_GNET05_WRITE=1 cargo test --release --locked --test gnet05_corpus issue_gnet_05_corpus::` (Release writes `validation.json`, because the deep inputs run only there; about 40 seconds on a 32-core x86_64 host).
 A Debug run skips the deep inputs and checks every other recorded outcome and denominator (about two minutes).
 Without the variable the tests fail if any file differs from the generator.
 

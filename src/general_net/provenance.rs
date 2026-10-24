@@ -14,10 +14,8 @@ use std::sync::{
     atomic::{AtomicU64, Ordering},
 };
 
-mod numeric_resume;
 mod owned_numeric_cuda;
 pub(crate) mod owned_numeric_execution;
-pub use numeric_resume::{NumericContinuationComponents, NumericContinuationIdentity};
 
 const VERSION: u32 = 3;
 const MAX_SOURCE_BYTES: usize = 1024 * 1024;
@@ -134,28 +132,6 @@ pub fn compile(
     compile_mode(source, entry, target, limits, Mode::Scalar)
 }
 
-/// Source-derived CPU ABI8 strict-f32-v1 scalar artifact. This does not widen
-/// the public scalar export ABI or admit numeric owners/devices/continuations.
-pub fn compile_numeric(
-    source: &[u8],
-    entry: &str,
-    target: compiled::Target,
-    limits: Limits,
-) -> Result<ProvenancedArtifact, Error> {
-    compile_mode(source, entry, target, limits, Mode::Numeric)
-}
-
-/// Source-derived CPU ABI9 scalar numeric continuation. The immutable receipt
-/// binds its actual task layout; it does not deserialize or authorize a task.
-pub fn compile_resumable_numeric(
-    source: &[u8],
-    entry: &str,
-    target: compiled::Target,
-    limits: Limits,
-) -> Result<ProvenancedArtifact, Error> {
-    compile_mode(source, entry, target, limits, Mode::ResumableNumeric)
-}
-
 /// Source-derived ABI2 owned-array artifact; storage limits are compiler-owned
 /// backend bounds, distinct from source semantics and oracle tool limits.
 pub fn compile_owned(
@@ -166,19 +142,6 @@ pub fn compile_owned(
     storage: compiled::OwnedLimits,
 ) -> Result<ProvenancedArtifact, Error> {
     compile_mode(source, entry, target, limits, Mode::Owned(storage))
-}
-
-/// Source-derived CPU ABI10 direct numeric owners. This private profile binds
-/// its heap/cleanup layout without widening scalar exports or admitting owners
-/// as external parameters, nominal numeric fields, devices or continuations.
-pub fn compile_owned_numeric(
-    source: &[u8],
-    entry: &str,
-    target: compiled::Target,
-    limits: Limits,
-    storage: compiled::OwnedLimits,
-) -> Result<ProvenancedArtifact, Error> {
-    compile_mode(source, entry, target, limits, Mode::OwnedNumeric(storage))
 }
 
 /// Source-derived direct numeric owner continuation: ABI11 on CPU, ABI12
@@ -280,10 +243,7 @@ enum Mode {
         compiled::Fault,
     ),
     Scalar,
-    Numeric,
-    ResumableNumeric,
     Owned(compiled::OwnedLimits),
-    OwnedNumeric(compiled::OwnedLimits),
     ResumableOwnedNumeric(compiled::OwnedLimits),
     Resumable(compiled::OwnedLimits),
     Speculative(compiled::OwnedLimits, compiled::SpeculationLimits, bool),
@@ -411,15 +371,8 @@ fn compile_mode(
     }
     let artifact = match mode {
         Mode::Scalar => compiled::emit(&net, &proof, entry, target, limits.compiler),
-        Mode::Numeric => compiled::emit_numeric(&net, &proof, entry, target, limits.compiler),
-        Mode::ResumableNumeric => {
-            compiled::emit_resumable_numeric(&net, &proof, entry, target, limits.compiler)
-        }
         Mode::Owned(storage) => {
             compiled::emit_owned(&net, &proof, entry, target, limits.compiler, storage)
-        }
-        Mode::OwnedNumeric(storage) => {
-            compiled::emit_owned_numeric(&net, &proof, entry, target, limits.compiler, storage)
         }
         Mode::ResumableOwnedNumeric(storage) => compiled::emit_resumable_owned_numeric(
             &net,
@@ -512,7 +465,7 @@ fn compile_mode(
             "word_bytes":8, "output_words":output_words,
             "event_words":compiled::EVENT_WORDS
         });
-        if matches!(artifact.abi_version(), 10..=12) {
+        if matches!(artifact.abi_version(), 11 | 12) {
             manifest["numeric"]["array_f32"] = json!({
                 "kind":258, "element_word_bytes":8, "element_bits":32,
                 "encoding":"nonnegative-i64-u32-bits", "external_owner_inputs":false
@@ -609,73 +562,6 @@ impl ProvenancedArtifact {
         } else {
             Err(Error::ManifestMismatch)
         }
-    }
-
-    /// Bind caller-supplied CPU ABI8 components, including actual executable
-    /// bytes and exact f32 encodings. This is an integrity identity, not an
-    /// observation, completed-source certificate or permission to publish.
-    /// Root must observe the process and validate its semantic output itself.
-    pub fn numeric_cpu_identity(
-        &self,
-        executable: &[u8],
-        args: &[eval::Value],
-        limits: oracle::Limits,
-        output: &[i64],
-        trace: &[u64],
-    ) -> Result<NumericCpuIdentity, Error> {
-        if self.artifact.abi_version() != 8
-            || self.artifact.target() != compiled::Target::Cpu
-            || executable.is_empty()
-            || output.len() != compiled::OUTPUT_WORDS
-        {
-            return Err(Error::ExecutionMismatch);
-        }
-        let input = numeric_words(self.artifact.params(), args)?;
-        let events = u64::try_from(output[7]).map_err(|_| Error::ExecutionMismatch)?;
-        let trace_words = events
-            .checked_mul(compiled::EVENT_WORDS as u64)
-            .and_then(|n| usize::try_from(n).ok())
-            .ok_or(Error::Limit)?;
-        if events > limits.trace_events as u64 || trace.len() != trace_words {
-            return Err(Error::ExecutionMismatch);
-        }
-        let bytes = input
-            .len()
-            .checked_add(output.len())
-            .and_then(|n| n.checked_add(trace.len()))
-            .and_then(|n| n.checked_mul(8))
-            .and_then(|n| n.checked_add(executable.len()))
-            .ok_or(Error::Limit)?;
-        if bytes > MAX_CAPTURE_BYTES {
-            return Err(Error::Limit);
-        }
-        let output_bytes = signed_bytes(output);
-        let trace_bytes: Vec<u8> = trace.iter().flat_map(|n| n.to_le_bytes()).collect();
-        let manifest = json!({"version":VERSION,
-            "scope":"caller_supplied_abi8_cpu_components", "artifact_id":self.id,
-            "backend":"cpu_components_only", "abi_version":8,
-            "execution_observed":false, "source_completion_certified":false,
-            "resume_authorized":false, "numeric":self.manifest["numeric"],
-            "layouts":self.manifest["layouts"], "storage":self.manifest["storage"],
-            "params":self.manifest["params"], "result":self.manifest["result"],
-            "executable":{"sha256":digest(executable),"bytes":executable.len()},
-            "input":{"words":input,"byte_order":"little-endian",
-                "sha256":digest(&signed_bytes(&input))},
-            "limits":oracle_limits(limits),
-            "output":{"sha256":digest(&output_bytes),"bytes":output_bytes.len()},
-            "trace":{"sha256":digest(&trace_bytes),"bytes":trace_bytes.len(),"events":events}
-        });
-        Ok(NumericCpuIdentity {
-            id: document_digest(&manifest),
-            manifest,
-            artifact_id: self.id.clone(),
-            emission: self.artifact.source().as_bytes().to_vec(),
-            executable: executable.to_vec(),
-            input,
-            limits,
-            output: output.to_vec(),
-            trace: trace.to_vec(),
-        })
     }
 
     /// Capture the byte identity of one ABI3 task component under this artifact.
@@ -840,7 +726,7 @@ impl ProvenancedArtifact {
                 Ok(eval::Value::F32(bits)) => json!(bits.to_bits()),
                 _ => Value::Null,
             };
-            if self.artifact.abi_version() == 10 {
+            if self.artifact.abi_version() == 11 {
                 manifest["result_element_bits"] = match &observation.semantic.result {
                     Ok(eval::Value::ArrayF32(bits)) => {
                         json!(
@@ -864,13 +750,6 @@ impl ProvenancedArtifact {
     }
 }
 
-fn oracle_limits(limits: oracle::Limits) -> Value {
-    json!({"fuel":limits.fuel,"transitions":limits.transitions,
-        "trace_events":limits.trace_events,"array_elements":limits.array_elements})
-}
-fn signed_bytes(words: &[i64]) -> Vec<u8> {
-    words.iter().flat_map(|n| n.to_le_bytes()).collect()
-}
 fn entry_input_identity(args: &[eval::Value]) -> Result<Value, Error> {
     if args.len() > crate::eval::host_read::MAX_PARAMETERS {
         return Err(Error::Limit);
@@ -941,65 +820,6 @@ fn numeric_words(types: &[front::Type], args: &[eval::Value]) -> Result<Vec<i64>
             _ => Err(Error::ExecutionMismatch),
         })
         .collect()
-}
-
-/// Immutable identities of supplied components. No imported receipt can become
-/// an observed CPU run or a GPU/fence receipt through this type.
-#[derive(Debug)]
-pub struct NumericCpuIdentity {
-    id: String,
-    manifest: Value,
-    artifact_id: String,
-    emission: Vec<u8>,
-    executable: Vec<u8>,
-    input: Vec<i64>,
-    limits: oracle::Limits,
-    output: Vec<i64>,
-    trace: Vec<u64>,
-}
-impl NumericCpuIdentity {
-    pub fn id(&self) -> &str {
-        &self.id
-    }
-    pub fn manifest(&self) -> &Value {
-        &self.manifest
-    }
-    pub fn verify_manifest(&self, manifest: &Value) -> Result<(), Error> {
-        if &self.manifest == manifest {
-            Ok(())
-        } else {
-            Err(Error::ManifestMismatch)
-        }
-    }
-    /// Require this actual source-derived artifact, including exact emission.
-    pub fn verify_artifact(&self, artifact: &ProvenancedArtifact) -> Result<(), Error> {
-        if artifact.id == self.artifact_id && artifact.artifact.source().as_bytes() == self.emission
-        {
-            Ok(())
-        } else {
-            Err(Error::ArtifactMismatch)
-        }
-    }
-    /// Compare all exact supplied bytes/carriers/budgets without trusting hashes.
-    pub fn verify_components(
-        &self,
-        executable: &[u8],
-        input: &[i64],
-        limits: oracle::Limits,
-        output: &[i64],
-        trace: &[u64],
-    ) -> Result<(), Error> {
-        if executable == self.executable
-            && input == self.input
-            && output == self.output
-            && trace == self.trace
-            && oracle_limits(limits) == oracle_limits(self.limits)
-        {
-            Ok(())
-        } else {
-            Err(Error::ExecutionMismatch)
-        }
-    }
 }
 
 /// The trusted adapter identifies its evidence honestly. CPU group-model

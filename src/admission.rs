@@ -15,7 +15,11 @@ use crate::{
 
 mod fold_hint;
 
-pub const SCHEMA_VERSION: u32 = 1;
+/// `invar explain` documents: the admission report plus the explain fields.
+pub const SCHEMA: &str = "invar-explain-v5";
+pub const SCHEMA_VERSION: u32 = 5;
+/// The `device_execution` object of an explain document.
+pub const DEVICE_SCHEMA: &str = "invar-explain-device-v5";
 pub const RULE_REVISION: &str = "counted-wrapping-map-v1";
 /// Largest serialized admission record or report: an interchange-format bound on the document, not
 /// on analysis memory, so it stays (`ADMISSION_RECORD_LIMIT`).
@@ -116,9 +120,6 @@ impl Guard {
     }
 
     /// The current graph map rewrites every element, so partial loops must stay serial.
-    pub fn covers_whole_arrays(&self, lengths: &[(&str, usize)]) -> bool {
-        self.covers_whole_arrays_within(lengths, &ByteBudget::standard())
-    }
     pub fn covers_whole_arrays_within(
         &self,
         lengths: &[(&str, usize)],
@@ -137,16 +138,6 @@ impl Guard {
         matches!(upper, Some(hi) if self.fits(hi, budget)
             && len(&self.output) == Some(hi)
             && self.inputs.iter().all(|name| len(name) == Some(hi)))
-    }
-
-    pub fn upper_len(&self, lengths: &[(&str, usize)]) -> Option<usize> {
-        match &self.upper {
-            Upper::Constant(n) => Some(*n as usize),
-            Upper::Length(name) => lengths
-                .iter()
-                .find(|(key, _)| *key == name)
-                .map(|(_, n)| *n),
-        }
     }
 
     fn json(&self) -> Value {
@@ -787,7 +778,7 @@ mod ai_01_fault_tests {
             )],
         );
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         assert!(jsonschema::is_valid(&schema, &document), "{document}");
     }

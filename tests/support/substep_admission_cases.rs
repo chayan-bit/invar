@@ -1475,7 +1475,7 @@ fn vendored_roles(xml: &str, root: &str) -> String {
 }
 
 /// P5: the pinned robot roles are the vendored models' effective masks, and
-/// the real Panda/UR5e policy sources bind with their visual-only geoms and
+/// the real Panda/UR5e policy sources bind with every robot geom colliding and
 /// Panda's link0/link1 self exclusion.
 #[test]
 fn p5_vendored_collision_masks_are_resolved_and_pinned() {
@@ -1554,8 +1554,6 @@ fn p5_contact_masks_defaults_and_exclusions_fail_closed() {
         );
         let robot_collision =
             |g: roxmltree::Node<'_, '_>| in_body(g, root) && !g.has_attribute("contype");
-        let robot_visual =
-            |g: roxmltree::Node<'_, '_>| in_body(g, root) && g.attribute("contype") == Some("0");
         let table = |g: roxmltree::Node<'_, '_>| in_body(g, "table");
         let cube_collision =
             |g: roxmltree::Node<'_, '_>| in_body(g, "cube") && !g.has_attribute("contype");
@@ -1600,14 +1598,6 @@ fn p5_contact_masks_defaults_and_exclusions_fail_closed() {
             (
                 "robot mask spelling",
                 retag(&xml, robot_collision, &[("contype", "01")]),
-            ),
-            (
-                "robot visual made collision",
-                retag(
-                    &xml,
-                    robot_visual,
-                    &[("contype", "1"), ("conaffinity", "1")],
-                ),
             ),
             (
                 "table masks 0",
@@ -1783,9 +1773,11 @@ fn p5_residual_model_and_assets_are_pinned_to_qualified_identity() {
         }
         let robot_id = selected_robot_id(&ir);
         let files = ir.assets.get_mut(&robot_id).unwrap();
+        // The UR5e model has no mesh asset, so its license file stands in.
         let mesh = files
             .keys()
             .find(|name| name.ends_with(".stl") || name.ends_with(".obj"))
+            .or_else(|| files.keys().next())
             .cloned()
             .unwrap();
         let original = files[&mesh].clone();

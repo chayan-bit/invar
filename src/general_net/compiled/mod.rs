@@ -163,17 +163,9 @@ impl Artifact {
         if self.entry_layout.is_some() {
             13
         } else if self.numeric.is_some() {
-            if self.owned.is_some() && self.continuation.is_some() {
-                // ABI12 `cuda-owned-numeric-continuation-v1` is target-distinct;
-                // the CPU artifact keeps ABI11.
-                if self.target == Target::Cuda { 12 } else { 11 }
-            } else if self.owned.is_some() {
-                10
-            } else if self.continuation.is_some() {
-                9
-            } else {
-                8
-            }
+            // CPU numeric artifacts are always ABI11 owner continuations; ABI12
+            // `cuda-owned-numeric-continuation-v1` is the same source on CUDA.
+            if self.target == Target::Cuda { 12 } else { 11 }
         } else if self.aggregate.is_some() {
             if self.continuation.is_some() { 7 } else { 6 }
         } else if self.device.is_some() {
@@ -358,7 +350,7 @@ impl<'a> Program<'a> {
                             } else if !(matches!(name.as_str(), "wrapping_add" | "wrapping_mul")
                                 || program.numeric.is_some()
                                     && matches!(
-                                        crate::math::f32_trig_base(name),
+                                        name.as_str(),
                                         "fma"
                                             | "f32_from_i32"
                                             | "f32_from_u32"
@@ -677,54 +669,9 @@ pub fn emit_resumable_aggregates(
     )
 }
 
-/// CPU ABI8 strict-f32-v1 scalar emission. Bits use checked u32-in-i64 carriers.
-/// Array/nominal numeric forms and all device/speculative numeric paths fail closed.
-pub fn emit_numeric(
-    net: &Net,
-    proof: &Proof,
-    entry: &str,
-    target: Target,
-    limits: Limits,
-) -> Result<Artifact, Error> {
-    let mir = net.compiled_mir(proof).map_err(Error::Boundary)?;
-    artifact(
-        &mir, entry, target, limits, None, false, None, false, false, true,
-    )
-}
-
-/// CPU ABI10 direct numeric owners, with strict-f32-v1 and the existing ten-word
-/// owned result/cleanup/storage layout. External owners, nominals, continuation,
-/// speculation and device targets remain unsupported. Legacy ABI1–9 are unchanged.
-/// Resumable owners use the separate `emit_resumable_owned_numeric` entry, whose
-/// direct emission is target-dependent: ABI11 on CPU, ABI12 on CUDA (provenance
-/// admits it as a compile receipt only, with no load, execution, resume or
-/// qualification authority), Metal refused.
-pub fn emit_owned_numeric(
-    net: &Net,
-    proof: &Proof,
-    entry: &str,
-    target: Target,
-    limits: Limits,
-    storage: OwnedLimits,
-) -> Result<Artifact, Error> {
-    let mir = net.compiled_mir(proof).map_err(Error::Boundary)?;
-    owned_f32::validate(&mir, entry, target, false)?;
-    artifact(
-        &mir,
-        entry,
-        target,
-        limits,
-        Some(OwnedLayout::new(storage)?),
-        false,
-        None,
-        false,
-        false,
-        true,
-    )
-}
-
-/// CPU ABI11 direct numeric owner continuations: ABI10 admission, storage and
-/// ten-word terminal packet over the unchanged ABI9 task/frame layout. The CPU
+/// CPU ABI11 strict-f32-v1 numeric continuations, the only CPU numeric ABI:
+/// f32 scalars plus direct i32/u32/f32 array owners, a ten-word terminal packet
+/// and the scalar continuation task/frame layout. The CPU
 /// entry `gnet_resume` takes a zero-initialized task plus the same zeroed heap,
 /// cleanup, trace and output buffers on every quantum; output is written only
 /// when it returns true. Fixed semantic budgets bind at first start; invalid
@@ -746,7 +693,7 @@ pub fn emit_resumable_owned_numeric(
     storage: OwnedLimits,
 ) -> Result<Artifact, Error> {
     let mir = net.compiled_mir(proof).map_err(Error::Boundary)?;
-    owned_f32::validate(&mir, entry, target, true)?;
+    owned_f32::validate(&mir, entry, target)?;
     artifact(
         &mir,
         entry,
@@ -758,26 +705,6 @@ pub fn emit_resumable_owned_numeric(
         false,
         false,
         true,
-    )
-}
-
-/// CPU ABI9 scalar numeric continuations. No heap, owner or device admission.
-/// An exclusively owned task retains exact bit carriers across finite quanta.
-/// Proof, entry, storage and whole-candidate type checks match `emit_numeric`.
-/// The generated CPU entry takes a zero-initialized task, eight output words
-/// and bounded trace storage; its unused heap/cleanup pointers may be null.
-/// Fixed semantic budgets bind at first start; later calls may change quantum.
-/// CUDA/Metal return `NumericTarget`; unsupported arrays/nominals stay rejected.
-pub fn emit_resumable_numeric(
-    net: &Net,
-    proof: &Proof,
-    entry: &str,
-    target: Target,
-    limits: Limits,
-) -> Result<Artifact, Error> {
-    let mir = net.compiled_mir(proof).map_err(Error::Boundary)?;
-    artifact(
-        &mir, entry, target, limits, None, true, None, false, false, true,
     )
 }
 

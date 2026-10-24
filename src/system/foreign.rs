@@ -372,14 +372,7 @@ pub fn verify_evidence(path: &Path, expected_hash: &str) -> Result<(), &'static 
     let record: Value =
         serde_json::from_slice(&std::fs::read(path).map_err(|_| "cannot read evidence")?)
             .map_err(|_| "malformed evidence JSON")?;
-    if matches!(
-        record["schema"].as_str(),
-        Some(
-            "invar-planner-contract-evidence-v1"
-                | "invar-planner-contract-evidence-v2"
-                | "invar-planner-contract-evidence-v3"
-        )
-    ) {
+    if record["schema"] == "invar-planner-contract-evidence-v3" {
         return planner::verify_evidence(&record, expected_hash);
     }
     if record["schema"] != "invar-component-evidence-v1"

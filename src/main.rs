@@ -26,10 +26,6 @@ fn main() {
 }
 
 fn run(args: Vec<OsString>) -> i32 {
-    let args = match cli::numeric_contract(args) {
-        Ok(args) => args,
-        Err(code) => return code,
-    };
     if let Some(code) = native_command::debug_command(&args) {
         return code;
     }
@@ -394,20 +390,10 @@ fn system_gen_ros2(path: &OsString, output: &OsString) -> i32 {
         .into_iter()
         .map(|(name, content)| (name, content.into_bytes()))
         .collect();
-    if ir.checked_document().is_ok_and(|document| {
-        document["schema"] == "invar-system-v6"
-            || (matches!(
-                document["schema"].as_str(),
-                Some(
-                    "invar-system-v7"
-                        | "invar-system-v8"
-                        | "invar-system-v9"
-                        | "invar-system-v10"
-                        | "invar-system-v11"
-                        | "invar-system-v12"
-                )
-            ) && document["robots"].is_array())
-    }) {
+    if ir
+        .checked_document()
+        .is_ok_and(|document| document["robots"].is_array())
+    {
         let model_files = match invar::system::generate_ros2_mjcf(&ir) {
             Ok(files) => files,
             Err(error) => return report_front(error, path, true),
@@ -560,16 +546,6 @@ fn system_command(path: &OsString, action: SystemAction<'_>) -> i32 {
         Ok(ir) => ir,
         Err(error) => return report_front(error, path, true),
     };
-    if matches!(action, SystemAction::Report(_)) && !ir.graph_ready() {
-        return report_front(
-            invar::front::FrontError::tool(
-                "UNSUPPORTED_FEATURE",
-                "system report requires invar-system-v2 metadata",
-            ),
-            path,
-            true,
-        );
-    }
     let path_name = path.to_string_lossy();
     let graph_issues = ir.graph_issues();
     if !graph_issues.is_empty() {
@@ -640,12 +616,7 @@ fn system_command(path: &OsString, action: SystemAction<'_>) -> i32 {
                 diagnostic
             }))
             .collect();
-        let mut document = invar::diagnostics::document("ok", warnings);
-        if !ir.graph_ready() {
-            document["checks_completed"] = serde_json::json!(["system-v1-well-formedness"]);
-            document["checks_pending"] = serde_json::json!(["system-v2-graph-checks"]);
-        }
-        println!("{document}");
+        println!("{}", invar::diagnostics::document("ok", warnings));
     }
     0
 }
@@ -653,23 +624,17 @@ fn system_command(path: &OsString, action: SystemAction<'_>) -> i32 {
 /// Numeric contracts of the program `invar run` executes, recorded in its
 /// JSON receipt (one program per process).
 static RUN_CONTRACTS: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
-/// Its fold receipt, which only invar-diagnostics-v3 carries (D12).
+/// Its fold receipt (D12).
 static RUN_FOLD: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
 
 fn print_run_json(mut document: serde_json::Value, path: &OsString) -> i32 {
     if let Some(contracts) = RUN_CONTRACTS.get() {
         document["numeric_contracts"] = contracts.clone();
     }
-    if let Some(fold) = RUN_FOLD.get().filter(|_| document["schema_version"] == 3) {
+    if let Some(fold) = RUN_FOLD.get() {
         document["numeric_contracts"]["fold"] = fold.clone();
     }
-    document["schema"] = serde_json::json!(if document["schema_version"] == 3 {
-        "invar-diagnostics-v3"
-    } else if document["schema_version"] == 2 {
-        "invar-diagnostics-v2"
-    } else {
-        invar::diagnostics::SCHEMA
-    });
+    document["schema"] = serde_json::json!(invar::diagnostics::SCHEMA);
     let serialized = document.to_string();
     if serialized.len() > 1_000_000 {
         println!(
@@ -757,14 +722,13 @@ fn explain(path: &OsString, engine: Option<&str>, artifact: Option<&OsString>) -
                     Err(error) => return auto_command::report(error, path, true, selected),
                 }
             }
-            let version = auto_command::explain_version(&mut document, engine);
-            document["schema"] = serde_json::json!(format!("invar-explain-v{version}"));
-            if version > 1 {
-                document["schema_version"] = serde_json::json!(version);
+            // Every `--engine auto` explain records its path (#50).
+            if engine == Some("auto") {
+                document["auto_path"] = serde_json::json!("established");
             }
+            document["schema"] = serde_json::json!(invar::admission::SCHEMA);
             if document.get("device_execution").is_some() {
-                document["device_schema"] =
-                    serde_json::json!(format!("invar-explain-device-v{version}"));
+                document["device_schema"] = serde_json::json!(invar::admission::DEVICE_SCHEMA);
             }
             if document.to_string().len() > 1_000_000 {
                 return report_front(
@@ -840,7 +804,7 @@ fn execute(
         if json {
             return print_run_json(
                 serde_json::json!({
-                    "schema_version": 1, "status": "ok", "diagnostics": [],
+                    "schema_version": 3, "status": "ok", "diagnostics": [],
                     "checks_completed": ["syntax", "names", "types", "local_ownership", "call_loans", "view_lifetimes"],
                     "checks_pending": []
                 }),
@@ -892,7 +856,7 @@ fn execute(
                 if json {
                     return print_run_json(
                         serde_json::json!({
-                            "schema_version": 1, "status": "ok", "diagnostics": [],
+                            "schema_version": 3, "status": "ok", "diagnostics": [],
                             "result": {"type": "i32", "value": value}
                         }),
                         path,
@@ -953,7 +917,7 @@ fn execute_scheduled(
                     diagnostics.push(note);
                 }
                 let mut document = serde_json::json!({
-                    "schema_version":1, "status":"ok", "diagnostics":diagnostics,
+                    "schema_version":3, "status":"ok", "diagnostics":diagnostics,
                     "result":{"type":"i32", "value":receipt["result"]},
                 });
                 if let Some(route) = receipt.get("normal_form") {
@@ -1050,7 +1014,7 @@ mod diagnostic_tests {
         let document = error.to_diagnostics_json("fixture.inv", b"");
         assert_eq!(document["diagnostics"][0]["code"], "NATIVE_BUILD");
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         assert!(jsonschema::is_valid(&schema, &document));
     }

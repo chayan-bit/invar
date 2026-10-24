@@ -189,7 +189,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "21253dfc2fc2c115acc0950e2eaa7137b90eaea8e1f8d952855d0ff7a78c1da2"
+        "ir_sha256": "5d3836b9fd425e2379249092b4001d5fd8dc7044fcfd73b1f85428d62a068aae"
       }
     },
     {
@@ -208,7 +208,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "37eb3e96894bebc738ad1fbdd7ea7bb1b845ce952651c08c16dedd464c6f6c25"
+        "ir_sha256": "422291d902bee96e02724de418159cf105c556aaf0ca07e747949cf3366d0d8f"
       }
     },
     {
@@ -230,17 +230,17 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "b76a11dbe1fc4ab53db43f8d7aac4d9bde316b4c585defda7d4d9c2f3d76d1ff",
+        "ir_sha256": "b062fd3edef93309e0e77b17def51891c3252339710dcc1840ae1eb6bb612c07",
         "generate": [
           {
             "target": "ros2",
-            "files": 55,
-            "tree_sha256": "696ce00a3a2a6a28e32653351b98ddb95038e29d77179fb2e5196adc76d01f45"
+            "files": 35,
+            "tree_sha256": "089059ca1dbda315f106b970979a63f8f075d2c5db1ed54a514c815c4bc1fc18"
           },
           {
             "target": "mjcf",
-            "files": 22,
-            "tree_sha256": "0cf35b41bdb7f7009709d1c9e6bfbaf247c1274ede0ebdd1004f57bae4660157"
+            "files": 2,
+            "tree_sha256": "9d714c10aa0bacb49368d6d6f3869f867eb4cf1a9cf2ac2bff171baa959c3c04"
           }
         ]
       }
@@ -264,17 +264,17 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "4553671b008c5fc61e56e632b5f70bf07115e482cbc89b87656c4684061ca3a8",
+        "ir_sha256": "5315d1b931aa0c9bf7375767bf93d634e195a1971e2c7d302f1558253d3db8ad",
         "generate": [
           {
             "target": "ros2",
-            "files": 102,
-            "tree_sha256": "bbcc9e6119c7a9281837f5d96263f415282b93025cb3e62b77b2afc47faa96d5"
+            "files": 47,
+            "tree_sha256": "fb2e466b99a9f59ba783cb1b1ff9ebbd683beb81208afa5a6930803b7cc7045f"
           },
           {
             "target": "mjcf",
-            "files": 69,
-            "tree_sha256": "1749e9480686d6c125dfa2b32c8efcfbca36be00d02ff2ac712eb1a09c8f16ba"
+            "files": 14,
+            "tree_sha256": "358f88397b5e8c93b02483ae20d8b8675d7c4e2a12448e5fb79e569126f0340e"
           }
         ]
       }
@@ -298,38 +298,6 @@
     {
       "path": "examples/cells/reach_place/components/curobo_planner/manifest-source-ur5e-v3.inv",
       "intent": "Foreign component manifest curobo_planner manifest-source-ur5e-v3 that checks standalone.",
-      "family": "foreign-manifest",
-      "tags": [
-        "manifest"
-      ],
-      "spec_section": "10.1",
-      "engines": [
-        "check"
-      ],
-      "expect": {
-        "command": "check",
-        "status": "ok"
-      }
-    },
-    {
-      "path": "examples/cells/reach_place/components/curobo_planner/manifest-ur5e.inv",
-      "intent": "Foreign component manifest curobo_planner manifest-ur5e that checks standalone.",
-      "family": "foreign-manifest",
-      "tags": [
-        "manifest"
-      ],
-      "spec_section": "10.1",
-      "engines": [
-        "check"
-      ],
-      "expect": {
-        "command": "check",
-        "status": "ok"
-      }
-    },
-    {
-      "path": "examples/cells/reach_place/components/curobo_planner/manifest.inv",
-      "intent": "Foreign component manifest curobo_planner manifest that checks standalone.",
       "family": "foreign-manifest",
       "tags": [
         "manifest"
@@ -444,7 +412,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "42ac2df7d58992e46db3e9485e506f534d039c872cccbb500d4864716761875a"
+        "ir_sha256": "82ecb737161efe2a3c4ab401da3142114c6cb121f43c03c3423b61f52135ba54"
       }
     },
     {
@@ -463,7 +431,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "42ac2df7d58992e46db3e9485e506f534d039c872cccbb500d4864716761875a"
+        "ir_sha256": "82ecb737161efe2a3c4ab401da3142114c6cb121f43c03c3423b61f52135ba54"
       }
     },
     {
@@ -482,7 +450,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "48d7f6a95eda1feac2a1f280807af1ba107d7fae06cba56f8c20eb38239d0399"
+        "ir_sha256": "5664748d003fe44860f3381788d3f634d59f5ca68b920b188335d8e8616d3dbd"
       }
     },
     {
@@ -1571,7 +1539,7 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "044fb77c4baf72d2f0a4fc49bc69dd3278f7d051231f6b83cf0660965fe2a54c"
+        "ir_sha256": "82c84b5ce7e846b846a7ff77b4390482a285aff15259c574db7fadd42df2d3b6"
       }
     },
     {
@@ -1591,7 +1559,7 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "e738b888dfdac70606ada6d16bcf9bd8640ba72cf8541d0e46f8e85bbf795b19"
+        "ir_sha256": "78374165a46b1a3bb646b4ea6397b85abd6fc16125d2c5fda138647e4012b5ff"
       }
     },
     {
@@ -1628,7 +1596,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "f4b098403e0c13462ae033744dde25b28abe248fc525aae1292e888dbb010434"
+        "ir_sha256": "903b0118d14afc04698f94ed99c72dd846988df445a260bb3e6fc5c159f1f4b4"
       }
     },
     {
@@ -1648,7 +1616,7 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "002e8cce6d8ec079898401667159b4c6fcd51713a34c40e9bbab23035e19797e"
+        "ir_sha256": "2212d81e7a69b82a60eeea8a4f3d917b1cb138186a5224de38d3792cc9f6ea31"
       }
     },
     {
@@ -1749,12 +1717,12 @@
         "diagnostics": [
           "S1011:warning"
         ],
-        "ir_sha256": "6718b92fda2dfdb5921039f7bccd068064a5ea4637e17d62126a96a70433cc42",
+        "ir_sha256": "3808dcacdbe31308a8efda2bef07494d4c037dc3353ea27608e8405aeef6352a",
         "generate": [
           {
             "target": "ros2",
             "files": 26,
-            "tree_sha256": "8e1883d3df188c9ea4356c912dd76e30e02457b599088fdac39230bddb822bba"
+            "tree_sha256": "f629b8127c8a672478a2d556cfcb1f2935f4191018dfa51dfe094b19d08c77a9"
           }
         ]
       }
@@ -1774,7 +1742,7 @@
         "command": "system",
         "status": "ok",
         "diagnostics": [],
-        "ir_sha256": "a7dd04834d3f22d094ca9c889d6ebcc586aa097b80b93753b25a4dc2dfd93953"
+        "ir_sha256": "3f88c8c774eb825214c8749cb485a2a734f83d9c5cfc754d42c61ec8368870e0"
       }
     },
     {

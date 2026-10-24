@@ -16,6 +16,8 @@ use crate::{
 
 #[cfg(feature = "cuda")]
 pub mod cuda;
+#[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
+mod device;
 mod families;
 mod lowering;
 #[cfg(all(feature = "metal", target_os = "macos"))]
@@ -169,18 +171,10 @@ fn map_step(
     };
     Ok(Some(Step {
         plan: LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
-            summary: None,
-            region: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             iterations: live.iterations,
             input_lengths: pass.input_lengths,
-            scalar: None,
             array: Some((map.output.clone(), pass.values)),
+            ..Default::default()
         },
         kind: PlanKind::Map,
         chunks: pass.chunks,
@@ -235,18 +229,10 @@ fn staged_consumer(
             .collect();
         return Some(Step {
             plan: LoopOverride {
-                histogram: None,
-                scatter: None,
-                gather: None,
-                summary: None,
-                region: None,
-                tensor: None,
-                transpose: None,
-                stencil: None,
                 iterations: len,
                 input_lengths,
-                scalar: None,
                 array: Some((standalone.output.clone(), pending.output)),
+                ..Default::default()
             },
             kind: PlanKind::FusedMap,
             chunks: Vec::new(),
@@ -303,18 +289,10 @@ fn producer_step(
     });
     Ok(Some(Step {
         plan: LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
-            summary: None,
-            region: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             iterations: len,
             input_lengths: pass.input_lengths,
-            scalar: None,
             array: (!elide).then(|| (fused.intermediate.clone(), pass.captured)),
+            ..Default::default()
         },
         kind: PlanKind::FusedMap,
         chunks: pass.chunks,
@@ -405,18 +383,10 @@ fn dag_producer_step(
     }
     Ok(Some(Step {
         plan: LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
-            summary: None,
-            region: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             iterations: len,
             input_lengths,
-            scalar: None,
             array: Some((first_output.clone(), values.remove(0))),
+            ..Default::default()
         },
         kind: PlanKind::FusedMap,
         chunks,
@@ -475,18 +445,10 @@ fn reduction_step(
     let (total, chunks, joined) = reduction_output(law, values, workers, hooks)?;
     Ok(Some(Step {
         plan: LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
-            summary: None,
-            region: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             iterations: len,
             input_lengths: vec![(input.clone(), borrowed[0].len())],
             scalar: Some(vec![(state.clone(), seed, law.combine(seed, total))]),
-            array: None,
+            ..Default::default()
         },
         kind: PlanKind::Reduction,
         chunks,
@@ -521,14 +483,6 @@ fn pair_reduction_step(
     .then(total);
     Ok(Some(Step {
         plan: LoopOverride {
-            region: None,
-            histogram: None,
-            scatter: None,
-            gather: None,
-            summary: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             iterations: len,
             input_lengths: candidate
                 .inputs
@@ -540,7 +494,7 @@ fn pair_reduction_step(
                 (candidate.states[0].clone(), seeds[0], final_pair.a),
                 (candidate.states[1].clone(), seeds[1], final_pair.b),
             ]),
-            array: None,
+            ..Default::default()
         },
         kind: PlanKind::Reduction,
         chunks,
@@ -608,18 +562,11 @@ fn scan_step(
     };
     Ok(Some(Step {
         plan: LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
-            summary: None,
-            region: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             iterations: len,
             input_lengths,
             scalar: Some(vec![(state.clone(), seed, final_state)]),
             array: target.map(|name| (name.clone(), published)),
+            ..Default::default()
         },
         kind: PlanKind::Scan,
         chunks,

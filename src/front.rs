@@ -8,7 +8,7 @@ const MAX_NESTING: usize = 32;
 /// Syntactic nesting is capped at [`MAX_NESTING`], but left-associative
 /// operator chains and `else if` chains deepen the tree without nesting, and
 /// every later pass walks it recursively. This keeps those walkers stack-safe
-/// on a 2 MiB thread in Debug builds (see `tests/robustness_limits.rs`).
+/// on a 2 MiB thread in Debug builds (see `tests/limits/robustness_limits.rs`).
 const MAX_TREE_HEIGHT: usize = 192;
 
 fn tree_height(child_height: usize) -> Result<usize, FrontError> {
@@ -68,13 +68,13 @@ impl FrontError {
         self
     }
 
-    /// Deterministic version-1 diagnostic document for this front-end result.
+    /// Compact, source-free summary; the schema-valid form is [`Self::to_diagnostics_json`].
     pub fn to_json(&self, path: &str) -> Value {
         let span = self
             .span
             .map(|span| json!({"start": span.start, "end": span.end}));
         json!({
-            "schema_version": 1,
+            "schema_version": 3,
             "status": match self.kind { ErrorKind::Source => "source_error", ErrorKind::Tool => "tool_error" },
             "diagnostics": [{
                 "code": self.code,

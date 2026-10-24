@@ -1,7 +1,6 @@
-(* Bootstrap 0.1 plus bounded L1-01..L1-04, R1-01, S1-11, and S1-01..S1-06 system syntax. Lexical and typing rules: bootstrap.md. *)
-(* v0.2 spatial checking uses opaque VoxelGrid and built-in Neighbors/Knn
-   records through ordinary bindings and field moves. No tuple binding.
-   Execution remains unsupported pending the sort-backed grid runtime. *)
+(* Invar source syntax. Lexical, typing and evaluation rules: docs/spec/invar-v0.1.md. *)
+(* v0.2 spatial queries use opaque VoxelGrid and built-in Neighbors/Knn
+   records through ordinary bindings and field moves. No tuple binding. *)
 program       = { top_item } ;
 top_item      = module | import | component_import | frame | system_item | foreign_function | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
 module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
@@ -41,7 +40,7 @@ product       = "product", identifier, "{", { "distribution", ( "internal" | "pr
               | "capacity", resource_item, { ",", resource_item }, ";" }, "}" ;
 system        = "system", identifier, [ "for", path, { ",", path } ], "{", { identifier, ":", path, ";" }, "}" ;
 (* S1-05: exact decimals and units are checked; tuples are ordered, not sets.
-   An asset is source provenance. Import resolves it into checked v5 model
+   An asset is source provenance. Import resolves it into checked model
    data; generation uses that model and hash-checked file-set assets. *)
 robot_model   = "robot", identifier, "{", "license", string_literal, ";",
                 [ "asset", ( "mjcf" | "urdf" ), string_literal, "sha256", string_literal, ";" ],
@@ -98,7 +97,7 @@ record_field  = identifier, ":", type ;
 variant       = "enum", identifier, "{", [ variant_arms, [ "," ] ], "}" ;
 variant_arms  = variant_arm, { ",", variant_arm } ;
 variant_arm   = identifier, [ "(", type, ")" ] ;
-numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric-v2.md *)
+numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric.md *)
 function      = "fn", identifier, [ generic_params ], "(", [ params ], ")", "->", type, [ "from", identifier ], block ;
 foreign_function = "extern", "c", "fn", identifier, "(", [ params ], ")", "->", result_type, "oracle", identifier, ";" ;
 generic_params = "<", generic_param, { ",", generic_param }, ">" ;
@@ -174,7 +173,8 @@ digit         = "0" .. "9" ;
    invar-math-cr-v1 reserves sqrt, cbrt, hypot, sin, cos, tan, asin, acos,
    atan, atan2, sinh, cosh, tanh, exp, exp2, expm1, log, log2, log10, log1p,
    pow, floor, ceil, trunc, round, abs, copysign, min and max, overloaded on
-   f32 or f64 and correctly rounded; see docs/design/v02-f64math.md.
+   f32 or f64 and correctly rounded, except f32 sin, cos and sqrt, which
+   follow invar-trig-f32-v1 on every engine today (issue #48).
    sort, sort_by_key, argsort, segmented_sort are reserved ordinary calls.
    Comparison chaining is syntactically excluded. Range syntax exists only
    in for statements. Assignment is a statement, not an expression.
@@ -183,13 +183,12 @@ digit         = "0" .. "9" ;
    FixedArray<T,N> is a type-only inline C-layout field for the robotics vocabulary.
    i64 nanosecond stamps are type-only.
    System declaration quantities use exact decimal text with explicit units;
-   ports use f32/f64 wire types, and only f32 has arithmetic.
-   System items evaluate at compile time into checked invar-system-v1, v2 when
-   S1-03 bus, license, or identity metadata is present, and v3 when S1-02 typed
-   config or golden tolerances are present. Earlier schemas remain frozen. Unknown
-   The v2 identity transform constant is a typed direct tree-edge source only;
-   nonidentity exact-decimal transforms are required by S1-05/S1-06 geometry.
-   clauses and all limits fail with registered S10xx source diagnostics.
+   ports use f32/f64 wire types.
+   System items evaluate at compile time into the checked invar-system IR
+   (specification section 8.2). The identity transform constant is a typed
+   direct tree-edge source only; nonidentity exact-decimal transforms are
+   required by S1-05/S1-06 geometry. Unknown clauses and all limits fail
+   with registered S10xx source diagnostics.
    px is a nominal camera unit, distinct from one and every SI unit, with no mixed algebra.
    Imports name exported functions or nominal types. Runtime records have 1..16 checked fields; scalar projection uses a named
    record binding; array fields require explicit move from an owned record.
@@ -207,7 +206,7 @@ digit         = "0" .. "9" ;
    malformed UTF-8 and split code-point boundaries return Utf8Error.
    sum_tree(xs), dot_tree(a, b), sum_exact(xs) and dot_exact(a, b) are reserved
    reduction intrinsics: each operand is a bare named Array<f32> read-borrowed
-   for the call, and the result is f32 (bootstrap.md, v0.2 float reductions).
+   for the call, and the result is f32 (specification Appendix B.1).
    vector3::<unit,frame>(x,y,z) and point::<frame>(x,y,z) construct
    fixed three-coordinate values; Point coordinates and Transform translation
    use integer micrometres. transform::<from,to>(tx,ty,tz,r00..r22) requires

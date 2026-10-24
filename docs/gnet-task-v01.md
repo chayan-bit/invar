@@ -1,7 +1,7 @@
 # GNET P4b: residual fork-join task region T (`gnet-task-v1`)
 
 This is the v0.1 lowering for programs whose certified parallel normal form keeps a fork-join after every law (law L20, `NormalForm::is_flat() == false`).
-It implements the [region design](design/gnet-parallel-v01.md)'s fork-join T reduced to fixed-width expansion, nested forks, a compacted arena and source-ordered joins ([normal-form design](design/net-parallel-laws-v01.md) section 10, P4b row).
+It implements the fork-join region T reduced to fixed-width expansion, nested forks, a compacted arena and source-ordered joins.
 
 ## Admission (`src/general_net/task/mod.rs`)
 
@@ -56,7 +56,7 @@ Every `Outcome` records the path that ran: `metal-msl3.2-cascade`, `metal-msl3.1
 ## Cost model (`src/general_net/task/cost.rs`)
 
 `Profile` carries the schedule, cascade lanes, expansion width, group sizes, arena and the refused regions of one device class.
-The bench pilot calibrates lanes (half, one and two times the profile's) and width over `task_bench::WIDTHS` (64 to 16384) on the C1 tuning split (programs 00, 02, 03, 04, 07, 08); the frozen values are folded into the profile, and `tests/net_task_region.rs` checks them against the committed pilot.
+The bench pilot calibrates lanes (half, one and two times the profile's) and width over `task_bench::WIDTHS` (64 to 16384) on the C1 tuning split (programs 00, 02, 03, 04, 07, 08); the frozen values are folded into the profile, and `tests/normal_form/net_task_region.rs` checks them against the committed pilot.
 A width wider than the tree only costs scheduler work, never padded lanes, because the arena holds compacted nodes instead of `radix^depth` slots.
 `task::route` refuses a region whose fingerprint the scored bench measured above the D5 residual tier on that device (`Refusal::CostModel`, code `task_cost_model`); the caller runs it on the native path.
 The test also checks that each refused set equals the set of programs with a resident or host MISS in the committed report.
@@ -69,9 +69,9 @@ For contrast, `cost::digit_padding` reports the padded share of the P4a spike's 
 
 ## Tests
 
-- `tests/net_task_region.rs`: CPU model (ASan and UBSan) against the CPU net oracle on the C1 family and generated trap-heavy fork-joins, under a wide plan and a tight plan that fills the arena; every named mutation (`task::Mutation`) must be caught; refusals.
-- `tests/net_task_region_metal.rs` and `tests/net_task_region_cuda.rs` (ignored): the same corpora on the devices.
-- `tests/net_task_region_bench.rs` and the bench tests in `tests/net_task_region_cuda.rs` (ignored): the D5 residual-tier bench against handwritten B-form kernels (`bench/task-region-v01/c1_handwritten.inc`).
+- `tests/normal_form/net_task_region.rs`: CPU model (ASan and UBSan) against the CPU net oracle on the C1 family and generated trap-heavy fork-joins, under a wide plan and a tight plan that fills the arena; every named mutation (`task::Mutation`) must be caught; refusals.
+- `tests/gpu_metal/task_region.rs` and `tests/gpu_cuda/task_region.rs` (ignored): the same corpora on the devices.
+- `tools/bench/net_task_region_bench.rs` and the bench tests in `tests/gpu_cuda/task_region.rs` (ignored): the D5 residual-tier bench against handwritten B-form kernels (`bench/task-region-v01/c1_handwritten.inc`).
 
 ## D5 residual tier (not met; refused to the native path)
 
@@ -102,7 +102,7 @@ Small inputs and large ones (where real parallel work hides the hops) pass; medi
 CUDA's resident tier mostly passes, but its host-to-host ratio misses because the handwritten baseline's host round trip is cheaper.
 
 The cost model therefore refuses every C1 region on Metal (both paths) and every C1 region but C1-01 on CUDA (`Refusal::CostModel`).
-Those regions run on the native path, and `tests/net_task_region.rs` keeps the refused sets equal to the committed reports' misses.
+Those regions run on the native path, and `tests/normal_form/net_task_region.rs` keeps the refused sets equal to the misses of the scored runs.
 The gate is unchanged.
 Lowering the hop latency further (for example a register replay of the top levels like the B form, or per-call routing by input size) is open.
 ## Open

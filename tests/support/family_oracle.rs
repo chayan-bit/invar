@@ -7,6 +7,9 @@
 use invar::{admission, check, front, mir, plan::PlanKind};
 use std::path::{Path, PathBuf};
 
+#[path = "../../test-support/corpus_sample.rs"]
+pub mod sample;
+
 /// Every family, by module. Each one's production selection is a normal-form
 /// lowering; its recognizer survives only here, as the oracle.
 pub const FAMILIES: &[&str] = &["core", "tensor", "grid", "segmented", "indexed"];
@@ -222,12 +225,13 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
 }
 
 /// The whole corpus: the examples, the benchmark corpora and the test fixtures.
-pub const CORPUS: &[&str] = &["examples", "bench", "tests", "demo"];
+pub const CORPUS: &[&str] = &["examples", "bench", "tools", "tests", "demo"];
 
 /// Every tracked `.inv` program under `dirs` with a `main` that checks, lowers
 /// and has an A0 report, one per distinct source, mapped through `f` on up to
-/// `THREADS` threads.
-pub fn each<T: Send>(dirs: &[&str], f: impl Fn(&Program) -> T + Sync) -> Vec<T> {
+/// `THREADS` threads. `sampled` keeps the examples and the deterministic
+/// `sample` of the rest.
+pub fn each<T: Send>(dirs: &[&str], sampled: bool, f: impl Fn(&Program) -> T + Sync) -> Vec<T> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let mut paths = Vec::new();
     for dir in dirs {
@@ -244,6 +248,15 @@ pub fn each<T: Send>(dirs: &[&str], f: impl Fn(&Program) -> T + Sync) -> Vec<T> 
             (String::from_utf8_lossy(&source).contains("fn main") && seen.insert(source.clone()))
                 .then_some((id, source))
         })
+        .collect();
+    // The examples reach every family (issue_54_selection_parity_on_the_examples),
+    // so a sampled pass keeps all of them plus the sample of the rest.
+    let (examples, rest): (Vec<_>, Vec<_>) = sources
+        .into_iter()
+        .partition(|(id, _)| id.starts_with("examples/"));
+    let sources: Vec<_> = examples
+        .into_iter()
+        .chain(sample::keep(rest, sampled, |(id, _)| id))
         .collect();
     let next = std::sync::atomic::AtomicUsize::new(0);
     let mut out: Vec<(usize, T)> = std::thread::scope(|scope| {

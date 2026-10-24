@@ -416,18 +416,9 @@ fn run_using(
         };
         receipt(&mut completion);
         Ok(Some(LoopOverride {
-            histogram: None,
-            scatter: None,
             gather: Some(completion),
             iterations: live.iterations,
-            input_lengths: Vec::new(),
-            scalar: None,
-            array: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
-            summary: None,
-            region: None,
+            ..Default::default()
         }))
     };
     let (observation, completed) =

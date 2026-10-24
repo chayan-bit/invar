@@ -26,9 +26,9 @@ mod summary;
 mod tensor;
 mod transpose;
 mod values;
-use bulk::live_loop;
 pub(crate) use bulk::{LiveLoop, LoopOverride};
-use frame::{Frame, Slot, copied, record_cleanup};
+use bulk::{live_loop, live_trips};
+use frame::{Frame, Slot, copied, park, record_cleanup};
 pub use reduce::{ReduceCall, Reducer, serial_reduction};
 #[cfg(test)]
 use values::mir_host_index;
@@ -183,7 +183,7 @@ mod diagnostic_tests {
         #[cfg(target_pointer_width = "64")]
         cases.push((mir_len_u32(u32::MAX as usize + 1).unwrap_err(), "MIR_SIZE"));
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         for (error, code) in cases {
             let document = error.to_diagnostics_json("fixture.inv", b"");
@@ -197,10 +197,7 @@ mod diagnostic_tests {
         let source = b"fn main() -> i32 { return 1; }";
         let checked = crate::check::check(crate::front::parse(source).unwrap(), true).unwrap();
         let mut program = mir::lower(&checked).unwrap();
-        let mut frame = Frame {
-            slots: HashMap::new(),
-            values: HashMap::new(),
-        };
+        let mut frame = Frame::default();
         let mut errors = vec![
             frame.value(0).unwrap_err(),
             frame.slot("missing").unwrap_err(),
@@ -252,7 +249,7 @@ mod diagnostic_tests {
         );
 
         let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v1.schema.json"))
+            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
         for (error, expected) in errors.into_iter().zip([
             "MIR_VALUE",

@@ -1,11 +1,11 @@
 # General-net v0.1 benchmark preparation
 
-`manifest.json` pins 15 ordinary Invar source fixtures for reference-engine checking. `parity-spec.json` records the proposed general GPU and handwritten-performance obligations. Neither is a device result or an accepted release manifest. The amendments dated 2026-09-28 (`general-gpu-v01.md`, `cuda-parity-v01.md`, and the latest `compiled-first-v01.md`) are the scope authority; main owns reconciliation with the canonical plan and harness. `spec/bootstrap.md` governs the executable current-source subset.
+`manifest.json` pins 15 ordinary Invar source fixtures for reference-engine checking. `parity-spec.json` records the proposed general GPU and handwritten-performance obligations. Neither is a device result or an accepted release manifest. The scope authority is [the GNET contract](../../src/general_net/CONTRACT.md#semantic-obligations) and [ordinary-source parity](../../docs/performance-acceptance.md#ordinary-source-parity); the original 2026-09-28 amendments are `docs/general-gpu-v01.md` and `docs/cuda-parity-v01.md` at commit `85dc53f`. `docs/spec/invar-v0.1.md` governs the executable current-source subset.
 
 ## Owned arrays and resumable CPU continuation
 
-The additive [strict-f32 ABI8 corpus](NUMERIC.md) retains every prior row and adds
-96 hand-derived observations. It executes published scalar numeric CPU emission,
+The additive [strict-f32 ABI11 corpus](NUMERIC.md) retains every prior row and adds
+96 hand-derived observations. It executes the published CPU numeric emission,
 records source/oracle/compiler exclusions, and now executes all 250 valid source
 rows through the private numeric named reference. The unchanged 254-row
 denominator retains four frontend rejections and all compiler/oracle exclusions.
@@ -85,7 +85,7 @@ The proposed `ablation_design` requires B net-derived compiled production code, 
 
 ## Reference validation and backend integration
 
-The additive Rust CLI validates every source hash and runs fresh `invar check` and `invar run --engine reference` observations, including expected negative exits. A validation pass covers source-literal corpus semantics only. Build `invar` and `invar-bench` together and use a new output path each time. `--source-revision` is caller supplied; the CLI records the executable SHA-256 but cannot verify that the binary came from that revision. Reports mark `source_revision_provenance: caller_supplied_unverified` and `executable_source_binding: unverified`:
+The additive Rust CLI validates every source hash and runs fresh `invar check` and `invar run --engine reference` observations, including expected negative exits. A validation pass covers source-literal corpus semantics only. Build `invar` and `invar-bench` together (`cargo build -p invar -p invar-tools`) and use a new output path each time. `--source-revision` is caller supplied; the CLI records the executable SHA-256 but cannot verify that the binary came from that revision. Reports mark `source_revision_provenance: caller_supplied_unverified` and `executable_source_binding: unverified`:
 
 ```sh
 target/debug/invar-bench --gnet-validate --manifest bench/general-net-v01/manifest.json --spec bench/general-net-v01/parity-spec.json --invar target/debug/invar --source-revision "$REVISION" --report "$NEW_REFERENCE_REPORT"

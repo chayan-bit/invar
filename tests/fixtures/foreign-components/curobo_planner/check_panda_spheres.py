@@ -26,7 +26,7 @@ import yaml
 
 from compare_model_fk import delta, model_pose
 
-MODEL_SHA = "d0de66277ee0a56dcf9a2a997f7cd6be3a157fc32cb567b658cc116c79a0430b"
+MODEL_SHA = "93a8d8e137ae43a33e7499ff627c1f633fb27d94f58ea7545b97c8f65027db1d"
 URDF_SHA = "eeecd06212a1ed160807243a1046ac0a1ce07d7e49370a4a17d181bed5a6f351"
 MARGIN_M = 0.002
 SPACING_M = 0.0005

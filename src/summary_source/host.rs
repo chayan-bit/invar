@@ -202,16 +202,7 @@ pub fn run_source(source: &[u8], fuel: u64, budget: Budget) -> Result<Run, Error
             }
         };
         Ok(Some(LoopOverride {
-            histogram: None,
-            scatter: None,
-            gather: None,
             iterations: live.iterations,
-            input_lengths: Vec::new(),
-            scalar: None,
-            array: None,
-            tensor: None,
-            transpose: None,
-            stencil: None,
             summary: Some(Completion {
                 contract: contract.clone(),
                 prepared,
@@ -220,7 +211,7 @@ pub fn run_source(source: &[u8], fuel: u64, budget: Budget) -> Result<Run, Error
                 budget: staging,
                 steps,
             }),
-            region: None,
+            ..Default::default()
         }))
     };
     let (observation, completed) =

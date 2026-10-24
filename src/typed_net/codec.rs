@@ -131,7 +131,7 @@ pub fn encode(
 }
 
 impl Net {
-    pub(super) fn decode_term(&self, id: NodeId) -> Result<term::Term, Error> {
+    fn decode_term(&self, id: NodeId) -> Result<term::Term, Error> {
         let node = self.node(id)?;
         let child = |index| self.decode_term(node.inputs[index]).map(Box::new);
         let kind = match &node.op {
@@ -180,6 +180,12 @@ impl Net {
             id: node.source_id,
             kind,
         })
+    }
+
+    /// Reconstruct the source term rooted at one node of a verified graph.
+    pub fn decode_subterm(&self, proof: &Proof, id: NodeId) -> Result<term::Term, Error> {
+        self.check_proof(proof)?;
+        self.decode_term(id)
     }
 
     /// Reconstruct source terms solely from typed graph connectivity.

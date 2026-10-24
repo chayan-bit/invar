@@ -178,7 +178,7 @@ A successful receipt contains `requested_engine`, the actual published `backends
 Scheduled receipts also carry per-region `choices` and cache/hint counts.
 An empty choice list reports `mir-serial`, never a GPU or parallel execution claim.
 Python `explain()` remains the schema-valid static AI-01 report until execution.
-After successful `auto`/`cuda`/`metal` execution it includes that run's frozen `invar-explain-device-v1` document; it does not rerun the program.
+After successful `auto`/`cuda`/`metal` execution it includes that run's `invar-explain-device-v5` document; it does not rerun the program.
 Receipts and explain output are bounded to one million bytes.
 
 Missing features, missing devices, ineligible programs and false device guards raise `EngineError` carrying the original `CUDA_UNAVAILABLE`, `METAL_UNAVAILABLE` or other Invar code in `diagnostics` / `diagnostic_json`.
@@ -225,8 +225,8 @@ it, then run:
 
 ```sh
 maturin develop --manifest-path crates/invar-python/Cargo.toml --locked --offline
-cargo test --locked --test issue_l1_06_python_binding issue_l1_06_python_binding
-cargo test --locked --release --test issue_l1_06_python_binding issue_l1_06_python_binding
+cargo test --locked --test exports issue_l1_06_python_binding
+cargo test --locked --release --test exports issue_l1_06_python_binding
 cargo clippy --manifest-path crates/invar-python/Cargo.toml --locked --offline --all-targets -- -D warnings
 python -m pytest crates/invar-python/tests -q
 # With a native-enabled core and the LLVM 21 toolchain, qualify both engines:
@@ -253,3 +253,22 @@ host); the Linux x86_64 and aarch64 shells evaluate but were not built.
 
 Rust callers use `HostReadArray::Float32`/`HostMutArray::Float32` for native `f32` slices.
 The existing `F32` variants containing `F32Bits` remain reference storage and are refused natively rather than cast or copied into a claimed zero-copy call.
+
+## Building a native wheel
+
+The native wheel is private and unpublished.
+Build it with the pinned Rust 1.95.0 and LLVM 21.1.8 environment and these workspace-local packaging tools:
+
+```sh
+python -m pip install maturin==1.9.6 patchelf==0.17.2.4 auditwheel==6.8.2
+maturin build --manifest-path crates/invar-python/Cargo.toml --locked --offline \
+  --release --features extension-module,native --jobs 2 --auditwheel skip \
+  --out /tmp/invar-raw-wheel
+auditwheel repair --plat manylinux_2_39_x86_64 \
+  --wheel-dir /tmp/invar-repaired-wheel /tmp/invar-raw-wheel/*.whl
+```
+
+The separate repair step is necessary: maturin's built-in repair copies LLVM and its dependencies but keeps LLVM's original `$ORIGIN/../lib` RUNPATH, so the installed wheel fails to import its renamed libffi dependency.
+Auditwheel gives LLVM and its dependent libraries the local `$ORIGIN` path.
+Native compilation of export hosts still requires rustc on PATH; it is not a bundled runtime dependency.
+The repaired wheel is qualified on Linux x86_64 with glibc 2.41 and CPython 3.12 only (all Python tests on both scalar engines in a fresh virtual environment without `PYTHONPATH`, `LLVM_SYS_211_PREFIX` or workspace library paths); macOS, ARM, older glibc and Nix are not qualified.

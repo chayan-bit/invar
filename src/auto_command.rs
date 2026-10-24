@@ -29,27 +29,10 @@ pub fn placement_requested(flags: &[OsString]) -> bool {
     }
 }
 
-/// The explain document version. Every `--engine auto` explain is v5 (#50),
-/// so one reaching here records the established path; the others keep the
-/// version of the intrinsic sites they carry.
-pub fn explain_version(document: &mut serde_json::Value, engine: Option<&str>) -> u32 {
-    if engine == Some("auto") {
-        document["auto_path"] = json!("established");
-        5
-    } else if document.get("explicit_spatial").is_some() {
-        4
-    } else if document.get("explicit_sorts").is_some() {
-        3
-    } else {
-        1
-    }
-}
-
 /// A scheduled run's JSON receipt. The established auto path's is the unified
 /// `invar-diagnostics-v3` recording `auto_path: "established"` (#50).
 pub fn receipt(mut document: serde_json::Value, path: &OsString, engine: Engine) -> i32 {
     if engine == Engine::Auto {
-        document["schema_version"] = json!(3);
         document["auto_path"] = json!("established");
     }
     print_run_json(document, path)
@@ -238,7 +221,7 @@ pub fn command(args: &[OsString]) -> i32 {
         let (status, mut doc) = match run.observation.result {
             Ok(Value::I32(v)) => (
                 0,
-                json!({"schema_version":1,"status":"ok","diagnostics":[],"result":{"type":"i32","value":v}}),
+                json!({"schema_version":3,"status":"ok","diagnostics":[],"result":{"type":"i32","value":v}}),
             ),
             Ok(_) => {
                 return Err(EvalError::Tool {
@@ -300,7 +283,6 @@ pub fn command(args: &[OsString]) -> i32 {
             doc["placement"] = summary.clone();
             doc["auto_path"] = json!("placement");
             doc["placement"]["engine"] = json!("none");
-            doc["schema_version"] = json!(3);
             if json_output {
                 if print_run_json(doc, path) == 2 {
                     return 2;
@@ -311,8 +293,7 @@ pub fn command(args: &[OsString]) -> i32 {
             status
         }
         Ok((status, mut doc)) => {
-            doc["schema_version"] = json!(3);
-            doc["schema"] = json!("invar-diagnostics-v3");
+            doc["schema"] = json!(invar::diagnostics::SCHEMA);
             if explain {
                 let mut report = match invar::schedule::regions(&source, &program) {
                     Ok(r) => r.to_json(),
@@ -323,8 +304,7 @@ pub fn command(args: &[OsString]) -> i32 {
                 if let Some(fold) = &fold {
                     report["numeric_contracts"]["fold"] = fold.clone();
                 }
-                report["schema"] = json!("invar-explain-v5");
-                report["schema_version"] = json!(5);
+                report["schema"] = json!(invar::admission::SCHEMA);
                 report["placement"] = doc["placement"].clone();
                 report["auto_path"] = json!("placement");
                 // Retain the established device-explain schema; detailed profile
@@ -334,7 +314,7 @@ pub fn command(args: &[OsString]) -> i32 {
                     "reason":if c["engine"]=="cpu" {"measured-cpu-cost"} else {"measured-device-cost"}
                 })).collect::<Vec<_>>();
                 if status == 0 {
-                    report["device_schema"] = json!("invar-explain-device-v5");
+                    report["device_schema"] = json!(invar::admission::DEVICE_SCHEMA);
                     report["device_execution"] = json!({"requested_engine":"auto","choices":choices,"result":doc["result"]["value"],
                     "module_cache_hits":0,"schedule_hint_hits":0,"schedule_hint_invalids":0});
                 }

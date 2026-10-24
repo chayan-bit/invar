@@ -69,6 +69,76 @@ impl Contract {
     }
 }
 
+/// CheckedProgram has public annotations: re-run the checker on the actual AST and
+/// require the current annotations, so stale caller edits are not authentication.
+/// Shared by the stencil, transpose and summary source families with their own refusals.
+pub(crate) fn recheck<E>(
+    source: &CheckedProgram,
+    bounds: E,
+    mismatch: E,
+    rejected: fn(front::FrontError) -> E,
+) -> Result<CheckedProgram, E> {
+    let p = &source.program;
+    if p.functions.len() > mir::MAX_FUNCTIONS {
+        return Err(bounds);
+    }
+    let checked = crate::check::check(
+        front::Program {
+            functions: p.functions.clone(),
+            foreign_functions: p.foreign_functions.clone(),
+            closures: p.closures.clone(),
+            frames: p
+                .frames
+                .iter()
+                .map(|f| front::FrameDecl {
+                    name: f.name.clone(),
+                    parent: f.parent.clone(),
+                    span: f.span,
+                })
+                .collect(),
+            modules: p
+                .modules
+                .iter()
+                // check::check injects this reserved standard module each time.
+                // Rebuild it, then require exact equality with the checked AST;
+                // caller mutation of standard declarations is still rejected.
+                .filter(|m| m.name != "std::robotics")
+                .map(|m| front::ModuleDecl {
+                    name: m.name.clone(),
+                    span: m.span,
+                })
+                .collect(),
+            imports: p
+                .imports
+                .iter()
+                .map(|i| front::Import {
+                    owner: i.owner.clone(),
+                    module: i.module.clone(),
+                    item: i.item.clone(),
+                    span: i.span,
+                })
+                .collect(),
+            records: p
+                .records
+                .iter()
+                .filter(|r| r.module.as_deref() != Some("std::robotics"))
+                .cloned()
+                .collect(),
+            variants: p.variants.clone(),
+            system_items: p.system_items.clone(),
+        },
+        false,
+    )
+    .map_err(rejected)?;
+    if &checked.program != p
+        || checked.expression_types != source.expression_types
+        || checked.function_expression_types != source.function_expression_types
+    {
+        return Err(mismatch);
+    }
+    Ok(checked)
+}
+
 pub(crate) fn function_fingerprint(function: &mir::Function) -> [u8; 32] {
     let mut locals = function.locals.iter().collect::<Vec<_>>();
     locals.sort_by_key(|(name, _)| *name);

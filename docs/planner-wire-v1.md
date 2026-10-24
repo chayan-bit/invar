@@ -59,15 +59,12 @@ RPC protocol or hidden runtime is introduced.
 
 ## Versioning and evidence
 
-Graphs using these records select `invar-system-v7`, version 7, with required
-`planner_contract: invar-planner-wire-v1`. The new schema permits standalone
-wire/manifest graphs and graphs with robot/cell declarations. V1–v6 schema files
-are unchanged, and graphs without planner records retain their prior version.
-The existing source frame/flow/resource/license checks still apply.
-
-Graphs containing the planner config select additive `invar-system-v8`, version
-8. V7 is unchanged; only v8 admits the config descriptor's bounded hash, pose,
-limit-array and borrowed-text fields. A v8 planner graph relabeled v7 is rejected.
+Graphs using these records carry the required
+`planner_contract: invar-planner-wire-v1` in `invar-system-v12`. The schema
+permits standalone wire/manifest graphs and graphs with robot/cell declarations,
+and admits the config descriptor's bounded hash, pose, limit-array and
+borrowed-text fields. The existing source frame/flow/resource/license checks
+still apply.
 
 ## Checked lifecycle and transport
 
@@ -181,7 +178,7 @@ sequencer, followed by live controller/ROS/curobo qualification.
 
 ## Pinned ROS build/hash preparation
 
-`issue_s1_06_planner_ros_build` adds a build-only probe using each real robot's
+`robotics::issue_s1_06_planner_ros_build` adds a build-only probe using each real robot's
 checked limits, generated planner node, controller bridge and all six planner
 message definitions. The CPU test validates deterministic preparation and rejects
 missing, duplicated, wrongly named and mismatched ROS hash entries. It does not
@@ -194,8 +191,8 @@ ID and a new absolute evidence directory:
 ```sh
 INVAR_S1_06_ROS_IMAGE_ID=sha256:<reviewed-image-id> \
 INVAR_S1_06_ROS_BUILD_DIR=/absolute/new-evidence-directory \
-cargo test --offline --locked --test issue_s1_06_planner_ros_build \
-  issue_s1_06_planner_ros_build_env_both_counts_and_hash_parity -- --ignored --exact
+cargo test --offline --locked --test robotics \
+  issue_s1_06_planner_ros_build::issue_s1_06_planner_ros_build_env_both_counts_and_hash_parity -- --ignored --exact
 ```
 
 Require one executed passing test, not a zero-test exit. The runner neither pulls images nor installs dependencies. It

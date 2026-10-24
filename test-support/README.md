@@ -20,7 +20,7 @@ The original inputs remain recoverable from commit
 child. CI selects `8` for the shared runners. For a loaded host, for example:
 
 ```sh
-INVAR_TEST_TIMEOUT_SCALE=8 cargo test --locked --offline --test issue_gnet_v01_corpus_expansion
+INVAR_TEST_TIMEOUT_SCALE=8 cargo test --locked --offline --test gnet_slices
 ```
 
 Run Cargo through the host's required resource wrapper. This setting adds
@@ -48,8 +48,8 @@ Sweep of compiled/process test deadlines:
   compiler/model/run watchdogs, including the asynchronous group child.
 - `tests/issue_gnet_{12_cuda_owned_numeric_model,f32_helpers_flag_independence,resume_device_model}.rs`:
   the existing process-group poll runners. CPU limits remain unchanged.
-- `tests/issue_m4_02_{stencil_source,transpose_source}.rs`,
-  `tests/issue_m4_03_matrix_contraction_tensor_core.rs`,
+- `tests/m4_transpose_stencil/issue_m4_02_{stencil_source,transpose_source}.rs`,
+  `tests/m4_contraction/issue_m4_03_matrix_contraction_tensor_core.rs`,
   `crates/invar-device/tests/m4_02_transpose.rs`: compiler and CPU-model runs.
   Embedded `alarm()` wall timers now use the parent group watchdog instead;
   stencil's independent CPU limit remains unchanged.
@@ -64,7 +64,7 @@ Sweep of compiled/process test deadlines:
 - `src/native.rs`: only the `cfg(test)` elapsed-time assertions around child
   output/draining and executable-writer checks; the real 30-second process
   watchdog and 250 ms executable-writer retry budget remain unchanged.
-- `tests/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
+- `tools/tests/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
   and FIFO probes, and harness elapsed-time assertions. Deliberate 200/250 ms
   timeout requests retain their exact durations and typed `Error::Timeout`.
   Scaled non-timeout requests saturate at the product's existing 600-second
@@ -74,8 +74,20 @@ Sweep of compiled/process test deadlines:
   fixture compile and fresh-process scalar-artifact checks consume the same knob.
 
 Product limits are intentionally unchanged: `src/native.rs`,
-`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_host,numeric_resume_host,numeric_owned_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
-`src/gnet_device_command.rs`, `bench/{baseline,build_lineage,general-net-v01/cli}.rs`,
+`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
+`src/gnet_device_command.rs`, `tools/bench/{baseline,build_lineage,general_net_cli}.rs`,
 and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
 real contract; GPU completion polling and semantic timing fixtures are not
 compiled-child harness watchdogs.
+
+## Corpus sample
+
+`corpus_sample.rs` walks the source corpus and picks the deterministic sample that pull-request CI runs for the exhaustive corpus sweeps: the device CPU-model corpus, the GNET v0.1 corpus denominators and the #54 selection-parity passes (which also keep every example, since the examples reach every family).
+A program is kept when the 64-bit FNV-1a hash of its path falls in bucket 0 of 8, and each directory category the hash misses keeps its lowest-hash program, which the sampler asserts.
+Count floors written for the whole corpus are divided by 8 for the sample; agreement checks are unchanged.
+`INVAR_FULL_CORPUS=1` runs every program; `just test` and CI on pushes to main set it.
+
+## Term oracle
+
+`term_oracle.rs` is test support, included by path, with no production API.
+It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `issue_m1_04`, `issue_m1_05` and `issue_m4_07_typed_bounded_scan` use as independent oracles.

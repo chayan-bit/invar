@@ -1,11 +1,10 @@
-//! Numeric policy v2 declarations (`docs/numeric-v2.md`): fold tiers and the
+//! Numeric policy v2 declarations (`docs/numeric.md`): fold tiers and the
 //! `reassoc_add` intrinsic. `acc = reassoc_add(acc, x)` in a loop that uses
 //! `acc` nowhere else becomes `acc + x`, with its span kept for the f32 check
 //! after typing. Tree, Exact and Relaxed folds, and the `reassoc_add` folds of
 //! a Strict function, lower in `fold_tiers`.
 
 mod fold_tiers;
-mod trig;
 pub(super) mod visit;
 use super::*;
 use visit::{Visit, walk_stmt};
@@ -179,14 +178,8 @@ fn expr(e: &Expr) -> Result<(), FrontError> {
     }
 }
 
-/// After typing: every rewritten update is an f32 addition, and the selected
-/// trig contract names its f32 calls.
-pub(super) fn finish(
-    sites: &Sites,
-    program: &mut Program,
-    checker: &Checker,
-) -> Result<(), FrontError> {
-    trig::select(program, &checker.function_expression_types);
+/// After typing: every rewritten update is an f32 addition.
+pub(super) fn finish(sites: &Sites, checker: &Checker) -> Result<(), FrontError> {
     let types = &checker.expression_types;
     for &site in &sites.relaxed {
         if types
