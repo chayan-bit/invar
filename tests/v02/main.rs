@@ -1,5 +1,4 @@
 // Shared fixtures, each loaded once and used by several modules below.
-#[allow(dead_code)]
 #[path = "../support/fsum_cases.rs"]
 mod fsum_cases_support;
 mod issue_v02_f64_oracle;
@@ -17,6 +16,8 @@ mod sort_fsum;
 mod spatial_oracle_support;
 mod v02_fsum_cli;
 mod v02_fsum_oracle;
+#[path = "../support/v02_math_msl_common.rs"]
+mod v02_math_msl_common_support;
 mod v02_placement;
 mod v02_sort_contract;
 mod v02_sort_device;

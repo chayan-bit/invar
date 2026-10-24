@@ -25,8 +25,7 @@ use std::{
 };
 use v02_math_msl_common::coremath::{build, tempdir, transcendental};
 
-#[path = "../support/v02_math_msl_common.rs"]
-mod v02_math_msl_common;
+use super::v02_math_msl_common_support as v02_math_msl_common;
 use v02_math_msl_common::{MUTATION, RANDOM, against_upstream, oracle, samples};
 
 const PRELUDE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/crates/invar-math/src");

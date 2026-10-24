@@ -6,9 +6,8 @@
 //!
 //! Heavy and opt-in:
 //! `INVAR_COREMATH_UPSTREAM=<core-math clone> cargo test --release --test
-//! issue_v02_math_differential -- --ignored --nocapture`.
-#[path = "../support/coremath.rs"]
-mod coremath;
+//! v02 issue_v02_math_differential:: -- --ignored --nocapture`.
+use super::v02_math_msl_common_support::coremath;
 
 use coremath::{build, records, same, tempdir, transcendental, worst_cases};
 use invar::{
