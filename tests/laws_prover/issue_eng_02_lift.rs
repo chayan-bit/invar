@@ -87,6 +87,11 @@ fn issue_eng_02_lift_refuses_outside_the_fragment() {
         "fn f(xs: read Array<i32>, n: u32) -> i32 { var s = 0; var i = 0u32; while i < n { s = s + xs[i]; i = i + 1u32; } return s; }",
         // A wrapping loop that orders an i32: Z/2^32 comparisons are unsigned.
         "fn f(xs: read Array<u32>, n: u32, k: i32) -> u32 { var s = 0u32; for i in 0u32 .. n { if k < 0 { s = wrapping_add(s, xs[i]); } } return s; }",
+        // Float guards: integer comparisons cannot model float order or NaN.
+        "fn f(xs: read Array<f32>, n: u32, m: f32) -> u32 { var at = 0u32; for i in 0u32 .. n { if xs[i] < m { at = i; } } return at; }",
+        "fn f(n: u32, x: f32, y: f32) -> u32 { var s = 0u32; for i in 0u32 .. n { if x < y { s = s + 1u32; } } return s; }",
+        // A guard no merge needs is still checked: this one reads away from i.
+        "fn f(xs: read Array<i32>, n: u32) -> i32 { var s = 0; for i in 0u32 .. n { if xs[i + 1u32] > 0 { s = s; } s = s + xs[i]; } return s; }",
     ];
     for source in refused {
         assert!(steps(source).is_err(), "{source}");

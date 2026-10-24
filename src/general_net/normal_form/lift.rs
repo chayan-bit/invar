@@ -12,7 +12,8 @@
 //! first trap); `wrapping_add` and `wrapping_mul` on `u32`
 //! are `Z/2^32`, whose ordered comparisons are unsigned, so a wrapping loop
 //! that orders an `i32` value is refused. A loop mixing checked and wrapping
-//! arithmetic, or using anything else, is refused.
+//! arithmetic, reading a float, or using anything else, is refused; so is a
+//! guard outside the fragment, even when no assignment depends on it.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -130,6 +131,8 @@ impl Walk<'_> {
                 Stmt::If { cond, yes, no } => {
                     // Every merge reads the condition before either branch ran.
                     let before = env.clone();
+                    // The guard is in the fragment even when no merge needs it.
+                    self.select(cond, Term::Lit(1), Term::Lit(0), &before)?;
                     let (mut then, mut other) = (env.clone(), env.clone());
                     self.block(yes, &mut then)?;
                     self.block(no, &mut other)?;
@@ -230,6 +233,9 @@ impl Walk<'_> {
             Expr::I32(x) => Term::Lit(i64::from(*x)),
             Expr::U32(x) => Term::Lit(i64::from(*x)),
             Expr::Local(name) => {
+                if !matches!(self.locals.get(name), Some(Type::I32 | Type::U32)) {
+                    return Err(format!("{name} is not an i32 or u32 scalar"));
+                }
                 if name == self.induction {
                     self.inputs.insert(name.clone());
                 }
@@ -238,6 +244,12 @@ impl Walk<'_> {
             Expr::Index { array, index, .. } => {
                 if !matches!(index.as_ref(), Expr::Local(i) if i == self.induction) {
                     return Err(format!("{array} is read away from the induction variable"));
+                }
+                if !matches!(
+                    self.locals.get(array),
+                    Some(Type::ArrayI32 | Type::ArrayU32)
+                ) {
+                    return Err(format!("{array} is not an i32 or u32 array"));
                 }
                 let name = format!("{array}[{}]", self.induction);
                 self.inputs.insert(name.clone());
