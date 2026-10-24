@@ -8,10 +8,8 @@ use invar::{
 };
 use serde_json::{Value as Json, json};
 
-use crate::corpus::CORPUS;
+use crate::{corpus::CORPUS, scratch};
 
-#[path = "../support/scratch.rs"]
-mod scratch;
 fn lower(source: &str) -> (invar::check::CheckedProgram, mir::Program) {
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();

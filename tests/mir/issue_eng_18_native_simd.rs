@@ -9,8 +9,7 @@ use invar::{
     native::{self, Build, Cpu, Fact, IntervalOp, Operand, Promise},
 };
 
-#[path = "../support/scratch.rs"]
-mod scratch;
+use crate::scratch;
 
 fn lower(source: &str) -> mir::Program {
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
