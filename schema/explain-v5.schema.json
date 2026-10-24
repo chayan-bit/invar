@@ -1276,6 +1276,66 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "required": [
+              "route"
+            ],
+            "properties": {
+              "route": {
+                "properties": {
+                  "host": {
+                    "const": "native"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "reductions"
+                  ]
+                },
+                {
+                  "required": [
+                    "intrinsics"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "route",
+              "engine"
+            ],
+            "properties": {
+              "route": {
+                "properties": {
+                  "host": {
+                    "const": "reference"
+                  }
+                }
+              },
+              "engine": {
+                "not": {
+                  "const": "none"
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reductions",
+              "intrinsics"
+            ]
+          }
         }
       ]
     },

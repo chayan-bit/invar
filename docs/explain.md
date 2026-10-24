@@ -80,6 +80,7 @@ Two objects are required when `auto_path` is `"placement"` and absent when it is
 On the reference route (`placement.route.host` is `"reference"`), the receipt also lists `placement.reductions`, the reached float reductions, and `placement.intrinsics`, the reached sort and spatial sites.
 Both hold the values the established auto path records in `device_execution.choices`, and the explain lists the same entries in its own device choices (#50).
 The native route runs compiled code that keeps no per-call receipts, so its receipt carries neither list.
+A run that stops with an error (`placement.engine` is `"none"`) carries neither list either; both schemas enforce these rules by route.
 `explicit_sorts`, `explicit_spatial` and `numeric_contracts` stay optional and unchanged, so the intrinsic sites stay visible under placement.
 `numeric_contracts` may also carry `fold`, which the top-level explain document and the `invar-diagnostics-v3` receipt of `invar run --engine auto` add: each declared fold tier a lowered fold used, to the algorithm that ran ([numeric contracts](numeric.md#receipts)).
 The receipt embedded as `execution` carries no `numeric_contracts`.

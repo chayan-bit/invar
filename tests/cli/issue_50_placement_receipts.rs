@@ -103,6 +103,13 @@ fn valid(run: &Value, explain: &Value, receipt: &str) {
         let mut bad = document.clone();
         bad["placement"][receipt][0]["invented"] = json!(1);
         assert!(!validator.is_valid(&bad));
+        // The reference route must carry both lists, even empty ones.
+        let mut missing = document.clone();
+        missing["placement"]
+            .as_object_mut()
+            .unwrap()
+            .remove(receipt);
+        assert!(!validator.is_valid(&missing));
     }
 }
 
@@ -182,6 +189,12 @@ fn native_placement_runs_name_their_route_and_record_no_site_lists() {
     for list in ["reductions", "intrinsics"] {
         assert!(run["placement"].get(list).is_none(), "{run}");
     }
+    // The schema forbids either list on the native route.
+    let validator = schema("invar-diagnostics-v3.schema.json");
+    assert!(validator.is_valid(&run), "{run}");
+    let mut listed = run.clone();
+    listed["placement"]["reductions"] = json!([]);
+    assert!(!validator.is_valid(&listed));
 }
 
 /// Metal has no binary64: placement names each f64 function `metal-no-f64` on
