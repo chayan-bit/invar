@@ -248,7 +248,7 @@ pub fn from_region(region: &Region, length: u32) -> Result<Ir, Error> {
             layout: Layout::ContiguousU32,
         },
         length,
-        geometry: Geometry { blocks, lanes: 256 },
+        geometry: Geometry::new(blocks, 256),
         lane_mask: LaneMask::IndexLtLength,
         barrier: Barrier::None,
         requires_barrier: false,
@@ -309,6 +309,7 @@ fn collective_ir(
             } else {
                 invar_device::collective::LANES
             },
+            planes: 1,
         },
         lane_mask: LaneMask::IndexLtLength,
         barrier: Barrier::Uniform,
@@ -488,7 +489,7 @@ fn from_dag(
         input: *input_buffers.first().ok_or(Error::Ineligible)?,
         output: *output_buffers.last().ok_or(Error::Ineligible)?,
         length,
-        geometry: Geometry { blocks, lanes: 256 },
+        geometry: Geometry::new(blocks, 256),
         lane_mask: LaneMask::IndexLtLength,
         barrier: Barrier::None,
         requires_barrier: false,

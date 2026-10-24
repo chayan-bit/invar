@@ -54,12 +54,7 @@ pub fn malformed_cases() -> Vec<Mutation> {
         (
             "geometry",
             VerifyError::Geometry,
-            Box::new(|ir| {
-                ir.geometry = Geometry {
-                    blocks: 0,
-                    lanes: 256,
-                }
-            }),
+            Box::new(|ir| ir.geometry = Geometry::new(0, 256)),
         ),
         (
             "arithmetic",
