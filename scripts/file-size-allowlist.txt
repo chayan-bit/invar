@@ -43,6 +43,7 @@
 855 tests/robotics/issue_s1_06_sequencer_binding.rs
 1451 tests/support/cuda_owned_numeric_host_cpu_model.rs
 817 tests/support/cuda_owned_numeric_host_lifecycle.rs
+831 tests/support/gnet_device.rs
 1844 tests/support/substep_admission_cases.rs
 930 tests/v02/v02_placement.rs
 952 tools/bench/acceptance.rs

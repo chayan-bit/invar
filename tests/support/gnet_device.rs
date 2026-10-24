@@ -773,3 +773,59 @@ pub fn check_case(name: &str, s: &CaseSummary) {
         _ => panic!("unknown case {name}"),
     }
 }
+
+/// Host fence, cancellation and quiescence on one backend: a cancelled epoch
+/// publishes nothing and is reclaimed only after its completion fence; the
+/// same backend then runs an exact fresh session; reclaiming unfenced work
+/// quarantines it and poisons the backend, refusing further preparation.
+pub fn lifecycle<B: Backend>(target: Target, label: &str, mut open: impl FnMut() -> B) {
+    use invar::general_net::compiled::ExecutionState;
+    let case = &adversarial()[3];
+    let plan = Plan::from_source(
+        case.source.as_bytes(),
+        case.entry,
+        target,
+        Limits::default(),
+    )
+    .unwrap();
+    let long = [Value::U32(4_000_000), Value::I32(1)];
+    let cfg = config(1_000_000, 64, 4096, 64, 2);
+    let mut backend = open();
+    let mut session = plan.prepare(&mut backend, &long, cfg).unwrap();
+    session.submit().unwrap();
+    session.cancel();
+    let begun = Instant::now();
+    loop {
+        match session.poll() {
+            Ok(Progress::Pending) if begun.elapsed() < DEADLINE => {
+                std::thread::sleep(Duration::from_micros(200))
+            }
+            Ok(progress) => panic!("{label}: cancelled epoch published {progress:?}"),
+            Err(_) => break,
+        }
+    }
+    assert_eq!(session.state(), ExecutionState::Cancelled, "{label}");
+    assert_eq!(session.submitted(), session.completed(), "{label}");
+    assert!(session.submit().is_err(), "{label}");
+    drop(session.reclaim().unwrap());
+    assert!(!backend.poisoned(), "{label}");
+    let short = [Value::U32(10), Value::I32(5)];
+    let cfg = config(FUEL, 1_000, 8, 64, 2);
+    let (got, _) = drive(&plan, &mut backend, &short, cfg).unwrap();
+    agree(
+        &format!("{label} after cancel"),
+        &plan,
+        &got,
+        &reference(&plan, &short, cfg),
+    );
+    let mut session = plan
+        .prepare(&mut backend, &long, config(1_000_000, 64, 4096, 64, 2))
+        .unwrap();
+    session.submit().unwrap();
+    assert!(session.reclaim().is_err(), "{label}: unfenced reclaim");
+    assert!(backend.poisoned(), "{label}");
+    assert!(matches!(
+        plan.prepare(&mut backend, &short, cfg),
+        Err(device_host::Error::Poisoned)
+    ));
+}

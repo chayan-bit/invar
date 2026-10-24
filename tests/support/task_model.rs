@@ -16,8 +16,7 @@ use invar::{
     general_net::{
         Net, Proof,
         compiled::Target,
-        normal_form,
-        oracle,
+        normal_form, oracle,
         task::{self, Mutation, Plan, Profile, Program, Schedule},
     },
 };
