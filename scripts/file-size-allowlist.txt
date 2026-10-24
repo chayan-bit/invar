@@ -36,7 +36,7 @@
 1728 src/system/substep_admission.rs
 940 src/system/urdf.rs
 1171 tests/issue_ai_02_spec_examples.rs
-858 tests/issue_m4_06_bounded_schedule_tuning.rs
+849 tests/issue_m4_06_bounded_schedule_tuning.rs
 879 tests/issue_p0a_trig_f32.rs
 806 tests/m4_summary/issue_m4_07_summary_source.rs
 874 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs

@@ -410,8 +410,6 @@ fn issue_eng_06_emitter_refuses_what_it_does_not_lower() {
         Err(Error::Schedule(moves::Refusal::SplitK))
     );
     // Verified moves this emitter does not lower yet.
-    let mut piped = schedule.clone();
-    piped.moves.push(Move::Pipeline { stages: 2 });
     let mut vector = schedule.clone();
     vector.moves.push(Move::Vectorize { width: 4 });
     vector.guards = [Operand::A, Operand::B]
@@ -423,7 +421,7 @@ fn issue_eng_06_emitter_refuses_what_it_does_not_lower() {
         level: Level::Shared,
     });
     let mut unsupported = 0;
-    for s in [&piped, &vector, &staged_c] {
+    for s in [&vector, &staged_c] {
         assert!(
             moves::verify(
                 s,
@@ -441,5 +439,5 @@ fn issue_eng_06_emitter_refuses_what_it_does_not_lower() {
         ));
         unsupported += 1;
     }
-    assert_eq!(unsupported, 3);
+    assert_eq!(unsupported, 2);
 }

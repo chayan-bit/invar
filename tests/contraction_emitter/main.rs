@@ -2,7 +2,9 @@
 mod corpus;
 
 mod issue_eng_06_emitter;
+mod issue_eng_06_layout;
 mod issue_eng_06_moves;
+mod issue_eng_06_pipeline;
 mod issue_eng_06_targets;
 mod issue_eng_06_tc;
 mod issue_eng_06_wiring;

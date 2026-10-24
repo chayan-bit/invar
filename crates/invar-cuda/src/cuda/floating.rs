@@ -518,6 +518,36 @@ impl CudaDevice {
         )
     }
 
+    /// A strict schedule given as moves (#61), verified against the built-in
+    /// target for this device and emitted by the generic contraction emitter,
+    /// with the same admission, D1 probe, staging, completion and output
+    /// checks as `run_tiled_contraction`. The default schedule stays the
+    /// tiled one; this runs others, such as the `cp.async` pipeline.
+    pub fn run_scheduled_contraction(
+        &mut self,
+        plan: &ir::Verified,
+        schedule: &invar_device::moves::Schedule,
+        inputs: [&[u32]; 2],
+        compiler: &Path,
+    ) -> Result<FloatingResult, Error> {
+        use invar_device::contraction;
+        let compile = |e: contraction::Error| Error::Compile(format!("{e:?}"));
+        let registry =
+            invar_device::target::Registry::builtin().map_err(|e| Error::Compile(e.to_string()))?;
+        let target = contraction::select_target(registry, self.caps)
+            .map_err(|e| Error::Compile(format!("{e:?}")))?;
+        let verified = contraction::verify(plan, schedule, target).map_err(compile)?;
+        let source = contraction::emit_cuda(plan, schedule, target).map_err(compile)?;
+        let geometry = contraction::geometry(plan, &verified);
+        self.run_emitted(
+            plan,
+            inputs,
+            compiler,
+            &source,
+            (geometry.groups, geometry.threads),
+        )
+    }
+
     /// `tc-f16-f32-v1`: inputs are rounded to binary16 here (an element past
     /// the binary16 range or rounding to a binary16 subnormal is refused
     /// before any compile or submission), then

@@ -10,7 +10,7 @@
 use crate::floating::{self, Target as Lang, finish, guard_helpers, header, strict_only};
 use crate::gemm::Geometry;
 use crate::moves::{self, Axis, Layout, Move, Operand, Region, Schedule};
-use crate::target::{Backend, Level, Registry, Target};
+use crate::target::{Backend, CopyAtom, CopyKind, Level, Registry, Target};
 use crate::{Capabilities, gemm};
 
 pub mod atoms;
@@ -69,6 +69,16 @@ pub fn gemm_tiled_v1() -> Schedule {
         ],
         guards: Vec::new(),
     }
+}
+
+/// `invar-f32-gemm-tiled-cp-async-v1`: `gemm_tiled_v1` with A and B double
+/// buffered through `cp.async` (targets with an async copy only). Not the
+/// default schedule; the tiled kernels the runtime ships are unchanged.
+pub fn gemm_pipelined_v1() -> Schedule {
+    let mut schedule = gemm_tiled_v1();
+    schedule.name = "invar-f32-gemm-tiled-cp-async-v1".to_owned();
+    schedule.moves.push(Move::Pipeline { stages: 2 });
+    schedule
 }
 
 /// The target must describe the plan's device exactly.
@@ -143,10 +153,14 @@ pub fn verify(
     if v.atom.is_some() {
         return Err(Error::Unsupported("matrix-atom"));
     }
-    if v.tiles_per_group != 1 || v.stages != 1 || v.vector != 1 {
-        return Err(Error::Unsupported(
-            "tiles-per-group, pipeline or vector loads",
-        ));
+    if v.tiles_per_group != 1 || v.vector != 1 {
+        return Err(Error::Unsupported("tiles-per-group or vector loads"));
+    }
+    // A pipeline lowers as `cp.async` multi-buffering (CUDA); TMA does not
+    // lower yet.
+    let cp_async = gpu_copy(target, &v.copy).is_some_and(|c| c.kind == CopyKind::CpAsync);
+    if v.stages > 1 && !(cp_async && matches!(plan.capabilities(), Capabilities::Cuda { .. })) {
+        return Err(Error::Unsupported("pipeline without cp.async"));
     }
     if staged != [Operand::A, Operand::B] || !v.privatized {
         return Err(Error::Unsupported(
@@ -154,6 +168,10 @@ pub fn verify(
         ));
     }
     Ok(v)
+}
+
+fn gpu_copy<'t>(target: &'t Target, name: &str) -> Option<&'t CopyAtom> {
+    target.gpu()?.copy_atoms.iter().find(|c| c.name == name)
 }
 
 /// Launch geometry: one-dimensional groups of the verified thread count.
@@ -218,6 +236,8 @@ fn schedule_tokens(v: &moves::Verified) -> Vec<(&'static str, String)> {
         ("$B_RD$", b_read),
         ("$AE$", (tm * tk).to_string()),
         ("$BE$", (tk * tn).to_string()),
+        ("$S$", v.stages.to_string()),
+        ("$W$", (v.stages - 1).to_string()),
         ("$T$", v.threads.to_string()),
         ("$TM$", tm.to_string()),
         ("$TN$", tn.to_string()),
@@ -292,7 +312,19 @@ pub fn emit_cuda(
     if empty(plan) {
         text.push_str("extern \"C\" __global__ void invar_f32_contract_v1(const float* A, const float* B, float* C) { (void)A; (void)B; (void)C; }\n");
     } else {
-        text.push_str(&body(plan, &v, CUDA_BODY));
+        let k_loop = CUDA_PIPELINED[1].replace("$STAGE$", CUDA_STAGE);
+        let parts = if v.stages > 1 {
+            [
+                CUDA_BODY[0],
+                CUDA_PIPELINED[0],
+                CUDA_BODY[2],
+                &k_loop,
+                CUDA_BODY[4],
+            ]
+        } else {
+            CUDA_BODY
+        };
+        text.push_str(&body(plan, &v, parts));
     }
     Ok(finish(text)?)
 }
@@ -387,6 +419,71 @@ const CUDA_BODY: [&str; 5] = [
 }
 "#,
 ];
+
+/// `Pipeline { stages }` on CUDA: `$S$` shared buffers per staged operand,
+/// filled by 4-byte `cp.async` copies (a masked slot copies 0 bytes and is
+/// zero-filled), `$W$` k-tiles in flight while one is read. Each cell still
+/// adds its products one at a time in increasing k; only the copies overlap.
+const CUDA_PIPELINED: [&str; 2] = [
+    r#"  __shared__ float As[$S$]$AS$;
+  __shared__ float Bs[$S$]$BS$;
+"#,
+    r#"    const unsigned long long ktiles = ($INNER$ull + $TK$ull - 1ull) / $TK$ull;
+    for (unsigned long long next = 0ull; next + 1ull < $S$ull; ++next) {
+      if (next < ktiles) {
+$STAGE$      }
+      asm volatile("cp.async.commit_group;\n" ::: "memory");
+    }
+    for (unsigned long long kt = 0ull; kt < ktiles; ++kt) {
+      {
+        const unsigned long long next = kt + $S$ull - 1ull;
+        if (next < ktiles) {
+$STAGE$        }
+      }
+      asm volatile("cp.async.commit_group;\n" ::: "memory");
+      asm volatile("cp.async.wait_group $W$;\n" ::: "memory");
+      __syncthreads();
+      const unsigned long long k0 = kt * $TK$ull;
+      const unsigned cur = static_cast<unsigned>(kt % $S$ull);
+      const unsigned span = $INNER$ull - k0 < $TK$ull ? static_cast<unsigned>($INNER$ull - k0) : $TK$u;
+      for (unsigned kk = 0u; kk < span; ++kk) {
+        float a[$FM$], b[$FN$];
+#pragma unroll
+        for (unsigned r = 0u; r < $FM$u; ++r) a[r] = As[cur]$A_RD$;
+#pragma unroll
+        for (unsigned c = 0u; c < $FN$u; ++c) b[c] = Bs[cur]$B_RD$;
+#pragma unroll
+        for (unsigned r = 0u; r < $FM$u; ++r)
+#pragma unroll
+          for (unsigned c = 0u; c < $FN$u; ++c) acc[r][c] = __fadd_rn(acc[r][c], __fmul_rn(a[r], b[c]));
+      }
+      __syncthreads();
+    }
+"#,
+];
+
+/// Issue the copies of k-tile `next` into buffer `next % stages`. Every
+/// physical index is checked before its copy; a slot outside the matrix
+/// copies nothing from the allocation base and reads as +0.
+const CUDA_STAGE: &str = r#"        const unsigned buf = static_cast<unsigned>(next % $S$ull);
+        const unsigned long long kn = next * $TK$ull;
+        for (unsigned e = t; e < $AE$u; e += $T$u) {
+          const unsigned long long i = row0 + e / $TK$u, k = kn + e % $TK$u;
+          const bool in = i < $ROWS$ull && k < $INNER$ull;
+          const unsigned long long ai = in ? $A_OFFSET$ull + i * $A_STRIDE$ull + k : 0ull;
+          if (in && ai >= $A_ELEMENTS$ull) __trap();
+          const unsigned d = static_cast<unsigned>(__cvta_generic_to_shared(&As[buf]$A_ST$));
+          asm volatile("cp.async.ca.shared.global [%0], [%1], 4, %2;\n" :: "r"(d), "l"(A + ai), "r"(in ? 4u : 0u) : "memory");
+        }
+        for (unsigned e = t; e < $BE$u; e += $T$u) {
+          const unsigned long long k = kn + e / $TN$u, j = col0 + e % $TN$u;
+          const bool in = k < $INNER$ull && j < $COLS$ull;
+          const unsigned long long bi = in ? $B_OFFSET$ull + k * $B_STRIDE$ull + j : 0ull;
+          if (in && bi >= $B_ELEMENTS$ull) __trap();
+          const unsigned d = static_cast<unsigned>(__cvta_generic_to_shared(&Bs[buf]$B_ST$));
+          asm volatile("cp.async.ca.shared.global [%0], [%1], 4, %2;\n" :: "r"(d), "l"(B + bi), "r"(in ? 4u : 0u) : "memory");
+        }
+"#;
 
 // Words carry binary32 bits. A defensive bounds failure raises the dispatch
 // flag instead of returning, so no thread leaves a barrier early; any raised

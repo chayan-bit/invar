@@ -38,10 +38,7 @@ fn issue_m4_01_numeric_layout_contracts_v2_shared_and_adversarial() {
         input,
         output: invar_device::Buffer { id: 1, ..input },
         length: 3,
-        geometry: invar_device::Geometry {
-            blocks: 1,
-            lanes: 32,
-        },
+        geometry: invar_device::Geometry::new(1, 32),
         lane_mask: invar_device::LaneMask::IndexLtLength,
         barrier: invar_device::Barrier::None,
         requires_barrier: false,

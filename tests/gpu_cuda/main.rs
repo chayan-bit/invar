@@ -16,6 +16,7 @@ mod a1_indexed;
 mod a1_segmented;
 mod a1_tensor_dispatch;
 mod eng_03_tier;
+mod eng_06_pipeline;
 mod gnet_03;
 #[cfg(unix)]
 mod gnet_03_nvrtc_pipes;

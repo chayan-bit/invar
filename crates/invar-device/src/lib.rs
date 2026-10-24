@@ -71,7 +71,108 @@ pub enum AddressSpace {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Layout {
     ContiguousU32,
+    /// A strided view with its element type (#61). No current family admits
+    /// it; each still requires `ContiguousU32`.
+    Strided(Strided),
     Unknown,
+}
+
+/// Element type of a buffer, as ENG-03 stores arrays. `F16`, `Bf16`, `I8` and
+/// `U8` are storage only: no device family computes in them; loads widen to
+/// f32, i32 or u32 and stores round or trap as in `docs/numeric-v2.md`.
+/// Host-side conversions stay in `src/numeric_contract/storage.rs`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ElementType {
+    U32,
+    I32,
+    F32,
+    F64,
+    F16,
+    Bf16,
+    I8,
+    U8,
+    Bool,
+}
+
+impl ElementType {
+    pub const fn bytes(self) -> u64 {
+        match self {
+            Self::F64 => 8,
+            Self::U32 | Self::I32 | Self::F32 => 4,
+            Self::F16 | Self::Bf16 => 2,
+            Self::I8 | Self::U8 | Self::Bool => 1,
+        }
+    }
+
+    /// Only stored, never an arithmetic type on a device.
+    pub const fn storage_only(self) -> bool {
+        matches!(self, Self::F16 | Self::Bf16 | Self::I8 | Self::U8)
+    }
+}
+
+/// Highest rank a strided layout describes.
+pub const MAX_RANK: usize = 4;
+
+/// `rank` extents and element strides, outermost first; unused trailing
+/// dimensions are 0.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Strided {
+    pub element: ElementType,
+    pub rank: u8,
+    pub extents: [u64; MAX_RANK],
+    pub strides: [u64; MAX_RANK],
+}
+
+impl Strided {
+    /// The dense row-major view of `extents` (rank 1 to `MAX_RANK`).
+    pub fn row_major(element: ElementType, extents: &[u64]) -> Option<Self> {
+        if extents.is_empty() || extents.len() > MAX_RANK {
+            return None;
+        }
+        let mut s = Self {
+            element,
+            rank: extents.len() as u8,
+            extents: [0; MAX_RANK],
+            strides: [0; MAX_RANK],
+        };
+        let mut stride = 1u64;
+        for (d, &extent) in extents.iter().enumerate().rev() {
+            s.extents[d] = extent;
+            s.strides[d] = stride;
+            stride = stride.checked_mul(extent.max(1))?;
+        }
+        Some(s)
+    }
+
+    /// Elements from the first to one past the last addressed: `1 + sum
+    /// (extent - 1) * stride`, or 0 for an empty view.
+    pub fn span(&self) -> Option<u64> {
+        let used = &self.extents[..usize::from(self.rank).min(MAX_RANK)];
+        if used.contains(&0) {
+            return Some(0);
+        }
+        used.iter()
+            .zip(&self.strides)
+            .try_fold(1u64, |span, (&extent, &stride)| {
+                span.checked_add((extent - 1).checked_mul(stride)?)
+            })
+    }
+
+    /// Rank 1 to `MAX_RANK`, unused dimensions zero, and every addressed
+    /// element inside a buffer of `elements`.
+    pub fn verify(&self, elements: u64) -> Result<(), Error> {
+        let rank = usize::from(self.rank);
+        if !(1..=MAX_RANK).contains(&rank)
+            || self.extents[rank..].iter().any(|&e| e != 0)
+            || self.strides[rank..].iter().any(|&s| s != 0)
+        {
+            return Err(Error::Layout);
+        }
+        match self.span() {
+            Some(span) if span <= elements => Ok(()),
+            _ => Err(Error::Bounds),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -141,6 +242,19 @@ pub struct Buffer {
 pub struct Geometry {
     pub blocks: u32,
     pub lanes: u32,
+    /// Third grid dimension (#61): 1 for every current family.
+    pub planes: u32,
+}
+
+impl Geometry {
+    /// A one-plane geometry, the shape every current family launches.
+    pub const fn new(blocks: u32, lanes: u32) -> Self {
+        Self {
+            blocks,
+            lanes,
+            planes: 1,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -301,6 +415,7 @@ pub fn verify(ir: Ir, origin: Provenance, caps: Capabilities) -> Result<Verified
             } else {
                 65_535
             }
+        || ir.geometry.planes != 1
         || ir.geometry.lanes == 0
         || ir.geometry.lanes > 1024
         || !ir.geometry.lanes.is_power_of_two()
