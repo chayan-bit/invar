@@ -1,7 +1,6 @@
 //! Metered data production and receipt proof; no MIR hook or publication.
 use super::{
-    Access, BoundedCandidate, Budget, Candidate, Contract, Cost, Error, Law, MAX_STAGING_BYTES,
-    MAX_VISITS, reserve,
+    Access, Budget, Candidate, Contract, Cost, Error, Law, MAX_STAGING_BYTES, MAX_VISITS, reserve,
 };
 use crate::front::Span;
 use crate::{check::CheckedProgram, general_net};
@@ -156,34 +155,6 @@ impl Contract {
         }
         Ok(law)
     }
-    fn producing_cost(&self, a: usize, i: usize, n: usize, budget: Budget) -> Result<Cost, Error> {
-        // Tighter bound for this producer+receipt, excluding future publication
-        // passes. Bottom-up heap construction has at most I total sift levels;
-        // extraction at most I*h, eight access visits per level plus 4*I swaps.
-        let base = Cost::bounded(a, i, n, Budget::default())?;
-        let h = if i <= 1 {
-            0
-        } else {
-            (usize::BITS - (i - 1).leading_zeros()) as usize
-        };
-        let visits = a
-            .checked_mul(2)
-            .and_then(|v| v.checked_add(n.checked_mul(4)?))
-            .and_then(|v| v.checked_add(i.checked_mul(34)?))
-            .and_then(|v| v.checked_add(i.checked_mul(h)?.checked_mul(8)?))
-            .and_then(|v| v.checked_add(HEADER_VISITS))
-            .and_then(|v| v.checked_add(self.seal.visits))
-            .ok_or(Error::Budget)?;
-        if base.bytes > budget.bytes.min(MAX_STAGING_BYTES)
-            || visits > budget.visits.min(MAX_VISITS)
-        {
-            return Err(Error::Budget);
-        }
-        Ok(Cost {
-            bytes: base.bytes,
-            visits,
-        })
-    }
 }
 
 #[derive(Debug)]
@@ -219,9 +190,6 @@ impl Cost {
     /// Data-only planning reserve. This excludes source/net/proof streams and
     /// is not an admission receipt; an admitted candidate's cost includes them.
     pub fn bounded(a: usize, i: usize, n: usize, budget: Budget) -> Result<Self, Error> {
-        if size_of::<BoundedCandidate>() > METADATA_BYTES {
-            return Err(Error::Budget);
-        }
         let h = if i <= 1 {
             0
         } else {
@@ -324,260 +292,6 @@ pub(super) fn sort_observation(a: &mut [Access]) -> Result<usize, Error> {
     let mut meter = Meter { used: 0, limit };
     heap_sort(a, &mut meter)?;
     Ok(meter.used)
-}
-
-impl Contract {
-    /// A smaller explicitly bounded producer. Larger shapes return Budget and
-    /// retain ordinary source execution; the legacy oracle is not called here.
-    /// Current checked-source/net/proof rechecking is streamed and charged.
-    /// Initial ordinary source compilation uses its existing compiler limits.
-    /// No publication authority is granted.
-    pub fn bounded_candidate(
-        &self,
-        values: &[u32],
-        indices: &[u32],
-        bins: u32,
-        budget: Budget,
-    ) -> Result<BoundedCandidate, Error> {
-        let n = usize::try_from(bins).map_err(|_| Error::Budget)?;
-        let cost = self.producing_cost(values.len(), indices.len(), n, budget)?;
-        let mut meter = Meter {
-            used: 0,
-            limit: cost.visits,
-        };
-        meter.visit(HEADER_VISITS / 2)?;
-        let proof_start = meter.used;
-        let law = self.verify_bounded(&mut meter)?;
-        if meter.used.checked_sub(proof_start).ok_or(Error::Budget)? != self.seal.visits {
-            return Err(Error::Binding);
-        }
-        // Guard the entire source footprint before private grouping. These
-        // errors are candidate refusals, not a replacement source trap order.
-        for (iteration, &bin) in indices.iter().enumerate() {
-            meter.visit(1)?;
-            if iteration >= values.len() || usize::try_from(bin).map_err(|_| Error::Budget)? >= n {
-                return Err(Error::Bounds { iteration });
-            }
-        }
-        let binding = Binding {
-            source_hash: self.source_hash,
-            source_contract: self.source_contract,
-            span: self.loop_span,
-            law,
-            revision: law.revision(),
-            values_identity: values.as_ptr() as usize,
-            indices_identity: indices.as_ptr() as usize,
-            bins,
-            values: copy_words(values, &mut meter)?,
-            indices: copy_words(indices, &mut meter)?,
-        };
-        let mut source_accesses = Vec::new();
-        let mut grouped_accesses = Vec::new();
-        reserve(&mut source_accesses, indices.len())?;
-        reserve(&mut grouped_accesses, indices.len())?;
-        for (iteration, &bin) in binding.indices.iter().enumerate() {
-            meter.visit(2)?;
-            source_accesses.push(Access {
-                iteration,
-                bin: usize::try_from(bin).map_err(|_| Error::Budget)?,
-            });
-        }
-        for &access in &source_accesses {
-            meter.visit(2)?;
-            grouped_accesses.push(access);
-        }
-        let before_sort = meter.used;
-        heap_sort(&mut grouped_accesses, &mut meter)?;
-        let sort_visits = meter.used.checked_sub(before_sort).ok_or(Error::Budget)?;
-        let mut output = Vec::new();
-        reserve(&mut output, n)?;
-        for _ in 0..n {
-            meter.visit(1)?;
-            output.push(law.identity());
-        }
-        for access in &grouped_accesses {
-            meter.visit(4)?;
-            let weight = *binding.values.get(access.iteration).ok_or(Error::Receipt)?;
-            let slot = output.get_mut(access.bin).ok_or(Error::Receipt)?;
-            *slot = law.combine(*slot, weight);
-        }
-        let produced_visits = meter.used;
-        let mut candidate = BoundedCandidate {
-            candidate: Candidate {
-                output,
-                source_accesses,
-                grouped_accesses,
-                sort_visits,
-            },
-            binding,
-            produced_visits,
-            checked_visits: 0,
-            cost,
-            proof_visits: self.seal.visits,
-        };
-        candidate.checked_visits =
-            self.validate_data(&candidate, values, indices, bins, law, budget)?;
-        Ok(candidate)
-    }
-
-    /// Recheck actual source/net and current input identities/contents, then
-    /// independently prove both traces and every modular output. Revalidating
-    /// meters this invocation's proof and receipt checks. Callers must sum
-    /// producer and validation visits if both run within one runtime attempt.
-    pub fn validate_bounded(
-        &self,
-        candidate: &BoundedCandidate,
-        values: &[u32],
-        indices: &[u32],
-        bins: u32,
-        budget: Budget,
-    ) -> Result<usize, Error> {
-        let cost = self.producing_cost(
-            values.len(),
-            indices.len(),
-            usize::try_from(bins).map_err(|_| Error::Budget)?,
-            budget,
-        )?;
-        let mut proof_meter = Meter {
-            used: 0,
-            limit: cost.visits,
-        };
-        let law = self.verify_bounded(&mut proof_meter)?;
-        if proof_meter.used != self.seal.visits {
-            return Err(Error::Binding);
-        }
-        let checked = self.validate_data(candidate, values, indices, bins, law, budget)?;
-        proof_meter
-            .used
-            .checked_add(
-                checked
-                    .checked_sub(candidate.produced_visits)
-                    .ok_or(Error::Receipt)?,
-            )
-            .ok_or(Error::Budget)
-    }
-    fn validate_data(
-        &self,
-        candidate: &BoundedCandidate,
-        values: &[u32],
-        indices: &[u32],
-        bins: u32,
-        law: Law,
-        budget: Budget,
-    ) -> Result<usize, Error> {
-        let n = usize::try_from(bins).map_err(|_| Error::Budget)?;
-        let cost = self.producing_cost(values.len(), indices.len(), n, budget)?;
-        let b = &candidate.binding;
-        let c = &candidate.candidate;
-        let h = if indices.len() <= 1 {
-            0
-        } else {
-            (usize::BITS - (indices.len() - 1).leading_zeros()) as usize
-        };
-        let sort_bound = indices
-            .len()
-            .checked_mul(h)
-            .and_then(|v| v.checked_mul(16))
-            .and_then(|v| v.checked_add(indices.len().checked_mul(4)?))
-            .ok_or(Error::Budget)?;
-        let expected_produced = (HEADER_VISITS / 2)
-            .checked_add(self.seal.visits)
-            .ok_or(Error::Budget)?
-            .checked_add(values.len())
-            .and_then(|v| v.checked_add(indices.len().checked_mul(10)?))
-            .and_then(|v| v.checked_add(n))
-            .and_then(|v| v.checked_add(c.sort_visits))
-            .ok_or(Error::Budget)?;
-        let mut meter = Meter {
-            used: candidate.produced_visits,
-            limit: cost.visits,
-        };
-        meter.visit(HEADER_VISITS / 2)?;
-        if b.source_hash != self.source_hash
-            || b.source_contract != self.source_contract
-            || b.span != self.loop_span
-            || b.law != law
-            || law != Law::WrappingSum
-            || b.revision != law.revision()
-            || b.bins != bins
-            || b.values_identity != values.as_ptr() as usize
-            || b.indices_identity != indices.as_ptr() as usize
-            || b.values.len() != values.len()
-            || b.indices.len() != indices.len()
-            || candidate.cost != cost
-            || candidate.proof_visits != self.seal.visits
-            || c.output.len() != n
-            || c.source_accesses.len() != indices.len()
-            || c.grouped_accesses.len() != indices.len()
-            || c.sort_visits > sort_bound
-            || candidate.produced_visits != expected_produced
-        {
-            return Err(Error::Receipt);
-        }
-        for (a, b) in values.iter().zip(&b.values) {
-            meter.visit(1)?;
-            if a != b {
-                return Err(Error::Receipt);
-            }
-        }
-        for (a, b) in indices.iter().zip(&b.indices) {
-            meter.visit(1)?;
-            if a != b {
-                return Err(Error::Receipt);
-            }
-        }
-        let mut sums = Vec::<u64>::new();
-        let mut seen = Vec::<u8>::new();
-        reserve(&mut sums, n)?;
-        reserve(&mut seen, indices.len())?;
-        for _ in 0..n {
-            meter.visit(1)?;
-            sums.push(0);
-        }
-        for _ in 0..indices.len() {
-            meter.visit(1)?;
-            seen.push(0);
-        }
-        for (ordinal, access) in c.source_accesses.iter().enumerate() {
-            meter.visit(5)?;
-            let bin = usize::try_from(*b.indices.get(ordinal).ok_or(Error::Receipt)?)
-                .map_err(|_| Error::Receipt)?;
-            if access.iteration != ordinal || access.bin != bin {
-                return Err(Error::Receipt);
-            }
-            let weight = *b.values.get(ordinal).ok_or(Error::Receipt)?;
-            let sum = sums.get_mut(bin).ok_or(Error::Receipt)?;
-            *sum = sum.checked_add(u64::from(weight)).ok_or(Error::Receipt)?;
-        }
-        let mut previous = None;
-        for access in &c.grouped_accesses {
-            meter.visit(4)?;
-            if previous.is_some_and(|bin| bin > access.bin) {
-                return Err(Error::Receipt);
-            }
-            previous = Some(access.bin);
-            let bin = usize::try_from(*b.indices.get(access.iteration).ok_or(Error::Receipt)?)
-                .map_err(|_| Error::Receipt)?;
-            let mark = seen.get_mut(access.iteration).ok_or(Error::Receipt)?;
-            if *mark != 0 || bin != access.bin || bin >= n {
-                return Err(Error::Receipt);
-            }
-            *mark = 1;
-        }
-        for mark in seen {
-            meter.visit(1)?;
-            if mark != 1 {
-                return Err(Error::Receipt);
-            }
-        }
-        for (&actual, sum) in c.output.iter().zip(sums) {
-            meter.visit(2)?;
-            if u64::from(actual) != sum % (1u64 << 32) {
-                return Err(Error::Receipt);
-            }
-        }
-        Ok(meter.used)
-    }
 }
 
 pub(super) fn role_bytes(checked: &CheckedProgram, entry: &str) -> Result<usize, Error> {
@@ -956,8 +670,7 @@ mod tests {
             }
             assert!(c.verified_mir().is_err(), "fault={fault}");
             assert!(
-                c.bounded_candidate(&[1], &[0], 1, Budget::default())
-                    .is_err(),
+                c.runtime_prepare(&[1], &[0], 1, &mut unmetered()).is_err(),
                 "fault={fault}"
             );
         }
@@ -1017,8 +730,7 @@ mod tests {
                 _ => c.seal.visits -= 1,
             }
             assert!(
-                c.bounded_candidate(&[1], &[0], 1, Budget::default())
-                    .is_err(),
+                c.runtime_prepare(&[1], &[0], 1, &mut unmetered()).is_err(),
                 "fault={fault}"
             );
         }
@@ -1031,6 +743,27 @@ mod tests {
     }
     fn stream(value: &impl fmt::Debug) -> usize {
         format!("{value:?}").len()
+    }
+    fn unmetered() -> Meter {
+        Meter {
+            used: 0,
+            limit: usize::MAX,
+        }
+    }
+    #[test]
+    fn issue_m4_05_gather_scatter_frontier_histogram_bounded_out_of_range_refuses() {
+        let c = contract();
+        for (values, indices, n, iteration) in [
+            (&[][..], &[0][..], 0, 0),
+            (&[0][..], &[1][..], 1, 0),
+            (&[0][..], &[0, 0][..], 1, 1),
+        ] {
+            assert_eq!(
+                c.runtime_prepare(values, indices, n, &mut unmetered())
+                    .err(),
+                Some(Error::Bounds { iteration })
+            );
+        }
     }
     /// Independent recomputation of the seal formula: source bytes + checked
     /// stream + recognition reserve + Net stream + Proof stream, where the
@@ -1118,8 +851,7 @@ mod tests {
             c.verify_bounded(&mut meter).unwrap();
             assert_ne!(meter.used, c.seal.visits, "delta={delta}");
             assert!(
-                c.bounded_candidate(&[1], &[0], 1, Budget::default())
-                    .is_err(),
+                c.runtime_prepare(&[1], &[0], 1, &mut unmetered()).is_err(),
                 "delta={delta}"
             );
         }
@@ -1138,56 +870,6 @@ mod tests {
         };
         assert_eq!(c.verify_bounded(&mut meter), Err(Error::Binding));
         assert_eq!(meter.used, c.source.len() + stream(&c.checked));
-    }
-    #[test]
-    fn issue_m4_05_gather_scatter_frontier_histogram_bounded_forged_receipts() {
-        // Zero weights keep the aggregate unchanged even if one contribution
-        // is duplicated or missing. All identities and extents otherwise match.
-        let values = [0u32, 0, 0, 0, 0];
-        let indices = [1u32, 0, 1, 0];
-        for fault in 0..24 {
-            let c = contract();
-            let mut p = c
-                .bounded_candidate(&values, &indices, 3, Budget::default())
-                .unwrap();
-            match fault {
-                0 => p.candidate.grouped_accesses[1] = p.candidate.grouped_accesses[0],
-                1 => {
-                    p.candidate.grouped_accesses.pop();
-                }
-                2 => p.candidate.grouped_accesses[0].iteration = 4,
-                3 => p.candidate.grouped_accesses[0].bin = 3,
-                4 => p.candidate.grouped_accesses.reverse(),
-                5 => p.candidate.source_accesses[1] = p.candidate.source_accesses[0],
-                6 => {
-                    p.candidate.source_accesses.pop();
-                }
-                7 => p.candidate.source_accesses[0].bin = 0,
-                8 => p.candidate.output[2] = 1,
-                9 => {
-                    p.candidate.output.pop();
-                }
-                10 => p.binding.law = Law::WrappingProduct,
-                11 => p.binding.revision = "stale",
-                12 => p.binding.source_hash[0] ^= 1,
-                13 => p.binding.source_contract[0] ^= 1,
-                14 => p.binding.values_identity ^= 1,
-                15 => p.binding.indices_identity ^= 1,
-                16 => p.binding.bins = 4,
-                17 => p.binding.values[4] = 1,
-                18 => p.cost.bytes += 1,
-                19 => p.produced_visits = usize::MAX,
-                20 => p.candidate.source_accesses[1].iteration = 0,
-                21 => p.candidate.grouped_accesses.last_mut().unwrap().bin = 2,
-                22 => p.produced_visits -= 1,
-                _ => p.candidate.sort_visits += 1,
-            }
-            assert!(
-                c.validate_bounded(&p, &values, &indices, 3, Budget::default())
-                    .is_err(),
-                "fault={fault}"
-            );
-        }
     }
     #[test]
     fn issue_m4_05_gather_scatter_frontier_histogram_bounded_sort_meter_and_limits() {
