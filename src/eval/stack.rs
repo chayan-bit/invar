@@ -7,6 +7,7 @@
 //! thread overflow (a process abort) before the 64-call `CALL_DEPTH_LIMIT`.
 //! Every root evaluation therefore runs on its own thread whose stack is sized
 //! from the documented limits, so the typed limit is always reached first.
+//! `mir_eval::observe` runs its recursive MIR interpreter on the same stack.
 
 use super::{EvalError, MAX_CALL_DEPTH, Observation, Value, ViewRange};
 use crate::numeric_contract::{F32Bits, F64Bits};

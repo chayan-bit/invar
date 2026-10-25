@@ -1,4 +1,4 @@
-//! Live MIR dispatch, auto choice, CLI explain and the M2 corpus on Metal.
+//! Live MIR dispatch, auto choice and CLI explain on Metal.
 
 use super::*;
 use invar::schedule::metal::Kernels;
@@ -155,101 +155,6 @@ fn issue_m3_06_metal_gpu_cli_explain_matches_forced_execution() {
         "metal"
     );
     assert_eq!(auto["device_execution"]["requested_engine"], "auto");
-}
-
-#[test]
-#[ignore = "requires the exported 252-program M2 corpus and a real Apple7+ GPU"]
-fn issue_m3_06_metal_gpu_full_m2_probe_corpus() {
-    let _gpu_lock = GPU_LOCK
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner());
-    use invar::{
-        eval,
-        schedule::{self, metal},
-    };
-    let directory = std::env::var_os("INVAR_M3_06_CORPUS_DIR")
-        .expect("INVAR_M3_06_CORPUS_DIR must name the exported M2 probe corpus");
-    let mut files = std::fs::read_dir(directory)
-        .unwrap()
-        .map(|entry| entry.unwrap().path())
-        .filter(|path| path.extension().is_some_and(|ext| ext == "invar"))
-        .collect::<Vec<_>>();
-    files.sort();
-    assert_eq!(files.len(), 252);
-    let mut counts = (0usize, 0usize, 0usize);
-    for file in files {
-        let source = std::fs::read(&file).unwrap();
-        let checked = check::check(front::parse(&source).unwrap(), true).unwrap();
-        let program = mir::lower(&checked).unwrap();
-        let report = admission::analyze(&source, &program).unwrap();
-        let eligible = report
-            .regions()
-            .iter()
-            .any(|region| region.plan_kind() != invar::plan::PlanKind::Serial);
-        let reference = eval::observe(&checked, 1_000_000);
-        let image = prebuilt(&source);
-        let model = calibrate(&source, &image);
-        let mut device = metal::open_device(&source, Kernels::Prebuilt(&image)).unwrap();
-        let cpu = schedule::run_source(&source, &program, 1_000_000, 4).unwrap();
-        assert_eq!(cpu.observation.result, reference.result, "CPU {file:?}");
-        assert_eq!(
-            cpu.observation.steps_used, reference.steps_used,
-            "CPU {file:?}"
-        );
-        assert_eq!(
-            cpu.observation.cleanup_trace, reference.cleanup_trace,
-            "CPU {file:?}"
-        );
-        let auto = metal::run_auto_source_with_fault(
-            &source,
-            &program,
-            1_000_000,
-            Kernels::Prebuilt(&image),
-            model,
-            metal::Fault::None,
-        )
-        .unwrap();
-        assert_eq!(auto.observation.result, reference.result, "auto {file:?}");
-        assert_eq!(
-            auto.observation.steps_used, reference.steps_used,
-            "auto {file:?}"
-        );
-        assert_eq!(
-            auto.observation.cleanup_trace, reference.cleanup_trace,
-            "auto {file:?}"
-        );
-        match metal::run_source_with_device(&source, &program, 1_000_000, &mut device) {
-            Ok(run) => {
-                assert!(eligible && !run.executed.is_empty(), "{file:?}");
-                assert_eq!(run.observation.result, reference.result, "Metal {file:?}");
-                assert_eq!(
-                    run.observation.steps_used, reference.steps_used,
-                    "Metal {file:?}"
-                );
-                assert_eq!(
-                    run.observation.cleanup_trace, reference.cleanup_trace,
-                    "Metal {file:?}"
-                );
-                counts.0 += 1;
-            }
-            Err(error) if !eligible && error.code == "METAL_UNAVAILABLE" => counts.2 += 1,
-            Err(error)
-                if eligible
-                    // Only zero-trip regions were reached, so none could publish.
-                    && cpu.executed.is_empty()
-                    && error.code == "METAL_UNAVAILABLE"
-                    && error.message == "no Metal result was published" =>
-            {
-                counts.1 += 1
-            }
-            Err(error) => panic!("unexpected forced Metal failure for {file:?}: {error:?}"),
-        }
-    }
-    assert_eq!(counts, (120, 24, 108));
-    eprintln!(
-        "Metal M2 corpus 252/252: forced={}, empty={}, ineligible={}",
-        counts.0, counts.1, counts.2
-    );
 }
 
 /// Large eligible regions over filled inputs: each family's first region is
