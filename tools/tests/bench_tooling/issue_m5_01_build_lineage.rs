@@ -907,10 +907,8 @@ fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
         .unwrap();
     let stdout = String::from_utf8_lossy(&child.stdout);
     assert!(
-        child.status.success(),
-        "FIFO receipt verification failed or blocked: exit {:?}; {stdout}",
-        child.status.code(),
+        child.status.success() && stdout.contains("running 1 test"),
+        "FIFO receipt check failed, blocked or ran no test (stale --exact?): exit {:?}; {stdout}",
+        child.status.code()
     );
-    // A stale `--exact` name runs zero tests and still exits 0.
-    assert!(stdout.contains("running 1 test"), "{stdout}");
 }
