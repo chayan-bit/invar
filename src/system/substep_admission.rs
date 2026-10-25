@@ -1,5 +1,5 @@
 //! Private source analysis for an opt-in policy whose native adapter is absent.
-//! The predictor/ledger below exist only in tests; no engine, ROS or ABI caller.
+//! No engine, ROS or ABI caller: export of a declared policy is refused.
 use std::collections::{BTreeMap, BTreeSet};
 
 use serde_json::Value;
@@ -12,33 +12,11 @@ use render_checks::{check_contacts, check_rendered, geometry_classes};
 
 pub(super) const TARGET: &str = "invar::mujoco_substep_admission_v1";
 const DT: f64 = 0.002;
-/// Steps per run (60 s at dt 0.002 s).
-#[cfg(test)]
-const MAX_STEPS: u64 = 30_000;
-/// Candidate evaluations per run, charged before prediction and never
-/// refunded. Every step charges at least one evaluation, so this cap equals
-/// `MAX_STEPS`: a full 30,000-step run admits ZERO rejected candidates, and a
-/// run with r rejected candidates reaches at most `30_000 - r` steps before the
-/// typed `CandidateBudget` stop. The cap is deliberately not raised; plans
-/// that need rejections must budget shorter runs.
-#[cfg(test)]
-const MAX_RUN_CANDIDATES: u64 = 30_000;
 /// The only `<option>` attributes the policy admits (values are checked
 /// separately); any other attribute (gravity, cone, impratio, tolerance,
 /// iterations, ...) and any child element (`<flag>`) is refused.
 const OPTION_ATTRIBUTES: [&str; 4] = ["integrator", "solver", "jacobian", "timestep"];
-#[cfg(test)]
-const MAX_CONTACTS: usize = 1024;
 const MAX_GEOMS: usize = 4096;
-// Conservative accounting for each bounded model evidence record, not WCET or
-// a native allocator measurement. Native frame/queue sizing remains unqualified.
-#[cfg(test)]
-const RECORD_BYTES: u64 = 65_536;
-
-#[cfg_attr(
-    not(test),
-    allow(dead_code, reason = "faults of the sealed test-only state machine")
-)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Fault {
     UncheckedSource,
@@ -49,20 +27,8 @@ enum Fault {
     ContactVisibility,
     ModelBinding,
     Identity,
-    Order,
-    Overflow,
     Nonfinite,
-    Bounds,
-    Contact,
     Capacity,
-    Credits,
-    NoAdmissibleFiniteGrid,
-    Predictor,
-    Fuel,
-    CandidateBudget,
-    PredictionMismatch,
-    Lifecycle,
-    Incomplete,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -90,8 +56,8 @@ impl Digest {
 // compensation generated on the arm bodies): their only change is `gravcomp="1"`
 // on every body of the robot subtree; the prior values were Panda d1dd553c and
 // UR5e 635a4b0d. Both models and asset sets were requalified after the 2026-10-23
-// strip of visual-only robot geoms and meshes; the Panda home capture was
-// regenerated (prior: Panda 1cc33d8a/5808f22e, UR5e 557f4a32/df5cbffd).
+// strip of visual-only robot geoms and meshes (prior: Panda 1cc33d8a/5808f22e,
+// UR5e 557f4a32/df5cbffd).
 const QUALIFIED_PANDA_MODEL_XML: &str =
     "c5e4c42605bd020aff70f43d7f8ef8a1c9924db69a00cf6fb60e119750dbf1a7";
 const QUALIFIED_PANDA_ASSETS: &str =
@@ -169,11 +135,7 @@ struct EngineProfile {
 }
 
 // A checked analysis result, private until a separately reviewed adapter exists.
-// Its identity/resource/state fields are consumed by the sealed test model only.
-#[cfg_attr(
-    not(test),
-    allow(dead_code, reason = "private analysis binding; no native adapter")
-)]
+#[allow(dead_code, reason = "private analysis binding; no native adapter")]
 #[derive(Debug)]
 struct Binding {
     layout: Layout,
@@ -693,11 +655,6 @@ fn bind(ir: &SystemIr) -> Result<Option<Binding>, Fault> {
         },
     }))
 }
-
-/// Complete-state *model* protocol. State owns all its modeled storage and has
-/// no interior sharing. This is neither an MjData clone nor native prediction.
-#[cfg(test)]
-mod model;
 
 #[cfg(test)]
 #[path = "../../tests/support/substep_admission_cases.rs"]
