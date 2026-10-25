@@ -897,7 +897,7 @@ fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
         .arg(std::env::current_exe().unwrap())
         .args([
             "--exact",
-            "issue_m5_01_build_lineage_fifo_receipt_fails_before_open",
+            "issue_m5_01_build_lineage::issue_m5_01_build_lineage_fifo_receipt_fails_before_open",
             "--nocapture",
         ])
         .env(CHILD_FLAG, &fixture.0)
@@ -905,10 +905,12 @@ fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
         .env("INVAR_LINEAGE_FIFO_REVISION", &request.expected_revision)
         .output()
         .unwrap();
+    let stdout = String::from_utf8_lossy(&child.stdout);
     assert!(
         child.status.success(),
-        "FIFO receipt verification failed or blocked: exit {:?}; {}",
+        "FIFO receipt verification failed or blocked: exit {:?}; {stdout}",
         child.status.code(),
-        String::from_utf8_lossy(&child.stdout)
     );
+    // A stale `--exact` name runs zero tests and still exits 0.
+    assert!(stdout.contains("running 1 test"), "{stdout}");
 }
