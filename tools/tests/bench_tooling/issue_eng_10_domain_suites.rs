@@ -3,6 +3,8 @@
 //! checks, runs on the reference evaluator, on `cpu-parallel` with 1, 2, 7 and
 //! 64 workers, and (with the `native` feature) on `native-serial`, and returns
 //! 0 only when its outputs equal the Rust oracle bit for bit.
+// `domains` reaches the binary-root hash module through `super::hash`.
+use crate::hash;
 use invar::{
     engine::{self, Engine},
     eval::{self, Value as EvalValue},
