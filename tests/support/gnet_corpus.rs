@@ -1,22 +1,8 @@
 //! Runnable source corpus shared by the GNET-02 corpus and native validations.
 
+use crate::corpus_sample::walk;
 use invar::{check, front};
-use std::path::{Path, PathBuf};
-
-fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-    let mut entries: Vec<_> = std::fs::read_dir(dir)
-        .unwrap()
-        .map(|entry| entry.unwrap().path())
-        .collect();
-    entries.sort();
-    for path in entries {
-        if path.is_dir() {
-            walk(&path, out);
-        } else if path.extension().is_some_and(|e| e == "inv") {
-            out.push(path);
-        }
-    }
-}
+use std::path::Path;
 
 /// Every source under tests/fixtures and examples that parses and checks as an
 /// executable program (system declarations, negative fixtures and libraries do not).

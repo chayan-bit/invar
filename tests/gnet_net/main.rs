@@ -2,6 +2,8 @@
 mod agree;
 #[path = "../support/gnet_corpus.rs"]
 mod corpus;
+#[path = "../../test-support/corpus_sample.rs"]
+mod corpus_sample;
 #[path = "../support/gnet_generator.rs"]
 mod generator;
 #[path = "../support/language_limits.rs"]

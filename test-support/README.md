@@ -82,7 +82,7 @@ compiled-child harness watchdogs.
 
 ## Corpus sample
 
-`corpus_sample.rs` walks the source corpus and picks the deterministic sample that pull-request CI runs for the exhaustive corpus sweeps: the device CPU-model corpus, the GNET v0.1 corpus denominators and the #54 selection-parity passes (which also keep every example, since the examples reach every family).
+`corpus_sample.rs` walks the source corpus and picks the deterministic sample that pull-request CI runs for the exhaustive corpus sweeps: the device CPU-model corpus, the GNET v0.1 corpus denominators, the GNET-02 native corpus (with one generated program in 8) and the #54 selection-parity passes (which also keep every example, since the examples reach every family).
 A program is kept when the 64-bit FNV-1a hash of its path falls in bucket 0 of 8, and each directory category the hash misses keeps its lowest-hash program, which the sampler asserts.
 Count floors written for the whole corpus are divided by 8 for the sample; agreement checks are unchanged.
 `INVAR_FULL_CORPUS=1` runs every program; `just test` and CI on pushes to main set it.
