@@ -88,27 +88,7 @@ fn compare_prefixes(p: &check::CheckedProgram, m: &mir::Program, expected: Optio
     } else {
         assert!(matches!(complete.result, Err(eval::EvalError::Trap { .. })));
     }
-    let net = general_net::Net::encode(m, general_net::Limits::default()).unwrap();
-    let proof = net.verify().unwrap();
-    for fuel in 0..=complete.steps_used + 1 {
-        let reference = eval::observe(p, fuel);
-        let extracted = mir_eval::observe(m, fuel);
-        let interaction = general_net::oracle::observe(
-            &net,
-            &proof,
-            general_net::oracle::Limits {
-                fuel,
-                ..general_net::oracle::Limits::default()
-            },
-        )
-        .unwrap();
-        for observed in [&extracted, &interaction.semantic] {
-            assert_eq!(observed.result, reference.result, "fuel={fuel}");
-            assert_eq!(observed.steps_used, reference.steps_used);
-            assert_eq!(observed.cleanup_trace, reference.cleanup_trace);
-        }
-    }
-    complete.steps_used + 2
+    crate::agree_on_every_prefix(p, m, complete.steps_used + 1, "frontier")
 }
 fn prefixes(s: &str, expected: Option<i32>) -> u64 {
     let p = checked(s);
@@ -589,8 +569,6 @@ fn issue_m4_05_gather_scatter_frontier_frozen_alias_negative_and_resource_prefix
             Err(Error::Exceeded(_))
         ));
         let m = c.verified_mir().unwrap();
-        let net = general_net::Net::encode(&m, general_net::Limits::default()).unwrap();
-        let proof = net.verify().unwrap();
         let complete = eval::observe(&p, 1000);
         assert!(matches!(
             complete.result,
@@ -600,25 +578,7 @@ fn issue_m4_05_gather_scatter_frontier_frozen_alias_negative_and_resource_prefix
             })
         ));
         assert!(complete.cleanup_trace.is_empty());
-        for fuel in 0..=complete.steps_used + 1 {
-            let reference = eval::observe(&p, fuel);
-            let extracted = mir_eval::observe(&m, fuel);
-            let interaction = general_net::oracle::observe(
-                &net,
-                &proof,
-                general_net::oracle::Limits {
-                    fuel,
-                    ..general_net::oracle::Limits::default()
-                },
-            )
-            .unwrap();
-            for actual in [&extracted, &interaction.semantic] {
-                assert_eq!(actual.result, reference.result);
-                assert_eq!(actual.steps_used, reference.steps_used);
-                assert_eq!(actual.cleanup_trace, reference.cleanup_trace);
-            }
-            count += 1;
-        }
+        count += crate::agree_on_every_prefix(&p, &m, complete.steps_used + 1, "frontier resource");
     }
     println!(
         "frontier demand/resource source/MIR/net fuel-prefix observations per engine: {count}"
