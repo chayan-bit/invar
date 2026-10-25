@@ -163,10 +163,6 @@ fn issue_m4_05_gather_scatter_frontier_histogram_duplicates_grouping_and_indepen
             let candidate = c.candidate(&values, &indices, n).unwrap();
             assert_eq!(candidate.output(), want);
             assert!(candidate.sort_visits() <= MAX_VISITS);
-            let bounded = c
-                .bounded_candidate(&values, &indices, n, Budget::default())
-                .unwrap();
-            assert_eq!(bounded.output(), want);
             assert_eq!(
                 candidate.source_accesses(),
                 indices
@@ -204,22 +200,10 @@ fn issue_m4_05_gather_scatter_frontier_histogram_duplicates_grouping_and_indepen
         }
         let want = expected(&weights, &indices, 4);
         assert_eq!(c.candidate(&weights, &indices, 4).unwrap().output(), want);
-        assert_eq!(
-            c.bounded_candidate(&weights, &indices, 4, Budget::default())
-                .unwrap()
-                .output(),
-            want
-        );
         count += prefixes(&source(HIST, &weights, &indices, 4, &want), false);
         weights.reverse();
         indices.reverse();
         assert_eq!(c.candidate(&weights, &indices, 4).unwrap().output(), want);
-        assert_eq!(
-            c.bounded_candidate(&weights, &indices, 4, Budget::default())
-                .unwrap()
-                .output(),
-            want
-        );
     }
     println!("histogram successful source/MIR/net fuel-prefix observations per engine: {count}");
 }
@@ -444,57 +428,10 @@ fn issue_m4_05_gather_scatter_frontier_histogram_bounded_independent_outputs_and
         (vec![0, 0, 7, 11, 19, 13], vec![2, 0, 2, 0, 2, 0], 4096),
         (vec![u32::MAX; 128], (0..128).map(|i| i % 17).collect(), 128),
     ] {
-        let p = c
-            .bounded_candidate(&values, &indices, n, Budget::default())
-            .unwrap();
+        let p = c.candidate(&values, &indices, n).unwrap();
         assert_eq!(p.output(), expected(&values, &indices, n));
-        assert_eq!(
-            p.output(),
-            c.candidate(&values, &indices, n).unwrap().output()
-        );
         assert_eq!(p.source_accesses().len(), indices.len());
         assert_eq!(p.grouped_accesses().len(), indices.len());
-        assert!(p.visits() <= p.cost().visits);
-        println!(
-            "bounded histogram A={} I={} N={n}: reserved_bytes={} reserved_visits={} measured_visits={} sort_visits={} proof_visits={}",
-            values.len(),
-            indices.len(),
-            p.cost().bytes,
-            p.cost().visits,
-            p.visits(),
-            p.sort_visits(),
-            p.proof_visits()
-        );
-        assert!(
-            c.validate_bounded(&p, &values, &indices, n, Budget::default())
-                .unwrap()
-                <= p.cost().visits
-        );
-        let budget = Budget {
-            bytes: p.cost().bytes,
-            visits: p.cost().visits,
-        };
-        assert!(c.bounded_candidate(&values, &indices, n, budget).is_ok());
-        for denied in [
-            Budget {
-                bytes: budget.bytes - 1,
-                ..budget
-            },
-            Budget {
-                visits: budget.visits - 1,
-                ..budget
-            },
-        ] {
-            assert_eq!(
-                c.bounded_candidate(&values, &indices, n, denied)
-                    .unwrap_err(),
-                Error::Budget
-            );
-            assert_eq!(
-                c.validate_bounded(&p, &values, &indices, n, denied),
-                Err(Error::Budget)
-            );
-        }
     }
     for i in 0..=128usize {
         let h = if i <= 1 {
@@ -515,26 +452,8 @@ fn issue_m4_05_gather_scatter_frontier_histogram_bounded_independent_outputs_and
     assert_eq!(maximum.visits, 59392); // Data-only proposal plus fixed headers.
     let weights = vec![u32::MAX; 4096];
     let indices = vec![0; 128];
-    // Full proof work exceeds the frozen cap at the originally proposed
-    // simultaneous maximum. Preserve cap and ordinary source fallback.
-    assert_eq!(
-        c.bounded_candidate(&weights, &indices, 4096, Budget::default())
-            .unwrap_err(),
-        Error::Budget
-    );
-    assert_eq!(
-        c.bounded_candidate(
-            &weights,
-            &indices,
-            4096,
-            Budget {
-                bytes: usize::MAX,
-                visits: usize::MAX
-            }
-        )
-        .unwrap_err(),
-        Error::Budget
-    );
+    // Full proof work exceeds the frozen cap at this simultaneous maximum
+    // (runtime_cost refuses it); the ordinary source candidate still runs.
     assert_eq!(
         c.candidate(&weights, &indices, 4096).unwrap().output(),
         expected(&weights, &indices, 4096)
@@ -554,51 +473,10 @@ fn issue_m4_05_gather_scatter_frontier_histogram_bounded_independent_outputs_and
             "{a} {i} {n}"
         );
     }
-    assert_eq!(
-        c.bounded_candidate(&vec![0; 2000], &vec![0; 2000], 1, Budget::default())
-            .unwrap_err(),
-        Error::Budget
-    );
-    for (values, indices, n, iteration) in [
-        (vec![], vec![0], 0, 0),
-        (vec![0], vec![1], 1, 0),
-        (vec![0], vec![0, 0], 1, 1),
-    ] {
-        assert_eq!(
-            c.bounded_candidate(&values, &indices, n, Budget::default())
-                .unwrap_err(),
-            Error::Bounds { iteration }
-        );
-    }
 }
 
 #[test]
-fn issue_m4_05_gather_scatter_frontier_histogram_bounded_input_binding_and_alias() {
-    let c = contract(HIST);
-    let values = [0u32, 0, 0, 99];
-    let indices = [0u32, 0, 0];
-    let p = c
-        .bounded_candidate(&values, &indices, 1, Budget::default())
-        .unwrap();
-    let replacement = values.to_vec();
-    assert_eq!(
-        c.validate_bounded(&p, &replacement, &indices, 1, Budget::default()),
-        Err(Error::Receipt)
-    );
-    let changed_source = HIST.replace("return out;", "return move out;");
-    assert_eq!(
-        contract(&changed_source).validate_bounded(&p, &values, &indices, 1, Budget::default()),
-        Err(Error::Receipt)
-    );
-    let shared = [1u32, 0, 1];
-    let aliased = c
-        .bounded_candidate(&shared, &shared, 2, Budget::default())
-        .unwrap();
-    assert_eq!(aliased.output(), [0, 2]);
-    assert!(
-        c.validate_bounded(&aliased, &shared, &shared, 2, Budget::default())
-            .is_ok()
-    );
+fn issue_m4_05_gather_scatter_frontier_histogram_strict_float_refuses() {
     let strict_float = "fn hist(a: read Array<f32>, ix: read Array<u32>, n: u32) -> Array<f32> { var out=filled_f32(n,0.0); for i in 0u32..len(ix) { out[ix[i]]=out[ix[i]]+a[i]; } return out; }";
     assert!(matches!(
         Contract::from_checked(strict_float.as_bytes(), &checked(strict_float), "hist"),
