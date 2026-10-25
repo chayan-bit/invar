@@ -1,4 +1,4 @@
-//! Live CUDA fused maps; the CPU graph and verifier tests stay in `tests/issue_m3_03_cuda_fused_maps.rs`.
+//! Live CUDA fused maps; the CPU graph and verifier tests stay in `tests/device/issue_m3_03_cuda_fused_maps.rs`.
 use invar::{admission, device_ir};
 use invar_device::{Capabilities, Error as VerifyError, Layout, Provenance};
 

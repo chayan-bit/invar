@@ -1,4 +1,4 @@
-//! Ordinary-source segmented publication on a real CUDA device; the CLI refusal test stays in `tests/issue_a1_segmented.rs`.
+//! Ordinary-source segmented publication on a real CUDA device; the CLI refusal test stays in `tests/device/issue_a1_segmented.rs`.
 use invar::mir_eval;
 use std::path::Path;
 

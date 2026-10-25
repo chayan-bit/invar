@@ -50,8 +50,7 @@ fn p8_certificate_boundary_and_word_layout() {
     }
 }
 
-#[path = "support/law_collective.rs"]
-mod law_support;
+use crate::law_support;
 
 #[test]
 fn p8_l10_l11_refusal_selects_executable_native_fallback() {

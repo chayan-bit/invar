@@ -1,4 +1,4 @@
-//! Owning-device tensor dispatch tests on CUDA; the ordinary CLI tests stay in `tests/a1_tensor_dispatch.rs`.
+//! Owning-device tensor dispatch tests on CUDA; the ordinary CLI tests stay in `tests/device/a1_tensor_dispatch.rs`.
 use invar::{check, front, mir_eval};
 use std::process::Command;
 

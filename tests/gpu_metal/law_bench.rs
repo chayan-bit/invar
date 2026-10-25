@@ -1,4 +1,4 @@
-//! Physical Metal law-collective pilot, sessions, warm path and calibration; the CPU statistics stay in `tests/net_law_collective_bench.rs`.
+//! Physical Metal law-collective pilot, sessions, warm path and calibration; the CPU statistics stay in `tests/law_collective/net_law_collective_bench.rs`.
 #[path = "../support/law_bench.rs"]
 mod bench;
 #[path = "../support/law_collective.rs"]

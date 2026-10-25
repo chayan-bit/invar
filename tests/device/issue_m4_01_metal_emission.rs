@@ -4,9 +4,9 @@
 //! `tests/gpu_metal/m4_01.rs`.
 #![forbid(unsafe_code)]
 
-#[path = "issue_m4_01_device/corpus.rs"]
+#[path = "../issue_m4_01_device/corpus.rs"]
 mod corpus;
-#[path = "issue_m4_01_device/ops.rs"]
+#[path = "../issue_m4_01_device/ops.rs"]
 mod ops;
 
 use corpus::MAT;
