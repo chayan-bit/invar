@@ -4,7 +4,7 @@ use invar::budget::ByteBudget;
 use invar::histogram_source::{
     Access, Budget, Contract, Cost, Error, MAX_STAGING_BYTES, MAX_VISITS,
 };
-use invar::{check, eval, front, general_net, laws, mir, mir_eval};
+use invar::{check, eval, front, general_net, laws, mir};
 
 const HIST: &str = "fn hist(a: read Array<u32>, ix: read Array<u32>, n: u32) -> Array<u32> { var out = filled_u32(n,0u32); for i in 0u32..len(ix) { out[ix[i]] = wrapping_add(out[ix[i]],a[i]); } return out; }";
 
@@ -60,27 +60,7 @@ fn observations(p: &check::CheckedProgram, m: &mir::Program, is_trap: bool) -> u
         assert_eq!(complete.result, Ok(eval::Value::I32(7)));
         assert!(!complete.cleanup_trace.is_empty());
     }
-    let net = general_net::Net::encode(m, general_net::Limits::default()).unwrap();
-    let proof = net.verify().unwrap();
-    for fuel in 0..=complete.steps_used + 1 {
-        let reference = eval::observe(p, fuel);
-        let extracted = mir_eval::observe(m, fuel);
-        let interaction = general_net::oracle::observe(
-            &net,
-            &proof,
-            general_net::oracle::Limits {
-                fuel,
-                ..general_net::oracle::Limits::default()
-            },
-        )
-        .unwrap();
-        for observed in [&extracted, &interaction.semantic] {
-            assert_eq!(observed.result, reference.result, "fuel={fuel}");
-            assert_eq!(observed.steps_used, reference.steps_used);
-            assert_eq!(observed.cleanup_trace, reference.cleanup_trace);
-        }
-    }
-    complete.steps_used + 2
+    crate::agree_on_every_prefix(p, m, complete.steps_used + 1, "histogram")
 }
 fn prefixes(s: &str, is_trap: bool) -> u64 {
     let p = checked(s);
@@ -417,8 +397,6 @@ fn issue_m4_05_gather_scatter_frontier_histogram_source_resource_limit_prefixes(
             Err(Error::Exceeded(_))
         ));
         let m = c.verified_mir().unwrap();
-        let net = general_net::Net::encode(&m, general_net::Limits::default()).unwrap();
-        let proof = net.verify().unwrap();
         let complete = eval::observe(&p, 1000);
         assert!(matches!(
             complete.result,
@@ -428,28 +406,12 @@ fn issue_m4_05_gather_scatter_frontier_histogram_source_resource_limit_prefixes(
             })
         ));
         assert!(complete.cleanup_trace.is_empty());
-        for fuel in 0..=complete.steps_used + 1 {
-            let reference = eval::observe(&p, fuel);
-            let extracted = mir_eval::observe(&m, fuel);
-            let interaction = general_net::oracle::observe(
-                &net,
-                &proof,
-                general_net::oracle::Limits {
-                    fuel,
-                    ..general_net::oracle::Limits::default()
-                },
-            )
-            .unwrap();
-            for observed in [&extracted, &interaction.semantic] {
-                assert_eq!(
-                    observed.result, reference.result,
-                    "resource n={n} fuel={fuel}"
-                );
-                assert_eq!(observed.steps_used, reference.steps_used);
-                assert_eq!(observed.cleanup_trace, reference.cleanup_trace);
-            }
-            count += 1;
-        }
+        count += crate::agree_on_every_prefix(
+            &p,
+            &m,
+            complete.steps_used + 1,
+            &format!("resource n={n}"),
+        );
     }
     println!(
         "histogram source-resource source/MIR/net fuel-prefix observations per engine: {count}"

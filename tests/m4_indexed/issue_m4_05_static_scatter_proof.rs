@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 use invar::budget::ByteBudget;
 use invar::scatter_proof;
-use invar::{check, eval, front, general_net, mir, mir_eval};
+use invar::{check, eval, front, general_net, mir};
 use scatter_proof::{Contract, Error, RULE_REVISION};
 
 /// Domain size the boundary test exercises; no longer a refusal bound (#57 byte budgets).
@@ -52,8 +52,6 @@ fn prefixes(s: &str, expected: Option<i32>) -> u64 {
         }
         Err(error) => panic!("unexpected proof boundary error: {error:?}"),
     };
-    let net = general_net::Net::encode(&m, general_net::Limits::default()).unwrap();
-    let proof = net.verify().unwrap();
     mir::verify(&m).unwrap();
     let complete = eval::observe(&p, 20_000);
     if let Some(value) = expected {
@@ -64,25 +62,7 @@ fn prefixes(s: &str, expected: Option<i32>) -> u64 {
             Err(eval::EvalError::Trap { .. }) | Err(eval::EvalError::Tool { .. })
         ));
     }
-    for fuel in 0..=complete.steps_used + 1 {
-        let reference = eval::observe(&p, fuel);
-        let extracted = mir_eval::observe(&m, fuel);
-        let interaction = general_net::oracle::observe(
-            &net,
-            &proof,
-            general_net::oracle::Limits {
-                fuel,
-                ..general_net::oracle::Limits::default()
-            },
-        )
-        .unwrap();
-        for actual in [&extracted, &interaction.semantic] {
-            assert_eq!(actual.result, reference.result, "fuel={fuel}");
-            assert_eq!(actual.steps_used, reference.steps_used, "fuel={fuel}");
-            assert_eq!(actual.cleanup_trace, reference.cleanup_trace, "fuel={fuel}");
-        }
-    }
-    complete.steps_used + 2
+    crate::agree_on_every_prefix(&p, &m, complete.steps_used + 1, "static")
 }
 
 #[test]

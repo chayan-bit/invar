@@ -54,19 +54,22 @@ pub(super) fn blocks(
 #[cfg(test)]
 mod tests {
     #[test]
-    fn logical_cursors_keep_the_owned_numeric_host_contract() {
+    fn pruned_owned_numeric_cuda_continuation_compiles() {
         let source = b"fn run(a:f32,n:u32)->f32{var xs:Array<f32> = filled_f32(n+1u32,a);xs[0u32]=xs[0u32]*a+a;return xs[0u32];}fn main()->i32{return 0;}";
-        let plan = crate::general_net::cuda_owned_numeric_host::Plan::from_source(
+        let artifact = crate::general_net::provenance::compile_resumable_owned_numeric(
             source,
             "run",
+            super::super::Target::Cuda,
             Default::default(),
             super::super::OwnedLimits {
                 elements: 64,
                 allocations: 16,
                 cleanup_events: 32,
             },
-        );
-        assert!(plan.is_ok(), "stable cursor map refused: {:?}", plan.err());
+        )
+        .unwrap();
+        assert_eq!(artifact.artifact().abi_version(), 12);
+        assert!(artifact.artifact().owned_numeric_cuda_facts().is_ok());
     }
 
     /// The L1-04 foreign-oracle program, inline: compiler sources must not name

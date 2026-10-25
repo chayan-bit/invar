@@ -19,7 +19,6 @@ mod compile_mode;
 mod device;
 mod execution;
 mod owned_numeric_cuda;
-pub(crate) mod owned_numeric_execution;
 use compile_mode::{Mode, compile_mode, task_fields};
 pub use device::{DeviceBuffers, DeviceCheckpoint, DeviceExecution, FenceBackend};
 use execution::FrozenResult;

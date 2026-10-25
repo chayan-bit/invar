@@ -2,8 +2,6 @@
 
 pub mod planner;
 
-pub const VOCABULARY: &str = include_str!("../lib/std/robotics/vocabulary.inv");
-pub const PLANNER_VOCABULARY_V1: &str = include_str!("../lib/std/robotics/planner-v1.inv");
 pub const ROS_MAPPING_JSON: &str = include_str!("../lib/std/robotics/ros-mapping-v1.json");
 const C_HEADER: &str = include_str!("../lib/std/robotics/layout-header-v1.h.in");
 

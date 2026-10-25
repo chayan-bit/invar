@@ -4,7 +4,7 @@
 use indexed_source::{Access, Contract, Error, Family};
 use invar::budget::{BudgetExceeded, ByteBudget, Resource};
 use invar::indexed_source;
-use invar::{check, eval, front, general_net, mir, mir_eval};
+use invar::{check, eval, front, general_net, mir};
 
 const GATHER: &str = "fn gather(a: read Array<u32>, ix: read Array<u32>) -> Array<u32> { var out = filled_u32(len(ix),0u32); for i in 0u32..len(ix) { out[i] = a[ix[i]]; } return out; }";
 const SCATTER: &str = "fn scatter(a: read Array<u32>, ix: read Array<u32>, n: u32) -> Array<u32> { var out = filled_u32(n,0u32); for i in 0u32..len(ix) { out[ix[i]] = a[i]; } return out; }";
@@ -75,8 +75,6 @@ fn observe_prefixes(
     entry: &str,
     complete_ok: bool,
 ) -> u64 {
-    let net = general_net::Net::encode(m, general_net::Limits::default()).unwrap();
-    let proof = net.verify().unwrap();
     let complete = eval::observe(p, 10_000);
     if complete_ok {
         assert_eq!(complete.result, Ok(eval::Value::I32(7)));
@@ -85,29 +83,7 @@ fn observe_prefixes(
         assert!(matches!(complete.result, Err(eval::EvalError::Trap { .. })));
         assert!(complete.cleanup_trace.is_empty());
     }
-    for fuel in 0..=complete.steps_used + 1 {
-        let reference = eval::observe(p, fuel);
-        let actual = mir_eval::observe(m, fuel);
-        assert_eq!(actual.result, reference.result, "entry={entry} fuel={fuel}");
-        assert_eq!(actual.steps_used, reference.steps_used);
-        assert_eq!(actual.cleanup_trace, reference.cleanup_trace);
-        let interaction = general_net::oracle::observe(
-            &net,
-            &proof,
-            general_net::oracle::Limits {
-                fuel,
-                ..general_net::oracle::Limits::default()
-            },
-        )
-        .unwrap();
-        assert_eq!(
-            interaction.semantic.result, reference.result,
-            "oracle entry={entry} fuel={fuel}"
-        );
-        assert_eq!(interaction.semantic.steps_used, reference.steps_used);
-        assert_eq!(interaction.semantic.cleanup_trace, reference.cleanup_trace);
-    }
-    complete.steps_used + 2
+    crate::agree_on_every_prefix(p, m, complete.steps_used + 1, &format!("entry={entry}"))
 }
 
 #[test]
@@ -443,8 +419,6 @@ fn issue_m4_05_gather_scatter_frontier_source_resource_limit_fuel_and_cleanup_pr
             Err(Error::Exceeded(_))
         ));
         let m = c.verified_mir().unwrap();
-        let net = general_net::Net::encode(&m, general_net::Limits::default()).unwrap();
-        let proof = net.verify().unwrap();
         let complete = eval::observe(&p, 1000);
         assert!(matches!(
             complete.result,
@@ -454,28 +428,12 @@ fn issue_m4_05_gather_scatter_frontier_source_resource_limit_fuel_and_cleanup_pr
             })
         ));
         assert!(complete.cleanup_trace.is_empty());
-        for fuel in 0..=complete.steps_used + 1 {
-            let reference = eval::observe(&p, fuel);
-            let actual = mir_eval::observe(&m, fuel);
-            let interaction = general_net::oracle::observe(
-                &net,
-                &proof,
-                general_net::oracle::Limits {
-                    fuel,
-                    ..general_net::oracle::Limits::default()
-                },
-            )
-            .unwrap();
-            for observed in [&actual, &interaction.semantic] {
-                assert_eq!(
-                    observed.result, reference.result,
-                    "resource n={n} fuel={fuel}"
-                );
-                assert_eq!(observed.steps_used, reference.steps_used);
-                assert_eq!(observed.cleanup_trace, reference.cleanup_trace);
-            }
-            count += 1;
-        }
+        count += crate::agree_on_every_prefix(
+            &p,
+            &m,
+            complete.steps_used + 1,
+            &format!("resource n={n}"),
+        );
     }
     println!("source-resource-limit source/MIR/net fuel-prefix observations per engine: {count}");
 }

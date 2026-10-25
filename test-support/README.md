@@ -56,11 +56,8 @@ Sweep of compiled/process test deadlines:
 - `crates/invar-cuda/src/cuda/{floating_tests,transpose_tests}.rs`: mock compiler
   children expecting success/diagnostics/caps scale; exact 50 ms typed timeout
   requests stay fixed.
-- `tests/support/cuda_owned_numeric_host_cpu_model.rs`: parent observation waits
-  scale; the backend's real compile/epoch resource contracts stay fixed.
 - `tests/support/owner_return_cpu.rs`: nested timeout and parent watchdog agree;
   CPU/address-space/file/descriptor/core limits remain unchanged.
-- `src/general_net/owned_numeric_task.rs`: only its `cfg(test)` compiler/driver.
 - `src/native.rs`: only the `cfg(test)` elapsed-time assertions around child
   output/draining and executable-writer checks; the real 30-second process
   watchdog and 250 ms executable-writer retry budget remain unchanged.
@@ -74,7 +71,7 @@ Sweep of compiled/process test deadlines:
   fixture compile and fresh-process scalar-artifact checks consume the same knob.
 
 Product limits are intentionally unchanged: `src/native.rs`,
-`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
+`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_owned_resume_host}`,
 `src/gnet_device_command.rs`, `tools/bench/{baseline,build_lineage,general_net_cli}.rs`,
 and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
 real contract; GPU completion polling and semantic timing fixtures are not
