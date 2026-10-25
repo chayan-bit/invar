@@ -2,10 +2,10 @@
 #![cfg(unix)]
 
 #[allow(dead_code)]
-#[path = "../../test-support/child_deadline.rs"]
+#[path = "../../../test-support/child_deadline.rs"]
 mod child_deadline;
 
-#[path = "../bench/build_lineage.rs"]
+#[path = "../../bench/build_lineage.rs"]
 mod build_lineage;
 
 use build_lineage::{BuildRequest, Error, Invocation, build, verify};

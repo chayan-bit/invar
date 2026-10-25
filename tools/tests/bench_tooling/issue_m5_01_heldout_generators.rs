@@ -1,11 +1,6 @@
 #![forbid(unsafe_code)]
+use crate::{corpus, hash, heldout};
 use invar::{check, front};
-#[path = "../bench/corpus.rs"]
-mod corpus;
-#[path = "../bench/hash.rs"]
-mod hash;
-#[path = "../bench/heldout.rs"]
-mod heldout;
 use serde_json::{Value, json};
 use std::{fs, process::Command};
 
@@ -132,7 +127,7 @@ fn determinism_coverage_and_proposal_contract() {
     assert_eq!(a["held_out_sha256"], corpus::held_out_hash(&a).unwrap());
     assert_eq!(
         corpus::generate().unwrap(),
-        serde_json::from_slice::<Value>(include_bytes!("../bench/corpus-v1.json")).unwrap()
+        serde_json::from_slice::<Value>(include_bytes!("../../bench/corpus-v1.json")).unwrap()
     );
 }
 

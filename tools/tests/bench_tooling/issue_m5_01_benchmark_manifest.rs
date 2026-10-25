@@ -79,7 +79,7 @@ fn issue_m5_01_v2_byte_accounting_proposal_preserves_v1_and_corpus() {
     let proposal_raw = fs::read(&proposal_path).unwrap();
     assert_eq!(
         proposal_raw,
-        include_bytes!("../bench/manifest-v2-proposal.json")
+        include_bytes!("../../bench/manifest-v2-proposal.json")
     );
     let proposal: Value = serde_json::from_slice(&proposal_raw).unwrap();
     assert_eq!(proposal["schema_version"], 2);
@@ -154,10 +154,10 @@ fn issue_m5_01_benchmark_manifest_provisional_families_are_unavailable_and_never
     let dir = fixture();
     let path = dir.join("bench/manifest-v1.json");
     let raw = fs::read(&path).unwrap();
-    assert_eq!(raw, include_bytes!("../bench/manifest-v1.json"));
+    assert_eq!(raw, include_bytes!("../../bench/manifest-v1.json"));
     let manifest: Value = serde_json::from_slice(&raw).unwrap();
     let v2: Value =
-        serde_json::from_slice(include_bytes!("../bench/manifest-v2-proposal.json")).unwrap();
+        serde_json::from_slice(include_bytes!("../../bench/manifest-v2-proposal.json")).unwrap();
     assert_eq!(manifest["freeze_status"], "provisional-pre-m4-01");
     assert_eq!(manifest["held_out_sha256"], v2["held_out_sha256"]);
     assert_eq!(manifest["held_out_freeze"]["status"], "deferred");

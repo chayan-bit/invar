@@ -1,8 +1,7 @@
 //! M3-03 fresh-process forced CUDA timing control (the in-process fused-map suite is
 //! `tests/gpu_cuda/m3_03.rs` in the `invar` package).
 #![cfg(feature = "cuda")]
-#[path = "support/invar_bin.rs"]
-mod invar_bin;
+use crate::invar_bin;
 use std::{process::Command, time::Instant};
 
 const CHAIN: &str = "fn main() -> i32 { \

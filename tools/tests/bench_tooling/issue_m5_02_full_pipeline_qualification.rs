@@ -1,8 +1,6 @@
 #![forbid(unsafe_code)]
-#[path = "../qualification/mod.rs"]
-mod qualification;
+use crate::qualification;
 use invar::{check, front, mir, schedule};
-pub use invar::{general_net, hex, layout_contract, numeric_contract, tensor_cache};
 use serde_json::{Value, json};
 use std::{fs, process::Command, sync::atomic::Ordering};
 

@@ -8,16 +8,8 @@ use invar::{
     eval::{self, Value as EvalValue},
 };
 use std::collections::BTreeMap;
-#[path = "../bench/corpus.rs"]
-#[allow(dead_code)]
-mod corpus;
-#[path = "../bench/domains/mod.rs"]
+#[path = "../../bench/domains/mod.rs"]
 mod domains;
-#[path = "../bench/hash.rs"]
-mod hash;
-#[path = "../bench/heldout.rs"]
-#[allow(dead_code)]
-mod heldout;
 use serde_json::{Value, json};
 
 const FUEL: u64 = 400_000_000;
@@ -254,7 +246,7 @@ fn issue_eng_10_manifest_validation_refuses_every_tampering() {
     frozen["freeze_status"] = json!("frozen");
     assert!(domains::manifest::validate(&frozen).is_err());
     // The domain suites never enter the M5-01 held-out hash.
-    let v1: Value = serde_json::from_str(include_str!("../bench/manifest-v1.json")).unwrap();
+    let v1: Value = serde_json::from_str(include_str!("../../bench/manifest-v1.json")).unwrap();
     assert_eq!(good["v1_held_out_sha256"], v1["held_out_sha256"]);
 }
 

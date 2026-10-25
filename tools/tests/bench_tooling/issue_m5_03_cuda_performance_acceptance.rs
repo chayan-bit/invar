@@ -1,7 +1,6 @@
-#[path = "../bench/acceptance.rs"]
+#[path = "../../bench/acceptance.rs"]
 mod acceptance;
-#[path = "../bench/hash.rs"]
-mod hash;
+use crate::hash;
 use serde_json::{Value, json};
 
 // All timings and hosts here are synthetic, with no device execution or speed claim.
