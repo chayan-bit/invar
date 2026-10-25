@@ -252,10 +252,9 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
         "E0616",
         "E0624",
         "UNCODED",
-        // Environment variable names passed to the ABI12 S2 CPU model's
-        // subprocess (src/general_net/cuda_owned_numeric_host/cpu.rs).
+        // Environment variable the ABI11 numeric host reads to find its
+        // compiler (src/general_net/numeric_owned_resume_host.rs).
         "PATH",
-        "TMPDIR",
         // Address-space macro the MSL emitter writes into generated Metal
         // source (crates/invar-math/src/msl.rs), not a diagnostic code.
         "INVAR_CONSTANT",

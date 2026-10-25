@@ -241,7 +241,7 @@ framing, watchdogs and evidence scope are documented in the binding evidence.
 ### Task phases (decisions D1 to D5, 2026-10-15)
 
 The generated MuJoCo model compensates gravity on the arm (D1): `invar system gen mjcf` and every model built from a cell set `gravcomp="1"` on each body of the robot subtree (an existing `1` is kept, any other value is refused with S1607), and never on cell objects or the mount.
-This changed both rendered model identities, which the substep policy requalified (Panda d1dd553c to 1cc33d8a, UR5e 635a4b0d to 557f4a32; the only rendered difference is that attribute), and the captured Panda home-hold replay was recaptured from the new model.
+This changed both rendered model identities, which the substep policy requalified (Panda d1dd553c to 1cc33d8a, UR5e 635a4b0d to 557f4a32; the only rendered difference is that attribute).
 The source gripper hold 253 stays violation-free with gravity compensation; the hold selector now also admits 254.
 
 Every motion is planned; there are no scripted segments.

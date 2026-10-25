@@ -1,6 +1,6 @@
 //! CLI refusals for forced engines on a program with no device candidate; device runs are in `tests/gpu_{cuda,metal}/a1_segmented.rs`.
 
-#[path = "support/a1_segmented_common.rs"]
+#[path = "../support/a1_segmented_common.rs"]
 mod a1_segmented_common;
 
 #[cfg(not(feature = "cuda"))]

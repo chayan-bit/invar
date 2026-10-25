@@ -1,4 +1,4 @@
-//! Live CUDA generated map and verifier rejections; the CPU verifier tests stay in `tests/issue_m3_02_device_ir_verifier.rs`.
+//! Live CUDA generated map and verifier rejections; the CPU verifier tests stay in `tests/device/issue_m3_02_device_ir_verifier.rs`.
 use invar::{check::check, front::parse, mir};
 use invar_device::Capabilities;
 

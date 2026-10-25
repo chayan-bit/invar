@@ -1,10 +1,9 @@
 #![forbid(unsafe_code)]
 
-#[path = "support/law_bench.rs"]
+#[path = "../support/law_bench.rs"]
 mod bench;
 
-#[path = "support/law_collective.rs"]
-mod support;
+use crate::law_support as support;
 
 fn verdict(ratio: f64, u95: f64) -> &'static str {
     if ratio > 1.0 {

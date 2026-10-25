@@ -1,7 +1,7 @@
 use invar::{check::check, front::parse, mir};
 use invar_device::Capabilities;
 
-#[path = "support/m3_02_cases.rs"]
+#[path = "../support/m3_02_cases.rs"]
 mod m3_02_cases;
 use m3_02_cases::{admitted, malformed_cases, observed_source, provenance};
 

@@ -4,7 +4,7 @@
 use a1_grid_common::{FUEL, fixtures, parity, program, sources};
 use invar::{mir_eval, schedule};
 
-#[path = "support/a1_grid_common.rs"]
+#[path = "../support/a1_grid_common.rs"]
 mod a1_grid_common;
 
 #[test]

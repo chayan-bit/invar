@@ -5,11 +5,11 @@ use invar::{
 use invar_device::{Capabilities, Provenance};
 use std::process::Command;
 
-#[path = "support/m3_05_programs.rs"]
+#[path = "../support/m3_05_programs.rs"]
 mod m3_05_programs;
 use m3_05_programs::{PAIR, REVERSED_ZIP};
 
-#[path = "support/scratch.rs"]
+#[path = "../support/scratch.rs"]
 mod scratch;
 
 #[test]

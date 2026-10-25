@@ -1,7 +1,7 @@
 use invar::{admission, device_ir, eval, mir_eval, plan::PlanKind, schedule};
 use invar_device::{Capabilities, DagOp, Error as VerifyError, Layout, Provenance};
 
-#[path = "support/m3_03_programs.rs"]
+#[path = "../support/m3_03_programs.rs"]
 mod m3_03_programs;
 use m3_03_programs::{CHAIN, LARGE_CHAIN, ZIP_DAG, checked_program};
 

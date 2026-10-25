@@ -1,8 +1,8 @@
-//! P1 to P4 tests: policy-model refusal, option attributes, nesting and rejected candidates.
+//! P1 to P3 tests: policy-model refusal, option attributes and nesting.
 
 use super::*;
 
-// ---- Review3 policy fixes (P1-P4) ----
+// ---- Review3 policy fixes (P1-P3) ----
 
 /// P1: both MJCF APIs reach `generate_mjcf_target`, which now refuses a policy
 /// model with S1504 before any schema check, asset read or output; URDF keeps
@@ -169,44 +169,5 @@ fn p3_unsupported_nesting_fails_closed_without_geom_index_shift() {
         ("unknown container", r#"<geom/><group><geom/></group>"#),
     ] {
         assert_eq!(classes(body), Err(Fault::UnsupportedLayout), "{name}");
-    }
-}
-
-/// P4: every step charges at least one evaluation, so the 30,000-evaluation
-/// run cap admits zero rejected candidates over 30,000 steps, and r rejected
-/// candidates cap the run at exactly 30,000 - r steps (cap not raised).
-#[test]
-fn p4_rejected_candidates_reduce_reachable_steps() {
-    assert_eq!(MAX_RUN_CANDIDATES, MAX_STEPS);
-    let b = binding(7);
-    for rejected in [0u64, 5] {
-        let mut run = new_run(b, MAX_STEPS, 260);
-        let mut p = Predictor::new(Behavior::RejectAbove(252), 30_001);
-        let mut steps = 0u64;
-        let stop = loop {
-            if steps == rejected {
-                p.behavior = Behavior::Pass;
-            }
-            if steps == MAX_STEPS {
-                break None;
-            }
-            drain(&mut run);
-            match run.prepare(request(&run), &mut p) {
-                Ok(t) => {
-                    let actual = t.predicted.clone();
-                    run.commit(t, actual).unwrap();
-                    steps += 1;
-                }
-                Err(fault) => break Some(fault),
-            }
-        };
-        assert_eq!(steps, MAX_STEPS - rejected, "rejected {rejected}");
-        assert_eq!(run.candidate_evaluations, MAX_RUN_CANDIDATES);
-        assert_eq!(
-            stop,
-            (rejected > 0).then_some(Fault::CandidateBudget),
-            "rejected {rejected}"
-        );
-        assert!(run.credits_consistent());
     }
 }

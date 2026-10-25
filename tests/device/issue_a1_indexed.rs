@@ -3,7 +3,7 @@
 use a1_indexed_common::{CASES, FUEL, equal, lower, static_refusals};
 use invar::{mir_eval, schedule};
 
-#[path = "support/a1_indexed_common.rs"]
+#[path = "../support/a1_indexed_common.rs"]
 mod a1_indexed_common;
 
 #[test]

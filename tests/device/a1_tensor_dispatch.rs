@@ -4,10 +4,10 @@ use a1_tensor_common::{DIRECT, SCALAR, TC, program};
 use invar::{check, front, mir, mir_eval};
 use std::process::Command;
 
-#[path = "support/a1_tensor_common.rs"]
+#[path = "../support/a1_tensor_common.rs"]
 mod a1_tensor_common;
 
-#[path = "support/gnet_agree.rs"]
+#[path = "../support/gnet_agree.rs"]
 mod agree;
 
 fn assert_net(checked: &check::CheckedProgram, fuel: u64, expected: &invar::eval::Observation) {
@@ -28,7 +28,7 @@ fn assert_net(checked: &check::CheckedProgram, fuel: u64, expected: &invar::eval
 
 #[test]
 fn a1_tensor_ordinary_tc_rounds_inputs_and_serial_fallback() {
-    let source = include_str!("a1_tensor/tc.inv");
+    let source = include_str!("../a1_tensor/tc.inv");
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     invar::ownership::check(&checked).unwrap();
     let p = mir::lower(&checked).unwrap();
