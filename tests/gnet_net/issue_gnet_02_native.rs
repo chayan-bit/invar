@@ -8,6 +8,7 @@
 #![forbid(unsafe_code)]
 
 use crate::corpus;
+use crate::corpus_sample;
 use crate::generator;
 
 use general_net::{Limits, Net, oracle};
@@ -138,24 +139,31 @@ fn run_all(cases: Vec<(String, check::CheckedProgram)>) -> (usize, BTreeMap<Stri
     (agreed.into_inner().unwrap(), refused.into_inner().unwrap())
 }
 
+// Pull-request CI compiles the deterministic `corpus_sample` sample (every
+// category kept, one generated program in STRIDE); INVAR_FULL_CORPUS=1 runs all.
 #[test]
 fn issue_gnet_02_native_cpu_matches_oracle_on_the_runnable_corpus() {
-    let (agreed, refused) = run_all(corpus::runnable_corpus());
+    let cases = corpus_sample::keep(corpus::runnable_corpus(), true, |case| &case.0);
+    let (agreed, refused) = run_all(cases);
     println!("gnet_02_native_corpus agreed={agreed} refused={refused:?}");
-    assert!(agreed >= 320, "agreed={agreed} refused={refused:?}");
+    let floor = corpus_sample::floor(320);
+    assert!(agreed >= floor, "agreed={agreed} refused={refused:?}");
 }
 
 #[test]
 fn issue_gnet_02_native_cpu_matches_oracle_on_generated_compositions() {
     let mut rng = generator::Rng(generator::SEED);
-    let cases = (0..generator::PROGRAMS)
-        .map(|index| {
-            let (source, _) = generator::program(&mut rng);
+    // Every program is generated, so the seeded sequence never depends on the sample.
+    let cases: Vec<_> = (0..generator::PROGRAMS)
+        .map(|index| (index, generator::program(&mut rng).0))
+        .filter(|(index, _)| corpus_sample::full() || index % corpus_sample::STRIDE == 0)
+        .map(|(index, source)| {
             let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
             (format!("generated-{index}: {source}"), checked)
         })
         .collect();
+    let expected = cases.len();
     let (agreed, refused) = run_all(cases);
     println!("gnet_02_native_generated agreed={agreed} refused={refused:?}");
-    assert_eq!(agreed, generator::PROGRAMS, "refused={refused:?}");
+    assert_eq!(agreed, expected, "refused={refused:?}");
 }
