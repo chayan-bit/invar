@@ -1,0 +1,14 @@
+mod a1_grid;
+mod a1_tensor_dispatch;
+mod issue_a1_indexed;
+mod issue_a1_segmented;
+mod issue_gnet_cuda_aot_format;
+mod issue_m3_01_cuda_runtime;
+mod issue_m3_02_device_ir_verifier;
+mod issue_m3_03_cuda_fused_maps;
+mod issue_m3_05_guarded_gpu_integration;
+mod issue_m4_01_metal_emission;
+mod issue_metal_aot_format;
+mod issue_v01_pair_reduction;
+mod issue_v01_shared_device_cap;
+mod v01_placement_calibration;

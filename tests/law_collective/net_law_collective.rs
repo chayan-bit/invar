@@ -50,7 +50,7 @@ fn p8_certificate_boundary_and_word_layout() {
     }
 }
 
-#[path = "support/law_collective.rs"]
+#[path = "../support/law_collective.rs"]
 mod law_support;
 
 #[test]

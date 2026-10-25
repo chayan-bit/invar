@@ -1,5 +1,5 @@
 //! Live guarded CUDA integration: forced and auto runs, the module cache, hints, faults and the CLI.
-//! The CPU graph, cache and explain tests stay in `tests/issue_m3_05_guarded_gpu_integration.rs`.
+//! The CPU graph, cache and explain tests stay in `tests/device/issue_m3_05_guarded_gpu_integration.rs`.
 #[path = "../support/scratch.rs"]
 mod scratch;
 use invar::{admission, check, device_cache, device_ir, eval, front, mir, plan::DeviceCostModel};

@@ -283,7 +283,7 @@ fn v01_placement_calibration_loader_refuses_corrupt_or_incomplete_profiles() {
 #[test]
 fn v01_placement_calibration_published_schema_agrees() {
     let schema: Value =
-        serde_json::from_str(include_str!("../schema/invar-placement-v1.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../schema/invar-placement-v1.schema.json")).unwrap();
     let validator = jsonschema::validator_for(&schema).unwrap();
     assert!(validator.is_valid(&document()));
     let bad: [fn(&mut Value); 5] = [

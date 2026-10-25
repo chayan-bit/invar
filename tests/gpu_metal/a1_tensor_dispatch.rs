@@ -1,4 +1,4 @@
-//! Owning-device tensor dispatch tests on Metal; the ordinary CLI tests stay in `tests/a1_tensor_dispatch.rs`.
+//! Owning-device tensor dispatch tests on Metal; the ordinary CLI tests stay in `tests/device/a1_tensor_dispatch.rs`.
 use invar::mir_eval;
 use std::process::Command;
 

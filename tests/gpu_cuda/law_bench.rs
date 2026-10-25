@@ -1,4 +1,4 @@
-//! Physical CUDA law-collective calibration and sessions; the CPU statistics stay in `tests/net_law_collective_bench.rs`.
+//! Physical CUDA law-collective calibration and sessions; the CPU statistics stay in `tests/law_collective/net_law_collective_bench.rs`.
 #[path = "../support/law_bench.rs"]
 mod bench;
 #[path = "../support/law_collective.rs"]
