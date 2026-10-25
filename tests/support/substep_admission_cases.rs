@@ -2,7 +2,6 @@
 use super::*;
 use crate::front;
 use std::path::Path;
-use std::sync::OnceLock;
 
 #[path = "substep_admission_cases/binding.rs"]
 mod binding;
@@ -30,16 +29,6 @@ fn compile(source: &str) -> Result<SystemIr, crate::front::FrontError> {
         front::parse_system(source.as_bytes())?,
         &Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/cells/reach_place"),
     )
-}
-fn binding(n: usize) -> &'static Binding {
-    static SIX: OnceLock<Binding> = OnceLock::new();
-    static SEVEN: OnceLock<Binding> = OnceLock::new();
-    let storage = if n == 6 { &SIX } else { &SEVEN };
-    storage.get_or_init(|| {
-        bind(&compile(&source(n)).expect("ordinary source policy binding"))
-            .unwrap()
-            .unwrap()
-    })
 }
 fn vendored(name: &str) -> String {
     std::fs::read_to_string(
