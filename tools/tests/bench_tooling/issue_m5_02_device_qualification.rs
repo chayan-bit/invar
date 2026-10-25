@@ -1,15 +1,9 @@
 #![forbid(unsafe_code)]
-pub use invar::{
-    check, front, general_net, hex, layout_contract, mir, numeric_contract, tensor_cache,
-};
-#[path = "../qualification/mod.rs"]
-#[allow(dead_code)] // This target exercises the device half of the shared harness.
-mod qualification;
+#[cfg(feature = "cuda")]
+use crate::invar_bin;
+use crate::qualification;
 use qualification::device::{self, Target};
 use serde_json::json;
-#[cfg(feature = "cuda")]
-#[path = "support/invar_bin.rs"]
-mod invar_bin;
 
 #[test]
 fn issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls() {

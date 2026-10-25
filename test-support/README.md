@@ -61,7 +61,7 @@ Sweep of compiled/process test deadlines:
 - `src/native.rs`: only the `cfg(test)` elapsed-time assertions around child
   output/draining and executable-writer checks; the real 30-second process
   watchdog and 250 ms executable-writer retry budget remain unchanged.
-- `tools/tests/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
+- `tools/tests/bench_tooling/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
   and FIFO probes, and harness elapsed-time assertions. Deliberate 200/250 ms
   timeout requests retain their exact durations and typed `Error::Timeout`.
   Scaled non-timeout requests saturate at the product's existing 600-second

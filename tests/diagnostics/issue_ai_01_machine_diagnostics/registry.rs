@@ -296,7 +296,7 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
         include_str!("../../../src/mir_eval/scatter.rs"),
         include_str!("../../../src/mir_eval/histogram.rs"),
         include_str!("../../../src/mir_eval/histogram/atomic_tests.rs"),
-        include_str!("../../../tools/tests/qualification_faults.rs"),
+        include_str!("../../../tools/tests/bench_tooling/qualification_faults.rs"),
     ];
     for entry in registry["codes"].as_array().unwrap() {
         assert!(valid_registry_entry(entry), "invalid reachability: {entry}");
@@ -321,10 +321,10 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
             let test = format!("fn {}(", entry["boundary_test"].as_str().unwrap());
             assert!(
                 include_str!("../../issue_m4_06_bounded_schedule_tuning.rs").contains(&test)
-                    || include_str!("../../../tools/tests/issue_m5_02_device_qualification.rs")
+                    || include_str!("../../../tools/tests/bench_tooling/issue_m5_02_device_qualification.rs")
                         .contains(&test)
                     || OWN_SOURCES.iter().any(|source| source.contains(&test))
-                    || include_str!("../../../tools/tests/qualification_faults.rs").contains(&test)
+                    || include_str!("../../../tools/tests/bench_tooling/qualification_faults.rs").contains(&test)
                     || include_str!("../../v02/v02_placement.rs").contains(&test)
                     || include_str!("../../robotics/issue_s1_11_robotics_vocabulary.rs").contains(&test)
                     || include_str!("../../robotics/issue_s1_02_foreign_manifests.rs").contains(&test)

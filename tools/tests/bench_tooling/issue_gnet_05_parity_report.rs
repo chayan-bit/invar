@@ -1,8 +1,4 @@
-#[path = "../bench/hash.rs"]
-mod hash;
-#[path = "support/invar_bin.rs"]
-mod invar_bin;
-
+use crate::{hash, invar_bin};
 use serde_json::{Value, json};
 use std::{
     fs,

@@ -13,11 +13,11 @@ failure-output = "immediate-final"
 # Name tests running longer than 2 min; never kill them.
 slow-timeout = "120s"
 
-# tests/issue_m5_01_build_lineage.rs takes its DEADLINES lock exclusively in these tests so other load cannot
-# eat their sub-second deadlines. Run them alone on the runner (keep in sync with `exclusive()` callers),
-# and first, so they never wait for a long test to drain.
+# tools/tests/bench_tooling/issue_m5_01_build_lineage.rs takes its DEADLINES lock exclusively in these
+# tests so other load cannot eat their sub-second deadlines. Run them alone on the runner (keep in sync
+# with `exclusive()` callers), and first, so they never wait for a long test to drain.
 [[profile.default.overrides]]
-filter = 'binary(issue_m5_01_build_lineage) & (test(=issue_m5_01_build_lineage_concurrent_capped_streams_and_timeout_fail) | test(=issue_m5_01_build_lineage_descendant_pipe_timeout_kills_process_group))'
+filter = 'binary(=bench_tooling) & test(/^issue_m5_01_build_lineage::issue_m5_01_build_lineage_(concurrent_capped_streams_and_timeout_fail|descendant_pipe_timeout_kills_process_group|version_probe_failures_prevent_build)$/)'
 threads-required = "num-test-threads"
 priority = 100
 

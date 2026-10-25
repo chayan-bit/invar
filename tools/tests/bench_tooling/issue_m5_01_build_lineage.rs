@@ -2,10 +2,10 @@
 #![cfg(unix)]
 
 #[allow(dead_code)]
-#[path = "../../test-support/child_deadline.rs"]
+#[path = "../../../test-support/child_deadline.rs"]
 mod child_deadline;
 
-#[path = "../bench/build_lineage.rs"]
+#[path = "../../bench/build_lineage.rs"]
 mod build_lineage;
 
 use build_lineage::{BuildRequest, Error, Invocation, build, verify};
@@ -897,7 +897,7 @@ fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
         .arg(std::env::current_exe().unwrap())
         .args([
             "--exact",
-            "issue_m5_01_build_lineage_fifo_receipt_fails_before_open",
+            "issue_m5_01_build_lineage::issue_m5_01_build_lineage_fifo_receipt_fails_before_open",
             "--nocapture",
         ])
         .env(CHILD_FLAG, &fixture.0)
@@ -905,10 +905,10 @@ fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
         .env("INVAR_LINEAGE_FIFO_REVISION", &request.expected_revision)
         .output()
         .unwrap();
+    let stdout = String::from_utf8_lossy(&child.stdout);
     assert!(
-        child.status.success(),
-        "FIFO receipt verification failed or blocked: exit {:?}; {}",
-        child.status.code(),
-        String::from_utf8_lossy(&child.stdout)
+        child.status.success() && stdout.contains("running 1 test"),
+        "FIFO receipt check failed, blocked or ran no test (stale --exact?): exit {:?}; {stdout}",
+        child.status.code()
     );
 }
