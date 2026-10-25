@@ -79,8 +79,10 @@ pub fn run(program: &mir::Program, fuel_limit: u64) -> Result<Outcome, EvalError
     })
 }
 
+/// Each MIR call recurses on the host stack, so the root runs on the reference
+/// evaluator's sized stack and the 64-call `CALL_DEPTH_LIMIT` is reached first.
 pub fn observe(program: &mir::Program, fuel_limit: u64) -> Observation {
-    observe_with_scheduler(program, fuel_limit, None).0
+    crate::eval::stack::observe_on_own_stack(|| observe_with_scheduler(program, fuel_limit, None).0)
 }
 
 /// Like [`observe_offers`], but reports only how many offered plans were published.
