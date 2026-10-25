@@ -28,7 +28,7 @@ pub mod gnet;
 mod grid;
 mod indexed;
 #[cfg(test)]
-mod indexed_profile;
+mod indexed_ordering;
 mod law_collective;
 mod library;
 mod pathsum;

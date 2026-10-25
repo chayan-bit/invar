@@ -278,7 +278,3 @@ impl MetalDevice {
     }
 }
 
-#[cfg(test)]
-mod p5b_timing {
-    include!("p5b_timing.rs");
-}
