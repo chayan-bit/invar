@@ -1,6 +1,6 @@
-//! The reference evaluator reaches its documented 64-call limit and reports
-//! the typed `CALL_DEPTH_LIMIT`, never a host stack overflow, when called from
-//! a default 2 MiB thread, in Debug and Release. This includes a recursive call
+//! The reference and MIR evaluators reach their documented 64-call limit and
+//! report the typed `CALL_DEPTH_LIMIT`, never a host stack overflow, when called
+//! from a default 2 MiB thread, in Debug and Release. This includes a recursive call
 //! nested at the checked maximum expression height in every frame, and every
 //! root entry (main, named scalar exports, host calls).
 #![forbid(unsafe_code)]
@@ -62,14 +62,19 @@ fn issue_eval_call_depth_limit_is_typed_on_a_default_thread() {
             (500, true),
         ] {
             let program = checked(&recursion(1, n), true).unwrap();
-            let observed = eval::observe(&program, 1_000_000);
-            assert_eq!(
-                depth_limited(&observed.result),
-                limited,
-                "{n}: {observed:?}"
-            );
-            if !limited {
-                assert_eq!(observed.result, Ok(Value::I32(1 + n as i32)));
+            let lowered = invar::mir::lower(&program).unwrap();
+            for observed in [
+                eval::observe(&program, 1_000_000),
+                invar::mir_eval::observe(&lowered, 1_000_000),
+            ] {
+                assert_eq!(
+                    depth_limited(&observed.result),
+                    limited,
+                    "{n}: {observed:?}"
+                );
+                if !limited {
+                    assert_eq!(observed.result, Ok(Value::I32(1 + n as i32)));
+                }
             }
         }
     });

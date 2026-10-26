@@ -70,10 +70,10 @@ production module and existing root adapter before running these tests.
 ```sh
 INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-child-debug \
   cargo test -p invar -p invar-tools --offline --locked --test gnet_slices \
-  --test issue_gnet_05_parity_report -- --nocapture
+  --test bench_tooling -- --nocapture
 INVAR_FULL_CORPUS=1 INVAR_GNET_CORPUS_REPORT_DIR=/tmp/new-child-release \
   cargo test -p invar -p invar-tools --offline --locked --release --test gnet_slices \
-  --test issue_gnet_05_parity_report -- --nocapture
+  --test bench_tooling -- --nocapture
 cargo fmt --all -- --check
 cargo clippy --offline --locked --all-targets -- -D warnings
 ```

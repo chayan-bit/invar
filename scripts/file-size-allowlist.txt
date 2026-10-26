@@ -11,8 +11,6 @@
 824 src/eval/host_read.rs
 817 src/front.rs
 886 src/general_net/compiled/mod.rs
-1246 src/general_net/cuda_owned_numeric_host.rs
-857 src/general_net/cuda_owned_numeric_host/cpu.rs
 1179 src/general_net/normal_form/certificate/loops.rs
 830 src/general_net/normal_form/exec/lanes.rs
 1792 src/general_net/normal_form/loops.rs
@@ -35,11 +33,9 @@
 806 tests/m4_summary/issue_m4_07_summary_source.rs
 874 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
 850 tests/robotics/issue_s1_06_sequencer_binding.rs
-1451 tests/support/cuda_owned_numeric_host_cpu_model.rs
-817 tests/support/cuda_owned_numeric_host_lifecycle.rs
 831 tests/support/gnet_device.rs
 930 tests/v02/v02_placement.rs
 952 tools/bench/acceptance.rs
 988 tools/qualification/device.rs
-1128 tools/tests/issue_m5_01_benchmark_manifest.rs
-914 tools/tests/issue_m5_01_build_lineage.rs
+1128 tools/tests/bench_tooling/issue_m5_01_benchmark_manifest.rs
+914 tools/tests/bench_tooling/issue_m5_01_build_lineage.rs

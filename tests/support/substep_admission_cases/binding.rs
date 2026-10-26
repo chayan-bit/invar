@@ -8,9 +8,10 @@ fn real_source_binds_both_structural_layouts_without_runtime_export() {
         let ir = compile(&source(n)).unwrap();
         let b = bind(&ir).unwrap().unwrap();
         assert_eq!(b.layout.arm_count(), n);
-        // Gripper candidates step down from the source-declared hold 253.
-        assert_eq!(b.tendon_start(), if n == 7 { Some(253) } else { None });
-        assert_eq!(b.candidates(), if n == 7 { 254 } else { 1 });
+        // The Panda binds the source-declared gripper hold 253.
+        if n == 7 {
+            assert_eq!(b.home_controls.last(), Some(&253.0));
+        }
         assert_eq!(b.identity.source, digest(ir.canonical_json().as_bytes()));
         assert_ne!(b.identity.assets, Digest([0; 32]));
         assert_ne!(b.identity.controls, b.identity.joints);
@@ -155,104 +156,4 @@ fn source_layout_bounds_and_control_order_are_not_fixture_name_authority() {
         ))
         .is_err()
     );
-}
-
-#[test]
-fn finite_order_rejects_without_live_state_or_clone_contamination() {
-    let b = binding(7);
-    let mut run = new_run(b, 1, 260);
-    let before = run.live.clone();
-    // Candidates start at the source-declared hold 253.
-    let mut predictor = Predictor::new(Behavior::RejectAbove(251), 254);
-    let ticket = run.prepare(request(&run), &mut predictor).unwrap();
-    assert_eq!(ticket.controls.tendon(), Some(251));
-    assert_eq!(predictor.inputs.len(), 3);
-    assert_eq!(run.live, before);
-    assert_eq!(run.commands, 0);
-    assert_eq!(run.snapshots, 1);
-    for input in &predictor.inputs {
-        assert_eq!(input, &before);
-        assert_ne!(input.q.as_ptr(), run.live.q.as_ptr());
-    }
-    let order = run
-        .queue
-        .iter()
-        .filter_map(|r| match &r.kind {
-            Kind::Candidate {
-                rank,
-                controls,
-                result,
-                ..
-            } => Some((*rank, controls.tendon().unwrap(), result.is_ok())),
-            _ => None,
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(order, [(0, 253, false), (1, 252, false), (2, 251, true)]);
-    assert_eq!(run.held, 3);
-    assert!(run.credits_consistent());
-    let actual = ticket.predicted.clone();
-    run.commit(ticket, actual).unwrap();
-    assert_eq!(run.live.latent[0], 1);
-    assert_eq!(run.live.latent[1], 0);
-    assert_eq!(run.held, 0);
-    assert!(run.credits_consistent());
-}
-
-#[test]
-fn every_fuel_prefix_releases_reservation_and_retains_all_rejections() {
-    let b = binding(7);
-    for fuel in 0..=254 {
-        let mut run = new_run(b, 1, 260);
-        drain(&mut run);
-        let before = run.live.clone();
-        let mut p = Predictor::new(Behavior::Exhaust, fuel);
-        let fault = run.prepare(request(&run), &mut p).unwrap_err();
-        assert_eq!(
-            fault,
-            if fuel == 254 {
-                Fault::NoAdmissibleFiniteGrid
-            } else {
-                Fault::Fuel
-            }
-        );
-        assert_eq!(run.live, before);
-        assert_eq!(run.held, 0);
-        assert!(run.credits_consistent());
-        assert_eq!(p.inputs.len(), fuel as usize);
-        assert_eq!(
-            run.queue
-                .iter()
-                .filter(|r| matches!(r.kind, Kind::Candidate { .. }))
-                .count(),
-            fuel as usize
-        );
-        run.quiesce(run.live.clone()).unwrap();
-        drain(&mut run);
-        assert!(run.finish().is_err());
-    }
-}
-
-#[test]
-fn queue_credit_boundary_has_no_prediction_or_advance_on_failure() {
-    let b = binding(7);
-    // One held snapshot plus the worst-case reservation (candidates + 3).
-    let need = b.candidates() + 4;
-    assert_eq!(need, 258);
-    for cap in [1, need - 2, need - 1, need] {
-        let mut run = new_run(b, 1, cap);
-        let before = run.live.clone();
-        let mut p = Predictor::new(Behavior::Pass, 1);
-        let outcome = run.prepare(request(&run), &mut p);
-        if cap < need {
-            assert_eq!(outcome.unwrap_err(), Fault::Credits);
-            assert!(p.inputs.is_empty());
-            assert_eq!(run.live, before);
-        } else {
-            let ticket = outcome.unwrap();
-            let actual = ticket.predicted.clone();
-            run.commit(ticket, actual).unwrap();
-        }
-        assert!(run.credits_consistent());
-    }
-    assert!(Run::new(b, RunId([1; 16]), State::home(b), 1, u32::MAX).is_err());
 }

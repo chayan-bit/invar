@@ -19,11 +19,6 @@ impl ProvenancedArtifact {
     pub fn checked_net(&self) -> (&Net, &Proof) {
         (&self.net, &self.proof)
     }
-    /// Exact private snapshot bytes hashed in the receipt. This is not an input
-    /// format; there is no deserializer or imported-proof acceptance path.
-    pub fn net_snapshot(&self) -> &[u8] {
-        &self.net_bytes
-    }
     pub fn verify_source(&self, bytes: &[u8]) -> Result<(), Error> {
         if self.source == bytes {
             Ok(())

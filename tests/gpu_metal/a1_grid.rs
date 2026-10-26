@@ -1,4 +1,4 @@
-//! Ordinary run-path evidence for grid adapters on a real Metal device; the CPU boundary tests stay in `tests/a1_grid.rs`.
+//! Ordinary run-path evidence for grid adapters on a real Metal device; the CPU boundary tests stay in `tests/device/a1_grid.rs`.
 use invar::{check, eval, front, mir_eval};
 
 #[path = "../support/a1_grid_common.rs"]

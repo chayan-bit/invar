@@ -66,7 +66,7 @@ Every milestone acceptance records commit, host/architecture, compiler/toolchain
 ## Continuous integration
 
 GitHub Actions runs CPU-only checks on GitHub-hosted Linux runners: Lint, Check, Hygiene, four Test shards and the CPU-model corpus test.
-On pull requests the corpus sweeps (device CPU model, GNET corpus denominators and #54 selection parity) run a deterministic 1-in-8 sample by path hash that keeps every corpus directory; pushes to main and `just test` set `INVAR_FULL_CORPUS=1` and run the whole corpus.
+On pull requests the corpus sweeps (device CPU model, GNET corpus denominators, #54 selection parity and the GNET-02 native corpus and generated programs) run a deterministic 1-in-8 sample by path hash that keeps every corpus directory; pushes to main and `just test` set `INVAR_FULL_CORPUS=1` and run the whole corpus.
 The workflow is [ci.yml](../.github/workflows/ci.yml).
 CUDA and Metal suites are not run in CI.
 Run them locally on a CUDA-capable Linux host or an Apple Silicon Mac when a change touches a device path, and record the hardware and result in the pull request.
@@ -78,7 +78,7 @@ After M0, use each GitHub issue's acceptance contract. List filtered tests and r
 ## Ordered affine-pair source form
 
 The [pair-reduction contract](pair-reduction-v1.md) defines the sealed modular law and its source/CPU/device boundaries.
-Run `cargo test --locked --test issue_v01_pair_reduction` in Debug and Release on the authorized CPU host.
+Run `cargo test --locked --test device issue_v01_pair_reduction` in Debug and Release on the authorized CPU host.
 Run the ignored `pair_reduction::` tests of the `gpu_cuda` target with `--features cuda` on qualified NVIDIA hardware, and of the `gpu_metal` target with `--features metal` on an Apple GPU.
 Require nonzero listed counts and retain profile/host separation.
 Pair source/reference/MIR/fuel/cleanup agreement, atomic two-scalar publication, maximum resource bounds and operator-order/non-associative-admission mutation failures are required.

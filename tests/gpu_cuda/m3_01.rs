@@ -1,4 +1,4 @@
-//! Live CUDA round trip; the mock-device runtime tests stay in `tests/issue_m3_01_cuda_runtime.rs`.
+//! Live CUDA round trip; the mock-device runtime tests stay in `tests/device/issue_m3_01_cuda_runtime.rs`.
 use invar_cuda::Runtime;
 
 #[test]

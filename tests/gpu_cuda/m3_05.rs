@@ -1,5 +1,5 @@
 //! Live guarded CUDA integration: forced and auto runs, the module cache, hints, faults and the CLI.
-//! The CPU graph, cache and explain tests stay in `tests/issue_m3_05_guarded_gpu_integration.rs`.
+//! The CPU graph, cache and explain tests stay in `tests/device/issue_m3_05_guarded_gpu_integration.rs`.
 #[path = "../support/scratch.rs"]
 mod scratch;
 use invar::{admission, check, device_cache, device_ir, eval, front, mir, plan::DeviceCostModel};
@@ -165,107 +165,6 @@ fn issue_m3_05_gpu_forced_corpus_and_warm_module_cache() {
             warm.cache_hits, warm.hint_hits, warm.observation.result
         );
     }
-}
-
-#[test]
-#[ignore = "requires the M2 probe corpus, a compatible CUDA GPU, and NVRTC 12.4+"]
-fn issue_m3_05_gpu_full_m2_probe_corpus() {
-    use invar::schedule::{self, cuda};
-    use invar_cuda::cuda::CudaDevice;
-
-    let directory = std::env::var_os("INVAR_M3_05_CORPUS_DIR")
-        .expect("INVAR_M3_05_CORPUS_DIR must name the exported M2 probe corpus");
-    let mut files = std::fs::read_dir(directory)
-        .unwrap()
-        .map(|entry| entry.unwrap().path())
-        .filter(|path| {
-            path.extension()
-                .is_some_and(|extension| extension == "invar")
-        })
-        .collect::<Vec<_>>();
-    files.sort();
-    assert_eq!(files.len(), 252, "expected every M2 generated probe");
-    let compiler = std::path::Path::new(env!("CARGO_BIN_EXE_invar-nvrtc"));
-    let model = cuda::calibrate().expect("CUDA calibration must complete on real hardware");
-    let mut device = CudaDevice::open().expect("CUDA_UNAVAILABLE: compatible device required");
-    let mut forced = 0usize;
-    let mut empty = 0usize;
-    let mut ineligible = 0usize;
-    for file in files {
-        let source = std::fs::read(&file).unwrap();
-        let checked = check::check(front::parse(&source).unwrap(), true).unwrap();
-        let program = mir::lower(&checked).unwrap();
-        let report = admission::analyze(&source, &program).unwrap();
-        let eligible = report
-            .regions()
-            .iter()
-            .any(|region| region.plan_kind() != invar::plan::PlanKind::Serial);
-        let reference = eval::observe(&checked, 1_000_000);
-        let cpu = schedule::run_source(&source, &program, 1_000_000, 4).unwrap();
-        assert_eq!(cpu.observation.result, reference.result, "CPU {file:?}");
-        assert_eq!(
-            cpu.observation.steps_used, reference.steps_used,
-            "CPU {file:?}"
-        );
-        assert_eq!(
-            cpu.observation.cleanup_trace, reference.cleanup_trace,
-            "CPU {file:?}"
-        );
-        let auto = cuda::run_auto_source_with_fault(
-            &source,
-            &program,
-            1_000_000,
-            compiler,
-            model,
-            cuda::Fault::None,
-        )
-        .unwrap();
-        assert_eq!(auto.observation.result, reference.result, "auto {file:?}");
-        assert_eq!(
-            auto.observation.steps_used, reference.steps_used,
-            "auto {file:?}"
-        );
-        assert_eq!(
-            auto.observation.cleanup_trace, reference.cleanup_trace,
-            "auto {file:?}"
-        );
-        match cuda::run_source_with_device(&source, &program, 1_000_000, &mut device, compiler) {
-            Ok(run) => {
-                assert!(
-                    eligible && !run.executed.is_empty(),
-                    "forced {file:?}: eligible={eligible} result={:?} steps={} executed={:?}",
-                    run.observation.result,
-                    run.observation.steps_used,
-                    run.executed
-                );
-                assert_eq!(run.observation.result, reference.result, "CUDA {file:?}");
-                assert_eq!(
-                    run.observation.steps_used, reference.steps_used,
-                    "CUDA {file:?}"
-                );
-                assert_eq!(
-                    run.observation.cleanup_trace, reference.cleanup_trace,
-                    "CUDA {file:?}"
-                );
-                forced += 1;
-            }
-            Err(error) if !eligible && error.code == "CUDA_UNAVAILABLE" => ineligible += 1,
-            Err(error)
-                if eligible
-                    // Only zero-trip regions were reached, so none could publish.
-                    && cpu.executed.is_empty()
-                    && error.code == "CUDA_UNAVAILABLE"
-                    && error.message == "no CUDA result was published" =>
-            {
-                empty += 1;
-            }
-            Err(error) => panic!("unexpected forced CUDA failure for {file:?}: {error:?}"),
-        }
-    }
-    assert_eq!((forced, empty, ineligible), (120, 24, 108));
-    eprintln!(
-        "M2 corpus 252/252: CUDA={forced}, empty={empty}, ineligible={ineligible}; auto and CPU agree with reference"
-    );
 }
 
 #[test]

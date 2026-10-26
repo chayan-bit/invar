@@ -56,15 +56,12 @@ Sweep of compiled/process test deadlines:
 - `crates/invar-cuda/src/cuda/{floating_tests,transpose_tests}.rs`: mock compiler
   children expecting success/diagnostics/caps scale; exact 50 ms typed timeout
   requests stay fixed.
-- `tests/support/cuda_owned_numeric_host_cpu_model.rs`: parent observation waits
-  scale; the backend's real compile/epoch resource contracts stay fixed.
 - `tests/support/owner_return_cpu.rs`: nested timeout and parent watchdog agree;
   CPU/address-space/file/descriptor/core limits remain unchanged.
-- `src/general_net/owned_numeric_task.rs`: only its `cfg(test)` compiler/driver.
 - `src/native.rs`: only the `cfg(test)` elapsed-time assertions around child
   output/draining and executable-writer checks; the real 30-second process
   watchdog and 250 ms executable-writer retry budget remain unchanged.
-- `tools/tests/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
+- `tools/tests/bench_tooling/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
   and FIFO probes, and harness elapsed-time assertions. Deliberate 200/250 ms
   timeout requests retain their exact durations and typed `Error::Timeout`.
   Scaled non-timeout requests saturate at the product's existing 600-second
@@ -74,7 +71,7 @@ Sweep of compiled/process test deadlines:
   fixture compile and fresh-process scalar-artifact checks consume the same knob.
 
 Product limits are intentionally unchanged: `src/native.rs`,
-`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_owned_resume_host,cuda_owned_numeric_host}`,
+`src/component_test/planner.rs`, `src/general_net/{device_host,numeric_owned_resume_host}`,
 `src/gnet_device_command.rs`, `tools/bench/{baseline,build_lineage,general_net_cli}.rs`,
 and CUDA/Metal driver watchdogs. Tests of these bounds continue to exercise the
 real contract; GPU completion polling and semantic timing fixtures are not
@@ -82,7 +79,7 @@ compiled-child harness watchdogs.
 
 ## Corpus sample
 
-`corpus_sample.rs` walks the source corpus and picks the deterministic sample that pull-request CI runs for the exhaustive corpus sweeps: the device CPU-model corpus, the GNET v0.1 corpus denominators and the #54 selection-parity passes (which also keep every example, since the examples reach every family).
+`corpus_sample.rs` walks the source corpus and picks the deterministic sample that pull-request CI runs for the exhaustive corpus sweeps: the device CPU-model corpus, the GNET v0.1 corpus denominators, the GNET-02 native corpus (with one generated program in 8) and the #54 selection-parity passes (which also keep every example, since the examples reach every family).
 A program is kept when the 64-bit FNV-1a hash of its path falls in bucket 0 of 8, and each directory category the hash misses keeps its lowest-hash program, which the sampler asserts.
 Count floors written for the whole corpus are divided by 8 for the sample; agreement checks are unchanged.
 `INVAR_FULL_CORPUS=1` runs every program; `just test` and CI on pushes to main set it.

@@ -321,13 +321,6 @@ pub fn calls() -> usize {
     CALLS.load(std::sync::atomic::Ordering::Relaxed)
 }
 
-/// How many kernels this process compiled and loaded successfully.
-pub fn compiled_count() -> usize {
-    cache().lock().map_or(0, |cache| {
-        cache.values().filter(|entry| entry.is_some()).count()
-    })
-}
-
 fn compiled(kernel: Kernel, slots: Vec<usize>) -> Option<std::sync::Arc<Compiled>> {
     let mut cache = cache().lock().ok()?;
     // The IR does not encode the input slots, so they are part of the key.
