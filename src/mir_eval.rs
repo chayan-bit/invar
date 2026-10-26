@@ -35,6 +35,8 @@ use values::mir_host_index;
 use values::{array_length, binary, filled, indexed, mir_len_u32, store_index, unary};
 
 const MAX_CALL_DEPTH: usize = 64;
+/// Grow unless the caller already has a whole evaluation's stack: a call costs up to 2 MiB unoptimized.
+const EVAL_STACK_RED_ZONE: usize = crate::eval::stack::STACK_BYTES;
 const MAX_ARRAY_LEN: usize = crate::array_limits::MAX_ARRAY_LEN;
 
 fn tool(code: &'static str, message: impl Into<String>) -> EvalError {
@@ -148,27 +150,34 @@ pub(crate) fn observe_all<'a>(
             Vec::new(),
         );
     }
-    let mut interpreter = Interpreter {
-        program,
-        provider,
-        sorts,
-        reducer,
-        fuel_limit,
-        steps_used: 0,
-        call_depth: 0,
-        trace: Vec::new(),
-        live_elements: 0,
-        used_overrides: 0,
-        published: Vec::new(),
-    };
-    let result = interpreter.call("main", Vec::new());
-    (
-        Observation {
-            result,
-            steps_used: interpreter.steps_used,
-            cleanup_trace: interpreter.trace,
+    // Providers are not `Send`, so the sized stack is grown in place, not on a thread.
+    stacker::maybe_grow(
+        EVAL_STACK_RED_ZONE,
+        crate::eval::stack::STACK_BYTES,
+        move || {
+            let mut interpreter = Interpreter {
+                program,
+                provider,
+                sorts,
+                reducer,
+                fuel_limit,
+                steps_used: 0,
+                call_depth: 0,
+                trace: Vec::new(),
+                live_elements: 0,
+                used_overrides: 0,
+                published: Vec::new(),
+            };
+            let result = interpreter.call("main", Vec::new());
+            (
+                Observation {
+                    result,
+                    steps_used: interpreter.steps_used,
+                    cleanup_trace: interpreter.trace,
+                },
+                interpreter.published,
+            )
         },
-        interpreter.published,
     )
 }
 
@@ -265,6 +274,50 @@ mod diagnostic_tests {
             let document = error.to_diagnostics_json("fixture.inv", source);
             assert_eq!(document["diagnostics"][0]["code"], expected);
             assert!(jsonschema::is_valid(&schema, &document), "{document}");
+        }
+    }
+
+    #[test]
+    fn issue_eval_call_depth_limit_is_typed_in_every_mir_entry_on_a_default_thread() {
+        for n in [10u32, 500] {
+            let source = format!(
+                "fn r(n: u32) -> i32 {{ if n == 0u32 {{ return 1; }} return r(n - 1u32) + 1; }} fn main() -> i32 {{ return r({n}u32); }}"
+            );
+            let checked =
+                crate::check::check(crate::front::parse(source.as_bytes()).unwrap(), true).unwrap();
+            let program = mir::lower(&checked).unwrap();
+            let expected = format!("{:?}", observe(&program, 1_000_000));
+            assert_eq!(
+                expected.contains("CALL_DEPTH_LIMIT"),
+                n == 500,
+                "{expected}"
+            );
+            // Debug strings cross the thread boundary: an `Observation` holds `Rc` values.
+            let entries = std::thread::scope(|scope| {
+                std::thread::Builder::new()
+                    .stack_size(2 * 1024 * 1024)
+                    .spawn_scoped(scope, || {
+                        [
+                            observe_with_scheduler(&program, 1_000_000, None).0,
+                            observe_offers(&program, 1_000_000, None).0,
+                            observe_engine(&program, 1_000_000, None, None).0,
+                            observe_all(&program, 1_000_000, None, None, None).0,
+                        ]
+                        .map(|observation| format!("{observation:?}"))
+                    })
+                    .unwrap()
+                    .join()
+                    .expect("every MIR entry must not overflow a 2 MiB caller thread")
+            });
+            assert_eq!(
+                entries,
+                [
+                    expected.clone(),
+                    expected.clone(),
+                    expected.clone(),
+                    expected
+                ]
+            );
         }
     }
 }

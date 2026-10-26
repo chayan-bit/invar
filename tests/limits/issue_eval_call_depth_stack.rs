@@ -2,7 +2,7 @@
 //! report the typed `CALL_DEPTH_LIMIT`, never a host stack overflow, when called
 //! from a default 2 MiB thread, in Debug and Release. This includes a recursive call
 //! nested at the checked maximum expression height in every frame, and every
-//! root entry (main, named scalar exports, host calls).
+//! root entry (main, named scalar exports, host calls) and the scheduler entry.
 #![forbid(unsafe_code)]
 
 use invar::{
@@ -61,11 +61,17 @@ fn issue_eval_call_depth_limit_is_typed_on_a_default_thread() {
             (64, true),
             (500, true),
         ] {
-            let program = checked(&recursion(1, n), true).unwrap();
+            let source = recursion(1, n);
+            let program = checked(&source, true).unwrap();
             let lowered = invar::mir::lower(&program).unwrap();
+            // The CPU scheduler reaches the MIR evaluator through `observe_engine`.
+            let scheduled = invar::schedule::run_source(source.as_bytes(), &lowered, 1_000_000, 1)
+                .unwrap()
+                .observation;
             for observed in [
                 eval::observe(&program, 1_000_000),
                 invar::mir_eval::observe(&lowered, 1_000_000),
+                scheduled,
             ] {
                 assert_eq!(
                     depth_limited(&observed.result),
