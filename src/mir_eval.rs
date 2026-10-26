@@ -35,6 +35,8 @@ use values::mir_host_index;
 use values::{array_length, binary, filled, indexed, mir_len_u32, store_index, unary};
 
 const MAX_CALL_DEPTH: usize = 64;
+/// Grow unless the caller already has a whole evaluation's stack: a call costs up to 2 MiB unoptimized.
+const EVAL_STACK_RED_ZONE: usize = crate::eval::stack::STACK_BYTES;
 const MAX_ARRAY_LEN: usize = crate::array_limits::MAX_ARRAY_LEN;
 
 fn tool(code: &'static str, message: impl Into<String>) -> EvalError {
@@ -148,27 +150,34 @@ pub(crate) fn observe_all<'a>(
             Vec::new(),
         );
     }
-    let mut interpreter = Interpreter {
-        program,
-        provider,
-        sorts,
-        reducer,
-        fuel_limit,
-        steps_used: 0,
-        call_depth: 0,
-        trace: Vec::new(),
-        live_elements: 0,
-        used_overrides: 0,
-        published: Vec::new(),
-    };
-    let result = interpreter.call("main", Vec::new());
-    (
-        Observation {
-            result,
-            steps_used: interpreter.steps_used,
-            cleanup_trace: interpreter.trace,
+    // Providers are not `Send`, so the sized stack is grown in place, not on a thread.
+    stacker::maybe_grow(
+        EVAL_STACK_RED_ZONE,
+        crate::eval::stack::STACK_BYTES,
+        move || {
+            let mut interpreter = Interpreter {
+                program,
+                provider,
+                sorts,
+                reducer,
+                fuel_limit,
+                steps_used: 0,
+                call_depth: 0,
+                trace: Vec::new(),
+                live_elements: 0,
+                used_overrides: 0,
+                published: Vec::new(),
+            };
+            let result = interpreter.call("main", Vec::new());
+            (
+                Observation {
+                    result,
+                    steps_used: interpreter.steps_used,
+                    cleanup_trace: interpreter.trace,
+                },
+                interpreter.published,
+            )
         },
-        interpreter.published,
     )
 }
 

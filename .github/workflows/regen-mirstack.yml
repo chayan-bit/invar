@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     env:
@@ -34,3 +34,16 @@ jobs:
       - name: Scheduler entry on a 2 MiB thread (integration test)
         if: always()
         run: cargo test --locked --test limits -- --exact issue_eval_call_depth_stack::issue_eval_call_depth_limit_is_typed_on_a_default_thread
+
+  windows-stacker:
+    # The full crate does not build with MSVC (core-math ICE, unrelated); prove the new dependency does.
+    name: stacker builds on Windows
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - run: cargo build --locked -p stacker
