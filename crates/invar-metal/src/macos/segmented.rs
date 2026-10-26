@@ -162,5 +162,5 @@ impl MetalDevice {
 }
 
 #[cfg(test)]
-#[path = "segmented_profile.rs"]
-mod profile;
+#[path = "segmented_boundaries.rs"]
+mod boundaries;

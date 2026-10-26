@@ -39,40 +39,6 @@ pub struct Cost {
     pub visits: usize,
 }
 
-/// Private producer receipt. This is not a runtime/publication permit.
-#[derive(Debug)]
-pub struct BoundedCandidate {
-    candidate: Candidate,
-    binding: bounded::Binding,
-    produced_visits: usize,
-    checked_visits: usize,
-    cost: Cost,
-    proof_visits: usize,
-}
-impl BoundedCandidate {
-    pub fn output(&self) -> &[u32] {
-        self.candidate.output()
-    }
-    pub fn source_accesses(&self) -> &[Access] {
-        self.candidate.source_accesses()
-    }
-    pub fn grouped_accesses(&self) -> &[Access] {
-        self.candidate.grouped_accesses()
-    }
-    pub fn cost(&self) -> Cost {
-        self.cost
-    }
-    pub fn visits(&self) -> usize {
-        self.checked_visits
-    }
-    pub fn sort_visits(&self) -> usize {
-        self.candidate.sort_visits()
-    }
-    pub fn proof_visits(&self) -> usize {
-        self.proof_visits
-    }
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     Source(front::FrontError),

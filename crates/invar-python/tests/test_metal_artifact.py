@@ -1,4 +1,4 @@
-"""#46: run_main(artifact=...) forwards a compiled-ahead Metal library as the CLI's --artifact does."""
+"""#46: run_main(artifact=...) takes a compiled-ahead Metal library as a path or as bytes, validated as the CLI's --artifact is."""
 import json
 import os
 import pathlib
@@ -38,11 +38,12 @@ def test_artifact_refusal_keeps_the_previous_receipt(tmp_path):
     assert module.receipt() == receipt
 
 
-@pytest.mark.parametrize("artifact", [b"INVGMETL", bytearray(b"INVGMETL"), b"/tmp/map.metallibc", BytesPath(), 7, ["map"]])
+@pytest.mark.parametrize("artifact", [BytesPath(), 7, ["map"], memoryview(b"INVGMETL"), 1.5, {"path": "map"}])
 @pytest.mark.parametrize("engine", ["metal", "auto"])
-def test_artifact_is_a_text_path_never_bytes(engine, artifact):
+def test_artifact_is_a_path_or_bytes_never_anything_else(engine, artifact):
     module = inv.compile_source(MAP, engine=engine)
-    rejected("TYPE_MISMATCH", lambda: module.run_main(artifact=artifact), inv.ValidationError)
+    error = rejected("TYPE_MISMATCH", lambda: module.run_main(artifact=artifact), inv.ValidationError)
+    assert "bytes or bytearray" in str(error)
     assert module.receipt() is None
 
 
@@ -51,7 +52,7 @@ def test_artifact_is_a_text_path_never_bytes(engine, artifact):
 def test_artifact_without_metal_is_refused_before_any_backend(engine, tmp_path):
     module = inv.compile_source(MAP, engine=engine)
     library = tmp_path / "map.metallibc"
-    for artifact in [str(library), library]:
+    for artifact in [str(library), library, b"INVGMETL", bytearray(b"INVGMETL")]:
         error = rejected("METAL_UNAVAILABLE", lambda: module.run_main(artifact=artifact))
         assert "artifact cannot be honored" in str(error)
     assert module.receipt() is None
@@ -63,20 +64,46 @@ def test_artifact_without_metal_is_refused_before_any_backend(engine, tmp_path):
         assert module.receipt() == receipt
 
 
+@pytest.mark.skipif(not METAL, reason="needs a Metal build; a build without Metal refuses artifact first")
+@pytest.mark.parametrize("engine", ["metal", "auto"])
+def test_malformed_artifact_bytes_are_refused_like_a_file(engine, tmp_path):
+    module = inv.compile_source(MAP, engine=engine)
+    cases = [b"", b"INVGMETL", b"not a library at all", b"INVGMETL" + bytes(48), bytes(56)]
+    for index, blob in enumerate(cases):
+        from_bytes = rejected("DEVICE_TOOLCHAIN_MISMATCH", lambda: module.run_main(artifact=blob), inv.EngineError)
+        from_bytearray = rejected("DEVICE_TOOLCHAIN_MISMATCH", lambda: module.run_main(artifact=bytearray(blob)), inv.EngineError)
+        library = tmp_path / f"case{index}.metallibc"
+        library.write_bytes(blob)
+        library.chmod(0o600)
+        from_file = rejected("DEVICE_TOOLCHAIN_MISMATCH", lambda: module.run_main(artifact=library), inv.EngineError)
+        assert from_bytes.diagnostics == from_bytearray.diagnostics
+        assert from_file.diagnostics["diagnostics"][0]["code"] == from_bytes.diagnostics["diagnostics"][0]["code"]
+        assert module.receipt() is None
+    oversized = bytes(56 + 64 * 1024 + 64 * 1024 * 1024 + 1)  # one byte past the container bound
+    rejected("DEVICE_TOOLCHAIN_MISMATCH", lambda: module.run_main(artifact=oversized), inv.EngineError)
+
+
 CHILD = textwrap.dedent("""
     import json, pathlib, sys
     import invar_python as inv
     source, library, stale = sys.argv[1], pathlib.Path(sys.argv[2]), sys.argv[3]
     report = {}
-    for engine, artifact in (("metal", library), ("auto", str(library))):
+    blob, stale_blob = library.read_bytes(), pathlib.Path(stale).read_bytes()
+    forms = (
+        ("metal", "metal", library, stale),
+        ("auto", "auto", str(library), stale),
+        ("metal-bytes", "metal", blob, stale_blob),
+        ("auto-bytes", "auto", bytearray(blob), bytearray(stale_blob)),
+    )
+    for label, engine, artifact, stale_artifact in forms:
         module = inv.compile_source(source, engine=engine)
         receipt = module.run_main(artifact=artifact, observe=True)
-        report[engine] = {"result": receipt["result"], "backends": receipt["backends"]}
+        report[label] = {"result": receipt["result"], "backends": receipt["backends"]}
         try:
-            module.run_main(artifact=stale)
+            module.run_main(artifact=stale_artifact)
         except inv.EngineError as error:
-            report[engine + "-stale"] = error.diagnostics
-            report[engine + "-stale-receipt"] = module.receipt()
+            report[label + "-stale"] = error.diagnostics
+            report[label + "-stale-receipt"] = module.receipt()
     try:
         inv.compile_source(source, engine="metal").run_main()
     except inv.EngineError as error:
@@ -127,7 +154,9 @@ def test_metal_artifact_runs_without_runtime_source(tmp_path):
     assert report["metal"] == {"result": 42, "backends": ["metal"]}
     assert report["auto"]["result"] == 42
     assert set(report["auto"]["backends"]) <= {"mir-serial", "cpu-parallel", "metal"}
-    for engine in ("metal", "auto"):
+    assert report["metal-bytes"] == report["metal"]
+    assert report["auto-bytes"]["result"] == 42
+    for engine in ("metal", "auto", "metal-bytes", "auto-bytes"):
         stale = report[engine + "-stale"]
         jsonschema.validate(stale, SCHEMA)
         assert stale["diagnostics"][0]["code"] == "DEVICE_TOOLCHAIN_MISMATCH"

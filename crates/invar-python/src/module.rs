@@ -4,21 +4,42 @@ use super::*;
 use invar::engine::Engine;
 use std::path::PathBuf;
 
-/// The file path of a compiled-ahead Metal library, as the CLI's `--artifact`
-/// takes it. In-memory bytes and bytes paths are refused, never guessed at.
-pub(crate) struct MetalArtifact(PathBuf);
+/// A compiled-ahead Metal library, as the CLI's `--artifact` takes it: a file
+/// path (`str` or `os.PathLike`) or the container itself (`bytes` or
+/// `bytearray`). Other types, including bytes paths and `memoryview`, are
+/// refused, never guessed at.
+pub(crate) enum MetalArtifact {
+    Path(PathBuf),
+    Bytes(Vec<u8>),
+}
+
+impl MetalArtifact {
+    /// The decoded, validated library, with the CLI's refusal on failure.
+    fn decode(&self) -> Result<invar::metal_aot::Image, invar::eval::EvalError> {
+        match self {
+            Self::Path(path) => invar::engine::metal_image_from_path(path),
+            Self::Bytes(bytes) => invar::engine::metal_image_from_bytes(bytes),
+        }
+    }
+}
 
 impl<'a, 'py> FromPyObject<'a, 'py> for MetalArtifact {
     type Error = PyErr;
 
     fn extract(value: Borrowed<'a, 'py, PyAny>) -> PyResult<Self> {
         let py = value.py();
+        if let Ok(bytes) = value.cast::<PyBytes>() {
+            return Ok(Self::Bytes(bytes.as_bytes().to_vec()));
+        }
+        if let Ok(bytes) = value.cast::<PyByteArray>() {
+            return Ok(Self::Bytes(bytes.to_vec()));
+        }
         let invalid = || {
             boundary_error(
                 py,
                 Class::Validation,
                 "TYPE_MISMATCH",
-                "artifact requires a str or os.PathLike file path of a compiled-ahead Metal library",
+                "artifact requires a str or os.PathLike file path, or bytes or bytearray holding a compiled-ahead Metal library",
             )
         };
         let path = py
@@ -26,7 +47,9 @@ impl<'a, 'py> FromPyObject<'a, 'py> for MetalArtifact {
             .call_method1("fspath", (&*value,))
             .map_err(|_| invalid())?;
         let path = path.cast::<PyString>().map_err(|_| invalid())?;
-        Ok(Self(PathBuf::from(path.to_str().map_err(|_| invalid())?)))
+        Ok(Self::Path(PathBuf::from(
+            path.to_str().map_err(|_| invalid())?,
+        )))
     }
 }
 
@@ -34,8 +57,8 @@ impl<'a, 'py> FromPyObject<'a, 'py> for MetalArtifact {
 impl CheckedModule {
     /// Run main with the selected engine. The receipt describes this completed
     /// invocation, never a predicted engine or a replay during explain.
-    /// `artifact` names a compiled-ahead Metal library for `metal` and `auto`,
-    /// forwarded to the CLI's `--artifact` path with its validation.
+    /// `artifact` names a compiled-ahead Metal library for `metal` and `auto`
+    /// (a path or the container's bytes), decoded with the CLI's validation.
     #[pyo3(signature = (*, fuel=Fuel(1_000_000), workers=None, observe=false, artifact=None))]
     pub(crate) fn run_main(
         &mut self,
@@ -121,13 +144,18 @@ impl CheckedModule {
                 }
                 json!({"requested_engine": self.engine, "backends": [self.engine], "result": document["result"]["value"]})
             } else {
+                let image = artifact
+                    .as_ref()
+                    .map(MetalArtifact::decode)
+                    .transpose()
+                    .map_err(|error| execution_error(py, error, &self.path, &self.source))?;
                 let receipt = invar::engine::run_mir(
                     &self.source,
                     &program,
                     engine,
                     fuel.0,
                     workers.map_or(1, |count| count.0),
-                    artifact.as_ref().map(|artifact| artifact.0.as_path()),
+                    image.as_ref(),
                 )
                 .map_err(|error| execution_error(py, error, &self.path, &self.source))?;
                 // The CLI CPU scheduler reports a serial guard path explicitly.
@@ -286,7 +314,9 @@ impl CheckedModule {
             .map(|(parameter, value)| match parameter.ty {
                 ScalarType::I32 => scalar_i32(py, &value).map(ScalarValue::I32),
                 ScalarType::U32 => scalar_u32(py, &value).map(ScalarValue::U32),
-                ScalarType::F32 => Err(invalid(py, Failure::Dtype)),
+                ScalarType::F32 | ScalarType::F64 | ScalarType::Bool => {
+                    Err(invalid(py, Failure::Dtype))
+                }
             })
             .collect::<PyResult<Vec<_>>>()?;
         let value = artifact

@@ -270,6 +270,57 @@ pub fn command(args: &[OsString]) -> i32 {
             json!(engine)
         };
         doc["placement"]["choices"] = json!(run.choices);
+        // The sort and spatial sites and the fsum receipts, in the shape the
+        // established path of this build records them (#50 part 2).
+        let device_build = cfg!(any(
+            feature = "cuda",
+            all(feature = "metal", target_os = "macos")
+        ));
+        let sites = run
+            .intrinsics
+            .iter()
+            .map(|site| {
+                let spatial = format!("{:?}", site.kind) == "Spatial";
+                let reason = match (device_build, spatial) {
+                    (false, _) => "cuda-feature-unavailable",
+                    (true, true) => invar::spatial::placement::UNMEASURED,
+                    (true, false) => "sort-cost-unmeasured",
+                };
+                let mut choice = json!({"function":site.function,"backend":"cpu-parallel","reason":reason,
+                    "span":{"start":site.span.start,"end":site.span.end}});
+                if !device_build {
+                    choice["kind"] = json!(format!("{:?}", site.kind));
+                }
+                if !(device_build && spatial) {
+                    choice["implementation"] = json!(site.implementation);
+                }
+                choice
+            })
+            .collect::<Vec<_>>();
+        // Metal has no binary64: f64 functions stay on the CPU, listed first as
+        // the established Metal explain lists them.
+        #[allow(unused_mut)]
+        let mut intrinsics = Vec::new();
+        #[cfg(all(feature = "metal", target_os = "macos"))]
+        intrinsics.extend(
+            invar::math::f64_sites(&program)
+                .into_iter()
+                .map(|(function, span)| {
+                    json!({"function":function,"span":{"start":span.start,"end":span.end},
+                "backend":"mir-serial","reason":invar::math::METAL_NO_F64})
+                }),
+        );
+        intrinsics.extend(sites);
+        doc["placement"]["intrinsics"] = json!(intrinsics);
+        doc["placement"]["reductions"] = run
+            .reductions
+            .iter()
+            .map(|r| {
+                json!({"function":r.function,"span":{"start":r.span.start,"end":r.span.end},
+                "backend":r.backend,"kind":r.family,"reason":r.reason,
+                "cost_ms":r.cost.map(|c|json!({"cpu":c.cpu_ms,"device":c.device_ms}))})
+            })
+            .collect();
         Ok((status, doc))
     };
     match run() {
@@ -309,14 +360,23 @@ pub fn command(args: &[OsString]) -> i32 {
                 report["auto_path"] = json!("placement");
                 // Retain the established device-explain schema; detailed profile
                 // costs live in the shared placement receipt beside it.
-                let choices=doc["placement"]["choices"].as_array().into_iter().flatten().map(|c|json!({
+                let mut choices=doc["placement"]["choices"].as_array().into_iter().flatten().map(|c|json!({
                     "function":c["function"],"span":c["span"],"backend":c["engine"],
                     "reason":if c["engine"]=="cpu" {"measured-cpu-cost"} else {"measured-device-cost"}
                 })).collect::<Vec<_>>();
+                for receipts in ["intrinsics", "reductions"] {
+                    let receipts = doc["placement"][receipts].as_array().into_iter().flatten();
+                    choices.extend(receipts.cloned());
+                }
                 if status == 0 {
                     report["device_schema"] = json!(invar::admission::DEVICE_SCHEMA);
                     report["device_execution"] = json!({"requested_engine":"auto","choices":choices,"result":doc["result"]["value"],
                     "module_cache_hits":0,"schedule_hint_hits":0,"schedule_hint_invalids":0});
+                    // Spatial family ids, as the established explain records them.
+                    invar::spatial::placement::annotate_device(
+                        &program,
+                        &mut report["device_execution"],
+                    );
                 }
                 report["execution"] = doc;
                 if report.to_string().len() > 1_000_000 {

@@ -10,6 +10,7 @@ use std::{
     process::Command,
     sync::atomic::{AtomicU64, Ordering},
 };
+mod memory;
 mod source;
 /// Exact refusal of an ABI12 (`cuda-owned-numeric-continuation-v1`) artifact.
 pub const UNSUPPORTED_ABI12: &str = "CPU device model: unsupported ABI 12 artifact";
@@ -64,6 +65,8 @@ impl CpuModel {
         fs::write(&source, code).map_err(|e| e.to_string())?;
         // The CPU limit bounds the compiler's own work whatever the host load;
         // the wall deadline only catches a compiler that stalls without it.
+        // Memory admission comes first, so a starved host queues compiles.
+        let _slot = memory::slot();
         let output = Command::new("timeout")
             .args(["--kill-after=2", COMPILE_WALL_SECONDS, "sh", "-c"])
             .arg(format!(

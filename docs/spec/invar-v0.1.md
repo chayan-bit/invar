@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27997 estimator=bytes/3 limit=30000
+Size record: tokens=28063 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -1035,7 +1035,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 10.4 Grasp poses and tool projection
 
-[N10.4.1] An attachable dynamic object may declare one `grasp pose xyz(...) quat(...);`, its object-from-grasp pose, which needs positive dynamic mass and collision geometry, and a duplicate, wrong translation unit or zero quaternion is a source error. `src/system/robot.rs`
+[N10.4.1] An attachable dynamic object may declare one `grasp pose xyz(...) quat(...);`, its object-from-grasp pose, which needs positive dynamic mass and collision geometry, and a duplicate, wrong translation unit or zero quaternion is a source error; without one the object-from-grasp pose is the identity. `src/system/robot.rs`
 [N10.4.2] MJCF places the weld site at the grasp, the tool goal is cube pose times object-from-grasp with a 100 mm world-Z pregrasp, and place uses the observed attachment and the unchanged final cube pose. `src/system/ros2/sequencer_node.rs::pregrasp`
 [N10.4.3] `invar-tool-projection-v2` records source-base from reference-base `B` and reference-tool from declared-tool `T`, so FK is `B * FK * T`, a goal becomes `inverse(B) * goal * inverse(T)`, a cube pose `inverse(B) * cube` and attachment `T * tool_from_cube`. `src/system/tool_projection.rs`
 
@@ -1055,7 +1055,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 [N11.2.1] The reference evaluator interprets checked source and is the oracle, and the typed MIR evaluator is an independent block interpreter that must agree on value, trap, steps and cleanup. `docs/mir-v1.md`
 [N11.2.2] MIR is verified at lowering and again at evaluation, and it is an internal schema and not a serialized format. `docs/mir-v1.md`
 [N11.2.3] The `native-serial` engine needs the `native` Cargo feature and LLVM 21, and otherwise reports `NATIVE_UNAVAILABLE`. `docs/native-toolchain-v1.md`
-[N11.2.4] Native arithmetic is checked against the exact i32 and u32 range, wrapping builtins truncate, and the LLVM IR carries no `nsw`, `nuw`, `noalias`, `inbounds` or `mustprogress`. `docs/native-toolchain-v1.md`
+[N11.2.4] Native arithmetic is checked against the exact i32 and u32 range, wrapping builtins truncate, and every `nsw`, `nuw`, `noalias` or `inbounds` in emitted LLVM IR carries an `!invar.fact` the promise audit proves, while fast-math flags, `mustprogress` and `llvm.assume` are always refused. `docs/native-toolchain-v1.md`
 [N11.2.5] Native and reference runs may use different fuel and are compared only for completed runs. `docs/native-toolchain-v1.md`
 
 ### 11.3 CPU parallel and admitted regions
@@ -1149,7 +1149,7 @@ fn main() -> i32 { return 0; }
 [N14.1.3] Selected exports have at most eight scalar parameters of `i32` or `u32`, and calls validate names, types, arity and fuel before any source work. `docs/scalar-exports-v1.md`
 [N14.1.4] `capabilities()` reports what this build supports, and it is the authority for the binding surface. `crates/invar-python/src/lib.rs::capabilities`
 [N14.1.5] The reference array entry copies, the GIL is not released, and external array owners, scheduled host arrays and `take` buffers are unavailable. `crates/invar-python/src/lib.rs::external_array_owners`
-[N14.1.6] Exports accept `read` and `mut` `Array<i32>`, `Array<u32>` and `Array<f32>` parameters, which `native-serial` passes zero-copy at the NumPy address with rollback on failure and the reference path copies. `crates/invar-python/src/lib.rs::array_export_paths`
+[N14.1.6] Exports accept `read` and `mut` `Array<i32>`, `Array<u32>`, `Array<f32>`, `Array<f64>` and `Array<Bool>` parameters, which `native-serial` passes zero-copy at the NumPy address with rollback on failure and the reference path copies. `crates/invar-python/src/lib.rs::array_export_paths`
 [N14.1.8] `CheckedModule.run_main` runs `main` on any engine of `reference`, `native-serial`, `cpu-parallel`, `auto`, `cuda` and `metal`, and `receipt()` returns the receipt of the last successful `run_main`. `crates/invar-python/src/module.rs::run_main`
 [N14.1.7] The private wheel qualification is Linux x86_64 with glibc 2.41 and CPython 3.12 only. `crates/invar-python/README.md`
 

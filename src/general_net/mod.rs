@@ -14,7 +14,6 @@ use crate::{
 pub mod compiled;
 mod compiler_child;
 pub mod coverage;
-mod cuda_owned_numeric_host;
 pub mod device_host;
 pub mod law_collective;
 pub mod normal_form;

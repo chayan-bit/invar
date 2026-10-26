@@ -18,7 +18,7 @@ use pyo3::{
     create_exception,
     exceptions::PyException,
     prelude::*,
-    types::{PyBytes, PyDict, PyFloat, PyInt, PyList, PyString, PyTuple},
+    types::{PyByteArray, PyBytes, PyDict, PyFloat, PyInt, PyList, PyString, PyTuple},
 };
 use serde_json::{Value, json};
 
@@ -476,14 +476,15 @@ fn capabilities(py: Python<'_>) -> PyResult<Py<PyAny>> {
             "scheduled_host_arrays":false,"gil_released":false,"external_array_owners":false,
             "reference_array_entry":"copying",
             "take_buffers":false,
-            "caller_output_buffers":"mut Array<i32|u32|f32> export parameters",
-            "array_exports":["read Array<i32>","read Array<u32>","mut Array<i32>","mut Array<u32>","read Array<f32>","mut Array<f32>"],
+            "caller_output_buffers":"mut Array<i32|u32|f32|f64|Bool> export parameters",
+            "array_exports":["read Array<i32>","read Array<u32>","mut Array<i32>","mut Array<u32>","read Array<f32>","mut Array<f32>","read Array<f64>","mut Array<f64>","read Array<Bool>","mut Array<Bool>"],
             "array_export_paths":{"native-serial":"zero-copy at the NumPy address, rollback on failure","reference":"copying"},
             "f32_arrays":"native-serial zero-copy read/mut (HA-1.3); reference paths copy",
+            "f64_bool_arrays":"native-serial zero-copy read/mut (HA-1.4); scalar f64 and returned arrays stay reference-only",
             "reference_v02_types":["f64","read Array<f64>","mut Array<f64>","read Array<Bool>","mut Array<Bool>"],
             "bool_arrays":"NumPy bool_ with every byte 0 or 1 (PY_ARRAY_BOOL_VALUE otherwise)",
             "returned_arrays":"copying reference path only (call_reference)",
-            "acceptance":"HA-1.3 native f32 arrays"
+            "acceptance":"HA-1.4 f64 and Bool arrays"
         }),
     )
 }

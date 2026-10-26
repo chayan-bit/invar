@@ -315,7 +315,7 @@ fn issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes() {
         document_codes(&document, &registered, &mut reached);
     }
     let mut required = source_codes();
-    // `invar-qualify` lives in the `invar-tools` package; tools/tests/qualify_cli.rs reaches these.
+    // `invar-qualify` lives in the `invar-tools` package; tools/tests/bench_tooling/qualify_cli.rs reaches these.
     required.remove("M5_USAGE");
     required.remove("M5_LIBRARY_PATH");
     #[cfg(not(feature = "native"))]

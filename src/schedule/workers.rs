@@ -10,7 +10,10 @@ use std::{
     thread,
 };
 
-use crate::laws::{self, Affine, Law};
+use crate::{
+    budget::{ByteBudget, Footprint, array_bytes},
+    laws::{self, Affine, Law},
+};
 
 /// Bound scoped thread creation even on very large hosts or explicit requests.
 pub const MAX_WORKERS: usize = 64;
@@ -303,7 +306,18 @@ pub(super) fn reduction_output(
     workers: usize,
     hooks: &Hooks,
 ) -> Result<Scheduled<u32>, Error> {
+    // ENG-18 (#101): a compiled kernel folds each chunk when one is
+    // available; chunks and their combine order are the same either way.
+    #[cfg(feature = "native")]
+    let kernel = crate::native::region::reduce_kernel(law, input.len());
     let (parts, ranges, joined) = parallel_chunks(input.len(), workers, hooks, |range| {
+        #[cfg(feature = "native")]
+        if let Some(part) = kernel
+            .as_ref()
+            .and_then(|kernel| kernel.reduce(&input[range.clone()]))
+        {
+            return Ok(part);
+        }
         Ok(input[range]
             .iter()
             .copied()
@@ -365,6 +379,20 @@ pub(super) fn scan_output(
         }
     }
     Ok((result, ranges, joined))
+}
+
+/// Whether a CPU map pass over `len` elements fits the standard host budget: `arrays` live `u32`
+/// arrays of that length (inputs, destinations, chunk results, joined values and staged copies).
+/// It replaces the old fixed `laws::MAX_ELEMENTS` for maps (#57) and agrees with `admission::Guard`.
+pub(super) fn map_pass_fits(len: usize, arrays: usize) -> bool {
+    host_fits(&ByteBudget::standard(), len, arrays)
+}
+
+pub(super) fn host_fits(budget: &ByteBudget, len: usize, arrays: usize) -> bool {
+    let bytes = array_bytes::<u32>(len).and_then(|array| array.checked_mul(arrays));
+    budget
+        .admit("cpu_map", &Footprint::ZERO.host(bytes))
+        .is_ok()
 }
 
 #[cfg(test)]

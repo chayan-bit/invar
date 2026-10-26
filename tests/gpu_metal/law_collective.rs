@@ -1,4 +1,4 @@
-//! Physical Metal qualification of the law-collective emitters; the CPU tests stay in `tests/net_law_collective.rs`.
+//! Physical Metal qualification of the law-collective emitters; the CPU tests stay in `tests/law_collective/net_law_collective.rs`.
 #[path = "../support/law_collective.rs"]
 mod law_support;
 use invar::eval;

@@ -62,6 +62,9 @@ assert info["copying"] is False and info["record_addresses"] == [xs.ctypes.data,
 - Validation, the alias rules, the borrow guards and the GIL are as for
   `call_reference` below. Exact read/read aliases are admitted.
 - HA-1.3 admits `read`/`mut Array<f32>` with NumPy `float32`, exact-bit rollback and strict-f32-v1 arithmetic.
+  HA-1.4 adds `read`/`mut Array<f64>` (NumPy `float64`, exact bits, 8-byte aligned) and `read`/`mut Array<Bool>`
+  (NumPy `bool_`, every byte 0 or 1, else `PY_ARRAY_BOOL_VALUE`). Scalar `f64` and `Bool` export parameters and
+  results are refused like scalar `f32`; function bodies may still use `f64`.
   `take` and returned arrays are not exported (`NATIVE_ABI`).
   Returned arrays use the copying `call_reference`. The public C ABI v1 is unchanged: arrays use the private
   record of `docs/host-array-arguments-ha1.md` section 12 (section 13).
@@ -189,12 +192,12 @@ Traps and fuel/resource exhaustion raise `TrapError` and `ResourceError`.
 `capabilities()["engine_features"]` reports compiled features, not live device availability.
 
 Build the binding with `--features native`, `--features cuda` or `--features metal` as needed.
-`run_main(artifact=path)` takes a compiled-ahead Metal library, as the CLI's `--artifact` does, for `metal` and `auto` (#46).
-Build it with `invar build PATH --target metal --output FILE`; `path` is a `str` or `os.PathLike` naming that file.
-The binding passes it to the same `invar::engine::run_mir` parameter, so validation and refusals match the CLI.
-A missing, unreadable or corrupt file raises `EngineError` / `DEVICE_TOOLCHAIN_MISMATCH` for `metal` and `auto`.
+`run_main(artifact=...)` takes a compiled-ahead Metal library, as the CLI's `--artifact` does, for `metal` and `auto` (#46).
+Build it with `invar build PATH --target metal --output FILE`; `artifact` is a `str` or `os.PathLike` naming that file, or the file's contents as `bytes` or `bytearray`.
+The binding decodes it (`invar::engine::metal_image` for a path, `metal_image_from_bytes` for bytes, the same size bound and checks) and passes the decoded image to `invar::engine::run_mir`, so validation and refusals match the CLI.
+A missing, unreadable or corrupt file, or corrupt, truncated or oversized bytes, raise `EngineError` / `DEVICE_TOOLCHAIN_MISMATCH` for `metal` and `auto`.
 A library built from another program raises the same error for `metal` and `auto`, including where `auto` runs a sort or spatial program on the CPU alone.
-In-memory bytes and bytes paths raise `ValidationError` / `TYPE_MISMATCH`.
+Any other type, including a path whose `__fspath__` returns `bytes`, a `memoryview`, a number or a list, raises `ValidationError` / `TYPE_MISMATCH`.
 Other engines refuse `artifact` with `EngineError` / `PY_ENGINE_UNAVAILABLE`.
 A build without Metal on macOS refuses it with `EngineError` / `METAL_UNAVAILABLE` before any backend is chosen, as the CLI does.
 Without `artifact`, forced `metal` raises `METAL_UNAVAILABLE` and `auto` stays on the CPU, unless the developer flag `INVAR_METAL_RUNTIME_SOURCE=1` allows runtime MSL compilation.
@@ -202,6 +205,7 @@ Without `artifact`, forced `metal` raises `METAL_UNAVAILABLE` and `auto` stays o
 ```python
 module = inv.compile_source(source, engine="metal")
 receipt = module.run_main(artifact="map.metallibc", observe=True)
+receipt = module.run_main(artifact=open("map.metallibc", "rb").read(), observe=True)
 ```
 
 `tests/test_metal_artifact.py` and the Metal case of `tests/test_engines.py` build their libraries with the CLI named by `INVAR_CLI` (built with `--features metal`).
@@ -210,7 +214,7 @@ Run them outside the Nix shell, where `xcrun metal` finds Apple's Metal toolchai
 CUDA requires the matching `invar-nvrtc` helper; set `INVAR_NVRTC_HELPER` to its explicit executable path when Python is not installed alongside it.
 Its NVRTC runtime must support the device's compute capability.
 
-HA-1.3 host exports remain exactly `reference` (copying) and `native-serial` (same-address `read`/`mut` i32/u32/f32 arrays, with rollback snapshots).
+HA-1.4 host exports remain exactly `reference` (copying) and `native-serial` (same-address `read`/`mut` i32/u32/f32/f64/Bool arrays, with rollback snapshots).
 An explicit `exports=[...]` selection with `cpu-parallel`, `auto`, `cuda` or `metal` raises `NATIVE_ABI` because those schedulers have no host-array entry point.
 These engines support whole-program `run_main`, not a new NumPy device ABI.
 `call_reference` remains explicitly copying even on a module with another selected engine, including f32 and returned arrays.
@@ -240,11 +244,11 @@ extension with `--features native` builds with maturin inside `nix develop .#pyt
 and runs `demo/zero_copy.py` and `tests/test_native_arrays.py`. The Linux qualification ran outside Nix (no Nix on the Linux
 host); the Linux x86_64 and aarch64 shells evaluate but were not built.
 
-## L1-06 criteria after HA-1.3
+## L1-06 criteria after HA-1.4
 
 | Criterion | Path and evidence |
 |---|---|
-| i32/u32/f32 read/mut arrays at the same address | Native-serial zero-copy; `test_native_arrays.py` and `test_native_f32_arrays.py` |
+| i32/u32/f32/f64/Bool read/mut arrays at the same address | Native-serial zero-copy; `test_native_arrays.py`, `test_native_f32_arrays.py` and `test_native_f64_bool_arrays.py` |
 | Empty and 1,000,000-element arrays | Same native path, copying reference comparator; empty records carry NULL |
 | Exact bits, NaN payloads, signed zero and rollback | Bit copies and integer snapshots; Rust/pytest compare original bytes after traps, every tested fuel prefix and tool errors |
 | Strict f32 arithmetic, infinities and gradual underflow | Existing strict-f32-v1; native/reference agreement and LLVM flag checks; arithmetic NaN payloads remain unobservable under that policy |

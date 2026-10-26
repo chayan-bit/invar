@@ -201,7 +201,7 @@ def measure(run, binding, mjmodel, pinmodel, spec):
 
 def main(repo, workspace, arm, runs, failed_run=None):
     config = workspace / "install/invar_cell_bringup/share/invar_cell_bringup/config"
-    binding_path = config / "sequencer-binding-v1.json"
+    binding_path = config / "sequencer-binding.json"
     binding = json.loads(binding_path.read_bytes())
     spec = next(a for a in json.loads((repo / "tests/fixtures/foreign-components/pinocchio_goldens.json").read_bytes())["arms"] if a["arm"] == arm)
     model_path = repo / "examples/cells/reach_place/assets/menagerie" / spec["model_file"]

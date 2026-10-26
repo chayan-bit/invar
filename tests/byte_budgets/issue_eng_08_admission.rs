@@ -5,7 +5,7 @@ use invar::{
     budget::{ByteBudget, Resource},
     check::check,
     front::parse,
-    laws, mir,
+    mir,
 };
 
 const MAP: &str = r#"
@@ -67,13 +67,15 @@ fn issue_eng_08_admission_guard_follows_the_host_budget() {
     assert!(!guard.evaluate_within(&lengths, &tight));
     assert_eq!(guard.select_plan_within(&lengths, &tight), "mir-serial");
     assert!(!guard.covers_whole_arrays_within(&lengths, &tight));
-    // The guard admits what the scheduler executes: up to `laws::MAX_ELEMENTS`, never past it,
-    // however large the budget (the scheduler and the device IR refuse a longer map).
-    let max = laws::MAX_ELEMENTS;
-    let roomy = ByteBudget::standard().with_host_bytes(usize::MAX / 2);
-    assert!(guard.evaluate_within(&[("xs", max), ("ys", max)], &roomy));
-    assert!(!guard.evaluate_within(&[("xs", max + 1), ("ys", max + 1)], &roomy));
-    assert!(!guard.evaluate_within(&[("xs", max), ("ys", max)], &ByteBudget::ZERO));
+    // No element-count cap: a map past the old one million elements is admitted by bytes alone,
+    // and refused only when its peak footprint (four arrays here) exceeds the budget.
+    let past = 1_000_001;
+    let lengths = [("xs", past), ("ys", past)];
+    let roomy = ByteBudget::standard().with_host_bytes(16 * past);
+    assert!(guard.evaluate_within(&lengths, &roomy));
+    let tight = ByteBudget::standard().with_host_bytes(16 * past - 1);
+    assert!(!guard.evaluate_within(&lengths, &tight));
+    assert!(!guard.evaluate_within(&lengths, &ByteBudget::ZERO));
 }
 
 /// The least analysis budget under which `source` analyzes, found by bisection (admission is

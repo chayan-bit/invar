@@ -1,0 +1,10 @@
+fn main() -> i32 {
+    let a: Array<f32> = filled_f32(70000u32, 0.5);
+    let b: Array<f32> = filled_f32(70000u32, 2.0);
+    let s = sum_tree(a);
+    let d = dot_exact(a, b);
+    if s != 35000.0 or d != 70000.0 { return 1; }
+    var xs: Array<u32> = [0u32, 1u32];
+    for i in 0u32..len(xs) { xs[i] = wrapping_add(xs[i], 1u32); }
+    return 42;
+}

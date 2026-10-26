@@ -165,6 +165,8 @@ pub(crate) fn scalar_type_name(ty: ScalarType) -> &'static str {
         ScalarType::I32 => "i32",
         ScalarType::U32 => "u32",
         ScalarType::F32 => "f32",
+        ScalarType::F64 => "f64",
+        ScalarType::Bool => "Bool",
     }
 }
 

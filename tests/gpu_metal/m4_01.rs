@@ -1,7 +1,7 @@
 //! M4-01 strict binary32 contraction on Metal, from the same verified device
 //! plan as CUDA. `issue_m4_01_metal_gpu_*` tests need a real Apple7+ GPU and are ignored by
 //! default: run them with `--features metal -- --ignored` on the Mac. The CPU emission
-//! checks live in `tests/issue_m4_01_metal_emission.rs`.
+//! checks live in `tests/device/issue_m4_01_metal_emission.rs`.
 #[path = "../issue_m4_01_device/corpus.rs"]
 mod corpus;
 #[path = "../issue_m4_01_device/ops.rs"]

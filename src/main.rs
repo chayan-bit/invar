@@ -705,14 +705,17 @@ fn explain(path: &OsString, engine: Option<&str>, artifact: Option<&OsString>) -
                 let Some(selected) = invar::engine::Engine::parse(engine) else {
                     return usage();
                 };
-                let device_result = invar::engine::run_mir(
-                    &source,
-                    &lowered,
-                    selected,
-                    1_000_000,
-                    1,
-                    artifact.map(std::path::Path::new),
-                );
+                let device_result = invar::engine::metal_image(artifact.map(std::path::Path::new))
+                    .and_then(|image| {
+                        invar::engine::run_mir(
+                            &source,
+                            &lowered,
+                            selected,
+                            1_000_000,
+                            1,
+                            image.as_ref(),
+                        )
+                    });
                 match device_result {
                     Ok(device) => {
                         let mut device = invar::engine::device_document(&device);
@@ -894,14 +897,11 @@ fn execute_scheduled(
         Ok(program) => program,
         Err(error) => return report_front(FrontError::tool(error.code, error.message), path, json),
     };
-    match invar::engine::run_mir(
-        source,
-        &program,
-        engine,
-        fuel,
-        workers,
-        artifact.map(std::path::Path::new),
-    ) {
+    let image = match invar::engine::metal_image(artifact.map(std::path::Path::new)) {
+        Ok(image) => image,
+        Err(error) => return auto_command::report(error, path, json, engine),
+    };
+    match invar::engine::run_mir(source, &program, engine, fuel, workers, image.as_ref()) {
         Ok(receipt) => {
             if json {
                 let mut diagnostics = Vec::new();

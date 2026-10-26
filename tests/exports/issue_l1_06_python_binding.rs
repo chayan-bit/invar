@@ -303,3 +303,38 @@ fn issue_l1_06_python_binding_missing_device_features_never_replay() {
         ));
     }
 }
+
+#[test]
+fn issue_l1_06_python_binding_metal_artifact_bytes_are_refused_like_a_file() {
+    use invar::engine::{metal_image, metal_image_from_bytes};
+    use invar::eval::EvalError;
+    use invar::metal_aot::MAX_CONTAINER_BYTES;
+    let refused = |result: Result<_, EvalError>| match result {
+        Err(EvalError::Tool { code, message }) => {
+            assert_eq!(code, "DEVICE_TOOLCHAIN_MISMATCH");
+            assert!(message.starts_with("compiled-ahead Metal library refused"));
+            message
+        }
+        other => panic!("expected a refusal, got {:?}", other.map(|_| ())),
+    };
+    let directory =
+        std::env::temp_dir().join(format!("invar-l1-06-metal-bytes-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let cases: [&[u8]; 4] = [b"", b"INVGMETL", b"not a library at all", &[0; 56]];
+    for (index, bytes) in cases.iter().enumerate() {
+        let from_bytes = refused(metal_image_from_bytes(bytes).map(|_| ()));
+        let file = directory.join(format!("case{index}.metallibc"));
+        std::fs::write(&file, bytes).unwrap();
+        #[cfg(unix)]
+        std::fs::set_permissions(&file, std::os::unix::fs::PermissionsExt::from_mode(0o600))
+            .unwrap();
+        // The file route refuses the same bytes with the same code; its message may name the I/O guard.
+        refused(metal_image(Some(&file)).map(|_| ()));
+        assert!(!from_bytes.is_empty());
+    }
+    // One byte past the container bound is refused before any parsing.
+    let oversized = vec![0u8; MAX_CONTAINER_BYTES + 1];
+    assert!(refused(metal_image_from_bytes(&oversized).map(|_| ())).contains("Size"));
+    assert!(metal_image(None).unwrap().is_none());
+    std::fs::remove_dir_all(&directory).unwrap();
+}

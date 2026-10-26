@@ -137,8 +137,8 @@ fn arguments(parameters: &[invar::exports::ExportParameter], variant: usize) -> 
         .iter()
         .enumerate()
         .map(|(index, parameter)| match parameter.ty {
-            ScalarType::F32 => unreachable!(
-                "f32 array parameters require the host-array corpus, not scalar invoke"
+            ScalarType::F32 | ScalarType::F64 | ScalarType::Bool => unreachable!(
+                "f32/f64/bool array parameters require the host-array corpus, not scalar invoke"
             ),
             ScalarType::I32 => ScalarValue::I32(match variant {
                 0 => 0,
@@ -216,13 +216,16 @@ fn invoke_case(
     let mut signed = vec![vec![variant as i32 - 3; 4]; signature.params.len()];
     let mut unsigned = vec![vec![variant as u32; 4]; signature.params.len()];
     let mut floats = vec![vec![variant as f32 - 3.0; 4]; signature.params.len()];
+    let mut doubles = vec![vec![variant as f64 - 3.0; 4]; signature.params.len()];
+    let mut flags = vec![vec![variant.is_multiple_of(2); 4]; signature.params.len()];
     let mut args = Vec::new();
-    for (((p, i), u), f) in signature
+    for ((((p, i), u), f), (d, b)) in signature
         .params
         .iter()
         .zip(&mut signed)
         .zip(&mut unsigned)
         .zip(&mut floats)
+        .zip(doubles.iter_mut().zip(&mut flags))
     {
         args.push(match (p.array, p.ty) {
             (None, _) => match scalars.next().unwrap() {
@@ -235,6 +238,10 @@ fn invoke_case(
             (Some(ArrayMode::Mut), ScalarType::I32) => A::Mut(M::I32(i)),
             (Some(ArrayMode::Mut), ScalarType::U32) => A::Mut(M::U32(u)),
             (Some(ArrayMode::Mut), ScalarType::F32) => A::Mut(M::Float32(f)),
+            (Some(ArrayMode::Read), ScalarType::F64) => A::Read(R::Float64(d)),
+            (Some(ArrayMode::Mut), ScalarType::F64) => A::Mut(M::Float64(d)),
+            (Some(ArrayMode::Read), ScalarType::Bool) => A::Read(R::Bool(b)),
+            (Some(ArrayMode::Mut), ScalarType::Bool) => A::Mut(M::Bool(b)),
         });
     }
     let result = artifact
@@ -243,7 +250,9 @@ fn invoke_case(
     drop(args);
     let mut result = result_value(result, artifact);
     result["array_outputs"] = json!({"i32": signed, "u32": unsigned,
-        "f32_bits": floats.iter().map(|v| v.iter().map(|x| x.to_bits()).collect::<Vec<_>>()).collect::<Vec<_>>()});
+        "f32_bits": floats.iter().map(|v| v.iter().map(|x| x.to_bits()).collect::<Vec<_>>()).collect::<Vec<_>>(),
+        "f64_bits": doubles.iter().map(|v| v.iter().map(|x| x.to_bits()).collect::<Vec<_>>()).collect::<Vec<_>>(),
+        "bool": flags});
     result
 }
 

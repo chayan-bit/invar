@@ -487,7 +487,7 @@ pub fn observe(program: &CheckedProgram, fuel_limit: u64) -> Observation {
 
 pub mod host_read;
 pub mod named;
-mod stack;
+pub(crate) mod stack;
 
 include!("eval/engine.rs");
 
