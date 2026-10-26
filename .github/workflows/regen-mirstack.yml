@@ -1,0 +1,36 @@
+name: regen-mirstack (temporary, MIR entry stack repro)
+
+on:
+  push:
+    branches: [fix/mir-eval-entry-stack]
+
+permissions:
+  contents: read
+
+jobs:
+  repro:
+    name: Unoptimized dev repro (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: 0
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - name: Build the test binaries (dev profile, opt-level 0)
+        run: cargo test --locked --no-run --lib --test limits
+      - name: Every MIR entry on a 2 MiB thread (library test)
+        if: always()
+        run: cargo test --locked --lib -- --exact mir_eval::diagnostic_tests::issue_eval_call_depth_limit_is_typed_in_every_mir_entry_on_a_default_thread
+      - name: Scheduler entry on a 2 MiB thread (integration test)
+        if: always()
+        run: cargo test --locked --test limits -- --exact issue_eval_call_depth_stack::issue_eval_call_depth_limit_is_typed_on_a_default_thread
