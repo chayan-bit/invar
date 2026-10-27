@@ -26,6 +26,14 @@ Optional tools:
 - [just](https://github.com/casey/just) runs the recipes in the [justfile](justfile).
 - [cargo-nextest](https://nexte.st/) 0.9.146 runs the suite in parallel with the profiles in [nextest.toml](.config/nextest.toml).
 
+On Windows (MSVC or `x86_64-pc-windows-gnullvm`):
+
+- MSVC builds compile the vendored CORE-MATH sources with clang-cl: install the Visual Studio component "C++ Clang Compiler for Windows", or set `CC=clang-cl`.
+- Tests that build C++ harnesses need a Clang `c++` on PATH; CI uses [llvm-mingw](https://github.com/mstorsjo/llvm-mingw) 20261006 (ucrt, x86_64).
+- Tests that bound child processes need GNU `timeout` on PATH ahead of `System32`; Git for Windows provides it in `usr\bin`.
+- Clone with `git -c core.symlinks=true clone ...` (Developer Mode or an elevated shell), since some fixtures are symlinks.
+- A few tests drive POSIX-only programs and are ignored on Windows with the reason in their `ignore` attribute.
+
 ## Making a change
 
 1. Implement the smallest complete behavior, including diagnostics and input limits.
@@ -61,13 +69,16 @@ The full suite is large and slow on a laptop; `just test-quick` is a good first 
 
 ## Continuous integration
 
-Every pull request runs [ci.yml](.github/workflows/ci.yml) on GitHub-hosted Linux runners, on CPU only:
+Every pull request runs [ci.yml](.github/workflows/ci.yml) on GitHub-hosted Linux and Windows runners, on CPU only:
 
 - **Lint**: `cargo fmt` and Clippy with warnings denied.
 - **Check**: `cargo check --all-targets`.
 - **Hygiene**: the file-size ratchet, the native host bundle check and the script self-tests.
 - **Test shards 1 to 4**: the full suite split four ways, plus doctests.
 - **Test (CPU-model corpus)**: the device CPU-model corpus test, run alone.
+- **Windows (msvc 1/4 to 4/4, gnullvm build)**: the default-feature suite on `windows-latest` with MSVC in four shards, a gnullvm build of every test target, and the CORE-MATH tests on both.
+  It always runs the pull-request corpus sample.
+  One test is excluded there: the `system gen ros2` tree hash for `cell-ur5e.inv` depends on the platform libm's `asin`, which differs from glibc by one ulp on Windows.
 
 Pull requests run a deterministic 1-in-8 sample of the corpus sweeps that keeps every corpus directory; pushes to main and `just test` run the whole corpus (`INVAR_FULL_CORPUS=1`).
 

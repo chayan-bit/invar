@@ -3,8 +3,8 @@
 //! reassociation); no Invar evaluator or engine is involved. The shared
 //! pieces are the library functions the language contract defines: `exp` is
 //! the correctly rounded `invar-math-cr-v1` result (one ulp of `f64` libm,
-//! checked in `tests/bench_tooling/issue_eng_10_domain_suites.rs`), `sin` and `cos` are the
-//! pinned `invar-trig-f32-v1` sequence (within its 2 ulp bound of libm).
+//! checked in `tests/bench_tooling/issue_eng_10_domain_suites.rs`), and so are `sin` and
+//! `cos`.
 use invar::{
     math::{self, MathFn},
     numeric_contract::F32Bits,
@@ -286,15 +286,12 @@ pub fn grid_bfs(walls: &[f32], n: usize) -> Vec<u32> {
     dist
 }
 
-/// f32 `sin` and `cos` are `invar-trig-f32-v1` today (C4 interim, not
-/// correctly rounded), so the oracle takes the contract's own sequence;
-/// the test file bounds both against `f64` libm at the contract's 2 ulp.
 pub fn sin(x: f32) -> f32 {
-    f32::from_bits(F32Bits::from_bits(x.to_bits()).sin().to_bits())
+    cr(MathFn::Sin, x)
 }
 
 pub fn cos(x: f32) -> f32 {
-    f32::from_bits(F32Bits::from_bits(x.to_bits()).cos().to_bits())
+    cr(MathFn::Cos, x)
 }
 
 pub fn batched_fk(q: &[f32], n: usize, links: usize) -> Vec<f32> {

@@ -49,7 +49,6 @@ pub mod summary;
 pub mod target;
 pub mod tc;
 pub mod transpose;
-pub mod trig_f32;
 pub mod v2;
 pub use collective::{Coefficient, Collective, CollectiveKind, PrefixMode, ReduceLaw};
 pub use msl::{METAL_SCAN_CHUNK_BLOCKS, PROBE_FUNCTION, PROBE_MSL, emit_msl, metal_functions};

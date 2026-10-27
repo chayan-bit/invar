@@ -446,7 +446,7 @@ impl CudaDevice {
             return Err(Error::Limit);
         }
         let report = self.strict_f32_probe(compiler)?;
-        if !report.admits_strict() || !invar_device::f32_ops::admits_trig(p, report) {
+        if !report.admits_strict() || !invar_device::f32_ops::admits_sqrt(p, report) {
             return Err(Error::Unavailable);
         }
         if p.output_len() == 0 {

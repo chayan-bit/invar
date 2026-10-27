@@ -173,8 +173,7 @@ digit         = "0" .. "9" ;
    invar-math-cr-v1 reserves sqrt, cbrt, hypot, sin, cos, tan, asin, acos,
    atan, atan2, sinh, cosh, tanh, exp, exp2, expm1, log, log2, log10, log1p,
    pow, floor, ceil, trunc, round, abs, copysign, min and max, overloaded on
-   f32 or f64 and correctly rounded, except f32 sin, cos and sqrt, which
-   follow invar-trig-f32-v1 on every engine today (issue #48).
+   f32 or f64 and correctly rounded on every engine.
    sort, sort_by_key, argsort, segmented_sort are reserved ordinary calls.
    Comparison chaining is syntactically excluded. Range syntax exists only
    in for statements. Assignment is a statement, not an expression.

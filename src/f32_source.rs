@@ -171,8 +171,7 @@ fn expression(
                     ("f32_from_u32", [a]) => Node::FromU32(*a),
                     ("f32_from_i32", [a]) => Node::FromI32(*a),
                     ("i32_from_f32", [a]) => Node::TruncI32(*a),
-                    ("sin", [a]) => Node::Sin(*a),
-                    ("cos", [a]) => Node::Cos(*a),
+                    // No device lowers cr-v1 `sin` or `cos` yet: such regions stay on the CPU.
                     ("sqrt", [a]) => Node::Sqrt(*a),
                     _ => return None,
                 }

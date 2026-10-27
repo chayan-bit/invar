@@ -609,7 +609,7 @@ fn placement_documents_record_numeric_contracts() {
     )
     .unwrap();
     let host = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);
-    let expected = json!({"binary64": "strict-f64-v1", "math": "invar-math-cr-v1", "trig": "invar-trig-f32-v1"});
+    let expected = json!({"binary64": "strict-f64-v1", "math": "invar-math-cr-v1"});
     for explain in [false, true] {
         let (status, document) = auto_cli(&dir, &["--host-class", &host], explain);
         assert_eq!(status, 0, "{document}");

@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=28063 estimator=bytes/3 limit=30000
+Size record: tokens=28051 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -515,7 +515,7 @@ fn main() -> i32 {
 [N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/m4_numeric_layout/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_strict_arithmetic_and_ieee_predicates`
 [N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/m4_numeric_layout/issue_m4_01_source_f32.rs::issue_m4_01_source_f32_rejects_implicit_conversion_and_remainder`
 [N5.8.5] `i32_from_f32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::i32_from_f32`
-[N5.8.6] On `f32`, `sqrt`, `sin` and `cos` follow `invar-trig-f32-v1` on every engine today, where `sqrt` is correctly rounded and `sin` and `cos` are a fixed operation sequence with the same 32-bit word everywhere, and moving them to `invar-math-cr-v1` is tracked by issue #48. `src/math.rs` `docs/trig-f32-v1.md`
+[N5.8.6] On `f32`, `sqrt`, `sin` and `cos` are `invar-math-cr-v1` like every library function, and because no device lowers `sin` or `cos` yet, a CUDA or Metal request keeps each function that calls them on the CPU with the reason `math-cr-v1-device-unavailable`. `src/math.rs::cr_v1_device_sites` `docs/numeric.md`
 
 ```invar outcome=value:7
 fn nudge(x: f32) -> f32 { return x + 0.2; }
@@ -1266,7 +1266,7 @@ fn main() -> i32 {
 [NB.4.1] `f64` is a primitive beside `f32` under `strict-f64-v1`, with `Array<f64>`, record and payload fields, round to nearest even, gradual underflow and no contraction except an explicit `fma`. `src/numeric_contract/binary64.rs`
 [NB.4.2] A decimal literal may carry an `f32` or `f64` suffix, and an unsuffixed literal takes its float type from context and otherwise defaults to `f32`. `spec/grammar.ebnf`
 [NB.4.3] Conversions are explicit intrinsics such as `f64_from_f32`, `f32_from_f64` and `i32_from_f64`, `filled_f64(n, x)` builds an owned array of `n` copies, and a float to integer conversion of NaN or an out-of-range value traps with `INTEGER_OVERFLOW`. `src/eval/floating.rs::i32_from_f64`
-[NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded, except the `f32` functions of N5.8.6. `src/math.rs`
+[NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded. `src/math.rs`
 [NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `src/math.rs`
 [NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `src/engine.rs::metal-no-f64`
 [NB.4.7] An `extern c fn` of N7.3.1 also accepts `f64` as a value argument, the result `T` stays `i32`, `u32`, `Bytes` or `String`, and an `f64` result or any `f32` argument or result is `TYPE_MISMATCH`. `tests/language/issue_l1_04_bytes_strings_cabi.rs::v02_f64_foreign_scalar_argument_matches_its_oracle` `src/check.rs::valid_result`
