@@ -240,9 +240,10 @@ def host_probe() -> dict:
 class Session:
     def __init__(self, repo: Path, root: Path, dry_run: bool):
         self.repo = repo
-        self.root = root
-        self.scratch = root / "scratch"
-        self.evidence = root / "evidence"
+        # Commands run with cwd=repo, so a relative root must be anchored to the caller's cwd.
+        self.root = root.resolve()
+        self.scratch = self.root / "scratch"
+        self.evidence = self.root / "evidence"
         self.checks_dir = self.evidence / "checks"
         self.dry_run = dry_run
         self.checks: list[dict] = []
@@ -1572,7 +1573,8 @@ def do_cleanup(session: Session) -> dict:
     root = session.root.resolve()
     if scratch != root and root not in scratch.parents:
         raise VerifyError(f"refusing to clean {scratch}; it is not under {root}")
-    if session.repo.resolve() in scratch.parents or scratch == session.repo.resolve():
+    repo = session.repo.resolve()
+    if scratch == repo or repo in scratch.parents or scratch in repo.parents:
         raise VerifyError(f"refusing to clean {scratch}; it overlaps the repo")
     planned = []
     if scratch.exists():
