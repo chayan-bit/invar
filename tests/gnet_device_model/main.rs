@@ -1,6 +1,9 @@
 #[allow(dead_code)]
 #[path = "../../test-support/child_deadline.rs"]
 mod child_deadline;
+#[allow(dead_code)]
+#[path = "../../test-support/gnet_words.rs"]
+mod gnet_words;
 #[path = "../support/gnet_device.rs"]
 mod device;
 mod epoch_model;

@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net};
 use std::{
@@ -145,34 +145,11 @@ int main(int argc,char** argv) {{
             })
             .collect();
         let words = self.run(&inputs, limits);
-        let (status, start, end) = match &expected.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IndexOutOfBounds => 9,
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    _ => panic!("trap"),
-                },
-                span.start as i128,
-                span.end as i128,
-            ),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "ARRAY_SIZE_LIMIT",
-                ..
-            }) => (10, 0, 0),
-            Err(_) => (
-                match expected.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    _ => panic!("{expected:?}"),
-                },
-                0,
-                0,
-            ),
-        };
-        assert_eq!((words[0], words[2], words[3]), (status, start, end));
+        let (status, start, end) = gnet_words::status(&expected);
+        assert_eq!(
+            (words[0], words[2], words[3]),
+            (i128::from(status), i128::from(start), i128::from(end))
+        );
         assert_eq!(
             &words[4..9],
             &[
@@ -187,15 +164,7 @@ int main(int argc,char** argv) {{
         for event in &expected.events {
             assert_eq!(
                 &words[offset..offset + 7],
-                &[
-                    i128::from(event.kind == oracle::EventKind::Complete),
-                    event.frame as i128,
-                    event.activation as i128,
-                    event.token.block.function as i128,
-                    event.token.block.block as i128,
-                    event.token.position as i128,
-                    event.rule as i128
-                ]
+                &gnet_words::event(event).map(i128::from)
             );
             offset += 7;
         }
@@ -533,15 +502,7 @@ fn issue_gnet_06_runtime_inputs_storage_budgets_and_presence_boundary() {
         for (i, event) in normal.events[..count].iter().enumerate() {
             assert_eq!(
                 &words[10 + i * 7..17 + i * 7],
-                &[
-                    i128::from(event.kind == oracle::EventKind::Complete),
-                    event.frame as i128,
-                    event.activation as i128,
-                    event.token.block.function as i128,
-                    event.token.block.block as i128,
-                    event.token.position as i128,
-                    event.rule as i128
-                ]
+                &gnet_words::event(event).map(i128::from)
             );
         }
         if status == 13 {

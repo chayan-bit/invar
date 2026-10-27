@@ -7,7 +7,7 @@
 //! that are checked after every epoch, and the model runs under ASan and UBSan.
 //! This is never a GPU, driver, memory-model or performance claim.
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 
 use invar::{
     check, eval, front,
@@ -443,28 +443,8 @@ pub fn expected(
     l: oracle::Limits,
 ) -> (Vec<i64>, Vec<u64>) {
     let o = oracle::observe_call(net, &net.verify().unwrap(), entry, args, l).unwrap();
-    let (status, result, start, end) = match &o.semantic.result {
-        Ok(eval::Value::F32(x)) => (0, i64::from(x.to_bits()), 0, 0),
-        Ok(eval::Value::I32(n)) => (0, i64::from(*n), 0, 0),
-        Err(eval::EvalError::Trap { category, span }) => {
-            let status = match category {
-                eval::TrapCategory::IntegerOverflow => 1,
-                eval::TrapCategory::DivisionByZero => 2,
-                eval::TrapCategory::IndexOutOfBounds => 9,
-                other => panic!("{other:?}"),
-            };
-            (status, 0, span.start as i64, span.end as i64)
-        }
-        Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0, 0),
-        Err(eval::EvalError::Tool { code, .. }) => match (o.failure, *code) {
-            (Some(oracle::ToolFailure::TransitionLimit), _) => (5, 0, 0, 0),
-            (Some(oracle::ToolFailure::TraceLimit), _) => (6, 0, 0, 0),
-            (None, "CALL_DEPTH_LIMIT") => (4, 0, 0, 0),
-            (None, "ARRAY_SIZE_LIMIT") => (10, 0, 0, 0),
-            other => panic!("{other:?}"),
-        },
-        x => panic!("{x:?}"),
-    };
+    let (status, start, end) = gnet_words::status(&o);
+    let result = gnet_words::result(&o);
     let header = vec![
         status,
         result,
@@ -476,20 +456,6 @@ pub fn expected(
         o.events.len() as i64,
         o.semantic.cleanup_trace.len() as i64,
     ];
-    let trace = o
-        .events
-        .iter()
-        .flat_map(|e| {
-            [
-                u64::from(e.kind == oracle::EventKind::Complete),
-                e.frame,
-                e.activation,
-                e.token.block.function as u64,
-                e.token.block.block as u64,
-                e.token.position as u64,
-                e.rule as u64,
-            ]
-        })
-        .collect();
+    let trace = o.events.iter().flat_map(gnet_words::event).collect();
     (header, trace)
 }

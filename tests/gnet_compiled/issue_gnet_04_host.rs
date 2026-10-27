@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+use crate::gnet_words;
 use invar::{
     eval::Value,
     general_net::{
@@ -68,21 +69,7 @@ fn ordinary_source_runtime_inputs_and_continuations_match_ordered_oracle() {
             assert_eq!(got.steps, reference.semantic.steps_used);
             assert_eq!(got.transitions, reference.transitions);
             assert_eq!(got.max_frames, reference.max_frames);
-            let events: Vec<[u64; 7]> = reference
-                .events
-                .iter()
-                .map(|e| {
-                    [
-                        u64::from(e.kind == oracle::EventKind::Complete),
-                        e.frame,
-                        e.activation,
-                        e.token.block.function as u64,
-                        e.token.block.block as u64,
-                        e.token.position as u64,
-                        e.rule as u64,
-                    ]
-                })
-                .collect();
+            let events: Vec<[u64; 7]> = reference.events.iter().map(gnet_words::event).collect();
             assert_eq!(got.events, events);
             assert_eq!(session.submitted(), session.completed());
             assert!(session.submit().is_err());
@@ -159,18 +146,7 @@ fn original_traps_and_every_source_fuel_prefix_match_actual_device_body() {
                 assert_eq!(got.transitions, reference.transitions);
                 assert_eq!(got.events.len(), reference.events.len());
                 for (actual, event) in got.events.iter().zip(reference.events) {
-                    assert_eq!(
-                        *actual,
-                        [
-                            u64::from(event.kind == oracle::EventKind::Complete),
-                            event.frame,
-                            event.activation,
-                            event.token.block.function as u64,
-                            event.token.block.block as u64,
-                            event.token.position as u64,
-                            event.rule as u64
-                        ]
-                    );
+                    assert_eq!(*actual, gnet_words::event(&event));
                 }
                 drop(session.reclaim().unwrap());
             }

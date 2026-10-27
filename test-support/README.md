@@ -90,3 +90,10 @@ Count floors written for the whole corpus are divided by 8 for the sample; agree
 
 `term_oracle.rs` is test support, included by path, with no production API.
 It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `issue_m1_04`, `issue_m1_05` and `issue_m4_07_typed_bounded_scan` use as independent oracles.
+
+## GNET oracle words
+
+`gnet_words.rs` maps one net-oracle observation to the compiled GNET ABI words.
+`status` returns the `compiled::Status` code and trap span, `result` the scalar result word, and `event`/`event_i64` the seven words of one trace event.
+It is included by path into the GNET host, CPU-model and provenance test binaries and the bench CPU corpus, each of which keeps its own header layout and comparisons.
+The mapping panics on any result no compiled ABI encodes, so an unexpected oracle outcome still fails the test.
