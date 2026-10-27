@@ -105,6 +105,75 @@ jobs:
         if: matrix.doctests
         run: cargo test --locked --doc
 
+  # Windows on CPU: the default-feature suite on MSVC in four shards, and a
+  # gnullvm build of every test target. C++ test harnesses compile with
+  # llvm-mingw's clang (pinned and checksummed below); children are bounded
+  # with Git for Windows' GNU timeout. Every run takes the pull-request corpus
+  # sample, so a push to main sees the same Windows result as its pull request;
+  # the Linux shards run the whole corpus on main.
+  # Excluded: issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output.
+  # `system gen ros2` derives the UR5e base RPY with the platform libm's asin,
+  # which differs from glibc by one ulp, so that tree hash is Linux-specific.
+  windows:
+    name: Windows (${{ matrix.name }})
+    runs-on: windows-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: msvc 1/4
+            args: --partition count:1/4
+            math: true
+          - name: msvc 2/4
+            args: --partition count:2/4
+          - name: msvc 3/4
+            args: --partition count:3/4
+          - name: msvc 4/4
+            args: --partition count:4/4
+          - name: gnullvm build
+            target: x86_64-pc-windows-gnullvm
+            args: --no-run
+            math: true
+    env:
+      INVAR_CI_PROFILE: debug
+      INVAR_FULL_CORPUS: 0
+      TARGET: ${{ matrix.target }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out symlinks as links
+        run: git config --global core.symlinks true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install llvm-mingw 20261006 (C++ harness compiler)
+        env:
+          LLVM_MINGW: llvm-mingw-20261006-ucrt-x86_64
+          SHA256: 317492c456aa27ee607a5919f1d2d38dcdc1112516a24d0bf4b00d078f52d17a
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/$LLVM_MINGW.zip" "https://github.com/mstorsjo/llvm-mingw/releases/download/20261006/$LLVM_MINGW.zip"
+          echo "$SHA256  $RUNNER_TEMP/$LLVM_MINGW.zip" | sha256sum -c -
+          7z x -o"$RUNNER_TEMP" "$RUNNER_TEMP/$LLVM_MINGW.zip" > /dev/null
+          cygpath -w "$RUNNER_TEMP/$LLVM_MINGW/bin" >> "$GITHUB_PATH"
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install && if [ -n "$TARGET" ]; then rustup target add "$TARGET"; fi
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
+        with:
+          tool: nextest@0.9.146
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: windows-${{ matrix.target || 'msvc' }}
+      - name: CORE-MATH (invar-math) tests
+        if: matrix.math
+        run: cargo test --locked ${TARGET:+--target "$TARGET"} -p invar-math
+      - name: Test (default features, ci-debug profile)
+        run: >-
+          cargo nextest run --locked ${TARGET:+--target "$TARGET"} --profile ci --cargo-profile ci-debug
+          -p invar -p invar-tools ${{ matrix.args }}
+          -E 'not test(=issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output)'
+
   # The jobs below compile the feature-gated code that the default-feature jobs never build.
   native:
     name: Build (native)
