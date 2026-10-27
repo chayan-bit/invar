@@ -182,7 +182,7 @@ extern component fixture_planner {{
 }}
 "#,
 extension=std::env::consts::DLL_EXTENSION,
-fk_record=fk_evidence.strip_prefix(&root).unwrap().to_str().unwrap()
+fk_record=fk_evidence.strip_prefix(&root).unwrap().to_str().unwrap().replace('\\', "/")
 )).unwrap();
     {
         let p = root.join("planner.inv");

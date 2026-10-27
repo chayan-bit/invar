@@ -170,18 +170,24 @@ pub(crate) fn import_mjcf(path: &Path) -> Result<(String, Vec<String>), XmlError
     } else {
         return Err(fail("S1606", "unsupported or ambiguous MJCF asset license"));
     };
-    let current =
-        std::env::current_dir().map_err(|_| fail("S1605", "current directory is unavailable"))?;
+    // Canonical on both sides: a Windows canonical path is verbatim (`\\?\`).
+    let current = std::env::current_dir()
+        .and_then(|dir| dir.canonicalize())
+        .map_err(|_| fail("S1605", "current directory is unavailable"))?;
     let full_path = path
         .canonicalize()
         .map_err(|_| fail("S1605", "MJCF source file is missing"))?;
     let relative_source = full_path
         .strip_prefix(&current)
         .map_err(|_| fail("S1605", "MJCF source must be below current directory"))?;
+    // Source text names the file with `/` on every host.
     let source_path = relative_source
-        .to_str()
-        .ok_or_else(|| fail("S1605", "MJCF path must be UTF-8"))?;
-    if !relative(source_path) {
+        .components()
+        .map(|part| part.as_os_str().to_str())
+        .collect::<Option<Vec<_>>>()
+        .ok_or_else(|| fail("S1605", "MJCF path must be UTF-8"))?
+        .join("/");
+    if !relative(&source_path) {
         return Err(fail("S1605", "MJCF path is not source-relative"));
     }
     let raw = std::fs::read(&full_path).map_err(|_| fail("S1605", "cannot read MJCF source"))?;

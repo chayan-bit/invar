@@ -193,9 +193,12 @@ fn issue_m0_owner_return_fuel_spec_actual_project_native() {
     }
 }
 
+// The bounded child runs under util-linux setsid and prlimit.
+#[cfg(target_os = "linux")]
 #[path = "../support/owner_return_cpu.rs"]
 mod cpu_process;
 
+#[cfg(target_os = "linux")]
 #[test]
 fn issue_m0_owner_return_fuel_spec_actual_compiled_cpu_and_resumption() {
     use general_net::compiled;

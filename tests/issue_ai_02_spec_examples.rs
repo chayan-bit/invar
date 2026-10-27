@@ -344,7 +344,7 @@ fn example_files() -> BTreeSet<String> {
                         .unwrap()
                         .to_str()
                         .unwrap()
-                        .to_owned(),
+                        .replace('\\', "/"),
                 );
             }
         }
@@ -483,7 +483,7 @@ fn tree_hash(dir: &Path) -> (usize, String) {
                         .unwrap()
                         .to_str()
                         .unwrap()
-                        .to_owned(),
+                        .replace('\\', "/"),
                     path,
                 ));
             }

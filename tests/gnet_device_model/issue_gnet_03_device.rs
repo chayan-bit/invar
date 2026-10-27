@@ -272,6 +272,10 @@ mod issue_gnet_03_device_adversarial_cpu_model_agrees_with_oracle {
 /// compiles again. Each run still agrees with the oracle on its own library,
 /// and every compile runs under the CPU-seconds limit.
 #[test]
+#[cfg_attr(
+    not(unix),
+    ignore = "the compiler double is a POSIX shell script logging `ulimit -t`"
+)]
 fn issue_gnet_03_device_cpu_model_compiles_each_program_once_per_thread() {
     let dir = std::path::PathBuf::from(env!("CARGO_TARGET_TMPDIR"))
         .join(format!("gnet03-model-cache-{}", std::process::id()));

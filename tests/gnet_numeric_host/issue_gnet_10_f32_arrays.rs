@@ -17,6 +17,9 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
+/// The harness executable; a Windows linker appends `.exe` to `-o run`.
+const RUN: &str = if cfg!(windows) { "run.exe" } else { "run" };
+
 mod cases;
 fn digest(b: &[u8]) -> String {
     Sha256::digest(b)
@@ -159,9 +162,9 @@ int main(int argc,char** argv){{
         child_deadline::cxx(
             child_deadline::CXX17_UBSAN_O2,
             &dir.join("source.cpp"),
-            &dir.join("run"),
+            &dir.join(RUN),
         );
-        let metadata = json!({"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","params":a.params().iter().map(|x|format!("{x:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":digest(a.source().as_bytes()),"harness_sha256":digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_sha256":digest(&fs::read(dir.join("run")).unwrap()),"owned":{"elements":layout.elements(),"allocations":layout.allocations(),"cleanup_events":layout.cleanup_events(),"heap_words":layout.heap_words(),"cleanup_words":layout.cleanup_words(),"storage_bytes":layout.storage_bytes()},"array_kinds":{"i32":0,"u32":1,"f32":258},"no_speculation_device":true});
+        let metadata = json!({"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","params":a.params().iter().map(|x|format!("{x:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":digest(a.source().as_bytes()),"harness_sha256":digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_sha256":digest(&fs::read(dir.join(RUN)).unwrap()),"owned":{"elements":layout.elements(),"allocations":layout.allocations(),"cleanup_events":layout.cleanup_events(),"heap_words":layout.heap_words(),"cleanup_words":layout.cleanup_words(),"storage_bytes":layout.storage_bytes()},"array_kinds":{"i32":0,"u32":1,"f32":258},"no_speculation_device":true});
         if let Some(r) = std::env::var_os("INVAR_GNET_ARRAY_REPORT_DIR") {
             let p = PathBuf::from(r)
                 .join("artifacts")
@@ -193,7 +196,7 @@ int main(int argc,char** argv){{
         let path = self.dir.join("inputs.txt");
         fs::write(&path, input).unwrap();
         let out = child_deadline::command(30)
-            .arg(self.dir.join("run"))
+            .arg(self.dir.join(RUN))
             .arg(mode)
             .stdin(Stdio::from(fs::File::open(path).unwrap()))
             .output()

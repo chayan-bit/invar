@@ -171,7 +171,15 @@ fn issue_gnet_resume_device_model_detects_device_lowering_mutations() {
             )
             .run(3);
             assert!(!o.timed_out, "{name} {target:?}: {}", o.summary());
-            assert_eq!(o.code, Some(code), "{name} {target:?}: {}", o.summary());
+            // Windows' combined ASan/UBSan runtime keeps one common `exitcode`,
+            // the last parsed (UBSAN_OPTIONS); the classified report below
+            // still names AddressSanitizer.
+            let exit = if cfg!(windows) && code == ASAN {
+                UBSAN
+            } else {
+                code
+            };
+            assert_eq!(o.code, Some(exit), "{name} {target:?}: {}", o.summary());
             // A sanitizer exit must carry the expected classified report; a
             // comparison exit must carry none.
             let want = if code == ASAN {
@@ -240,6 +248,8 @@ fn issue_gnet_resume_device_model_numeric_owners_have_no_device_route() {
 #[cfg(unix)]
 #[test]
 fn issue_gnet_resume_device_model_bounded_runner_limits_and_classifies() {
+    use crate::child_deadline;
+    use std::{path::Path, time::Duration};
     // Wall deadline: the whole process group, including a backgrounded
     // descendant, is killed and the outcome is reported as timed out.
     let sh = Path::new("sh");
@@ -258,6 +268,7 @@ fn issue_gnet_resume_device_model_bounded_runner_limits_and_classifies() {
     assert!(!descendant.is_empty(), "{o:?}");
     #[cfg(target_os = "linux")]
     {
+        use std::{fs, path::PathBuf, time::Instant};
         let stat = PathBuf::from(format!("/proc/{descendant}/stat"));
         let begun = Instant::now();
         loop {

@@ -39,25 +39,31 @@ pub fn median(values: &[f64]) -> f64 {
 }
 // Read the actual execution host, including physical Metal benchmark runs.
 fn load_1m() -> f64 {
-    #[cfg(target_os = "linux")]
-    let text = std::fs::read_to_string("/proc/loadavg").expect("host load receipt");
-    #[cfg(target_os = "macos")]
-    let text = {
-        let output = std::process::Command::new("sysctl")
-            .args(["-n", "vm.loadavg"])
-            .output()
-            .expect("host load receipt");
-        assert!(output.status.success());
-        String::from_utf8(output.stdout).expect("host load text")
-    };
-    #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-    compile_error!("sort timings require an implemented host load receipt");
-    text.trim_start_matches(['{', ' '])
+    load_text()
+        .trim_start_matches(['{', ' '])
         .split_whitespace()
         .next()
         .unwrap()
         .parse()
         .expect("one-minute load")
+}
+#[cfg(target_os = "linux")]
+fn load_text() -> String {
+    std::fs::read_to_string("/proc/loadavg").expect("host load receipt")
+}
+#[cfg(target_os = "macos")]
+fn load_text() -> String {
+    let output = std::process::Command::new("sysctl")
+        .args(["-n", "vm.loadavg"])
+        .output()
+        .expect("host load receipt");
+    assert!(output.status.success());
+    String::from_utf8(output.stdout).expect("host load text")
+}
+/// Other hosts (Windows) have no load average: the bench builds but refuses to time.
+#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+fn load_text() -> String {
+    panic!("sort timings require a host load receipt (Linux or macOS)")
 }
 pub fn row(
     backend: &str,

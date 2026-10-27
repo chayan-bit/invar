@@ -52,9 +52,17 @@ fn as_pose(p: invar_foreign::component::Pose) -> Pose {
     }
 }
 
+/// Fields drop in order: the planner unloads its library before the root is
+/// removed, since Windows cannot delete a loaded library.
 struct Fixture<const N: usize> {
-    root: PathBuf,
     planner: Planner<N>,
+    _root: Root,
+}
+struct Root(PathBuf);
+impl Drop for Root {
+    fn drop(&mut self) {
+        fs::remove_dir_all(&self.0).unwrap();
+    }
 }
 impl<const N: usize> Fixture<N> {
     fn new(label: &str) -> Self {
@@ -127,7 +135,10 @@ impl<const N: usize> Fixture<N> {
                 scene_config_path: &root.join("robot.yml"),
             })
             .unwrap();
-        Self { root, planner }
+        Self {
+            planner,
+            _root: Root(root),
+        }
     }
     fn gate(&mut self, core: &mut Sequencer<N>, request: &Request<N>, ns: u64) {
         let trajectory = self.planner.plan(request).unwrap();
@@ -146,7 +157,6 @@ impl<const N: usize> Fixture<N> {
 impl<const N: usize> Drop for Fixture<N> {
     fn drop(&mut self) {
         self.planner.shutdown().unwrap();
-        fs::remove_dir_all(&self.root).unwrap();
     }
 }
 

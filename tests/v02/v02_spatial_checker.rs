@@ -6,7 +6,11 @@ fn invoke(source: &str, command: &str) -> std::process::Output {
     let path = std::env::temp_dir().join(format!(
         "invar-spatial-checker-{}-{}.inv",
         std::process::id(),
-        std::thread::current().name().unwrap_or("test")
+        // `::` in a test name is not a valid Windows file name.
+        std::thread::current()
+            .name()
+            .unwrap_or("test")
+            .replace("::", "-")
     ));
     let mut file = std::fs::OpenOptions::new()
         .write(true)

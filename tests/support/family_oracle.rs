@@ -244,7 +244,12 @@ pub fn each<T: Send>(dirs: &[&str], sampled: bool, f: impl Fn(&Program) -> T + S
         .into_iter()
         .filter_map(|path| {
             let source = std::fs::read(&path).unwrap();
-            let id = path.strip_prefix(&root).unwrap().display().to_string();
+            let id = path
+                .strip_prefix(&root)
+                .unwrap()
+                .display()
+                .to_string()
+                .replace('\\', "/");
             (String::from_utf8_lossy(&source).contains("fn main") && seen.insert(source.clone()))
                 .then_some((id, source))
         })
