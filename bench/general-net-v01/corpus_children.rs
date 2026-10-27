@@ -257,26 +257,15 @@ int main(int argc,char** argv){{
         );
         source.push_str(&driver);
         fs::write(dir.join("source.cpp"), &source).unwrap();
-        let output = child_deadline::command(60)
-            .args([
-                "c++",
-                if device { "-std=c++20" } else { "-std=c++17" },
-                "-pthread",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "children compile {:?}: {}",
-            output.status,
-            String::from_utf8_lossy(&output.stderr)
-        );
+        let std = if device { "-std=c++20" } else { "-std=c++17" };
+        let flags = [
+            std,
+            "-pthread",
+            "-O1",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=all",
+        ];
+        child_deadline::cxx(&flags, &dir.join("source.cpp"), &dir.join("run"));
         if let Some(report_dir) = std::env::var_os("INVAR_GNET_CORPUS_REPORT_DIR") {
             let recorded = PathBuf::from(report_dir).join("artifacts").join(format!(
                 "abi{}-{:?}-{}",

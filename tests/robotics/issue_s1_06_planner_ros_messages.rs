@@ -1,3 +1,4 @@
+use crate::child_deadline;
 use invar::{front, system};
 
 #[test]
@@ -58,17 +59,10 @@ fn check_conversions(n: u32, files: &std::collections::BTreeMap<String, String>)
         .replace("@N@", &n.to_string());
     fs::write(root.join("probe.cpp"), source).unwrap();
     let executable = root.join("probe");
-    let result = Command::new("c++")
-        .args(["-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic"])
-        .arg(root.join("probe.cpp"))
-        .arg("-o")
-        .arg(&executable)
-        .output()
-        .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
+    child_deadline::cxx(
+        &["-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic"],
+        &root.join("probe.cpp"),
+        &executable,
     );
     let result = Command::new(&executable).output().unwrap();
     assert!(

@@ -1,5 +1,6 @@
 //! Actual generated binding / private Rust process. CPU doubles, no ROS/cuRobo claim.
 use super::sequencer_binding_support as support;
+use crate::child_deadline;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{
@@ -203,26 +204,20 @@ impl Fixture {
                 .replace("@JOINTS@", &n.to_string()),
         )
         .unwrap();
-        let output = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-Wall",
-                "-Wextra",
-                "-Werror",
-                "-pedantic",
-                "-pthread",
-                "-I",
-            ])
-            .arg(&self.root)
-            .arg(self.root.join("probe.cpp"))
-            .arg("-o")
-            .arg(self.root.join("probe"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "generated callback compile: {}",
-            String::from_utf8_lossy(&output.stderr)
+        let include = format!("-I{}", self.root.display());
+        let flags = [
+            "-std=c++17",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-pedantic",
+            "-pthread",
+            &include,
+        ];
+        child_deadline::cxx(
+            &flags,
+            &self.root.join("probe.cpp"),
+            &self.root.join("probe"),
         );
         #[cfg(unix)]
         {

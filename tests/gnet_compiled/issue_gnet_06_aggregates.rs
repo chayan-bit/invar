@@ -1,13 +1,9 @@
 #![forbid(unsafe_code)]
 
+use crate::{gnet_words, owned_driver};
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net};
-use std::{
-    fs,
-    path::PathBuf,
-    process::Command,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, path::PathBuf};
 
 fn lowered(source: &str) -> Net {
     let parsed =
@@ -50,65 +46,8 @@ impl Cpu {
         );
         let aggregate = artifact.aggregate_layout().unwrap().clone();
         let result = artifact.result().clone();
-        let run = if let Some(quantum) = quantum {
-            let bytes = artifact.continuation_layout().unwrap().task_bytes();
-            format!(
-                "static_assert(sizeof(GnetTask)=={bytes}); GnetTask task={{}}; unsigned rounds=0; while(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,heap.data(),cleanup.data(),&task,{quantum})) {{ if(++rounds>1000001) return 3; }} auto before=task.transitions; if(!gnet_resume(input.data(),output,trace.data(),fuel,trans,cap,heap.data(),cleanup.data(),&task,{quantum}) || task.transitions!=before) return 4;"
-            )
-        } else {
-            "gnet_run(input.data(),output,trace.data(),fuel,trans,cap,heap.data(),cleanup.data());"
-                .to_owned()
-        };
         let layout = artifact.owned_layout().unwrap().clone();
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-aggregates-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
-        let driver = format!(
-            r#"
-#include <iostream>
-#include <vector>
-#include <string>
-int main(int argc,char** argv) {{
-    gnet_u fuel=std::stoull(argv[1]),trans=std::stoull(argv[2]),cap=std::stoull(argv[3]);
-    std::vector<gnet_w> input; for(int i=4;i<argc;++i) input.push_back(std::stoll(argv[i]));
-    gnet_w output[10]={{}}; std::vector<gnet_u> trace(cap*7),cleanup({clean}); std::vector<gnet_w> heap({heap});
-    {run}
-    for(auto word:output) std::cout<<word<<' ';
-    for(gnet_u i=0;i<(gnet_u)output[7]*7;++i) std::cout<<trace[i]<<' ';
-    for(gnet_u i=0;i<(gnet_u)output[8]*4;++i) std::cout<<cleanup[i]<<' ';
-    for(auto word:heap) std::cout<<word<<' ';
-}}
-"#,
-            run = run,
-            clean = layout.cleanup_words(),
-            heap = layout.heap_words()
-        );
-        fs::write(
-            dir.join("source.cpp"),
-            format!("{}\n{driver}", artifact.source()),
-        )
-        .unwrap();
-        let output = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        let dir = owned_driver::build("aggregates", &artifact, quantum);
         Self {
             dir,
             layout,
@@ -117,25 +56,7 @@ int main(int argc,char** argv) {{
         }
     }
     fn run(&self, args: &[i64], limits: oracle::Limits) -> Vec<i128> {
-        let output = Command::new(self.dir.join("run"))
-            .args([
-                limits.fuel.to_string(),
-                limits.transitions.to_string(),
-                limits.trace_events.to_string(),
-            ])
-            .args(args.iter().map(ToString::to_string))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        String::from_utf8(output.stdout)
-            .unwrap()
-            .split_whitespace()
-            .map(|x| x.parse().unwrap())
-            .collect()
+        owned_driver::run(&self.dir, args, limits)
     }
     fn compare(
         &self,
@@ -156,34 +77,11 @@ int main(int argc,char** argv) {{
             })
             .collect();
         let words = self.run(&inputs, limits);
-        let (status, start, end) = match &expected.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IndexOutOfBounds => 9,
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    _ => panic!("trap"),
-                },
-                span.start as i128,
-                span.end as i128,
-            ),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "ARRAY_SIZE_LIMIT",
-                ..
-            }) => (10, 0, 0),
-            Err(_) => (
-                match expected.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    _ => panic!("{expected:?}"),
-                },
-                0,
-                0,
-            ),
-        };
-        assert_eq!((words[0], words[2], words[3]), (status, start, end));
+        let (status, start, end) = gnet_words::status(&expected);
+        assert_eq!(
+            (words[0], words[2], words[3]),
+            (i128::from(status), i128::from(start), i128::from(end))
+        );
         assert_eq!(
             &words[4..9],
             &[
@@ -198,15 +96,7 @@ int main(int argc,char** argv) {{
         for event in &expected.events {
             assert_eq!(
                 &words[offset..offset + 7],
-                &[
-                    i128::from(event.kind == oracle::EventKind::Complete),
-                    event.frame as i128,
-                    event.activation as i128,
-                    event.token.block.function as i128,
-                    event.token.block.block as i128,
-                    event.token.position as i128,
-                    event.rule as i128
-                ]
+                &gnet_words::event(event).map(i128::from)
             );
             offset += 7;
         }
@@ -544,15 +434,7 @@ fn issue_gnet_06_runtime_inputs_storage_budgets_and_presence_boundary() {
         for (i, event) in normal.events[..count].iter().enumerate() {
             assert_eq!(
                 &words[10 + i * 7..17 + i * 7],
-                &[
-                    i128::from(event.kind == oracle::EventKind::Complete),
-                    event.frame as i128,
-                    event.activation as i128,
-                    event.token.block.function as i128,
-                    event.token.block.block as i128,
-                    event.token.position as i128,
-                    event.rule as i128
-                ]
+                &gnet_words::event(event).map(i128::from)
             );
         }
         if status == 13 {

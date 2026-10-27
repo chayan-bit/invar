@@ -556,7 +556,7 @@ pub fn emit_speculative(
     )
 }
 
-/// Fixed32-lane single-group scalar child execution with source-ordered commit.
+/// One fixed 32-thread group: root on thread 0, up to 8 child lanes (`SpeculationLimits::slots`) on threads 1..=8, source-ordered commit.
 /// Host dispatch must validate worksets and fence every epoch before publication.
 #[allow(clippy::too_many_arguments)]
 pub fn emit_device_speculative(

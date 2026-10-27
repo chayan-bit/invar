@@ -3,8 +3,12 @@
 mod child_deadline;
 #[path = "../support/gnet_device.rs"]
 mod device;
+mod epoch_model;
 #[path = "../support/executable.rs"]
 mod executable;
+#[allow(dead_code)]
+#[path = "../../test-support/gnet_words.rs"]
+mod gnet_words;
 #[path = "../support/gnet_parallel.rs"]
 mod parallel;
 

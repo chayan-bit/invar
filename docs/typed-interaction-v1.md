@@ -5,7 +5,7 @@ revision. No Invar source-to-primitive-agent encoding is claimed.
 
 ## Finite term graph
 
-`src/typed_net.rs` stores nodes by bounded index. Each live node has exactly
+`src/typed_net/mod.rs` stores nodes by bounded index. Each live node has exactly
 one typed result port, a source ID, a conservative effect fact, and ordered
 input connections. The entry and named function bodies are roots. Every other
 node has exactly one parent; unreachable nodes, cycles, invalid IDs, duplicate

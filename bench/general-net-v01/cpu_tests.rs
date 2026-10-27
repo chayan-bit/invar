@@ -4,6 +4,9 @@
 mod child_deadline;
 #[path = "../../test-support/corpus_sample.rs"]
 mod corpus_sample;
+#[allow(dead_code)]
+#[path = "../../test-support/gnet_words.rs"]
+mod gnet_words;
 
 #[path = "corpus_cpu.rs"]
 mod corpus_cpu;

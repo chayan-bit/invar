@@ -94,17 +94,28 @@ fn issue_eng_18_objects_record_machine_and_pipeline() {
     );
     let host = native::emit_mir_for(&program, &Build::HOST).unwrap();
     eprintln!("host machine: {:?}", host.machine);
-    // A known live CPU names its description; LLVM may report its features
-    // (x86_64) or let the CPU name imply them (Apple silicon).
+    // A known live CPU names its description only when it has every feature
+    // the description lists: a hypervisor can mask some (a "znver4" VM
+    // without AVX-512), and then no description may be named. LLVM reports no
+    // feature string on Apple silicon; there the CPU name implies them.
     let described = match std::env::consts::ARCH {
         "x86_64" if host.machine.cpu == "znver4" => Some("cpu-x86_64-zen4"),
         "aarch64" if host.machine.cpu == "apple-m4" => Some("cpu-aarch64-apple-m4"),
         _ => None,
     };
-    if described.is_some() {
+    if let Some(name) = described {
+        let triple = format!("{}-unknown-linux-gnu", std::env::consts::ARCH);
+        let wanted = native::resolve(&Cpu::Described(name.into()), &triple).unwrap();
+        let live = host.machine.features.split(',').collect::<Vec<_>>();
+        let satisfied = host.machine.features.is_empty()
+            || wanted
+                .features
+                .split(',')
+                .all(|feature| live.contains(&feature));
+        let expected = satisfied.then_some(name);
         assert_eq!(
             host.machine.target.as_deref(),
-            described,
+            expected,
             "{:?}",
             host.machine
         );

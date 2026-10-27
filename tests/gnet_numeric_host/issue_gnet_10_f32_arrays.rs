@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 
 use invar::{
     check, eval, front,
@@ -156,24 +156,10 @@ int main(int argc,char** argv){{
             pool = layout.allocations() * 4
         );
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = child_deadline::command(60)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "{:?}:{}",
-            out.status,
-            String::from_utf8_lossy(&out.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O2,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         let metadata = json!({"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","params":a.params().iter().map(|x|format!("{x:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":digest(a.source().as_bytes()),"harness_sha256":digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_sha256":digest(&fs::read(dir.join("run")).unwrap()),"owned":{"elements":layout.elements(),"allocations":layout.allocations(),"cleanup_events":layout.cleanup_events(),"heap_words":layout.heap_words(),"cleanup_words":layout.cleanup_words(),"storage_bytes":layout.storage_bytes()},"array_kinds":{"i32":0,"u32":1,"f32":258},"no_speculation_device":true});
         if let Some(r) = std::env::var_os("INVAR_GNET_ARRAY_REPORT_DIR") {
@@ -231,38 +217,7 @@ int main(int argc,char** argv){{
         rows_out
     }
     fn compare(&self, n: &Net, o: &oracle::Observation, w: &[i64]) -> Json {
-        let (status, start, end) = match &o.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    eval::TrapCategory::IndexOutOfBounds => 9,
-                    _ => panic!("trap"),
-                },
-                span.start as i64,
-                span.end as i64,
-            ),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "ARRAY_SIZE_LIMIT",
-                ..
-            }) => (10, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "CALL_DEPTH_LIMIT",
-                ..
-            }) => (4, 0, 0),
-            Err(_) => (
-                match o.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    Some(oracle::ToolFailure::Allocation) => 11,
-                    _ => panic!("{o:?}"),
-                },
-                0,
-                0,
-            ),
-        };
+        let (status, start, end) = gnet_words::status(o);
         assert_eq!((w[0], w[2], w[3]), (status, start, end));
         assert_eq!(
             &w[4..9],
@@ -276,18 +231,7 @@ int main(int argc,char** argv){{
         );
         let mut at = 10;
         for e in &o.events {
-            assert_eq!(
-                &w[at..at + 7],
-                &[
-                    i64::from(e.kind == oracle::EventKind::Complete),
-                    e.frame as i64,
-                    e.activation as i64,
-                    e.token.block.function as i64,
-                    e.token.block.block as i64,
-                    e.token.position as i64,
-                    e.rule as i64
-                ]
-            );
+            assert_eq!(&w[at..at + 7], &gnet_words::event_i64(e));
             at += 7
         }
         let p = n.compiled_mir(&n.verify().unwrap()).unwrap();

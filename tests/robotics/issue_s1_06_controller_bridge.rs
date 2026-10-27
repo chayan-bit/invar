@@ -1,3 +1,4 @@
+use crate::child_deadline;
 use std::path::Path;
 
 use invar::{front, system};
@@ -151,27 +152,17 @@ struct JointTrajectory { std::vector<std::string> joint_names; std::vector<Point
         .replace("@FIRST_JOINT@", first_joint);
     fs::write(&harness, fixture).unwrap();
     let executable = root.join("runtime");
-    let result = Command::new("c++")
-        .args([
-            "-std=c++17",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-pedantic",
-            "-O2",
-        ])
-        .arg("-I")
-        .arg(&includes)
-        .arg(&harness)
-        .arg("-o")
-        .arg(&executable)
-        .output()
-        .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    let include = format!("-I{}", includes.display());
+    let flags = [
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pedantic",
+        "-O2",
+        &include,
+    ];
+    child_deadline::cxx(&flags, &harness, &executable);
     let result = Command::new(&executable).output().unwrap();
     assert!(
         result.status.success(),

@@ -50,6 +50,7 @@ num-bigint = "=0.4.8"
 num-rational = "=0.4.2"
 sha2 = "=0.11.0"
 roxmltree = "=0.21.1"
+stacker = "=0.1.25"
 
 [target.'cfg(unix)'.dependencies]
 libc = "=0.2.189"

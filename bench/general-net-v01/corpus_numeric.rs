@@ -1,5 +1,5 @@
 //! Source-derived ABI8 strict-f32 CPU corpus with explicit host-mode capabilities.
-use super::{child_deadline, corpus_sample};
+use super::{child_deadline, corpus_sample, gnet_words};
 
 use super::corpus_cpu as base;
 use invar::{
@@ -193,30 +193,11 @@ int main(int argc,char** argv){{
             n = a.params().len()
         );
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = child_deadline::command(60)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .args(if force_no_sse {
-                &["-DINVAR_CORPUS_NO_SSE=1"][..]
-            } else {
-                &[]
-            })
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "numeric compile {:?}: {}",
-            out.status,
-            String::from_utf8_lossy(&out.stderr)
-        );
+        let mut flags = child_deadline::CXX17_UBSAN_O2.to_vec();
+        if force_no_sse {
+            flags.push("-DINVAR_CORPUS_NO_SSE=1");
+        }
+        child_deadline::cxx(&flags, &dir.join("source.cpp"), &dir.join("run"));
         let probe = child_deadline::command(5)
             .arg(dir.join("run"))
             .arg("--capabilities")
@@ -297,32 +278,7 @@ int main(int argc,char** argv){{
         result
     }
     fn compare(&self, o: &oracle::Observation, w: &[i64]) -> Json {
-        let (status, start, end) = match &o.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    _ => panic!("numeric trap {o:?}"),
-                },
-                span.start as i64,
-                span.end as i64,
-            ),
-            Err(eval::EvalError::Tool {
-                code: "CALL_DEPTH_LIMIT",
-                ..
-            }) => (compiled::Status::CallDepthLimit as i64, 0, 0),
-            Err(_) => (
-                match o.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    _ => panic!("numeric tool failure {o:?}"),
-                },
-                0,
-                0,
-            ),
-        };
+        let (status, start, end) = gnet_words::status(o);
         assert_eq!((w[0], w[2], w[3]), (status, start, end));
         assert_eq!(
             &w[4..8],
@@ -347,18 +303,7 @@ int main(int argc,char** argv){{
         };
         assert_eq!(w.len(), 8 + o.events.len() * 7);
         for (actual, e) in w[8..].chunks_exact(7).zip(&o.events) {
-            assert_eq!(
-                actual,
-                &[
-                    i64::from(e.kind == oracle::EventKind::Complete),
-                    e.frame as i64,
-                    e.activation as i64,
-                    e.token.block.function as i64,
-                    e.token.block.block as i64,
-                    e.token.position as i64,
-                    e.rule as i64
-                ]
-            )
+            assert_eq!(actual, &gnet_words::event_i64(e))
         }
         json!({"status":"executed","artifact":self.metadata,"header":w[..8],"all_words_le_i64_sha256":base::digest(&w.iter().flat_map(|w|w.to_le_bytes()).collect::<Vec<_>>()),"events":o.events.len(),"nan_agreement":"class only; non-NaN exact bits; echo/negate/selected vectors additionally assert NaN payload/sign bits","gpu_execution":"not_performed"})
     }

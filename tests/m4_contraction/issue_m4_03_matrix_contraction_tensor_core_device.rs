@@ -492,28 +492,16 @@ fn host_run(
     ));
     fs::create_dir(&dir).unwrap();
     fs::write(dir.join("kernel.cpp"), text).unwrap();
-    let built = Command::new("timeout")
-        .arg("120")
-        .arg(std::env::var_os("CXX").unwrap_or_else(|| "c++".into()))
-        .args([
-            "-std=c++20",
-            "-O1",
-            "-pthread",
-            "-ffp-contract=off",
-            "-fno-fast-math",
-            "-Wno-attributes",
-            "-Wno-unknown-pragmas",
-        ])
-        .arg(dir.join("kernel.cpp"))
-        .arg("-o")
-        .arg(dir.join("run"))
-        .output()
-        .unwrap();
-    assert!(
-        built.status.success(),
-        "host compile failed; preserved {dir:?}: {}",
-        String::from_utf8_lossy(&built.stderr)
-    );
+    let flags = [
+        "-std=c++20",
+        "-O1",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-Wno-attributes",
+        "-Wno-unknown-pragmas",
+    ];
+    crate::child_deadline::cxx(&flags, &dir.join("kernel.cpp"), &dir.join("run"));
     let mut input = format!("{} {} {c_len} {groups}\n", a.len(), b.len());
     for w in a.iter().chain(b) {
         input.push_str(&format!("{w}\n"));

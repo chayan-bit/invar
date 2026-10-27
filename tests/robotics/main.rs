@@ -1,3 +1,6 @@
+#[allow(dead_code)]
+#[path = "../../test-support/child_deadline.rs"]
+mod child_deadline;
 // Shared fixtures, each loaded once and used by several modules below.
 mod file_hash;
 mod issue_s1_01_system_dialect;

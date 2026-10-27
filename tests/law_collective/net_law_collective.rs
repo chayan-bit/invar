@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+use crate::child_deadline;
 use invar::eval::{self, EvalError};
 use invar::general_net::{
     law_collective::{Error, LawRepr, Layout, Representation, cuda, msl},
@@ -131,15 +132,10 @@ for(auto x:out) std::cout<<x<<' ';}}
             format!("{}\n{driver}", native.source()),
         )
         .unwrap();
-        let build = Command::new("c++")
-            .current_dir(&dir)
-            .args(["-std=c++17", "-O1", "source.cpp", "-o", "run"])
-            .output()
-            .unwrap();
-        assert!(
-            build.status.success(),
-            "{}",
-            String::from_utf8_lossy(&build.stderr)
+        child_deadline::cxx(
+            &["-std=c++17", "-O1"],
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         let run = Command::new(dir.join("run")).output().unwrap();
         assert!(run.status.success());
