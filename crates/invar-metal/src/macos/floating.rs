@@ -187,7 +187,7 @@ impl MetalDevice {
         let ops = invar_device::f32_ops::probe_ops(p);
         let report = self.strict_f32_probe()?;
         if !report.admits_strict_with_fallback(&ops)
-            || !invar_device::f32_ops::admits_trig(p, report)
+            || !invar_device::f32_ops::admits_sqrt(p, report)
         {
             return Err(Error::Unavailable(
                 "strict f32 operation probe refused".into(),

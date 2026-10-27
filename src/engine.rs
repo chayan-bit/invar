@@ -113,11 +113,12 @@ fn run_cuda(
             },
         )?;
         let value = observed_i32(run.observation)?;
-        let mut choices = run
-            .executed
-            .iter()
-            .map(|step| step_choice(step, "cuda", "forced-device"))
-            .collect::<Vec<_>>();
+        let mut choices = cpu_kept_choices(program, false);
+        choices.extend(
+            run.executed
+                .iter()
+                .map(|step| step_choice(step, "cuda", "forced-device")),
+        );
         choices.extend(run.reductions.iter().map(reduction_choice));
         Ok(serde_json::json!({
             "requested_engine": "cuda",
@@ -134,22 +135,21 @@ fn run_cuda(
                 message: error.message,
             })?;
         let value = observed_i32(run.observation)?;
-        let mut choices = run
-            .choices
-            .iter()
-            .map(|choice| {
-                serde_json::json!({
-                    "function": choice.function,
-                    "span": {"start": choice.span.start, "end": choice.span.end},
-                    "backend": choice.backend,
-                    "reason": choice.reason,
-                    "cost_ms": choice.cost.map(|cost| serde_json::json!({
-                        "cpu": cost.cpu_ms, "device": cost.device_ms,
-                    })),
-                })
+        let mut choices = cpu_kept_choices(program, false);
+        // The CPU-kept entries come first; the scheduler's choices pair with run.executed by position after them.
+        let scheduled = choices.len();
+        choices.extend(run.choices.iter().map(|choice| {
+            serde_json::json!({
+                "function": choice.function,
+                "span": {"start": choice.span.start, "end": choice.span.end},
+                "backend": choice.backend,
+                "reason": choice.reason,
+                "cost_ms": choice.cost.map(|cost| serde_json::json!({
+                    "cpu": cost.cpu_ms, "device": cost.device_ms,
+                })),
             })
-            .collect::<Vec<_>>();
-        annotate_sort_implementations(&mut choices, &run.executed);
+        }));
+        annotate_sort_implementations(&mut choices[scheduled..], &run.executed);
         choices.extend(run.reductions.iter().map(reduction_choice));
         Ok(serde_json::json!({
             "requested_engine": "auto",
@@ -244,7 +244,7 @@ fn run_metal(
             },
         )?;
         let value = observed_i32(run.observation)?;
-        let mut choices = metal_no_f64_choices(program);
+        let mut choices = cpu_kept_choices(program, true);
         choices.extend(
             run.executed
                 .iter()
@@ -265,8 +265,8 @@ fn run_metal(
             },
         )?;
         let value = observed_i32(run.observation)?;
-        let mut choices = metal_no_f64_choices(program);
-        // The metal-no-f64 entries come first; the scheduler's choices pair with run.executed by position after them.
+        let mut choices = cpu_kept_choices(program, true);
+        // The CPU-kept entries come first; the scheduler's choices pair with run.executed by position after them.
         let scheduled = choices.len();
         choices.extend(run.choices.iter().map(|choice| serde_json::json!({
             "function": choice.function,
@@ -490,17 +490,29 @@ fn annotate_native_document(document: &mut serde_json::Value, path: &str, source
     }
 }
 
-/// Metal has no binary64: each function computing f64 stays on the CPU
-/// (`mir-serial`) with reason `metal-no-f64`, never emulated.
-#[cfg(all(feature = "metal", target_os = "macos"))]
-fn metal_no_f64_choices(program: &crate::mir::Program) -> Vec<serde_json::Value> {
-    crate::math::f64_sites(program)
+/// Functions a device request keeps on the CPU (`mir-serial`), never
+/// emulated: on Metal each function computing f64 (`metal-no-f64`), and on
+/// CUDA and Metal each function calling f32 `sin` or `cos`
+/// (`math-cr-v1-device-unavailable`).
+pub fn cpu_kept_choices(program: &crate::mir::Program, metal: bool) -> Vec<serde_json::Value> {
+    let f64_sites = if metal {
+        crate::math::f64_sites(program)
+    } else {
+        Vec::new()
+    };
+    f64_sites
         .into_iter()
-        .map(|(function, span)| {
+        .map(|site| (site, crate::math::METAL_NO_F64))
+        .chain(
+            crate::math::cr_v1_device_sites(program)
+                .into_iter()
+                .map(|site| (site, crate::math::MATH_CR_V1_DEVICE_UNAVAILABLE)),
+        )
+        .map(|((function, span), reason)| {
             serde_json::json!({
                 "function": function,
                 "span": {"start": span.start, "end": span.end},
-                "backend": "mir-serial", "reason": crate::math::METAL_NO_F64,
+                "backend": "mir-serial", "reason": reason,
             })
         })
         .collect()

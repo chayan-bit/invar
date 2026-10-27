@@ -10,6 +10,35 @@ use crate::{
     mir,
 };
 
+/// Correctly rounded binary32 `sqrt` (`invar-math-cr-v1`) over words, in
+/// exact integer arithmetic: no host or device float. A subnormal operand is
+/// scaled exactly by 2^150 into an integer whose root rounds once and scales
+/// back exactly by 2^-75; NaN results are the canonical quiet NaN.
+const SQRT: &str = r#"
+static_assert(sizeof(unsigned)==4,"GNET sqrt words require32 bits");
+GNET_FN unsigned gnet_f32_root(unsigned a) {
+  if (a == 0u || a == 2139095040u) return a;
+  int e = (int)(a >> 23) - 127;
+  gnet_u s = (a & 8388607u) | 8388608u;
+  if (e % 2 != 0) { s <<= 1; --e; }
+  const gnet_u n = s << 23;
+  gnet_u q = 0;
+  for (int bit = 23; bit >= 0; --bit) {
+    const gnet_u t = q | (1ULL << bit);
+    if (t*t <= n) q = t;
+  }
+  if (n-q*q > q) ++q;
+  return (unsigned)gnet_f32_pack(q, e/2, 0);
+}
+GNET_FN unsigned gnet_f32_sqrt(unsigned x) {
+  const unsigned a = x & 2147483647u;
+  if (a > 2139095040u || ((x >> 31) != 0u && a != 0u)) return 2143289344u;
+  if (a == 0u) return x;
+  if (a < 8388608u) return (unsigned)gnet_f32_mul(gnet_f32_root((unsigned)gnet_f32_from_u32(a << 1)), 436207616u);
+  return gnet_f32_root(x);
+}
+"#;
+
 pub(super) fn preamble(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
     if p.numeric.is_none() {
         return Ok(());
@@ -36,19 +65,8 @@ static_assert(CHAR_BIT==8 && sizeof(gnet_u)==8 && sizeof(gnet_w)==8 && ULLONG_MA
             _ => None,
         })
         .collect::<Vec<_>>();
-    let trig = calls.iter().any(|n| matches!(*n, "sin" | "cos"));
-    let root = calls.contains(&"sqrt");
-    if trig || root {
-        w.push(match p.target {
-            Target::Cpu => "#define GNET_TRIG_CONSTANT static const",
-            Target::Cuda => "#define GNET_TRIG_CONSTANT __device__ static const",
-            Target::Metal => "#define GNET_TRIG_CONSTANT constant",
-        })?;
-        w.push(&invar_device::trig_f32::helpers(
-            invar_device::trig_f32::Lang::Gnet,
-            trig,
-            root,
-        ))?;
+    if calls.contains(&"sqrt") {
+        w.push(SQRT)?;
     }
     Ok(())
 }
@@ -96,7 +114,7 @@ pub(super) fn operation(
         O::Call { name, args }
             if matches!(
                 name.as_str(),
-                "fma" | "f32_from_i32" | "f32_from_u32" | "sin" | "cos" | "sqrt"
+                "fma" | "f32_from_i32" | "f32_from_u32" | "sqrt"
             ) =>
         {
             let name = name.as_str();
@@ -104,16 +122,11 @@ pub(super) fn operation(
                 "fma" => "gnet_f32_fma",
                 "f32_from_i32" => "gnet_f32_from_i32",
                 "f32_from_u32" => "gnet_f32_from_u32",
-                "sin" | "cos" => invar_device::trig_f32::SIN_HELPER,
-                "sqrt" => invar_device::trig_f32::SQRT_HELPER,
+                "sqrt" => "gnet_f32_sqrt",
                 _ => return Err(Error::UnsupportedCall),
             };
             match args.as_slice() {
-                [a] if matches!(name, "sin" | "cos") => format!(
-                    "{helper}((unsigned){},{}u)",
-                    value(p, f, *a)?,
-                    u8::from(name == "cos")
-                ),
+                [a] if name == "sqrt" => format!("{helper}((unsigned){})", value(p, f, *a)?),
                 [a] => format!("{helper}({})", value(p, f, *a)?),
                 [a, b, c] if name == "fma" => format!(
                     "{helper}({},{},{})",

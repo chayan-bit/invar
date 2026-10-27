@@ -600,8 +600,7 @@ pub(super) fn object(data: NativeIr, facts: Vec<Fact>, build: &Build) -> Result<
             &receipt.cpu,
             &receipt.features,
             level,
-            // The host links as a position-independent executable, and the
-            // invar-trig-f32-v1 helpers address local constant tables, so the
+            // The host links as a position-independent executable, so the
             // object is PIC on every target (x86_64 rejected R_X86_64_32S).
             RelocMode::PIC,
             CodeModel::Default,

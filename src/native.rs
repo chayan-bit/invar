@@ -136,29 +136,6 @@ pub fn emit_mir_debug(program: &mir::Program, source: &DebugSource) -> Result<Ob
     Ok(object)
 }
 
-/// Test hook for the exhaustive native sweep: the `invar-trig-f32-v1` helpers
-/// exactly as program code embeds them, behind exported C symbols
-/// `invar_trig_sweep_{sin,cos,sqrt}(u32) -> u32`, through the same LLVM path.
-#[doc(hidden)]
-pub fn trig_sweep_object() -> Result<Vec<u8>, String> {
-    use invar_device::trig_f32::{Lang, helpers};
-    let mut ir = String::from(
-        "declare float @llvm.fma.f32(float, float, float)\ndeclare float @llvm.sqrt.f32(float)\n",
-    );
-    ir.push_str(&helpers(Lang::Llvm, true, true));
-    for (name, call) in [
-        ("sin", "@invar_trig_f32_v1(i32 %x, i32 0)"),
-        ("cos", "@invar_trig_f32_v1(i32 %x, i32 1)"),
-        ("sqrt", "@invar_sqrt_f32_v1(i32 %x)"),
-    ] {
-        let _ = writeln!(
-            ir,
-            "define i32 @invar_trig_sweep_{name}(i32 %x) {{\n  %r = call i32 {call}\n  ret i32 %r\n}}"
-        );
-    }
-    Ok(object_from_ir((ir, Vec::new(), Vec::new(), Vec::new()))?.bytes)
-}
-
 /// The unoptimized generic path: debug and export objects (see [`Build::UNOPTIMIZED`]).
 fn object_from_ir(data: NativeIr) -> Result<Object, String> {
     optimize::object(data, Vec::new(), &Build::UNOPTIMIZED)
@@ -430,9 +407,7 @@ pub fn link_with_library(
                 },
             );
             format!(
-                "{host}\n#[allow(dead_code)] mod invar_device {{ pub mod trig_f32 {{ {} }} }}\nmod numeric_contract {{ {} use crate::invar_device; }}\nmod fsum_reference {{ {} }}\nuse invar_sort_cpu as sort_cpu;\nmod spatial_cell {{ {} }}\nmod invar_spatial {{ {} }}\n{}",
-                // numeric_contract's f32 sin, cos and sqrt come from invar-trig-f32-v1.
-                include_str!("../crates/invar-device/src/trig_f32.rs"),
+                "{host}\nmod numeric_contract {{ {} }}\nmod fsum_reference {{ {} }}\nuse invar_sort_cpu as sort_cpu;\nmod spatial_cell {{ {} }}\nmod invar_spatial {{ {} }}\n{}",
                 numeric,
                 // numeric_contract::fold reaches crate::fsum_reference.
                 include_str!("fsum_reference.rs"),

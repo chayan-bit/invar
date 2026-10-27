@@ -187,6 +187,58 @@ pub fn corpus<B: Backend>(backend: &mut B, target: Target) {
         ),
         S::Success
     );
+    cr_v1(backend, target);
+}
+
+/// f32 `sqrt` is the correctly rounded `invar-math-cr-v1` word on every
+/// target (signed zeros, subnormals, both NaN classes, infinities and a
+/// stratified sweep of normals), and `sin` and `cos` are refused: no device
+/// lowers their cr-v1 kernels yet (#48).
+fn cr_v1<B: Backend>(backend: &mut B, target: Target) {
+    use invar::math::{MathFn, eval_f32};
+    let xs: Vec<u32> = (0u32..256)
+        .map(|i| (i << 24) | (i.wrapping_mul(0x9e37_79b1) >> 8))
+        .chain([
+            0,
+            0x8000_0000,
+            1,
+            0x8000_0001,
+            2,
+            3,
+            0x0040_0000,
+            0x007f_ffff,
+            0x0080_0000,
+            0x3f80_0000,
+            0x4000_0000,
+            0x7f7f_ffff,
+            0x7f80_0000,
+            0xff80_0000,
+            0x7fc0_0000,
+            0x7f80_0001,
+            0xffc0_0001,
+        ])
+        .collect();
+    let source = "fn run(a: read Array<f32>, b: mut Array<f32>) -> u32 { for i in 0u32..len(a) { b[i] = sqrt(a[i]); } return len(a); } fn main() -> i32 { return 0; }";
+    let args = vec![f(&xs), f(&vec![0; xs.len()])];
+    let Value::ArrayF32(out) = &args[1] else {
+        panic!("sqrt output array")
+    };
+    let out = Rc::clone(out);
+    assert_eq!(
+        agree(backend, target, source, "run", args, 100_000),
+        compiled::Status::Success
+    );
+    for (&x, y) in xs.iter().zip(out.borrow().iter()) {
+        let want = eval_f32(MathFn::Sqrt, &[F32Bits::from_bits(x)]);
+        assert_eq!(y.to_bits(), want.to_bits(), "{target:?} sqrt {x:#010x}");
+    }
+    for name in ["sin", "cos"] {
+        let source = source.replace("sqrt(", &format!("{name}("));
+        assert!(
+            Plan::from_source(source.as_bytes(), "run", target, limits()).is_err(),
+            "{target:?} admitted cr-v1 {name}"
+        );
+    }
 }
 
 /// Same full-size source and input on the net oracle and each physical backend.

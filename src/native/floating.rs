@@ -166,6 +166,9 @@ impl Ir<'_> {
         if decoded.len() != function.arity() {
             return Err(error("verified math arity mismatch"));
         }
+        if self.exporting {
+            return Err(error("native exports do not link the invar-math-cr-v1 library"));
+        }
         if function == M::Copysign {
             // A NaN sign source counts as positive.
             let unordered = self.tmp();
@@ -207,12 +210,6 @@ impl Ir<'_> {
     /// `name` lowered when it is a float intrinsic; `None` otherwise.
     fn float_intrinsic(&mut self, name: &str, args: &[String], arg_types: &[Option<Type>], at: Span) -> Result<Option<String>, String> {
         let first = float_format(arg_types.first().and_then(Option::as_ref));
-        // C4 interim: f32 sin, cos and sqrt stay on the invar-trig-f32-v1
-        // helpers lowered by the ordinary call arms.
-        let trig = matches!(name, "sin" | "cos" | "sqrt");
-        if trig && matches!(arg_types.first(), Some(Some(Type::F32))) {
-            return Ok(None);
-        }
         if let Some(function) = crate::math::MathFn::from_name(name) {
             let format = first.ok_or_else(|| error("verified math operand type missing"))?;
             return self.math_call(function, format, args).map(Some);

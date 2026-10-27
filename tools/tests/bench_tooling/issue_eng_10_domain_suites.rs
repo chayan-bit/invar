@@ -184,7 +184,7 @@ fn entries<'a>(manifest: &'a mut Value, suite: &str) -> &'a mut Vec<Value> {
 }
 
 #[test]
-fn issue_eng_10_trig_oracle_stays_within_the_contract_bound_of_f64_libm() {
+fn issue_eng_10_trig_oracle_is_within_one_ulp_of_f64_libm() {
     for k in -3000i32..3000 {
         let x = k as f32 * 0.01 + 0.003;
         for (got, wide) in [
@@ -192,7 +192,7 @@ fn issue_eng_10_trig_oracle_stays_within_the_contract_bound_of_f64_libm() {
             (domains::oracle::cos(x), (x as f64).cos() as f32),
         ] {
             let ulps = (got.to_bits() as i64 - wide.to_bits() as i64).abs();
-            assert!(ulps <= 2, "trig({x}): {got} against {wide}");
+            assert!(ulps <= 1, "trig({x}): {got} against {wide}");
         }
     }
 }

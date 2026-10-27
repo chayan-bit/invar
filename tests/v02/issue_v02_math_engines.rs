@@ -113,14 +113,7 @@ fn program(f: MathFn, binary64: bool) -> (String, i32) {
             f64::from_bits(eval_f64(f, &parsed).to_bits())
         } else {
             let parsed: Vec<F32Bits> = args.iter().map(|v| bits32(v)).collect();
-            // C4 interim: f32 sin, cos and sqrt keep main's invar-trig-f32-v1.
-            let result = match (f, parsed.as_slice()) {
-                (MathFn::Sin, [x]) => x.sin(),
-                (MathFn::Cos, [x]) => x.cos(),
-                (MathFn::Sqrt, [x]) => x.sqrt(),
-                _ => eval_f32(f, &parsed),
-            };
-            f64::from(f32::from_bits(result.to_bits()))
+            f64::from(f32::from_bits(eval_f32(f, &parsed).to_bits()))
         };
         let Some(expected) = literal(expected, ty) else {
             continue;

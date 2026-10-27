@@ -1,7 +1,7 @@
 # Numeric contracts
 
 This document is normative for the f32 source semantics (`strict-f32-v1`) and for the declared fold tiers and storage types of numeric policy version 2.
-The f64 contract `strict-f64-v1` and the math library `invar-math-cr-v1` are specified in Appendix B of [the specification](spec/invar-v0.1.md); the f32 `sin`, `cos` and `sqrt` sequence is [`invar-trig-f32-v1`](trig-f32-v1.md).
+The f64 contract `strict-f64-v1` and the math library `invar-math-cr-v1` are specified in Appendix B of [the specification](spec/invar-v0.1.md).
 
 ## Policy `strict-f32-v1`
 
@@ -17,7 +17,7 @@ Decimal literals contain at most 256 digits and unary negation is separate, incl
 `+`, `-`, `*`, `/`, unary `-`, and the six comparison operators accept matching f32 operands without implicit integer conversion.
 `fma(a: f32, b: f32, c: f32) -> f32` computes the exact product plus addend with one rounding.
 `f32_from_u32` and `f32_from_i32` round the exact integer to nearest even.
-`sin`, `cos` and `sqrt` (each `f32 -> f32`) follow the frozen [`invar-trig-f32-v1`](trig-f32-v1.md) contract: `sqrt` is correctly rounded, and `sin` and `cos` are a fixed sequence of the operations above that is bit-identical on every engine but not correctly rounded.
+`sin`, `cos` and `sqrt` (each `f32 -> f32`) are `invar-math-cr-v1` like every library function: correctly rounded, so every engine returns the same word.
 `i32_from_f32(value: f32) -> i32` first requires a finite value in the closed interval `[i32::MIN, i32::MAX]`, then truncates toward zero.
 An invalid `i32_from_f32` traps `INTEGER_OVERFLOW` at the source call, before publication of any subsequent result.
 `Quantity<f32, Unit>` checks units before erasing the unit tag to f32 and must generate identical code to the equivalent bare f32 program.
@@ -58,7 +58,8 @@ Every process probes the live device under the pinned strict compiler options be
 CUDA requires disabled FMA contraction and FTZ and explicit precise division and square-root options.
 Metal requires disabled fast math and `#pragma METAL fp contract(off)`.
 Division remains CPU-only unless device admission establishes its required rounding and subnormal behavior.
-Source `sin`, `cos` and `sqrt` run on a device only through the `invar-trig-f32-v1` helpers ([`trig-f32-v1.md`](trig-f32-v1.md)), which never read or produce a subnormal; they are admitted when every probe mismatch of the operations they use is a subnormal-class case.
+Source `sqrt` runs on a device through a correctly rounded helper that reads a subnormal only through exact integer paths; it is admitted when every probe mismatch of the operations it uses is a subnormal-class case.
+No device lowers `invar-math-cr-v1` `sin` or `cos` yet, so a region that calls them stays on the CPU; under a CUDA or Metal request explain lists each such function with backend `mir-serial` and reason `math-cr-v1-device-unavailable`.
 A flushing Metal device may execute an operation only behind a sound dispatch guard covering every possible divergence under the documented device model.
 A flagged dispatch is discarded after confirmed completion and rerun on the exact CPU path with an explicit fallback reason.
 Unknown completion quarantines work and forbids publication and CPU replay.
