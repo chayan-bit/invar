@@ -83,12 +83,7 @@ fn recipe(source: &str, entry: &str) -> Result<(StaticRecipe, Contract, mir::Pro
     {
         return Err(Refusal::Binding);
     }
-    let function = checked
-        .program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Refusal::Shape)?;
+    let function = checked.program.function(entry).ok_or(Refusal::Shape)?;
     let region = function.body.statements.get(1).ok_or(Refusal::Shape)?;
     let StmtKind::For { body, .. } = &region.kind else {
         return Err(Refusal::Shape);
@@ -121,11 +116,7 @@ fn validate_recipe(recipe: &StaticRecipe, current: &mir::Program) -> Result<(), 
     if current.contract_digest() != recipe.source_contract {
         return Err(Refusal::Binding);
     }
-    let function = current
-        .functions
-        .iter()
-        .find(|f| f.name == recipe.entry)
-        .ok_or(Refusal::Recipe)?;
+    let function = current.function(&recipe.entry).ok_or(Refusal::Recipe)?;
     let (head_id, head, body_id) = function
         .blocks
         .iter()

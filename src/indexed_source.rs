@@ -123,12 +123,7 @@ impl Contract {
         {
             return Err(Error::CheckedMismatch);
         }
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         if !(2..=3).contains(&f.params.len())
             || f.params[..2]
                 .iter()

@@ -597,9 +597,7 @@ impl Builder<'_> {
                 let function = self
                     .source
                     .program
-                    .functions
-                    .iter()
-                    .find(|function| function.name == *name);
+                    .function(name);
                 let foreign = self.source.program.foreign_functions.iter().find(|function| function.name == *name);
                 let mut values = Vec::with_capacity(args.len());
                 for (position, arg) in args.iter().enumerate() {

@@ -63,12 +63,7 @@ fn observe_scalar(
     if fuel_limit == 0 {
         return refused("INVALID_FUEL", "fuel must be positive");
     }
-    let Some(function) = program
-        .program
-        .functions
-        .iter()
-        .find(|function| function.name == name)
-    else {
+    let Some(function) = program.program.function(name) else {
         return refused("NATIVE_ABI", "unknown scalar function");
     };
     let admitted = |ty: &Type| {

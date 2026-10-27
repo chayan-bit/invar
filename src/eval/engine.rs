@@ -20,9 +20,7 @@ impl Evaluator<'_> {
         let function = self
             .program
             .program
-            .functions
-            .iter()
-            .find(|function| function.name == name)
+            .function(name)
             .ok_or_else(|| EvalError::tool("INTERNAL_CALL", "missing checked function"))?;
         if args.len() != function.params.len() {
             return Err(EvalError::tool(
@@ -453,9 +451,7 @@ impl Evaluator<'_> {
                 let modes = self
                     .program
                     .program
-                    .functions
-                    .iter()
-                    .find(|function| function.name == *name)
+                    .function(name)
                     .map(|function| function.params.as_slice())
                     .or_else(|| self.program.program.foreign_functions.iter().find(|function| function.name == *name).map(|function| function.params.as_slice()))
                     .map(|params| {

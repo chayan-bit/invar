@@ -197,7 +197,7 @@ fn parameter_type<'a>(source: &'a [u8], param: &Param) -> Option<&'a str> {
 /// and `read` or `take` Bytes and String only (src/check.rs), so they never
 /// need a `var` or an annotation and are not looked up.
 fn parameter<'a>(program: &'a Program, callee: &str, at: usize) -> Option<&'a Param> {
-    let function = program.functions.iter().find(|f| f.name == callee)?;
+    let function = program.function(callee)?;
     function
         .generic_params
         .is_empty()

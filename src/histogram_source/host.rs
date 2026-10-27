@@ -64,12 +64,7 @@ impl Plan {
         if verified.contract_digest() != program.contract_digest() {
             return Err(Error::Binding);
         }
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         let [allocation, region, _] = f.body.statements.as_slice() else {
             return Err(Error::Unrecognized);
         };

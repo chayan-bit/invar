@@ -273,12 +273,7 @@ impl Contract {
             .map_err(Error::Net)?;
         let proof = net.verify().map_err(Error::Net)?;
         let program = net.compiled_mir(&proof).map_err(Error::Net)?;
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         if f.params.len() != 3
             || !matches!(f.params[0].ty, Type::ArrayF32 | Type::ArrayU32)
             || f.params[0].mode != Some(Mode::Read)
@@ -368,11 +363,7 @@ impl Contract {
         }
         let boundary = matched.ok_or(Error::Unrecognized)?;
         let ticks = Ticks::derive(col_lower, col_upper, &body.statements).ok_or(Error::Bounds)?;
-        let lowered = program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let lowered = program.function(entry).ok_or(Error::Unrecognized)?;
         let function_contract = crate::tensor::function_fingerprint(lowered);
         let loop_span = outer.span;
         if loop_span.start >= loop_span.end

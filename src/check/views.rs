@@ -260,19 +260,13 @@ impl Scan<'_> {
                 Ok(fact)
             }
             ExprKind::Call { name, args } => {
-                let callee = self
-                    .program
-                    .program
-                    .functions
-                    .iter()
-                    .find(|f| f.name == *name)
-                    .ok_or_else(|| {
-                        fail(
-                            "OWN_BORROW_SOURCE",
-                            "view-producing call is unknown",
-                            expr.span,
-                        )
-                    })?;
+                let callee = self.program.program.function(name).ok_or_else(|| {
+                    fail(
+                        "OWN_BORROW_SOURCE",
+                        "view-producing call is unknown",
+                        expr.span,
+                    )
+                })?;
                 let source = callee.return_from.as_ref().ok_or_else(|| {
                     fail(
                         "OWN_RETURN_BORROW",
@@ -378,13 +372,7 @@ impl Scan<'_> {
                 if let Some(modes) = crate::check::sort_modes(name) {
                     return self.sort_args(args, modes);
                 }
-                if let Some(callee) = self
-                    .program
-                    .program
-                    .functions
-                    .iter()
-                    .find(|f| f.name == *name)
-                {
+                if let Some(callee) = self.program.program.function(name) {
                     for (arg, param) in args.iter().zip(&callee.params) {
                         if let ExprKind::Name(actual) = &arg.kind {
                             if param.mode == Some(Mode::Read) {

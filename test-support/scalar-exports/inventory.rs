@@ -174,7 +174,7 @@ fn reasons(program: &mir::Program, root: &mir::Function) -> BTreeSet<String> {
         if !seen.insert(name) {
             continue;
         }
-        let Some(function) = program.functions.iter().find(|f| f.name == name) else {
+        let Some(function) = program.function(name) else {
             if !matches!(name, "wrapping_add" | "wrapping_mul") {
                 reasons.insert(format!("unsupported_intrinsic:{name}"));
             }

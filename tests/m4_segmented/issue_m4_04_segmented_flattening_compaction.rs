@@ -605,12 +605,7 @@ fn issue_m4_04_segmented_flattening_compaction_library_grouped_renamed_fuel_pref
                     let c = Contract::from_source(s.as_bytes(), entry).unwrap();
                     assert_eq!(c.function(), entry);
                     let ast = checked(&s);
-                    let f = ast
-                        .program
-                        .functions
-                        .iter()
-                        .find(|f| f.name == entry)
-                        .unwrap();
+                    let f = ast.program.function(entry).unwrap();
                     assert_eq!(c.loop_span(), f.body.statements[1].span);
                     c.verify_source(s.as_bytes()).unwrap();
                     c.verify_mir(&c.verified_mir().unwrap()).unwrap();

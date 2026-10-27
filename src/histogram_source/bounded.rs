@@ -79,12 +79,7 @@ fn recognition(
     checked_stream: usize,
 ) -> Result<usize, Error> {
     let lookups = name_lookup(checked)?.checked_mul(2).ok_or(Error::Budget)?;
-    let f = checked
-        .program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Error::Binding)?;
+    let f = checked.program.function(entry).ok_or(Error::Binding)?;
     let mut entry_stream = Meter {
         used: 0,
         limit: usize::MAX,
@@ -295,12 +290,7 @@ pub(super) fn sort_observation(a: &mut [Access]) -> Result<usize, Error> {
 }
 
 pub(super) fn role_bytes(checked: &CheckedProgram, entry: &str) -> Result<usize, Error> {
-    let f = checked
-        .program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Error::Binding)?;
+    let f = checked.program.function(entry).ok_or(Error::Binding)?;
     let Some(first) = f.body.statements.first() else {
         return Err(Error::Binding);
     };
@@ -777,13 +767,7 @@ mod tests {
             .iter()
             .map(|f| f.name.len() + 1)
             .sum();
-        let entry = c
-            .checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == c.entry)
-            .unwrap();
+        let entry = c.checked.program.function(&c.entry).unwrap();
         (2 * names + stream(entry)).min(stream(&c.checked))
     }
     fn contract_with_main(main: &str) -> Contract {

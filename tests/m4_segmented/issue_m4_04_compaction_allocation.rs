@@ -164,12 +164,7 @@ fn issue_m4_04_segmented_flattening_compaction_library_structure_fuel_and_alloca
                     );
                     assert_eq!(d.loop_spans, c.loop_spans());
                     let ast = checked(&s);
-                    let f = ast
-                        .program
-                        .functions
-                        .iter()
-                        .find(|f| f.name == entry)
-                        .unwrap();
+                    let f = ast.program.function(entry).unwrap();
                     let statement = &f.body.statements[2];
                     assert_eq!(d.statement_span, statement.span);
                     let front::StmtKind::Binding { value, .. } = &statement.kind else {

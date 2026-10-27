@@ -364,9 +364,7 @@ pub(crate) fn annotate(source: &CheckedProgram, program: &mir::Program) -> Vec<C
         .iter()
         .filter_map(|f| {
             program
-                .functions
-                .iter()
-                .find(|lowered| lowered.name == f.name)
+                .function(&f.name)
                 .and_then(|lowered| recognize(f, lowered))
         })
         .collect()
@@ -378,9 +376,7 @@ pub(crate) fn verify(program: &mir::Program) -> Result<(), mir::Error> {
     let mut seen = std::collections::HashSet::new();
     for contract in &program.tensor_contracts {
         let function = program
-            .functions
-            .iter()
-            .find(|f| f.name == contract.function)
+            .function(&contract.function)
             .ok_or_else(|| mir::invalid("tensor contract function missing"))?;
         if contract.version != VERSION
             || !seen.insert(&contract.function)

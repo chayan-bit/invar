@@ -274,12 +274,7 @@ impl MapContract {
     pub fn from_source(source: &[u8], entry: &str) -> Result<Self, Error> {
         let checked = check::check(front::parse(source).map_err(Error::Source)?, false)
             .map_err(Error::Source)?;
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         if f.params.len() != 3
             || f.result != Type::ArrayU32
             || f.return_from.is_some()
