@@ -96,7 +96,11 @@ fn cxx_builds_a_harness_and_reports_compiler_errors() {
         &dir.join("ok"),
     );
     assert!(Command::new(dir.join("ok")).status().unwrap().success());
-    std::fs::write(dir.join("bad.cpp"), "int main() { return undeclared_name; }\n").unwrap();
+    std::fs::write(
+        dir.join("bad.cpp"),
+        "int main() { return undeclared_name; }\n",
+    )
+    .unwrap();
     let failure = std::panic::catch_unwind(|| {
         child_deadline::cxx(
             child_deadline::CXX17_UBSAN_O2,
