@@ -1,6 +1,6 @@
 //! Corpus runner shared by the dedicated integration test. Expectations are
 //! authored separately from executions; unsupported backends retain their rows.
-use super::child_deadline;
+use super::{child_deadline, gnet_words};
 
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net, mir, mir_eval};
@@ -205,45 +205,10 @@ impl Drop for Cpu {
     }
 }
 pub(super) fn words(observation: &oracle::Observation) -> Vec<i64> {
-    use compiled::Status as S;
-    let (status, result, start, end) = match &observation.semantic.result {
-        Ok(eval::Value::I32(n)) => (S::Success, i64::from(*n), 0, 0),
-        Ok(eval::Value::U32(n)) => (S::Success, i64::from(*n), 0, 0),
-        Err(eval::EvalError::Trap { category, span }) => (
-            match category {
-                eval::TrapCategory::IntegerOverflow => S::IntegerOverflow,
-                eval::TrapCategory::DivisionByZero => S::DivisionByZero,
-                eval::TrapCategory::IndexOutOfBounds => S::IndexOutOfBounds,
-                _ => panic!("scalar compiled trap"),
-            },
-            0,
-            span.start as i64,
-            span.end as i64,
-        ),
-        Err(eval::EvalError::EvaluationLimit { .. }) => (S::FuelLimit, 0, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "ARRAY_SIZE_LIMIT",
-            ..
-        }) => (S::ArraySizeLimit, 0, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "CALL_DEPTH_LIMIT",
-            ..
-        }) => (S::CallDepthLimit, 0, 0, 0),
-        Err(_) => (
-            match observation.failure {
-                Some(oracle::ToolFailure::TransitionLimit) => S::TransitionLimit,
-                Some(oracle::ToolFailure::TraceLimit) => S::TraceLimit,
-                _ => panic!("unexpected compiled result {observation:?}"),
-            },
-            0,
-            0,
-            0,
-        ),
-        _ => panic!("i32/u32 compiled results"),
-    };
+    let (status, start, end) = gnet_words::status(observation);
     let mut words = vec![
-        status as i64,
-        result,
+        status,
+        gnet_words::result(observation),
         start,
         end,
         observation.semantic.steps_used as i64,
@@ -252,15 +217,7 @@ pub(super) fn words(observation: &oracle::Observation) -> Vec<i64> {
         observation.events.len() as i64,
     ];
     for e in &observation.events {
-        words.extend([
-            i64::from(e.kind == oracle::EventKind::Complete),
-            e.frame as i64,
-            e.activation as i64,
-            e.token.block.function as i64,
-            e.token.block.block as i64,
-            e.token.position as i64,
-            e.rule as i64,
-        ]);
+        words.extend(gnet_words::event_i64(e));
     }
     words
 }

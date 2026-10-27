@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net};
 use std::{
@@ -142,33 +142,7 @@ int main(int argc,char** argv) {{
             })
             .collect();
         let words = self.run(&inputs, limits);
-        let (status, start, end) = match &expected.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IndexOutOfBounds => 9,
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    _ => panic!("trap"),
-                },
-                span.start as i64,
-                span.end as i64,
-            ),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "ARRAY_SIZE_LIMIT",
-                ..
-            }) => (10, 0, 0),
-            Err(_) => (
-                match expected.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    _ => panic!("{expected:?}"),
-                },
-                0,
-                0,
-            ),
-        };
+        let (status, start, end) = gnet_words::status(&expected);
         assert_eq!((words[0], words[2], words[3]), (status, start, end));
         assert_eq!(
             &words[4..9],
@@ -182,18 +156,7 @@ int main(int argc,char** argv) {{
         );
         let mut offset = 10;
         for event in &expected.events {
-            assert_eq!(
-                &words[offset..offset + 7],
-                &[
-                    i64::from(event.kind == oracle::EventKind::Complete),
-                    event.frame as i64,
-                    event.activation as i64,
-                    event.token.block.function as i64,
-                    event.token.block.block as i64,
-                    event.token.position as i64,
-                    event.rule as i64
-                ]
-            );
+            assert_eq!(&words[offset..offset + 7], &gnet_words::event_i64(event));
             offset += 7;
         }
         let program = net.compiled_mir(&net.verify().unwrap()).unwrap();
@@ -274,12 +237,8 @@ fn issue_gnet_03_worklist_is_fair_bounded_and_keeps_independent_root_observation
             limits,
         )
         .unwrap();
-        let (status, result, start, end) = match &observation.semantic.result {
-            Ok(eval::Value::I32(n)) => (0, i64::from(*n), 0, 0),
-            Err(eval::EvalError::Trap { span, .. }) => (9, 0, span.start as i64, span.end as i64),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0, 0),
-            x => panic!("{x:?}"),
-        };
+        let (status, start, end) = gnet_words::status(&observation);
+        let result = gnet_words::result(&observation);
         let header = [
             status,
             result,
@@ -295,15 +254,7 @@ fn issue_gnet_03_worklist_is_fair_bounded_and_keeps_independent_root_observation
             checks.push_str(&format!("if(output[{lane}*10+{j}]!={word}) return 20;\n"));
         }
         for (i, event) in observation.events.iter().enumerate() {
-            let words = [
-                i64::from(event.kind == oracle::EventKind::Complete),
-                event.frame as i64,
-                event.activation as i64,
-                event.token.block.function as i64,
-                event.token.block.block as i64,
-                event.token.position as i64,
-                event.rule as i64,
-            ];
+            let words = gnet_words::event_i64(event);
             for (j, word) in words.iter().enumerate() {
                 checks.push_str(&format!(
                     "if(trace[{lane}*10000*7+{i}*7+{j}]!={word}) return 21;\n"

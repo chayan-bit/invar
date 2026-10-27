@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 
 use invar::{
     eval,
@@ -206,18 +206,7 @@ fn check_actual(artifact: &ProvenancedArtifact, words: &[i64], result: i32) {
     );
     let mut offset = 10;
     for event in &observed.events {
-        assert_eq!(
-            &words[offset..offset + 7],
-            &[
-                i64::from(event.kind == oracle::EventKind::Complete),
-                event.frame as i64,
-                event.activation as i64,
-                event.token.block.function as i64,
-                event.token.block.block as i64,
-                event.token.position as i64,
-                event.rule as i64
-            ]
-        );
+        assert_eq!(&words[offset..offset + 7], &gnet_words::event_i64(event));
         offset += 7;
     }
     let (net, proof) = artifact.checked_net();
@@ -559,18 +548,7 @@ fn compare_scalar_checkpoint(a: &ProvenancedArtifact, b: &provenance::DeviceBuff
     );
     let trace = words(&b[2]);
     for (i, event) in observed.events.iter().enumerate() {
-        assert_eq!(
-            &trace[i * 7..i * 7 + 7],
-            &[
-                u64::from(event.kind == oracle::EventKind::Complete),
-                event.frame,
-                event.activation,
-                event.token.block.function as u64,
-                event.token.block.block as u64,
-                event.token.position as u64,
-                event.rule as u64
-            ]
-        );
+        assert_eq!(&trace[i * 7..i * 7 + 7], &gnet_words::event(event));
     }
     let state = words(&b[11]);
     assert_eq!(state[12], 0);

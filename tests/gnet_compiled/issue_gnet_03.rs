@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net};
 use std::{
@@ -96,46 +96,10 @@ impl Drop for Cpu {
 }
 
 fn expected(observation: &oracle::Observation) -> Vec<i64> {
-    use compiled::Status as S;
-    let (status, result, start, end) = match &observation.semantic.result {
-        Ok(eval::Value::I32(n)) => (S::Success, i64::from(*n), 0, 0),
-        Ok(eval::Value::U32(n)) => (S::Success, i64::from(*n), 0, 0),
-        Ok(eval::Value::Bool(n)) => (S::Success, i64::from(*n), 0, 0),
-        Ok(eval::Value::Unit) => (S::Success, 0, 0, 0),
-        Err(eval::EvalError::Trap { category, span }) => (
-            match category {
-                eval::TrapCategory::IntegerOverflow => S::IntegerOverflow,
-                eval::TrapCategory::DivisionByZero => S::DivisionByZero,
-                _ => panic!("scalar trap"),
-            },
-            0,
-            span.start as i64,
-            span.end as i64,
-        ),
-        Err(eval::EvalError::EvaluationLimit { .. }) => (S::FuelLimit, 0, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "CALL_DEPTH_LIMIT",
-            ..
-        }) => (S::CallDepthLimit, 0, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "ENTRYPOINT_SIGNATURE" | "INVALID_FUEL",
-            ..
-        }) => (S::InvalidInput, 0, 0, 0),
-        Err(_) => (
-            match observation.failure {
-                Some(oracle::ToolFailure::TransitionLimit) => S::TransitionLimit,
-                Some(oracle::ToolFailure::TraceLimit) => S::TraceLimit,
-                _ => panic!("unexpected oracle result {observation:?}"),
-            },
-            0,
-            0,
-            0,
-        ),
-        _ => panic!("nonscalar result"),
-    };
+    let (status, start, end) = gnet_words::status(observation);
     let mut words = vec![
-        status as i64,
-        result,
+        status,
+        gnet_words::result(observation),
         start,
         end,
         observation.semantic.steps_used as i64,
@@ -144,15 +108,7 @@ fn expected(observation: &oracle::Observation) -> Vec<i64> {
         observation.events.len() as i64,
     ];
     for event in &observation.events {
-        words.extend([
-            i64::from(event.kind == oracle::EventKind::Complete),
-            event.frame as i64,
-            event.activation as i64,
-            event.token.block.function as i64,
-            event.token.block.block as i64,
-            event.token.position as i64,
-            event.rule as i64,
-        ]);
+        words.extend(gnet_words::event_i64(event));
     }
     words
 }

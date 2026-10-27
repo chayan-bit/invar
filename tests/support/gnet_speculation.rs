@@ -1,6 +1,7 @@
 //! Shared by the GNET-04 CPU (ABI4) and device-group model (ABI5) speculation
 //! tests: the source net, limits, driver invocation and the oracle comparison
 //! of the 9-word header, event trace and cleanup trace.
+use crate::gnet_words;
 use invar::general_net::{self, Net, compiled, oracle};
 use invar::{check, eval, front};
 use std::process::Command;
@@ -83,44 +84,8 @@ pub fn compare(
     words: &[i64],
 ) -> usize {
     let reference = oracle::observe_call(net, &net.verify().unwrap(), entry, args, limits).unwrap();
-    let (status, result, start, end) = match &reference.semantic.result {
-        Ok(eval::Value::I32(n)) => (0, i64::from(*n), 0, 0),
-        Ok(eval::Value::U32(n)) => (0, i64::from(*n), 0, 0),
-        Ok(eval::Value::Bool(n)) => (0, i64::from(*n), 0, 0),
-        Ok(eval::Value::Unit) => (0, 0, 0, 0),
-        Err(eval::EvalError::Trap { category, span }) => (
-            match category {
-                eval::TrapCategory::IntegerOverflow => 1,
-                eval::TrapCategory::DivisionByZero => 2,
-                eval::TrapCategory::IndexOutOfBounds => 9,
-                _ => panic!("trap"),
-            },
-            0,
-            span.start as i64,
-            span.end as i64,
-        ),
-        Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "CALL_DEPTH_LIMIT",
-            ..
-        }) => (4, 0, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "ARRAY_SIZE_LIMIT",
-            ..
-        }) => (10, 0, 0, 0),
-        Err(_) => (
-            match reference.failure {
-                Some(oracle::ToolFailure::TransitionLimit) => 5,
-                Some(oracle::ToolFailure::TraceLimit) => 6,
-                Some(oracle::ToolFailure::Allocation) => 11,
-                _ => panic!("{reference:?}"),
-            },
-            0,
-            0,
-            0,
-        ),
-        x => panic!("{x:?}"),
-    };
+    let (status, start, end) = gnet_words::status(&reference);
+    let result = gnet_words::result(&reference);
     assert_eq!(
         &words[..9],
         &[
@@ -140,15 +105,7 @@ pub fn compare(
     for event in &reference.events {
         assert_eq!(
             &words[offset..offset + 7],
-            &[
-                i64::from(event.kind == oracle::EventKind::Complete),
-                event.frame as i64,
-                event.activation as i64,
-                event.token.block.function as i64,
-                event.token.block.block as i64,
-                event.token.position as i64,
-                event.rule as i64
-            ],
+            &gnet_words::event_i64(event),
             "event at {offset} for {entry} {args:?}"
         );
         offset += 7;

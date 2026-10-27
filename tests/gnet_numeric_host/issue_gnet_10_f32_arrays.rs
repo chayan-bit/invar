@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 
 use invar::{
     check, eval, front,
@@ -217,38 +217,7 @@ int main(int argc,char** argv){{
         rows_out
     }
     fn compare(&self, n: &Net, o: &oracle::Observation, w: &[i64]) -> Json {
-        let (status, start, end) = match &o.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    eval::TrapCategory::IndexOutOfBounds => 9,
-                    _ => panic!("trap"),
-                },
-                span.start as i64,
-                span.end as i64,
-            ),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "ARRAY_SIZE_LIMIT",
-                ..
-            }) => (10, 0, 0),
-            Err(eval::EvalError::Tool {
-                code: "CALL_DEPTH_LIMIT",
-                ..
-            }) => (4, 0, 0),
-            Err(_) => (
-                match o.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    Some(oracle::ToolFailure::Allocation) => 11,
-                    _ => panic!("{o:?}"),
-                },
-                0,
-                0,
-            ),
-        };
+        let (status, start, end) = gnet_words::status(o);
         assert_eq!((w[0], w[2], w[3]), (status, start, end));
         assert_eq!(
             &w[4..9],
@@ -262,18 +231,7 @@ int main(int argc,char** argv){{
         );
         let mut at = 10;
         for e in &o.events {
-            assert_eq!(
-                &w[at..at + 7],
-                &[
-                    i64::from(e.kind == oracle::EventKind::Complete),
-                    e.frame as i64,
-                    e.activation as i64,
-                    e.token.block.function as i64,
-                    e.token.block.block as i64,
-                    e.token.position as i64,
-                    e.rule as i64
-                ]
-            );
+            assert_eq!(&w[at..at + 7], &gnet_words::event_i64(e));
             at += 7
         }
         let p = n.compiled_mir(&n.verify().unwrap()).unwrap();

@@ -1,6 +1,6 @@
 //! Actual ABI2/3 CPU execution. Caller-owned heaps/tasks retain their full
 //! denominator; source and backend budgets are accounted separately.
-use super::{child_deadline, corpus_sample};
+use super::{child_deadline, corpus_sample, gnet_words};
 
 use super::corpus_cpu::{
     self as base, cleanup, compiled_rejection, digest, document, equal, expectation, recorded,
@@ -380,15 +380,7 @@ fn owned_expected_words(expected: &oracle::Observation) -> Vec<i64> {
 }
 fn append_events(words: &mut Vec<i64>, expected: &oracle::Observation) {
     for e in &expected.events {
-        words.extend([
-            i64::from(e.kind == oracle::EventKind::Complete),
-            e.frame as i64,
-            e.activation as i64,
-            e.token.block.function as i64,
-            e.token.block.block as i64,
-            e.token.position as i64,
-            e.rule as i64,
-        ]);
+        words.extend(gnet_words::event_i64(e));
     }
 }
 fn schedules(doc: &Json) -> Vec<Vec<u64>> {
