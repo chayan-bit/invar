@@ -38,6 +38,8 @@ group. Timeout status is 124, forced kill is SIGKILL (shell status 137), and cal
 their normal failure checks. Existing typed product timeout tests keep their
 exact injected short deadlines. The knob must never be read by product code.
 
+`cxx(flags, source, exe)` compiles a C++ test harness with `$CXX` (else `c++`) under a 120-second base deadline and panics with the compiler's stderr on failure; `CXX17_UBSAN_O1`/`O2` are the emitted-CPU harness flag sets.
+
 Sweep of compiled/process test deadlines:
 
 - `bench/general-net-v01/corpus_{cpu,owned,children,numeric}.rs`: each compiler,

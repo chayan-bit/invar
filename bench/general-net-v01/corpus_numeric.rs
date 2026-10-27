@@ -193,30 +193,11 @@ int main(int argc,char** argv){{
             n = a.params().len()
         );
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = child_deadline::command(60)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .args(if force_no_sse {
-                &["-DINVAR_CORPUS_NO_SSE=1"][..]
-            } else {
-                &[]
-            })
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "numeric compile {:?}: {}",
-            out.status,
-            String::from_utf8_lossy(&out.stderr)
-        );
+        let mut flags = child_deadline::CXX17_UBSAN_O2.to_vec();
+        if force_no_sse {
+            flags.push("-DINVAR_CORPUS_NO_SSE=1");
+        }
+        child_deadline::cxx(&flags, &dir.join("source.cpp"), &dir.join("run"));
         let probe = child_deadline::command(5)
             .arg(dir.join("run"))
             .arg("--capabilities")

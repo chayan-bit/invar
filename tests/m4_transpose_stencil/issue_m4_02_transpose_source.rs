@@ -426,23 +426,10 @@ for(unsigned i=0;i<{count};++i)std::cout<<output[i]<<' ';return 0; }}
                     .join(",")
             );
             fs::write(dir.join("transpose.cpp"), format!("{cpu}\n{driver}")).unwrap();
-            let built = child_deadline::command(60)
-                .arg("c++")
-                .args([
-                    "-std=c++17",
-                    "-O2",
-                    "-fsanitize=undefined",
-                    "-fno-sanitize-recover=all",
-                ])
-                .arg(dir.join("transpose.cpp"))
-                .arg("-o")
-                .arg(dir.join("transpose"))
-                .output()
-                .unwrap();
-            assert!(
-                built.status.success(),
-                "{}",
-                String::from_utf8_lossy(&built.stderr)
+            child_deadline::cxx(
+                child_deadline::CXX17_UBSAN_O2,
+                &dir.join("transpose.cpp"),
+                &dir.join("transpose"),
             );
             let run = child_deadline::command(10)
                 .arg(dir.join("transpose"))

@@ -163,24 +163,10 @@ impl Cpu {
             format!("{}\n{DRIVER}", artifact.source()),
         )
         .unwrap();
-        let output = child_deadline::command(30)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .expect("corpus needs timeout and C++17");
-        assert!(
-            output.status.success(),
-            "C++ compile {:?}: {}",
-            output.status,
-            String::from_utf8_lossy(&output.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O1,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self { dir }
     }

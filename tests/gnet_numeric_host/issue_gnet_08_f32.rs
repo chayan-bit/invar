@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+use crate::child_deadline;
 use invar::{
     check, eval, front,
     general_net::{self, Net, compiled, oracle},
@@ -86,22 +87,10 @@ int main(int argc,char** argv) {{
 "#
         );
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "{}",
-            String::from_utf8_lossy(&out.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O2,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self { dir }
     }
