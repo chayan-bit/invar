@@ -3,12 +3,7 @@
 use crate::{child_deadline, gnet_words};
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net};
-use std::{
-    fs,
-    path::PathBuf,
-    process::Command,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, path::PathBuf, process::Command};
 
 const FIB: &str = "fn fib(n: u32) -> i32 { if n < 2u32 { return 1; } return fib(n - 1u32) + fib(n - 2u32); } fn main() -> i32 { return fib(8u32); }";
 const DRIVER: &str = r#"
@@ -40,13 +35,7 @@ struct Cpu {
 }
 impl Cpu {
     fn new(artifact: &compiled::Artifact) -> Self {
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-gnet-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-gnet");
         fs::write(
             dir.join("source.cpp"),
             format!("{}\n{DRIVER}", artifact.source()),

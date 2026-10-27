@@ -10,12 +10,7 @@ use invar::{
 };
 use serde_json::{Value as Json, json};
 use sha2::{Digest, Sha256};
-use std::{
-    fs,
-    path::PathBuf,
-    process::Stdio,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, path::PathBuf, process::Stdio};
 
 /// The harness executable; a Windows linker appends `.exe` to `-o run`.
 const RUN: &str = if cfg!(windows) { "run.exe" } else { "run" };
@@ -119,13 +114,7 @@ impl Cpu {
         );
         let layout = a.owned_layout().unwrap().clone();
         assert_eq!(layout.output_words(), 10);
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "gnet-f32-arrays-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("gnet-f32-arrays");
         let driver = format!(
             r#"
 #include <iostream>

@@ -10,7 +10,6 @@ use std::{
     collections::BTreeMap,
     fs,
     path::{Path, PathBuf},
-    sync::atomic::{AtomicUsize, Ordering},
 };
 
 const DRIVER: &str = r#"
@@ -151,13 +150,7 @@ struct Cpu {
 }
 impl Cpu {
     fn new(artifact: &compiled::Artifact) -> Self {
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-gnet-corpus-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-gnet-corpus");
         fs::write(
             dir.join("source.cpp"),
             format!("{}\n{DRIVER}", artifact.source()),

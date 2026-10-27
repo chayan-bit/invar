@@ -11,12 +11,7 @@ use invar::{
     general_net::{self, Net, compiled, oracle},
 };
 use serde_json::{Value as Json, json};
-use std::{
-    collections::BTreeMap,
-    fs,
-    path::PathBuf,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{collections::BTreeMap, fs, path::PathBuf};
 
 fn checked(bytes: &[u8]) -> Result<check::CheckedProgram, front::FrontError> {
     let checked = check::check(front::parse(bytes)?, true)?;
@@ -107,13 +102,7 @@ pub(super) struct Run {
 }
 impl Cpu {
     fn compile(artifact: &compiled::Artifact, driver: &str) -> Self {
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-corpus-owned-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-corpus-owned");
         fs::write(
             dir.join("source.cpp"),
             format!("{}\n{driver}", artifact.source()),

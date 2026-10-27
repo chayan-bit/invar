@@ -14,7 +14,6 @@ use std::{
     fs,
     path::PathBuf,
     process::Stdio,
-    sync::atomic::{AtomicUsize, Ordering},
 };
 
 /// The harness executable; a Windows linker appends `.exe` to `-o run`.
@@ -162,13 +161,7 @@ impl Cpu {
         );
         let owned = a.owned_layout().unwrap();
         let (heap, clean) = (owned.heap_words(), owned.cleanup_words());
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-corpus-numeric-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-corpus-numeric");
         let driver = format!(
             r#"
 #include <iostream>

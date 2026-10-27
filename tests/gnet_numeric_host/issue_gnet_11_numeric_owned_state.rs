@@ -9,12 +9,7 @@ use invar::{
     general_net::{self, Net, compiled, oracle},
     numeric_contract::{F32Bits, NumericPolicy},
 };
-use std::{
-    fs,
-    path::PathBuf,
-    process::Stdio,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, path::PathBuf, process::Stdio};
 
 mod cases;
 
@@ -173,13 +168,7 @@ impl Cpu {
     }
     fn build_driver(a: &compiled::Artifact, template: &str, body: &str) -> Self {
         let layout = a.owned_layout().unwrap();
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "gnet-abi11-state-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("gnet-abi11-state");
         let driver = template
             .replace("@BODY@", body)
             .replace("@HEAP@", &layout.heap_words().to_string())
