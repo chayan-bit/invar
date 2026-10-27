@@ -622,7 +622,7 @@ pub(crate) fn cuda_generated_case(case: &Value, corpus: &Value) -> Result<Value,
     let toolchain = format!("NVRTC {major}.{minor}; sm_{sm}");
     let compiler = env::current_exe()
         .map_err(|e| e.to_string())?
-        .with_file_name("invar-nvrtc");
+        .with_file_name(format!("invar-nvrtc{}", std::env::consts::EXE_SUFFIX));
     if !compiler.is_file() {
         return Err(format!(
             "bounded NVRTC helper unavailable: {}",
@@ -681,7 +681,7 @@ pub(crate) fn cuda_generated_case_once(case: &Value, corpus: &Value) -> Result<V
     let toolchain = format!("NVRTC {major}.{minor}; sm_{sm}");
     let compiler = env::current_exe()
         .map_err(|e| e.to_string())?
-        .with_file_name("invar-nvrtc");
+        .with_file_name(format!("invar-nvrtc{}", std::env::consts::EXE_SUFFIX));
     if !compiler.is_file() {
         return Err("bounded NVRTC helper unavailable".into());
     }

@@ -45,7 +45,7 @@ fn issue_ai_01_machine_diagnostics_indexed_registry_matches_family_sources() {
                 .unwrap()
                 .to_str()
                 .unwrap()
-                .to_owned()
+                .replace('\\', "/")
         })
         .collect::<Vec<_>>();
     files.sort_unstable();

@@ -1,17 +1,21 @@
 //! Test executables never have a writable descriptor in the test process.
 use std::{
-    fs,
-    io::{self, Write},
-    os::unix::fs::{DirBuilderExt, PermissionsExt},
+    fs, io,
     path::Path,
-    process::{Command, Stdio},
     sync::atomic::{AtomicU64, Ordering},
+};
+#[cfg(unix)]
+use std::{
+    io::Write,
+    os::unix::fs::{DirBuilderExt, PermissionsExt},
+    process::{Command, Stdio},
 };
 
 static NEXT: AtomicU64 = AtomicU64::new(0);
 
 /// The writer is a child, so unrelated forks cannot inherit its writable fd.
 /// Wait for that child, sync through a read-only fd, then atomically publish.
+#[cfg(unix)]
 #[allow(dead_code)]
 pub fn write(path: &Path, contents: &[u8]) -> io::Result<()> {
     let parent = path
@@ -49,4 +53,26 @@ pub fn write(path: &Path, contents: &[u8]) -> io::Result<()> {
     })();
     let cleanup = fs::remove_dir_all(directory);
     result.and(cleanup)
+}
+
+/// Windows children inherit no handle the test process did not mark
+/// inheritable, and std never does, so the writer needs no child here.
+#[cfg(windows)]
+#[allow(dead_code)]
+pub fn write(path: &Path, contents: &[u8]) -> io::Result<()> {
+    let staged = path.with_file_name(format!(
+        ".executable-{}-{}",
+        std::process::id(),
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    ));
+    let result = fs::File::create_new(&staged)
+        .and_then(|mut file| {
+            io::Write::write_all(&mut file, contents)?;
+            file.sync_all()
+        })
+        .and_then(|()| fs::rename(&staged, path));
+    if result.is_err() {
+        let _ = fs::remove_file(&staged);
+    }
+    result
 }

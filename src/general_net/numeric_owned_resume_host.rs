@@ -122,6 +122,7 @@ fn private_directory(prefix: &str) -> Result<PathBuf, Error> {
             .map_err(|_| Error::Limit)?;
         let path =
             std::env::temp_dir().join(format!("{prefix}-{}-{epoch}-{nonce}", std::process::id()));
+        #[allow(unused_mut)] // mode() is Unix-only
         let mut builder = fs::DirBuilder::new();
         #[cfg(unix)]
         {
@@ -141,10 +142,14 @@ fn compiler_path(path: &Path) -> Result<PathBuf, Error> {
         return fs::canonicalize(path).map_err(io);
     }
     let paths = std::env::var_os("PATH").ok_or(Error::Input)?;
+    // `c++` is `c++.exe` on Windows.
+    let mut suffixed = path.as_os_str().to_owned();
+    suffixed.push(std::env::consts::EXE_SUFFIX);
     for dir in std::env::split_paths(&paths) {
-        let candidate = dir.join(path);
-        if candidate.is_file() {
-            return fs::canonicalize(candidate).map_err(io);
+        for candidate in [dir.join(path), dir.join(&suffixed)] {
+            if candidate.is_file() {
+                return fs::canonicalize(candidate).map_err(io);
+            }
         }
     }
     Err(Error::Input)

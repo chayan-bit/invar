@@ -527,7 +527,7 @@ fn issue_s1_05_vendored_menagerie_files_match_their_pinned_manifest() {
                         .unwrap()
                         .to_str()
                         .unwrap()
-                        .to_owned(),
+                        .replace('\\', "/"),
                 );
             }
         }

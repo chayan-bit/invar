@@ -181,6 +181,8 @@ fn live_page_snapshot_never_modifies_the_slice() {
     let state = invar_cuda::pages::observe(&data[1..19999]);
     #[cfg(any(target_os = "linux", target_os = "macos"))]
     assert!(matches!(state,PageState::Known{resident,total} if total>0 && resident<=total));
+    #[cfg(not(any(target_os = "linux", target_os = "macos")))]
+    assert!(matches!(state, PageState::Unknown));
     assert!(data.iter().all(|x| *x == 0x12345678));
 }
 #[test]

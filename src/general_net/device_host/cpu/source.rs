@@ -31,7 +31,10 @@ Dim gridDim,blockDim{32,1,1};thread_local Dim threadIdx{0,0,0},blockIdx{0,0,0};
 #define threadgroup
 #define constant
 #define kernel
-using uint=unsigned;using ulong=unsigned long;
+using uint=unsigned;using ulong=std::uint64_t;
+#if __SIZEOF_LONG__ == 4
+#define long long long
+#endif
 struct uint3{uint x,y,z;};
 namespace metal{enum class mem_flags{mem_device=1,mem_threadgroup=2};
 inline unsigned operator|(mem_flags a,mem_flags b){return unsigned(a)|unsigned(b);}
@@ -52,6 +55,7 @@ inline void threadgroup_barrier(unsigned){group_barrier.arrive_and_wait();}}
 #undef threadgroup
 #undef constant
 #undef kernel
+#undef long
 "#
                 .into(),
             )
@@ -64,6 +68,11 @@ inline void threadgroup_barrier(unsigned){group_barrier.arrive_and_wait();}}
         "invar_gnet_children_v5(a,o,t,c,h,cl,task.get(),slot(),ph,pt,pc,s,threadIdx.x,uint3{0,0,0},uint3{1,1,1},uint3{32,1,1});"
     };
     let driver=r#"
+#ifdef _WIN32
+#define INVAR_MODEL_EXPORT __declspec(dllexport)
+#else
+#define INVAR_MODEL_EXPORT __attribute__((visibility("default")))
+#endif
 struct ModelWork {
  std::array<std::vector<gnet_u>,12> b;
  std::array<size_t,12> sizes{};
@@ -91,7 +100,7 @@ struct ModelWork {
  void shutdown(){ {std::lock_guard lock(mutex);stopping=true;}wake.notify_all();for(auto& worker:workers)if(worker.joinable())worker.join();}
  ~ModelWork(){shutdown();}
 };
-extern "C" __attribute__((visibility("default"))) uint32_t @SYMBOL@(uint32_t command,void** opaque,const uint64_t* input,size_t n,uint64_t* output,size_t m) noexcept {
+extern "C" INVAR_MODEL_EXPORT uint32_t @SYMBOL@(uint32_t command,void** opaque,const uint64_t* input,size_t n,uint64_t* output,size_t m) noexcept {
  if(!opaque)return 2;
  try{
  if(command==0){if(*opaque||!input||n!=18+@ARGS@||!output||m!=12)return 2;

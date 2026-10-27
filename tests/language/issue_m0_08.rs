@@ -105,7 +105,12 @@ fn issue_m0_08_adversarial_source_corpus() {
 
 #[test]
 fn issue_m0_08_json_escaping_and_single_document() {
-    let path = std::env::temp_dir().join(format!("invar m0-08 \"{}\".inv", std::process::id()));
+    // Windows file names cannot hold `"`; there the temp directory's `\` needs escaping.
+    let quote = if cfg!(windows) { "'" } else { "\"" };
+    let path = std::env::temp_dir().join(format!(
+        "invar m0-08 {quote}{}{quote}.inv",
+        std::process::id()
+    ));
     std::fs::write(&path, "fn main() -> i32 { return unknown; }").unwrap();
     let output = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(["check", path.to_str().unwrap(), "--format", "json"])

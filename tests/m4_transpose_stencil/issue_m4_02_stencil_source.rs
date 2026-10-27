@@ -25,6 +25,7 @@ use std::{
 /// Generated programs also limit themselves internally (alarm/RLIMIT_CPU).
 const COMPILE_WALL: Duration = Duration::from_secs(180);
 const RUN_WALL: Duration = Duration::from_secs(60);
+#[cfg(unix)]
 const CPU_SECONDS: u64 = 120;
 
 /// Run a subprocess with a wall deadline and, on Unix, a CPU-seconds limit.
@@ -660,6 +661,10 @@ static float __fadd_rn(float a,float b) { volatile float v=a+b; return v; }
 "#;
 
 #[test]
+#[cfg_attr(
+    not(unix),
+    ignore = "the CPU barrier model limits itself with setrlimit (sys/resource.h)"
+)]
 fn issue_m4_02_transpose_stencil_schedules_exact_cuda_text_cpu_barrier_model() {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
     // Each process has at most 256 workers, 128KiB each (32MiB total stack),

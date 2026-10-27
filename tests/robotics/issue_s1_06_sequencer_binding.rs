@@ -674,10 +674,18 @@ fn flow(n: usize) {
     assert!(s.child.wait().unwrap().success());
 }
 #[test]
+#[cfg_attr(
+    not(unix),
+    ignore = "the generated process transport is POSIX (poll.h)"
+)]
 fn issue_s1_06_binding_six_joint_real_process_ordering() {
     flow(6);
 }
 #[test]
+#[cfg_attr(
+    not(unix),
+    ignore = "the generated process transport is POSIX (poll.h)"
+)]
 fn issue_s1_06_binding_seven_joint_real_process_ordering() {
     flow(7);
 }

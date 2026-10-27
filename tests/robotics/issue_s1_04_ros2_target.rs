@@ -61,7 +61,7 @@ fn issue_s1_04_ros2_target_public_generation_is_deterministic() {
         .iter()
         .map(|(path, bytes)| {
             (
-                path.to_str().unwrap().to_owned(),
+                path.to_str().unwrap().replace('\\', "/"),
                 Sha256::digest(bytes)
                     .iter()
                     .map(|byte| format!("{byte:02x}"))
