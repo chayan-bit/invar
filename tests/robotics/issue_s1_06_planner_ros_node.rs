@@ -1,6 +1,11 @@
+use crate::child_deadline;
 use invar::{front, system};
 
 #[test]
+#[cfg_attr(
+    not(unix),
+    ignore = "the generated ROS 2 node is a Linux program (dlfcn.h)"
+)]
 fn issue_s1_06_planner_ros_node_is_separate_and_uses_checked_conversions() {
     for n in [6, 7] {
         let manifest = include_str!("../fixtures/s1_06/planner-manifest.inv")
@@ -76,22 +81,20 @@ fn check_cpp(n: u32, files: &std::collections::BTreeMap<String, String>) {
     )
     .unwrap();
     let executable = root.join("config");
-    let compiled = Command::new("c++")
-        .args(["-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic"])
-        .arg("-I")
-        .arg(&interfaces)
-        .arg("-I")
-        .arg(&includes)
-        .arg(&source)
-        .arg("-o")
-        .arg(&executable)
-        .output()
-        .unwrap();
-    assert!(
-        compiled.status.success(),
-        "{}",
-        String::from_utf8_lossy(&compiled.stderr)
+    let (i1, i2) = (
+        format!("-I{}", interfaces.display()),
+        format!("-I{}", includes.display()),
     );
+    let flags = [
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pedantic",
+        &i1,
+        &i2,
+    ];
+    child_deadline::cxx(&flags, &source, &executable);
     let result = Command::new(&executable).arg(&source).output().unwrap();
     assert!(
         result.status.success(),

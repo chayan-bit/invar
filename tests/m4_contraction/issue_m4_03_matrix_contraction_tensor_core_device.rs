@@ -13,7 +13,6 @@ use corpus::{DIRECT, LARGEST, NONFINITE, NORMAL, SHAPES, SUBNORMAL};
 use invar_device::{Capabilities, Provenance, floating, gemm};
 use std::{
     fs,
-    process::Command,
     sync::atomic::{AtomicUsize, Ordering},
 };
 
@@ -414,8 +413,8 @@ const MSL_SHIM: &str = r#"#include <atomic>
 #include <thread>
 #include <vector>
 typedef unsigned int uint;
-typedef unsigned long ulong;
-static_assert(sizeof(ulong) == 8, "LP64 host required");
+typedef __UINT64_TYPE__ ulong;
+static_assert(sizeof(ulong) == 8, "64-bit ulong required");
 #define kernel
 #define device
 #define threadgroup static
@@ -492,37 +491,25 @@ fn host_run(
     ));
     fs::create_dir(&dir).unwrap();
     fs::write(dir.join("kernel.cpp"), text).unwrap();
-    let built = Command::new("timeout")
-        .arg("120")
-        .arg(std::env::var_os("CXX").unwrap_or_else(|| "c++".into()))
-        .args([
-            "-std=c++20",
-            "-O1",
-            "-pthread",
-            "-ffp-contract=off",
-            "-fno-fast-math",
-            "-Wno-attributes",
-            "-Wno-unknown-pragmas",
-        ])
-        .arg(dir.join("kernel.cpp"))
-        .arg("-o")
-        .arg(dir.join("run"))
-        .output()
-        .unwrap();
-    assert!(
-        built.status.success(),
-        "host compile failed; preserved {dir:?}: {}",
-        String::from_utf8_lossy(&built.stderr)
-    );
+    let exe = dir.join(format!("run{}", std::env::consts::EXE_SUFFIX));
+    let flags = [
+        "-std=c++20",
+        "-O1",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-Wno-attributes",
+        "-Wno-unknown-pragmas",
+    ];
+    crate::child_deadline::cxx(&flags, &dir.join("kernel.cpp"), &exe);
     let mut input = format!("{} {} {c_len} {groups}\n", a.len(), b.len());
     for w in a.iter().chain(b) {
         input.push_str(&format!("{w}\n"));
     }
     fs::write(dir.join("input"), input).unwrap();
-    let ran = Command::new("sh")
-        .arg("-c")
-        .arg("timeout 120 ./run < input")
-        .current_dir(&dir)
+    let ran = crate::child_deadline::command(120)
+        .arg(&exe)
+        .stdin(fs::File::open(dir.join("input")).unwrap())
         .output()
         .unwrap();
     assert!(

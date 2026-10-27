@@ -241,18 +241,7 @@ fn issue_gnet_10_private_storage_trace_transition_and_cleanup_caps() {
             .chunks_exact(7)
             .zip(&complete.events)
         {
-            assert_eq!(
-                actual,
-                &[
-                    i64::from(e.kind == oracle::EventKind::Complete),
-                    e.frame as i64,
-                    e.activation as i64,
-                    e.token.block.function as i64,
-                    e.token.block.block as i64,
-                    e.token.position as i64,
-                    e.rule as i64
-                ]
-            )
+            assert_eq!(actual, &gnet_words::event_i64(e))
         }
         let at = 10 + event_count * 7;
         for (q, c) in w[at..at + w[8] as usize * 4]

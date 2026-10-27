@@ -1,4 +1,5 @@
 //! CPU adapter execution, not ROS/cuRobo or complete task qualification.
+use crate::child_deadline;
 use invar::{
     front,
     system::{
@@ -248,19 +249,12 @@ fn issue_s1_06_source_tool_projection_executes_rust_and_generated_cpp_both_arms(
         extra.push(b' ');
         fs::write(temp.join("bad.xml"), extra).unwrap();
         // Execute the exact-byte model guard, including trailing-byte refusal.
-        program=program.replace("int main(){",&format!("int main(){{assert(reference_model_matches(\"{}\"));assert(!reference_model_matches(\"{}\"));",temp.join("model.xml").display(),temp.join("bad.xml").display()));
+        program=program.replace("int main(){",&format!("int main(){{assert(reference_model_matches({:?}));assert(!reference_model_matches({:?}));",temp.join("model.xml").to_str().unwrap(),temp.join("bad.xml").to_str().unwrap()));
         fs::write(temp.join("probe.cpp"), program).unwrap();
-        let result = Command::new("c++")
-            .args(["-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic"])
-            .arg(temp.join("probe.cpp"))
-            .arg("-o")
-            .arg(temp.join("probe"))
-            .output()
-            .unwrap();
-        assert!(
-            result.status.success(),
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
+        child_deadline::cxx(
+            &["-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic"],
+            &temp.join("probe.cpp"),
+            &temp.join("probe"),
         );
         assert!(Command::new(temp.join("probe")).status().unwrap().success());
         fs::remove_dir_all(temp).unwrap();

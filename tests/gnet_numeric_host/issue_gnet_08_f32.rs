@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+use crate::{child_deadline, gnet_words};
 use invar::{
     check, eval, front,
     general_net::{self, Net, compiled, oracle},
@@ -86,22 +87,10 @@ int main(int argc,char** argv) {{
 "#
         );
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "{}",
-            String::from_utf8_lossy(&out.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O2,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self { dir }
     }
@@ -147,28 +136,7 @@ int main(int argc,char** argv) {{
         words: &[i64],
     ) {
         let o = oracle::observe_call(net, &net.verify().unwrap(), entry, args, limits).unwrap();
-        let (status, start, end) = match &o.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    _ => panic!("{o:?}"),
-                },
-                span.start as i64,
-                span.end as i64,
-            ),
-            Err(_) => (
-                match o.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    _ => panic!("{o:?}"),
-                },
-                0,
-                0,
-            ),
-        };
+        let (status, start, end) = gnet_words::status(&o);
         assert_eq!((words[0], words[2], words[3]), (status, start, end));
         assert_eq!(
             &words[4..8],
@@ -197,18 +165,7 @@ int main(int argc,char** argv) {{
         }
         assert_eq!(words.len(), 8 + o.events.len() * 7);
         for (actual, event) in words[8..].chunks_exact(7).zip(&o.events) {
-            assert_eq!(
-                actual,
-                &[
-                    i64::from(event.kind == oracle::EventKind::Complete),
-                    event.frame as i64,
-                    event.activation as i64,
-                    event.token.block.function as i64,
-                    event.token.block.block as i64,
-                    event.token.position as i64,
-                    event.rule as i64
-                ]
-            );
+            assert_eq!(actual, &gnet_words::event_i64(event));
         }
     }
 }

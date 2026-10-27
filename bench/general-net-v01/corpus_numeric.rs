@@ -1,5 +1,5 @@
 //! Source-derived ABI8 strict-f32 CPU corpus with explicit host-mode capabilities.
-use super::{child_deadline, corpus_sample};
+use super::{child_deadline, corpus_sample, gnet_words};
 
 use super::corpus_cpu as base;
 use invar::{
@@ -16,6 +16,9 @@ use std::{
     process::Stdio,
     sync::atomic::{AtomicUsize, Ordering},
 };
+
+/// The harness executable; a Windows linker appends `.exe` to `-o run`.
+const RUN: &str = if cfg!(windows) { "run.exe" } else { "run" };
 fn checked(bytes: &[u8]) -> Result<check::CheckedProgram, front::FrontError> {
     let p = check::check(front::parse(bytes)?, true)?;
     invar::ownership::check(&p)?;
@@ -193,32 +196,13 @@ int main(int argc,char** argv){{
             n = a.params().len()
         );
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = child_deadline::command(60)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .args(if force_no_sse {
-                &["-DINVAR_CORPUS_NO_SSE=1"][..]
-            } else {
-                &[]
-            })
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "numeric compile {:?}: {}",
-            out.status,
-            String::from_utf8_lossy(&out.stderr)
-        );
+        let mut flags = child_deadline::CXX17_UBSAN_O2.to_vec();
+        if force_no_sse {
+            flags.push("-DINVAR_CORPUS_NO_SSE=1");
+        }
+        child_deadline::cxx(&flags, &dir.join("source.cpp"), &dir.join(RUN));
         let probe = child_deadline::command(5)
-            .arg(dir.join("run"))
+            .arg(dir.join(RUN))
             .arg("--capabilities")
             .output()
             .unwrap();
@@ -226,12 +210,13 @@ int main(int argc,char** argv){{
             probe.status.success(),
             "numeric capability probe: {probe:?}"
         );
+        // A Windows C++ runtime writes text-mode stdout, so `\n` arrives as `\r\n`.
         let x86_ftz_daz = match probe.stdout.as_slice() {
-            b"sse-ftz-daz=0\n" => false,
-            b"sse-ftz-daz=1\n" => true,
+            b"sse-ftz-daz=0\n" | b"sse-ftz-daz=0\r\n" => false,
+            b"sse-ftz-daz=1\n" | b"sse-ftz-daz=1\r\n" => true,
             other => panic!("unexpected numeric capability response: {other:?}"),
         };
-        let metadata = json!({"host_environment_capabilities":{"x86_FTZ_DAZ":x86_ftz_daz,"forced_no_sse_for_test":force_no_sse},"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","target":format!("{:?}",a.target()),"params":a.params().iter().map(|p|format!("{p:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":base::digest(a.source().as_bytes()),"harness_sha256":base::digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_executable_sha256":base::digest(&fs::read(dir.join("run")).unwrap()),"owned_layout":true,"continuation_layout":true,"speculation_layout":false,"device_layout":false});
+        let metadata = json!({"host_environment_capabilities":{"x86_FTZ_DAZ":x86_ftz_daz,"forced_no_sse_for_test":force_no_sse},"abi":a.abi_version(),"numeric_policy":"strict-f32-v1","target":format!("{:?}",a.target()),"params":a.params().iter().map(|p|format!("{p:?}")).collect::<Vec<_>>(),"result":format!("{:?}",a.result()),"states":a.states(),"frame_bytes":a.frame_bytes(),"emitted_source_sha256":base::digest(a.source().as_bytes()),"harness_sha256":base::digest(&fs::read(dir.join("source.cpp")).unwrap()),"native_executable_sha256":base::digest(&fs::read(dir.join(RUN)).unwrap()),"owned_layout":true,"continuation_layout":true,"speculation_layout":false,"device_layout":false});
         if let Some(r) = std::env::var_os("INVAR_GNET_CORPUS_REPORT_DIR") {
             let p = PathBuf::from(r)
                 .join("numeric-artifacts")
@@ -276,7 +261,7 @@ int main(int argc,char** argv){{
         let path = self.dir.join("input.txt");
         fs::write(&path, input).unwrap();
         let out = child_deadline::command(30)
-            .arg(self.dir.join("run"))
+            .arg(self.dir.join(RUN))
             .arg(mode.to_string())
             .arg(if ftz { "1" } else { "0" })
             .stdin(Stdio::from(fs::File::open(path).unwrap()))
@@ -297,32 +282,7 @@ int main(int argc,char** argv){{
         result
     }
     fn compare(&self, o: &oracle::Observation, w: &[i64]) -> Json {
-        let (status, start, end) = match &o.semantic.result {
-            Ok(_) => (0, 0, 0),
-            Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-            Err(eval::EvalError::Trap { category, span }) => (
-                match category {
-                    eval::TrapCategory::IntegerOverflow => 1,
-                    eval::TrapCategory::DivisionByZero => 2,
-                    _ => panic!("numeric trap {o:?}"),
-                },
-                span.start as i64,
-                span.end as i64,
-            ),
-            Err(eval::EvalError::Tool {
-                code: "CALL_DEPTH_LIMIT",
-                ..
-            }) => (compiled::Status::CallDepthLimit as i64, 0, 0),
-            Err(_) => (
-                match o.failure {
-                    Some(oracle::ToolFailure::TransitionLimit) => 5,
-                    Some(oracle::ToolFailure::TraceLimit) => 6,
-                    _ => panic!("numeric tool failure {o:?}"),
-                },
-                0,
-                0,
-            ),
-        };
+        let (status, start, end) = gnet_words::status(o);
         assert_eq!((w[0], w[2], w[3]), (status, start, end));
         assert_eq!(
             &w[4..8],
@@ -347,18 +307,7 @@ int main(int argc,char** argv){{
         };
         assert_eq!(w.len(), 8 + o.events.len() * 7);
         for (actual, e) in w[8..].chunks_exact(7).zip(&o.events) {
-            assert_eq!(
-                actual,
-                &[
-                    i64::from(e.kind == oracle::EventKind::Complete),
-                    e.frame as i64,
-                    e.activation as i64,
-                    e.token.block.function as i64,
-                    e.token.block.block as i64,
-                    e.token.position as i64,
-                    e.rule as i64
-                ]
-            )
+            assert_eq!(actual, &gnet_words::event_i64(e))
         }
         json!({"status":"executed","artifact":self.metadata,"header":w[..8],"all_words_le_i64_sha256":base::digest(&w.iter().flat_map(|w|w.to_le_bytes()).collect::<Vec<_>>()),"events":o.events.len(),"nan_agreement":"class only; non-NaN exact bits; echo/negate/selected vectors additionally assert NaN payload/sign bits","gpu_execution":"not_performed"})
     }
@@ -757,7 +706,7 @@ pub fn environment_capabilities() {
         }
     }
     let rejected = child_deadline::command(5)
-        .arg(h.dir.join("run"))
+        .arg(h.dir.join(RUN))
         .args(["0", "1"])
         .stdin(Stdio::null())
         .output()

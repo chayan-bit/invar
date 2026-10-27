@@ -73,6 +73,9 @@ pub fn write_atomic(output: &Path, bytes: &[u8]) -> Result<(), Error> {
         file.write_all(bytes).map_err(Error::Io)?;
         file.sync_all().map_err(Error::Io)?;
         fs::rename(&temp, output).map_err(Error::Io)?;
+        // Windows cannot open a directory as a File (os error 5); there the
+        // replacing rename is the last durability point a caller can reach.
+        #[cfg(unix)]
         fs::File::open(
             output
                 .parent()
@@ -80,7 +83,8 @@ pub fn write_atomic(output: &Path, bytes: &[u8]) -> Result<(), Error> {
                 .unwrap_or(Path::new(".")),
         )
         .and_then(|dir| dir.sync_all())
-        .map_err(Error::Io)
+        .map_err(Error::Io)?;
+        Ok(())
     })();
     if result.is_err() {
         let _ = fs::remove_file(&temp);

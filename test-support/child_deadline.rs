@@ -1,5 +1,5 @@
 //! Test harness wall deadlines only. Never use this module in production code.
-use std::{process::Command, time::Duration};
+use std::{ffi::OsStr, path::Path, process::Command, time::Duration};
 
 pub fn parse_scale(value: &str) -> Result<u32, &'static str> {
     if value.is_empty() || !value.bytes().all(|c| c.is_ascii_digit()) {
@@ -31,7 +31,62 @@ pub fn seconds(base: u64) -> u64 {
 /// GNU timeout owns the process group; TERM then KILL bounds uncooperative children.
 /// 124 is timeout; forced kill is SIGKILL (shell status 137). Compilation and execution get separate calls.
 pub fn command(base_seconds: u64) -> Command {
-    let mut command = Command::new("timeout");
+    let mut command = Command::new(gnu_timeout());
     command.args(["--kill-after=2", &seconds(base_seconds).to_string()]);
     command
+}
+
+/// Windows resolves a bare program name in its system directory before PATH,
+/// and `System32\timeout.exe` is a sleep command; take GNU coreutils' from
+/// PATH instead (Git for Windows ships it in `usr\bin`).
+fn gnu_timeout() -> std::path::PathBuf {
+    if !cfg!(windows) {
+        return "timeout".into();
+    }
+    let system = std::env::var("SystemRoot")
+        .unwrap_or_default()
+        .to_lowercase();
+    std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default())
+        .map(|dir| dir.join("timeout.exe"))
+        .find(|path| {
+            path.is_file()
+                && (system.is_empty()
+                    || !path.to_string_lossy().to_lowercase().starts_with(&system))
+        })
+        .expect("GNU timeout on PATH (Git for Windows usr\\bin)")
+}
+
+/// C++17 with UBSan aborting on the first report: the emitted-CPU harness builds.
+pub const CXX17_UBSAN_O1: &[&str] = &[
+    "-std=c++17",
+    "-O1",
+    "-fsanitize=undefined",
+    "-fno-sanitize-recover=all",
+];
+pub const CXX17_UBSAN_O2: &[&str] = &[
+    "-std=c++17",
+    "-O2",
+    "-fsanitize=undefined",
+    "-fno-sanitize-recover=all",
+];
+
+/// Compile a C++ test harness `source` into `exe` with `$CXX` (else `c++`) and `flags`,
+/// under a 120-second base wall deadline; panics with the compiler's stderr on failure.
+pub fn cxx<S: AsRef<OsStr>>(flags: &[S], source: &Path, exe: &Path) {
+    let compiler = std::env::var_os("CXX").unwrap_or_else(|| "c++".into());
+    let output = command(120)
+        .arg(&compiler)
+        .args(flags)
+        .arg(source)
+        .arg("-o")
+        .arg(exe)
+        .output()
+        .unwrap_or_else(|error| panic!("timeout {compiler:?}: {error}"));
+    assert!(
+        output.status.success(),
+        "{compiler:?} {}: {}\n{}",
+        source.display(),
+        output.status,
+        String::from_utf8_lossy(&output.stderr)
+    );
 }

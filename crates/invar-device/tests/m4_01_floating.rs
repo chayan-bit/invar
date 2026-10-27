@@ -1,4 +1,7 @@
 #![forbid(unsafe_code)]
+#[allow(dead_code)]
+#[path = "../../../test-support/child_deadline.rs"]
+mod child_deadline;
 // Exercise the production module and its shared IR v2 verification.
 use floating::{Buffer, Error, Ir, Verified, emit_cpu, emit_cuda, emit_msl, verify};
 pub use invar_device::{Capabilities, MAX_SOURCE_BYTES, Provenance, Span, floating, source_hash};
@@ -394,26 +397,19 @@ fn cpu_run(p: &Verified, harness: &str, optimization: &str) -> String {
     let temp = Temp(dir);
     let source = format!("{}\n{harness}", emit_cpu(p).unwrap());
     fs::write(temp.0.join("contract.cpp"), &source).unwrap();
-    let compiler = std::env::var_os("CXX").unwrap_or_else(|| "c++".into());
-    let compilation = Command::new(compiler)
-        .args(p.cpu_options())
-        .args([
-            optimization,
-            "-fsanitize=undefined",
-            "-fno-sanitize-recover=all",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-        ])
-        .arg(temp.0.join("contract.cpp"))
-        .arg("-o")
-        .arg(temp.0.join("contract"))
-        .output()
-        .unwrap();
-    assert!(
-        compilation.status.success(),
-        "{}\n{source}",
-        String::from_utf8_lossy(&compilation.stderr)
+    let flags = [
+        optimization,
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ];
+    let flags = [p.cpu_options(), &flags].concat();
+    child_deadline::cxx(
+        &flags,
+        &temp.0.join("contract.cpp"),
+        &temp.0.join("contract"),
     );
     let run = Command::new(temp.0.join("contract")).output().unwrap();
     assert!(

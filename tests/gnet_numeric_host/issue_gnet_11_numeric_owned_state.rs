@@ -2,7 +2,7 @@
 //! ABI11 owned-numeric continuations: real emitted C++ under UBSan compared
 //! word-for-word across quanta and against the independent graph oracle.
 
-use crate::child_deadline;
+use crate::{child_deadline, gnet_words};
 
 use invar::{
     check, eval, front,
@@ -188,24 +188,10 @@ impl Cpu {
             .replace("@SLOTS@", &layout.allocations().to_string())
             .replace("@PARAMS@", &a.params().len().to_string());
         fs::write(dir.join("source.cpp"), format!("{}\n{driver}", a.source())).unwrap();
-        let out = child_deadline::command(120)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O2",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            out.status.success(),
-            "{:?}:{}",
-            out.status,
-            String::from_utf8_lossy(&out.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O2,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self { dir }
     }
@@ -382,60 +368,10 @@ impl Pair {
     }
 }
 
-fn status(o: &oracle::Observation) -> (i64, i64, i64) {
-    match &o.semantic.result {
-        Ok(_) => (0, 0, 0),
-        Err(eval::EvalError::Trap { category, span }) => (
-            match category {
-                eval::TrapCategory::IntegerOverflow => 1,
-                eval::TrapCategory::DivisionByZero => 2,
-                eval::TrapCategory::IndexOutOfBounds => 9,
-                _ => panic!("trap"),
-            },
-            span.start as i64,
-            span.end as i64,
-        ),
-        Err(eval::EvalError::EvaluationLimit { .. }) => (3, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "ARRAY_SIZE_LIMIT",
-            ..
-        }) => (10, 0, 0),
-        Err(eval::EvalError::Tool {
-            code: "CALL_DEPTH_LIMIT",
-            ..
-        }) => (4, 0, 0),
-        Err(_) => (
-            match o.failure {
-                Some(oracle::ToolFailure::TransitionLimit) => 5,
-                Some(oracle::ToolFailure::TraceLimit) => 6,
-                Some(oracle::ToolFailure::Allocation) => 11,
-                _ => panic!("{o:?}"),
-            },
-            0,
-            0,
-        ),
-    }
-}
-fn events(o: &oracle::Observation) -> Vec<i64> {
-    o.events
-        .iter()
-        .flat_map(|e| {
-            [
-                i64::from(e.kind == oracle::EventKind::Complete),
-                e.frame as i64,
-                e.activation as i64,
-                e.token.block.function as i64,
-                e.token.block.block as i64,
-                e.token.position as i64,
-                e.rule as i64,
-            ]
-        })
-        .collect()
-}
 /// Independent oracle comparison of status, counters, trace, cleanup lengths
 /// and root carriers. Full storage equality is checked across quanta.
 fn compare(layout: &compiled::OwnedLayout, o: &oracle::Observation, w: &[i64]) {
-    assert_eq!((w[0], w[2], w[3]), status(o), "{o:?}");
+    assert_eq!((w[0], w[2], w[3]), gnet_words::status(o), "{o:?}");
     assert_eq!(
         &w[4..9],
         &[
@@ -447,7 +383,8 @@ fn compare(layout: &compiled::OwnedLayout, o: &oracle::Observation, w: &[i64]) {
         ]
     );
     let trace_end = 10 + o.events.len() * 7;
-    assert_eq!(&w[10..trace_end], events(o).as_slice());
+    let events: Vec<i64> = o.events.iter().flat_map(gnet_words::event_i64).collect();
+    assert_eq!(&w[10..trace_end], events.as_slice());
     let cleanup = &w[trace_end..trace_end + o.semantic.cleanup_trace.len() * 4];
     for (row, c) in cleanup.chunks_exact(4).zip(&o.semantic.cleanup_trace) {
         assert_eq!(row[2], c.length as i64)

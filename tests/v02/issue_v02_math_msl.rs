@@ -107,6 +107,10 @@ fn host_run(binary: &Path, x: &[u64], y: &[u64]) -> Vec<u64> {
 }
 
 #[test]
+#[cfg_attr(
+    windows,
+    ignore = "the MSL prelude builds as host C++ only on LP64 hosts (Metal long is 64-bit)"
+)]
 fn v02_math_msl_prelude_compiles_warning_free_on_the_host() {
     let directory = tempdir("msl-prelude");
     let unit = directory.join("prelude.cpp");
@@ -134,6 +138,10 @@ fn v02_math_msl_prelude_compiles_warning_free_on_the_host() {
 }
 
 #[test]
+#[cfg_attr(
+    windows,
+    ignore = "the MSL prelude builds as host C++ only on LP64 hosts (Metal long is 64-bit)"
+)]
 fn v02_math_msl_soft_binary64_matches_the_host_fpu() {
     let directory = tempdir("msl-softdouble");
     let binary = directory.join("softdouble_check");
@@ -163,6 +171,10 @@ fn v02_math_msl_soft_binary64_matches_the_host_fpu() {
 }
 
 #[test]
+#[cfg_attr(
+    windows,
+    ignore = "the MSL prelude builds as host C++ only on LP64 hosts (Metal long is 64-bit)"
+)]
 fn v02_math_msl_host_build_matches_the_cpu_library() {
     let directory = tempdir("msl-host");
     let (x, y) = samples(20_000);
@@ -188,6 +200,10 @@ fn v02_math_msl_host_build_matches_the_cpu_library() {
 }
 
 #[test]
+#[cfg_attr(
+    windows,
+    ignore = "the MSL prelude builds as host C++ only on LP64 hosts (Metal long is 64-bit)"
+)]
 fn v02_math_msl_host_build_catches_a_mutated_polynomial_coefficient() {
     let directory = tempdir("msl-host-mutant");
     let source = msl_map_source(MathFn::Sin);

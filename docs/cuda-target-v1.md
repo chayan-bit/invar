@@ -26,8 +26,9 @@ result on another.
 
 Map DAGs, wrapping reductions and affine scans now admit up to 2^28 `u32`
 elements through the device runtime API. Large standalone maps use the existing
-DAG encoding; the frozen single-map encoding and ordinary source/reference
-execution limits remain unchanged (1,000,000 elements per array, 2,000,000 live).
+DAG encoding; the frozen single-map encoding keeps `invar_device::MAX_ELEMENTS`
+(1,000,000 elements, `crates/invar-device/src/lib.rs:22`), and ordinary source/reference
+execution limits are the language limits of `src/array_limits.rs` (2^24 elements per array, 2^28 live).
 Admission is subject to transfer budgets and live device capacity, with typed
 resource refusals.
 This does not qualify M5 performance. Family verifier limits stay fixed. CUDA

@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+use crate::child_deadline;
 use invar::{
     eval,
     general_net::{self, Net, compiled::Target, oracle, provenance},
@@ -367,22 +368,10 @@ int main() {
             format!("{}\n{driver}", artifact.artifact().source()),
         )
         .unwrap();
-        let output = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("candidate.cpp"))
-            .arg("-o")
-            .arg(dir.join("candidate"))
-            .output()
-            .expect("emitted CPU verification requires a C++17 compiler");
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O1,
+            &dir.join("candidate.cpp"),
+            &dir.join("candidate"),
         );
         let output = Command::new(dir.join("candidate")).output().unwrap();
         assert!(
