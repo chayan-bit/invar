@@ -122,7 +122,9 @@ source/MIR/native corpus covers 29 cases: values, exact trap categories and
 byte spans, source-order failures, checked and wrapping boundaries, loops,
 calls, recursion limit, arrays and loans, cleanup prefix, and fuel. The
 real CLI `build` and `run` paths execute a linked object and reject an
-existing output. No Linux/Windows native run or Miri result is claimed;
-default Linux CI exercises the non-native path only.
+existing output. The CI `Build (native)` job runs the native-feature suite
+(63 tests across five binaries) and the `invar-foreign` tests on Linux
+x86_64 with LLVM 21; that is a CI correctness run, not performance
+qualification. No Windows native run or Miri result is claimed.
 
 ENG-18 (#101), `tests/mir/issue_eng_18_native_simd.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target. `tests/mir/issue_eng_18_native_regions.rs` checks map kernels against `Plan::live_values` on edge ranges and aliased slots, reduce kernels against the left fold, vector code in the kernels, and identical cpu-parallel observations with kernels on and off at 1, 2 and 7 workers and on fuel prefixes, including a checked overflow that traps in source order.
