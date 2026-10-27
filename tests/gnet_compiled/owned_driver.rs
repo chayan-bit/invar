@@ -11,7 +11,6 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
     str::FromStr,
-    sync::atomic::{AtomicUsize, Ordering},
 };
 
 /// Compile `artifact` with the driver into a fresh `invar-{name}-*` directory.
@@ -26,13 +25,7 @@ pub fn build(name: &str, artifact: &compiled::Artifact, quantum: Option<u64>) ->
             .to_owned()
     };
     let layout = artifact.owned_layout().unwrap();
-    static NEXT: AtomicUsize = AtomicUsize::new(0);
-    let dir = std::env::temp_dir().join(format!(
-        "invar-{name}-{}-{}",
-        std::process::id(),
-        NEXT.fetch_add(1, Ordering::Relaxed)
-    ));
-    fs::create_dir(&dir).unwrap();
+    let dir = child_deadline::scratch(&format!("invar-{name}"));
     let driver = format!(
         r#"
 #include <iostream>

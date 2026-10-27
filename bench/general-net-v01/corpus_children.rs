@@ -8,13 +8,7 @@ use invar::{
     general_net::{self, Net, compiled, oracle},
 };
 use serde_json::{Value as Json, json};
-use std::{
-    collections::BTreeMap,
-    fs,
-    path::PathBuf,
-    process::Command,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{collections::BTreeMap, fs, path::PathBuf, process::Command};
 
 #[path = "corpus_children/denominator.rs"]
 mod denominator;
@@ -154,13 +148,7 @@ struct Observation {
 }
 impl Harness {
     fn new(artifact: compiled::Artifact) -> Self {
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-corpus-children-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-corpus-children");
         let owned = artifact.owned_layout().unwrap();
         let scratch = artifact.speculation_layout().unwrap();
         let device = artifact.device_layout().is_some();

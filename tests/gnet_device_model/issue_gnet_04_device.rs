@@ -8,11 +8,7 @@ mod speculation;
 use invar::eval;
 use invar::general_net::{Net, compiled, oracle};
 use speculation::{limits, lowered, spec, storage};
-use std::{
-    fs,
-    path::PathBuf,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, path::PathBuf};
 
 struct Device {
     dir: PathBuf,
@@ -48,13 +44,7 @@ impl Device {
         assert_eq!(artifact.abi_version(), 5);
         let owned = artifact.owned_layout().unwrap();
         let scratch = artifact.speculation_layout().unwrap();
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-speculate-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-speculate");
         let driver = format!(
             r#"
 #include <iostream>

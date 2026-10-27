@@ -5,12 +5,7 @@ mod child_deadline;
 use floating::Buffer;
 use invar_device::transpose;
 pub use invar_device::{Capabilities, MAX_SOURCE_BYTES, Provenance, Span, floating};
-use std::{
-    fmt::Write,
-    fs,
-    path::PathBuf,
-    sync::atomic::{AtomicU64, Ordering},
-};
+use std::{fmt::Write, fs, path::PathBuf};
 use transpose::{Error, Ir, MAX_LOGICAL_ELEMENTS, Verified, emit_cpu, emit_cuda, verify};
 
 fn origin() -> Provenance {
@@ -410,13 +405,7 @@ fn cpu_run(
     optimization: &str,
     label: &str,
 ) -> String {
-    static NEXT: AtomicU64 = AtomicU64::new(0);
-    let dir = std::env::temp_dir().join(format!(
-        "invar-transpose-{}-{}",
-        std::process::id(),
-        NEXT.fetch_add(1, Ordering::Relaxed)
-    ));
-    fs::create_dir(&dir).unwrap();
+    let dir = child_deadline::scratch("invar-transpose");
     let temp = Temp(dir);
     let mut source = emit_cpu(p).unwrap();
     if let Some(second) = second {

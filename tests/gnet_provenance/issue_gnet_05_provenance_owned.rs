@@ -10,11 +10,7 @@ use invar::{
 use provenance::{Error, Limits, ProvenancedArtifact};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use std::{
-    fs,
-    path::PathBuf,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, path::PathBuf};
 
 mod abi45;
 mod numeric;
@@ -83,13 +79,7 @@ struct Cpu {
 }
 impl Cpu {
     fn new(artifact: &ProvenancedArtifact) -> Self {
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-provenance-owned-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-provenance-owned");
         let owned = artifact.artifact().owned_layout().unwrap();
         let run = if let Some(layout) = artifact.artifact().continuation_layout() {
             format!(
@@ -346,13 +336,7 @@ impl GroupModel {
                 112,
             ]
         };
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "invar-provenance-group-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("invar-provenance-group");
         let mut shim = String::from(
             "#include <thread>\n#include <barrier>\n#include <fstream>\n#include <vector>\n#include <unistd.h>\n",
         );

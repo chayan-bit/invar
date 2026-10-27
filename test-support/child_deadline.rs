@@ -1,5 +1,12 @@
-//! Test harness child processes: wall deadlines and exit checks. Never use this module in production code.
-use std::{ffi::OsStr, path::Path, process::Command, time::Duration};
+//! Test harness child processes: wall deadlines, scratch directories and exit
+//! checks. Never use this module in production code.
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+    process::Command,
+    sync::atomic::{AtomicUsize, Ordering},
+    time::Duration,
+};
 
 pub fn parse_scale(value: &str) -> Result<u32, &'static str> {
     if value.is_empty() || !value.bytes().all(|c| c.is_ascii_digit()) {
@@ -39,7 +46,7 @@ pub fn command(base_seconds: u64) -> Command {
 /// Windows resolves a bare program name in its system directory before PATH,
 /// and `System32\timeout.exe` is a sleep command; take GNU coreutils' from
 /// PATH instead (Git for Windows ships it in `usr\bin`).
-fn gnu_timeout() -> std::path::PathBuf {
+fn gnu_timeout() -> PathBuf {
     if !cfg!(windows) {
         return "timeout".into();
     }
@@ -57,6 +64,19 @@ fn gnu_timeout() -> std::path::PathBuf {
 }
 
 /// C++17 with UBSan aborting on the first report: the emitted-CPU harness builds.
+/// A fresh `<temp>/<prefix>-<pid>-<n>` directory for one compiled harness; the
+/// counter keeps concurrent callers in one process apart.
+pub fn scratch(prefix: &str) -> PathBuf {
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+    let dir = std::env::temp_dir().join(format!(
+        "{prefix}-{}-{}",
+        std::process::id(),
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    ));
+    std::fs::create_dir(&dir).unwrap();
+    dir
+}
+
 pub const CXX17_UBSAN_O1: &[&str] = &[
     "-std=c++17",
     "-O1",

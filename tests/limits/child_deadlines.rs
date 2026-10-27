@@ -50,6 +50,16 @@ fn scale_is_explicit_bounded_and_cannot_disable_deadlines() {
     assert!(String::from_utf8_lossy(&output.stdout).contains("INVAR_TEST_TIMEOUT_SCALE"));
 }
 
+#[test]
+fn scratch_dirs_are_fresh_and_distinct() {
+    let first = child_deadline::scratch("invar-scratch-helper");
+    let second = child_deadline::scratch("invar-scratch-helper");
+    assert_ne!(first, second);
+    assert!(first.is_dir() && second.is_dir());
+    std::fs::remove_dir(&first).unwrap();
+    std::fs::remove_dir(&second).unwrap();
+}
+
 #[cfg(unix)]
 #[test]
 fn hung_child_is_killed_even_when_it_ignores_term() {

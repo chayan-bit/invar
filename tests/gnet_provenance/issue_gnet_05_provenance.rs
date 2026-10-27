@@ -8,11 +8,7 @@ use invar::{
 };
 use provenance::{Error, Limits};
 use serde_json::json;
-use std::{
-    fs,
-    process::Command,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fs, process::Command};
 
 const SOURCE: &[u8] =
     b"fn calc(n: i32) -> i32 { return n * 3; } fn peer(n: i32) -> i32 { return n + 7; }";
@@ -338,13 +334,7 @@ fn issue_gnet_05_provenance_compiler_profile_receipt() {
 
 #[test]
 fn issue_gnet_05_provenance_real_emitted_cpu_same_names_changed_computation() {
-    static NEXT: AtomicUsize = AtomicUsize::new(0);
-    let dir = std::env::temp_dir().join(format!(
-        "invar-gnet-provenance-{}-{}",
-        std::process::id(),
-        NEXT.fetch_add(1, Ordering::Relaxed)
-    ));
-    fs::create_dir(&dir).unwrap();
+    let dir = child_deadline::scratch("invar-gnet-provenance");
     let driver = r#"
 #include <iostream>
 int main() {

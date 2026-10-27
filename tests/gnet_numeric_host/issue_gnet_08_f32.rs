@@ -11,7 +11,6 @@ use std::{
     fs,
     path::PathBuf,
     process::{Command, Stdio},
-    sync::atomic::{AtomicUsize, Ordering},
 };
 fn storage() -> compiled::OwnedLimits {
     compiled::OwnedLimits {
@@ -54,13 +53,7 @@ impl Cpu {
         assert_eq!(a.abi_version(), 11);
         assert_eq!(a.numeric_policy(), Some(NumericPolicy::STRICT_F32));
         assert!(a.device_layout().is_none());
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "gnet-f32-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::create_dir(&dir).unwrap();
+        let dir = child_deadline::scratch("gnet-f32");
         let n = a.params().len();
         let bytes = a.continuation_layout().unwrap().task_bytes();
         let storage = a.owned_layout().unwrap();
