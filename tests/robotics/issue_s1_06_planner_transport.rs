@@ -137,6 +137,10 @@ fn exercise<const N: usize>() {
 }
 
 #[test]
+#[cfg_attr(
+    not(unix),
+    ignore = "the reference planner component is a POSIX program (poll.h)"
+)]
 fn issue_s1_06_planner_generated_bridge_exercises_real_invp_transport() {
     exercise::<6>();
     exercise::<7>();

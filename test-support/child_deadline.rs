@@ -31,9 +31,29 @@ pub fn seconds(base: u64) -> u64 {
 /// GNU timeout owns the process group; TERM then KILL bounds uncooperative children.
 /// 124 is timeout; forced kill is SIGKILL (shell status 137). Compilation and execution get separate calls.
 pub fn command(base_seconds: u64) -> Command {
-    let mut command = Command::new("timeout");
+    let mut command = Command::new(gnu_timeout());
     command.args(["--kill-after=2", &seconds(base_seconds).to_string()]);
     command
+}
+
+/// Windows resolves a bare program name in its system directory before PATH,
+/// and `System32\timeout.exe` is a sleep command; take GNU coreutils' from
+/// PATH instead (Git for Windows ships it in `usr\bin`).
+fn gnu_timeout() -> std::path::PathBuf {
+    if !cfg!(windows) {
+        return "timeout".into();
+    }
+    let system = std::env::var("SystemRoot")
+        .unwrap_or_default()
+        .to_lowercase();
+    std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default())
+        .map(|dir| dir.join("timeout.exe"))
+        .find(|path| {
+            path.is_file()
+                && (system.is_empty()
+                    || !path.to_string_lossy().to_lowercase().starts_with(&system))
+        })
+        .expect("GNU timeout on PATH (Git for Windows usr\\bin)")
 }
 
 /// C++17 with UBSan aborting on the first report: the emitted-CPU harness builds.

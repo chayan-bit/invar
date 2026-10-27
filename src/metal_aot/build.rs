@@ -164,6 +164,7 @@ impl Scratch {
                 .map_or(0, |d| d.as_nanos())
         );
         let dir = std::env::temp_dir().join(unique);
+        #[allow(unused_mut)] // mode() is Unix-only
         let mut builder = fs::DirBuilder::new();
         #[cfg(unix)]
         std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);

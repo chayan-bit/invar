@@ -3,19 +3,13 @@
 //! This checks the device lowering of ordinary-source owned continuations; it
 //! is never a GPU, driver, memory-model or performance claim.
 
-use crate::child_deadline;
 use crate::epoch_model::{self, *};
 
 use invar::{
     eval,
     general_net::{Net, compiled, oracle},
 };
-use std::{
-    collections::BTreeSet,
-    fs,
-    path::{Path, PathBuf},
-    time::{Duration, Instant},
-};
+use std::collections::BTreeSet;
 
 mod cases;
 

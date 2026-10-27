@@ -11,6 +11,7 @@ use std::{io::Write, time::Instant};
 ))]
 #[cfg_attr(not(all(feature = "native", feature = "cuda")), allow(dead_code))]
 mod cpu;
+mod host_key;
 #[cfg(any(
     feature = "native",
     feature = "cuda",
@@ -90,16 +91,7 @@ pub fn host_identity(host_class: &str, device: &str, driver: &str) -> Value {
             })
         })
     };
-    #[cfg(target_os = "linux")]
-    let host_key = std::fs::read_to_string("/etc/machine-id").ok();
-    #[cfg(target_os = "macos")]
-    let host_key = command("ioreg", &["-rd1", "-c", "IOPlatformExpertDevice"]).and_then(|s| {
-        s.lines()
-            .find(|l| l.contains("\"IOPlatformUUID\""))
-            .and_then(|l| l.split_once('=').map(|(_, v)| v.trim().to_owned()))
-    });
-    #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-    let host_key: Option<String> = None;
+    let host_key = host_key::read();
     #[cfg(feature = "native")]
     let llvm = format!("{:?}", inkwell::support::get_llvm_version());
     #[cfg(not(feature = "native"))]
@@ -175,7 +167,7 @@ fn fit(times: &[f64], sizes: [usize; 2]) -> Result<(f64, f64), String> {
 }
 
 #[cfg(any(
-    test,
+    all(test, any(target_os = "linux", target_os = "macos")),
     feature = "native",
     feature = "cuda",
     all(feature = "metal", target_os = "macos")
@@ -202,7 +194,7 @@ fn row(
     )
 }
 #[cfg(any(
-    test,
+    all(test, any(target_os = "linux", target_os = "macos")),
     feature = "native",
     feature = "cuda",
     all(feature = "metal", target_os = "macos")
@@ -278,7 +270,7 @@ fn budget(start: Instant) -> Result<(), String> {
     feature = "native",
     feature = "cuda",
     all(feature = "metal", target_os = "macos"),
-    test
+    all(test, any(target_os = "linux", target_os = "macos"))
 ))]
 fn resident(input: &[u32]) -> Result<(), String> {
     match invar_cuda::pages::observe(input) {
@@ -356,7 +348,11 @@ fn device_coefficients(samples: &[[f64; 3]; 3]) -> Result<Value, String> {
         samples[0][1],
     ))
 }
-#[cfg(any(test, feature = "cuda", all(feature = "metal", target_os = "macos")))]
+#[cfg(any(
+    all(test, any(target_os = "linux", target_os = "macos")),
+    feature = "cuda",
+    all(feature = "metal", target_os = "macos")
+))]
 fn device_samples(
     start: Instant,
     engine: Engine,
@@ -669,7 +665,7 @@ pub fn calibrate(host_class: &str, source_revision: &str) -> Result<Value, Error
                 .collect::<Result<Vec<_>, _>>()?;
             let compiler = std::env::current_exe()
                 .map_err(|e| e.to_string())?
-                .with_file_name("invar-nvrtc");
+                .with_file_name(format!("invar-nvrtc{}", std::env::consts::EXE_SUFFIX));
             let map = device_samples(start, Engine::Cuda, |n, input| {
                 let index = [1, SIZES[0], SIZES[1]]
                     .iter()

@@ -388,7 +388,10 @@ Dim gridDim,blockDim{32,1,1};thread_local Dim threadIdx{0,0,0},blockIdx{0,0,0};
 #define threadgroup
 #define constant
 #define kernel
-using uint=unsigned;using ulong=unsigned long;
+using uint=unsigned;using ulong=__UINT64_TYPE__;
+#if __SIZEOF_LONG__ == 4
+#define long long long
+#endif
 struct uint3 {uint x,y,z;};
 namespace metal {enum class mem_flags {mem_device=1,mem_threadgroup=2};
 inline unsigned operator|(mem_flags a,mem_flags b){return unsigned(a)|unsigned(b);}
@@ -405,6 +408,7 @@ inline void threadgroup_barrier(unsigned){group_barrier.arrive_and_wait();}}
 #undef threadgroup
 #undef constant
 #undef kernel
+#undef long
 inline void host_entry(const gnet_w* input,gnet_w* output,gnet_u* trace,const gnet_u* config,gnet_w* heap,gnet_u* cleanup,GnetTask* task,GnetSpecSlot* slots,gnet_w* private_heap,gnet_u* private_trace,gnet_u* private_cleanup,gnet_u* state) {
  invar_gnet_children_v5(input,output,trace,config,heap,cleanup,task,slots,private_heap,private_trace,private_cleanup,state,threadIdx.x,uint3{0,0,0},uint3{1,1,1},uint3{32,1,1});}
 "#);

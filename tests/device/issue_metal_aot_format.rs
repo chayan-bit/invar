@@ -515,7 +515,9 @@ fn build_refuses_when_the_metal_toolchain_is_missing() {
     // No `xcrun` at all.
     let empty = dir.join("empty");
     std::fs::create_dir_all(&empty).unwrap();
-    let (ok, report) = invar(&args, Some(&empty));
+    // Windows has no `xcrun` anywhere; keep its PATH, which a gnullvm build
+    // needs to find the toolchain's unwinder DLL.
+    let (ok, report) = invar(&args, (!cfg!(windows)).then_some(empty.as_path()));
     assert!(!ok);
     assert!(
         report["error"]

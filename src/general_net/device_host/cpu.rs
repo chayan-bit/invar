@@ -9,6 +9,7 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
     sync::atomic::{AtomicU64, Ordering},
+    time::Duration,
 };
 mod memory;
 mod source;
@@ -42,7 +43,7 @@ impl CpuModel {
 const COMPILE_CPU_SECONDS: u32 = 60;
 /// Wall backstop, the GNET NVRTC deadline. On a loaded runner models of at
 /// most 20 CPU-s took over 60 s of wall time, so wall time measures load.
-const COMPILE_WALL_SECONDS: &str = "300";
+const COMPILE_WALL: Duration = Duration::from_secs(300);
 /// A compiled model library: compiler, emitted-source digest and bytes.
 type Compiled = (PathBuf, [u8; 32], Vec<u8>);
 thread_local! {
@@ -63,16 +64,24 @@ impl CpuModel {
     ) -> Result<Vec<u8>, String> {
         let source = directory.0.join("model.cpp");
         fs::write(&source, code).map_err(|e| e.to_string())?;
-        // The CPU limit bounds the compiler's own work whatever the host load;
-        // the wall deadline only catches a compiler that stalls without it.
+        // The CPU limit bounds the compiler's own work whatever the host load,
+        // where the platform has one (`ulimit -t` in a POSIX shell); the wall
+        // deadline kills the compiler's process group if it stalls without it.
         // Memory admission comes first, so a starved host queues compiles.
         let _slot = memory::slot();
-        let output = Command::new("timeout")
-            .args(["--kill-after=2", COMPILE_WALL_SECONDS, "sh", "-c"])
-            .arg(format!(
-                "ulimit -t {COMPILE_CPU_SECONDS} && exec \"$0\" \"$@\""
-            ))
-            .arg(&self.compiler)
+        let mut command = if cfg!(unix) {
+            let mut shell = Command::new("sh");
+            shell
+                .arg("-c")
+                .arg(format!(
+                    "ulimit -t {COMPILE_CPU_SECONDS} && exec \"$0\" \"$@\""
+                ))
+                .arg(&self.compiler);
+            shell
+        } else {
+            Command::new(&self.compiler)
+        };
+        command
             .args([
                 "-std=c++20",
                 "-O1",
@@ -87,21 +96,19 @@ impl CpuModel {
             ])
             .arg(&source)
             .arg("-o")
-            .arg(library)
-            .output()
-            .map_err(|e| e.to_string())?;
-        if !output.status.success() {
-            directory.1 = false;
-            let _ = fs::write(directory.0.join("compiler.stdout"), &output.stdout);
-            let _ = fs::write(directory.0.join("compiler.stderr"), &output.stderr);
-            return Err(format!(
-                "CPU device model compile {:?}; evidence {}: {}",
-                output.status.code(),
-                directory.0.display(),
-                String::from_utf8_lossy(&output.stderr)
-            ));
-        }
-        fs::read(library).map_err(|e| e.to_string())
+            .arg(library);
+        let evidence = directory.0.join("compiler");
+        let failure =
+            match super::super::compiler_child::bounded(&mut command, &evidence, COMPILE_WALL) {
+                Ok((true, ..)) => return fs::read(library).map_err(|e| e.to_string()),
+                Ok((false, _, stderr)) => String::from_utf8_lossy(&stderr).into_owned(),
+                Err(error) => error,
+            };
+        directory.1 = false;
+        Err(format!(
+            "CPU device model compile failed; evidence {}: {failure}",
+            directory.0.display()
+        ))
     }
 }
 struct Directory(PathBuf, bool);

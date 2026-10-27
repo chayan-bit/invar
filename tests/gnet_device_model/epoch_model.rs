@@ -72,7 +72,10 @@ pub const METAL_SHIM: &str = r#"
 #define threadgroup
 #define constant
 #define kernel
-using uint = unsigned; using ulong = unsigned long;
+using uint = unsigned; using ulong = __UINT64_TYPE__;
+#if __SIZEOF_LONG__ == 4
+#define long long long
+#endif
 "#;
 /// Exit codes of the generated model.
 pub const TASK: i32 = 10;
@@ -234,7 +237,7 @@ pub fn harness(
     write!(text, "namespace dev {{\n{dev_body}\n}}\n").unwrap();
     if metal {
         text.push_str(
-            "#undef device\n#undef thread\n#undef threadgroup\n#undef constant\n#undef kernel\n",
+            "#undef device\n#undef thread\n#undef threadgroup\n#undef constant\n#undef kernel\n#undef long\n",
         );
     }
     let mut inputs = roots
