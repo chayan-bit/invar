@@ -1,0 +1,1969 @@
+#!/usr/bin/env python3
+"""Drive the Invar compiler the way a user does, and record the evidence.
+
+The binary is a short-lived CLI. Each check is its own process. Scratch files
+live under $INVAR_VERIFY_ROOT/scratch. Proof transcripts live under
+$INVAR_VERIFY_ROOT/evidence and survive `cleanup`.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import platform
+import shutil
+import subprocess
+import sys
+import tempfile
+import textwrap
+from pathlib import Path
+
+SCHEMA = "invar-verify-v1"
+DEFAULT_ROOT = Path("/tmp/invar-verify")
+FEATURES = (
+    "parser",
+    "checker",
+    "reference",
+    "parallelism",
+    "codegen",
+    "robotics",
+    "cli",
+    "tests",
+)
+
+TWELVE_ROS2_FILES = 26
+TWELVE_ROS2_TREE_SHA256 = (
+    "f629b8127c8a672478a2d556cfcb1f2935f4191018dfa51dfe094b19d08c77a9"
+)
+TWO_COMPONENTS_IR_SHA256 = (
+    "3f88c8c774eb825214c8749cb485a2a734f83d9c5cfc754d42c61ec8368870e0"
+)
+
+GNET_SOURCE = (
+    "fn leaf(x:u32)->u32{return wrapping_add(x,1u32);} "
+    "fn entry(x:u32)->u32{let a=leaf(x);let b=leaf(x);return wrapping_add(a,b);}"
+)
+GNET_CONFIG = (
+    '{"fuel":1000,"transitions":10000,"trace_events":2000,'
+    '"quantum":2,"rounds":1,"capacity":2}'
+)
+TENSOR_SOURCE = (
+    "fn mat(a:read Array<f32>,b:read Array<f32>,rows:u32,inner:u32,cols:u32)"
+    "->Array<f32>{var c=filled_f32(rows*cols,0.0);for i in 0u32..rows{"
+    "for j in 0u32..cols{var sum:f32=0.0;for k in 0u32..inner{"
+    "sum=sum+a[i*inner+k]*b[k*cols+j];}c[i*cols+j]=sum;}}return c;} "
+    "fn main()->i32{let a:Array<f32> = [1.0,2.0];let b:Array<f32> = [3.0,4.0];"
+    "let c=mat(a,b,1u32,2u32,1u32);if c[0u32]==11.0{return 7;}return 0;}"
+)
+PARSE_ERROR_SOURCE = "fn main( -> i32 { return 1; }\n"
+
+FOCUSED_TEST = "issue_ai_01_machine_diagnostics_document_size_limit"
+
+
+class VerifyError(Exception):
+    def __init__(self, message: str, exit_code: int = 2):
+        super().__init__(message)
+        self.exit_code = exit_code
+
+
+def find_repo(start: Path) -> Path:
+    for candidate in [start, *start.parents]:
+        cargo = candidate / "Cargo.toml"
+        toolchain = candidate / "rust-toolchain.toml"
+        if not cargo.is_file() or not toolchain.is_file():
+            continue
+        text = cargo.read_text(encoding="utf-8", errors="replace")
+        header = text.split("[workspace]", 1)[0]
+        if 'name = "invar"' in header:
+            return candidate
+    raise VerifyError(
+        f"could not find the Invar repo from {start}. "
+        "Run this from a checkout, or pass --repo."
+    )
+
+
+def resolve_repo(explicit: Path | None) -> Path:
+    if explicit is not None:
+        return find_repo(explicit.resolve())
+    try:
+        return find_repo(Path.cwd().resolve())
+    except VerifyError:
+        return find_repo(Path(__file__).resolve())
+
+
+def command_output(argv: list[str], timeout: float = 15) -> tuple[int, str, str]:
+    try:
+        completed = subprocess.run(
+            argv,
+            check=False,
+            capture_output=True,
+            timeout=timeout,
+            text=True,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return 127, "", str(error)
+    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
+
+
+def llvm_probe() -> dict:
+    prefix = os.environ.get("LLVM_SYS_211_PREFIX")
+    if prefix and Path(prefix).is_dir():
+        return {
+            "available": True,
+            "detail": f"LLVM_SYS_211_PREFIX={prefix}",
+        }
+    found = []
+    for name in ("llvm-config-21", "llvm-config"):
+        path = shutil.which(name)
+        if path is None:
+            continue
+        code, out, err = command_output([path, "--version"])
+        version = out or err or f"exit {code}"
+        found.append(f"{path} {version}")
+        if code == 0 and version.startswith("21."):
+            return {"available": True, "detail": f"{path} {version}"}
+    llvm18 = Path("/usr/lib/llvm-18")
+    if llvm18.is_dir():
+        found.append("/usr/lib/llvm-18")
+    if not found:
+        detail = "LLVM 21.1.8 is not installed"
+    else:
+        detail = (
+            "native builds need LLVM 21.1.8; rustc's LLVM is not a substitute. Found "
+            + "; ".join(found)
+        )
+    return {"available": False, "detail": detail}
+
+
+def nvidia_probe() -> dict:
+    path = shutil.which("nvidia-smi")
+    if path is None:
+        return {
+            "present": False,
+            "detail": "nvidia-smi is not installed and no NVIDIA device was queried",
+        }
+    code, out, err = command_output([path, "-L"], timeout=20)
+    if code != 0:
+        return {
+            "present": False,
+            "detail": f"{path} -L exited {code}: {err or out or 'no device list'}",
+        }
+    if not out:
+        return {"present": False, "detail": f"{path} -L printed no devices"}
+    return {"present": True, "detail": out.splitlines()[0]}
+
+
+def cxx_probe() -> dict:
+    """The device CPU model compiles C++20 that includes <barrier>.
+
+    `invar gnet-device` reads `CXX` and otherwise runs `c++`. On this image
+    `c++` is clang, which does not see libstdc++'s `<barrier>`, while `g++` does.
+    """
+
+    def compiles(compiler: str) -> bool:
+        path = shutil.which(compiler)
+        if path is None:
+            return False
+        with tempfile.TemporaryDirectory(prefix="invar-verify-cxx-") as tmp:
+            source = Path(tmp) / "barrier.cpp"
+            source.write_text("#include <barrier>\nint main(){return 0;}\n", encoding="utf-8")
+            code, _, _ = command_output(
+                [path, "-std=c++20", str(source), "-c", "-o", str(Path(tmp) / "barrier.o")],
+                timeout=60,
+            )
+            return code == 0
+
+    chosen = os.environ.get("CXX")
+    if chosen:
+        ok = compiles(chosen)
+        return {
+            "compiler": chosen if ok else None,
+            "override": False,
+            "detail": (
+                f"CXX={chosen} can compile <barrier>"
+                if ok
+                else f"CXX={chosen} cannot compile a C++20 <barrier> program"
+            ),
+        }
+    if compiles("c++"):
+        return {
+            "compiler": "c++",
+            "override": False,
+            "detail": "`c++ -std=c++20` can compile <barrier>",
+        }
+    if compiles("g++"):
+        return {
+            "compiler": "g++",
+            "override": True,
+            "detail": (
+                "`c++` cannot compile <barrier> (on this host it is clang and does not "
+                "see libstdc++'s header). g++ can. The drive sets CXX=g++ for "
+                "gnet-device CPU models, which is the compiler switch invar already reads."
+            ),
+        }
+    return {
+        "compiler": None,
+        "override": False,
+        "detail": (
+            "Neither `c++` nor `g++` can compile a C++20 program that includes <barrier>. "
+            "gnet-device CPU models cannot run here."
+        ),
+    }
+
+
+def host_probe() -> dict:
+    rustc = shutil.which("rustc")
+    cargo = shutil.which("cargo")
+    rustc_version = ""
+    cargo_version = ""
+    if rustc:
+        _, rustc_version, _ = command_output([rustc, "--version"])
+    if cargo:
+        _, cargo_version, _ = command_output([cargo, "--version"])
+    return {
+        "os": platform.system(),
+        "arch": platform.machine(),
+        "rustc": rustc_version or None,
+        "cargo": cargo_version or None,
+        "llvm21": llvm_probe(),
+        "nvidia": nvidia_probe(),
+        "metal_host": platform.system() == "Darwin",
+        "ros2": shutil.which("ros2"),
+        "nextest": shutil.which("cargo-nextest"),
+        "just": shutil.which("just"),
+        "cxx": cxx_probe(),
+    }
+
+
+class Session:
+    def __init__(self, repo: Path, root: Path, dry_run: bool):
+        self.repo = repo
+        self.root = root
+        self.scratch = root / "scratch"
+        self.evidence = root / "evidence"
+        self.checks_dir = self.evidence / "checks"
+        self.dry_run = dry_run
+        self.checks: list[dict] = []
+        self.binary = Path(os.environ.get("INVAR_VERIFY_BIN", repo / "target" / "debug" / "invar"))
+        self.host = host_probe()
+        cxx = self.host["cxx"]
+        if cxx.get("override") and cxx.get("compiler") and "CXX" not in os.environ:
+            os.environ["CXX"] = cxx["compiler"]
+
+    def prepare_dirs(self) -> None:
+        self.scratch.mkdir(parents=True, exist_ok=True)
+        self.checks_dir.mkdir(parents=True, exist_ok=True)
+        if self.root.resolve() == self.repo.resolve():
+            raise VerifyError(
+                f"INVAR_VERIFY_ROOT is the repo ({self.repo}). "
+                "Use a directory outside the checkout so cleanup cannot touch source."
+            )
+
+    def record(self, check: dict) -> dict:
+        self.checks.append(check)
+        self.checks_dir.mkdir(parents=True, exist_ok=True)
+        path = self.checks_dir / f"{check['id']}.json"
+        path.write_text(json.dumps(check, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return check
+
+    def skip(self, check_id: str, feature: str, reason: str, command: list[str] | None = None) -> dict:
+        return self.record(
+            {
+                "id": check_id,
+                "feature": feature,
+                "status": "skipped",
+                "reason": reason,
+                "command": command or [],
+                "summary": reason,
+            }
+        )
+
+    def dry(self, check_id: str, feature: str, summary: str, command: list[str]) -> dict:
+        return self.record(
+            {
+                "id": check_id,
+                "feature": feature,
+                "status": "dry_run",
+                "command": command,
+                "summary": summary,
+            }
+        )
+
+    def run(
+        self,
+        check_id: str,
+        feature: str,
+        argv: list[str],
+        *,
+        timeout: float,
+        summary: str,
+        expect,
+        cwd: Path | None = None,
+    ) -> dict:
+        if self.dry_run:
+            return self.dry(check_id, feature, summary, argv)
+        try:
+            completed = subprocess.run(
+                argv,
+                cwd=cwd or self.repo,
+                check=False,
+                capture_output=True,
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired as error:
+            stdout = _decode(error.stdout)
+            stderr = _decode(error.stderr)
+            return self.record(
+                {
+                    "id": check_id,
+                    "feature": feature,
+                    "status": "fail",
+                    "command": argv,
+                    "summary": f"timed out after {timeout:.0f}s while {summary}",
+                    "reason": f"timed out after {timeout:.0f}s",
+                    "stdout_excerpt": stdout[-2000:],
+                    "stderr_excerpt": stderr[-2000:],
+                }
+            )
+        except OSError as error:
+            return self.record(
+                {
+                    "id": check_id,
+                    "feature": feature,
+                    "status": "fail",
+                    "command": argv,
+                    "summary": f"could not run {argv[0]}: {error}",
+                    "reason": str(error),
+                }
+            )
+        stdout = _decode(completed.stdout)
+        stderr = _decode(completed.stderr)
+        document = _parse_json(stdout)
+        problem = expect(
+            completed.returncode,
+            stdout,
+            stderr,
+            completed.stdout,
+            document,
+        )
+        check = {
+            "id": check_id,
+            "feature": feature,
+            "status": "fail" if problem else "pass",
+            "command": argv,
+            "exit_code": completed.returncode,
+            "summary": problem or summary,
+            "stdout_excerpt": stdout[:2000],
+            "stderr_excerpt": stderr[:2000],
+        }
+        if problem:
+            check["reason"] = problem
+        if document is not None and not isinstance(document, str):
+            check["document_status"] = document.get("status")
+            if "result" in document:
+                check["result"] = document.get("result")
+        self.record(check)
+        stored = dict(check)
+        stored["stdout"] = stdout[:200_000]
+        stored["stderr"] = stderr[:200_000]
+        (self.checks_dir / f"{check_id}.json").write_text(
+            json.dumps(stored, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return check
+
+    def require_binary(self) -> None:
+        if self.dry_run:
+            return
+        if not self.binary.is_file():
+            raise VerifyError(
+                f"Invar binary is not at {self.binary}. Run `invar-verify build` first.",
+                exit_code=1,
+            )
+        if not os.access(self.binary, os.X_OK):
+            raise VerifyError(f"{self.binary} is not executable.", exit_code=1)
+
+
+def _decode(data: bytes | None) -> str:
+    if not data:
+        return ""
+    return data.decode("utf-8", errors="replace")
+
+
+def _parse_json(stdout: str):
+    text = stdout.strip()
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as error:
+        return f"stdout is not one JSON document: {error}"
+
+
+def _ok(problem: str | None):
+    return problem
+
+
+def expect_help(code, stdout, stderr, raw, document) -> str | None:
+    del stderr, raw, document
+    if code != 0:
+        return f"invar --help exited {code}, expected 0"
+    if not stdout.startswith("Usage: invar --help"):
+        return "help text does not start with 'Usage: invar --help'"
+    for needle in (
+        "invar check PATH",
+        "invar run PATH --engine reference|native-serial|cuda|metal|auto",
+        "invar run PATH --engine cpu-parallel --workers 1..64",
+        "invar system gen ros2 PATH --out NEW_DIRECTORY",
+        "invar source-device PATH",
+        "invar gnet-device PATH",
+    ):
+        if needle not in stdout:
+            return f"help text is missing {needle!r}"
+    return None
+
+
+def expect_usage(code, stdout, stderr, raw, document) -> str | None:
+    del stdout, raw, document
+    if code != 2:
+        return f"usage error exited {code}, expected 2"
+    if "Usage: invar --help" not in stderr:
+        return "usage error did not print the help text on stderr"
+    return None
+
+
+def expect_json_status(
+    expected_code,
+    expected_status,
+    code_field=None,
+    value=None,
+    empty_diagnostics=False,
+):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        if code != expected_code:
+            return f"exited {code}, expected {expected_code}"
+        if isinstance(document, str):
+            return document
+        if not isinstance(document, dict):
+            return "stdout was empty or not a JSON object"
+        if document.get("status") != expected_status:
+            return (
+                f"status is {document.get('status')!r}, expected {expected_status!r}. "
+                f"diagnostics={_diag_brief(document)}"
+            )
+        codes = _diag_codes(document)
+        if empty_diagnostics and codes:
+            return f"expected no diagnostics, found {codes}"
+        if code_field is not None:
+            trap = (document.get("trap") or {}).get("category")
+            if code_field not in codes and trap != code_field:
+                return f"diagnostic codes {codes} and trap {trap!r} do not include {code_field}"
+        if value is not None:
+            got = (document.get("result") or {}).get("value")
+            if got != value:
+                return f"result.value is {got!r}, expected {value!r}"
+        return None
+
+    return expect
+
+
+def expect_checks_include(*names: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        base = expect_json_status(0, "ok")(code, "", "", b"", document)
+        if base:
+            return base
+        completed = document.get("checks_completed")
+        if not isinstance(completed, list):
+            return "checks_completed is missing"
+        missing = [name for name in names if name not in completed]
+        if missing:
+            return f"checks_completed {completed} is missing {missing}"
+        return None
+
+    return expect
+
+
+def expect_region(function: str, status: str, kind: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        base = expect_json_status(0, "ok")(code, "", "", b"", document)
+        if base:
+            return base
+        regions = document.get("regions")
+        if not isinstance(regions, list):
+            return "explain document has no regions array"
+        for region in regions:
+            if region.get("function") != function:
+                continue
+            execution = region.get("execution") if isinstance(region.get("execution"), dict) else {}
+            got_kind = execution.get("kind", region.get("kind"))
+            if region.get("status") != status or got_kind != kind:
+                return (
+                    f"region {function} is status {region.get('status')!r} "
+                    f"kind {got_kind!r}, expected {status!r} {kind!r}"
+                )
+            return None
+        return f"explain document has no region for {function}"
+
+    return expect
+
+
+def expect_source_device(result: int, completed_regions: int, fuel_limit: bool = False):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        if isinstance(document, str):
+            return document
+        if not isinstance(document, dict):
+            return "source-device did not print a JSON object"
+        if document.get("schema") != "invar-private-source-device-v1":
+            return f"schema is {document.get('schema')!r}"
+        if "gpu_execution_claim" in document:
+            return "cpu-model report contains gpu_execution_claim; that would over-claim the run"
+        if fuel_limit:
+            if code == 0:
+                return "fuel 1 was expected to fail and exited 0"
+            error = document.get("error")
+            if not isinstance(error, str) or "EvaluationLimit" not in error:
+                return f"fuel-limit error is {error!r}"
+            if document.get("completed_regions") != 0:
+                return f"completed_regions is {document.get('completed_regions')!r}, expected 0"
+            return None
+        if code != 0:
+            return f"source-device exited {code}: {document.get('error')}"
+        if document.get("backend") != "cpu-model":
+            return f"backend is {document.get('backend')!r}, expected cpu-model"
+        if document.get("result") != result:
+            return f"result is {document.get('result')!r}, expected {result}"
+        if document.get("completed_regions") != completed_regions:
+            return (
+                f"completed_regions is {document.get('completed_regions')!r}, "
+                f"expected {completed_regions}"
+            )
+        return None
+
+    return expect
+
+
+def expect_gnet(result: int, backend: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        if isinstance(document, str):
+            return document
+        if not isinstance(document, dict):
+            return "gnet-device did not print a JSON object"
+        if code != 0:
+            return f"gnet-device exited {code}: {document.get('error')}"
+        if document.get("result") != result:
+            return f"result is {document.get('result')!r}, expected {result}"
+        if document.get("status") != 0:
+            return f"receipt status is {document.get('status')!r}, expected 0"
+        execution = document.get("execution") if isinstance(document.get("execution"), dict) else {}
+        if execution.get("evidence_backend") != "CpuGroupModel":
+            return f"evidence_backend is {execution.get('evidence_backend')!r}, expected CpuGroupModel"
+        if document.get("backend") != backend:
+            return f"backend is {document.get('backend')!r}, expected {backend}"
+        return None
+
+    return expect
+
+
+def expect_error_contains(needle: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del raw
+        if code == 0:
+            return f"expected a refusal containing {needle!r} and the command exited 0"
+        blob = stdout + "\n" + stderr
+        if isinstance(document, dict):
+            blob += "\n" + json.dumps(document)
+        if needle not in blob:
+            return f"refusal text does not contain {needle!r}. stdout={stdout[:500]!r} stderr={stderr[:500]!r}"
+        return None
+
+    return expect
+
+
+def expect_tool_code(code_name: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        if code != 2:
+            return f"tool refusal exited {code}, expected 2"
+        if isinstance(document, str):
+            return document
+        if not isinstance(document, dict):
+            return "tool refusal did not print JSON"
+        if document.get("status") != "tool_error":
+            return f"status is {document.get('status')!r}, expected tool_error"
+        codes = _diag_codes(document)
+        if code_name not in codes:
+            return f"diagnostic codes {codes} do not include {code_name}"
+        return None
+
+    return expect
+
+
+def expect_generated(files: int):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, raw
+        if code != 0:
+            return f"system gen exited {code}"
+        if isinstance(document, str):
+            return document
+        if not isinstance(document, dict):
+            return "system gen did not print JSON"
+        if document.get("status") != "ok":
+            return f"status is {document.get('status')!r}"
+        if document.get("generated_files") != files:
+            return f"generated_files is {document.get('generated_files')!r}, expected {files}"
+        return None
+
+    return expect
+
+
+def expect_sha256(expected: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, stderr, document
+        if code != 0:
+            return f"system ir exited {code}"
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != expected:
+            return f"stdout sha256 is {digest}, expected {expected}"
+        return None
+
+    return expect
+
+
+def expect_substring(code_expected: int, needle: str):
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del raw, document
+        if code != code_expected:
+            return f"exited {code}, expected {code_expected}"
+        if needle not in stdout and needle not in stderr:
+            return f"output does not contain {needle!r}"
+        return None
+
+    return expect
+
+
+def _diag_codes(document: dict) -> list:
+    diagnostics = document.get("diagnostics")
+    if not isinstance(diagnostics, list):
+        return []
+    return [item.get("code") for item in diagnostics if isinstance(item, dict)]
+
+
+def _diag_brief(document: dict) -> str:
+    diagnostics = document.get("diagnostics")
+    if not isinstance(diagnostics, list) or not diagnostics:
+        return "[]"
+    first = diagnostics[0]
+    if isinstance(first, dict):
+        return f"{first.get('code')}: {first.get('message')}"
+    return str(first)[:200]
+
+
+def tree_hash(directory: Path) -> tuple[int, str]:
+    files: list[tuple[str, Path]] = []
+    for path in directory.rglob("*"):
+        if path.is_file():
+            files.append((path.relative_to(directory).as_posix(), path))
+    files.sort()
+    hasher = hashlib.sha256()
+    for relative, path in files:
+        data = path.read_bytes()
+        hasher.update(f"{relative}\0{len(data)}\0".encode())
+        hasher.update(data)
+    return len(files), hasher.hexdigest()
+
+
+def write_fixture(session: Session, name: str, text: str) -> Path:
+    directory = session.scratch / "fixtures"
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / name
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+def invar(session: Session, *args: str) -> list[str]:
+    return [str(session.binary), *args]
+
+
+def drive_parser(session: Session) -> None:
+    feature = "parser"
+    session.require_binary()
+    good = session.repo / "examples" / "sum.inv"
+    session.run(
+        "parser.accept-sum",
+        feature,
+        invar(session, "check", str(good), "--format", "json"),
+        timeout=60,
+        summary="check examples/sum.inv accepts syntax, names, and types",
+        expect=expect_checks_include("syntax", "names", "types"),
+    )
+    if session.dry_run:
+        bad = session.scratch / "fixtures" / "parse-error.inv"
+    else:
+        bad = write_fixture(session, "parse-error.inv", PARSE_ERROR_SOURCE)
+    session.run(
+        "parser.reject-token",
+        feature,
+        invar(session, "check", str(bad), "--format", "json"),
+        timeout=60,
+        summary="a missing parameter type is PARSE_EXPECTED_TOKEN",
+        expect=expect_json_status(1, "source_error", "PARSE_EXPECTED_TOKEN"),
+    )
+
+
+def drive_checker(session: Session) -> None:
+    feature = "checker"
+    session.require_binary()
+    session.run(
+        "checker.ownership-sum",
+        feature,
+        invar(session, "check", str(session.repo / "examples" / "sum.inv"), "--format", "json"),
+        timeout=60,
+        summary="sum.inv passes ownership, call loans, and view lifetimes",
+        expect=expect_checks_include(
+            "local_ownership",
+            "call_loans",
+            "view_lifetimes",
+        ),
+    )
+    session.run(
+        "checker.view-overlap",
+        feature,
+        invar(
+            session,
+            "check",
+            str(session.repo / "examples" / "views" / "overlap.inv"),
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="overlapping mutable views are OWN_BORROW_CONFLICT",
+        expect=expect_json_status(1, "source_error", "OWN_BORROW_CONFLICT"),
+    )
+    session.run(
+        "checker.view-return",
+        feature,
+        invar(
+            session,
+            "check",
+            str(session.repo / "examples" / "views" / "invalid-return.inv"),
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="returning a view of a local is OWN_RETURN_BORROW",
+        expect=expect_json_status(1, "source_error", "OWN_RETURN_BORROW"),
+    )
+    session.run(
+        "checker.foreign-callback",
+        feature,
+        invar(
+            session,
+            "check",
+            str(session.repo / "examples" / "bytes" / "foreign-callback.inv"),
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="a callback in a foreign signature is TYPE_MISMATCH",
+        expect=expect_json_status(1, "source_error", "TYPE_MISMATCH"),
+    )
+
+
+def drive_reference(session: Session) -> None:
+    feature = "reference"
+    session.require_binary()
+    cases = (
+        ("reference.sum", "examples/sum.inv", 10, "examples/sum.inv returns 10"),
+        ("reference.ownership", "examples/ownership.inv", 41, "examples/ownership.inv returns 41"),
+        (
+            "reference.recursion",
+            "examples/language/recursion.inv",
+            55,
+            "examples/language/recursion.inv returns fib(10) = 55",
+        ),
+        (
+            "reference.matrix",
+            "examples/families/matrix-f32.inv",
+            7,
+            "examples/families/matrix-f32.inv returns 7",
+        ),
+        (
+            "reference.transpose",
+            "examples/families/transpose.inv",
+            7,
+            "examples/families/transpose.inv returns 7",
+        ),
+    )
+    for check_id, relative, value, summary in cases:
+        session.run(
+            check_id,
+            feature,
+            invar(session, "run", str(session.repo / relative), "--engine", "reference", "--format", "json"),
+            timeout=60,
+            summary=summary,
+            expect=expect_json_status(0, "ok", value=value),
+        )
+    session.run(
+        "reference.checked-sum-traps",
+        feature,
+        invar(
+            session,
+            "run",
+            str(session.repo / "examples" / "parallel" / "reduction-checked-sum.inv"),
+            "--engine",
+            "reference",
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="the checked parallel sum traps with INTEGER_OVERFLOW on the reference engine",
+        expect=expect_json_status(3, "trap", "INTEGER_OVERFLOW"),
+    )
+
+
+def drive_parallelism(session: Session) -> None:
+    feature = "parallelism"
+    session.require_binary()
+    parallel = session.repo / "examples" / "parallel"
+    for workers in (1, 2):
+        session.run(
+            f"parallelism.map-workers-{workers}",
+            feature,
+            invar(
+                session,
+                "run",
+                str(parallel / "map-wrapping.inv"),
+                "--engine",
+                "cpu-parallel",
+                "--workers",
+                str(workers),
+                "--format",
+                "json",
+            ),
+            timeout=120,
+            summary=f"wrapping map with {workers} workers returns 120",
+            expect=expect_json_status(0, "ok", value=120),
+        )
+    session.run(
+        "parallelism.reduction-workers-2",
+        feature,
+        invar(
+            session,
+            "run",
+            str(parallel / "reduction-wrapping-sum.inv"),
+            "--engine",
+            "cpu-parallel",
+            "--workers",
+            "2",
+            "--format",
+            "json",
+        ),
+        timeout=120,
+        summary="wrapping reduction with 2 workers returns 7",
+        expect=expect_json_status(0, "ok", value=7),
+    )
+    session.run(
+        "parallelism.scan-workers-2",
+        feature,
+        invar(
+            session,
+            "run",
+            str(parallel / "scan-affine.inv"),
+            "--engine",
+            "cpu-parallel",
+            "--workers",
+            "2",
+            "--format",
+            "json",
+        ),
+        timeout=120,
+        summary="affine scan with 2 workers returns 26",
+        expect=expect_json_status(0, "ok", value=26),
+    )
+    session.run(
+        "parallelism.checked-sum-still-traps",
+        feature,
+        invar(
+            session,
+            "run",
+            str(parallel / "reduction-checked-sum.inv"),
+            "--engine",
+            "cpu-parallel",
+            "--workers",
+            "2",
+            "--format",
+            "json",
+        ),
+        timeout=120,
+        summary="checked addition stays a trap under cpu-parallel",
+        expect=expect_json_status(3, "trap", "INTEGER_OVERFLOW"),
+    )
+    session.run(
+        "parallelism.sum-stays-serial",
+        feature,
+        invar(
+            session,
+            "run",
+            str(session.repo / "examples" / "sum.inv"),
+            "--engine",
+            "cpu-parallel",
+            "--workers",
+            "2",
+            "--format",
+            "json",
+        ),
+        timeout=120,
+        summary="the checked i32 sum still returns 10 when a parallel engine is requested",
+        expect=expect_json_status(0, "ok", value=10),
+    )
+    session.run(
+        "parallelism.explain-map",
+        feature,
+        invar(session, "explain", str(parallel / "map-wrapping.inv"), "--format", "json"),
+        timeout=60,
+        summary="explain admits main as a map",
+        expect=expect_region("main", "admitted", "map"),
+    )
+    session.run(
+        "parallelism.explain-sum",
+        feature,
+        invar(session, "explain", str(session.repo / "examples" / "sum.inv"), "--format", "json"),
+        timeout=60,
+        summary="explain rejects sum as serial because checked addition is not reassociated",
+        expect=expect_region("sum", "rejected", "serial"),
+    )
+    session.run(
+        "parallelism.auto-map",
+        feature,
+        invar(
+            session,
+            "run",
+            str(parallel / "map-wrapping.inv"),
+            "--engine",
+            "auto",
+            "--format",
+            "json",
+        ),
+        timeout=120,
+        summary="auto on the default build runs the wrapping map on CPU and returns 120",
+        expect=expect_json_status(0, "ok", value=120),
+    )
+    if session.dry_run:
+        source = session.scratch / "fixtures" / "gnet-entry.inv"
+    else:
+        source = write_fixture(session, "gnet-entry.inv", GNET_SOURCE)
+    cxx = session.host["cxx"]
+    if cxx.get("compiler") is None and not session.dry_run:
+        for backend in ("cpu-model-cuda", "cpu-model-metal"):
+            session.skip(
+                f"parallelism.gnet-{backend}",
+                feature,
+                "Skipped gnet-device CPU model. " + cxx["detail"],
+                ["invar", "gnet-device", str(source), "entry", backend, "[5]", GNET_CONFIG],
+            )
+    else:
+        for backend in ("cpu-model-cuda", "cpu-model-metal"):
+            session.run(
+                f"parallelism.gnet-{backend}",
+                feature,
+                invar(
+                    session,
+                    "gnet-device",
+                    str(source),
+                    "entry",
+                    backend,
+                    "[5]",
+                    GNET_CONFIG,
+                ),
+                timeout=300,
+                summary=f"gnet-device {backend} returns 12 from the CPU group model",
+                expect=expect_gnet(12, backend),
+            )
+    session.run(
+        "parallelism.cpu-parallel-without-workers",
+        feature,
+        invar(
+            session,
+            "run",
+            str(parallel / "map-wrapping.inv"),
+            "--engine",
+            "cpu-parallel",
+            "--format",
+            "json",
+        ),
+        timeout=30,
+        summary="cpu-parallel without --workers is a usage error",
+        expect=expect_usage,
+    )
+
+
+def drive_codegen(session: Session) -> None:
+    feature = "codegen"
+    session.require_binary()
+    transpose = session.repo / "examples" / "families" / "transpose.inv"
+    session.run(
+        "codegen.transpose-cpu-model",
+        feature,
+        invar(
+            session,
+            "source-device",
+            str(transpose),
+            "transpose",
+            "transpose",
+            "cpu-model",
+            "100000",
+        ),
+        timeout=180,
+        summary="transpose source runs on the CUDA CPU model and returns 7",
+        expect=expect_source_device(7, 1),
+    )
+    session.run(
+        "codegen.transpose-fuel-limit",
+        feature,
+        invar(
+            session,
+            "source-device",
+            str(transpose),
+            "transpose",
+            "transpose",
+            "cpu-model",
+            "1",
+        ),
+        timeout=60,
+        summary="fuel 1 stops the CPU model before a completed region",
+        expect=expect_source_device(0, 0, fuel_limit=True),
+    )
+    if session.dry_run:
+        tensor = session.scratch / "fixtures" / "tensor-mat.inv"
+    else:
+        tensor = write_fixture(session, "tensor-mat.inv", TENSOR_SOURCE)
+    session.run(
+        "codegen.tensor-cpu-model",
+        feature,
+        invar(session, "source-device", str(tensor), "tensor", "mat", "cpu-model", "100000"),
+        timeout=180,
+        summary="tensor source runs on the CUDA CPU model and returns 7",
+        expect=expect_source_device(7, 1),
+    )
+    session.run(
+        "codegen.cuda-refuses-without-feature",
+        feature,
+        invar(
+            session,
+            "run",
+            str(session.repo / "examples" / "sum.inv"),
+            "--engine",
+            "cuda",
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="the default build refuses --engine cuda instead of pretending to run it",
+        expect=expect_tool_code("CUDA_UNAVAILABLE"),
+    )
+    session.run(
+        "codegen.metal-refuses-without-feature",
+        feature,
+        invar(
+            session,
+            "run",
+            str(session.repo / "examples" / "sum.inv"),
+            "--engine",
+            "metal",
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="the default build refuses --engine metal instead of pretending to run it",
+        expect=expect_tool_code("METAL_UNAVAILABLE"),
+    )
+    session.run(
+        "codegen.native-refuses-without-feature",
+        feature,
+        invar(
+            session,
+            "run",
+            str(session.repo / "examples" / "sum.inv"),
+            "--engine",
+            "native-serial",
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="the default build refuses --engine native-serial",
+        expect=expect_tool_code("NATIVE_UNAVAILABLE"),
+    )
+    if session.dry_run:
+        gnet = session.scratch / "fixtures" / "gnet-entry.inv"
+    else:
+        gnet = write_fixture(session, "gnet-entry.inv", GNET_SOURCE)
+    session.run(
+        "codegen.gnet-cuda-refuses",
+        feature,
+        invar(session, "gnet-device", str(gnet), "entry", "cuda", "[5]", GNET_CONFIG),
+        timeout=60,
+        summary="forced CUDA gnet-device refuses on a build without the cuda feature",
+        expect=expect_error_contains("forced CUDA requires the cuda feature"),
+    )
+    session.run(
+        "codegen.gnet-metal-refuses",
+        feature,
+        invar(session, "gnet-device", str(gnet), "entry", "metal", "[5]", GNET_CONFIG),
+        timeout=60,
+        summary="forced Metal gnet-device refuses on a build without the metal feature",
+        expect=expect_error_contains("forced Metal requires the metal feature"),
+    )
+    llvm = session.host["llvm21"]
+    if not llvm["available"]:
+        session.skip(
+            "codegen.native-serial-run",
+            feature,
+            "Skipped native LLVM execution. " + llvm["detail"],
+            ["cargo", "build", "--locked", "--features", "native", "--bin", "invar"],
+        )
+    else:
+        session.skip(
+            "codegen.native-serial-run",
+            feature,
+            "LLVM 21 is visible, but this skill's binary is the default-feature build. "
+            "A native-serial run needs a separate `cargo build --locked --features native` "
+            "and is not part of the default proof.",
+            ["cargo", "build", "--locked", "--features", "native", "--bin", "invar"],
+        )
+    nvidia = session.host["nvidia"]
+    if not nvidia["present"]:
+        session.skip(
+            "codegen.cuda-hardware",
+            feature,
+            "Skipped CUDA hardware execution and `just test-gpu-cuda`. "
+            + nvidia["detail"]
+            + ". The default binary also has no cuda feature, so a GPU run would not be honest.",
+            ["just", "test-gpu-cuda"],
+        )
+    else:
+        session.skip(
+            "codegen.cuda-hardware",
+            feature,
+            "An NVIDIA device is visible, but the verification binary was built without "
+            "--features cuda. CUDA hardware tests stay skipped until that build exists.",
+            ["just", "test-gpu-cuda"],
+        )
+    if not session.host["metal_host"]:
+        session.skip(
+            "codegen.metal-hardware",
+            feature,
+            "Skipped Metal hardware execution and `just test-metal`. "
+            f"This host is {session.host['os']} {session.host['arch']}, not an Apple Silicon Mac.",
+            ["just", "test-metal"],
+        )
+    else:
+        session.skip(
+            "codegen.metal-hardware",
+            feature,
+            "This is a Mac, but the verification binary was built without --features metal. "
+            "Metal hardware tests stay skipped until that build exists.",
+            ["just", "test-metal"],
+        )
+
+
+def drive_robotics(session: Session) -> None:
+    feature = "robotics"
+    session.require_binary()
+    system = session.repo / "examples" / "system"
+    session.run(
+        "robotics.two-components",
+        feature,
+        invar(session, "system", "check", str(system / "two-components.inv"), "--format", "json"),
+        timeout=60,
+        summary="two-components.inv passes the system checker with no diagnostics",
+        expect=expect_json_status(0, "ok", empty_diagnostics=True),
+    )
+    session.run(
+        "robotics.two-producers",
+        feature,
+        invar(session, "system", "check", str(system / "two-producers.inv"), "--format", "json"),
+        timeout=60,
+        summary="two producers on one input are S1004",
+        expect=expect_json_status(1, "source_error", "S1004"),
+    )
+    session.run(
+        "robotics.twelve-warning",
+        feature,
+        invar(session, "system", "check", str(system / "twelve-components.inv"), "--format", "json"),
+        timeout=60,
+        summary="twelve-components.inv checks ok and reports the S1011 warning",
+        expect=expect_json_status(0, "ok", "S1011"),
+    )
+    session.run(
+        "robotics.two-components-ir",
+        feature,
+        invar(session, "system", "ir", str(system / "two-components.inv")),
+        timeout=60,
+        summary="system ir stdout matches the example index sha256",
+        expect=expect_sha256(TWO_COMPONENTS_IR_SHA256),
+    )
+    generated_root = session.scratch / "generated"
+    if not session.dry_run:
+        generated_root.mkdir(parents=True, exist_ok=True)
+    hashes = []
+    for attempt in (1, 2):
+        out = generated_root / f"twelve-ros2-{os.getpid()}-{attempt}"
+        command = invar(
+            session,
+            "system",
+            "gen",
+            "ros2",
+            str(system / "twelve-components.inv"),
+            "--out",
+            str(out),
+        )
+        if session.dry_run:
+            session.dry(
+                f"robotics.ros2-gen-{attempt}",
+                feature,
+                "would generate a ROS 2 workspace and hash the new directory",
+                command,
+            )
+            continue
+        session.run(
+            f"robotics.ros2-gen-{attempt}",
+            feature,
+            command,
+            timeout=60,
+            summary=f"generate ROS 2 workspace attempt {attempt} writes {TWELVE_ROS2_FILES} files",
+            expect=expect_generated(TWELVE_ROS2_FILES),
+        )
+        if not out.is_dir():
+            session.record(
+                {
+                    "id": f"robotics.ros2-tree-{attempt}",
+                    "feature": feature,
+                    "status": "fail",
+                    "command": command,
+                    "summary": f"generated directory {out} is missing, so the tree was not hashed",
+                    "reason": "generator did not publish the output directory",
+                }
+            )
+            continue
+        count, digest = tree_hash(out)
+        hashes.append((count, digest))
+        problem = None
+        if count != TWELVE_ROS2_FILES or digest != TWELVE_ROS2_TREE_SHA256:
+            problem = (
+                f"tree is {count} files {digest}, expected "
+                f"{TWELVE_ROS2_FILES} files {TWELVE_ROS2_TREE_SHA256}"
+            )
+        session.record(
+            {
+                "id": f"robotics.ros2-tree-{attempt}",
+                "feature": feature,
+                "status": "fail" if problem else "pass",
+                "command": ["tree-sha256", str(out)],
+                "summary": problem
+                or f"ROS 2 tree matches the example index ({count} files)",
+                "reason": problem,
+                "files": count,
+                "tree_sha256": digest,
+            }
+        )
+    if not session.dry_run and len(hashes) == 2 and hashes[0] != hashes[1]:
+        session.record(
+            {
+                "id": "robotics.ros2-deterministic",
+                "feature": feature,
+                "status": "fail",
+                "summary": f"two generations differ: {hashes[0]} vs {hashes[1]}",
+                "reason": "ROS 2 generation was not deterministic",
+            }
+        )
+    elif session.dry_run:
+        session.dry(
+            "robotics.ros2-deterministic",
+            feature,
+            "would compare the two generated trees",
+            ["tree-sha256", "attempt-1", "attempt-2"],
+        )
+    else:
+        session.record(
+            {
+                "id": "robotics.ros2-deterministic",
+                "feature": feature,
+                "status": "pass" if len(hashes) == 2 else "fail",
+                "summary": "two ROS 2 generations produced the same tree hash"
+                if len(hashes) == 2
+                else "could not compare two generations",
+                "reason": None if len(hashes) == 2 else "a generation did not publish a tree",
+            }
+        )
+    if session.host["ros2"] is None:
+        session.skip(
+            "robotics.ros2-runtime",
+            feature,
+            "Skipped colcon/ROS 2 runtime and robot hardware. `ros2` is not on PATH, "
+            "and this VM has no robot controller. Workspace generation above is the check that can run.",
+            ["ros2", "launch"],
+        )
+    else:
+        session.skip(
+            "robotics.ros2-runtime",
+            feature,
+            "ros2 is on PATH, but this drive does not launch a controller or claim a hardware run.",
+            ["ros2", "launch"],
+        )
+    session.skip(
+        "robotics.component-test",
+        feature,
+        "Skipped `invar component test`. The cell fixtures load a foreign shared library "
+        "and a separate-process planner; this drive does not build that library or start the fixture server.",
+        [
+            "invar",
+            "component",
+            "test",
+            "examples/cells/reach_place/components/process_fixture/manifest.inv",
+        ],
+    )
+
+
+def drive_cli(session: Session) -> None:
+    feature = "cli"
+    session.require_binary()
+    session.run(
+        "cli.help",
+        feature,
+        invar(session, "--help"),
+        timeout=30,
+        summary="invar --help exits 0 and names the user commands",
+        expect=expect_help,
+    )
+    session.run(
+        "cli.usage",
+        feature,
+        invar(session),
+        timeout=30,
+        summary="invar with no arguments exits 2 and prints usage on stderr",
+        expect=expect_usage,
+    )
+    missing = session.scratch / "missing-program.inv"
+    if not session.dry_run and missing.exists():
+        missing.unlink()
+    session.run(
+        "cli.missing-file",
+        feature,
+        invar(session, "check", str(missing), "--format", "json"),
+        timeout=30,
+        summary="a missing source file is FILE_READ, not a source diagnostic",
+        expect=expect_tool_code("FILE_READ"),
+    )
+    session.run(
+        "cli.system-file-is-not-a-language-check",
+        feature,
+        invar(
+            session,
+            "check",
+            str(session.repo / "examples" / "system" / "two-components.inv"),
+            "--format",
+            "json",
+        ),
+        timeout=60,
+        summary="invar check on a system file uses the system checker and returns status ok",
+        expect=expect_json_status(0, "ok"),
+    )
+
+
+def drive_tests(session: Session, jobs: int) -> None:
+    feature = "tests"
+    script = session.repo / "scripts" / "check-file-size"
+    session.run(
+        "tests.file-size",
+        feature,
+        [str(script)],
+        timeout=120,
+        summary="the file-size ratchet reports 0 violations",
+        expect=expect_substring(0, "0 violations"),
+    )
+    cargo = [
+        "cargo",
+        "test",
+        "--locked",
+        "--bin",
+        "invar",
+        "--jobs",
+        str(jobs),
+        FOCUSED_TEST,
+    ]
+
+    def expect_one_pass(code, stdout, stderr, raw, document) -> str | None:
+        del raw, document
+        blob = stdout + "\n" + stderr
+        if code != 0:
+            tail = "\n".join(blob.splitlines()[-30:])
+            return f"cargo test exited {code}.\n{tail}"
+        if "1 passed" not in blob:
+            return f"cargo test did not report '1 passed'. tail:\n" + "\n".join(blob.splitlines()[-20:])
+        if "0 passed" in blob and "1 passed" not in blob:
+            return "cargo test matched no tests"
+        return None
+
+    if session.dry_run:
+        session.dry("tests.focused-bin", feature, "would run one invar binary test", cargo)
+    else:
+        _cargo_locked(
+            session,
+            "tests.focused-bin",
+            feature,
+            cargo,
+            timeout=3600,
+            summary=f"cargo test --bin invar {FOCUSED_TEST} passes one test",
+            expect=expect_one_pass,
+        )
+    if session.host["nextest"] is None:
+        session.skip(
+            "tests.full-nextest",
+            feature,
+            "Skipped the CI suite (`cargo nextest` Debug, Release, and doctests). "
+            "cargo-nextest is not installed. `just test` is the full gate and is not part of "
+            "the cloud proof; it runs the whole corpus and takes far longer than this drive.",
+            [
+                "cargo",
+                "nextest",
+                "run",
+                "--locked",
+                "--profile",
+                "ci",
+                "-p",
+                "invar",
+                "-p",
+                "invar-tools",
+            ],
+        )
+    else:
+        session.skip(
+            "tests.full-nextest",
+            feature,
+            "cargo-nextest is installed, but the default drive does not launch the full "
+            "Debug+Release corpus. Run `invar-verify test --profile full` for that gate.",
+            ["invar-verify", "test", "--profile", "full"],
+        )
+
+
+def _cargo_locked(session: Session, check_id, feature, argv, *, timeout, summary, expect) -> dict:
+    import fcntl
+
+    lock_path = session.root / "cargo.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+") as handle:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise VerifyError(
+                "another invar-verify build or test holds the cargo target lock at "
+                f"{lock_path}. Refusing to share one target directory.",
+            ) from error
+        return session.run(
+            check_id,
+            feature,
+            argv,
+            timeout=timeout,
+            summary=summary,
+            expect=expect,
+        )
+
+
+DRIVERS = {
+    "parser": drive_parser,
+    "checker": drive_checker,
+    "reference": drive_reference,
+    "parallelism": drive_parallelism,
+    "codegen": drive_codegen,
+    "robotics": drive_robotics,
+    "cli": drive_cli,
+}
+
+
+def do_doctor(session: Session) -> dict:
+    binary_ok = False
+    help_problem = None
+    if session.binary.is_file():
+        code, out, err = command_output([str(session.binary), "--help"], timeout=30)
+        binary_ok = code == 0 and out.startswith("Usage: invar --help")
+        if not binary_ok:
+            help_problem = f"`{session.binary} --help` exited {code}: {(err or out)[:300]}"
+    else:
+        help_problem = f"no binary at {session.binary}"
+    rustc = session.host.get("rustc") or ""
+    toolchain_ok = rustc.startswith("rustc 1.95.")
+    ready = binary_ok and toolchain_ok and session.host.get("cargo") is not None
+    report = {
+        "schema": SCHEMA,
+        "command": "doctor",
+        "ready": ready,
+        "repo": str(session.repo),
+        "binary": str(session.binary),
+        "binary_ok": binary_ok,
+        "toolchain_ok": toolchain_ok,
+        "host": session.host,
+        "evidence_dir": str(session.evidence),
+        "scratch_dir": str(session.scratch),
+        "reason": None if ready else help_problem or "rustc is not 1.95 or cargo is missing",
+    }
+    if not toolchain_ok:
+        report["reason"] = (
+            f"rustc is {rustc or 'missing'}; rust-toolchain.toml pins 1.95.0. "
+            + (help_problem or "")
+        ).strip()
+    session.evidence.mkdir(parents=True, exist_ok=True)
+    (session.evidence / "doctor.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return report
+
+
+def do_build(session: Session, jobs: int) -> dict:
+    argv = [
+        "cargo",
+        "build",
+        "--locked",
+        "--bin",
+        "invar",
+        "--jobs",
+        str(jobs),
+    ]
+    if session.dry_run:
+        check = session.dry("build.default", "build", "would build the default-feature invar binary", argv)
+        return {"schema": SCHEMA, "command": "build", "ok": True, "checks": [check]}
+
+    def expect(code, stdout, stderr, raw, document) -> str | None:
+        del stdout, raw, document
+        if code != 0:
+            tail = "\n".join((stderr or "").splitlines()[-40:])
+            return f"cargo build exited {code}.\n{tail}"
+        if not session.binary.is_file():
+            return f"cargo build exited 0 but {session.binary} is missing"
+        return None
+
+    check = _cargo_locked(
+        session,
+        "build.default",
+        "build",
+        argv,
+        timeout=7200,
+        summary=f"cargo build --locked --bin invar -j {jobs} produced {session.binary}",
+        expect=expect,
+    )
+    return {
+        "schema": SCHEMA,
+        "command": "build",
+        "ok": check["status"] == "pass",
+        "checks": [check],
+        "binary": str(session.binary),
+    }
+
+
+def do_cleanup(session: Session) -> dict:
+    scratch = session.scratch.resolve()
+    root = session.root.resolve()
+    if scratch != root and root not in scratch.parents:
+        raise VerifyError(f"refusing to clean {scratch}; it is not under {root}")
+    if session.repo.resolve() in scratch.parents or scratch == session.repo.resolve():
+        raise VerifyError(f"refusing to clean {scratch}; it overlaps the repo")
+    planned = []
+    if scratch.exists():
+        planned.append(str(scratch))
+    if session.dry_run:
+        return {
+            "schema": SCHEMA,
+            "command": "cleanup",
+            "ok": True,
+            "dry_run": True,
+            "would_remove": planned,
+            "preserved": [str(session.evidence)],
+        }
+    if scratch.exists():
+        shutil.rmtree(scratch)
+    return {
+        "schema": SCHEMA,
+        "command": "cleanup",
+        "ok": True,
+        "dry_run": False,
+        "removed": planned,
+        "preserved": [str(session.evidence)],
+        "evidence_still_present": session.evidence.is_dir(),
+    }
+
+
+def do_test(session: Session, jobs: int, profile: str) -> dict:
+    if profile == "focused":
+        before = len(session.checks)
+        drive_tests(session, jobs)
+        checks = session.checks[before:]
+        ok = all(item["status"] in ("pass", "skipped", "dry_run") for item in checks)
+        return {"schema": SCHEMA, "command": "test", "profile": profile, "ok": ok, "checks": checks}
+    if session.host["nextest"] is None or session.host["just"] is None:
+        missing = []
+        if session.host["nextest"] is None:
+            missing.append("cargo-nextest")
+        if session.host["just"] is None:
+            missing.append("just")
+        raise VerifyError(
+            "the full suite is `just test` (cargo nextest Debug and Release, then doctests). "
+            f"Missing: {', '.join(missing)}. Install them and rerun, or use --profile focused.",
+            exit_code=2,
+        )
+    if session.dry_run:
+        check = session.dry("tests.full-nextest", "tests", "would run just test", ["just", "test"])
+        return {"schema": SCHEMA, "command": "test", "profile": profile, "ok": True, "checks": [check]}
+    env = os.environ.copy()
+    env.setdefault("NEXTEST_TEST_THREADS", "8")
+    env.setdefault("INVAR_TEST_TIMEOUT_SCALE", "8")
+    env.setdefault("INVAR_FULL_CORPUS", "1")
+    # `just test` is the documented full gate. It is intentionally not the default.
+    completed = subprocess.run(
+        ["just", "test"],
+        cwd=session.repo,
+        check=False,
+        capture_output=True,
+        timeout=86400,
+        env=env,
+    )
+    stdout = _decode(completed.stdout)
+    stderr = _decode(completed.stderr)
+    problem = None if completed.returncode == 0 else f"just test exited {completed.returncode}"
+    check = session.record(
+        {
+            "id": "tests.full-nextest",
+            "feature": "tests",
+            "status": "fail" if problem else "pass",
+            "command": ["just", "test"],
+            "exit_code": completed.returncode,
+            "summary": problem or "just test passed",
+            "reason": problem,
+            "stdout_excerpt": stdout[-2000:],
+            "stderr_excerpt": stderr[-2000:],
+        }
+    )
+    return {
+        "schema": SCHEMA,
+        "command": "test",
+        "profile": profile,
+        "ok": check["status"] == "pass",
+        "checks": [check],
+    }
+
+
+def do_drive(session: Session, feature: str, jobs: int) -> dict:
+    before = len(session.checks)
+    if feature == "all":
+        for name in FEATURES:
+            if name == "tests":
+                drive_tests(session, jobs)
+            else:
+                DRIVERS[name](session)
+    elif feature == "tests":
+        drive_tests(session, jobs)
+    else:
+        DRIVERS[feature](session)
+    checks = session.checks[before:]
+    failed = [item["id"] for item in checks if item["status"] == "fail"]
+    return {
+        "schema": SCHEMA,
+        "command": "drive",
+        "feature": feature,
+        "ok": not failed,
+        "failed": failed,
+        "checks": [_public_check(item) for item in checks],
+    }
+
+
+def do_suite(session: Session, jobs: int) -> dict:
+    build_report = do_build(session, jobs)
+    if not session.dry_run and not build_report["ok"]:
+        return {
+            "schema": SCHEMA,
+            "command": "suite",
+            "ok": False,
+            "failed": ["build.default"],
+            "checks": [_public_check(item) for item in session.checks],
+            "evidence_dir": str(session.evidence),
+        }
+    drive_report = do_drive(session, "all", jobs)
+    doctor = do_doctor(session)
+    failed = [item["id"] for item in session.checks if item["status"] == "fail"]
+    skipped = [item["id"] for item in session.checks if item["status"] == "skipped"]
+    report = {
+        "schema": SCHEMA,
+        "command": "suite",
+        "ok": not failed and (session.dry_run or doctor["ready"]),
+        "ready": doctor["ready"],
+        "failed": failed,
+        "skipped": skipped,
+        "passed": [item["id"] for item in session.checks if item["status"] == "pass"],
+        "dry_run": [item["id"] for item in session.checks if item["status"] == "dry_run"],
+        "checks": [_public_check(item) for item in session.checks],
+        "evidence_dir": str(session.evidence),
+        "binary": str(session.binary),
+        "host": session.host,
+    }
+    if not doctor["ready"] and not session.dry_run:
+        report["ok"] = False
+        report["reason"] = doctor["reason"]
+    (session.evidence / "suite.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    # drive_report is reflected in report["checks"]; keep the name used so a
+    # reader can see suite includes every feature drive.
+    del drive_report
+    return report
+
+
+def _public_check(item: dict) -> dict:
+    keep = (
+        "id",
+        "feature",
+        "status",
+        "summary",
+        "reason",
+        "command",
+        "exit_code",
+        "document_status",
+        "result",
+        "files",
+        "tree_sha256",
+    )
+    return {key: item[key] for key in keep if key in item and item[key] is not None}
+
+
+def emit(report: dict, fmt: str) -> int:
+    ok = bool(report.get("ok", report.get("ready", False)))
+    if fmt == "json":
+        json.dump(report, sys.stdout, indent=2, sort_keys=True)
+        sys.stdout.write("\n")
+    else:
+        command = report.get("command", "verify")
+        print(f"{command}: {'ok' if ok else 'FAILED'}")
+        if report.get("reason"):
+            print(report["reason"])
+        if report.get("ready") is not None and command == "doctor":
+            print(f"ready: {report['ready']}")
+            print(f"binary: {report.get('binary')}")
+            host = report.get("host") or {}
+            print(f"rustc: {host.get('rustc')}")
+            print(f"llvm21: {host.get('llvm21')}")
+            print(f"nvidia: {host.get('nvidia')}")
+            print(f"ros2: {host.get('ros2')}")
+            print(f"cxx: {host.get('cxx')}")
+        for check in report.get("checks") or []:
+            status = check["status"].upper()
+            line = f"{status} {check['id']}: {check.get('summary') or check.get('reason') or ''}"
+            print(line)
+        if "would_remove" in report:
+            print("would remove:")
+            for path in report["would_remove"]:
+                print(f"  {path}")
+            print("preserved:")
+            for path in report["preserved"]:
+                print(f"  {path}")
+        if "removed" in report:
+            print(f"removed: {report['removed'] or '(nothing)'}")
+            print(f"evidence still present: {report['evidence_still_present']}")
+            print(f"preserved: {report['preserved']}")
+        if report.get("evidence_dir"):
+            print(f"evidence: {report['evidence_dir']}")
+    if report.get("command") == "doctor":
+        return 0 if report.get("ready") else 1
+    return 0 if ok else 1
+
+
+def build_parser() -> argparse.ArgumentParser:
+    # Defaults are SUPPRESS so a global flag is accepted on either side of the
+    # subcommand without the side that did not see it writing over the other.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--format", choices=("text", "json"), default=argparse.SUPPRESS)
+    common.add_argument(
+        "--repo",
+        type=Path,
+        default=argparse.SUPPRESS,
+        help="checkout root (default: walk up from the cwd, then from this script)",
+    )
+    common.add_argument(
+        "--root",
+        type=Path,
+        default=argparse.SUPPRESS,
+        help="scratch and evidence root (default: $INVAR_VERIFY_ROOT or /tmp/invar-verify)",
+    )
+    common.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=argparse.SUPPRESS,
+        help="print the side-effecting commands and do not run them",
+    )
+    common.add_argument(
+        "--jobs",
+        type=int,
+        default=argparse.SUPPRESS,
+        help="cargo build/test parallelism (default: 2, or $INVAR_VERIFY_JOBS)",
+    )
+    parser = argparse.ArgumentParser(
+        prog="invar-verify",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        parents=[common],
+        description=textwrap.dedent(
+            """\
+            Build and drive Invar from a checkout, then write JSON evidence.
+
+            The compiler is a short-lived CLI. There is no server to keep up.
+            `build` produces target/debug/invar with default features. `drive`
+            and `suite` run that binary on real examples. GPU, Metal, LLVM
+            native, and ROS 2 hardware runs are recorded as skipped when this
+            host cannot perform them. CPU reference, cpu-parallel, and the
+            device CPU models still run.
+
+            Evidence is written to $INVAR_VERIFY_ROOT/evidence (default
+            /tmp/invar-verify/evidence). `cleanup` deletes only
+            $INVAR_VERIFY_ROOT/scratch.
+            """
+        ),
+        epilog=textwrap.dedent(
+            """\
+            examples:
+              invar-verify doctor --format json
+              invar-verify build --jobs 2 --format json
+              invar-verify drive parser --format json
+              invar-verify drive parallelism --format json
+              invar-verify suite --format json
+              invar-verify run -- check examples/sum.inv --format json
+              invar-verify cleanup --dry-run --format json
+              invar-verify cleanup --format json
+
+            destructive commands (honour --dry-run):
+              build     writes target/
+              drive robotics   writes a generated ROS 2 tree under scratch
+              test      writes target/ (cargo test profile)
+              cleanup   deletes the scratch directory
+            """
+        ),
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    def command(name: str, help_text: str) -> argparse.ArgumentParser:
+        return sub.add_parser(name, help=help_text, parents=[common])
+
+    command("doctor", "read-only check that the binary and toolchain are worth driving")
+    command("build", "cargo build --locked --bin invar (default features)")
+    drive = command("drive", "run one feature recipe, or 'all'")
+    drive.add_argument("feature", choices=(*FEATURES, "all"))
+    command("suite", "build, then drive every feature, including the focused test")
+    test = command("test", "run the focused cargo test, or the full just test gate")
+    test.add_argument("--profile", choices=("focused", "full"), default="focused")
+    run = command("run", "run the built binary with the following arguments and capture JSON evidence")
+    run.add_argument("argv", nargs=argparse.REMAINDER, help="arguments after --")
+    command("cleanup", "delete scratch files and keep evidence")
+    parser.set_defaults(
+        format="text",
+        repo=None,
+        root=None,
+        dry_run=False,
+        jobs=int(os.environ.get("INVAR_VERIFY_JOBS", "2")),
+    )
+    return parser
+
+
+def normalize_argv(argv: list[str]) -> list[str]:
+    """Accept global flags on either side of the subcommand.
+
+    Argparse keeps a parent flag that appears before the subcommand, then the
+    subparser's defaults replace it. Moving those flags to just after the
+    subcommand makes both orders apply.
+    """
+    if not argv or argv[0] in {"-h", "--help"}:
+        return argv
+    valued = {"--format", "--repo", "--root", "--jobs"}
+    options: list[str] = []
+    positionals: list[str] = []
+    index = 0
+    while index < len(argv):
+        arg = argv[index]
+        if arg == "--":
+            positionals.extend(argv[index:])
+            break
+        if arg in valued and index + 1 < len(argv):
+            options.extend((arg, argv[index + 1]))
+            index += 2
+            continue
+        if arg == "--dry-run":
+            options.append(arg)
+            index += 1
+            continue
+        positionals.append(arg)
+        index += 1
+    if not positionals:
+        return options
+    return [positionals[0], *options, *positionals[1:]]
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(normalize_argv(list(sys.argv[1:] if argv is None else argv)))
+    if args.jobs < 1 or args.jobs > 16:
+        raise VerifyError("--jobs must be from 1 to 16")
+    jobs = args.jobs
+    repo = resolve_repo(args.repo)
+    root = args.root or Path(os.environ.get("INVAR_VERIFY_ROOT", str(DEFAULT_ROOT)))
+    session = Session(repo, root, args.dry_run)
+    session.prepare_dirs()
+    if args.command == "doctor":
+        report = do_doctor(session)
+    elif args.command == "build":
+        report = do_build(session, jobs)
+    elif args.command == "drive":
+        report = do_drive(session, args.feature, jobs)
+    elif args.command == "suite":
+        report = do_suite(session, jobs)
+    elif args.command == "test":
+        report = do_test(session, jobs, args.profile)
+    elif args.command == "cleanup":
+        report = do_cleanup(session)
+    elif args.command == "run":
+        forwarded = list(args.argv)
+        if forwarded and forwarded[0] == "--":
+            forwarded = forwarded[1:]
+        if not forwarded:
+            raise VerifyError("run needs the invar arguments after --")
+        session.require_binary()
+        check = session.run(
+            "run.once",
+            "run",
+            invar(session, *forwarded),
+            timeout=180,
+            summary="captured one invar invocation",
+            expect=lambda code, stdout, stderr, raw, document: None,
+        )
+        report = {
+            "schema": SCHEMA,
+            "command": "run",
+            "ok": check["status"] in {"pass", "dry_run"},
+            "checks": [_public_check(check)],
+            "evidence_dir": str(session.evidence),
+        }
+    else:
+        raise VerifyError(f"unknown command {args.command}")
+    return emit(report, args.format)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except VerifyError as error:
+        print(f"invar-verify: {error}", file=sys.stderr)
+        sys.exit(error.exit_code)
+    except KeyboardInterrupt:
+        print("invar-verify: interrupted", file=sys.stderr)
+        sys.exit(130)
