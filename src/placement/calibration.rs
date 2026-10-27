@@ -11,6 +11,7 @@ use std::{io::Write, time::Instant};
 ))]
 #[cfg_attr(not(all(feature = "native", feature = "cuda")), allow(dead_code))]
 mod cpu;
+mod host_key;
 #[cfg(any(
     feature = "native",
     feature = "cuda",
@@ -90,34 +91,7 @@ pub fn host_identity(host_class: &str, device: &str, driver: &str) -> Value {
             })
         })
     };
-    #[cfg(target_os = "linux")]
-    let host_key = std::fs::read_to_string("/etc/machine-id").ok();
-    #[cfg(target_os = "macos")]
-    let host_key = command("ioreg", &["-rd1", "-c", "IOPlatformExpertDevice"]).and_then(|s| {
-        s.lines()
-            .find(|l| l.contains("\"IOPlatformUUID\""))
-            .and_then(|l| l.split_once('=').map(|(_, v)| v.trim().to_owned()))
-    });
-    // `reg query` prints `MachineGuid <type> <guid>`; no admin rights needed.
-    #[cfg(windows)]
-    let host_key = command(
-        "reg",
-        &[
-            "query",
-            r"HKLM\SOFTWARE\Microsoft\Cryptography",
-            "/v",
-            "MachineGuid",
-        ],
-    )
-    .and_then(|s| {
-        s.lines()
-            .find_map(|l| match l.split_whitespace().collect::<Vec<_>>()[..] {
-                ["MachineGuid", _, guid] => Some(guid.to_owned()),
-                _ => None,
-            })
-    });
-    #[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]
-    let host_key: Option<String> = None;
+    let host_key = host_key::read();
     #[cfg(feature = "native")]
     let llvm = format!("{:?}", inkwell::support::get_llvm_version());
     #[cfg(not(feature = "native"))]

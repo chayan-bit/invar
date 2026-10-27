@@ -122,8 +122,7 @@ fn private_directory(prefix: &str) -> Result<PathBuf, Error> {
             .map_err(|_| Error::Limit)?;
         let path =
             std::env::temp_dir().join(format!("{prefix}-{}-{epoch}-{nonce}", std::process::id()));
-        #[allow(unused_mut)] // mode() is Unix-only
-        let mut builder = fs::DirBuilder::new();
+        let builder = &mut fs::DirBuilder::new();
         #[cfg(unix)]
         {
             use std::os::unix::fs::DirBuilderExt;
@@ -143,16 +142,12 @@ fn compiler_path(path: &Path) -> Result<PathBuf, Error> {
     }
     let paths = std::env::var_os("PATH").ok_or(Error::Input)?;
     // `c++` is `c++.exe` on Windows.
-    let mut suffixed = path.as_os_str().to_owned();
-    suffixed.push(std::env::consts::EXE_SUFFIX);
-    for dir in std::env::split_paths(&paths) {
-        for candidate in [dir.join(path), dir.join(&suffixed)] {
-            if candidate.is_file() {
-                return fs::canonicalize(candidate).map_err(io);
-            }
-        }
-    }
-    Err(Error::Input)
+    let exe = format!("{}{}", path.display(), std::env::consts::EXE_SUFFIX);
+    std::env::split_paths(&paths)
+        .flat_map(|dir| [dir.join(path), dir.join(&exe)])
+        .find(|candidate| candidate.is_file())
+        .ok_or(Error::Input)
+        .and_then(|found| fs::canonicalize(found).map_err(io))
 }
 fn wrapper(
     artifact: &compiled::Artifact,

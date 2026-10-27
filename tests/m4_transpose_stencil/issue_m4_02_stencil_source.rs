@@ -25,8 +25,6 @@ use std::{
 /// Generated programs also limit themselves internally (alarm/RLIMIT_CPU).
 const COMPILE_WALL: Duration = Duration::from_secs(180);
 const RUN_WALL: Duration = Duration::from_secs(60);
-#[cfg(unix)]
-const CPU_SECONDS: u64 = 120;
 
 /// Run a subprocess with a wall deadline and, on Unix, a CPU-seconds limit.
 /// The child leads its own process group; on expiry the whole group is
@@ -36,6 +34,7 @@ fn bounded(program: &Path, args: &[OsString], wall: Duration) -> (Output, bool) 
     #[cfg(unix)]
     let mut command = {
         use std::os::unix::process::CommandExt;
+        const CPU_SECONDS: u64 = 120;
         let mut c = Command::new("sh");
         c.arg("-c")
             .arg(format!("ulimit -t {CPU_SECONDS} && exec \"$0\" \"$@\""))
@@ -45,11 +44,9 @@ fn bounded(program: &Path, args: &[OsString], wall: Duration) -> (Output, bool) 
         c
     };
     #[cfg(not(unix))]
-    let mut command = {
-        let mut c = Command::new(program);
-        c.args(args);
-        c
-    };
+    let mut command = Command::new(program);
+    #[cfg(not(unix))]
+    command.args(args);
     command
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
@@ -661,10 +658,7 @@ static float __fadd_rn(float a,float b) { volatile float v=a+b; return v; }
 "#;
 
 #[test]
-#[cfg_attr(
-    not(unix),
-    ignore = "the CPU barrier model limits itself with setrlimit (sys/resource.h)"
-)]
+#[cfg_attr(not(unix), ignore = "the CPU barrier model calls setrlimit")]
 fn issue_m4_02_transpose_stencil_schedules_exact_cuda_text_cpu_barrier_model() {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
     // Each process has at most 256 workers, 128KiB each (32MiB total stack),
