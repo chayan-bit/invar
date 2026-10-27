@@ -20,10 +20,7 @@ fn lower(source: &str) -> mir::Program {
     mir::lower(&check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap()).unwrap()
 }
 fn variant() -> Schedule {
-    Schedule::m3(Geometry {
-        blocks: 1024,
-        lanes: 256,
-    })
+    Schedule::m3(Geometry::new(1024, 256))
 }
 fn candidates(n: u32) -> Vec<Candidate> {
     enumerate(&region(), n, Capabilities::cuda_12_9_sm89(), [variant()]).unwrap()
@@ -522,10 +519,7 @@ fn issue_m4_06_metal_gpu_resident_dispatch_and_full_output() {
     assert!(!empty_run.cache_hit);
     // Every admitted geometry must preserve all words, not just an exit code.
     for lanes in [64, 128, 256] {
-        let s = Schedule::m3(Geometry {
-            blocks: 100_000u32.div_ceil(lanes),
-            lanes,
-        });
+        let s = Schedule::m3(Geometry::new(100_000u32.div_ceil(lanes), lanes));
         let plan = enumerate(&r, 100_000, device.capabilities(), [s])
             .unwrap()
             .remove(0)
@@ -597,10 +591,7 @@ fn issue_m4_06_gpu_resident_dispatch_and_full_output() {
         );
     }
     for lanes in [64, 128, 256] {
-        let s = Schedule::m3(Geometry {
-            blocks: 100_000u32.div_ceil(lanes),
-            lanes,
-        });
+        let s = Schedule::m3(Geometry::new(100_000u32.div_ceil(lanes), lanes));
         let plan = enumerate(&r, 100_000, device.capabilities(), [s])
             .unwrap()
             .remove(0)
