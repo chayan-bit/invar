@@ -62,11 +62,7 @@ pub fn run(
         .args(words)
         .output()
         .unwrap();
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    crate::child_deadline::assert_success(&output);
     String::from_utf8(output.stdout)
         .unwrap()
         .split_whitespace()

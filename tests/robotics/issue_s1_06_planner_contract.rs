@@ -32,11 +32,7 @@ fn compile(root: &Path, file: &str, library: &str) -> PathBuf {
         .arg(&path)
         .output()
         .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
     path
 }
 fn cli(args: &[&Path]) -> std::process::Output {
@@ -153,11 +149,7 @@ extern component fixture_fk {{
         Path::new("--output"),
         &fk_output,
     ]);
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
     let fk_evidence = PathBuf::from(
         serde_json::from_slice::<Value>(&result.stdout).unwrap()["evidence"]
             .as_str()
@@ -309,11 +301,7 @@ int fixture_planner_shutdown(void **context) {{ free(*context);*context=NULL;ret
         ];
         let result = cli(&args);
         if fault == 0 {
-            assert!(
-                result.status.success(),
-                "{}",
-                String::from_utf8_lossy(&result.stderr)
-            );
+            crate::child_deadline::assert_success(&result);
             let report: Value = serde_json::from_slice(&result.stdout).unwrap();
             assert_eq!(report["status"], "diagnostic");
             let path = PathBuf::from(report["evidence"].as_str().unwrap());

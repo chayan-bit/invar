@@ -362,11 +362,7 @@ fn issue_s1_05_robot_cell_mujoco_handwritten_urdf_round_trip() {
         .args(["import", "urdf", source.to_str().unwrap()])
         .output()
         .unwrap();
-    assert!(
-        command.status.success(),
-        "{}",
-        String::from_utf8_lossy(&command.stderr)
-    );
+    crate::child_deadline::assert_success(&command);
     assert_eq!(command.stdout, imported.as_bytes());
     let checked = system::compile_at(
         parse_system(imported.as_bytes()).unwrap(),
@@ -397,11 +393,7 @@ fn issue_s1_05_robot_cell_mujoco_handwritten_urdf_round_trip() {
         ])
         .output()
         .unwrap();
-    assert!(
-        command.status.success(),
-        "{}",
-        String::from_utf8_lossy(&command.stderr)
-    );
+    crate::child_deadline::assert_success(&command);
     assert_eq!(
         std::fs::read_to_string(output.join("robot.urdf")).unwrap(),
         canonical

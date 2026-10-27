@@ -374,11 +374,7 @@ int main() {
             &dir.join("candidate"),
         );
         let output = Command::new(dir.join("candidate")).output().unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        child_deadline::assert_success(&output);
         let words: Vec<u64> = String::from_utf8(output.stdout)
             .unwrap()
             .split_whitespace()

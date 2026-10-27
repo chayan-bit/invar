@@ -388,11 +388,7 @@ fn issue_gnet_11_loader_refuses_changed_library_bytes_and_identity() {
         .arg(&lib)
         .output()
         .unwrap();
-    assert!(
-        out.status.success(),
-        "{}",
-        String::from_utf8_lossy(&out.stderr)
-    );
+    crate::child_deadline::assert_success(&out);
     let hash = file_digest(&lib).unwrap();
     let load = |path: &Path, id| {
         Driver::load(path, hash, id, "invar_fault", vec![], 144 + 64, [4, 4]).map(drop)

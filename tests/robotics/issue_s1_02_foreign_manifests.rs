@@ -38,11 +38,7 @@ fn build_planar(fixture: &Path, directory: &Path) -> std::path::PathBuf {
         .arg(&library)
         .output()
         .unwrap();
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    crate::child_deadline::assert_success(&output);
     library
 }
 
@@ -126,11 +122,7 @@ fn issue_s1_02_foreign_manifests_header_is_deterministic_and_c11_layout_checked(
         .current_dir(&directory)
         .output()
         .unwrap();
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    crate::child_deadline::assert_success(&output);
     std::fs::remove_dir_all(directory).unwrap();
 }
 
@@ -369,11 +361,7 @@ fn issue_s1_02_foreign_manifests_planar2_generated_adapter_matches_independent_g
         .arg(&evidence_dir)
         .output()
         .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
     let outcome: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     let evidence = std::path::PathBuf::from(outcome["evidence"].as_str().unwrap());
     system::foreign::verify_evidence(&evidence, &digest).unwrap();
@@ -430,11 +418,7 @@ fn issue_s1_02_foreign_manifests_external_library_failures() {
         .arg(&library)
         .output()
         .unwrap();
-    assert!(
-        compiled.status.success(),
-        "{}",
-        String::from_utf8_lossy(&compiled.stderr)
-    );
+    crate::child_deadline::assert_success(&compiled);
     let result = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(["component", "test"])
         .arg(&manifest)
@@ -522,11 +506,7 @@ fn build_process() -> (std::path::PathBuf, std::path::PathBuf) {
         .arg(&library)
         .output()
         .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
     (directory, library)
 }
 
@@ -557,11 +537,7 @@ fn process_command(library: &Path, directory: &Path, mode: &str) -> std::process
 fn issue_s1_02_foreign_manifests_env_process_start_step_shutdown() {
     let (directory, library) = build_process();
     let output = process_command(&library, &directory, "normal");
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    crate::child_deadline::assert_success(&output);
     let record: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(record["golden_vectors"], 3);
     let evidence = std::path::PathBuf::from(record["evidence"].as_str().unwrap());
@@ -658,11 +634,7 @@ fn issue_s1_02_foreign_manifests_env_pinocchio_independent_goldens() {
         ))
         .output()
         .unwrap();
-    assert!(
-        configured.status.success(),
-        "{}",
-        String::from_utf8_lossy(&configured.stderr)
-    );
+    crate::child_deadline::assert_success(&configured);
     let built = Command::new("cmake")
         .arg("--build")
         .arg(&build)
@@ -675,11 +647,7 @@ fn issue_s1_02_foreign_manifests_env_pinocchio_independent_goldens() {
         ])
         .output()
         .unwrap();
-    assert!(
-        built.status.success(),
-        "{}",
-        String::from_utf8_lossy(&built.stderr)
-    );
+    crate::child_deadline::assert_success(&built);
     for (arm, manifest_file, model_file, expected, target, vectors) in arms {
         let model = root.join(model_file);
         let actual = Sha256::digest(std::fs::read(&model).unwrap())
