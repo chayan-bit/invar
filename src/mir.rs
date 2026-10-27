@@ -44,6 +44,11 @@ pub struct Program {
 }
 
 impl Program {
+    /// The first function named `name`.
+    pub fn function(&self, name: &str) -> Option<&Function> {
+        self.functions.iter().find(|f| f.name == name)
+    }
+
     /// Stable typed source identity: hash-map iteration never defines cache keys.
     pub fn contract_digest(&self) -> [u8; 32] {
         use sha2::{Digest, Sha256};

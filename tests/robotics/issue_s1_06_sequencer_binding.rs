@@ -312,11 +312,7 @@ for action in [task,recorder]: assert call(types.SimpleNamespace(action=action,r
             .arg(launch)
             .output()
             .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        child_deadline::assert_success(&output);
     }
     fn new(n: usize, label: &str) -> Self {
         Self::with_source(n, label, &support::source(n))
@@ -366,11 +362,7 @@ int invar_pinocchio_bridge_v1_shutdown(void **c){free(*c);*c=0;return 0;}
             .arg(&lib)
             .output()
             .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        child_deadline::assert_success(&output);
         let model = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("examples/cells/reach_place/assets/menagerie")
             .join(if n == 7 {
@@ -828,20 +820,12 @@ fn issue_s1_06_snapshot_mujoco_cpu_env() {
             .arg(f.root.join("snapshot_probe"))
             .output()
             .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        child_deadline::assert_success(&output);
         let output = Command::new(f.root.join("snapshot_probe"))
             .arg(f.root.join("scene.xml"))
             .output()
             .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        child_deadline::assert_success(&output);
         println!("{}", String::from_utf8_lossy(&output.stdout));
     }
 }

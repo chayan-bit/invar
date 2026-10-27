@@ -65,10 +65,6 @@ fn check_conversions(n: u32, files: &std::collections::BTreeMap<String, String>)
         &executable,
     );
     let result = Command::new(&executable).output().unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    child_deadline::assert_success(&result);
     fs::remove_dir_all(root).unwrap();
 }

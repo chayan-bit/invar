@@ -1,4 +1,5 @@
-//! Test harness wall deadlines only. Never use this module in production code.
+//! Test harness child processes: wall deadlines, scratch directories and exit
+//! checks. Never use this module in production code.
 use std::{
     ffi::OsStr,
     path::{Path, PathBuf},
@@ -106,6 +107,16 @@ pub fn cxx<S: AsRef<OsStr>>(flags: &[S], source: &Path, exe: &Path) {
         "{compiler:?} {}: {}\n{}",
         source.display(),
         output.status,
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+/// Panics with the child's stderr unless it exited successfully.
+#[track_caller]
+pub fn assert_success(output: &std::process::Output) {
+    assert!(
+        output.status.success(),
+        "{}",
         String::from_utf8_lossy(&output.stderr)
     );
 }

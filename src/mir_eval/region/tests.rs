@@ -29,7 +29,7 @@ fn lower(source: &str) -> mir::Program {
 }
 
 fn function<'p>(program: &'p mir::Program, name: &str) -> &'p Function {
-    program.functions.iter().find(|f| f.name == name).unwrap()
+    program.function(name).unwrap()
 }
 
 /// The span of the `nth` counted loop of `name`, in block order.

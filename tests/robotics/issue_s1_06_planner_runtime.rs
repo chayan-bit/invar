@@ -92,11 +92,7 @@ int probe_shutdown(void **context) {{ free(*context); *context = NULL; return 0;
         .arg(&path)
         .output()
         .unwrap();
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    crate::child_deadline::assert_success(&output);
     (root, path)
 }
 

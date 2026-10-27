@@ -124,3 +124,17 @@ fn cxx_builds_a_harness_and_reports_compiler_errors() {
     assert!(message.contains("undeclared_name"), "{message}");
     std::fs::remove_dir_all(&dir).unwrap();
 }
+
+#[cfg(unix)]
+#[test]
+fn assert_success_accepts_a_clean_exit_and_panics_with_stderr() {
+    let ok = Command::new("sh").args(["-c", "exit 0"]).output().unwrap();
+    child_deadline::assert_success(&ok);
+    let failed = Command::new("sh")
+        .args(["-c", "echo child-stderr >&2; exit 3"])
+        .output()
+        .unwrap();
+    let failure = std::panic::catch_unwind(|| child_deadline::assert_success(&failed)).unwrap_err();
+    let message = failure.downcast_ref::<String>().unwrap();
+    assert!(message.contains("child-stderr"), "{message}");
+}

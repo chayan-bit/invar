@@ -262,12 +262,7 @@ impl SourcePlan {
         let checked = front::parse(source)
             .and_then(|p| check::check(p, false))
             .map_err(Error::Source)?;
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Binding)?;
+        let f = checked.program.function(entry).ok_or(Error::Binding)?;
         let binding = |s: &Stmt| match &s.kind {
             StmtKind::Binding { name, .. } => Ok(name.clone()),
             _ => Err(Error::Binding),

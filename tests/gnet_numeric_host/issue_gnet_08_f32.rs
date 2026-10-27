@@ -107,11 +107,7 @@ int main(int argc,char** argv) {{
             .stdin(Stdio::from(fs::File::open(path).unwrap()))
             .output()
             .unwrap();
-        assert!(
-            out.status.success(),
-            "{}",
-            String::from_utf8_lossy(&out.stderr)
-        );
+        child_deadline::assert_success(&out);
         let result: Vec<Vec<i64>> = String::from_utf8(out.stdout)
             .unwrap()
             .lines()

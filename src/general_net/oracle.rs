@@ -924,11 +924,7 @@ fn observe_entry(
         .run(name, args, main_entry)
         .and_then(|value| value.value(&machine.arrays, &machine.aggregates))
         .and_then(|result| {
-            let function = program
-                .functions
-                .iter()
-                .find(|f| f.name == name)
-                .ok_or_else(internal)?;
+            let function = program.function(name).ok_or_else(internal)?;
             let mut commits = Vec::new();
             for ((param, arg), value) in function.params.iter().zip(args).zip(&machine.external) {
                 if param.mode != Some(Mode::Mut) {

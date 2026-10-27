@@ -190,17 +190,8 @@ impl Region {
             general_net::Net::lower(checked, general_net::Limits::default()).map_err(Error::Net)?;
         let proof = net.verify().map_err(Error::Net)?;
         let mir = net.compiled_mir(&proof).map_err(Error::Net)?;
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
-        let lowered = mir
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
+        let lowered = mir.function(entry).ok_or(Error::Unrecognized)?;
         if let [
             front::Stmt {
                 kind: StmtKind::Return(Some(value)),

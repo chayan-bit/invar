@@ -136,12 +136,7 @@ fn reserve<T>(v: &mut Vec<T>, count: usize) -> Result<(), Error> {
 }
 
 fn source_law(checked: &CheckedProgram, entry: &str) -> Result<(Span, Law), Error> {
-    let f = checked
-        .program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Error::Unrecognized)?;
+    let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
     let [values, indices, bins] = f.params.as_slice() else {
         return Err(Error::Unrecognized);
     };

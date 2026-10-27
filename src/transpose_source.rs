@@ -69,12 +69,7 @@ impl Contract {
             .map_err(Error::Net)?;
         let proof = net.verify().map_err(Error::Net)?;
         let program = net.compiled_mir(&proof).map_err(Error::Net)?;
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         if f.params.len() != 3
             || f.return_from.is_some()
             || !f.generic_params.is_empty()
@@ -178,11 +173,7 @@ impl Contract {
             .checked_add(expr_ticks(value).ok_or(Error::Bounds)?)
             .and_then(|n| expr_ticks(index).and_then(|t| n.checked_add(t)))
             .ok_or(Error::Bounds)?;
-        let lowered = program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let lowered = program.function(entry).ok_or(Error::Unrecognized)?;
         let function_contract = crate::tensor::function_fingerprint(lowered);
         let loop_span = outer.span;
         if loop_span.start >= loop_span.end

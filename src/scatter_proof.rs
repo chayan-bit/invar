@@ -185,12 +185,7 @@ fn affine(e: &Expr, induction: &str) -> Option<(u32, u32)> {
 }
 
 fn shape(checked: &CheckedProgram, entry: &str) -> Result<Shape, Error> {
-    let f = checked
-        .program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Error::Unrecognized)?;
+    let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
     let [input] = f.params.as_slice() else {
         return Err(Error::Unrecognized);
     };

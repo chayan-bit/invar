@@ -261,12 +261,7 @@ impl Contract {
         {
             return Err(Error::CheckedMismatch);
         }
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         if f.params.len() != 3
             || f.return_from.is_some()
             || !f.generic_params.is_empty()
@@ -413,11 +408,7 @@ impl Contract {
             .iter()
             .try_fold(1u64, |n, s| n.checked_add(stmt_ticks(s)?))
             .ok_or(Error::Bounds)?;
-        let function = m
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let function = m.function(entry).ok_or(Error::Unrecognized)?;
         let function_contract = crate::tensor::function_fingerprint(function);
         if outer.span.start >= outer.span.end
             || outer.span.start < f.span.start

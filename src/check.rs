@@ -402,11 +402,7 @@ fn check_impl(
                 ));
             }
         }
-        let Some(oracle) = program
-            .functions
-            .iter()
-            .find(|function| function.name == foreign.oracle)
-        else {
+        let Some(oracle) = program.function(&foreign.oracle) else {
             return Err(FrontError::source(
                 "NAME_UNKNOWN",
                 "foreign oracle function is missing",
@@ -437,11 +433,7 @@ fn check_impl(
             },
         );
     }
-    if let Some(main) = program
-        .functions
-        .iter()
-        .find(|function| function.name == "main")
-    {
+    if let Some(main) = program.function("main") {
         if !main.params.is_empty() || main.result != Type::I32 {
             return Err(FrontError::source(
                 "ENTRYPOINT_SIGNATURE",

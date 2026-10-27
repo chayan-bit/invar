@@ -50,11 +50,7 @@ fn ordinary_source_check_accepts_exact_policy_and_ros_refuses_before_output() {
             .args(["--format", "json"])
             .output()
             .unwrap();
-        assert!(
-            check.status.success(),
-            "{}",
-            String::from_utf8_lossy(&check.stderr)
-        );
+        crate::child_deadline::assert_success(&check);
         let generation = Command::new(env!("CARGO_BIN_EXE_invar"))
             .args(["system", "gen", "ros2"])
             .arg(&paths.input)

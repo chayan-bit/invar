@@ -202,11 +202,7 @@ fn issue_s1_06_integration_start_resolves_product_robot_dof() {
         ])
         .output()
         .unwrap();
-    assert!(
-        checked.status.success(),
-        "{}",
-        String::from_utf8_lossy(&checked.stderr)
-    );
+    crate::child_deadline::assert_success(&checked);
     for (robot, count) in [
         ("menagerie::franka_emika_panda", 7),
         ("menagerie::universal_robots_ur5e", 6),

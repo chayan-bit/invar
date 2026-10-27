@@ -149,11 +149,7 @@ fn statement_ticks(s: &Stmt) -> Option<u64> {
 
 /// Recognize the family on a parsed or checked program's entry function.
 fn shape(program: &front::Program, entry: &str) -> Result<Shape, Error> {
-    let f = program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Error::Unrecognized)?;
+    let f = program.function(entry).ok_or(Error::Unrecognized)?;
     if f.params.len() != 5
         || f.result != Type::ArrayF32
         || f.return_from.is_some()

@@ -29,7 +29,7 @@
 1159 src/system/ros2.rs
 940 src/system/urdf.rs
 1171 tests/issue_ai_02_spec_examples.rs
-858 tests/issue_m4_06_bounded_schedule_tuning.rs
+849 tests/issue_m4_06_bounded_schedule_tuning.rs
 806 tests/m4_summary/issue_m4_07_summary_source.rs
 874 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
 850 tests/robotics/issue_s1_06_sequencer_binding.rs

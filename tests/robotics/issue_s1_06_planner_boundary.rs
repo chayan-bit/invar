@@ -149,11 +149,7 @@ int main(void) { return 0; }
         .arg(path.join("layout"))
         .output()
         .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
     assert!(
         Command::new(path.join("layout"))
             .status()

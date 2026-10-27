@@ -235,12 +235,7 @@ impl Contract {
         {
             return Err(Error::CheckedMismatch);
         }
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         let [edges, start] = f.params.as_slice() else {
             return Err(Error::Unrecognized);
         };

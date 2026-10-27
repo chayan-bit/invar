@@ -435,11 +435,7 @@ for(unsigned i=0;i<{count};++i)std::cout<<output[i]<<' ';return 0; }}
                 .arg(dir.join("transpose"))
                 .output()
                 .unwrap();
-            assert!(
-                run.status.success(),
-                "{}",
-                String::from_utf8_lossy(&run.stderr)
-            );
+            child_deadline::assert_success(&run);
             let actual: Vec<u32> = String::from_utf8(run.stdout)
                 .unwrap()
                 .split_whitespace()

@@ -144,11 +144,7 @@ int main(int argc,char** argv) {{
             .arg(self.dir.join("completed.bin"))
             .output()
             .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
+        child_deadline::assert_success(&output);
         let words = String::from_utf8(output.stdout)
             .unwrap()
             .split_whitespace()
