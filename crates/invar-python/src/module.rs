@@ -254,9 +254,7 @@ impl CheckedModule {
         let function = self
             .checked
             .program
-            .functions
-            .iter()
-            .find(|function| function.name == name)
+            .function(name)
             .ok_or_else(|| {
                 boundary_error(
                     py,

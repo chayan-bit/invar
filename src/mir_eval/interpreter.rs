@@ -20,9 +20,7 @@ impl Interpreter<'_> {
         }
         let function = self
             .program
-            .functions
-            .iter()
-            .find(|function| function.name == name)
+            .function(name)
             .ok_or_else(|| tool("MIR_CALL", "missing verified function"))?;
         if args.len() != function.params.len() {
             return Err(tool("MIR_CALL", "invalid call arity"));

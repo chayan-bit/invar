@@ -88,12 +88,7 @@ impl Plan {
         if contract.certificate().domain().0 != 0 {
             return Err(Error::Unrecognized);
         }
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         let [allocate, region, _] = f.body.statements.as_slice() else {
             return Err(Error::Unrecognized);
         };
@@ -116,11 +111,7 @@ impl Plan {
         let mut tick_spans = vec![region.span, store.span];
         ticks(value, &mut tick_spans)?;
         ticks(index, &mut tick_spans)?;
-        let function = program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let function = program.function(entry).ok_or(Error::Unrecognized)?;
         let plan = Self {
             source_hash: Sha256::digest(&source).into(),
             source,
@@ -165,9 +156,7 @@ impl Plan {
             return Err(failure("SCATTER_SOURCE_BINDING"));
         }
         self.verify_function(
-            m.functions
-                .iter()
-                .find(|f| f.name == self.function)
+            m.function(&self.function)
                 .ok_or_else(|| failure("SCATTER_SOURCE_BINDING"))?,
         )
     }

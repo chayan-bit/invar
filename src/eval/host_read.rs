@@ -431,7 +431,7 @@ fn observe_on_stack(
     if fuel_limit == 0 {
         return refuse("INVALID_FUEL", "fuel must be positive");
     }
-    let Some(function) = program.program.functions.iter().find(|f| f.name == name) else {
+    let Some(function) = program.program.function(name) else {
         return refuse("NATIVE_ABI", "unknown function");
     };
     let host_call = policy == Policy::HostCall;

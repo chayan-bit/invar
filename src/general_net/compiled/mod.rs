@@ -758,13 +758,9 @@ fn artifact_with(
                             .any(|i| i.output.as_ref().is_some_and(|(_, t)| floating(t)))
                 })
         }) || !mir.records.is_empty()
-            || mir
-                .functions
-                .iter()
-                .find(|f| f.name == entry)
-                .is_some_and(|f| {
-                    entry::owner(&f.result) || f.params.iter().any(|p| entry::owner(&p.ty))
-                }));
+            || mir.function(entry).is_some_and(|f| {
+                entry::owner(&f.result) || f.params.iter().any(|p| entry::owner(&p.ty))
+            }));
     let numeric = numeric || extended;
     // Numeric artifacts are CPU-only except ABI12: CUDA resumable owners.
     let owned_numeric_cuda =

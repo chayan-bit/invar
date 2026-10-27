@@ -183,7 +183,7 @@ impl Case {
     fn args(&self, root: &[u32], net: &Net) -> Vec<eval::Value> {
         let proof = net.verify().unwrap();
         let mir = net.compiled_mir(&proof).unwrap();
-        let f = mir.functions.iter().find(|f| f.name == self.entry).unwrap();
+        let f = mir.function(self.entry).unwrap();
         f.params
             .iter()
             .zip(root)

@@ -292,10 +292,7 @@ struct Context<'a> {
 
 impl<'a> Context<'a> {
     fn function(&self, name: &str) -> Option<&'a Function> {
-        self.program
-            .functions
-            .iter()
-            .find(|function| function.name == name)
+        self.program.function(name)
     }
 }
 

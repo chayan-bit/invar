@@ -715,9 +715,7 @@ fn expr(
             }
             if let Some(params) = program
                 .program
-                .functions
-                .iter()
-                .find(|function| function.name == *name)
+                .function(name)
                 .map(|function| function.params.as_slice())
                 .or_else(|| {
                     program

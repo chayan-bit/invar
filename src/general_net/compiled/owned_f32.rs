@@ -37,11 +37,7 @@ pub(super) fn validate(program: &mir::Program, entry: &str, target: Target) -> R
     {
         return Err(Error::UnsupportedType);
     }
-    let entry = program
-        .functions
-        .iter()
-        .find(|f| f.name == entry)
-        .ok_or(Error::Entry)?;
+    let entry = program.function(entry).ok_or(Error::Entry)?;
     if entry.params.iter().any(|p| {
         matches!(p.ty, Type::ArrayI32 | Type::ArrayU32 | Type::ArrayF32) || !direct_type(&p.ty)
     }) {

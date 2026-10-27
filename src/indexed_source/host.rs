@@ -97,12 +97,7 @@ impl Plan {
         if contract.family() != Family::Gather {
             return Err(Error::Unrecognized);
         }
-        let f = checked
-            .program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let f = checked.program.function(entry).ok_or(Error::Unrecognized)?;
         let [allocation, region, _] = f.body.statements.as_slice() else {
             return Err(Error::Unrecognized);
         };
@@ -125,11 +120,7 @@ impl Plan {
         let mut tick_spans = vec![region.span, store.span];
         ticks(value, &mut tick_spans)?;
         ticks(index, &mut tick_spans)?;
-        let function = program
-            .functions
-            .iter()
-            .find(|f| f.name == entry)
-            .ok_or(Error::Unrecognized)?;
+        let function = program.function(entry).ok_or(Error::Unrecognized)?;
         let p = Self {
             source_hash: Sha256::digest(&source).into(),
             source,
@@ -166,9 +157,7 @@ impl Plan {
             return Err(failure("GATHER_SOURCE_BINDING"));
         }
         let function = m
-            .functions
-            .iter()
-            .find(|f| f.name == self.function)
+            .function(&self.function)
             .ok_or_else(|| failure("GATHER_SOURCE_BINDING"))?;
         self.verify_function(function)
     }
