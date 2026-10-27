@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+use crate::child_deadline;
 use general_net::{Net, compiled, oracle};
 use invar::{check, eval, front, general_net};
 use std::{
@@ -53,22 +54,10 @@ impl Cpu {
         .unwrap();
         // UBSan checks emitted integer arithmetic, including signed MIN/-1 and
         // the u32 product that cannot fit a signed 64-bit intermediate.
-        let output = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .expect("CPU emitted-code tests need a C++17 compiler");
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O1,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self { dir }
     }

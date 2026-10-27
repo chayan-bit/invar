@@ -1,8 +1,5 @@
 #![forbid(unsafe_code)]
-#[allow(dead_code)]
-#[path = "../../test-support/child_deadline.rs"]
-mod child_deadline;
-
+use crate::child_deadline;
 use contraction_source::{Contract, Emission, Error};
 use invar::contraction_source;
 use invar::{
@@ -193,20 +190,12 @@ int main() {{
         count
     );
     fs::write(dir.join("kernel.cpp"), format!("{}\n{harness}", e.source())).unwrap();
-    let built = child_deadline::command(30)
-        .arg(std::env::var_os("CXX").unwrap_or_else(|| "c++".into()))
-        .args(e.options())
-        .args([opt, "-fsanitize=undefined", "-fno-sanitize-recover=all"])
-        .arg(dir.join("kernel.cpp"))
-        .arg("-o")
-        .arg(dir.join("run"))
-        .output()
-        .unwrap();
-    assert!(
-        built.status.success(),
-        "CPU compiler failed; preserved {dir:?}: {}",
-        String::from_utf8_lossy(&built.stderr)
-    );
+    let flags = [
+        e.options(),
+        &[opt, "-fsanitize=undefined", "-fno-sanitize-recover=all"],
+    ]
+    .concat();
+    child_deadline::cxx(&flags, &dir.join("kernel.cpp"), &dir.join("run"));
     let ran = child_deadline::command(10)
         .arg(dir.join("run"))
         .output()

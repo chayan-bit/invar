@@ -1,3 +1,6 @@
+#[allow(dead_code)]
+#[path = "../../test-support/child_deadline.rs"]
+mod child_deadline;
 mod issue_gnet_03;
 mod issue_gnet_03_owned;
 mod issue_gnet_04_host;

@@ -428,29 +428,16 @@ fn cpu_run(
     }
     source.push_str(harness);
     fs::write(temp.0.join("transpose.cpp"), &source).unwrap();
-    let compiler = std::env::var_os("CXX").unwrap_or_else(|| "c++".into());
-    let output = child_deadline::command(30)
-        .arg(compiler)
-        .args(p.cpu_options())
-        .args([
-            optimization,
-            "-fsanitize=undefined",
-            "-fno-sanitize-recover=all",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-        ])
-        .arg(temp.0.join("transpose.cpp"))
-        .arg("-o")
-        .arg(temp.0.join("run"))
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "{label}: compile {:?}: {}",
-        output.status,
-        String::from_utf8_lossy(&output.stderr)
-    );
+    let flags = [
+        optimization,
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ];
+    let flags = [p.cpu_options(), &flags].concat();
+    child_deadline::cxx(&flags, &temp.0.join("transpose.cpp"), &temp.0.join("run"));
     let output = child_deadline::command(10)
         .arg(temp.0.join("run"))
         .output()

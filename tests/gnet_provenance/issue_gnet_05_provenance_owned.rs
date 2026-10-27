@@ -138,23 +138,10 @@ int main(int argc,char** argv) {{
             format!("{}\n{driver}", artifact.artifact().source()),
         )
         .unwrap();
-        let output = child_deadline::command(60)
-            .arg("c++")
-            .args([
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("candidate.cpp"))
-            .arg("-o")
-            .arg(dir.join("candidate"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O1,
+            &dir.join("candidate.cpp"),
+            &dir.join("candidate"),
         );
         Self { dir }
     }
@@ -478,24 +465,16 @@ int main(int argc,char** argv) {{
             format!("{shim}\n{source}\n{bridge}\n{driver}"),
         )
         .unwrap();
-        let output = child_deadline::command(60)
-            .arg("c++")
-            .args([
+        child_deadline::cxx(
+            &[
                 "-std=c++20",
                 "-pthread",
                 "-O1",
                 "-fsanitize=undefined",
                 "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("group.cpp"))
-            .arg("-o")
-            .arg(dir.join("group"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
+            ],
+            &dir.join("group.cpp"),
+            &dir.join("group"),
         );
         Self {
             dir,

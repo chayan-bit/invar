@@ -119,24 +119,10 @@ impl Cpu {
             format!("{}\n{driver}", artifact.source()),
         )
         .unwrap();
-        let output = child_deadline::command(60)
-            .args([
-                "c++",
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "C++ compile {:?}: {}",
-            output.status,
-            String::from_utf8_lossy(&output.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O1,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self::for_harness(artifact, dir)
     }

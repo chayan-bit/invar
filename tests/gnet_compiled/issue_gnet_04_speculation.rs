@@ -3,6 +3,7 @@
 #[path = "../support/gnet_speculation.rs"]
 mod speculation;
 
+use crate::child_deadline;
 use invar::eval;
 use invar::general_net::{Net, compiled, oracle};
 use speculation::{limits, lowered, spec, storage};
@@ -89,22 +90,10 @@ int main(int argc,char** argv) {{
             format!("{}\n{driver}", artifact.source()),
         )
         .unwrap();
-        let output = Command::new("c++")
-            .args([
-                "-std=c++17",
-                "-O1",
-                "-fsanitize=undefined",
-                "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O1,
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self {
             dir,

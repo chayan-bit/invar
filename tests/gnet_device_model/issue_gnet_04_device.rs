@@ -154,24 +154,16 @@ inline void host_entry(const gnet_w* input,gnet_w* output,gnet_u* trace,const gn
             format!("{shim}\n{source}\n{bridge}\n{driver}"),
         )
         .unwrap();
-        let output = child_deadline::command(60)
-            .arg("c++")
-            .args([
+        child_deadline::cxx(
+            &[
                 "-std=c++20",
                 "-pthread",
                 "-O1",
                 "-fsanitize=undefined",
                 "-fno-sanitize-recover=all",
-            ])
-            .arg(dir.join("source.cpp"))
-            .arg("-o")
-            .arg(dir.join("run"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
+            ],
+            &dir.join("source.cpp"),
+            &dir.join("run"),
         );
         Self {
             dir,
