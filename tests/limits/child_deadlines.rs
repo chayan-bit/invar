@@ -83,3 +83,29 @@ fn hung_child_is_killed_even_when_it_ignores_term() {
     assert!(output.status.success(), "{output:?}");
     eprint!("{}", String::from_utf8_lossy(&output.stderr));
 }
+
+#[cfg(unix)]
+#[test]
+fn cxx_builds_a_harness_and_reports_compiler_errors() {
+    let dir = std::env::temp_dir().join(format!("invar-cxx-helper-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(dir.join("ok.cpp"), "int main() { return 0; }\n").unwrap();
+    child_deadline::cxx(
+        child_deadline::CXX17_UBSAN_O1,
+        &dir.join("ok.cpp"),
+        &dir.join("ok"),
+    );
+    assert!(Command::new(dir.join("ok")).status().unwrap().success());
+    std::fs::write(dir.join("bad.cpp"), "int main() { return undeclared_name; }\n").unwrap();
+    let failure = std::panic::catch_unwind(|| {
+        child_deadline::cxx(
+            child_deadline::CXX17_UBSAN_O2,
+            &dir.join("bad.cpp"),
+            &dir.join("bad"),
+        )
+    })
+    .unwrap_err();
+    let message = failure.downcast_ref::<String>().unwrap();
+    assert!(message.contains("undeclared_name"), "{message}");
+    std::fs::remove_dir_all(&dir).unwrap();
+}
