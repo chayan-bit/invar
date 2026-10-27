@@ -19,11 +19,7 @@ fn issue_s1_01_system_dialect_emits_checked_canonical_ir() {
         .args(["system", "ir", FIXTURE])
         .output()
         .unwrap();
-    assert!(
-        command.status.success(),
-        "{}",
-        String::from_utf8_lossy(&command.stderr)
-    );
+    crate::child_deadline::assert_success(&command);
     let ir: serde_json::Value = serde_json::from_slice(&command.stdout).unwrap();
     let schema: serde_json::Value = serde_json::from_str(invar::system::SCHEMA_JSON).unwrap();
     assert!(jsonschema::is_valid(&schema, &ir));

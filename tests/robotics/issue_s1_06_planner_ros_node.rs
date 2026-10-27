@@ -96,11 +96,7 @@ fn check_cpp(n: u32, files: &std::collections::BTreeMap<String, String>) {
     ];
     child_deadline::cxx(&flags, &source, &executable);
     let result = Command::new(&executable).arg(&source).output().unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    child_deadline::assert_success(&result);
     // Minimal API stand-ins check C++ syntax only; actual pinned ROS build is still required.
     let stubs = root.join("stubs");
     fs::create_dir_all(stubs.join("rclcpp")).unwrap();
@@ -190,10 +186,6 @@ struct PlannerTrajectory{n}V1 {{ double dt_s; std::vector<PlannerWaypoint{n}V1> 
         .arg(root.join("src/invar_planner_node/src/main.cpp"))
         .output()
         .unwrap();
-    assert!(
-        compiled.status.success(),
-        "{}",
-        String::from_utf8_lossy(&compiled.stderr)
-    );
+    child_deadline::assert_success(&compiled);
     fs::remove_dir_all(root).unwrap();
 }

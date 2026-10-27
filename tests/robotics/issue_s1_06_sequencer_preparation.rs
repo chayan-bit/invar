@@ -102,11 +102,7 @@ impl<const N: usize> Fixture<N> {
             .arg(&path)
             .output()
             .unwrap();
-        assert!(
-            result.status.success(),
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
-        );
+        crate::child_deadline::assert_success(&result);
         fs::write(root.join("child"), "not executed: CPU double").unwrap();
         fs::write(root.join("robot.yml"), "CPU double").unwrap();
         let mut planner = Planner::<N>::open(&path, "probe").unwrap();

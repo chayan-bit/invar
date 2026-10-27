@@ -49,11 +49,7 @@ fn issue_s1_04_ros2_target_public_generation_is_deterministic() {
             .arg(&output)
             .output()
             .unwrap();
-        assert!(
-            run.status.success(),
-            "{}",
-            String::from_utf8_lossy(&run.stderr)
-        );
+        crate::child_deadline::assert_success(&run);
         results.push(generated_files(&output));
     }
     assert_eq!(results[0], results[1]);

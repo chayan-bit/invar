@@ -80,11 +80,7 @@ where
         .args(args.iter().map(ToString::to_string))
         .output()
         .unwrap();
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    child_deadline::assert_success(&output);
     String::from_utf8(output.stdout)
         .unwrap()
         .split_whitespace()

@@ -131,11 +131,7 @@ fn issue_s1_05_robot_cell_mujoco_env_force_torque_has_six_axes() {
         .args(["-c", "import mujoco,sys; m=mujoco.MjModel.from_xml_path(sys.argv[1]); d=mujoco.MjData(m); mujoco.mj_step(m,d); assert m.nsensor == 2; assert list(m.sensor_dim) == [3,3]", path.to_str().unwrap()])
         .output().unwrap();
     std::fs::remove_file(path).unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
 }
 
 #[test]
@@ -154,9 +150,5 @@ fn issue_s1_05_robot_cell_mujoco_env_camera_loads() {
         .args(["-c", "import mujoco,sys; m=mujoco.MjModel.from_xml_path(sys.argv[1]); d=mujoco.MjData(m); mujoco.mj_step(m,d); assert list(m.cam_resolution[0]) == [640,480]; assert list(m.cam_intrinsic[0]) == [500.25,501,1.25,-0.5]", path.to_str().unwrap()])
         .output().unwrap();
     std::fs::remove_file(path).unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    crate::child_deadline::assert_success(&result);
 }

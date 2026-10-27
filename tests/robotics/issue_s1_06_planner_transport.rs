@@ -60,11 +60,7 @@ fn exercise<const N: usize>() {
         .arg(&library)
         .output()
         .unwrap();
-    assert!(
-        compiled.status.success(),
-        "{}",
-        String::from_utf8_lossy(&compiled.stderr)
-    );
+    crate::child_deadline::assert_success(&compiled);
     let yaml = root.join("fixture.yml");
     fs::write(&yaml, "{}").unwrap();
     let names: Vec<_> = (0..N).map(|i| format!("joint{i}")).collect();
