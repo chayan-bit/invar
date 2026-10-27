@@ -23,7 +23,7 @@ The initial candidate is a zero-based counted wrapping `u32` map with one or two
 `facts` records typed logical reads/writes, ownership, loans, effect order, trap/termination summaries, physical alias assumption, and cleanup policy.
 For rejected regions, unestablished facts and the guard are null.
 The guard contains `upper` (a constant or named array length), ordered `inputs`, and `output`.
-It requires the upper bound to be at most every current array length and 1,000,000; it is evaluated before any candidate write while the protected arrays remain stable.
+It requires the upper bound to be at most every current array length and the map's peak host footprint to fit the host byte budget (inputs plus three more `u32` arrays of that length, #57); it is evaluated before any candidate write while the protected arrays remain stable.
 False or missing guard inputs select `mir-serial`.
 
 Persisted documents are descriptive admission inputs.

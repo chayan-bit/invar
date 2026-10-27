@@ -226,6 +226,7 @@ The emitted C++17 CPU path runs under UBSan and matches every observation/event
 against the independent net oracle for dynamic recursion, loops, phi routing,
 selected branches, Unit calls, exact integer edges and ordered traps/limits.
 This supplies executed compiler lowering evidence for the scalar slice only.
+The next paragraph records the original GNET-02 validation bundle; the GNET-03 section below supersedes its device statements.
 The minimal recursive GPU validation bundle has standalone CUDA/Metal runners,
 fences,10s dispatch deadlines, retained leases/quarantine and exact oracle trace
 comparison. Runtime compiler/module-load/transfer/fence costs remain separate.
@@ -239,7 +240,7 @@ general-device coverage, calibrated performance or completed GNET03/04 acceptanc
 
 `device_host::Plan::from_source` compiles checked ordinary source to one program-specific ABI5 kernel per target (`invar_gnet_children_v5`) and runs it on the CPU group model, CUDA or Metal through the same fenced session.
 There is no net interpreter on the device: the kernel switches only on the frame's own generated continuation states, and every independent call site has its own generated projection and discovery routine.
-Thread 0 runs the root continuation for a finite quantum per round; up to 8 lanes run discovered children in private slots, heaps, traces and cleanup buffers; barriers separate root mutation, child execution and publication; a host fence separates submissions.
+The kernel runs as exactly one group of 32 threads (any other launch geometry is refused with status 8); thread 0 runs the root continuation for a finite quantum per round; up to 8 lanes (`SpeculationLimits::slots`, threads 1..=8) run discovered children in private slots, heaps, traces and cleanup buffers; barriers separate root mutation, child execution and publication; a host fence separates submissions.
 Children commit in source order only at their demand; an owner child, a stale generation, a failed guard or a child over the remaining budget is replayed by the root, never published.
 A full worklist serializes the call (`capacity_serialized`), it never fails the source program.
 
@@ -282,7 +283,7 @@ The CPU group model run of the injection suite is checked under ThreadSanitizer,
 `ContestedClaim` (child phase) claims free used lanes with an identity no call site matches and releases them one child phase later; `CancelRace` (child phase) cancels lane 0 while its child is unfinished.
 Every slice run under every fault must agree exactly with the oracle, and its counters must move in the fault's direction against the same uninjected run (stale: fewer commits and more replays; contested: different spawn/commit/serialization counts; cancel: more spawns).
 Without the feature `Fault` is uninhabited and the hook text is not compiled: the default suite checks that the `invar` binary and the emitted CUDA/Metal source of every admitted corpus program lack it, and the CUDA suite checks that every slice program's production compiled-ahead image lacks the hook symbol while every injected image keeps it.
-Metal libraries are compiled from the emitted source at run time and the evidence Mac has no offline Metal toolchain, so Metal absence rests on the source and binary checks.
+Production Metal libraries are compiled ahead of time (`invar build --target metal`) and loaded with `--artifact`; the hardware suite builds fault-injected Metal kernels through the developer-only `INVAR_METAL_RUNTIME_SOURCE=1` runtime-source path, so Metal absence of the hook rests on the source and binary checks.
 These are differential results, not a simulation proof; no performance, placement or parity claim is made.
 
 ## Semantic obligations
