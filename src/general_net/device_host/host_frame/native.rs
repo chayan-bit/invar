@@ -21,6 +21,7 @@ pub(super) struct Native {
 struct Scratch(PathBuf);
 impl Scratch {
     fn create(path: PathBuf) -> Result<Self, Error> {
+        #[allow(unused_mut)] // mode() is Unix-only
         let mut builder = fs::DirBuilder::new();
         #[cfg(unix)]
         {

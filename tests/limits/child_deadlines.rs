@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#[cfg_attr(not(unix), allow(dead_code))]
 #[path = "../../test-support/child_deadline.rs"]
 mod child_deadline;
 

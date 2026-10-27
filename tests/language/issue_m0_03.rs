@@ -96,7 +96,11 @@ fn issue_m0_03_cli_check_json_and_status() {
     let path = std::env::temp_dir().join(format!(
         "invar-m0-03-{}-{}.inv",
         std::process::id(),
-        std::thread::current().name().unwrap_or("test")
+        // `::` in a test name is not a valid Windows file name.
+        std::thread::current()
+            .name()
+            .unwrap_or("test")
+            .replace("::", "-")
     ));
     let binary = env!("CARGO_BIN_EXE_invar");
     for (source, expected_status, expected_exit, code) in [

@@ -249,7 +249,7 @@ fn issue_s1_06_source_tool_projection_executes_rust_and_generated_cpp_both_arms(
         extra.push(b' ');
         fs::write(temp.join("bad.xml"), extra).unwrap();
         // Execute the exact-byte model guard, including trailing-byte refusal.
-        program=program.replace("int main(){",&format!("int main(){{assert(reference_model_matches(\"{}\"));assert(!reference_model_matches(\"{}\"));",temp.join("model.xml").display(),temp.join("bad.xml").display()));
+        program=program.replace("int main(){",&format!("int main(){{assert(reference_model_matches({:?}));assert(!reference_model_matches({:?}));",temp.join("model.xml").to_str().unwrap(),temp.join("bad.xml").to_str().unwrap()));
         fs::write(temp.join("probe.cpp"), program).unwrap();
         child_deadline::cxx(
             &["-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic"],

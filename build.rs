@@ -103,5 +103,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|byte| format!("{byte:02x}"))
         .collect::<String>();
     println!("cargo:rustc-env=INVAR_BUILD_DIGEST={digest}");
+    // Windows gives a main thread 1 MiB of stack, Linux and macOS 8 MiB; give
+    // the binaries the same 8 MiB so deep programs behave alike on every host.
+    if std::env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "windows") {
+        if std::env::var("CARGO_CFG_TARGET_ENV").is_ok_and(|env| env == "msvc") {
+            println!("cargo:rustc-link-arg-bins=/STACK:8388608");
+        } else {
+            println!("cargo:rustc-link-arg-bins=-Wl,--stack,8388608");
+        }
+    }
     Ok(())
 }
