@@ -9,6 +9,7 @@ use crate::{
         self, BinaryOp, Expr, ExprKind, Mode, Place, Span, Stmt, StmtKind, Type, named, ungroup,
     },
     general_net, laws, mir, recurrence,
+    segmented_source::expr_ticks,
     typed_net::{self, Coefficient, Effect, Net, Node, Op, Plan, Prefix},
 };
 use sha2::{Digest, Sha256};
@@ -156,23 +157,6 @@ fn selected<'a>(
         return None;
     }
     Some((Predicate::from_op(*op)?, then_block.statements.as_slice()))
-}
-fn expr_ticks(e: &Expr) -> Option<u64> {
-    match &e.kind {
-        ExprKind::Group(e) => expr_ticks(e),
-        ExprKind::Name(_) | ExprKind::Integer(_) => Some(1),
-        ExprKind::Binary { left, right, .. }
-        | ExprKind::Index {
-            base: left,
-            index: right,
-        } => expr_ticks(left)?
-            .checked_add(expr_ticks(right)?)?
-            .checked_add(1),
-        ExprKind::Call { args, .. } => args
-            .iter()
-            .try_fold(1u64, |n, e| n.checked_add(expr_ticks(e)?)),
-        _ => None,
-    }
 }
 fn statement_ticks(s: &Stmt) -> Option<u64> {
     let n = match &s.kind {

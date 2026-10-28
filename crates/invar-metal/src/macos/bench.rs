@@ -64,10 +64,7 @@ impl MetalDevice {
         bytes: usize,
     ) -> Result<Option<f64>, Error> {
         self.admit()?;
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         if let Some(pipeline) = pipeline {
             let refs = buffers.iter().map(|buffer| &**buffer).collect::<Vec<_>>();
             self.encode(&command, pipeline, &refs, blocks, lanes)?;
@@ -261,10 +258,7 @@ impl MetalDevice {
         scan: bool,
     ) -> Result<f64, Error> {
         self.admit()?;
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         self.encode_collective(&command, ir, pipelines, buffers, scan)?;
         let buffers = buffers.all();
         let mut work = MetalWork::prepared(command.clone(), buffers, pipelines.to_vec());
@@ -419,10 +413,7 @@ impl MetalDevice {
         // using it has been submitted yet.
         unsafe { ptr::write(flag.contents().as_ptr().cast::<u32>(), 0) };
         let begun = Instant::now();
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         self.encode(&command, &pipeline, &[&flag], 1, 1)?;
         let mut work = MetalWork::prepared(command.clone(), vec![flag.clone()], vec![pipeline]);
         work.submit()?;
@@ -460,10 +451,7 @@ impl MetalDevice {
         unsafe {
             ptr::copy_nonoverlapping(host.as_ptr(), input.contents().as_ptr().cast(), bytes);
         }
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         let encoder = command
             .blitCommandEncoder()
             .ok_or_else(|| Error::Unavailable("Metal blit encoder unavailable".into()))?;

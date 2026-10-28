@@ -25,8 +25,9 @@ fn owned<'py>(py: Python<'py>, values: &[i32]) -> Bound<'py, numpy::PyArray1<i32
     array
 }
 
-fn code_and_steps(py: Python<'_>, error: &PyErr) -> (String, u64) {
-    let document: Value = serde_json::from_str(
+/// The exception's `diagnostic_json` attribute, parsed.
+fn diagnostic_document(py: Python<'_>, error: &PyErr) -> Value {
+    serde_json::from_str(
         &error
             .value(py)
             .getattr("diagnostic_json")
@@ -34,7 +35,11 @@ fn code_and_steps(py: Python<'_>, error: &PyErr) -> (String, u64) {
             .extract::<String>()
             .unwrap(),
     )
-    .unwrap();
+    .unwrap()
+}
+
+fn code_and_steps(py: Python<'_>, error: &PyErr) -> (String, u64) {
+    let document = diagnostic_document(py, error);
     let steps = error
         .value(py)
         .getattr("steps_used")
@@ -157,15 +162,7 @@ fn issue_l1_06_python_binding_artifact_call_original_trap_and_recovery() {
             .call(py, "divide", &args, Fuel(100), false)
             .unwrap_err();
         assert!(error.is_instance_of::<TrapError>(py));
-        let document: Value = serde_json::from_str(
-            &error
-                .value(py)
-                .getattr("diagnostic_json")
-                .unwrap()
-                .extract::<String>()
-                .unwrap(),
-        )
-        .unwrap();
+        let document = diagnostic_document(py, &error);
         assert_eq!(document["diagnostics"][0]["code"], "DIVISION_BY_ZERO");
         assert_eq!(document["diagnostics"][0]["path"], "original.inv");
         let expected = module
@@ -221,15 +218,7 @@ fn issue_l1_06_python_binding_exact_scalar_validation_without_callbacks() {
                 scalar_u32(py, &value).unwrap_err(),
             ] {
                 assert!(error.is_instance_of::<ValidationError>(py));
-                let document: Value = serde_json::from_str(
-                    &error
-                        .value(py)
-                        .getattr("diagnostic_json")
-                        .unwrap()
-                        .extract::<String>()
-                        .unwrap(),
-                )
-                .unwrap();
+                let document = diagnostic_document(py, &error);
                 assert_eq!(document["diagnostics"][0]["code"], "TYPE_MISMATCH");
                 assert!(jsonschema::is_valid(&schema, &document));
             }
@@ -278,15 +267,7 @@ fn issue_l1_06_python_binding_foreign_error_boundary_documents() {
                 &format!("C import failed: {external:?}"),
             );
             assert!(error.is_instance_of::<ForeignError>(py));
-            let document: Value = serde_json::from_str(
-                &error
-                    .value(py)
-                    .getattr("diagnostic_json")
-                    .unwrap()
-                    .extract::<String>()
-                    .unwrap(),
-            )
-            .unwrap();
+            let document = diagnostic_document(py, &error);
             assert_eq!(document["diagnostics"][0]["code"], expected);
             assert!(jsonschema::is_valid(&schema, &document));
             assert_eq!(document["diagnostics"][0]["suggested_fixes"], json!([]));
@@ -316,15 +297,7 @@ fn issue_l1_06_python_binding_reference_staging_limit_is_a_typed_resource_error(
             staging_limit(py),
         ] {
             assert!(error.is_instance_of::<ResourceError>(py));
-            let document: Value = serde_json::from_str(
-                &error
-                    .value(py)
-                    .getattr("diagnostic_json")
-                    .unwrap()
-                    .extract::<String>()
-                    .unwrap(),
-            )
-            .unwrap();
+            let document = diagnostic_document(py, &error);
             assert_eq!(document["diagnostics"][0]["code"], "PY_STAGING_LIMIT");
             assert!(jsonschema::is_valid(&schema, &document));
             assert_eq!(document["diagnostics"][0]["suggested_fixes"], json!([]));
@@ -345,15 +318,7 @@ fn assert_host_mapping<E: pyo3::PyTypeInfo>(
     .unwrap();
     let error = host_error(py, core, "reference.inv", b"");
     assert!(error.is_instance_of::<E>(py), "{core:?}");
-    let document: Value = serde_json::from_str(
-        &error
-            .value(py)
-            .getattr("diagnostic_json")
-            .unwrap()
-            .extract::<String>()
-            .unwrap(),
-    )
-    .unwrap();
+    let document = diagnostic_document(py, &error);
     assert_eq!(document["diagnostics"][0]["code"], expected, "{core:?}");
     assert!(jsonschema::is_valid(&schema, &document));
     assert_eq!(document["diagnostics"][0]["suggested_fixes"], json!([]));
@@ -456,15 +421,7 @@ fn issue_l1_06_python_binding_device_failures_preserve_codes_without_replay() {
         ] {
             let error = engines::execution_error(py, core_tool(code), "engines.inv", b"");
             assert!(error.is_instance_of::<EngineError>(py));
-            let document: Value = serde_json::from_str(
-                &error
-                    .value(py)
-                    .getattr("diagnostic_json")
-                    .unwrap()
-                    .extract::<String>()
-                    .unwrap(),
-            )
-            .unwrap();
+            let document = diagnostic_document(py, &error);
             assert_eq!(document["diagnostics"][0]["code"], code);
             assert!(jsonschema::is_valid(&schema, &document));
         }

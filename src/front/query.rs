@@ -21,3 +21,23 @@ impl Program {
         self.functions.iter().find(|f| f.name == name)
     }
 }
+
+impl Type {
+    /// The type as written in source (`Array<i32>`, `Bool`); a named type is its stored name.
+    pub fn source_name(&self) -> &str {
+        match self {
+            Type::I32 => "i32",
+            Type::U32 => "u32",
+            Type::F32 => "f32",
+            Type::F64 => "f64",
+            Type::Bool => "Bool",
+            Type::Unit => "Unit",
+            Type::ArrayI32 => "Array<i32>",
+            Type::ArrayU32 => "Array<u32>",
+            Type::ArrayF32 => "Array<f32>",
+            Type::ArrayF64 => "Array<f64>",
+            Type::ArrayBool => "Array<Bool>",
+            Type::Named(name) => name,
+        }
+    }
+}

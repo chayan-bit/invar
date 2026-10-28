@@ -1,3 +1,5 @@
+#[path = "../../test-support/split_mix.rs"]
+mod split_mix;
 #[path = "../support/normal_form.rs"]
 mod support;
 

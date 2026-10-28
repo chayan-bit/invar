@@ -26,23 +26,6 @@ pub(super) fn validate_template(function: &Function) -> Result<(), FrontError> {
     Ok(())
 }
 
-fn type_key(ty: &Type) -> String {
-    match ty {
-        Type::I32 => "i32".into(),
-        Type::U32 => "u32".into(),
-        Type::F32 => "f32".into(),
-        Type::F64 => "f64".into(),
-        Type::Bool => "Bool".into(),
-        Type::Unit => "Unit".into(),
-        Type::ArrayI32 => "Array<i32>".into(),
-        Type::ArrayU32 => "Array<u32>".into(),
-        Type::ArrayF32 => "Array<f32>".into(),
-        Type::ArrayF64 => "Array<f64>".into(),
-        Type::ArrayBool => "Array<Bool>".into(),
-        Type::Named(name) => name.clone(),
-    }
-}
-
 fn value_type(ty: &Type) -> bool {
     match ty {
         Type::I32
@@ -149,14 +132,15 @@ fn replace_explicit_types(name: &mut String, arguments: &HashMap<String, Type>) 
         .split('|')
         .map(|part| {
             if let Some(ty) = arguments.get(part) {
-                type_key(ty)
+                ty.source_name().to_owned()
             } else if let Some(element) = part
                 .strip_prefix("Array<")
                 .and_then(|tail| tail.strip_suffix('>'))
             {
-                arguments
-                    .get(element)
-                    .map_or_else(|| part.to_owned(), |ty| format!("Array<{}>", type_key(ty)))
+                arguments.get(element).map_or_else(
+                    || part.to_owned(),
+                    |ty| format!("Array<{}>", ty.source_name()),
+                )
             } else {
                 part.to_owned()
             }
@@ -385,7 +369,11 @@ impl FunctionChecker<'_> {
             .collect::<Vec<_>>();
         let instance_name = format!(
             "{base}$<{}>",
-            types.iter().map(type_key).collect::<Vec<_>>().join("|")
+            types
+                .iter()
+                .map(Type::source_name)
+                .collect::<Vec<_>>()
+                .join("|")
         );
         let instance = instantiate(&template, &mapping, instance_name.clone())?;
         let instance_result = instance.result.clone();

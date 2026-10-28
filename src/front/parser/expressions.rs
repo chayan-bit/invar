@@ -285,7 +285,7 @@ impl Parser {
                             let TokenKind::Integer(value) = token.kind else { unreachable!() };
                             Ok(value)
                         } else {
-                            Ok(Self::type_name(&parser.nested(|parser| parser.ty())?))
+                            Ok(parser.nested(|parser| parser.ty())?.source_name().to_owned())
                         }
                     })?;
                     self.expect_symbol(">")?;
@@ -303,20 +303,7 @@ impl Parser {
                     name.push_str("$<");
                     for (index, ty) in types.iter().enumerate() {
                         if index != 0 { name.push('|'); }
-                        name.push_str(&match ty {
-                            Type::I32 => "i32".to_owned(),
-                            Type::U32 => "u32".to_owned(),
-                            Type::F32 => "f32".to_owned(),
-                            Type::F64 => "f64".to_owned(),
-                            Type::Bool => "Bool".to_owned(),
-                            Type::Unit => "Unit".to_owned(),
-                            Type::ArrayI32 => "Array<i32>".to_owned(),
-                            Type::ArrayU32 => "Array<u32>".to_owned(),
-                            Type::ArrayF32 => "Array<f32>".to_owned(),
-                            Type::ArrayF64 => "Array<f64>".to_owned(),
-                            Type::ArrayBool => "Array<Bool>".to_owned(),
-                            Type::Named(name) => name.clone(),
-                        });
+                        name.push_str(ty.source_name());
                     }
                     name.push('>');
                 }

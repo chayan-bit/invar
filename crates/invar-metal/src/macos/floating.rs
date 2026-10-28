@@ -478,10 +478,7 @@ impl MetalDevice {
                 );
             }
         }
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         let refs = buffers.each_ref().map(|b| &**b);
         self.encode(&command, &pipeline, &refs, launch.0, launch.1)?;
         let mut work = MetalWork::prepared(command.clone(), buffers.to_vec(), vec![pipeline]);

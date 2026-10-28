@@ -6,6 +6,7 @@ use crate::{
     check::CheckedProgram,
     front::{self, BinaryOp, Expr, ExprKind, Mode, Place, Span, StmtKind, Type, named, ungroup},
     general_net, mir,
+    tensor::expr_ticks,
 };
 use invar_device::{Capabilities, Provenance, floating::Buffer, transpose};
 pub mod host;
@@ -45,20 +46,6 @@ fn product(e: &Expr, a: &str, b: &str) -> bool {
 }
 fn flat(e: &Expr, row: &str, stride: &str, col: &str) -> bool {
     matches!(&ungroup(e).kind,ExprKind::Binary {left,op:BinaryOp::Add,right,..} if product(left,row,stride)&&named(right,col))
-}
-fn expr_ticks(e: &Expr) -> Option<u64> {
-    match &e.kind {
-        ExprKind::Group(e) => expr_ticks(e),
-        ExprKind::Name(_) | ExprKind::Integer(_) | ExprKind::Float(_) => Some(1),
-        ExprKind::Binary { left, right, .. }
-        | ExprKind::Index {
-            base: left,
-            index: right,
-        } => expr_ticks(left)?
-            .checked_add(expr_ticks(right)?)?
-            .checked_add(1),
-        _ => None,
-    }
 }
 
 impl Contract {

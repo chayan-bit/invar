@@ -8,23 +8,6 @@ pub(super) fn qualified(module: Option<&str>, name: &str) -> String {
     }
 }
 
-pub(super) fn type_name(ty: &Type) -> String {
-    match ty {
-        Type::I32 => "i32".into(),
-        Type::U32 => "u32".into(),
-        Type::F32 => "f32".into(),
-        Type::F64 => "f64".into(),
-        Type::Bool => "Bool".into(),
-        Type::Unit => "Unit".into(),
-        Type::ArrayI32 => "Array<i32>".into(),
-        Type::ArrayU32 => "Array<u32>".into(),
-        Type::ArrayF32 => "Array<f32>".into(),
-        Type::ArrayF64 => "Array<f64>".into(),
-        Type::ArrayBool => "Array<Bool>".into(),
-        Type::Named(name) => name.clone(),
-    }
-}
-
 pub(super) fn decimal(value: &str, span: Span) -> Result<String, FrontError> {
     let negative = value.starts_with('-');
     let raw = value.strip_prefix('-').unwrap_or(value);

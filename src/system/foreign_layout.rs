@@ -42,12 +42,12 @@ pub(super) fn foreign_config_layout(name: &str) -> Option<Value> {
 }
 
 pub(super) fn foreign_port_layout(ty: &Type, layout: &str) -> bool {
-    let name = type_name(ty);
-    if crate::robotics::planner::port_layout(&name).as_deref() == Some(layout) {
+    let name = ty.source_name();
+    if crate::robotics::planner::port_layout(name).as_deref() == Some(layout) {
         return true;
     }
     matches!(
-        (name.as_str(), layout),
+        (name, layout),
         ("std::robotics::JointPositions<f64,2>", "inv_joint2_f64")
             | ("std::robotics::JointPositions<f64,6>", "inv_joint6_f64")
             | ("std::robotics::JointPositions<f64,7>", "inv_joint7_f64")
@@ -102,7 +102,10 @@ pub(super) fn checked_foreign_property(
         let tolerance = decimal(raw_tolerance, span)
             .map_err(|_| error("S1400", "invalid property tolerance", span))?;
         if output.direction == "out"
-            && type_name(&output.ty).starts_with("std::robotics::Pose<f64,")
+            && output
+                .ty
+                .source_name()
+                .starts_with("std::robotics::Pose<f64,")
             && !tolerance.starts_with('-')
         {
             return Ok(());
