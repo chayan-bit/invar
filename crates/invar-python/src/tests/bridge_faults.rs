@@ -474,15 +474,7 @@ fn issue_ai_01_machine_diagnostics_python_invalid_checked_signature_fault_is_typ
                 .extract()
                 .unwrap();
             assert_eq!(code, "PY_ABI_TYPE_UNAVAILABLE");
-            let document: Value = serde_json::from_str(
-                &error
-                    .value(py)
-                    .getattr("diagnostic_json")
-                    .unwrap()
-                    .extract::<String>()
-                    .unwrap(),
-            )
-            .unwrap();
+            let document = diagnostic_document(py, &error);
             let schema: Value = serde_json::from_str(include_str!(
                 "../../../../schema/invar-diagnostics-v3.schema.json"
             ))
