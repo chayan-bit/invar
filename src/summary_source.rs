@@ -16,7 +16,9 @@ use crate::{
     front::{
         self, BinaryOp, Expr, ExprKind, Mode, Place, Span, Stmt, StmtKind, Type, named, ungroup,
     },
-    general_net, mir, typed_net,
+    general_net, mir,
+    segmented_source::expr_ticks,
+    typed_net,
 };
 use std::{mem::size_of, sync::Arc};
 
@@ -190,23 +192,6 @@ fn allocation(s: &Stmt, count: &str, width: Option<u32>) -> Option<String> {
 fn publish(s: &Stmt, output: &str, iter: &str, width: Option<(u32, u32)>, state: &str) -> bool {
     matches!(&s.kind,StmtKind::Assign {place:Place::Index {name,index,..},value}
         if name==output && named(value,state) && match width {None=>named(index,iter),Some((d,row))=>flat(index,iter,d,row)})
-}
-fn expr_ticks(e: &Expr) -> Option<u64> {
-    match &e.kind {
-        ExprKind::Group(e) => expr_ticks(e),
-        ExprKind::Name(_) | ExprKind::Integer(_) => Some(1),
-        ExprKind::Binary { left, right, .. }
-        | ExprKind::Index {
-            base: left,
-            index: right,
-        } => expr_ticks(left)?
-            .checked_add(expr_ticks(right)?)?
-            .checked_add(1),
-        ExprKind::Call { args, .. } => args
-            .iter()
-            .try_fold(1u64, |n, e| n.checked_add(expr_ticks(e)?)),
-        _ => None,
-    }
 }
 fn stmt_ticks(s: &Stmt) -> Option<u64> {
     match &s.kind {
