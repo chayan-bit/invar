@@ -72,7 +72,7 @@ pub(super) fn component<'a>(
                 }
                 let rate = positive(rate, Some("Hz"))?;
                 let latency = latency.as_ref().map(duration).transpose()?;
-                port_docs.push(json!({"name":name,"direction":direction,"type":type_name(ty),"rate":rate,"latency":latency,"optional":optional,"layout":layout,"bus":bus}));
+                port_docs.push(json!({"name":name,"direction":direction,"type":ty.source_name(),"rate":rate,"latency":latency,"optional":optional,"layout":layout,"bus":bus}));
             }
             SystemClause::Param {
                 name,
@@ -81,7 +81,7 @@ pub(super) fn component<'a>(
                 range,
                 span,
             } => {
-                let expected = type_name(ty);
+                let expected = ty.source_name();
                 let Some(unit) = expected
                     .strip_prefix("Quantity<dec,")
                     .and_then(|s| s.strip_suffix('>'))
@@ -138,8 +138,8 @@ pub(super) fn component<'a>(
                 }
             }
             SystemClause::IdentityParam { name, ty, span } => {
-                let expected = type_name(ty);
-                let Some(("Transform", args)) = crate::robotics::generic_parts(&expected) else {
+                let expected = ty.source_name();
+                let Some(("Transform", args)) = crate::robotics::generic_parts(expected) else {
                     return Err(error(
                         "S1203",
                         "identity constant requires Transform<Child,Parent>",
