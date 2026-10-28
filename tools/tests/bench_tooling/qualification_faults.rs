@@ -1,6 +1,6 @@
 //! Fault and boundary controls for the M5-02 qualification harness (`qualification/`). The harness is
 //! compiled into this binary (`main.rs`) to inject its faults. The diagnostic
-//! registry (`tests/issue_ai_01_machine_diagnostics`) cites these tests by name.
+//! registry (`tests/diagnostics/issue_ai_01_machine_diagnostics.rs`) cites these tests by name.
 #![forbid(unsafe_code)]
 use crate::qualification;
 use invar::front::Span;

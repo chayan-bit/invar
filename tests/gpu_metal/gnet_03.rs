@@ -11,7 +11,7 @@ use invar::general_net::{compiled::Target, device_host::metal::Metal};
 
 /// The generated MSL is program specific, so there is no compiled-ahead
 /// library to load: compile it at run time, as forced Metal does with
-/// `INVAR_METAL_RUNTIME_SOURCE=1`. `issue_metal_aot_gpu` covers the
+/// `INVAR_METAL_RUNTIME_SOURCE=1`. `gpu_metal::metal_aot` covers the
 /// compiled-ahead route (`invar build --target metal`, then `gnet-device --artifact`).
 fn metal() -> Metal {
     Metal::open_runtime_source().expect("Metal device")

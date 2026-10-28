@@ -78,7 +78,7 @@ pub enum Layout {
 
 /// Element type of a buffer, as ENG-03 stores arrays. `F16`, `Bf16`, `I8` and
 /// `U8` are storage only: no device family computes in them; loads widen to
-/// f32, i32 or u32 and stores round or trap as in `docs/numeric-v2.md`.
+/// f32, i32 or u32 and stores round or trap as in `docs/numeric.md`.
 /// Host-side conversions stay in `src/numeric_contract/storage.rs`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ElementType {

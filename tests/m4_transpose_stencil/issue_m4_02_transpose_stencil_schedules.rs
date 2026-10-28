@@ -1,7 +1,7 @@
 //! M4-02 contract entry for the transpose half of
 //! `cargo test --locked issue_m4_02_transpose_stencil_schedules`.
 //!
-//! The stencil half of the selection is `tests/issue_m4_02_stencil_source.rs`
+//! The stencil half of the selection is `tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs`
 //! (source binding/mutations, ordinary source and one/several ping-pong slices
 //! under `constant_zero` and `clamp`, failure prefixes, emitted CPU bits and
 //! guards, FP32 goldens, special-value bits, the CUDA-text CPU barrier model).
