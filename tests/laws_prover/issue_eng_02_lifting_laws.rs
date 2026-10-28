@@ -21,17 +21,9 @@ use invar::{
 };
 use std::{cell::RefCell, rc::Rc};
 
-/// SplitMix64: a deterministic generator (no new dependency).
-struct Rng(u64);
+use crate::split_mix::Rng;
 
 impl Rng {
-    fn next(&mut self) -> u64 {
-        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        let mut z = self.0;
-        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-        z ^ (z >> 31)
-    }
     fn below(&mut self, n: u64) -> u64 {
         self.next() % n.max(1)
     }
