@@ -58,23 +58,6 @@ pub(super) fn display_name(name: &str) -> String {
     name.replace("$<", "<").replace('|', ", ")
 }
 
-fn type_name(ty: &Type) -> String {
-    match ty {
-        Type::I32 => "i32".into(),
-        Type::U32 => "u32".into(),
-        Type::F32 => "f32".into(),
-        Type::F64 => "f64".into(),
-        Type::Bool => "Bool".into(),
-        Type::Unit => "Unit".into(),
-        Type::ArrayI32 => "Array<i32>".into(),
-        Type::ArrayU32 => "Array<u32>".into(),
-        Type::ArrayF32 => "Array<f32>".into(),
-        Type::ArrayF64 => "Array<f64>".into(),
-        Type::ArrayBool => "Array<Bool>".into(),
-        Type::Named(name) => name.clone(),
-    }
-}
-
 impl<'a> Module<'a> {
     pub(super) fn new(source: &Source<'a>) -> Result<Self, String> {
         // Scalars occupy the low bytes of their i64 slot (see `variable`).
@@ -155,7 +138,7 @@ impl<'a> Module<'a> {
     }
 
     fn ty(&mut self, ty: &Type) -> Option<usize> {
-        let name = type_name(ty);
+        let name = ty.source_name().to_owned();
         if let Some(id) = self.types.get(&name) {
             return Some(*id);
         }

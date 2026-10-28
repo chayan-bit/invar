@@ -157,7 +157,7 @@ impl Parser {
                         let TokenKind::Integer(value) = token.kind else { unreachable!() };
                         Ok(value)
                     } else {
-                        Ok(Self::type_name(&parser.nested(|parser| parser.ty())?))
+                        Ok(parser.nested(|parser| parser.ty())?.source_name().to_owned())
                     }
                 })?;
                 self.expect_symbol(">")?;
@@ -168,23 +168,6 @@ impl Parser {
             return Ok(Type::Named(name));
         }
         Err(self.expected("type"))
-    }
-
-    fn type_name(ty: &Type) -> String {
-        match ty {
-            Type::I32 => "i32".into(),
-            Type::U32 => "u32".into(),
-            Type::F32 => "f32".into(),
-            Type::F64 => "f64".into(),
-            Type::Bool => "Bool".into(),
-            Type::Unit => "Unit".into(),
-            Type::ArrayI32 => "Array<i32>".into(),
-            Type::ArrayU32 => "Array<u32>".into(),
-            Type::ArrayF32 => "Array<f32>".into(),
-            Type::ArrayF64 => "Array<f64>".into(),
-            Type::ArrayBool => "Array<Bool>".into(),
-            Type::Named(name) => name.clone(),
-        }
     }
 
     fn generic_record_initializer_follows(&self) -> bool {

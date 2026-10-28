@@ -503,7 +503,7 @@ impl CheckedModule {
             };
             wire.push(arg);
         }
-        let expected = match type_name(&function.result) {
+        let expected = match function.result.source_name() {
             "Result<i32,ForeignError>" => invar_foreign::I32,
             "Result<u32,ForeignError>" => invar_foreign::U32,
             "Result<Bytes,ForeignError>" => invar_foreign::BYTES,

@@ -191,23 +191,6 @@ fn invalid(py: Python<'_>, failure: Failure) -> PyErr {
     )
 }
 
-fn type_name(ty: &Type) -> &str {
-    match ty {
-        Type::I32 => "i32",
-        Type::U32 => "u32",
-        Type::F32 => "f32",
-        Type::F64 => "f64",
-        Type::Bool => "Bool",
-        Type::Unit => "Unit",
-        Type::ArrayI32 => "Array<i32>",
-        Type::ArrayU32 => "Array<u32>",
-        Type::ArrayF32 => "Array<f32>",
-        Type::ArrayF64 => "Array<f64>",
-        Type::ArrayBool => "Array<Bool>",
-        Type::Named(name) => name,
-    }
-}
-
 /// Whether `call_foreign` can invoke a C import with these parameters: its argument validation refuses `take`
 /// (PY_TAKE_UNAVAILABLE) and every type but exact i32, u32, Bytes and String (PY_ABI_TYPE_UNAVAILABLE).
 fn foreign_callable(params: &[invar::front::Param]) -> bool {
@@ -223,7 +206,7 @@ fn foreign_callable(params: &[invar::front::Param]) -> bool {
 
 fn parameters(params: &[invar::front::Param]) -> Value {
     json!(params.iter().map(|param| json!({
-        "name": param.name, "type": type_name(&param.ty),
+        "name": param.name, "type": param.ty.source_name(),
         "mode": match param.mode { None => "value", Some(Mode::Read) => "read", Some(Mode::Mut) => "mut", Some(Mode::Take) => "take" }
     })).collect::<Vec<_>>())
 }
@@ -416,8 +399,8 @@ fn compile_source(
         exception(py, class, error.to_diagnostics_json(&path, &source))
     })?;
     let mut signatures = json!({
-        "source_functions": program.functions.iter().map(|function| json!({"name":function.name,"parameters":parameters(&function.params),"result":type_name(&function.result),"exported":false,"callable":false})).collect::<Vec<_>>(),
-        "c_imports": program.foreign_functions.iter().map(|function| json!({"name":function.name,"parameters":parameters(&function.params),"result":type_name(&function.result),"exported":false,"callable":foreign_callable(&function.params)})).collect::<Vec<_>>()
+        "source_functions": program.functions.iter().map(|function| json!({"name":function.name,"parameters":parameters(&function.params),"result":function.result.source_name(),"exported":false,"callable":false})).collect::<Vec<_>>(),
+        "c_imports": program.foreign_functions.iter().map(|function| json!({"name":function.name,"parameters":parameters(&function.params),"result":function.result.source_name(),"exported":false,"callable":foreign_callable(&function.params)})).collect::<Vec<_>>()
     });
     let checked = invar::check::check(program, false)
         .map_err(|error| exception(py, Class::Check, error.to_diagnostics_json(&path, &source)))?;
