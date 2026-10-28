@@ -1,38 +1,36 @@
 # Tracked .rs files over 800 lines, with the line count each may not exceed (scripts/check-file-size).
 # One `<lines> <path>` per line, sorted by path. Lower an entry in the PR that splits the file; drop it when the
 # file is back under 800 lines. Never raise one: split the file instead.
-1211 bench/general-net-v01/corpus_children.rs
+1192 bench/general-net-v01/corpus_children.rs
 959 bench/general-net-v01/gnet05/generate.rs
 963 crates/invar-cuda/src/cuda.rs
 993 crates/invar-device/src/segmented.rs
-1720 src/check.rs
+1712 src/check.rs
 992 src/component_test/planner.rs
-801 src/eval/engine.rs
 824 src/eval/host_read.rs
 817 src/front.rs
-886 src/general_net/compiled/mod.rs
+874 src/general_net/compiled/mod.rs
 1179 src/general_net/normal_form/certificate/loops.rs
 830 src/general_net/normal_form/exec/lanes.rs
 1792 src/general_net/normal_form/loops.rs
 1235 src/general_net/numeric_owned_resume_host.rs
-1015 src/general_net/oracle.rs
+1011 src/general_net/oracle.rs
 868 src/general_net/oracle_arrays.rs
-967 src/general_net/owned_numeric_task.rs
 1006 src/general_net/path_sum/emit.rs
 810 src/general_net/path_sum/range.rs
-1247 src/histogram_source/bounded.rs
+913 src/histogram_source/bounded.rs
 1027 src/main.rs
 1033 src/mir_eval/bulk.rs
 818 src/mir_eval/region/tests.rs
-901 src/placement/calibration.rs
-863 src/summary_source.rs
+897 src/placement/calibration.rs
+839 src/summary_source.rs
 1159 src/system/ros2.rs
 940 src/system/urdf.rs
 1171 tests/issue_ai_02_spec_examples.rs
 849 tests/issue_m4_06_bounded_schedule_tuning.rs
 806 tests/m4_summary/issue_m4_07_summary_source.rs
-874 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
-850 tests/robotics/issue_s1_06_sequencer_binding.rs
+873 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
+831 tests/robotics/issue_s1_06_sequencer_binding.rs
 831 tests/support/gnet_device.rs
 930 tests/v02/v02_placement.rs
 952 tools/bench/acceptance.rs
