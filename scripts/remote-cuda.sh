@@ -11,7 +11,7 @@
 # to run beside another tenant's GPU job (correctness only, timings invalid),
 # REMOTE_CUDA_NO_SKIP=1 to run the known gaps below, REMOTE_CUDA_TESTS to replace
 # the target list, REMOTE_CUDA_EXTRA_SKIPS (comma-separated) to add skips.
-# Exit: 0 pass, 1 test failures, 2 build failure, 3 GPU or runner busy, 4 timeout,
+# Exit: 0 pass, 1 test failures (or no test ran, or a filter matched none), 2 build failure, 3 GPU or runner busy, 4 timeout,
 # 5 ssh dropped mid-run (the run finished remotely; read its log for the result).
 set -euo pipefail
 ref=${1:?usage: scripts/remote-cuda.sh <git-ref> [test-name-filters]}

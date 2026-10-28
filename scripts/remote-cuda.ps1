@@ -123,6 +123,11 @@ try {
     Say "gpu after: $($g.Name), driver $($g.Driver), util $($g.Util)%, free $($g.Free) MiB"
     if ($timedOut) { Say "TIMEOUT after $TimeoutMin min; process tree killed"; exit 4 }
     if ($rows.Count -eq 0) { $text | Select-Object -Last 40 | Write-Output; Say 'BUILD FAILED'; exit 2 }
+    # A run that executed nothing, or a filter that matched no executed test, proves nothing.
+    $ran = @($text | Where-Object { $_ -match '^test (\S+) \.\.\. (ok|FAILED)$' } | ForEach-Object { ($_ -split ' ')[1] })
+    if ($ran.Count -eq 0) { Say 'NO TESTS RAN: check the filters against this ref'; exit 1 }
+    $unmatched = @($Filter.Split(' ') | Where-Object { $_ } | Where-Object { $f = $_; -not ($ran | Where-Object { $_.Contains($f) }) })
+    if ($unmatched) { Say "FILTER MATCHED NO TEST: $($unmatched -join ', ')"; exit 1 }
     # A target without a result row also fails the run.
     if ($p.ExitCode -ne 0 -or (& $sum Failed) -gt 0 -or $rows.Count -lt $expected) {
         if ($rows.Count -lt $expected) { Say 'some targets did not run (build error?); see the log' }
