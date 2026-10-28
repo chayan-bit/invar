@@ -69,6 +69,24 @@ const MAX_QUARANTINE: usize = 8;
 type BufferRef = Retained<ProtocolObject<dyn MTLBuffer>>;
 type PipelineRef = Retained<ProtocolObject<dyn MTLComputePipelineState>>;
 
+/// A new command buffer on `queue`.
+fn command_buffer(
+    queue: &ProtocolObject<dyn MTLCommandQueue>,
+) -> Result<Retained<ProtocolObject<dyn MTLCommandBuffer>>, Error> {
+    queue
+        .commandBuffer()
+        .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))
+}
+
+/// A new compute encoder on `command`.
+fn compute_encoder(
+    command: &ProtocolObject<dyn MTLCommandBuffer>,
+) -> Result<Retained<ProtocolObject<dyn MTLComputeCommandEncoder>>, Error> {
+    command
+        .computeCommandEncoder()
+        .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))
+}
+
 struct MetalWork {
     state: WorkState,
     command: Retained<ProtocolObject<dyn MTLCommandBuffer>>,
@@ -242,9 +260,7 @@ impl MetalDevice {
                 "Metal pipeline threadgroup limit is below verified geometry".into(),
             ));
         }
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let encoder = compute_encoder(command)?;
         encoder.setComputePipelineState(pipeline);
         for (index, buffer) in buffers.iter().enumerate() {
             // SAFETY: verified emitter signatures bind these buffers to

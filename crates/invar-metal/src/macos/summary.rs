@@ -241,10 +241,7 @@ impl MetalDevice {
         pipelines: Vec<PipelineRef>,
         encode: impl FnOnce(&Self, &ProtocolObject<dyn MTLCommandBuffer>) -> Result<(), Error>,
     ) -> Result<f64, Error> {
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         encode(self, &command)?;
         let mut work = MetalWork::prepared(command.clone(), buffers, pipelines);
         work.submit()?;

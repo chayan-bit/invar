@@ -100,10 +100,7 @@ impl MetalDevice {
         // scratch start zeroed (Metal zero-fills new buffers); every read word
         // is written by the kernels first.
         let compact = matches!(plan.ir().family, seg::Family::Compact { .. });
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         for (launch, pipeline) in launches.iter().zip(&pipelines) {
             let bound = launch
                 .buffers
