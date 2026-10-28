@@ -7,18 +7,7 @@ use invar::{check, eval, front, mir, mir_eval, schedule};
 
 const FUEL: u64 = 50_000_000;
 
-/// SplitMix64: a deterministic generator (no new dependency).
-struct Rng(u64);
-
-impl Rng {
-    fn next(&mut self) -> u64 {
-        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        let mut z = self.0;
-        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-        z ^ (z >> 31)
-    }
-}
+use crate::split_mix::Rng;
 
 /// A source expression with exactly the value `x` (NaN as the class).
 fn literal(x: F) -> String {

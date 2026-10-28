@@ -97,3 +97,8 @@ It holds the call-by-value term evaluator and the demand-ordered observation of 
 `status` returns the `compiled::Status` code and trap span, `result` the scalar result word, and `event`/`event_i64` the seven words of one trace event.
 It is included by path into the GNET host, CPU-model and provenance test binaries and the bench CPU corpus, each of which keeps its own header layout and comparisons.
 The mapping panics on any result no compiled ABI encodes, so an unexpected oracle outcome still fails the test.
+
+## SplitMix64
+
+`split_mix.rs` holds the SplitMix64 `Rng::next` that the law, normal-form and numeric-tier test binaries draw their deterministic cases from.
+Each including module adds its own draws (`below`, `range`, `i32`) in a local `impl Rng`; `issue_eng_03_numeric_tiers` keeps its `below` without the zero guard on purpose.

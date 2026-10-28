@@ -7,6 +7,8 @@ mod contraction_source;
 #[allow(dead_code)]
 #[path = "../../src/frontier_source.rs"]
 mod frontier_source;
+#[path = "../../test-support/split_mix.rs"]
+mod split_mix;
 #[path = "../support/task_model.rs"]
 mod task_model;
 
