@@ -193,7 +193,7 @@ pub fn corpus<B: Backend>(backend: &mut B, target: Target) {
 /// f32 `sqrt` is the correctly rounded `invar-math-cr-v1` word on every
 /// target (signed zeros, subnormals, both NaN classes, infinities and a
 /// stratified sweep of normals), and `sin` and `cos` are refused: no device
-/// lowers their cr-v1 kernels yet (#48).
+/// lowers their cr-v1 kernels yet (#163).
 fn cr_v1<B: Backend>(backend: &mut B, target: Target) {
     use invar::math::{MathFn, eval_f32};
     let xs: Vec<u32> = (0u32..256)
