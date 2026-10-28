@@ -509,7 +509,6 @@ pub(super) mod cuda {
     ) -> Option<crate::plan::DeviceCost> {
         reached::cost(c, l, caps, model)
     }
-    #[allow(clippy::too_many_arguments)] // Registry signature includes the CUDA compiler.
     pub(in crate::schedule::families) fn step(
         source: &[u8],
         candidate: &Candidate,

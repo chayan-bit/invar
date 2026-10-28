@@ -195,7 +195,6 @@ impl Cpu {
                     _ => unreachable!(),
                 }
             }
-            #[allow(unreachable_patterns)]
             _ => panic!("unsupported decode"),
         }
     }

@@ -249,7 +249,6 @@ fn scalar(ty: &Type) -> bool {
 }
 
 impl<'a> Program<'a> {
-    #[allow(clippy::too_many_arguments)] // Private builder binds independent immutable profiles.
     fn new(
         mir: &'a mir::Program,
         entry: &str,
@@ -531,7 +530,6 @@ pub fn emit_resumable(
 /// Compiled CPU child speculation over ABI3 continuations. Private scratch
 /// never consumes serial-path storage; logical publication stays source ordered.
 /// This initial backend does not dispatch CUDA/Metal speculation.
-#[allow(clippy::too_many_arguments)]
 pub fn emit_speculative(
     net: &Net,
     proof: &Proof,
@@ -558,7 +556,6 @@ pub fn emit_speculative(
 
 /// One fixed 32-thread group: root on thread 0, up to 8 child lanes (`SpeculationLimits::slots`) on threads 1..=8, source-ordered commit.
 /// Host dispatch must validate worksets and fence every epoch before publication.
-#[allow(clippy::too_many_arguments)]
 pub fn emit_device_speculative(
     net: &Net,
     proof: &Proof,
