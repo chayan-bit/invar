@@ -71,6 +71,17 @@ The workflow is [ci.yml](../.github/workflows/ci.yml).
 CUDA and Metal suites are not run in CI.
 Run them locally on a CUDA-capable Linux host or an Apple Silicon Mac when a change touches a device path, and record the hardware and result in the pull request.
 
+`just test-gpu-cuda-remote <ref> [filters]` (`scripts/remote-cuda.sh`) runs a ref's CUDA suites on a remote Windows CUDA host over ssh.
+It ships `git archive <ref>` to the host, builds with the per-user Rust `x86_64-pc-windows-gnullvm` toolchain linked by a per-user llvm-mingw, and runs the lib tests plus every test binary that names the `cuda` feature or `CudaDevice`, with `--include-ignored`.
+Set `REMOTE_CUDA_HOST` to the host's ssh alias; the script names no host.
+On the host, everything lives under `%USERPROFILE%\<REMOTE_CUDA_DIR>` (default `invar-remote-cuda`): `nvrtc\` holds the NVRTC DLLs, and the cargo home, target directory, sources, run logs and the runner lock sit beside it.
+The pinned llvm-mingw lives under `%USERPROFILE%\toolchains\` (`REMOTE_CUDA_MINGW` overrides the path).
+One run holds the lock at a time, and a run waits for three quiet GPU samples (at most `REMOTE_CUDA_MAX_UTIL` percent busy and `REMOTE_CUDA_MIN_FREE_MIB` free) before it starts; it exits 3 when the GPU stays busy, and never stops another tenant's work.
+`REMOTE_CUDA_SHARED=1` runs beside another tenant when memory allows; such runs check correctness only and their timings are not valid.
+Exit codes: 0 pass, 1 test failures, 2 build failure, 3 busy, 4 timeout, 5 ssh dropped (the run finished remotely; read the log).
+The full log lands in `target/remote-cuda/<run>.log`.
+The skip list in the script names Windows-only gaps, none of them a CUDA result; `REMOTE_CUDA_NO_SKIP=1` runs them, `REMOTE_CUDA_EXTRA_SKIPS` adds skips and `REMOTE_CUDA_TESTS` replaces the target list.
+
 ## Later implementation and hardware acceptance
 
 After M0, use each GitHub issue's acceptance contract. List filtered tests and require a nonzero relevant count before running them in Debug/Release. Default CPU CI and real CUDA qualification are distinct: skipped, mock-only or unavailable-device checks cannot close a hardware issue. [Performance acceptance](performance-acceptance.md) defines independent baselines, numerical policy and the frozen per-family targets; no performance claim follows from this specification or the standalone recurrence probe.

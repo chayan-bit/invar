@@ -20,6 +20,10 @@ test:
 test-gpu-cuda:
     cargo test --locked -p invar -p invar-tools --features cuda -- --include-ignored
 
+# CUDA suites of a git ref on a remote Windows CUDA host; see docs/validation.md.
+test-gpu-cuda-remote ref *filter:
+    scripts/remote-cuda.sh {{ref}} "{{filter}}"
+
 # Apple GPU suites; needs an Apple Silicon Mac with no other heavy work running.
 test-metal:
     cargo test --locked -p invar -p invar-tools --features metal -- --include-ignored
