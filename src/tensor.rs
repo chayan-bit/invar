@@ -189,7 +189,7 @@ fn counted<'a>(stmt: &'a Stmt, upper: &str) -> Option<(&'a str, &'a front::Block
     };
     (zero_index(lower) && named(bound, upper)).then_some((name.as_str(), body))
 }
-fn expr_ticks(expr: &Expr) -> Option<u64> {
+pub(crate) fn expr_ticks(expr: &Expr) -> Option<u64> {
     match &expr.kind {
         ExprKind::Group(inner) => expr_ticks(inner),
         ExprKind::Name(_) | ExprKind::Integer(_) | ExprKind::Float(_) => Some(1),
