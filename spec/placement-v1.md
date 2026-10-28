@@ -70,8 +70,8 @@ Under C4, every row and decision receipt records `numeric_contract_version`, and
 matching requires that version as well as the numeric domain. This integer-only
 probe reuses the existing integer explain policy ID `wrapping-u32-v1`; it does
 not measure floating math or claim the
-unimplemented `invar-math-cr-v1` operations. Future float rows must carry their
-owning lane's actual version, including C4's default or explicit legacy contract.
+`invar-math-cr-v1` operations. Future float rows must carry their
+owning lane's actual version.
 Region rows take precedence. Selection stays within the recorded size interval.
 The scalar work unit of the current probe is one wrapping-add-one map element.
 Its data cannot price other maps, reductions, scans or new intrinsics.

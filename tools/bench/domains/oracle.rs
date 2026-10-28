@@ -3,7 +3,7 @@
 //! reassociation); no Invar evaluator or engine is involved. The shared
 //! pieces are the library functions the language contract defines: `exp` is
 //! the correctly rounded `invar-math-cr-v1` result (one ulp of `f64` libm,
-//! checked in `tests/bench_tooling/issue_eng_10_domain_suites.rs`), and so are `sin` and
+//! checked in `tools/tests/bench_tooling/issue_eng_10_domain_suites.rs`), and so are `sin` and
 //! `cos`.
 use invar::{
     math::{self, MathFn},

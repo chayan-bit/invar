@@ -457,7 +457,7 @@ fn v02_observe(engine: ExportEngine) -> (Vec<u64>, Vec<bool>, Vec<bool>, Vec<u64
         })
     ));
     (
-        // Arithmetic NaN payloads are unobservable (docs/numeric-v1.md); only copies keep them.
+        // Arithmetic NaN payloads are unobservable (docs/numeric.md); only copies keep them.
         halved
             .iter()
             .map(|x| {

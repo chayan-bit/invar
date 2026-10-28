@@ -46,9 +46,11 @@ Sweep of compiled/process test deadlines:
   generated program, capability/rejection probe, fair worklist and child fence.
   The fence observer allows three extra seconds for the child watchdog's
   two-second TERM/KILL grace and reaping.
-- `tests/issue_gnet_{04_device,05_provenance_owned,09_provenance,10_f32_arrays,11_numeric_owned_state}.rs`:
+- `tests/gnet_device_model/issue_gnet_04_device.rs`, `tests/gnet_provenance/issue_gnet_05_provenance_owned.rs`,
+  `tests/gnet_numeric_host/issue_gnet_{10_f32_arrays,11_numeric_owned_state}.rs`:
   compiler/model/run watchdogs, including the asynchronous group child.
-- `tests/issue_gnet_{12_cuda_owned_numeric_model,f32_helpers_flag_independence,resume_device_model}.rs`:
+- `tests/gnet_device_model/issue_gnet_{12_cuda_owned_numeric_model,resume_device_model}.rs`,
+  `tests/gnet_numeric_host/issue_gnet_f32_helpers_flag_independence.rs`:
   the existing process-group poll runners. CPU limits remain unchanged.
 - `tests/m4_transpose_stencil/issue_m4_02_{stencil_source,transpose_source}.rs`,
   `tests/m4_contraction/issue_m4_03_matrix_contraction_tensor_core.rs`,
