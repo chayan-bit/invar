@@ -92,18 +92,13 @@ impl PathSum {
     /// Encode `(kernel index, groups)` stages in order, wait, and return the
     /// GPU execution interval in milliseconds.
     pub fn dispatch(&mut self, stages: &[(usize, usize)]) -> Result<f64, Error> {
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         for &(kernel, groups) in stages {
             let pipeline = self.pipelines.get(kernel).ok_or(Error::Limit)?;
             if groups == 0 || groups > self.groups {
                 return Err(Error::Limit);
             }
-            let encoder = command
-                .computeCommandEncoder()
-                .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+            let encoder = compute_encoder(&command)?;
             encoder.setComputePipelineState(pipeline);
             for (i, buffer) in [&self.args, &self.part, &self.out, &self.stops]
                 .into_iter()

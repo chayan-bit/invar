@@ -38,13 +38,8 @@ impl Work {
         }
         // Retire the previous fence before this epoch can be submitted.
         self.command = None;
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
+        let encoder = compute_encoder(&command)?;
         encoder.setComputePipelineState(&self.pipeline);
         for (i, buffer) in self.buffers.iter().enumerate() {
             // SAFETY: ABI5 source declares all twelve retained buffers at these

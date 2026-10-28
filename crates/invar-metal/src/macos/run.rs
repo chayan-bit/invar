@@ -219,13 +219,8 @@ impl MetalDevice {
         unsafe {
             ptr::write(n_buffer.contents().as_ptr().cast::<u32>(), ir.length);
         }
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
+        let encoder = compute_encoder(&command)?;
         encoder.setComputePipelineState(&pipeline);
         for (index, buffer) in input_buffers.iter().chain(&output_buffers).enumerate() {
             // SAFETY: the verified map/DAG ABI assigns consecutive input then
@@ -398,10 +393,7 @@ impl MetalDevice {
                 );
             }
         }
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         self.encode_collective(&command, ir, &pipelines, &owned, scan)?;
         let output = owned.output.clone();
         let buffers = owned.all();
@@ -564,9 +556,7 @@ impl MetalDevice {
                 ));
             }
         }
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let encoder = compute_encoder(command)?;
         let slots = inputs.len();
         let step = invar_device::METAL_SCAN_CHUNK_BLOCKS;
         let size = |width: usize| MTLSize {

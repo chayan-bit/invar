@@ -68,10 +68,7 @@ impl MetalDevice {
             ptr::write_bytes(buffers[2].contents().as_ptr().cast::<u64>(), 0, x.len());
             ptr::write(buffers[3].contents().as_ptr().cast::<u32>(), n);
         }
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
         let refs = buffers.each_ref().map(|b| &**b);
         self.encode(&command, &map.pipeline, &refs, n.div_ceil(LANES), LANES)?;
         let mut work = MetalWork::prepared(

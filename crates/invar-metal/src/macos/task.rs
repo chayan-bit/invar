@@ -148,13 +148,8 @@ impl TaskWork {
         first: bool,
         epochs: usize,
     ) -> Result<Retained<ProtocolObject<dyn MTLCommandBuffer>>, Error> {
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
+        let encoder = compute_encoder(&command)?;
         for (i, buffer) in self.buffers.iter().enumerate() {
             // SAFETY: the task ABI declares these four buffers at slots 0..4;
             // every capacity was checked at allocation; offset is 0.
@@ -372,13 +367,8 @@ impl CascadeWork {
                 );
             }
         }
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
+        let encoder = compute_encoder(&command)?;
         for (i, buffer) in self.buffers.iter().enumerate() {
             // SAFETY: the task ABI declares these four buffers at slots 0..4;
             // every capacity was checked at allocation; offset is 0.
@@ -492,13 +482,8 @@ impl BaselineWork {
                 4,
             )
         };
-        let command = self
-            .queue
-            .commandBuffer()
-            .ok_or_else(|| Error::Unavailable("Metal command buffer unavailable".into()))?;
-        let encoder = command
-            .computeCommandEncoder()
-            .ok_or_else(|| Error::Unavailable("Metal compute encoder unavailable".into()))?;
+        let command = command_buffer(&self.queue)?;
+        let encoder = compute_encoder(&command)?;
         for (i, buffer) in self.buffers.iter().enumerate() {
             // SAFETY: the baseline source declares these five buffers at
             // slots 0..5; capacities were checked at allocation; offset is 0.
