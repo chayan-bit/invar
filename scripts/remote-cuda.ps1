@@ -89,7 +89,10 @@ try {
     $env:INVAR_NVRTC_HELPER = Join-Path $base 'target\debug\invar-nvrtc.exe'
     $env:INVAR_NVRTC_COMPILER = $env:INVAR_NVRTC_HELPER
     # cudarc loads nvcuda.dll from System32 and the NVRTC DLL from PATH.
-    $env:PATH = "$(Join-Path $base 'nvrtc');$mingwBin;$env:PATH"
+    # GNU timeout for test-support/child_deadline.rs comes from a per-user Portable Git, appended last.
+    $gnuBin = Join-Path $env:USERPROFILE 'toolchains\PortableGit\usr\bin'
+    if (-not (Test-Path "$gnuBin\timeout.exe")) { Say "BUILD FAILED: no GNU timeout at $gnuBin"; exit 2 }
+    $env:PATH = "$(Join-Path $base 'nvrtc');$mingwBin;$env:PATH;$gnuBin"
     $env:TMP = $env:TEMP = Join-Path $runDir 'tmp'
     New-Item -ItemType Directory $env:TMP -Force | Out-Null
 
