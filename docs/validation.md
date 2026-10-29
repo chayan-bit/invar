@@ -76,6 +76,8 @@ It ships `git archive <ref>` to the host, builds with the per-user Rust `x86_64-
 Set `REMOTE_CUDA_HOST` to the host's ssh alias; the script names no host.
 On the host, everything lives under `%USERPROFILE%\<REMOTE_CUDA_DIR>` (default `invar-remote-cuda`): `nvrtc\` holds the NVRTC DLLs, and the cargo home, target directory, sources, run logs and the runner lock sit beside it.
 The pinned llvm-mingw lives under `%USERPROFILE%\toolchains\` (`REMOTE_CUDA_MINGW` overrides the path).
+GNU `timeout`, which the test harness needs on Windows, comes from a per-user Portable Git unpacked at `%USERPROFILE%\toolchains\PortableGit`; the runner appends its `usr\bin` to `PATH` last, so it shadows nothing.
+For the binary64 correctly rounded kernels, `nvrtc\` must hold NVRTC 12.9 or newer; compiled-ahead images then also need a CUDA 12.9 driver (#288).
 One run holds the lock at a time, and a run waits for three quiet GPU samples (at most `REMOTE_CUDA_MAX_UTIL` percent busy and `REMOTE_CUDA_MIN_FREE_MIB` free) before it starts; it exits 3 when the GPU stays busy, and never stops another tenant's work.
 `REMOTE_CUDA_SHARED=1` runs beside another tenant when memory allows; such runs check correctness only and their timings are not valid.
 Exit codes: 0 pass, 1 test failures, no test run, or a filter that matched no test, 2 build failure, 3 busy, 4 timeout, 5 ssh dropped (the run finished remotely; read the log).
