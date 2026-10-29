@@ -19,6 +19,7 @@ Users can run an admitted source kernel on a CPU model of the device, or ask for
 - Run `invar run PATH --engine native-serial|cuda|metal --format json`.
 - Run `invar build PATH --target native|cuda|metal ...` when the matching feature is compiled in.
 - Run `just test-gpu-cuda` or `just test-metal` on matching hardware. Those are not the cloud proof.
+- Run `just test-gpu-cuda-remote REF [FILTERS]` (`scripts/remote-cuda.sh`) to build a git ref and run its CUDA suites on a remote Windows CUDA host over ssh. It needs `REMOTE_CUDA_HOST`, exits 3 when the runner or GPU is busy, and writes its log to `target/remote-cuda/<run>.log`. See `docs/validation.md`. Its result belongs to that host and that ref, not to this checkout's binary.
 
 ## Driving it with invar-verify
 
