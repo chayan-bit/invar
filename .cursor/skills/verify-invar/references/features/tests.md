@@ -14,7 +14,7 @@ The repository's own checks are `scripts/check-file-size`, `cargo test`, and the
 - Run `cargo test --locked --bin invar issue_ai_01_machine_diagnostics_document_size_limit`.
 - Run `just test-quick` for the fast nextest profile.
 - Run `just test` for Debug nextest, Release nextest, and doctests, with `INVAR_FULL_CORPUS=1`.
-- Run `just test-gpu-cuda` or `just test-metal` only on matching hardware. Those skips are on the codegen feature.
+- Run `just test-gpu-cuda` or `just test-metal` only on matching hardware, or `just test-gpu-cuda-remote REF` against a remote Windows CUDA host. Those skips are on the codegen feature.
 
 ## Driving it with invar-verify
 
