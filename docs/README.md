@@ -10,7 +10,7 @@ There is no archive directory: documents that were superseded are deleted, and t
 | --- | --- |
 | [README](../README.md) | See what Invar is and build it |
 | [Glossary](glossary.md) | Look up a project word: admission, oracle, family, receipt, cr-v1 and more |
-| [Architecture](architecture.md) | Understand the design direction and the trust boundaries |
+| [Architecture](architecture.md) | Follow one program through the code, then read the design direction and trust boundaries |
 | [Examples](../examples/README.md) | Run verified programs |
 
 ## Current specifications
@@ -60,7 +60,7 @@ They are direction, not promises, and they say so in their status lines.
 
 | Document | Covers |
 | --- | --- |
-| [Architecture](architecture.md) | One meaning with many admitted implementations; evidence and trust |
+| [Architecture](architecture.md) | A code tour, then: one meaning with many admitted implementations; evidence and trust |
 | [Parallelism foundations](parallelism-foundation.md) | Why interaction nets, and what they must and need not do |
 | [System integration](system-integration-v1.md) | Invar as the robot system description (decided and implemented) |
 
