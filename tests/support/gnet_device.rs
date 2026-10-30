@@ -271,6 +271,7 @@ impl Frontier {
 #[derive(Default, Debug)]
 pub struct Denominator {
     pub runnable: usize,
+    pub programs: Vec<String>,
     pub executed: BTreeMap<&'static str, usize>,
     pub refused: BTreeMap<&'static str, usize>,
     pub storage_limit: usize,
@@ -285,6 +286,7 @@ pub struct Denominator {
 impl Denominator {
     pub fn absorb(&mut self, other: Self) {
         self.runnable += other.runnable;
+        self.programs.extend(other.programs);
         for (k, v) in other.executed {
             *self.executed.entry(k).or_default() += v;
         }
@@ -337,25 +339,19 @@ fn outcome(reference: &oracle::Observation) -> &'static str {
     }
 }
 
-/// Run the whole corpus on one backend kind. `fuel_short` additionally replays
-/// every admitted program one source step short of its own use, which must end
-/// in the exact fuel limit with only completed cleanup observable.
-/// Shard `(index, count)` of the corpus, or of its `sample` if `sampled`.
+/// Run `sources` on one backend kind. `fuel_short` also replays each admitted
+/// program one source step short of its use: exact fuel limit, completed cleanup.
 pub fn corpus_denominator<B: Backend>(
     target: Target,
     label: &str,
     mut backend: impl FnMut() -> B,
     fuel_short: bool,
-    shard: (usize, usize),
-    sampled: bool,
+    sources: Vec<Source>,
 ) -> Denominator {
     let mut d = Denominator::default();
-    for (_, source) in sample::keep(corpus(), sampled, |source| &source.name)
-        .into_iter()
-        .enumerate()
-        .filter(|(i, _)| i % shard.1 == shard.0)
-    {
+    for source in sources {
         d.runnable += 1;
+        d.programs.push(source.name.clone());
         let plan = match Plan::from_source(&source.bytes, "main", target, Limits::default()) {
             Ok(plan) => plan,
             Err(error) => {
@@ -715,14 +711,18 @@ pub fn bounded_pool<T: Sync, R: Send>(
     done.into_iter().map(|(_, result)| result).collect()
 }
 
-/// Run `shards` corpus shards concurrently (each with a 64 MiB stack for the
-/// recursive reference evaluator) and merge their denominators. `sampled`
-/// runs the deterministic `sample` instead of the whole corpus.
+/// Corpus (or `sample`) `part`: sorted programs at positions `part.0` mod `part.1`.
+pub fn part_sources(part: (usize, usize), sampled: bool) -> Vec<Source> {
+    sample::part(sample::keep(corpus(), sampled, |s| &s.name), part)
+}
+
+/// Run `part_sources(part, sampled)` on `shards` threads (64 MiB stacks); merge.
 pub fn sharded<B: Backend>(
     target: Target,
     label: &str,
     backend: fn() -> B,
     fuel_short: bool,
+    part: (usize, usize),
     shards: usize,
     sampled: bool,
 ) -> Denominator {
@@ -732,8 +732,8 @@ pub fn sharded<B: Backend>(
                 std::thread::Builder::new()
                     .stack_size(64 * 1024 * 1024)
                     .spawn_scoped(scope, move || {
-                        let shard = (i, shards);
-                        corpus_denominator(target, label, backend, fuel_short, shard, sampled)
+                        let sources = sample::part(part_sources(part, sampled), (i, shards));
+                        corpus_denominator(target, label, backend, fuel_short, sources)
                     })
                     .unwrap()
             })

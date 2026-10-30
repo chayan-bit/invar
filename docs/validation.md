@@ -65,7 +65,7 @@ Every milestone acceptance records commit, host/architecture, compiler/toolchain
 
 ## Continuous integration
 
-GitHub Actions runs CPU-only checks on GitHub-hosted Linux runners: Lint, Check, Hygiene, four Test shards and the CPU-model corpus test.
+GitHub Actions runs CPU-only checks on GitHub-hosted Linux runners: Lint, Check, Hygiene, four Test shards and the CPU-model corpus test in two parts (`INVAR_CORPUS_PART=1/2`, `2/2`).
 On pull requests the corpus sweeps (device CPU model, GNET corpus denominators, #54 selection parity and the GNET-02 native corpus and generated programs) run a deterministic 1-in-8 sample by path hash that keeps every corpus directory; pushes to main and `just test` set `INVAR_FULL_CORPUS=1` and run the whole corpus.
 The workflow is [ci.yml](../.github/workflows/ci.yml).
 CUDA and Metal suites are not run in CI.

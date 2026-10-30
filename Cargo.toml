@@ -68,11 +68,11 @@ sha2 = "=0.11.0"
 # CI Debug suites. Same checks as `dev` (debug assertions, overflow checks), but optimised enough that
 # Rust-bound tests run several times faster than at opt-level 0. Selected with `--cargo-profile ci-debug`
 # in .github/workflows/ci.yml; local `cargo test` keeps plain `dev`. tests/limits/ci_profile_canary.rs fails
-# if this profile ever loses its checks. Debuginfo is set here because the workflow's
-# CARGO_PROFILE_DEV_DEBUG does not reach a profile that only inherits dev.
+# if this profile ever loses its checks. No debuginfo: panic messages carry file:line without it, and it
+# made the CI test build 11% (Linux) to 12% (Windows) slower.
 [profile.ci-debug]
 inherits = "dev"
 opt-level = 1
 debug-assertions = true
 overflow-checks = true
-debug = "line-tables-only"
+debug = 0
