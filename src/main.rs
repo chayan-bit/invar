@@ -1,8 +1,5 @@
 #![forbid(unsafe_code)]
 
-//! The `invar` command line: argument parsing, file IO, diagnostics and exit status.
-//! Subcommands live in the `*_command.rs` and `cli*.rs` files; the compiler itself is the `invar` library (`lib.rs`).
-
 #[cfg(feature = "cuda")]
 use invar::engine::nvrtc_helper;
 mod auto_command;
