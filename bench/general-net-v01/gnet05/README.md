@@ -10,7 +10,7 @@ Tests: `tests/gnet05_corpus/issue_gnet_05_corpus.rs`.
 | File | Content |
 | --- | --- |
 | `generate.rs` | Seeded generator `gnet05-gen-v3` (SplitMix64, root seed `0x474e455430357631`), held-out split, normalized identity, large-input ladders, `calibrate`, per-input step budgets and the deep inputs (`DEEP_INPUTS`, `deepen`) |
-| `deep_select.py` | Record of how the deep inputs were selected with the net-laws prototype of the normal-form design (Appendix C of `docs/design/net-parallel-laws-v01.md`, in git history up to commit `85dc53f`) |
+| `deep_select.py` | Record of how the deep inputs were selected with the net-laws prototype of the normal-form design (Appendix C of the net-parallel-laws design note, kept in git history: `git show 85dc53f:docs/design/net-parallel-laws-v01.md`) |
 | `programs/*.inv` | 72 programs, each with entry `run(a, b) -> i32` and a `main` calling it on one recorded input |
 | `manifest.json` | Per-program provenance: family, ordinal, seed, drawn shape, inputs, negative inputs, large-input ladder, the calibrated large input and the deep input, the declared step budget of every input, split, source and normalized SHA-256; default and maximum budgets; pinned held-out digest |
 | `validation.json` | Per-input reference status, steps and oracle outcome; per-target device admission; counted denominators; the deep inputs' outcomes, counted apart (Release run) |

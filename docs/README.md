@@ -81,7 +81,7 @@ They are direction, not promises, and they say so in their status lines.
 
 ## Where else documentation lives
 
-- Many directories under `src/` have a README with their entry points.
+- Every area directory under `src/` and every crate under `crates/` has a README with its entry points, its place in the pipeline and the tests that cover it.
 - Module headers (`//!` comments at the top of each `src/*.rs` file) say what the file is and where to start reading.
 - [tools/README.md](../tools/README.md), [test-support/README.md](../test-support/README.md) and [examples/README.md](../examples/README.md) cover the benchmark tooling, shared test helpers and the example library.
 - Planned work and open gaps are tracked in [GitHub issues](https://github.com/chayan-bit/invar/issues), not in documents.

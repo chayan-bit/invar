@@ -1,10 +1,19 @@
 # compaction_source
 
-Recognition and allocation accounting for source compaction.
-The module root is ../compaction_source.rs.
-Predicate, Contract, Descriptor and Prepared describe admitted work.
-allocation.rs diagnoses allocation sites and reported budgets.
+Recognition of ordinary-source stable `u32` compaction, with a bounded local CPU candidate and allocation accounting.
 
-See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
-Preserve diagnostics, source order, deterministic observations and receipt identities.
-Run focused checks through the required host wrapper before the full suite.
+## Where to start
+
+- `Predicate`, `Contract`, `Descriptor` and `Prepared` in [../compaction_source.rs](../compaction_source.rs) describe admitted work; [allocation.rs](allocation.rs) diagnoses allocation sites and reported budgets.
+
+## Position in the pipeline
+
+A source family: the registry in [schedule](../schedule/README.md) offers it each region (`schedule/families/segmented.rs`).
+
+## Tests
+
+- `cargo nextest run --locked --test m4_segmented`.
+
+## Rules to keep
+
+- Recognition never changes execution; a near match is rejected.

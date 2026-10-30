@@ -1,10 +1,19 @@
 # indexed_source
 
-Indexed gather/scatter/frontier source families and host execution.
-The module root is ../indexed_source.rs.
-Family, Candidate and Contract represent recognized source behavior.
-host::prepare and host::run_source validate and execute admitted work.
+Bounded ordinary-source `u32` gather, injective scatter and dense-mask frontier candidates, with synchronous CPU host execution.
 
-See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
-Preserve diagnostics, source order, deterministic observations and receipt identities.
-Run focused checks through the required host wrapper before the full suite.
+## Where to start
+
+- `Family`, `Candidate` and `Contract` in [../indexed_source.rs](../indexed_source.rs); `host::prepare` and `host::run_source` in [host.rs](host.rs) validate and execute admitted work.
+
+## Position in the pipeline
+
+A source family used by [schedule](../schedule/README.md) and [indexed_device](../indexed_device/README.md); [../frontier_source.rs](../frontier_source.rs) holds the frontier oracle.
+
+## Tests
+
+- `cargo nextest run --locked --test m4_indexed` and `--test byte_budgets`.
+
+## Rules to keep
+
+- A candidate is an observation, not an execution, fuel or publication permit.
