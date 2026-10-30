@@ -54,7 +54,7 @@ pub enum Error {
         image: u32,
         device: u32,
     },
-    /// The driver predates the toolchain that produced the image.
+    /// The driver's CUDA major version predates the image's toolchain.
     Driver {
         required: u32,
         found: u32,
@@ -97,10 +97,15 @@ pub fn options(sm: u32) -> [String; 6] {
 }
 
 /// Lowest `cuDriverGetVersion` accepted for an image from NVRTC `major.minor`.
-pub fn min_driver((major, minor): (u32, u32)) -> u32 {
-    major
-        .saturating_mul(1000)
-        .saturating_add(minor.saturating_mul(10))
+///
+/// CUDA minor-version compatibility: SASS from any `major.x` toolkit runs on
+/// a `major.0` or newer driver, and drivers run SASS from older majors
+/// (backward compatibility), so only the major sets the floor (#288). The
+/// image is SASS only, so nothing needs the newer driver's PTX JIT; a feature
+/// that still needs a newer driver is refused by the driver itself
+/// (`Error::Rejected`) and never recompiled.
+pub fn min_driver((major, _minor): (u32, u32)) -> u32 {
+    major.saturating_mul(1000)
 }
 
 impl Header {
@@ -141,7 +146,8 @@ impl Header {
         Ok(())
     }
 
-    /// Exact architecture and a driver no older than the image's toolchain.
+    /// Exact architecture and a driver whose CUDA major version is no older
+    /// than the image's toolchain (see [`min_driver`]).
     pub fn admit_device(&self, sm: u32, driver: u32) -> Result<(), Error> {
         if self.sm != sm {
             return Err(Error::Sm {

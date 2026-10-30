@@ -92,12 +92,12 @@ fn round_trip_records_program_target_and_toolchain() {
         let image = cuda_aot::decode(&container(&plan, sm, &elf(sm))).unwrap();
         assert_eq!(cuda_aot::cubin_sm(image.cubin()), Ok(sm));
         image.header().verify(&plan).unwrap();
-        image.header().admit_device(sm, 12090).unwrap();
+        image.header().admit_device(sm, 12000).unwrap();
         let receipt = image.receipt();
         assert_eq!(receipt["schema"], cuda_aot::SCHEMA);
         assert_eq!(receipt["format_version"], 1);
         assert_eq!(receipt["target"]["sm"], sm);
-        assert_eq!(receipt["target"]["min_driver"], 12090);
+        assert_eq!(receipt["target"]["min_driver"], 12000);
         assert_eq!(receipt["toolchain"]["compiler"], "nvrtc");
         assert_eq!(receipt["toolchain"]["nvrtc"], "12.9");
         assert_eq!(
@@ -346,14 +346,46 @@ fn image_is_matched_to_its_program_and_device() {
             device: 89
         })
     );
+    assert_eq!(header.admit_device(120, 12090), Ok(()));
+}
+
+/// CUDA minor-version compatibility (#288): a SASS image admits any driver of
+/// its toolchain's major or a newer major, and refuses an older major.
+#[test]
+fn driver_admission_follows_cuda_minor_version_compatibility() {
+    let header = |nvrtc| {
+        let plan = plan(SOURCE);
+        Header::of(&plan, 86, nvrtc, &elf(86))
+    };
+    // NVRTC 12.9 image on a CUDA 12.4 driver, and on 12.0 and 13.0.
+    for driver in [12000, 12040, 12090, 13000] {
+        assert_eq!(header((12, 9)).admit_device(86, driver), Ok(()));
+    }
     assert_eq!(
-        header.admit_device(120, 12080),
+        header((12, 9)).admit_device(86, 11080),
         Err(Error::Driver {
-            required: 12090,
-            found: 12080
+            required: 12000,
+            found: 11080
         })
     );
-    assert_eq!(header.admit_device(120, 12090), Ok(()));
+    // NVRTC 13.x image on a 12.x driver: major mismatch.
+    assert_eq!(
+        header((13, 0)).admit_device(86, 12090),
+        Err(Error::Driver {
+            required: 13000,
+            found: 12090
+        })
+    );
+    // NVRTC 11.x image on a 12.x driver: drivers are backward compatible.
+    assert_eq!(header((11, 8)).admit_device(86, 12040), Ok(()));
+    assert_eq!(cuda_aot::min_driver((12, 9)), 12000);
+    assert_eq!(
+        header((12, 4)).admit_device(75, 12040),
+        Err(Error::Sm {
+            image: 86,
+            device: 75
+        })
+    );
 }
 
 #[cfg(not(feature = "cuda"))]
