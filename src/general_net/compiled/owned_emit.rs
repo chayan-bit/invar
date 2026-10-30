@@ -13,13 +13,12 @@ pub(super) fn preamble(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
     let Some(layout) = &p.owned else {
         return w.push(&super::resume::exit_macro(
             p,
-            "GNET_STOP",
+            "gnet_stop",
             if p.resumable {
                 "gnet_finish(output,status,result,start,end,steps,transitions,max_depth,used); task->done=1; GNET_SAVE; return true"
             } else {
                 "gnet_finish(output,status,result,start,end,steps,transitions,max_depth,used); return"
             },
-            "gnet_stop",
         ));
     };
     let slots = layout.allocations();
@@ -34,9 +33,8 @@ pub(super) fn preamble(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
     };
     w.push(&super::resume::exit_macro(
         p,
-        "GNET_STOP",
-        &format!("gnet_finish(output,status,result,start,end,steps,transitions,max_depth,used); output[8]=(gnet_w)cleanup_used; output[9]=(gnet_w)allocated; {stop}"),
         "gnet_stop",
+        &format!("gnet_finish(output,status,result,start,end,steps,transitions,max_depth,used); output[8]=(gnet_w)cleanup_used; output[9]=(gnet_w)allocated; {stop}"),
     ))?;
     if p.numeric.is_none()
         && p.aggregate.is_none()

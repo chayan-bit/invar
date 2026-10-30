@@ -54,7 +54,7 @@ struct GnetTask {
     gnet_w status,result,start,end;
 };
 #define GNET_SAVE task->depth=depth; task->max_depth=max_depth; task->steps=steps; task->transitions=transitions; task->used=used; task->next_frame=next_frame; task->allocated=allocated; task->live=live; task->cleanup_used=cleanup_used; task->status=status; task->result=result; task->start=start; task->end=end"#)?;
-    let yield_macro = exit_macro(p, "GNET_YIELD", "GNET_SAVE; return false", "gnet_yield");
+    let yield_macro = exit_macro(p, "gnet_yield", "GNET_SAVE; return false");
     w.push(&format!("{yield_macro}\n"))?;
     w.push(&format!(
         "static_assert(sizeof(GnetTask)=={}, \"GNET task layout mismatch\");",
@@ -91,8 +91,10 @@ pub(super) fn compact(p: &Program<'_>) -> bool {
     p.resumable && p.target == Target::Cuda
 }
 
-/// `#define NAME BODY`, or under `compact` a jump to the shared `label`.
-pub(super) fn exit_macro(p: &Program<'_>, name: &str, body: &str, label: &str) -> String {
+/// `#define LABEL BODY` (the macro is the upper-case label), or under
+/// `compact` a jump to the shared `label` that runs `LABEL_EXIT`.
+pub(super) fn exit_macro(p: &Program<'_>, label: &str, body: &str) -> String {
+    let name = label.to_ascii_uppercase();
     if compact(p) {
         format!("#define {name}_EXIT {body}\n#define {name} goto {label}")
     } else {
