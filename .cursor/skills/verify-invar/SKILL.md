@@ -21,6 +21,8 @@ Ready means `target/debug/invar` exists and `invar --help` exits 0 with a first 
 
 The build writes `target/`. `--dry-run` prints the cargo command and does not run it.
 
+The helper uses whichever `rustc` and `cargo` come first on `PATH`. If a system Rust shadows rustup (doctor reports `toolchain_ok: false` with an older `rustc`), put the rustup shims first, for example `PATH="$HOME/.cargo/bin:$PATH"`, for build, doctor, and every drive.
+
 ## Doctor
 
 ```sh
@@ -93,13 +95,14 @@ Useful environment:
 The default suite records these as `skipped` when the probe says so:
 
 - `codegen.native-serial-run` — LLVM 21.1.8 is not installed (`native` is not rustc's LLVM).
-- `codegen.cuda-hardware` — no NVIDIA GPU, and the binary has no `cuda` feature. This covers `just test-gpu-cuda`.
+- `codegen.cuda-hardware` — no NVIDIA GPU, and the binary has no `cuda` feature. This covers `just test-gpu-cuda`. `just test-gpu-cuda-remote` needs a remote Windows CUDA host (`REMOTE_CUDA_HOST`) and is never run by the drive.
 - `codegen.metal-hardware` — not an Apple Silicon Mac. This covers `just test-metal`.
 - `robotics.ros2-runtime` — `ros2` is not on PATH and there is no robot. Generation of the workspace is still checked.
 - `robotics.component-test` — needs a foreign shared library and the fixture server.
 - `tests.full-nextest` — `cargo-nextest` is absent, and the full Debug+Release corpus is the CI gate rather than the cloud proof.
+- `parallelism.gnet-cpu-model-cuda` and `parallelism.gnet-cpu-model-metal` — neither `c++` nor `g++` can compile C++20 with `<barrier>` (doctor's `host.cxx.compiler` is null). Install a C++20 compiler to run them.
 
-CPU reference, `cpu-parallel`, explain, `source-device` CPU model, and `gnet-device` CPU model are not in that list. They run.
+CPU reference, `cpu-parallel`, explain, and `source-device` CPU model are not in that list. They run. The `gnet-device` CPU model runs whenever a C++20 compiler is present.
 
 ## Maintenance
 

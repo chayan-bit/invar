@@ -30,6 +30,6 @@ Preconditions:
 ## Gotchas
 
 - A green `check` is not a run. The reference feature is the execution proof.
-- `invar check PATH --fix --write` rewrites source. Dry-run does not exist on that flag. Do not pass `--write` from a verification drive.
+- `invar check PATH --fix --write` rewrites source. `--fix` alone is the preview: it prints the unified diff of any validated fixes (nothing when none apply), reports a remaining source error, and writes nothing. Do not pass `--write` from a verification drive.
 - Foreign programs that typecheck still need an absolute `--c-library` before `invar run`. The reference engine executes the Invar oracle. It does not load the library. That is not a C ABI proof.
 - View diagnostics are ownership codes (`OWN_...`), not parser codes.
