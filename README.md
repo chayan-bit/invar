@@ -11,6 +11,10 @@
 
 </div>
 
+**New here?**
+Start with the [glossary](docs/glossary.md) for the project's words, the [documentation index](docs/README.md) and the [architecture](docs/architecture.md) overview.
+To build it, see [Quick start](#quick-start); to change it, read [CONTRIBUTING.md](CONTRIBUTING.md) and pick a [good first issue](https://github.com/chayan-bit/invar/labels/good%20first%20issue).
+
 Write ordinary sequential code.
 Make ownership and observable effects understandable.
 Let the compiler choose an equivalent implementation when it can establish legality and a useful cost advantage.
@@ -97,11 +101,13 @@ CUDA and Metal suites are ignored by default and are not run in CI; see [CONTRIB
 
 | Document | Purpose |
 | --- | --- |
+| [Documentation index](docs/README.md) | Which documents are current specifications, design notes or process |
+| [Glossary](docs/glossary.md) | Plain definitions of the project's terms |
 | [v0.1 language specification](docs/spec/invar-v0.1.md) | Normative specification whose every code block and cited statement is checked by the test suite |
 | [Grammar](spec/grammar.ebnf) | Complete syntax for that scope |
 | [Placement](spec/placement-v1.md) | Placement profiles and receipts for `--engine auto` |
 | [Examples](examples/README.md) | Verified example library with an index of expected results |
-| [Architecture](docs/architecture.md) | Long-term design and trusted boundaries |
+| [Architecture](docs/architecture.md) | A code tour that follows one program through the compiler, then the long-term design and trusted boundaries |
 | [Parallelism foundations](docs/parallelism-foundation.md) | Interaction calculus, structured operations, and automatic GPU generation |
 | [Numeric contracts](docs/numeric.md) | f32 semantics, fold tiers and storage types |
 | [Explain JSON](docs/explain.md) | `invar explain` documents and device execution reports |
