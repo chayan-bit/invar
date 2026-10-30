@@ -111,6 +111,9 @@ jobs:
   # with Git for Windows' GNU timeout. Every run takes the pull-request corpus
   # sample, so a push to main sees the same Windows result as its pull request;
   # the Linux shards run the whole corpus on main.
+  # The CPU-model corpus test takes the whole runner, so it runs after msvc 1/4's
+  # partition instead of inside it, where it serialized that shard's long tests;
+  # left in the partition, shard 1 was the slowest Windows job by about 3 min.
   # Excluded: issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output.
   # `system gen ros2` derives the UR5e base RPY with the platform libm's asin,
   # which differs from glibc by one ulp, so that tree hash is Linux-specific.
@@ -124,11 +127,12 @@ jobs:
         include:
           - name: msvc 1/4
             args: --partition count:1/4
-            math: true
+            corpus: true
           - name: msvc 2/4
             args: --partition count:2/4
           - name: msvc 3/4
             args: --partition count:3/4
+            math: true
           - name: msvc 4/4
             args: --partition count:4/4
           - name: gnullvm build
@@ -172,7 +176,12 @@ jobs:
         run: >-
           cargo nextest run --locked ${TARGET:+--target "$TARGET"} --profile ci --cargo-profile ci-debug
           -p invar -p invar-tools ${{ matrix.args }}
-          -E 'not test(=issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output)'
+          -E 'not test(=issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output) & not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+      - name: CPU-model corpus test
+        if: matrix.corpus
+        run: >-
+          cargo nextest run --locked --profile ci --cargo-profile ci-debug -p invar -p invar-tools
+          --test gnet_device_model -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
 
   # The jobs below compile the feature-gated code that the default-feature jobs never build.
   native:
