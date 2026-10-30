@@ -53,9 +53,9 @@ struct GnetTask {
     gnet_u allocated,live,cleanup_used,fuel,transition_cap,trace_cap;
     gnet_w status,result,start,end;
 };
-#define GNET_SAVE task->depth=depth; task->max_depth=max_depth; task->steps=steps; task->transitions=transitions; task->used=used; task->next_frame=next_frame; task->allocated=allocated; task->live=live; task->cleanup_used=cleanup_used; task->status=status; task->result=result; task->start=start; task->end=end
-#define GNET_YIELD GNET_SAVE; return false
-"#)?;
+#define GNET_SAVE task->depth=depth; task->max_depth=max_depth; task->steps=steps; task->transitions=transitions; task->used=used; task->next_frame=next_frame; task->allocated=allocated; task->live=live; task->cleanup_used=cleanup_used; task->status=status; task->result=result; task->start=start; task->end=end"#)?;
+    let yield_macro = exit_macro(p, "GNET_YIELD", "GNET_SAVE; return false", "gnet_yield");
+    w.push(&format!("{yield_macro}\n"))?;
     w.push(&format!(
         "static_assert(sizeof(GnetTask)=={}, \"GNET task layout mismatch\");",
         ContinuationLayout::new(p.bytes).task_bytes()
@@ -81,6 +81,28 @@ struct GnetTask {
         ))?;
     }
     Ok(())
+}
+
+/// CUDA continuations hoist the per-state prologue out of the state switch
+/// and share one yield and one stop epilogue (`exits`). The code is the same
+/// protocol; NVRTC time grew with thousands of inlined copies of both (#278).
+/// Metal keeps the inline form: Metal Shading Language has no `goto`.
+pub(super) fn compact(p: &Program<'_>) -> bool {
+    p.resumable && p.target == Target::Cuda
+}
+
+/// `#define NAME BODY`, or under `compact` a jump to the shared `label`.
+pub(super) fn exit_macro(p: &Program<'_>, name: &str, body: &str, label: &str) -> String {
+    if compact(p) {
+        format!("#define {name}_EXIT {body}\n#define {name} goto {label}")
+    } else {
+        format!("#define {name} {body}")
+    }
+}
+
+/// The shared epilogues at the end of `gnet_resume`, reached only by `goto`.
+pub(super) fn exits(w: &mut Writer) -> Result<(), Error> {
+    w.push("gnet_yield: GNET_YIELD_EXIT;\ngnet_stop: GNET_STOP_EXIT;")
 }
 
 pub(super) fn begin(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {

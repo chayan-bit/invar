@@ -38,6 +38,22 @@ pub(super) fn event(
     ))
 }
 
+/// Every resumable state begins with the same yield and transition checks, so
+/// under `resume::compact` they run once before the state switch. A cursor
+/// outside the emitted states still fails first, exactly as its `default`.
+fn hoisted_prologue(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
+    let mut guard = String::from("switch(fr.pc) { ");
+    for state in p.states.iter().filter(|state| state.reachable) {
+        guard.push_str(&format!("case {}: ", state.pc));
+    }
+    guard.push_str(&format!(
+        "break; default: {{ {} }} }}",
+        fail(Status::InvalidState, None)
+    ));
+    w.push(&guard)?;
+    transition(w, true)
+}
+
 fn transition(writer: &mut Writer, resumable: bool) -> Result<(), Error> {
     if resumable {
         writer.push("if (slice_steps==quantum) { GNET_YIELD; } ++slice_steps;")?;
@@ -164,11 +180,15 @@ GNET_FN void gnet_run(GNET_MEM const gnet_w* input, GNET_MEM gnet_w* output,
     if program.resumable {
         w.push("task->started=1; task->fuel=fuel; task->transition_cap=transition_cap; task->trace_cap=trace_cap; }")?;
     }
-    if program.body_regions.is_empty() {
+    let compact = super::resume::compact(program);
+    if program.body_regions.is_empty() && !compact {
         w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1]; switch(fr.pc) {")?;
     } else {
         w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1];")?;
         super::body_map::boundary(&mut w, program)?;
+        if compact {
+            hoisted_prologue(&mut w, program)?;
+        }
         w.push("switch(fr.pc) {")?;
     }
     for state in &program.states {
@@ -180,10 +200,17 @@ GNET_FN void gnet_run(GNET_MEM const gnet_w* input, GNET_MEM gnet_w* output,
         "default: {{ {} }} }} }}",
         fail(Status::InvalidState, None)
     ))?;
+    if compact {
+        super::resume::exits(&mut w)?;
+    }
     w.push("}")?;
     let args = entry.params.len();
     if program.resumable {
-        super::resume::kernel(&mut w, program, target, args)?;
+        // A CUDA device image launches only its group kernel; a second entry
+        // point would make NVRTC compile the continuation twice.
+        if !(program.device && target == Target::Cuda) {
+            super::resume::kernel(&mut w, program, target, args)?;
+        }
     } else {
         super::owned_emit::kernel(&mut w, program, target, args)?;
     }
@@ -204,6 +231,7 @@ fn state_source(w: &mut Writer, p: &Program<'_>, state: State) -> Result<(), Err
     } = state;
     let block = &p.mir.functions[f].blocks[b];
     w.push(&format!("case {pc}: {{"))?;
+    let prologue = !super::resume::compact(p);
     for (i, instruction) in block
         .instructions
         .iter()
@@ -211,7 +239,9 @@ fn state_source(w: &mut Writer, p: &Program<'_>, state: State) -> Result<(), Err
         .skip(start)
         .take(if p.resumable { 1 } else { usize::MAX })
     {
-        transition(w, p.resumable)?;
+        if prologue {
+            transition(w, p.resumable)?;
+        }
         let rule = coverage::operation(&instruction.kind).0;
         if rule == coverage::Rule::Tick {
             w.push(&format!(
@@ -264,7 +294,9 @@ fn state_source(w: &mut Writer, p: &Program<'_>, state: State) -> Result<(), Err
             return Ok(());
         }
     }
-    transition(w, p.resumable)?;
+    if prologue {
+        transition(w, p.resumable)?;
+    }
     let term = block.end.as_ref().ok_or(Error::State)?;
     let (rule, _, _) = coverage::terminator(term);
     event(w, 0, f, b, block.instructions.len(), rule)?;
