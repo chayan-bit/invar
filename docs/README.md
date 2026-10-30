@@ -69,6 +69,7 @@ They are direction, not promises, and they say so in their status lines.
 | Document | Covers |
 | --- | --- |
 | [Validation](validation.md) | Required commands, adversarial cases, oracles, CI and remote CUDA runs |
+| [Testing guide](testing.md) | How the suite is organized, how to run a subset, and what each test file covers |
 | [Rust engineering](rust-engineering.md) | Rules for Rust code, APIs, errors, safety and tests |
 | [CUDA-class acceptance](performance-acceptance.md) | The protocol for performance claims |
 
