@@ -107,7 +107,7 @@ CUDA and Metal suites are ignored by default and are not run in CI; see [CONTRIB
 | [Grammar](spec/grammar.ebnf) | Complete syntax for that scope |
 | [Placement](spec/placement-v1.md) | Placement profiles and receipts for `--engine auto` |
 | [Examples](examples/README.md) | Verified example library with an index of expected results |
-| [Architecture](docs/architecture.md) | Long-term design and trusted boundaries |
+| [Architecture](docs/architecture.md) | A code tour that follows one program through the compiler, then the long-term design and trusted boundaries |
 | [Parallelism foundations](docs/parallelism-foundation.md) | Interaction calculus, structured operations, and automatic GPU generation |
 | [Numeric contracts](docs/numeric.md) | f32 semantics, fold tiers and storage types |
 | [Explain JSON](docs/explain.md) | `invar explain` documents and device execution reports |
