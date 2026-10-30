@@ -17,7 +17,15 @@ fn cuda() -> aot::Aot {
 #[test]
 #[ignore = "requires a CUDA device and NVRTC"]
 fn issue_gnet_03_gpu_corpus_executes_on_cuda_with_exact_oracle_agreement() {
-    let d = device::sharded(Target::Cuda, "cuda", cuda, true, 4, false);
+    let d = device::sharded(
+        Target::Cuda,
+        "cuda",
+        cuda,
+        true,
+        device::sample::WHOLE,
+        4,
+        false,
+    );
     d.print("cuda");
     assert_eq!(d.fallback, 0);
     assert!(d.executed_total() >= 250, "{d:?}");

@@ -121,3 +121,42 @@ pub fn keep<T>(items: Vec<T>, sampled: bool, path: impl Fn(&T) -> &String) -> Ve
         .filter(|item| kept.contains(path(item)))
         .collect()
 }
+
+/// The whole corpus, as a 0-based `(index, count)` part.
+pub const WHOLE: (usize, usize) = (0, 1);
+
+/// The corpus part this process runs, from `INVAR_CORPUS_PART=k/n` (1-based,
+/// so CI job names read `1/2`, `2/2`); the whole corpus when the variable is
+/// unset or empty. Anything else fails the run.
+pub fn corpus_part() -> (usize, usize) {
+    match std::env::var("INVAR_CORPUS_PART") {
+        Ok(value) => parse_part(&value),
+        Err(std::env::VarError::NotPresent) => WHOLE,
+        Err(error) => panic!("INVAR_CORPUS_PART: {error}"),
+    }
+}
+
+/// `k/n` (1-based) as a 0-based part; empty is `WHOLE`; anything else panics.
+pub fn parse_part(value: &str) -> (usize, usize) {
+    if value.is_empty() {
+        return WHOLE;
+    }
+    value
+        .split_once('/')
+        .and_then(|(k, n)| Some((k.parse::<usize>().ok()?, n.parse::<usize>().ok()?)))
+        .filter(|&(k, n)| (1..=n).contains(&k))
+        .map(|(k, n)| (k - 1, n))
+        .unwrap_or_else(|| panic!("INVAR_CORPUS_PART must be k/n with 1 <= k <= n, got {value:?}"))
+}
+
+/// Part `(index, count)` of `items` (in their sorted path order): the items at
+/// positions `index` mod `count`. Neighbouring programs share a directory and a
+/// similar cost, so dealing them out in turn keeps the parts' run times close.
+pub fn part<T>(items: Vec<T>, (index, count): (usize, usize)) -> Vec<T> {
+    items
+        .into_iter()
+        .enumerate()
+        .filter(|(i, _)| i % count == index)
+        .map(|(_, item)| item)
+        .collect()
+}
