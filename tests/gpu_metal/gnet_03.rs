@@ -20,7 +20,15 @@ fn metal() -> Metal {
 #[test]
 #[ignore = "requires an Apple Metal device"]
 fn issue_gnet_03_metal_gpu_corpus_executes_on_metal_with_exact_oracle_agreement() {
-    let d = device::sharded(Target::Metal, "metal", metal, true, 4, false);
+    let d = device::sharded(
+        Target::Metal,
+        "metal",
+        metal,
+        true,
+        device::sample::WHOLE,
+        4,
+        false,
+    );
     d.print("metal");
     assert_eq!(d.fallback, 0);
     assert!(d.executed_total() >= 250, "{d:?}");

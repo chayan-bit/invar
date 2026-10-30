@@ -111,7 +111,7 @@ Every pull request runs [ci.yml](.github/workflows/ci.yml) on GitHub-hosted Linu
 - **Check**: `cargo check --all-targets`.
 - **Hygiene**: the file-size ratchet, the native host bundle check and the script self-tests.
 - **Test shards 1 to 4**: the full suite split four ways, plus doctests.
-- **Test (CPU-model corpus)**: the device CPU-model corpus test, run alone.
+- **Test (CPU-model corpus 1/2, 2/2)**: the device CPU-model corpus test, run alone, each job on one half of the corpus programs (`INVAR_CORPUS_PART`).
 - **Windows (msvc 1/4 to 4/4, gnullvm build)**: the default-feature suite on `windows-latest` with MSVC in four shards, a gnullvm build of every test target, and the CORE-MATH tests on both.
   It always runs the pull-request corpus sample.
   One test is excluded there: the `system gen ros2` tree hash for `cell-ur5e.inv` depends on the platform libm's `asin`, which differs from glibc by one ulp on Windows.

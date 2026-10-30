@@ -60,9 +60,10 @@ jobs:
       fail-fast: false
       matrix:
         # One test, issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles each corpus program to C++ three times
-        # (about 3 min on the pull-request sample, about 20 min on the whole corpus). It runs alone in its own job, built from
-        # its own test binary only, and is excluded from the four shards below; no test is skipped overall.
-        # "Test (CPU-model corpus)" is a required status check, so the job keeps its name.
+        # (about 3 min on the pull-request sample, 19-28 min on the whole corpus). It is excluded from the four shards below and runs
+        # in two jobs, each built from its own test binary only: INVAR_CORPUS_PART deals the corpus's programs (sorted by path) out
+        # by index, so the two parts are disjoint and together run every program; no test is skipped overall.
+        # issue_gnet_03_device_corpus_parts_cover_the_corpus (in a shard) checks the parts cover the corpus.
         include:
           - name: shard 1/4
             args: --partition count:1/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
@@ -73,8 +74,12 @@ jobs:
             args: --partition count:3/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
           - name: shard 4/4
             args: --partition count:4/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
-          - name: CPU-model corpus
-            args: --test gnet_device_model -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          - name: CPU-model corpus 1/2
+            part: 1/2
+            args: --test gnet_device_model --success-output final -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          - name: CPU-model corpus 2/2
+            part: 2/2
+            args: --test gnet_device_model --success-output final -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
     env:
       # tests/limits/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
       INVAR_CI_PROFILE: debug
@@ -93,6 +98,8 @@ jobs:
       - name: Test (default features, ci-debug profile)
         env:
           NEXTEST_ARGS: ${{ matrix.args }}
+          # Empty (the whole corpus) outside the two corpus jobs.
+          INVAR_CORPUS_PART: ${{ matrix.part }}
         # NEXTEST_ARGS is intentionally word-split (it holds flags and a quoted filterset).
         run: eval "cargo nextest run --locked --profile ci --cargo-profile ci-debug -p invar -p invar-tools $NEXTEST_ARGS"
       - name: Doctests

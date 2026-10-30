@@ -156,14 +156,63 @@ fn issue_gnet_03_device_emitted_code_is_program_specific_without_interpreter() {
     );
 }
 
+/// Corpus parts CI runs as separate jobs (`INVAR_CORPUS_PART=1/2`, `2/2` in
+/// .github/workflows/ci.yml).
+const CI_CORPUS_PARTS: usize = 2;
+
+#[test]
+fn issue_gnet_03_device_corpus_parts_cover_the_corpus() {
+    // No device work: the CI parts are disjoint, non-empty, together exactly
+    // the programs the unsplit test runs, and still above the corpus floor.
+    let names = |part| -> Vec<String> {
+        device::part_sources(part, true)
+            .into_iter()
+            .map(|source| source.name)
+            .collect()
+    };
+    let mut whole = names(device::sample::WHOLE);
+    let mut union = Vec::new();
+    for index in 0..CI_CORPUS_PARTS {
+        let part = names((index, CI_CORPUS_PARTS));
+        assert!(
+            !part.is_empty(),
+            "corpus part {} of {CI_CORPUS_PARTS} is empty",
+            index + 1
+        );
+        union.extend(part);
+    }
+    whole.sort();
+    union.sort();
+    assert_eq!(union, whole, "the corpus parts must partition the corpus");
+    assert!(
+        whole.len() >= device::sample::floor(250),
+        "{} runnable programs",
+        whole.len()
+    );
+}
+
+#[test]
+fn issue_gnet_03_device_corpus_part_selector_reads_k_of_n() {
+    assert_eq!(device::sample::parse_part(""), device::sample::WHOLE);
+    assert_eq!(device::sample::parse_part("1/1"), (0, 1));
+    assert_eq!(device::sample::parse_part("1/2"), (0, 2));
+    assert_eq!(device::sample::parse_part("2/2"), (1, 2));
+    for bad in ["0/2", "3/2", "2", "1/0", "a/2", "1/2/3", " 1/2"] {
+        let parsed = std::panic::catch_unwind(|| device::sample::parse_part(bad));
+        assert!(parsed.is_err(), "{bad:?} must be rejected");
+    }
+}
+
 #[test]
 fn issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle() {
     // Emitted CUDA bodies at full fuel; emitted Metal bodies at full fuel and
     // one source step short. Both run the same deterministic corpus sample
-    // (every admitted runnable program under INVAR_FULL_CORPUS=1).
+    // (every admitted runnable program under INVAR_FULL_CORPUS=1), or the part
+    // of it that INVAR_CORPUS_PART selects.
     // Four shards per runner bound compiler contention across the shared CI pool.
     // The CUDA and Metal halves run at once: 2 x 4 shard threads fill the
     // test's 8-thread nextest reservation.
+    let part = device::sample::corpus_part();
     let (cuda, metal): (Denominator, Denominator) = std::thread::scope(|scope| {
         let cuda = scope.spawn(|| {
             device::sharded(
@@ -171,6 +220,7 @@ fn issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle() {
                 "cpu-model-cuda",
                 CpuModel::default,
                 false,
+                part,
                 4,
                 true,
             )
@@ -181,6 +231,7 @@ fn issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle() {
                 "cpu-model-metal",
                 CpuModel::default,
                 true,
+                part,
                 4,
                 true,
             )
@@ -193,9 +244,21 @@ fn issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle() {
     });
     cuda.print("cpu-model-cuda");
     metal.print("cpu-model-metal");
+    let mut expected: Vec<String> = device::part_sources(part, true)
+        .into_iter()
+        .map(|source| source.name)
+        .collect();
+    expected.sort();
+    assert!(!expected.is_empty(), "corpus part {part:?} is empty");
     for d in [&cuda, &metal] {
+        let mut ran = d.programs.clone();
+        ran.sort();
+        assert_eq!(ran, expected, "corpus part {part:?} ran other programs");
         assert_eq!(d.fallback, 0);
-        assert!(d.executed_total() >= device::sample::floor(250), "{d:?}");
+        // Each of the n parts executes at least ceil(floor / n), so all parts
+        // together still execute at least the whole corpus's floor.
+        let floor = device::sample::floor(250).div_ceil(part.1);
+        assert!(d.executed_total() >= floor, "{d:?}");
         assert!(d.executed["agree_trap"] > 0 && d.executed["agree_value"] > 0);
     }
     assert_eq!(cuda.executed, metal.executed);
