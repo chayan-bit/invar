@@ -38,20 +38,106 @@ pub(super) fn event(
     ))
 }
 
-/// Every resumable state begins with the same yield and transition checks, so
-/// under `resume::compact` they run once before the state switch. A cursor
-/// outside the emitted states still fails first, exactly as its `default`.
-fn hoisted_prologue(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
-    let mut guard = String::from("switch(fr.pc) { ");
-    for state in p.states.iter().filter(|state| state.reachable) {
-        guard.push_str(&format!("case {}: ", state.pc));
+/// States per CUDA part routine: NVRTC time grows faster than linearly in
+/// the size of one function, so `resume::compact` continuations run their
+/// states in routines of at most this many; fewer would add part switches.
+const PART_STATES: usize = 128;
+
+/// The continuation's locals: ten `gnet_u` counters, then four `gnet_w`.
+const LOCALS: [&str; 14] = [
+    "depth",
+    "max_depth",
+    "steps",
+    "transitions",
+    "used",
+    "next_frame",
+    "allocated",
+    "live",
+    "cleanup_used",
+    "slice_steps",
+    "status",
+    "result",
+    "start",
+    "end",
+];
+
+/// Under `resume::compact`, each run of `PART_STATES` states is one noinline
+/// routine over the continuation's locals. It runs states until the cursor
+/// leaves its run, yields or stops; `gnet_resume` selects the routine for the
+/// cursor (after the boundary checks, failing an unknown cursor first) and
+/// owns both epilogues, so every state keeps its exact check order.
+fn parts(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
+    let load = |names: &[&str]| {
+        names
+            .iter()
+            .map(|v| format!("{v}=gl.{v}"))
+            .collect::<Vec<_>>()
+            .join(",")
+    };
+    let load = format!(
+        "gnet_u {}; gnet_w {};",
+        load(&LOCALS[..10]),
+        load(&LOCALS[10..])
+    );
+    let store = LOCALS.map(|v| format!("gl.{v}={v};")).join(" ");
+    w.push("#ifdef __CUDACC__\n#define GNET_PART __device__ __noinline__\n#else\n#define GNET_PART __device__\n#endif")?;
+    w.push(&format!(
+        "struct GnetLocals {{ gnet_u {}; gnet_w {}; }};",
+        LOCALS[..10].join(","),
+        LOCALS[10..].join(",")
+    ))?;
+    let states: Vec<_> = p.states.iter().filter(|s| s.reachable).collect();
+    for (k, run) in states.chunks(PART_STATES).enumerate() {
+        let members: String = run.iter().map(|s| format!("case {}: ", s.pc)).collect();
+        w.push(&format!(
+            "GNET_PART int gnet_part_{k}({},GnetLocals& gl) {{",
+            super::resume::params(p, false)
+        ))?;
+        w.push(&format!("GNET_FRAME GnetFrame* frames=task->frames; {load} int gnet_r=0; bool gnet_entered=true;"))?;
+        w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1];")?;
+        w.push(&format!(
+            "if (!gnet_entered) {{ switch(fr.pc) {{ {members}break; default: goto gnet_part_out; }}"
+        ))?;
+        super::body_map::boundary(w, p)?;
+        w.push("} gnet_entered=false;")?;
+        transition(w, true)?;
+        w.push("switch(fr.pc) {")?;
+        for state in run {
+            state_source(w, p, **state)?;
+        }
+        w.push("default: goto gnet_part_out; } }")?;
+        w.push(&format!("gnet_yield: gnet_r=1; goto gnet_part_out;\ngnet_stop: gnet_r=2;\ngnet_part_out: {store} return gnet_r; }}"))?;
     }
-    guard.push_str(&format!(
-        "break; default: {{ {} }} }}",
+    Ok(())
+}
+
+/// The `gnet_resume` loop that runs the part routine of each cursor.
+fn dispatch(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
+    let states: Vec<_> = p.states.iter().filter(|s| s.reachable).collect();
+    let mut select = String::from("int gnet_part=0; switch(fr.pc) { ");
+    let mut calls = String::from("switch(gnet_part) { ");
+    let args = super::resume::args(p);
+    for (k, run) in states.chunks(PART_STATES).enumerate() {
+        for state in run {
+            select.push_str(&format!("case {}: ", state.pc));
+        }
+        select.push_str(&format!("gnet_part={k}; break; "));
+        calls.push_str(&format!(
+            "case {k}: gnet_r=gnet_part_{k}({args},gl); break; "
+        ));
+    }
+    select.push_str(&format!(
+        "default: {{ {} }} }}",
         fail(Status::InvalidState, None)
     ));
-    w.push(&guard)?;
-    transition(w, true)
+    w.push(&select)?;
+    w.push(&format!(
+        "GnetLocals gl={{{}}}; int gnet_r=0;",
+        LOCALS.join(",")
+    ))?;
+    w.push(&format!("{calls}}}"))?;
+    w.push(&LOCALS.map(|v| format!("{v}=gl.{v};")).join(" "))?;
+    w.push("if (gnet_r==1) { GNET_YIELD; } if (gnet_r==2) { GNET_STOP; } }")
 }
 
 fn transition(writer: &mut Writer, resumable: bool) -> Result<(), Error> {
@@ -133,7 +219,11 @@ GNET_FN void gnet_finish(GNET_MEM gnet_w* output, gnet_w status, gnet_w result,
     } else {
         ""
     };
+    let compact = super::resume::compact(program);
     if program.resumable {
+        if compact {
+            parts(&mut w, program)?;
+        }
         super::resume::begin(&mut w, program)?;
     } else {
         w.push(&format!(
@@ -180,28 +270,28 @@ GNET_FN void gnet_run(GNET_MEM const gnet_w* input, GNET_MEM gnet_w* output,
     if program.resumable {
         w.push("task->started=1; task->fuel=fuel; task->transition_cap=transition_cap; task->trace_cap=trace_cap; }")?;
     }
-    let compact = super::resume::compact(program);
-    if program.body_regions.is_empty() && !compact {
-        w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1]; switch(fr.pc) {")?;
-    } else {
+    if compact {
         w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1];")?;
         super::body_map::boundary(&mut w, program)?;
-        if compact {
-            hoisted_prologue(&mut w, program)?;
-        }
-        w.push("switch(fr.pc) {")?;
-    }
-    for state in &program.states {
-        if state.reachable {
-            state_source(&mut w, program, *state)?;
-        }
-    }
-    w.push(&format!(
-        "default: {{ {} }} }} }}",
-        fail(Status::InvalidState, None)
-    ))?;
-    if compact {
+        dispatch(&mut w, program)?;
         super::resume::exits(&mut w)?;
+    } else {
+        if program.body_regions.is_empty() {
+            w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1]; switch(fr.pc) {")?;
+        } else {
+            w.push("while (true) { GNET_FRAME GnetFrame& fr=frames[depth-1];")?;
+            super::body_map::boundary(&mut w, program)?;
+            w.push("switch(fr.pc) {")?;
+        }
+        for state in &program.states {
+            if state.reachable {
+                state_source(&mut w, program, *state)?;
+            }
+        }
+        w.push(&format!(
+            "default: {{ {} }} }} }}",
+            fail(Status::InvalidState, None)
+        ))?;
     }
     w.push("}")?;
     let args = entry.params.len();

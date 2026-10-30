@@ -83,10 +83,11 @@ struct GnetTask {
     Ok(())
 }
 
-/// CUDA continuations hoist the per-state prologue out of the state switch
-/// and share one yield and one stop epilogue (`exits`). The code is the same
-/// protocol; NVRTC time grew with thousands of inlined copies of both (#278).
-/// Metal keeps the inline form: Metal Shading Language has no `goto`.
+/// CUDA continuations run their states in bounded part routines (see
+/// `emit::parts`) with one shared yield and one shared stop epilogue per
+/// routine. The protocol is unchanged; NVRTC time grew superlinearly with one
+/// giant routine and thousands of inlined epilogue copies (#278). Metal keeps
+/// the single inline form: Metal Shading Language has no `goto`.
 pub(super) fn compact(p: &Program<'_>) -> bool {
     p.resumable && p.target == Target::Cuda
 }
@@ -107,22 +108,39 @@ pub(super) fn exits(w: &mut Writer) -> Result<(), Error> {
     w.push("gnet_yield: GNET_YIELD_EXIT;\ngnet_stop: GNET_STOP_EXIT;")
 }
 
+/// `gnet_resume`'s parameter list, with the optional ones defaulted or not.
+pub(super) fn params(p: &Program<'_>, defaults: bool) -> String {
+    let default = if defaults { "=nullptr" } else { "" };
+    let mut params = String::from(
+        "GNET_MEM const gnet_w* input,GNET_MEM gnet_w* output,\n    GNET_MEM gnet_u* trace,gnet_u fuel,gnet_u transition_cap,gnet_u trace_cap,\n    GNET_MEM gnet_w* heap,GNET_MEM gnet_u* cleanup,GNET_MEM GnetTask* task,gnet_u quantum",
+    );
+    if p.speculation.is_some() {
+        params.push_str(&format!(", GNET_PRIVATE GnetSpecState* spec{default}"));
+    }
+    if !p.body_regions.is_empty() {
+        params.push_str(&format!(", GNET_MEM gnet_u* p2{default}"));
+    }
+    params
+}
+
+/// The arguments that forward every `params` parameter unchanged.
+pub(super) fn args(p: &Program<'_>) -> String {
+    let mut args =
+        String::from("input,output,trace,fuel,transition_cap,trace_cap,heap,cleanup,task,quantum");
+    if p.speculation.is_some() {
+        args.push_str(",spec");
+    }
+    if !p.body_regions.is_empty() {
+        args.push_str(",p2");
+    }
+    args
+}
+
 pub(super) fn begin(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
     let slots = p.owned.as_ref().map_or(0, |layout| layout.allocations());
-    let extra = if p.speculation.is_some() {
-        ", GNET_PRIVATE GnetSpecState* spec=nullptr"
-    } else {
-        ""
-    };
-    let region = if p.body_regions.is_empty() {
-        ""
-    } else {
-        ", GNET_MEM gnet_u* p2=nullptr"
-    };
+    let params = params(p, true);
     w.push(&format!(r#"
-GNET_FN bool gnet_resume(GNET_MEM const gnet_w* input,GNET_MEM gnet_w* output,
-    GNET_MEM gnet_u* trace,gnet_u fuel,gnet_u transition_cap,gnet_u trace_cap,
-    GNET_MEM gnet_w* heap,GNET_MEM gnet_u* cleanup,GNET_MEM GnetTask* task,gnet_u quantum{extra}{region}) {{
+GNET_FN bool gnet_resume({params}) {{
     if (task->done) return true;
     GNET_FRAME GnetFrame* frames=task->frames;
     gnet_u depth=task->depth,max_depth=task->max_depth,steps=task->steps;
