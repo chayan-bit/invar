@@ -1,10 +1,19 @@
 # tensor
 
-Tensor contraction contracts, physical layouts and emission.
-The module root is ../tensor.rs.
-annotate and verify establish Contract; emit_cuda and emit_msl emit code.
-host::run_source executes through CUDA, Metal or the explicit CPU model.
+Rank-2 tensor contraction: source-derived contracts, physical layouts and CUDA and Metal emission.
 
-See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
-Preserve diagnostics, source order, deterministic observations and receipt identities.
-Run focused checks through the required host wrapper before the full suite.
+## Where to start
+
+- `annotate` and `verify` in [../tensor.rs](../tensor.rs) establish a `Contract`; `emit_cuda`, `emit_msl` and `emit` produce kernel source; [host.rs](host.rs) has `run_source` for CUDA, Metal or the explicit CPU model.
+
+## Position in the pipeline
+
+A source family used by [schedule](../schedule/README.md); cache keys are in [../tensor_cache.rs](../tensor_cache.rs).
+
+## Tests
+
+- `cargo nextest run --locked --test m4_contraction`, `--test m4_numeric_layout` and `--test contraction_emitter`.
+
+## Rules to keep
+
+- Recognition never changes source execution; unknown forms keep the CPU path.

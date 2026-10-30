@@ -1,5 +1,11 @@
 #![forbid(unsafe_code)]
 
+//! Invar compiler library: parse, check, admit and run programs whose parallel plans are justified by evidence.
+//!
+//! Start at `front::parse`, then `check::check`, `mir::lower`, `admission::analyze` and `schedule::run_source`;
+//! `engine` selects the execution engine and `main.rs` is the CLI.
+//! Each area directory under `src/` has a README, and `docs/architecture.md` walks one program through all of them.
+
 pub mod admission;
 mod angle;
 pub mod array_limits;

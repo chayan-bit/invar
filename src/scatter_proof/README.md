@@ -1,10 +1,19 @@
 # scatter_proof
 
-Scatter legality certificates and bounded host execution.
-The module root is ../scatter_proof.rs.
-Certificate and Contract retain checked source facts.
-host::prepare and host::run_source enforce the admitted plan.
+Static injectivity and destination-bound certificates for literal-domain affine scatters, with bounded host execution.
 
-See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
-Preserve diagnostics, source order, deterministic observations and receipt identities.
-Run focused checks through the required host wrapper before the full suite.
+## Where to start
+
+- `Certificate` and `Contract` in [../scatter_proof.rs](../scatter_proof.rs); `host::prepare` and `host::run_source` in [host.rs](host.rs) enforce the admitted plan.
+
+## Position in the pipeline
+
+Used by the indexed families; see [indexed_source](../indexed_source/README.md).
+
+## Tests
+
+- `cargo nextest run --locked --test m4_indexed` (`static_scatter_proof`, `static_scatter_runtime`).
+
+## Rules to keep
+
+- The certificate carries no scheduling or publication authority.

@@ -1,10 +1,23 @@
 # component_test
 
-The component test CLI and planner subprocess integration.
-The module root is ../component_test.rs.
-command receives CLI arguments and returns an exit status.
-planner::run executes the planner-specific test path.
+`invar component test`: the public component contract harness and the writer for immutable passing evidence.
 
-See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
-Preserve diagnostics, source order, deterministic observations and receipt identities.
-Run focused checks through the required host wrapper before the full suite.
+## Where to start
+
+- `command` in [../component_test.rs](../component_test.rs) takes the CLI arguments and returns an exit status; `planner` in [planner.rs](planner.rs) runs the planner-specific, hash-bound test path.
+
+## Position in the pipeline
+
+Uses [system](../system/README.md) manifests.
+
+## Tests
+
+- `cargo nextest run --locked --test robotics` (`foreign_manifests`, `planner_contract`, `planner_boundary`).
+
+## Rules to keep
+
+- Diagnostic fixtures never write a pass.
+
+## Read next
+
+- [specification section 10](../../docs/spec/invar-v0.1.md#10-foreign-component-manifests)

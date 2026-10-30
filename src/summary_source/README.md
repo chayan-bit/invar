@@ -1,10 +1,19 @@
 # summary_source
 
-Bounded summary-family recognition and execution.
-The module root is ../summary_source.rs.
-Family, Contract, Observation and Prepared describe admitted work.
-host::run_source owns completion and result publication.
+Checked recognition and preparation of bounded summary scans (finite-state and matrix), with CPU execution and a device plan.
 
-See [the architecture overview](../../docs/architecture.md) for the full pipeline and [validation](../../docs/validation.md) for the checks.
-Preserve diagnostics, source order, deterministic observations and receipt identities.
-Run focused checks through the required host wrapper before the full suite.
+## Where to start
+
+- `Family`, `Contract`, `Observation` and `Prepared` in [../summary_source.rs](../summary_source.rs); [matcher.rs](matcher.rs) holds the matrix-scan helpers; [host.rs](host.rs) has `run_source`; [device.rs](device.rs) lowers a prepared scan to the device IR. [../bounded_summary.rs](../bounded_summary.rs) defines the summaries.
+
+## Position in the pipeline
+
+A source family used by [schedule](../schedule/README.md).
+
+## Tests
+
+- `cargo nextest run --locked --test m4_summary`.
+
+## Rules to keep
+
+- Candidate extraction stays separate from fuel debit, loan admission and publication.
