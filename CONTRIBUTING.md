@@ -10,6 +10,22 @@ Read the [v0.1 language specification](docs/spec/invar-v0.1.md), the [grammar](s
 Larger work items are tracked in [GitHub issues](https://github.com/chayan-bit/invar/issues).
 For a substantial change, open an issue first so the design can be agreed before you invest in it.
 
+To find your way around the code, read these in order:
+
+1. The [README](README.md), for what Invar is.
+2. The [glossary](docs/glossary.md), for words like admission, oracle, family and receipt.
+3. The [architecture code tour](docs/architecture.md#code-tour-one-program-end-to-end), which follows one program through the compiler and names the entry function at each step.
+4. The README in the `src/` area you will touch; each lists its entry points, its place in the pipeline and its tests.
+5. The [testing guide](docs/testing.md), which says what each test binary covers and how to run one.
+
+The [documentation index](docs/README.md) lists everything else.
+
+## Finding something to work on
+
+Issues labelled [good first issue](https://github.com/chayan-bit/invar/labels/good%20first%20issue) are sized for a first contribution.
+The other labels say the area (`area:*`), the size (`size:*`), the risk (`risk:*`) and the kind of change (`type:*`).
+Comment on the issue before you start so two people do not do the same work.
+
 ## Reporting bugs
 
 Open a bug report using the issue form on GitHub.
@@ -34,10 +50,30 @@ On Windows (MSVC or `x86_64-pc-windows-gnullvm`):
 - Clone with `git -c core.symlinks=true clone ...` (Developer Mode or an elevated shell), since some fixtures are symlinks.
 - A few tests drive POSIX-only programs and are ignored on Windows with the reason in their `ignore` attribute.
 
+## First build
+
+```sh
+git clone https://github.com/chayan-bit/invar.git
+cd invar
+cargo build --locked
+cargo run --locked --bin invar -- run examples/sum.inv --engine reference
+```
+
+The program returns 10.
+The default build needs only Rust and a C compiler (the vendored CORE-MATH sources are C).
+The `native` feature additionally needs LLVM 21 ([native toolchain](docs/native-toolchain-v1.md)), and the `cuda` and `metal` features need their own hardware to run, though they compile without it.
+
+To run one test binary or one test, use nextest directly; the [testing guide](docs/testing.md) lists the binaries:
+
+```sh
+cargo nextest run --locked --test language
+cargo nextest run --locked --test language -E 'test(/issue_m0_04/)'
+```
+
 ## Making a change
 
 1. Implement the smallest complete behavior, including diagnostics and input limits.
-2. Add focused positive, negative and boundary tests.
+2. Add focused positive, negative and boundary tests, in the test binary that already covers the area (see the [testing guide](docs/testing.md)).
 3. Update the specification and grammar together when a change affects language semantics, and explain any changed user-visible behavior.
 4. Never weaken a test oracle to make a failing test pass without a justified semantic change.
 5. Prefer the standard library; a new dependency needs a concrete need and review.
@@ -102,7 +138,8 @@ Use [Conventional Commits](https://www.conventionalcommits.org/): `<type>: <desc
 Keep commits small and focused.
 
 Keep each pull request focused on one change and link the issue it addresses.
-Fill in the pull request template: describe what changed, how you tested it and any remaining limitations.
+Fill in the [pull request template](.github/pull_request_template.md): describe what changed, how you tested it and any remaining limitations.
+Name the exact commands you ran and the result, and list any check you could not run, such as a GPU suite.
 
 ## License of contributions
 
