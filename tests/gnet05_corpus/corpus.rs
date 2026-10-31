@@ -554,10 +554,7 @@ fn device_corpus<B: device_host::Backend>(
 ) -> [u64; 6] {
     let start = std::time::Instant::now();
     let programs = calibrated();
-    let jobs = std::env::var("INVAR_GNET05_DEVICE_JOBS")
-        .ok()
-        .and_then(|n| n.parse().ok())
-        .unwrap_or(1);
+    let jobs = device_jobs();
     let runs = device::bounded_pool(&programs, jobs, |p| {
         let plan =
             Plan::from_source(p.source.as_bytes(), "run", target, parallel::limits()).ok()?;
@@ -583,6 +580,15 @@ fn device_corpus<B: device_host::Backend>(
         "{label}: the corpus executed frontiers"
     );
     totals
+}
+
+/// Concurrent device programs: `INVAR_GNET05_DEVICE_JOBS`, default 1.
+#[cfg(any(feature = "metal", feature = "cuda"))]
+pub(crate) fn device_jobs() -> usize {
+    std::env::var("INVAR_GNET05_DEVICE_JOBS")
+        .ok()
+        .and_then(|n| n.parse().ok())
+        .unwrap_or(1)
 }
 
 /// Every input of one admitted program: its `device_corpus` totals and the

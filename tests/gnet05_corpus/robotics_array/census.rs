@@ -47,7 +47,7 @@ struct Entry {
 struct Run {
     context: String,
     plan: device_host::Plan,
-    args: Vec<eval::Value>,
+    args: Vec<Arg>,
     wide: usize,
 }
 
@@ -90,9 +90,9 @@ fn census_admission(target: compiled::Target) -> Vec<Entry> {
                     selected.then(|| {
                         let input = &p.oracle_inputs[0];
                         let args = if kind == "seed" {
-                            input.iter().map(|&x| eval::Value::U32(x)).collect()
+                            input.iter().map(|&x| Arg::U32(x)).collect()
                         } else {
-                            values(&array::expand(&p.case, arm_of(p, &arms), input))
+                            array::expand(&p.case, arm_of(p, &arms), input)
                         };
                         Run {
                             context: format!("{} {name}", p.id),
@@ -117,25 +117,22 @@ fn census_admission(target: compiled::Target) -> Vec<Entry> {
 /// device, wide and as a capacity-0 serial control, exact against the CPU
 /// net oracle. One backend serves both capacities of a (program, config)
 /// unless a run poisons it. A source whose ahead-of-time compile was refused
-/// records that refusal and runs nothing. Rows are appended to
-/// `INVAR_GNET05_CENSUS` as they complete, when set.
+/// records that refusal and runs nothing. Entries are independent and run
+/// `INVAR_GNET05_DEVICE_JOBS` at a time (default 1); each row prints as it
+/// completes, and `INVAR_GNET05_CENSUS`, when set, receives them in census
+/// order at the end.
 #[cfg(any(feature = "metal", feature = "cuda"))]
 fn census_run<B: device_host::Backend>(
     label: &str,
     entries: Vec<Entry>,
     ahead: &Ahead,
-    mut backend: impl FnMut() -> B,
+    backend: impl Fn() -> B + Sync,
 ) {
-    let mut out = std::env::var_os("INVAR_GNET05_CENSUS").map(|p| fs::File::create(p).unwrap());
-    let mut executed = 0;
-    for Entry {
-        mut row,
-        admission,
-        run,
-    } in entries
-    {
+    let rows = device::bounded_pool(&entries, crate::corpus::device_jobs(), |entry| {
+        let mut row = entry.row.clone();
+        let mut executed = 0;
         let started = std::time::Instant::now();
-        if let Some(run) = run {
+        if let Some(run) = &entry.run {
             let key: [u8; 32] = Sha256::digest(run.plan.artifact().source()).into();
             let compile = ahead.get(&key);
             match compile {
@@ -144,16 +141,18 @@ fn census_run<B: device_host::Backend>(
                 None => {}
             }
             if !matches!(compile, Some(Err(_))) {
-                executed += run_capacities(label, &run, &mut row, &mut backend);
+                executed += run_capacities(label, run, &mut row, &mut || backend());
             }
         }
-        row["seconds"] = json!((admission + started.elapsed()).as_secs_f64());
+        row["seconds"] = json!((entry.admission + started.elapsed()).as_secs_f64());
         println!("gnet05ra census {row}");
-        if let Some(f) = out.as_mut() {
-            use std::io::Write;
-            writeln!(f, "{row}").unwrap();
-        }
+        (row, executed)
+    });
+    if let Some(path) = std::env::var_os("INVAR_GNET05_CENSUS") {
+        let text: String = rows.iter().map(|(row, _)| format!("{row}\n")).collect();
+        fs::write(path, text).unwrap();
     }
+    let executed: usize = rows.iter().map(|(_, n)| n).sum();
     println!("gnet05ra census {label} executed={executed}");
 }
 
@@ -184,11 +183,11 @@ fn run_capacities<B: device_host::Backend>(
             transitions: DEVICE_CAP,
             ..device::config(DEVICE_CAP, events, 16, 64, capacity)
         };
-        let sized = device::reference(plan, &values_copy(args), cfg(DEVICE_CAP as usize));
+        let sized = device::reference(plan, &values(args), cfg(DEVICE_CAP as usize));
         let cfg = cfg(sized.events.len().max(1));
-        let expected_args = values_copy(args);
+        let expected_args = values(args);
         let expected = device::reference(plan, &expected_args, cfg);
-        let run_args = values_copy(args);
+        let run_args = values(args);
         // Includes the backend's pipeline compilation unless it was
         // compiled ahead (see the row's `compile`).
         let device_started = std::time::Instant::now();
@@ -218,19 +217,6 @@ fn run_capacities<B: device_host::Backend>(
 /// (`compiled::DeviceLayout::buffer_bytes`).
 #[cfg(any(feature = "metal", feature = "cuda"))]
 const DEVICE_CAP: u64 = 1_000_000;
-
-#[cfg(any(feature = "metal", feature = "cuda"))]
-fn values_copy(v: &[eval::Value]) -> Vec<eval::Value> {
-    v.iter()
-        .map(|x| match x {
-            eval::Value::ArrayF32(a) => {
-                eval::Value::ArrayF32(Rc::new(RefCell::new(a.borrow().clone())))
-            }
-            eval::Value::U32(x) => eval::Value::U32(*x),
-            other => panic!("census argument {other:?}"),
-        })
-        .collect()
-}
 
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
