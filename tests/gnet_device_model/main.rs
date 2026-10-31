@@ -12,8 +12,8 @@ mod gnet_words;
 #[path = "../support/gnet_parallel.rs"]
 mod parallel;
 
-mod issue_gnet_03_device;
-mod issue_gnet_03_injection;
-mod issue_gnet_04_device;
-mod issue_gnet_12_cuda_owned_numeric_model;
-mod issue_gnet_resume_device_model;
+mod cuda_owned_numeric_model;
+mod device_fault_injection;
+mod device_model;
+mod resume_device_model;
+mod speculation_device_model;

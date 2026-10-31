@@ -18,6 +18,6 @@ mod robotics;
 #[path = "../support/gnet_robotics_checks.rs"]
 mod robotics_checks;
 
-mod issue_gnet_05_corpus;
-mod issue_gnet_05_robotics;
-mod issue_gnet_05_robotics_array;
+mod corpus;
+mod robotics;
+mod robotics_array;

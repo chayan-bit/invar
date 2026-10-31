@@ -5,9 +5,9 @@ mod child_deadline;
 #[path = "../../test-support/gnet_words.rs"]
 mod gnet_words;
 
-mod issue_gnet_08_f32;
-mod issue_gnet_08_named_source;
-mod issue_gnet_10_f32_arrays;
-mod issue_gnet_11_numeric_host;
-mod issue_gnet_11_numeric_owned_state;
-mod issue_gnet_f32_helpers_flag_independence;
+mod abi11_host;
+mod abi11_owned_state;
+mod f32_arrays;
+mod f32_continuations;
+mod f32_helpers_flag_independence;
+mod named_source_numeric;

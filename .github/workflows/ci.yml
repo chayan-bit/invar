@@ -59,27 +59,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # One test, issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle, compiles each corpus program to C++ three times
+        # One test, device_model::device_model_corpus_cpu_model_agrees_with_oracle, compiles each corpus program to C++ three times
         # (about 3 min on the pull-request sample, 19-28 min on the whole corpus). It is excluded from the four shards below and runs
         # in two jobs, each built from its own test binary only: INVAR_CORPUS_PART deals the corpus's programs (sorted by path) out
         # by index, so the two parts are disjoint and together run every program; no test is skipped overall.
-        # issue_gnet_03_device_corpus_parts_cover_the_corpus (in a shard) checks the parts cover the corpus.
+        # device_model_corpus_parts_cover_the_corpus (in a shard) checks the parts cover the corpus.
         include:
           - name: shard 1/4
-            args: --partition count:1/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:1/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
             doctests: true
           - name: shard 2/4
-            args: --partition count:2/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:2/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
           - name: shard 3/4
-            args: --partition count:3/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:3/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
           - name: shard 4/4
-            args: --partition count:4/4 -E 'not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --partition count:4/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
           - name: CPU-model corpus 1/2
             part: 1/2
-            args: --test gnet_device_model --success-output final -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --test gnet_device_model --success-output final -E 'test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
           - name: CPU-model corpus 2/2
             part: 2/2
-            args: --test gnet_device_model --success-output final -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+            args: --test gnet_device_model --success-output final -E 'test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
     env:
       # tests/limits/ci_profile_canary.rs checks that the ci-debug profile keeps debug assertions.
       INVAR_CI_PROFILE: debug
@@ -177,12 +177,12 @@ jobs:
         run: >-
           cargo nextest run --locked ${TARGET:+--target "$TARGET"} --profile ci --cargo-profile ci-debug
           -p invar -p invar-tools ${{ matrix.args }}
-          -E 'not test(=issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output) & not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          -E 'not test(=issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output) & not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
       - name: CPU-model corpus test
         if: matrix.corpus
         run: >-
           cargo nextest run --locked --profile ci --cargo-profile ci-debug -p invar -p invar-tools
-          --test gnet_device_model -E 'test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          --test gnet_device_model -E 'test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
 
   # The jobs below compile the feature-gated code that the default-feature jobs never build.
   native:
@@ -220,7 +220,7 @@ jobs:
           cargo nextest run --locked --profile ci --cargo-profile ci-debug --features native
           --test mir --test exports --test gnet_net --test diagnostics
           --test numeric_tiers
-          -E 'not ((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|eng_18_native_(simd|regions)|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/)) & not (binary(=numeric_tiers) & not test(/^issue_eng_03_tier_engines::/)) & not (binary(=gnet_net) & not test(/^issue_gnet_02_native::/)) & not (binary(=diagnostics) & not test(/^issue_dx_20_/))'
+          -E 'not ((binary(=mir) | binary(=exports)) & not test(/^issue_(m1_02|eng_18_native_(simd|regions)|l1_06_(native_arrays|native_f32_arrays|scalar_export_core|export_failure_contract))::/)) & not (binary(=numeric_tiers) & not test(/^issue_eng_03_tier_engines::/)) & not (binary(=gnet_net) & not test(/^net_native_cpu::/)) & not (binary(=diagnostics) & not test(/^issue_dx_20_/))'
       - name: Foreign boundary (invar-foreign) clippy and tests
         run: |
           cargo clippy --locked -p invar-foreign --all-targets -- -D warnings

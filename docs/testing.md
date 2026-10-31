@@ -217,9 +217,9 @@ The GNET-05 acceptance corpus under `bench/general-net-v01/gnet05`.
 
 | Module | Covers |
 | --- | --- |
-| `issue_gnet_05_corpus` | Source-derived corpus: every program against the oracles. |
-| `issue_gnet_05_robotics` | Robotics programs of the corpus. |
-| `issue_gnet_05_robotics_array` | Host-array variants and the device admission census (a file plus a directory). |
+| `corpus` | Source-derived corpus: every program against the oracles. |
+| `robotics` | Robotics programs of the corpus. |
+| `robotics_array` | Host-array variants and the device admission census (a file plus a directory). |
 
 ### `gnet_net`
 
@@ -227,13 +227,13 @@ The general interaction net: lowering a checked program to a net and comparing t
 
 | Module | Covers |
 | --- | --- |
-| `issue_gnet_01` | The checked-source boundary, wire mutations, forged annotations and version separation. |
-| `issue_gnet_02` | Arrays in the net: moves, traps, cleanup prefixes, fuel prefixes and live-array budgets. |
-| `issue_gnet_02_aggregates` | Records and variants in the net: results, moves, borrows and cleanup. |
-| `issue_gnet_02_corpus` | Every runnable fixture and example agrees across engines. |
-| `issue_gnet_02_generated` | Seeded random well-typed programs. |
-| `issue_gnet_02_native` | Compiled native CPU lowering of the net against the oracle. |
-| `issue_gnet_net_oracle_gaps` | The exact corpus gaps recorded by qualification. |
+| `net_boundary` | The checked-source boundary, wire mutations, forged annotations and version separation. |
+| `net_oracle_arrays` | Arrays in the net: moves, traps, cleanup prefixes, fuel prefixes and live-array budgets. |
+| `net_oracle_aggregates` | Records and variants in the net: results, moves, borrows and cleanup. |
+| `net_oracle_corpus` | Every runnable fixture and example agrees across engines. |
+| `net_oracle_generated` | Seeded random well-typed programs. |
+| `net_native_cpu` | Compiled native CPU lowering of the net against the oracle. |
+| `net_oracle_gaps` | The exact corpus gaps recorded by qualification. |
 
 ### `gnet_compiled`
 
@@ -242,15 +242,15 @@ Compiled general-net code on the CPU: scalar, owned-array and aggregate ABIs, th
 | Module | Covers |
 | --- | --- |
 | `owned_driver` | Helper: the C++ driver shared by the owned and aggregate suites. |
-| `issue_gnet_03` | Compiled CPU code for scalar programs against the oracle. |
-| `issue_gnet_03_owned` | Compiled CPU code with owned arrays and resumable continuations. |
-| `issue_gnet_04_host` | The host driver: runtime inputs, continuations, fuel prefixes and caps. |
-| `issue_gnet_04_host_cli` | `invar gnet-device` and its CPU-model receipts. |
-| `issue_gnet_04_host_failure` | Host-side failure and poison handling. |
-| `issue_gnet_04_m4_admission` | Numeric forms are checked and never reinterpreted as integers. |
-| `issue_gnet_04_speculation` | Independent recursive children are extracted and committed in source order. |
-| `issue_gnet_06_aggregates` | Compiled CPU code for records and variants. |
-| `issue_gnet_06_m4_admission` | Current f32 scalar, array and record forms fail closed. |
+| `compiled_cpu_scalar` | Compiled CPU code for scalar programs against the oracle. |
+| `compiled_cpu_owned` | Compiled CPU code with owned arrays and resumable continuations. |
+| `host_runtime_inputs` | The host driver: runtime inputs, continuations, fuel prefixes and caps. |
+| `host_cli` | `invar gnet-device` and its CPU-model receipts. |
+| `host_failure` | Host-side failure and poison handling. |
+| `m4_numeric_admission` | Numeric forms are checked and never reinterpreted as integers. |
+| `speculation` | Independent recursive children are extracted and committed in source order. |
+| `compiled_cpu_aggregates` | Compiled CPU code for records and variants. |
+| `aggregate_m4_admission` | Current f32 scalar, array and record forms fail closed. |
 
 ### `gnet_device_model`
 
@@ -259,11 +259,11 @@ Emitted device kernels compiled as C++ and run on the CPU (the CPU model) agains
 | Module | Covers |
 | --- | --- |
 | `epoch_model` | Helper: the shared CPU model of per-root continuation kernels. |
-| `issue_gnet_03_device` | Ordinary-source device admission and the corpus CPU-model run (the long corpus test is its own CI job). |
-| `issue_gnet_03_injection` | Device fault injection on the CPU group model. |
-| `issue_gnet_04_device` | Group execution of recursive children and exact prefixes. |
-| `issue_gnet_12_cuda_owned_numeric_model` | CPU model of the CUDA owned-numeric continuation (ABI12). |
-| `issue_gnet_resume_device_model` | CPU model of the resumable CUDA/Metal continuation (ABI3), every epoch. |
+| `device_model` | Ordinary-source device admission and the corpus CPU-model run (the long corpus test is its own CI job). |
+| `device_fault_injection` | Device fault injection on the CPU group model. |
+| `speculation_device_model` | Group execution of recursive children and exact prefixes. |
+| `cuda_owned_numeric_model` | CPU model of the CUDA owned-numeric continuation (ABI12). |
+| `resume_device_model` | CPU model of the resumable CUDA/Metal continuation (ABI3), every epoch. |
 
 ### `gnet_numeric_host`
 
@@ -271,12 +271,12 @@ Loaded numeric (`f32`) continuations, ABI11 hosts and named-source numeric entry
 
 | Module | Covers |
 | --- | --- |
-| `issue_gnet_08_f32` | `f32` storage, emission and resumable batches. |
-| `issue_gnet_08_named_source` | Private numeric named-source entry: bit copies and every fuel prefix. |
-| `issue_gnet_10_f32_arrays` | `f32` arrays: source, MIR, oracle and native agree on every fuel prefix. |
-| `issue_gnet_11_numeric_host` | Loaded ABI11 owned numeric continuations. |
-| `issue_gnet_11_numeric_owned_state` | ABI11 emitted C++ under UBSan against the oracle. |
-| `issue_gnet_f32_helpers_flag_independence` | Scaffolding for the strict-f32 owned-continuation contract. |
+| `f32_continuations` | `f32` storage, emission and resumable batches. |
+| `named_source_numeric` | Private numeric named-source entry: bit copies and every fuel prefix. |
+| `f32_arrays` | `f32` arrays: source, MIR, oracle and native agree on every fuel prefix. |
+| `abi11_host` | Loaded ABI11 owned numeric continuations. |
+| `abi11_owned_state` | ABI11 emitted C++ under UBSan against the oracle. |
+| `f32_helpers_flag_independence` | Scaffolding for the strict-f32 owned-continuation contract. |
 
 ### `gnet_provenance`
 
@@ -284,10 +284,10 @@ Receipts that bind compiled artifacts to the exact source, bytes and budgets the
 
 | Module | Covers |
 | --- | --- |
-| `issue_gnet_05_provenance` | Reproducible, byte-bound provenance of compiled artifacts. |
-| `issue_gnet_05_provenance_owned` | Provenance of owned and continuation layouts (a file plus a directory). |
-| `issue_gnet_10_provenance` | Provenance of `f32` array layouts. |
-| `issue_gnet_11_provenance_source` | Source-issued ABI11 receipt checks. |
+| `provenance` | Reproducible, byte-bound provenance of compiled artifacts. |
+| `provenance_owned` | Provenance of owned and continuation layouts (a file plus a directory). |
+| `f32_array_provenance` | Provenance of `f32` array layouts. |
+| `abi11_source_provenance` | Source-issued ABI11 receipt checks. |
 
 ### `gnet_slices`
 
@@ -295,10 +295,10 @@ Small vertical slices of the general-net work: arrays and records, device entry,
 
 | Module | Covers |
 | --- | --- |
-| `gnet_p2` | The P2 slice: arrays, copies and limits agree with the oracle. |
-| `issue_gnet_p0b_entry` | The device entry ABI: CPU group models, typed refusals, pending work. |
-| `issue_gnet_p5b` | Reachability, numeric helpers and returned owners against the oracle. |
-| `issue_gnet_p5b_robotics` | Two robotics programs on the device against the oracle. |
+| `p2_compiled_slices` | The P2 slice: arrays, copies and limits agree with the oracle. |
+| `device_entry_abi` | The device entry ABI: CPU group models, typed refusals, pending work. |
+| `exactness_checks` | Reachability, numeric helpers and returned owners against the oracle. |
+| `robotics_device_checks` | Two robotics programs on the device against the oracle. |
 
 ### `normal_form`
 
@@ -315,10 +315,10 @@ The law-directed normal form of the net: regions, laws, certificates, family adm
 | `net_task_region` | The residual fork-join task region against the oracle. |
 | `normal_form_residue_seed` | The residue ring behind the affine laws. |
 | `pnf_family_admission` | Family admission from the normal form (a file plus a directory). |
-| `gnet_p4a_path_sum` | The path-sum lowering against the oracle. |
-| `v01_gnet05_run` | `invar run` on the GNET-05 corpus. |
-| `v01_gnet_auto_placement` | Placement runs record the legal engine set. |
-| `v01_normal_form_run` | `invar run` executes serial-only programs through the checked normal form. |
+| `path_sum` | The path-sum lowering against the oracle. |
+| `gnet05_run` | `invar run` on the GNET-05 corpus. |
+| `auto_placement` | Placement runs record the legal engine set. |
+| `normal_form_run` | `invar run` executes serial-only programs through the checked normal form. |
 
 ### `laws_prover`
 

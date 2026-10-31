@@ -33,7 +33,7 @@ skips=(
     issue_m5_01_benchmark_manifest_validation_and_rejections  # needs a git checkout
     source_packet_reverification_binds_source_key_dimensions_generation_and_input_bytes  # order-dependent on any OS
     p2_cuda_handwritten_diagnostic  # timing diagnostic; needs INVAR_NVRTC and a locked session
-    issue_gnet_05_robotics_baseline_outputs_match_reference  # needs INVAR_ROBOTICS_BASELINE_OUT
+    robotics_baseline_outputs_match_reference  # needs INVAR_ROBOTICS_BASELINE_OUT
 )
 [ "${REMOTE_CUDA_NO_SKIP:-0}" = 1 ] && skips=()
 [ -n "${REMOTE_CUDA_TESTS:-}" ] && tests=$REMOTE_CUDA_TESTS
