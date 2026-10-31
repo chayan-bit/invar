@@ -62,7 +62,7 @@ fn program(f: &str, edges: &[u32], start: u32, count: i32) -> String {
 }
 
 #[test]
-fn issue_eng_08_frontier_past_the_old_caps_is_admitted_and_exact() {
+fn frontier_past_the_old_caps_is_admitted_and_exact() {
     let mut cases = 0;
     for (n, rounds) in [(17usize, 17u32), (20, 20), (40, 40), (64, 5)] {
         let c = contract(n as u32, rounds);
@@ -79,7 +79,7 @@ fn issue_eng_08_frontier_past_the_old_caps_is_admitted_and_exact() {
 }
 
 #[test]
-fn issue_eng_08_frontier_matches_every_cpu_engine_past_the_old_caps() {
+fn frontier_matches_every_cpu_engine_past_the_old_caps() {
     let mut engines = 0;
     for (n, rounds) in [(17usize, 17u32), (20, 6)] {
         let f = function(n as u32, rounds);
@@ -93,7 +93,7 @@ fn issue_eng_08_frontier_matches_every_cpu_engine_past_the_old_caps() {
 }
 
 #[test]
-fn issue_eng_08_default_capacity_no_longer_caps_the_frontier_at_16() {
+fn default_capacity_no_longer_caps_the_frontier_at_16() {
     let n = 20;
     let c = contract(n as u32, 3);
     let edges = star(n);
@@ -140,7 +140,7 @@ fn issue_eng_08_default_capacity_no_longer_caps_the_frontier_at_16() {
 }
 
 #[test]
-fn issue_eng_08_one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() {
+fn one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() {
     let mut cases = 0;
     for (n, rounds) in [(1usize, 1u32), (17, 17), (30, 3)] {
         let c = contract(n as u32, rounds);
@@ -173,7 +173,7 @@ fn issue_eng_08_one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() 
 }
 
 #[test]
-fn issue_eng_08_footprint_matches_measured_allocation() {
+fn footprint_matches_measured_allocation() {
     // The sizes are part of the source, so each is its own contract. Re-verifying a contract costs
     // the same for literals of equal width, so what remains after subtracting the footprint's
     // owned bytes is one fixed number per width group.
@@ -204,7 +204,7 @@ fn issue_eng_08_footprint_matches_measured_allocation() {
 }
 
 #[test]
-fn issue_eng_08_overflow_and_oversized_sources_refuse_without_allocating() {
+fn overflow_and_oversized_sources_refuse_without_allocating() {
     assert_eq!(
         frontier_source::footprint(usize::MAX, 1, 0).bytes(Resource::Host),
         None
@@ -234,7 +234,7 @@ fn issue_eng_08_overflow_and_oversized_sources_refuse_without_allocating() {
 }
 
 #[test]
-fn issue_eng_08_language_array_limit_still_refuses_below_the_byte_budget() {
+fn language_array_limit_still_refuses_below_the_byte_budget() {
     let c = contract(3, 2);
     let big = vec![0u32; invar::array_limits::MAX_ARRAY_LEN + 1];
     // 64 MiB of edges passes the default byte budget; only the language limit refuses it.

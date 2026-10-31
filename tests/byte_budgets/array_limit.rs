@@ -16,7 +16,7 @@ fn contract(source: &str, entry: &str) -> Contract {
 }
 
 #[test]
-fn issue_eng_08_indexed_families_refuse_past_the_language_array_limit_under_the_byte_budget() {
+fn indexed_families_refuse_past_the_language_array_limit_under_the_byte_budget() {
     let over = MAX_ARRAY_LEN + 1;
     let budget = ByteBudget::default();
     let scatter = contract(SCATTER, "scatter");
@@ -43,7 +43,7 @@ fn issue_eng_08_indexed_families_refuse_past_the_language_array_limit_under_the_
 }
 
 #[test]
-fn issue_eng_08_affine_scatter_refuses_past_the_language_array_limit() {
+fn affine_scatter_refuses_past_the_language_array_limit() {
     let over = MAX_ARRAY_LEN as u64 + 1;
     let source = format!(
         "fn scatter(a: read Array<u32>) -> Array<u32> {{ var out: Array<u32> = filled_u32({over}u32,0u32); for i in 0u32..4u32 {{ out[i] = a[i]; }} return out; }}"

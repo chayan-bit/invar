@@ -210,7 +210,7 @@ fn cases() -> Vec<(&'static str, Formula, bool)> {
 }
 
 #[test]
-fn issue_eng_02_prove_ring_identities() {
+fn prove_ring_identities() {
     let mut proved = 0;
     for (name, formula, valid) in cases() {
         let verdict = decide(&formula);
@@ -222,7 +222,7 @@ fn issue_eng_02_prove_ring_identities() {
 }
 
 #[test]
-fn issue_eng_02_prove_smtlib_text() {
+fn prove_smtlib_text() {
     let formula = Formula::new(
         Sort::Int,
         vec![(
@@ -252,7 +252,7 @@ fn issue_eng_02_prove_smtlib_text() {
 /// Distinct names get distinct symbols, never a builtin; a sum past
 /// [`MAX_MONOMIALS`] is unproved.
 #[test]
-fn issue_eng_02_prove_symbols_and_limits() {
+fn prove_symbols_and_limits() {
     let names = ["|", "_", "#p", "\\", "true", "bvadd", "x"];
     let sum = names
         .iter()
@@ -292,7 +292,7 @@ fn issue_eng_02_prove_symbols_and_limits() {
 /// A deep `max` chain normalises and prints in linear size (each operand
 /// once), and its SMT-LIB2 form binds operands with `let`.
 #[test]
-fn issue_eng_02_prove_nested_max_stays_linear() {
+fn prove_nested_max_stays_linear() {
     let mut chain = v("x");
     for _ in 0..40 {
         chain = chain.max(v("x"));
@@ -314,7 +314,7 @@ fn issue_eng_02_prove_nested_max_stays_linear() {
 
 /// Each named rule mutation changes some verdict of [`cases`].
 #[test]
-fn issue_eng_02_prove_kills_every_rule_mutation() {
+fn prove_kills_every_rule_mutation() {
     for mutation in Mutation::ALL {
         let killed = cases()
             .into_iter()
@@ -336,7 +336,7 @@ fn issue_eng_02_prove_kills_every_rule_mutation() {
 
 /// Cross-check against z3 where it is installed; it is never required.
 #[test]
-fn issue_eng_02_prove_agrees_with_z3_when_present() {
+fn prove_agrees_with_z3_when_present() {
     let Ok(probe) = Command::new("z3").arg("-version").output() else {
         eprintln!("z3 not on PATH: cross-check not run");
         return;

@@ -56,7 +56,7 @@ fn model(d: usize, coeff: &[u32], seed: &[u32], count: usize) -> Vec<u32> {
 }
 
 #[test]
-fn issue_eng_08_dimensions_past_the_old_matcher_cap_are_a_typed_family_bound() {
+fn dimensions_past_the_old_matcher_cap_are_a_typed_family_bound() {
     let mut cases = 0;
     for d in [4usize, 5, 16, 17, 24] {
         let source = matrix_source(d);
@@ -75,7 +75,7 @@ fn issue_eng_08_dimensions_past_the_old_matcher_cap_are_a_typed_family_bound() {
 }
 
 #[test]
-fn issue_eng_08_refused_forms_run_identically_on_every_cpu_engine() {
+fn refused_forms_run_identically_on_every_cpu_engine() {
     let mut engines = 0;
     for d in [5usize, 17] {
         let count = 2;
@@ -97,7 +97,7 @@ fn issue_eng_08_refused_forms_run_identically_on_every_cpu_engine() {
 }
 
 #[test]
-fn issue_eng_08_matcher_analysis_bytes_are_budgeted() {
+fn matcher_analysis_bytes_are_budgeted() {
     let mut cases = 0;
     let long = |d: usize| {
         (0..d).fold(matrix_source(d), |s, j| {

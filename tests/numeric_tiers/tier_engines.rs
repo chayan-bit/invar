@@ -136,7 +136,7 @@ fn word(rng: &mut Rng) -> F {
 }
 
 #[test]
-fn issue_eng_03_tree_and_exact_source_folds_match_the_oracle_on_every_engine() {
+fn tree_and_exact_source_folds_match_the_oracle_on_every_engine() {
     let mut rng = Rng(0x0e03_7ee5);
     let mut runs = 0;
     for case in 0..80 {
@@ -162,7 +162,7 @@ fn issue_eng_03_tree_and_exact_source_folds_match_the_oracle_on_every_engine() {
 }
 
 #[test]
-fn issue_eng_03_tiers_differ_where_the_oracle_says_they_do() {
+fn tiers_differ_where_the_oracle_says_they_do() {
     let one = F::from_bits(1.0f32.to_bits());
     let big = F::from_bits(1.0e8f32.to_bits());
     // 1e8 + 1 - 1e8 + 0.5: the left fold and the one-leaf tree lose the 1.
@@ -184,7 +184,7 @@ fn issue_eng_03_tiers_differ_where_the_oracle_says_they_do() {
 
 /// 100,003 generated terms span many leaves and every worker split.
 #[test]
-fn issue_eng_03_large_tree_and_exact_folds_are_bit_identical_across_workers() {
+fn large_tree_and_exact_folds_are_bit_identical_across_workers() {
     let n = 100_003u32;
     let value = |i: u32| {
         let h = i.wrapping_mul(2_654_435_761) % 2_000_001;
@@ -209,7 +209,7 @@ fn code(source: &str) -> &'static str {
 }
 
 #[test]
-fn issue_eng_03_folds_no_tier_can_take_are_refused_not_run_strict() {
+fn folds_no_tier_can_take_are_refused_not_run_strict() {
     let wrap = |body: &str| {
         format!(
             "#[numeric(fold = \"tree\")] fn f(xs: read Array<f32>) -> f32 {{ {body} }} \
@@ -251,7 +251,7 @@ fn issue_eng_03_folds_no_tier_can_take_are_refused_not_run_strict() {
 
 /// The source evaluator and MIR agree at every fuel prefix of a tiered fold.
 #[test]
-fn issue_eng_03_tiered_folds_keep_fuel_prefixes_on_reference_and_mir() {
+fn tiered_folds_keep_fuel_prefixes_on_reference_and_mir() {
     for tier in ["tree", "exact"] {
         let source = program(
             tier,
@@ -274,7 +274,7 @@ fn issue_eng_03_tiered_folds_keep_fuel_prefixes_on_reference_and_mir() {
 }
 
 #[test]
-fn issue_eng_03_compact_functions_with_many_folds_are_not_refused() {
+fn compact_functions_with_many_folds_are_not_refused() {
     // Each fold generates dozens of nodes from fewer source bytes; their spans
     // must not run out in a compact function. (Counters are `j0`.. because
     // `i32` is a type name.)
@@ -292,7 +292,7 @@ fn issue_eng_03_compact_functions_with_many_folds_are_not_refused() {
 }
 
 #[test]
-fn issue_eng_03_generated_names_never_collide_with_source_names() {
+fn generated_names_never_collide_with_source_names() {
     // A function may already use the names the lowering would generate.
     for tier in ["tree", "exact"] {
         let source = format!(
@@ -309,7 +309,7 @@ fn issue_eng_03_generated_names_never_collide_with_source_names() {
 }
 
 #[test]
-fn issue_eng_03_folds_past_the_array_limit_trap_array_size_limit() {
+fn folds_past_the_array_limit_trap_array_size_limit() {
     // The slot buffer of a fold over every u32 is past the array limit; the
     // Exact init slot must not overflow the count first (review finding).
     for tier in ["tree", "exact"] {
@@ -344,7 +344,7 @@ fn issue_eng_03_folds_past_the_array_limit_trap_array_size_limit() {
 /// and a shape it cannot take runs strict, which the contract admits, instead
 /// of being refused (ENG-03 step 5').
 #[test]
-fn issue_eng_03_relaxed_folds_run_as_tree_and_other_sums_run_strict() {
+fn relaxed_folds_run_as_tree_and_other_sums_run_strict() {
     let mut rng = Rng(0x5e1a_0005);
     let mut engines = 0;
     for _ in 0..12 {

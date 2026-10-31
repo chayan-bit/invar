@@ -120,7 +120,7 @@ fn check_within_target(v: &Verified, t: &Target) {
 }
 
 #[test]
-fn issue_eng_06_moves_grid_verifies_or_refuses_by_name_on_every_target() {
+fn moves_grid_verifies_or_refuses_by_name_on_every_target() {
     let registry = Registry::builtin().unwrap();
     let mut verified = 0;
     let mut reasons: BTreeMap<&'static str, usize> = BTreeMap::new();
@@ -180,7 +180,7 @@ fn issue_eng_06_moves_grid_verifies_or_refuses_by_name_on_every_target() {
 }
 
 #[test]
-fn issue_eng_06_moves_budget_exceeding_sequences_are_refused_before_emission() {
+fn moves_budget_exceeding_sequences_are_refused_before_emission() {
     let sm86 = Registry::builtin().unwrap().get("cuda-sm86").unwrap();
     // 128x128x64 scalar: A 64*(128+1)*4 + B 64*128*4 = 65792 bytes > 48 KiB.
     let big = grid_schedule([128, 128, 64], 1, None, 1, true);
@@ -216,7 +216,7 @@ fn issue_eng_06_moves_budget_exceeding_sequences_are_refused_before_emission() {
 }
 
 #[test]
-fn issue_eng_06_moves_forged_schedules_are_refused() {
+fn moves_forged_schedules_are_refused() {
     let registry = Registry::builtin().unwrap();
     let sm90 = registry.get("cuda-sm90").unwrap();
     let apple9 = registry.get("metal-apple9").unwrap();
@@ -359,7 +359,7 @@ fn issue_eng_06_moves_forged_schedules_are_refused() {
 }
 
 #[test]
-fn issue_eng_06_moves_a_new_target_file_verifies_schedules_with_no_rust_change() {
+fn moves_a_new_target_file_verifies_schedules_with_no_rust_change() {
     let dir = std::env::temp_dir().join(format!("invar-eng-06-moves-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();

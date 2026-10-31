@@ -50,7 +50,7 @@ fn scratch(label: &str) -> PathBuf {
 }
 
 #[test]
-fn issue_eng_06_builtin_targets_parse_and_match_the_files_on_disk() {
+fn builtin_targets_parse_and_match_the_files_on_disk() {
     let builtin = Registry::builtin().unwrap();
     let names: Vec<_> = builtin.targets().iter().map(|t| t.name.as_str()).collect();
     for expected in [
@@ -117,7 +117,7 @@ fn issue_eng_06_builtin_targets_parse_and_match_the_files_on_disk() {
 }
 
 #[test]
-fn issue_eng_06_every_target_file_validates_against_the_schema() {
+fn every_target_file_validates_against_the_schema() {
     let validator = schema();
     let files = files();
     assert!(files.len() >= 11);
@@ -130,7 +130,7 @@ fn issue_eng_06_every_target_file_validates_against_the_schema() {
 }
 
 #[test]
-fn issue_eng_06_malformed_and_unknown_field_files_are_refused() {
+fn malformed_and_unknown_field_files_are_refused() {
     let validator = schema();
     let base = sm90();
     let parse_refusals: [(&str, Value); 8] = [
@@ -199,7 +199,7 @@ fn issue_eng_06_malformed_and_unknown_field_files_are_refused() {
 }
 
 #[test]
-fn issue_eng_06_out_of_range_files_are_refused_with_the_field() {
+fn out_of_range_files_are_refused_with_the_field() {
     let validator = schema();
     let base = sm90();
     type Edit = fn(&mut Value);
@@ -379,7 +379,7 @@ fn issue_eng_06_out_of_range_files_are_refused_with_the_field() {
 }
 
 #[test]
-fn issue_eng_06_names_must_match_the_file_and_the_device() {
+fn names_must_match_the_file_and_the_device() {
     let base = sm90();
     assert!(matches!(parse("cuda-sm89", &base), Err(Error::Name { .. })));
     let mut renamed = base.clone();
@@ -411,7 +411,7 @@ fn issue_eng_06_names_must_match_the_file_and_the_device() {
 }
 
 #[test]
-fn issue_eng_06_live_capabilities_select_a_target_or_refuse() {
+fn live_capabilities_select_a_target_or_refuse() {
     let builtin = Registry::builtin().unwrap();
     let cuda = |sm| Capabilities::Cuda {
         major: 12,
@@ -458,7 +458,7 @@ fn issue_eng_06_live_capabilities_select_a_target_or_refuse() {
 }
 
 #[test]
-fn issue_eng_06_a_new_target_is_a_new_file_with_no_rust_change() {
+fn a_new_target_is_a_new_file_with_no_rust_change() {
     // Jetson Orin (sm_87, #21) and the CPU targets: copy every other file,
     // confirm the device is unknown, add only its JSON file, and the same
     // compiled registry code now selects it.
@@ -499,7 +499,7 @@ fn issue_eng_06_a_new_target_is_a_new_file_with_no_rust_change() {
 }
 
 #[test]
-fn issue_eng_06_oversized_files_and_sets_are_refused_before_parsing() {
+fn oversized_files_and_sets_are_refused_before_parsing() {
     use invar_device::target::{MAX_FILE_BYTES, MAX_FILES};
     // A valid target padded past the limit with whitespace is refused by size,
     // not parsed; one byte under the limit still parses.

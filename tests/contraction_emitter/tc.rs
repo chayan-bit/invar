@@ -43,7 +43,7 @@ fn emission(source: &str, dims: [u32; 3], caps: Capabilities) -> DeviceEmission 
 }
 
 #[test]
-fn issue_eng_06_tc_moves_emit_exactly_the_tc_rs_text() {
+fn tc_moves_emit_exactly_the_tc_rs_text() {
     let registry = Registry::builtin().unwrap();
     let mut compared = 0;
     for caps in [
@@ -107,7 +107,7 @@ fn mma_fragment(lane: u64, row0: u64, col0: u64, k0: u64) -> Fragment {
 }
 
 #[test]
-fn issue_eng_06_tc_fragments_cover_each_atom_tile_exactly_once() {
+fn tc_fragments_cover_each_atom_tile_exactly_once() {
     let registry = Registry::builtin().unwrap();
     let sm90 = registry.get("cuda-sm90").unwrap();
     let e = emission(TC_DIRECT, [33, 40, 17], cuda(4, 90));
@@ -207,7 +207,7 @@ fn emulate_mma([rows, inner, cols]: [u32; 3], a: &[u32], b: &[u32]) -> Vec<u32> 
 }
 
 #[test]
-fn issue_eng_06_tc_emulated_results_are_admissible_under_the_reference() {
+fn tc_emulated_results_are_admissible_under_the_reference() {
     let mut checked = 0;
     for (label, dims, a, b) in tc_cases() {
         if dims[1] > 4096 {
@@ -227,7 +227,7 @@ fn issue_eng_06_tc_emulated_results_are_admissible_under_the_reference() {
 }
 
 #[test]
-fn issue_eng_06_tc_refuses_what_it_does_not_lower() {
+fn tc_refuses_what_it_does_not_lower() {
     let registry = Registry::builtin().unwrap();
     let sm90 = registry.get("cuda-sm90").unwrap();
     let apple9 = registry.get("metal-apple9").unwrap();

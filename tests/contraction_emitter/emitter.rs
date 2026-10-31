@@ -279,7 +279,7 @@ fn inputs([r, k, n]: [u32; 3]) -> Vec<(&'static str, Vec<u32>, Vec<u32>)> {
 }
 
 #[test]
-fn issue_eng_06_emitter_gemm_moves_emit_exactly_the_gemm_rs_text() {
+fn emitter_gemm_moves_emit_exactly_the_gemm_rs_text() {
     let schedule = gemm_tiled_v1();
     let mut compared = 0;
     for (caps, target) in devices() {
@@ -330,7 +330,7 @@ const EMULATED: [[u32; 3]; 9] = [
 ];
 
 #[test]
-fn issue_eng_06_emitter_emulated_index_math_equals_the_strict_oracle() {
+fn emitter_emulated_index_math_equals_the_strict_oracle() {
     let registry = Registry::builtin().unwrap();
     let (caps, target) = (cuda(4, 90), registry.get("cuda-sm90").unwrap());
     let mut schedules = vec![gemm_tiled_v1()];
@@ -367,7 +367,7 @@ fn issue_eng_06_emitter_emulated_index_math_equals_the_strict_oracle() {
 }
 
 #[test]
-fn issue_eng_06_emitter_refuses_what_it_does_not_lower() {
+fn emitter_refuses_what_it_does_not_lower() {
     let registry = Registry::builtin().unwrap();
     let sm90 = registry.get("cuda-sm90").unwrap();
     let apple9 = registry.get("metal-apple9").unwrap();

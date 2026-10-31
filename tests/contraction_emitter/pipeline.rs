@@ -38,7 +38,7 @@ fn cuda(minor: u32, sm: u32) -> Capabilities {
 const ACCUMULATE: &str = "acc[r][c] = __fadd_rn(acc[r][c], __fmul_rn(a[r], b[c]));";
 
 #[test]
-fn issue_eng_06_pipeline_emits_cp_async_multi_buffering_where_the_target_has_it() {
+fn pipeline_emits_cp_async_multi_buffering_where_the_target_has_it() {
     let registry = Registry::builtin().unwrap();
     let mut emitted = 0;
     for caps in [
@@ -97,7 +97,7 @@ fn issue_eng_06_pipeline_emits_cp_async_multi_buffering_where_the_target_has_it(
 }
 
 #[test]
-fn issue_eng_06_pipeline_is_refused_without_an_async_copy() {
+fn pipeline_is_refused_without_an_async_copy() {
     let registry = Registry::builtin().unwrap();
     let schedule = gemm_pipelined_v1();
     // Turing and older have no cp.async; Metal has no async copy at all.
@@ -161,7 +161,7 @@ fn model(stages: u64, ktiles: u64) -> u64 {
 }
 
 #[test]
-fn issue_eng_06_pipeline_protocol_reads_each_k_tile_once_after_its_copy() {
+fn pipeline_protocol_reads_each_k_tile_once_after_its_copy() {
     let mut runs = 0;
     for stages in 2..=8 {
         for ktiles in 0..40 {

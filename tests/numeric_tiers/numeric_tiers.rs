@@ -45,7 +45,7 @@ fn exact(x: F) -> BigRational {
 }
 
 #[test]
-fn issue_eng_03_policy_v2_accepts_the_four_tiers_and_refuses_the_rest() {
+fn policy_v2_accepts_the_four_tiers_and_refuses_the_rest() {
     let tiers = [
         ("f32-strict", NumericPolicy::STRICT_F32, FoldTier::Strict),
         ("f32-tree", NumericPolicy::TREE_F32, FoldTier::Tree),
@@ -141,7 +141,7 @@ fn issue_eng_03_policy_v2_accepts_the_four_tiers_and_refuses_the_rest() {
 }
 
 #[test]
-fn issue_eng_03_tier_references_name_one_result() {
+fn tier_references_name_one_result() {
     let init = F::POS_ZERO;
     let cancel = [f(1.0e8), f(1.0), f(-1.0e8)];
     assert_eq!(FoldTier::Strict.reference(init, &cancel), Some(F::POS_ZERO));
@@ -211,7 +211,7 @@ fn sample(rng: &mut Rng, case: u64) -> (F, Vec<F>) {
 }
 
 #[test]
-fn issue_eng_03_strict_tree_and_exact_stay_inside_the_relaxed_bound() {
+fn strict_tree_and_exact_stay_inside_the_relaxed_bound() {
     let mut rng = Rng(0x3e03_0280);
     let mut by_case = [0usize; 6];
     let mut exact_checked = 0;
@@ -247,7 +247,7 @@ fn issue_eng_03_strict_tree_and_exact_stay_inside_the_relaxed_bound() {
 }
 
 #[test]
-fn issue_eng_03_relaxed_refuses_results_outside_the_contract() {
+fn relaxed_refuses_results_outside_the_contract() {
     let one = f(1.0);
     let mut refused = 0;
     let mut refuse = |init: F, terms: &[F], result: F| {
@@ -314,7 +314,7 @@ fn fold_program(attribute: &str, update: &str) -> String {
 }
 
 #[test]
-fn issue_eng_03_numeric_attribute_declares_a_tier_and_refuses_the_rest() {
+fn numeric_attribute_declares_a_tier_and_refuses_the_rest() {
     use invar::front::parse;
     let tiers = [
         ("strict", FoldTier::Strict),
@@ -368,7 +368,7 @@ fn issue_eng_03_numeric_attribute_declares_a_tier_and_refuses_the_rest() {
 /// has the Tree program's outcome and fuel at every fuel prefix, while a plain
 /// `+` fold in a Strict function stays strict.
 #[test]
-fn issue_eng_03_relaxed_folds_lower_as_tree_with_identical_fuel() {
+fn relaxed_folds_lower_as_tree_with_identical_fuel() {
     use invar::{check, eval, front, mir, mir_eval};
     let terms = [f(1.0e8), f(1.0), f(-1.0e8), f(0.5)];
     let tree_sum = FoldTier::Tree.reference(F::POS_ZERO, &terms).unwrap();
@@ -420,7 +420,7 @@ fn issue_eng_03_relaxed_folds_lower_as_tree_with_identical_fuel() {
 }
 
 #[test]
-fn issue_eng_03_reassoc_add_relaxes_only_an_additive_fold_update() {
+fn reassoc_add_relaxes_only_an_additive_fold_update() {
     let mut refused = 0;
     for update in [
         "reassoc_add(acc * 2.0, xs[i])",
@@ -472,7 +472,7 @@ fn issue_eng_03_reassoc_add_relaxes_only_an_additive_fold_update() {
 }
 
 #[test]
-fn issue_eng_03_a_caller_tier_never_reaches_its_callee() {
+fn a_caller_tier_never_reaches_its_callee() {
     let source = "fn callee(x: f32) -> f32 { var acc: f32 = 0.0; acc = acc + x; return acc; } \
         #[numeric(fold = \"relaxed\")] fn main() -> i32 { \
         let k: i32 = 1; \
@@ -506,7 +506,7 @@ use invar::numeric_contract::{
 };
 
 #[test]
-fn issue_eng_03_every_f16_and_bf16_pattern_round_trips() {
+fn every_f16_and_bf16_pattern_round_trips() {
     let (mut f16_values, mut bf16_values) = (0, 0);
     for bits in 0..=u16::MAX {
         let half = F16Bits::from_bits(bits);
@@ -562,7 +562,7 @@ fn rounds(value: F) -> (u16, u16) {
 }
 
 #[test]
-fn issue_eng_03_f32_rounds_to_nearest_even_at_every_boundary() {
+fn f32_rounds_to_nearest_even_at_every_boundary() {
     let mut boundaries = 0;
     // Each pair of adjacent positive narrow values, including the subnormals
     // and the overflow threshold (one step past the largest finite value).
@@ -622,7 +622,7 @@ fn issue_eng_03_f32_rounds_to_nearest_even_at_every_boundary() {
 }
 
 #[test]
-fn issue_eng_03_integer_narrowing_traps_outside_the_range() {
+fn integer_narrowing_traps_outside_the_range() {
     let mut stored = 0;
     for value in -1_000..=1_000_i32 {
         let fits = (-128..=127).contains(&value);
@@ -653,7 +653,7 @@ fn issue_eng_03_integer_narrowing_traps_outside_the_range() {
 }
 
 #[test]
-fn issue_eng_03_a_strict_f32_fold_stays_serial_in_the_normal_form() {
+fn a_strict_f32_fold_stays_serial_in_the_normal_form() {
     use invar::general_net::normal_form::{self, Node};
     // A strict fold is never reassociated: the parallel normal form keeps
     // refusing it with the v1 reason. Tiered folds never reach it as a float
