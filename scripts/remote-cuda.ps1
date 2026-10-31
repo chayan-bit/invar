@@ -32,7 +32,7 @@ function Say($m) { Write-Output "remote-cuda: $m" }
 function Gpu {
     $f = (& nvidia-smi --query-gpu=name,driver_version,utilization.gpu,memory.used,memory.total `
             --format=csv,noheader,nounits | Select-Object -First 1).Split(',') | ForEach-Object { $_.Trim() }
-    [pscustomobject]@{ Name = $f[0]; Driver = $f[1]; Util = [int]$f[2]; Free = [int]$f[4] - [int]$f[3] }
+    [pscustomobject]@{ Name = $f[0]; Driver = $f[1]; Util = [int]$f[2]; Used = [int]$f[3]; Free = [int]$f[4] - [int]$f[3] }
 }
 
 # One run at a time: the target dir and the GPU are shared. The lock is an open
@@ -99,17 +99,60 @@ try {
     $env:TMP = $env:TEMP = Join-Path $runDir 'tmp'
     New-Item -ItemType Directory $env:TMP -Force | Out-Null
 
-    $targets = ($Tests.Split(',') | Where-Object { $_ } | ForEach-Object { "--test $_" }) -join ' '
+    # Successful NVRTC compiles persist across runs in this runner's own cache
+    # (src/nvrtc_cache.rs: keyed by source, compiler digest, NVRTC and sm;
+    # verified on read). The GNET-05 device corpus runs 8 programs at a time.
+    $env:INVAR_NVRTC_CACHE_DIR = Join-Path $base 'nvrtc-cache'
+    if (-not $env:INVAR_GNET05_DEVICE_JOBS) { $env:INVAR_GNET05_DEVICE_JOBS = '8' }
+
+    $suites = @('--lib') + @($Tests.Split(',') | Where-Object { $_ } | ForEach-Object { "--test $_" })
     $cargo = Join-Path $env:USERPROFILE '.cargo\bin\cargo.exe'
+    $common = "--locked --profile $Profile --features cuda --no-fail-fast"
     $skips = ($Skip.Split(',') | Where-Object { $_ } | ForEach-Object { "--skip $_" }) -join ' '
-    $cmd = "`"$cargo`" test --locked --profile $Profile --features cuda --no-fail-fast --lib $targets -- --include-ignored $skips $Filter > `"$log`" 2>&1"
-    $expected = $Tests.Split(',').Count + 1
+    $expected = $suites.Count
+    $deadline = (Get-Date).AddMinutes($TimeoutMin)
+    $begun = Get-Date
+    $exitCodes = @()
     Push-Location $src
-    $p = Start-Process cmd.exe -ArgumentList '/c', "`"$cmd`"" -NoNewWindow -PassThru
+    # Build every suite once, then run all suites at the same time, one process
+    # each: they are independent, and the host has the cores and GPU memory.
+    $p = Start-Process cmd.exe -ArgumentList '/c', "`"`"$cargo`" test $common --no-run $($suites -join ' ') > `"$log`" 2>&1`"" -NoNewWindow -PassThru
     $p.Handle | Out-Null  # keep the handle so ExitCode is readable after exit
-    $timedOut = -not $p.WaitForExit($TimeoutMin * 60000)
+    $timedOut = -not $p.WaitForExit([math]::Max(1, ($deadline - (Get-Date)).TotalMilliseconds))
     if ($timedOut) { & taskkill.exe /T /F /PID $p.Id | Out-Null }
+    $built = -not $timedOut -and $p.ExitCode -eq 0
+    Say "build: $([int]((Get-Date) - $begun).TotalSeconds) s"
+    $lanes = @()
+    if ($built) {
+        for ($i = 0; $i -lt $suites.Count; $i++) {
+            $laneLog = Join-Path $runDir "suite-$i.log"
+            $cmd = "`"$cargo`" test $common $($suites[$i]) -- --include-ignored $skips $Filter > `"$laneLog`" 2>&1"
+            $lp = Start-Process cmd.exe -ArgumentList '/c', "`"$cmd`"" -NoNewWindow -PassThru
+            $lp.Handle | Out-Null
+            $lanes += [pscustomobject]@{ Suite = $suites[$i]; Process = $lp; Log = $laneLog; Started = Get-Date; Seconds = $null }
+        }
+        # Sample this run's peak GPU memory and host working set while it runs.
+        $gpuPeak = 0; $ramPeak = 0
+        while (@($lanes | Where-Object { -not $_.Process.HasExited }).Count -gt 0) {
+            if ((Get-Date) -gt $deadline) { $timedOut = $true; break }
+            $gpuPeak = [math]::Max($gpuPeak, (Gpu).Used)
+            $ram = (Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($base) } |
+                    Measure-Object -Property WorkingSet64 -Sum).Sum
+            $ramPeak = [math]::Max($ramPeak, [int64]$ram)
+            Start-Sleep 5
+        }
+        Say "peak GPU memory used $gpuPeak MiB (all tenants); peak working set of this run's binaries $([int]($ramPeak / 1MB)) MiB"
+        foreach ($lane in $lanes) {
+            if (-not $lane.Process.HasExited) { & taskkill.exe /T /F /PID $lane.Process.Id | Out-Null; continue }
+            $lane.Seconds = [int]($lane.Process.ExitTime - $lane.Started).TotalSeconds
+            $exitCodes += $lane.Process.ExitCode
+        }
+        # One log in suite order, as a single sequential run would print it.
+        foreach ($lane in $lanes) { Get-Content $lane.Log | Add-Content $log }
+    }
     Pop-Location
+    Say "wall: $([int]((Get-Date) - $begun).TotalSeconds) s"
+    $lanes | ForEach-Object { Say "suite $($_.Suite): $($_.Seconds) s" }
 
     $text = Get-Content $log
     $rows = @(); $current = $null
@@ -135,7 +178,7 @@ try {
     $unmatched = @($Filter.Split(' ') | Where-Object { $_ } | Where-Object { $f = $_; -not ($ran | Where-Object { $_.Contains($f) }) })
     if ($unmatched) { Say "FILTER MATCHED NO TEST: $($unmatched -join ', ')"; exit 1 }
     # A target without a result row also fails the run.
-    if ($p.ExitCode -ne 0 -or (& $sum Failed) -gt 0 -or $rows.Count -lt $expected) {
+    if (-not $built -or ($exitCodes | Where-Object { $_ -ne 0 }) -or (& $sum Failed) -gt 0 -or $rows.Count -lt $expected) {
         if ($rows.Count -lt $expected) { Say 'some targets did not run (build error?); see the log' }
         exit 1
     }
