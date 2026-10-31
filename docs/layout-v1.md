@@ -46,6 +46,6 @@ Tensor cache key format 2 hashes the device IR version immediately after the cac
 
 ## Semantic fixtures
 
-The committed `issue_m4_01_layout_oracle` fixtures cover contiguous, transposed, bounded-stride, empty, misaligned, overflowing, and widened accesses.
-The committed `issue_m4_01_numeric_layout_contracts` and `issue_m4_01_tensor_cache` fixtures cover ordinary matrix loops, physical bounds, source identity, version refusal, and cache invalidation.
+The committed `layout_oracle` fixtures cover contiguous, transposed, bounded-stride, empty, misaligned, overflowing, and widened accesses.
+The committed `numeric_layout_contracts` and `tensor_cache` fixtures cover ordinary matrix loops, physical bounds, source identity, version refusal, and cache invalidation.
 IR construction alone does not establish source or engine acceptance.

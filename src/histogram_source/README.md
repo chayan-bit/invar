@@ -12,7 +12,7 @@ A source family used by [schedule](../schedule/README.md) and [indexed_device](.
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_indexed` (histogram modules) and `--test byte_budgets`.
+- `cargo nextest run --locked --test indexed` (histogram modules) and `--test byte_budgets`.
 
 ## Rules to keep
 
