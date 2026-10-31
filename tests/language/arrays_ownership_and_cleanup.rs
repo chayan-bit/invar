@@ -1,3 +1,4 @@
+//! Issue label M0-05.
 use invar::{
     check::check,
     eval::{EvalError, TrapCategory, Value, observe, run},
@@ -17,7 +18,7 @@ fn value(source: &str) -> i32 {
 }
 
 #[test]
-fn issue_m0_05_array_values_indexing_and_filling() {
+fn arrays_ownership_and_cleanup_array_values_indexing_and_filling() {
     assert_eq!(
         value(
             "fn main() -> i32 { let xs: Array<i32> = []; if len(xs) == 0u32 { return 1; } return 0; }"
@@ -67,7 +68,7 @@ fn issue_m0_05_array_values_indexing_and_filling() {
 }
 
 #[test]
-fn issue_m0_05_rejects_invalid_ownership() {
+fn arrays_ownership_and_cleanup_rejects_invalid_ownership() {
     let cases = [
         (
             "fn main() -> i32 { let a: Array<i32> = [1]; let b: Array<i32> = a; return 0; }",
@@ -124,7 +125,7 @@ fn issue_m0_05_rejects_invalid_ownership() {
 }
 
 #[test]
-fn issue_m0_05_cleanup_and_failure_order() {
+fn arrays_ownership_and_cleanup_and_failure_order() {
     let program = checked(
         "fn main() -> i32 { let a: Array<i32> = [1]; let b: Array<u32> = [2u32, 3u32]; return 0; }",
     )
@@ -187,7 +188,7 @@ fn issue_m0_05_cleanup_and_failure_order() {
 }
 
 #[test]
-fn issue_m0_05_bounded_array_allocation() {
+fn arrays_ownership_and_cleanup_bounded_array_allocation() {
     let program =
         checked("fn main() -> i32 { let a: Array<i32> = filled_i32(16777217u32, 0); return 0; }")
             .unwrap();

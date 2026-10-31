@@ -25,7 +25,8 @@ tests=$(for t in $(git grep -lE 'feature *= *"cuda"|CudaDevice' "$sha" -- tests 
     sed -nE -e "s|^$sha:tests/([^/]+)\\.rs$|\\1|p" -e "s|^$sha:tests/([^/]+)/.*|\\1|p" | sort -u); do
     git cat-file -e "$sha:tests/$t.rs" 2>/dev/null || git cat-file -e "$sha:tests/$t/main.rs" 2>/dev/null && echo "$t"
 done | paste -sd, -)
-# Known Windows gaps, none of them a CUDA result (libtest --skip substrings):
+# Known Windows gaps and opt-in tests whose inputs the runner does not supply,
+# none of them a CUDA result (libtest --skip substrings):
 skips=(
     system::substep_admission::     # S1405 manifest path checks assume Unix paths
     a1_grid_cuda_completed_equality     # uses /bin/false as the failing compiler
@@ -34,6 +35,20 @@ skips=(
     source_packet_reverification_binds_source_key_dimensions_generation_and_input_bytes  # order-dependent on any OS
     p2_cuda_handwritten_diagnostic  # timing diagnostic; needs INVAR_NVRTC and a locked session
     issue_gnet_05_robotics_baseline_outputs_match_reference  # needs INVAR_ROBOTICS_BASELINE_OUT
+    task_region::pilot  # CUDA bench; needs P4B_OUT
+    task_region::session  # CUDA bench; needs P4B_OUT and P4B_SESSION
+    task_region::report  # CUDA bench report; needs P4B_OUT
+    p8_calibrate_cuda  # opt-in; asserts INVAR_GPU_EXCLUSIVE=1
+    p8_d5_cuda_session  # opt-in; asserts INVAR_GPU_EXCLUSIVE=1
+    v02_math_cuda_matches_upstream_core_math_bit_for_bit  # needs INVAR_COREMATH_UPSTREAM
+    v02_math_cuda_differential_catches_a_mutated_polynomial_coefficient  # needs INVAR_COREMATH_UPSTREAM
+    v02_math_matches_upstream_core_math_on_worst_cases_and_random_inputs  # host side; needs INVAR_COREMATH_UPSTREAM
+    v02_math_differential_catches_a_mutated_polynomial_coefficient  # host side; needs INVAR_COREMATH_UPSTREAM
+    v02_math_msl_host_build_matches_upstream_core_math  # needs INVAR_COREMATH_UPSTREAM
+    v02_math_msl_prelude_compiles_warning_free_on_the_host  # host C++ build assumes a 64-bit long; Windows is LLP64
+    v02_math_msl_soft_binary64_matches_the_host_fpu  # host C++ build assumes a 64-bit long; Windows is LLP64
+    v02_math_msl_host_build_matches_the_cpu_library  # host C++ build assumes a 64-bit long; Windows is LLP64
+    v02_math_msl_host_build_catches_a_mutated_polynomial_coefficient  # host C++ build assumes a 64-bit long; Windows is LLP64
 )
 [ "${REMOTE_CUDA_NO_SKIP:-0}" = 1 ] && skips=()
 [ -n "${REMOTE_CUDA_TESTS:-}" ] && tests=$REMOTE_CUDA_TESTS

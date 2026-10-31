@@ -91,7 +91,7 @@ Count floors written for the whole corpus are divided by 8 for the sample; agree
 ## Term oracle
 
 `term_oracle.rs` is test support, included by path, with no production API.
-It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `issue_m1_04`, `issue_m1_05` and `typed_bounded_scan` use as independent oracles.
+It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `typed_net_verifier`, `typed_net_rewrite_extraction` and `typed_bounded_scan` use as independent oracles.
 
 ## GNET oracle words
 

@@ -1,3 +1,4 @@
+//! Issue label L1-02.
 use std::process::Command;
 
 use invar::{check, eval, front, mir, mir_eval};
@@ -11,7 +12,7 @@ fn checked(source: &str) -> check::CheckedProgram {
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_reference_mir_native_agree() {
+fn borrowed_views_reference_mir_native_agree() {
     let reference = agree(VIEWS, 10_000, 65);
     assert_eq!(
         reference.cleanup_trace,
@@ -23,19 +24,19 @@ fn issue_l1_02_borrowed_views_reference_mir_native_agree() {
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_read_return_from_mut_parameter() {
+fn borrowed_views_read_return_from_mut_parameter() {
     let source = "fn peek(xs: mut Array<i32>) -> View<i32> from xs { return view(xs,0u32,1u32); } fn main() -> i32 { var xs: Array<i32> = [8i32]; let part = peek(xs); return part[0u32]; }";
     agree(source, 1000, 8);
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_nested_reborrow_chain() {
+fn borrowed_views_nested_reborrow_chain() {
     let source = "fn main() -> i32 { var xs: Array<i32> = [1i32]; let a = view_mut(xs,0u32,1u32); if true { let b = view_mut(a,0u32,1u32); if true { let c = view_mut(b,0u32,1u32); c[0u32] = 9i32; } b[0u32] = b[0u32] + 1i32; } return a[0u32]; }";
     agree(source, 1000, 10);
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_public_check_and_negative_sources() {
+fn borrowed_views_public_check_and_negative_sources() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/l1_02_views.inv"
@@ -114,7 +115,7 @@ fn issue_l1_02_borrowed_views_public_check_and_negative_sources() {
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_range_and_stride_trap_identically() {
+fn borrowed_views_range_and_stride_trap_identically() {
     for source in [
         "fn main() -> i32 { let xs: Array<i32> = [1i32,2i32]; let a = view(xs,0u32,3u32); return a[0u32]; }",
         "fn main() -> i32 { let xs: Array<i32> = [1i32,2i32]; let a = view(xs,0u32,2u32,0u32); return a[0u32]; }",
@@ -145,7 +146,7 @@ fn issue_l1_02_borrowed_views_range_and_stride_trap_identically() {
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_mir_rejects_forged_view_source() {
+fn borrowed_views_mir_rejects_forged_view_source() {
     let checked = checked(VIEWS);
     let mut lowered = mir::lower(&checked).unwrap();
     let mut changed = false;
@@ -167,7 +168,7 @@ fn issue_l1_02_borrowed_views_mir_rejects_forged_view_source() {
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_mir_rejects_owner_drop_and_return_escape() {
+fn borrowed_views_mir_rejects_owner_drop_and_return_escape() {
     let program = checked(VIEWS);
     let mut lowered = mir::lower(&program).unwrap();
     let main = lowered
@@ -213,7 +214,7 @@ fn issue_l1_02_borrowed_views_mir_rejects_owner_drop_and_return_escape() {
 }
 
 #[test]
-fn issue_l1_02_borrowed_views_mir_consumes_materialized_view_once() {
+fn borrowed_views_mir_consumes_materialized_view_once() {
     let source = "fn relay(xs: read Array<i32>) -> View<i32> from xs { let part = view(xs,0u32,1u32); return part; } fn main() -> i32 { let xs: Array<i32> = [7i32]; let part = relay(xs); return part[0u32]; }";
     let checked = checked(source);
     let mut lowered = mir::lower(&checked).unwrap();

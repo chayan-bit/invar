@@ -63,7 +63,7 @@ priority = 90
 # Real 2^28-live-element fixtures retain about 1 GiB per engine. Give each the
 # runner so source/MIR/oracle comparisons cannot overlap other large fixtures.
 [[profile.default.overrides]]
-filter = 'test(=issue_gnet_02_aggregates::issue_gnet_02_aggregates_source_global_live_limit_counts_record_shell) | test(=issue_m2_02::issue_m2_02_fused_map_extraction_elides_unobservable_intermediate) | test(=compaction_allocation::segmented_flattening_compaction_library_caller_live_owners_refuse) | test(=gather_preflight::gather_scatter_frontier_preflight_traps_and_language_limits) | test(=gather_runtime::gather_scatter_frontier_runtime_refusal_trap_spans_and_limits) | test(=static_scatter_runtime::gather_scatter_frontier_scatter_runtime_source_limits_and_errors) | test(=robustness_limits::live_array_elements_are_capped_in_aggregate) | test(=schedule::families::segmented::tests::compact_two_regions_preserve_all_predicates_and_source_fuel)'
+filter = 'test(=issue_gnet_02_aggregates::issue_gnet_02_aggregates_source_global_live_limit_counts_record_shell) | test(=fused_map_extraction::fused_map_extraction_elides_unobservable_intermediate) | test(=compaction_allocation::segmented_flattening_compaction_library_caller_live_owners_refuse) | test(=gather_preflight::gather_scatter_frontier_preflight_traps_and_language_limits) | test(=gather_runtime::gather_scatter_frontier_runtime_refusal_trap_spans_and_limits) | test(=static_scatter_runtime::gather_scatter_frontier_scatter_runtime_source_limits_and_errors) | test(=robustness_limits::live_array_elements_are_capped_in_aggregate) | test(=schedule::families::segmented::tests::compact_two_regions_preserve_all_predicates_and_source_fuel)'
 threads-required = "num-test-threads"
 
 [profile.default]
@@ -77,7 +77,7 @@ store-failure-output = false
 
 [profile.quick]
 # Fast source/MIR/library contracts; compiler/device/system matrices stay in ci.
-default-filter = '(kind(lib) & not test(/^(general_net|schedule|system)::/)) | (binary(=language) & not test(/^(issue_m0_owner_return_fuel_spec|issue_l1_04_bytes_strings_cabi|issue_r1_01_units_frames)::/)) | (binary(=gnet_net) & test(/^issue_gnet_01::/))'
+default-filter = '(kind(lib) & not test(/^(general_net|schedule|system)::/)) | (binary(=language) & not test(/^(owner_return_fuel|bytes_strings_and_c_abi|units_and_frames)::/)) | (binary(=gnet_net) & test(/^issue_gnet_01::/))'
 retries = 0
 
 [profile.quick.junit]

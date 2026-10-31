@@ -16,7 +16,7 @@ Runs on the output of [check](../check/README.md); `invar run --engine reference
 
 ## Tests
 
-- `cargo nextest run --locked --test language` (fuel, traps and cleanup order are in `issue_m0_04` and `issue_m0_05`).
+- `cargo nextest run --locked --test language` (fuel, traps and cleanup order are in `arithmetic_fuel_and_demand` and `arrays_ownership_and_cleanup`).
 - `cargo nextest run --locked --test limits` includes the 64-call depth limit.
 - `cargo nextest run --locked --test exports` covers host array arguments.
 
