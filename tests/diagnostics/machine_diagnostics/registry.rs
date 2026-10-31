@@ -19,6 +19,7 @@ fn valid_registry_entry(entry: &Value) -> bool {
                         || name.starts_with("robotics_vocabulary_")
                         || name.starts_with("foreign_manifests_")
                         || name.starts_with("issue_l1_06_python_binding_")
+                        || name.starts_with("machine_diagnostics_qualification_")
                         || name.starts_with("issue_m5_02_full_pipeline_qualification_")
                         || (name.starts_with("test_")
                             && include_str!("../../../crates/invar-python/tests/test_binding.py")
