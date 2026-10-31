@@ -2,35 +2,35 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=28051 estimator=bytes/3 limit=30000
+Size record: tokens=27948 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
 
-Note: this file is machine checked by `tests/issue_ai_02_spec_examples.rs`; the checks are described in 1.2.
-[N1.1.1] A line starting with `[N` and an identifier is a normative statement and is a requirement on conforming implementations of Invar v0.1. `tests/issue_ai_02_spec_examples.rs::check_spec_text`
-[N1.1.2] Every normative statement cites at least one repository file, and a `path::name` citation names text that occurs in that file. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_normative_statements_cite_existing_sources`
-[N1.1.3] A line starting with `Note:` is informative and carries no requirement. `tests/issue_ai_02_spec_examples.rs`
-[N1.1.4] Where this specification and the implementation disagree, the test fails and the disagreement is fixed or escalated, never papered over. `tests/issue_ai_02_spec_examples.rs`
+Note: this file is machine checked by `tests/spec_examples.rs`; the checks are described in 1.2.
+[N1.1.1] A line starting with `[N` and an identifier is a normative statement and is a requirement on conforming implementations of Invar v0.1. `tests/spec_examples.rs::check_spec_text`
+[N1.1.2] Every normative statement cites at least one repository file, and a `path::name` citation names text that occurs in that file. `tests/spec_examples.rs::spec_examples_normative_statements_cite_existing_sources`
+[N1.1.3] A line starting with `Note:` is informative and carries no requirement. `tests/spec_examples.rs`
+[N1.1.4] Where this specification and the implementation disagree, the test fails and the disagreement is fixed or escalated, never papered over. `tests/spec_examples.rs`
 [N1.1.5] Planned work and open gaps are tracked in GitHub issues and are not normative text here, and v0.2 features that are on `main` appear only in Appendix B. `CONTRIBUTING.md`
 
 ### 1.2 Executable blocks and outcome tags
 
-[N1.2.1] Every fenced block carries an `outcome=` tag and an untagged block fails the test suite. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_rejects_an_untagged_spec_block`
-[N1.2.2] Tag `value:N` means `invar run --engine reference` completes and `main` returns the i32 N. `tests/issue_ai_02_spec_examples.rs::run_block`
-[N1.2.3] Tag `trap:CATEGORY` means the same command reports a source trap of that category. `tests/issue_ai_02_spec_examples.rs::run_block`
-[N1.2.4] Tag `diag:CODE` means `invar check` rejects the source and the first diagnostic has that code. `tests/issue_ai_02_spec_examples.rs::run_block`
-[N1.2.5] Tag `limit` with `fuel=N` means the run ends with `evaluation_limit`, and tag `check` means `invar check` accepts the file. `tests/issue_ai_02_spec_examples.rs::run_block`
-[N1.2.6] Tag `system:ok` or `system:CODE` runs `invar system check` and requires success or that first diagnostic code. `tests/issue_ai_02_spec_examples.rs::run_block`
-[N1.2.7] The flag `foreign` supplies an unused `--c-library` path, because the reference engine runs the Invar oracle and never loads it. `tests/issue_ai_02_spec_examples.rs::run_block`
-[N1.2.8] A block that is not Invar source carries `outcome=none`, and an Invar block may not. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_rejects_a_block_whose_outcome_differs`
-[N1.2.9] A block whose real outcome differs from its tag fails the suite. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_rejects_a_block_whose_outcome_differs`
+[N1.2.1] Every fenced block carries an `outcome=` tag and an untagged block fails the test suite. `tests/spec_examples.rs::spec_examples_rejects_an_untagged_spec_block`
+[N1.2.2] Tag `value:N` means `invar run --engine reference` completes and `main` returns the i32 N. `tests/spec_examples.rs::run_block`
+[N1.2.3] Tag `trap:CATEGORY` means the same command reports a source trap of that category. `tests/spec_examples.rs::run_block`
+[N1.2.4] Tag `diag:CODE` means `invar check` rejects the source and the first diagnostic has that code. `tests/spec_examples.rs::run_block`
+[N1.2.5] Tag `limit` with `fuel=N` means the run ends with `evaluation_limit`, and tag `check` means `invar check` accepts the file. `tests/spec_examples.rs::run_block`
+[N1.2.6] Tag `system:ok` or `system:CODE` runs `invar system check` and requires success or that first diagnostic code. `tests/spec_examples.rs::run_block`
+[N1.2.7] The flag `foreign` supplies an unused `--c-library` path, because the reference engine runs the Invar oracle and never loads it. `tests/spec_examples.rs::run_block`
+[N1.2.8] A block that is not Invar source carries `outcome=none`, and an Invar block may not. `tests/spec_examples.rs::spec_examples_rejects_a_block_whose_outcome_differs`
+[N1.2.9] A block whose real outcome differs from its tag fails the suite. `tests/spec_examples.rs::spec_examples_rejects_a_block_whose_outcome_differs`
 
 ### 1.3 Precedence and companion documents
 
 [N1.3.1] The grammar is `spec/grammar.ebnf`, and this file is the normative semantic text of the language and of the later contracts. `spec/grammar.ebnf`
-[N1.3.2] Examples are indexed in `examples/index.json`, validated by `examples/index.schema.json`, and run by the same test binary. `tests/issue_ai_02_spec_examples.rs::issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output`
+[N1.3.2] Examples are indexed in `examples/index.json`, validated by `examples/index.schema.json`, and run by the same test binary. `tests/spec_examples.rs::spec_examples_index_validates_and_every_example_matches_its_expected_output`
 [N1.3.3] No safety theorem, native performance result, parallel speedup or AI-authoring advantage is claimed by this specification. `README.md`
 
 ## 2. Source text
@@ -1091,7 +1091,7 @@ fn main() -> i32 {
 [N11.5.1] Forced `cuda` or `metal` fails with `CUDA_UNAVAILABLE` or `METAL_UNAVAILABLE` for missing hardware, an ineligible region or a false guard, and never returns a CPU result as a device pass. `docs/explain.md`
 [N11.5.2] CUDA admits NVRTC 12.4 or newer in the 12.x series and compute capability 5.0 or newer, compiled for the explicit `sm` of device zero. `docs/cuda-target-v1.md`
 [N11.5.3] Metal needs Apple7 or newer with MSL 3.1, a kernel needing more than 31 buffer arguments is Metal-ineligible, and the general-net task cascade additionally needs MSL 3.2 and otherwise uses its staged form. `docs/gnet-task-v01.md`
-[N11.5.4] The device IR admits `u32` maps (fused chains of 2 to 16 stages), reductions and affine scans through one verifier, and only a verified plan reaches code emission. `tests/issue_m3_04_cuda_reductions_scans.rs::issue_m3_04_cuda_reductions_scans_graph_plans_lower_to_shared_ir`
+[N11.5.4] The device IR admits `u32` maps (fused chains of 2 to 16 stages), reductions and affine scans through one verifier, and only a verified plan reaches code emission. `tests/device_reductions_scans.rs::device_reductions_scans_graph_plans_lower_to_shared_ir`
 [N11.5.5] Unknown completion is `CUDA_PENDING` or `METAL_PENDING`, permits no CPU replay, and keeps loans and quarantine. `tests/gpu_cuda/m3_05.rs::issue_m3_05_gpu_failure_prefix_and_quarantine`
 [N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain.md`
 [N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md`
@@ -1155,10 +1155,10 @@ fn main() -> i32 { return 0; }
 
 ## 15. Example library and coverage
 
-[N15.1.1] Every Invar source file under `examples/` is listed exactly once in `examples/index.json` with its path, intent, family, tags, spec section and expected result. `tests/issue_ai_02_spec_examples.rs::validate_index`
-[N15.1.2] Each family is either covered by at least one example or listed under `pending_families` with a reason. `tests/issue_ai_02_spec_examples.rs::validate_index`
-[N15.1.3] Each runnable example runs on the reference evaluator and on every engine it declares, check and system examples run their declared check commands, and `native-serial` runs only in a build with the `native` feature. `tests/issue_ai_02_spec_examples.rs::run_example`
-[N15.1.4] System examples carry their expected diagnostics and their IR or generated-file hashes, checked twice for byte identity. `tests/issue_ai_02_spec_examples.rs::tree_hash`
+[N15.1.1] Every Invar source file under `examples/` is listed exactly once in `examples/index.json` with its path, intent, family, tags, spec section and expected result. `tests/spec_examples.rs::validate_index`
+[N15.1.2] Each family is either covered by at least one example or listed under `pending_families` with a reason. `tests/spec_examples.rs::validate_index`
+[N15.1.3] Each runnable example runs on the reference evaluator and on every engine it declares, check and system examples run their declared check commands, and `native-serial` runs only in a build with the `native` feature. `tests/spec_examples.rs::run_example`
+[N15.1.4] System examples carry their expected diagnostics and their IR or generated-file hashes, checked twice for byte identity. `tests/spec_examples.rs::tree_hash`
 
 ## Appendix B. Beyond v0.1: v0.2 features on main
 

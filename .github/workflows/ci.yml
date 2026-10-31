@@ -115,7 +115,7 @@ jobs:
   # The CPU-model corpus test takes the whole runner, so it runs after msvc 1/4's
   # partition instead of inside it, where it serialized that shard's long tests;
   # left in the partition, shard 1 was the slowest Windows job by about 3 min.
-  # Excluded: issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output.
+  # Excluded: spec_examples_index_validates_and_every_example_matches_its_expected_output.
   # `system gen ros2` derives the UR5e base RPY with the platform libm's asin,
   # which differs from glibc by one ulp, so that tree hash is Linux-specific.
   windows:
@@ -177,7 +177,7 @@ jobs:
         run: >-
           cargo nextest run --locked ${TARGET:+--target "$TARGET"} --profile ci --cargo-profile ci-debug
           -p invar -p invar-tools ${{ matrix.args }}
-          -E 'not test(=issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output) & not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
+          -E 'not test(=spec_examples_index_validates_and_every_example_matches_its_expected_output) & not test(=issue_gnet_03_device::issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle)'
       - name: CPU-model corpus test
         if: matrix.corpus
         run: >-

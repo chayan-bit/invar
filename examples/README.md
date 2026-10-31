@@ -3,7 +3,7 @@
 Every `.inv` file under this directory is a verified example.
 [index.json](index.json) lists each one exactly once with its intent, family, specification section, the engines it runs on and its expected result.
 The index is validated by [index.schema.json](index.schema.json).
-`tests/issue_ai_02_spec_examples.rs` runs every example through the real toolchain and fails if an output, a hash or a listing changes.
+`tests/spec_examples.rs` runs every example through the real toolchain and fails if an output, a hash or a listing changes.
 
 Changing an expected result needs a semantic explanation in the commit, not a refreshed snapshot.
 
@@ -38,5 +38,5 @@ Runnable examples list `native-serial` and the test runs that engine only in a b
 
 ## Adding one
 
-Add the file, add its entry to `index.json`, and run `cargo test --locked --test issue_ai_02_spec_examples`.
+Add the file, add its entry to `index.json`, and run `cargo test --locked --test spec_examples`.
 A family with no example yet goes under `pending_families` with a reason.

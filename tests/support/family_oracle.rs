@@ -254,7 +254,7 @@ pub fn each<T: Send>(dirs: &[&str], sampled: bool, f: impl Fn(&Program) -> T + S
                 .then_some((id, source))
         })
         .collect();
-    // The examples reach every family (issue_54_selection_parity_on_the_examples),
+    // The examples reach every family (selection_parity_on_the_examples),
     // so a sampled pass keeps all of them plus the sample of the rest.
     let (examples, rest): (Vec<_>, Vec<_>) = sources
         .into_iter()
