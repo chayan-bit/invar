@@ -218,7 +218,7 @@ The GNET-05 acceptance corpus under `bench/general-net-v01/gnet05`.
 | Module | Covers |
 | --- | --- |
 | `corpus` | Source-derived corpus: every program against the oracles. |
-| `robotics` | Robotics programs of the corpus. |
+| `robotics_corpus` | Robotics programs of the corpus. |
 | `robotics_array` | Host-array variants and the device admission census (a file plus a directory). |
 
 ### `gnet_net`

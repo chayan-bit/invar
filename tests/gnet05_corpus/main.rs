@@ -19,5 +19,5 @@ mod robotics;
 mod robotics_checks;
 
 mod corpus;
-mod robotics;
 mod robotics_array;
+mod robotics_corpus;
