@@ -15,7 +15,7 @@ After [mir](../mir/README.md); selected by `--engine native-serial` and by `inva
 
 ## Tests
 
-- `cargo nextest run --locked --features native --test mir` (`issue_m1_02` trap ABI, `issue_eng_18_*` regions and SIMD) and `--test language`.
+- `cargo nextest run --locked --features native --test mir` (`native_cpu_trap_abi` trap ABI, `issue_eng_18_*` regions and SIMD) and `--test language`.
 - `cargo nextest run --locked --test diagnostics` covers DWARF and the debugger helpers.
 
 ## Rules to keep

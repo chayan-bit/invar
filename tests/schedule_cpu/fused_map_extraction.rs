@@ -1,3 +1,4 @@
+//! Issue label M2-02.
 #[path = "../support/language_limits.rs"]
 mod language_limits;
 #[cfg(feature = "native")]
@@ -17,7 +18,7 @@ fn main() -> i32 {
 "#;
 
 #[test]
-fn issue_m2_02_fused_map_extraction_public_source_graph_and_mutation() {
+fn fused_map_extraction_public_source_graph_and_mutation() {
     let checked = check(parse(SOURCE.as_bytes()).unwrap(), true).unwrap();
     let mir = mir::lower(&checked).unwrap();
     let extracted = loops::extract_fused(SOURCE.as_bytes(), &mir)
@@ -113,7 +114,7 @@ fn source_for(
 }
 
 #[test]
-fn issue_m2_02_fused_map_extraction_shapes_names_constants_and_reordering() {
+fn fused_map_extraction_shapes_names_constants_and_reordering() {
     let cases = [
         vec![],
         vec![0],
@@ -160,7 +161,7 @@ fn issue_m2_02_fused_map_extraction_shapes_names_constants_and_reordering() {
 }
 
 #[test]
-fn issue_m2_02_fused_map_extraction_preserves_unwritten_tail() {
+fn fused_map_extraction_preserves_unwritten_tail() {
     let source = SOURCE
         .replace("filled_u32(len(data), 0u32)", "filled_u32(4u32, 0u32)")
         .replace(
@@ -185,7 +186,7 @@ fn issue_m2_02_fused_map_extraction_preserves_unwritten_tail() {
 }
 
 #[test]
-fn issue_m2_02_fused_map_extraction_rejects_intervening_mutation() {
+fn fused_map_extraction_rejects_intervening_mutation() {
     let source = SOURCE.replace(
         "let stable: Array<u32> = move first;",
         "first[0u32] = 9u32; let stable: Array<u32> = move first;",
@@ -204,7 +205,7 @@ fn issue_m2_02_fused_map_extraction_rejects_intervening_mutation() {
 }
 
 #[test]
-fn issue_m2_02_fused_map_extraction_near_matches_keep_serial_with_reasons() {
+fn fused_map_extraction_near_matches_keep_serial_with_reasons() {
     let variants = [
         (
             SOURCE.replace("wrapping_add(data[i], 3u32)", "data[i] + 3u32"),
@@ -250,7 +251,7 @@ fn issue_m2_02_fused_map_extraction_near_matches_keep_serial_with_reasons() {
 }
 
 #[test]
-fn issue_m2_02_fused_map_extraction_unequal_inputs_with_true_guard() {
+fn fused_map_extraction_unequal_inputs_with_true_guard() {
     let source = r#"
 fn main() -> i32 {
     let left: Array<u32> = [1u32, 2u32, 3u32];
@@ -295,7 +296,7 @@ fn main() -> i32 {
 
 #[cfg(feature = "native")]
 #[test]
-fn issue_m2_02_fused_map_extraction_native_serial_and_trap() {
+fn fused_map_extraction_native_serial_and_trap() {
     for source in [
         SOURCE.to_string(),
         SOURCE.replace("filled_u32(len(data), 0u32)", "filled_u32(2u32, 0u32)"),
@@ -371,7 +372,7 @@ fn u32_literal(len: usize) -> String {
 
 /// Loop 1 may not run, or may run under different control flow, before loop 2.
 #[test]
-fn issue_m2_02_fused_map_extraction_regression_first_loop_must_execute() {
+fn fused_map_extraction_regression_first_loop_must_execute() {
     let second = "let stable: Array<u32> = move first; \
         var second: Array<u32> = filled_u32(len(stable), 0u32); \
         for j in 0u32 .. len(stable) { second[j] = wrapping_mul(stable[j], 7u32); } \
@@ -418,7 +419,7 @@ fn issue_m2_02_fused_map_extraction_regression_first_loop_must_execute() {
 
 /// Rewiring a verifier-valid graph built from public source changes live output.
 #[test]
-fn issue_m2_02_fused_map_extraction_regression_live_graph_rewiring() {
+fn fused_map_extraction_regression_live_graph_rewiring() {
     let data = [1u32, 2, u32::MAX, 40, 7];
     let expected = data
         .iter()
@@ -503,7 +504,7 @@ fn producer_publication(source: &str, workers: usize) -> (Option<String>, String
 /// An intermediate only the consumer reads is not written; results, cleanup
 /// traces and allocation-limit outcomes still match the reference.
 #[test]
-fn issue_m2_02_fused_map_extraction_elides_unobservable_intermediate() {
+fn fused_map_extraction_elides_unobservable_intermediate() {
     let checks = "var h: u32 = 0u32; for k in 0u32 .. len(second) { h = wrapping_add(wrapping_mul(h, 31u32), second[k]); } if h == 7u32 { return 1; } return 0; }";
     for len in [1usize, 64, 257] {
         let source = format!(

@@ -115,7 +115,7 @@ Not yet measured: the R <= 1.10 (clang -O3) and R <= 1.15 (ISPC) timing gates; t
 ## Acceptance evidence
 
 On macOS 27 arm64, with the prefix above, the nonignored
-`issue_m1_02_native_cpu_trap_abi` filter lists four tests. Filtered Debug
+`native_cpu_trap_abi` filter lists four tests. Filtered Debug
 and Release tests, feature Clippy, full feature Debug tests, default fmt,
 Clippy, Debug/Release tests, build, and offline tests pass. The fixed
 source/MIR/native corpus covers 29 cases: values, exact trap categories and
@@ -127,4 +127,4 @@ existing output. The CI `Build (native)` job runs the native-feature suite
 x86_64 with LLVM 21; that is a CI correctness run, not performance
 qualification. No Windows native run or Miri result is claimed.
 
-ENG-18 (#101), `tests/mir/issue_eng_18_native_simd.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target. `tests/mir/issue_eng_18_native_regions.rs` checks map kernels against `Plan::live_values` on edge ranges and aliased slots, reduce kernels against the left fold, vector code in the kernels, and identical cpu-parallel observations with kernels on and off at 1, 2 and 7 workers and on fuel prefixes, including a checked overflow that traps in source order.
+ENG-18 (#101), `tests/mir/native_simd_and_targets.rs` with `--features native`: the corpus (examples `sum`, `ownership`, `fk_panda` in binary64 with CORE-MATH sin, cos and sqrt, plus overflow, fuel and bounds traps) prints byte-identical documents and exit statuses under the unoptimized, portable and host builds; the audit maps every planted promise to its fact and refuses planted unproven ones; and a promised u32 map kernel compiles to vector code (vector IR types plus ymm/zmm registers on x86_64, `.4s` NEON arrangements on aarch64) for the live CPU and the described target. `tests/mir/native_parallel_regions.rs` checks map kernels against `Plan::live_values` on edge ranges and aliased slots, reduce kernels against the left fold, vector code in the kernels, and identical cpu-parallel observations with kernels on and off at 1, 2 and 7 workers and on fuel prefixes, including a checked overflow that traps in source order.

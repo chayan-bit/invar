@@ -52,7 +52,7 @@ fn recursion(terms: usize, n: u32) -> String {
 }
 
 #[test]
-fn issue_eval_call_depth_limit_is_typed_on_a_default_thread() {
+fn call_depth_limit_is_typed_on_a_default_thread() {
     on_default_thread(|| {
         for (n, limited) in [
             (10, false),
@@ -87,7 +87,7 @@ fn issue_eval_call_depth_limit_is_typed_on_a_default_thread() {
 }
 
 #[test]
-fn issue_eval_call_depth_limit_at_maximum_expression_height_in_every_frame() {
+fn call_depth_limit_at_maximum_expression_height_in_every_frame() {
     // The largest accepted chain: one more level is a checked height refusal.
     let terms = (1..=1000)
         .rev()
@@ -107,7 +107,7 @@ fn issue_eval_call_depth_limit_at_maximum_expression_height_in_every_frame() {
 }
 
 #[test]
-fn issue_eval_call_depth_limit_named_and_host_entries_on_a_default_thread() {
+fn call_depth_limit_named_and_host_entries_on_a_default_thread() {
     let source = "fn descend(n: u32) -> i32 { if n == 0u32 { return 7; } return descend(n - 1u32) + 0; } fn fill(xs: mut Array<i32>, n: u32) -> i32 { xs[0u32] = 9; return descend(n); }";
     let program = checked(source, false).unwrap();
     invar::ownership::check(&program).unwrap();
