@@ -119,7 +119,13 @@ try {
     $p = Start-Process cmd.exe -ArgumentList '/c', "`"`"$cargo`" test $common --no-run $($suites -join ' ') > `"$log`" 2>&1`"" -NoNewWindow -PassThru
     $p.Handle | Out-Null  # keep the handle so ExitCode is readable after exit
     $timedOut = -not $p.WaitForExit([math]::Max(1, ($deadline - (Get-Date)).TotalMilliseconds))
-    if ($timedOut) { & taskkill.exe /T /F /PID $p.Id | Out-Null }
+    # taskkill can be refused over ssh; this run's own binaries all live under $base.
+    function StopTree($proc) {
+        & taskkill.exe /T /F /PID $proc.Id 2>$null | Out-Null
+        Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($base) } |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
+    if ($timedOut) { StopTree $p }
     $built = -not $timedOut -and $p.ExitCode -eq 0
     Say "build: $([int]((Get-Date) - $begun).TotalSeconds) s"
     $lanes = @()
@@ -143,7 +149,7 @@ try {
         }
         Say "peak GPU memory used $gpuPeak MiB (all tenants); peak working set of this run's binaries $([int]($ramPeak / 1MB)) MiB"
         foreach ($lane in $lanes) {
-            if (-not $lane.Process.HasExited) { & taskkill.exe /T /F /PID $lane.Process.Id | Out-Null; continue }
+            if (-not $lane.Process.HasExited) { StopTree $lane.Process; continue }
             $lane.Seconds = [int]($lane.Process.ExitTime - $lane.Started).TotalSeconds
             $exitCodes += $lane.Process.ExitCode
         }
