@@ -61,10 +61,10 @@ const CORPUS: &[(&str, u64)] = &[
 
 /// Optimization and target features never change an observation: status
 /// and the whole result document (values, traps, spans, fuel, cleanup)
-/// match the unoptimized generic build, which issue_m1_02 ties to the
+/// match the unoptimized generic build, which native_cpu_trap_abi ties to the
 /// reference evaluator.
 #[test]
-fn issue_eng_18_optimized_builds_observe_identically() {
+fn optimized_builds_observe_identically() {
     let builds = [Build::UNOPTIMIZED, Build::PORTABLE, Build::HOST];
     for (source, fuel) in CORPUS {
         let program = lower(source);
@@ -76,7 +76,7 @@ fn issue_eng_18_optimized_builds_observe_identically() {
 }
 
 #[test]
-fn issue_eng_18_objects_record_machine_and_pipeline() {
+fn objects_record_machine_and_pipeline() {
     let program = lower(include_str!("../../examples/sum.inv"));
     let portable = native::emit_mir(&program).unwrap();
     assert_eq!(portable.machine.cpu, "generic");
@@ -130,7 +130,7 @@ fn triple_arch() -> &'static str {
 }
 
 #[test]
-fn issue_eng_18_described_targets_select_cpu_and_features() {
+fn described_targets_select_cpu_and_features() {
     let (name, other) = match triple_arch() {
         "x86_64" => ("cpu-x86_64-zen4", "cpu-aarch64-apple-m4"),
         "aarch64" => ("cpu-aarch64-apple-m4", "cpu-x86_64-zen4"),
@@ -255,7 +255,7 @@ fn facts() -> Vec<Fact> {
 }
 
 #[test]
-fn issue_eng_18_promise_audit_maps_every_promise_to_a_fact() {
+fn promise_audit_maps_every_promise_to_a_fact() {
     let ir = map_kernel(true);
     let promised = native::audit(&ir, &facts()).unwrap();
     let count = |kind| promised.iter().filter(|(p, _)| *p == kind).count();
@@ -267,7 +267,7 @@ fn issue_eng_18_promise_audit_maps_every_promise_to_a_fact() {
 }
 
 #[test]
-fn issue_eng_18_planted_unproven_promises_fail() {
+fn planted_unproven_promises_fail() {
     let ir = map_kernel(true);
     // A promise with no fact attached.
     let planted = ir.replace("%y = mul i32 %x, 3", "%y = mul nsw i32 %x, 3");
@@ -438,7 +438,7 @@ fn assert_vectorized(object: &native::Object, assembly: &str) {
 }
 
 #[test]
-fn issue_eng_18_promised_map_vectorizes_for_the_live_cpu() {
+fn promised_map_vectorizes_for_the_live_cpu() {
     let (object, assembly) = native::compile_ir(&map_kernel(true), facts(), &Build::HOST).unwrap();
     eprintln!("machine: {:?}", object.machine);
     if object.machine.cpu == "generic" {
@@ -449,7 +449,7 @@ fn issue_eng_18_promised_map_vectorizes_for_the_live_cpu() {
 }
 
 #[test]
-fn issue_eng_18_described_target_vectorizes_the_map() {
+fn described_target_vectorizes_the_map() {
     let name = match triple_arch() {
         "x86_64" => "cpu-x86_64-zen4",
         _ => "cpu-aarch64-apple-m4",

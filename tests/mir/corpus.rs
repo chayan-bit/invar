@@ -1,5 +1,5 @@
 //! Programs shared by the MIR differential suites: the reference evaluator and the MIR evaluator
-//! (and, in `issue_m1_02`, the native backend) must agree on each one. Fixed corpus, no random seed.
+//! (and, in `native_cpu_trap_abi`, the native backend) must agree on each one. Fixed corpus, no random seed.
 
 /// `(source, fuel)`.
 pub const CORPUS: &[(&str, u64)] = &[

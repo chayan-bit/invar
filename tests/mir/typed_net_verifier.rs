@@ -1,3 +1,4 @@
+//! Issue label M1-04.
 use std::collections::BTreeMap;
 
 use crate::term;
@@ -29,7 +30,7 @@ fn t(id: u32, kind: Kind) -> Term {
 }
 
 #[test]
-fn issue_m1_04_typed_net_verifier_public_mir_ports_and_ownership() {
+fn typed_net_verifier_public_mir_ports_and_ownership() {
     let source = "fn main() -> i32 { let xs: Array<i32> = [4]; return xs[0u32]; }";
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
@@ -125,7 +126,7 @@ fn annotations(items: &[(u32, Type)]) -> BTreeMap<u32, Type> {
 }
 
 #[test]
-fn issue_m1_04_typed_net_verifier_cbv_demand_and_failure_provenance() {
+fn typed_net_verifier_cbv_demand_and_failure_provenance() {
     let (program, signatures) = spin();
     let discarded = t(
         0,
@@ -276,7 +277,7 @@ fn issue_m1_04_typed_net_verifier_cbv_demand_and_failure_provenance() {
 }
 
 #[test]
-fn issue_m1_04_typed_net_verifier_rejects_types_affine_duplication_and_stale_facts() {
+fn typed_net_verifier_rejects_types_affine_duplication_and_stale_facts() {
     let pair = t(
         0,
         Kind::Pair(Box::new(t(1, Kind::Nat(2))), Box::new(t(2, Kind::Nat(9)))),
@@ -420,7 +421,7 @@ mod term_oracle_self_tests {
     }
 
     #[test]
-    fn issue_m1_04_term_oracle_preserves_demand_and_provenance() {
+    fn typed_net_verifier_term_oracle_preserves_demand_and_provenance() {
         // A discarded argument remains demanded under call-by-value.
         let discarded = t(
             0,
@@ -514,7 +515,7 @@ mod term_oracle_self_tests {
     }
 
     #[test]
-    fn issue_m1_04_term_oracle_affine_binding_and_limits() {
+    fn typed_net_verifier_term_oracle_affine_binding_and_limits() {
         let identity = t(
             1,
             Kind::Lambda {

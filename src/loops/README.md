@@ -14,7 +14,7 @@ Called from `plan::decide` in [../plan.rs](../plan.rs) after [admission](../admi
 
 ## Tests
 
-- `cargo nextest run --locked --test schedule_cpu` (`issue_m2_02` covers fusion).
+- `cargo nextest run --locked --test schedule_cpu` (`fused_map_extraction` covers fusion).
 - `cargo nextest run --locked --test byte_budgets` covers the graph limits.
 
 ## Rules to keep

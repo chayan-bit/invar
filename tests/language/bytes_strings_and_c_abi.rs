@@ -43,7 +43,7 @@ fn compile_foreign_fixture() -> (std::path::PathBuf, std::path::PathBuf) {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_utf8_and_byte_values_agree() {
+fn bytes_strings_and_c_abi_utf8_and_byte_values_agree() {
     for name in [
         "basic",
         "decode-valid",
@@ -106,7 +106,7 @@ fn issue_l1_04_bytes_strings_cabi_utf8_and_byte_values_agree() {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_public_failures() {
+fn bytes_strings_and_c_abi_public_failures() {
     for (name, command, code) in [
         ("bad-byte-escape", "check", "LEX_INVALID_LITERAL"),
         ("bad-text-escape", "check", "LEX_INVALID_LITERAL"),
@@ -156,7 +156,7 @@ fn issue_l1_04_bytes_strings_cabi_public_failures() {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_large_bounded_value() {
+fn bytes_strings_and_c_abi_large_bounded_value() {
     let source = format!(
         "fn main() -> i32 {{ let data: Bytes = b\"{}\"; if len(data) == 131072u32 {{ return 7; }} return 0; }}",
         "x".repeat(131_072)
@@ -165,7 +165,7 @@ fn issue_l1_04_bytes_strings_cabi_large_bounded_value() {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_foreign_oracle_declares_and_checks() {
+fn bytes_strings_and_c_abi_foreign_oracle_declares_and_checks() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/l1_04/foreign-oracle.inv"
@@ -256,7 +256,7 @@ fn issue_l1_04_bytes_strings_cabi_foreign_oracle_declares_and_checks() {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_foreign_buffers_and_failures_agree() {
+fn bytes_strings_and_c_abi_foreign_buffers_and_failures_agree() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/l1_04/foreign-buffers.inv"
@@ -287,7 +287,7 @@ fn issue_l1_04_bytes_strings_cabi_foreign_buffers_and_failures_agree() {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_detectable_foreign_failures_are_typed() {
+fn bytes_strings_and_c_abi_detectable_foreign_failures_are_typed() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/l1_04/foreign-failures.inv"
@@ -310,7 +310,7 @@ fn issue_l1_04_bytes_strings_cabi_detectable_foreign_failures_are_typed() {
 }
 
 #[test]
-fn issue_l1_04_bytes_strings_cabi_unsupported_signatures_reject_publicly() {
+fn bytes_strings_and_c_abi_unsupported_signatures_reject_publicly() {
     for (name, code) in [
         ("foreign-cstring", "TYPE_MISMATCH"),
         ("foreign-borrowed-return", "UNSUPPORTED_FEATURE"),
@@ -342,7 +342,7 @@ fn issue_l1_04_bytes_strings_cabi_unsupported_signatures_reject_publicly() {
 /// mode does not change invar-math-cr-v1 results (CORE-MATH honours the ambient
 /// mode, so every call holds round-to-nearest).
 #[test]
-fn v02_math_rounds_to_nearest_after_a_foreign_call_changes_the_mode() {
+fn math_rounds_to_nearest_after_a_foreign_call_changes_the_mode() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/l1_04/foreign-round-upward.inv"
@@ -373,7 +373,7 @@ fn v02_math_rounds_to_nearest_after_a_foreign_call_changes_the_mode() {
 /// v0.2 f64math: an `f64` value argument crosses the C ABI as binary64 bits
 /// (`INV_TAG_F64_V1`) and agrees with its Invar oracle on every engine.
 #[test]
-fn v02_f64_foreign_scalar_argument_matches_its_oracle() {
+fn f64_foreign_scalar_argument_matches_its_oracle() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/l1_04/foreign-f64.inv"

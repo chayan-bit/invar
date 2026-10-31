@@ -52,7 +52,7 @@ fn owner_cases() -> Vec<(&'static str, String)> {
  ].into_iter().map(|(id,decl,ty,value,body)| (id,format!("{decl} fn make()->{ty} {{let item:{ty} = {value};return item;}} fn main()->i32 {{let result=make();{body}}}"))).collect()
 }
 #[test]
-fn issue_m0_owner_return_fuel_spec_bare_and_explicit_names_have_same_charge() {
+fn owner_return_fuel_bare_and_explicit_names_have_same_charge() {
     for (id, bare) in owner_cases() {
         let explicit = bare.replace("return item;", "return move item;");
         let a = qualify(&bare);
@@ -72,7 +72,7 @@ fn issue_m0_owner_return_fuel_spec_bare_and_explicit_names_have_same_charge() {
     );
 }
 #[test]
-fn issue_m0_owner_return_fuel_spec_charge_precedes_transfer_and_cleanup() {
+fn owner_return_fuel_charge_precedes_transfer_and_cleanup() {
     let bare = "fn make()->Array<i32> {if true {let done=filled_i32(1u32,9);}let keep=filled_i32(1u32,8);let item:Array<i32> = [3,5];return item;}fn main()->i32 {let result=make();return result[1u32];}";
     let p = checked(bare);
     let full = qualify(bare);
@@ -127,7 +127,7 @@ fn issue_m0_owner_return_fuel_spec_charge_precedes_transfer_and_cleanup() {
     }
 }
 #[test]
-fn issue_m0_owner_return_fuel_spec_nested_and_failed_returns() {
+fn owner_return_fuel_nested_and_failed_returns() {
     let bare = "fn relay(xs:take Array<i32>)->Array<i32>{return xs;}fn make()->Array<i32>{let xs:Array<i32> = [3,5];return xs;}fn outer()->Array<i32>{let a=make();return relay(move a);}fn main()->i32{let result=outer();return result[1u32];}";
     let explicit = bare.replace("return xs;", "return move xs;");
     let a = qualify(bare);
@@ -160,7 +160,7 @@ fn issue_m0_owner_return_fuel_spec_nested_and_failed_returns() {
 }
 #[cfg(feature = "native")]
 #[test]
-fn issue_m0_owner_return_fuel_spec_actual_project_native() {
+fn owner_return_fuel_actual_project_native() {
     for (_, source) in owner_cases() {
         let p = checked(&source);
         let m = mir::lower(&p).unwrap();
@@ -200,7 +200,7 @@ mod cpu_process;
 
 #[cfg(target_os = "linux")]
 #[test]
-fn issue_m0_owner_return_fuel_spec_actual_compiled_cpu_and_resumption() {
+fn owner_return_fuel_actual_compiled_cpu_and_resumption() {
     use general_net::compiled;
     use std::fs;
     let mut cases = owner_cases()

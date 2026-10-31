@@ -1,3 +1,4 @@
+//! Issue label M1-01.
 #![forbid(unsafe_code)]
 
 use invar::{check, eval, front, general_net, mir, mir_eval};
@@ -48,7 +49,7 @@ fn qualify(source: &str, expected: i32, pinned_steps: Option<u64>) {
 }
 
 #[test]
-fn issue_m1_01_explicit_move_and_borrowed_return_fuel_unchanged() {
+fn mir_verifier_and_evaluator_explicit_move_and_borrowed_return_fuel_unchanged() {
     qualify(
         "fn make() -> Array<i32> { let xs: Array<i32> = [3,5]; return move xs; } fn main() -> i32 { let a = make(); return a[1u32]; }",
         5,

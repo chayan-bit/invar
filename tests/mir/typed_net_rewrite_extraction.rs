@@ -1,3 +1,4 @@
+//! Issue label M1-05.
 use std::collections::BTreeMap;
 
 use crate::term;
@@ -13,7 +14,7 @@ use invar::{
 use term::{Kind, Term};
 
 #[test]
-fn issue_m1_05_rewrite_extraction_equivalence_public_mir_graph_differential() {
+fn typed_net_rewrite_extraction_equivalence_public_mir_graph_differential() {
     let source = "fn main() -> i32 { return 10 - 3; }";
     let checked = check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
@@ -89,7 +90,7 @@ fn issue_m1_05_rewrite_extraction_equivalence_public_mir_graph_differential() {
 
 #[cfg(feature = "native")]
 #[test]
-fn issue_m1_05_rewrite_extraction_equivalence_native_cpu() {
+fn typed_net_rewrite_extraction_equivalence_native_cpu() {
     use invar::native;
     for source in [
         "fn main() -> i32 { return 10 - 3; }",
@@ -214,7 +215,7 @@ fn maps(input: Vec<u32>) -> Net {
 }
 
 #[test]
-fn issue_m1_05_rewrite_extraction_equivalence_beta_changes_extracted_body() {
+fn typed_net_rewrite_extraction_equivalence_beta_changes_extracted_body() {
     let source = t(
         0,
         Kind::Apply(
@@ -405,7 +406,7 @@ fn issue_m1_05_rewrite_extraction_equivalence_beta_changes_extracted_body() {
 }
 
 #[test]
-fn issue_m1_05_rewrite_extraction_equivalence_fusion_changes_loop_count() {
+fn typed_net_rewrite_extraction_equivalence_fusion_changes_loop_count() {
     for input in [vec![], vec![0], vec![1, u32::MAX, 42]] {
         let mut net = maps(input.clone());
         let proof = net.verify(LIMITS).unwrap();
@@ -435,7 +436,7 @@ fn issue_m1_05_rewrite_extraction_equivalence_fusion_changes_loop_count() {
 }
 
 #[test]
-fn issue_m1_05_rewrite_extraction_equivalence_invalid_and_fallback() {
+fn typed_net_rewrite_extraction_equivalence_invalid_and_fallback() {
     let mut net = maps(vec![2, 4]);
     let original = net.extract(&net.verify(LIMITS).unwrap()).unwrap();
     let too_small = Limits {

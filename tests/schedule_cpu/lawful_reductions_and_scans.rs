@@ -1,7 +1,8 @@
+//! Issue label M2-03.
 use invar::{check::check, eval, front::parse, laws, mir, mir_eval, schedule};
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_source_wrapping_sum() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_source_wrapping_sum() {
     let source = "fn main() -> i32 { let xs: Array<u32> = [4294967295u32, 1u32, 7u32]; var acc: u32 = 0u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } if acc == 7u32 { return 0; } return 1; }";
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
@@ -39,7 +40,7 @@ fn assert_cpu_agrees_with_reference(source: &str) {
 }
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_reads_seed_live_after_preloop_store() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_reads_seed_live_after_preloop_store() {
     let source = "fn main() -> i32 { let xs: Array<u32> = [2u32, 3u32]; var acc: u32 = 0u32; acc = 9u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } if acc == 14u32 { return 0; } return 1; }";
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
@@ -53,7 +54,7 @@ fn issue_m2_03_lawful_reduction_scan_reads_seed_live_after_preloop_store() {
 }
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_exhaustive_bounded_laws() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_exhaustive_bounded_laws() {
     for modulus in [4u32, 8] {
         for law in [laws::Law::WrappingSum, laws::Law::WrappingProduct] {
             for left in 0..modulus {
@@ -103,7 +104,7 @@ fn issue_m2_03_lawful_reduction_scan_exhaustive_bounded_laws() {
 }
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_ordered_tree_shapes_and_cost() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_ordered_tree_shapes_and_cost() {
     let left = laws::Affine { a: 2, b: 3 };
     let right = laws::Affine { a: 5, b: 7 };
     assert_ne!(left.then(right), right.then(left));
@@ -144,7 +145,7 @@ fn issue_m2_03_lawful_reduction_scan_ordered_tree_shapes_and_cost() {
 }
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_seeded_differential() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_seeded_differential() {
     let mut state = 0x9e3779b97f4a7c15u64;
     let mut next = || {
         state ^= state << 13;
@@ -195,7 +196,7 @@ fn issue_m2_03_lawful_reduction_scan_seeded_differential() {
 }
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_public_source_shapes_and_negatives() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_public_source_shapes_and_negatives() {
     for (law, operation, identity) in [
         (laws::Law::WrappingSum, "wrapping_add", 0u32),
         (laws::Law::WrappingProduct, "wrapping_mul", 1u32),
@@ -245,7 +246,7 @@ fn issue_m2_03_lawful_reduction_scan_public_source_shapes_and_negatives() {
 }
 
 #[test]
-fn issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws() {
     let base = "fn main() -> i32 { let xs: Array<u32> = [2u32, 3u32]; var acc: u32 = 0u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } return 0; }";
     let variants = [
         format!(
@@ -274,7 +275,7 @@ fn issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws() {
 
 /// Commuted operands, live seeds, mutable inputs and constant bounds are lawful.
 #[test]
-fn issue_m2_03_lawful_reduction_scan_accepts_lawful_source_variants() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_accepts_lawful_source_variants() {
     let base = "fn main() -> i32 { let xs: Array<u32> = [2u32, 3u32, 4294967295u32]; var acc: u32 = 0u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } if acc == 4u32 { return 0; } return 1; }";
     let variants = [
         base.replace("wrapping_add(acc, xs[i])", "wrapping_add(xs[i], acc)"),
@@ -298,7 +299,7 @@ fn issue_m2_03_lawful_reduction_scan_accepts_lawful_source_variants() {
 
 /// Reductions read live inputs and seeds: parameters, filled and moved owners.
 #[test]
-fn issue_m2_03_lawful_reduction_scan_live_inputs_and_seeds() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_live_inputs_and_seeds() {
     let data = (0..257)
         .map(|i| format!("{}u32", (i as u32).wrapping_mul(2_654_435_761)))
         .collect::<Vec<_>>()
@@ -332,7 +333,7 @@ fn issue_m2_03_lawful_reduction_scan_live_inputs_and_seeds() {
 /// The executed reduction comes from the graph: retargeting its array input or
 /// staling its law revision changes the live result or rejects the graph.
 #[test]
-fn issue_m2_03_lawful_reduction_scan_graph_rewiring_and_stale_rule() {
+fn lawful_reductions_and_scans_lawful_reduction_scan_graph_rewiring_and_stale_rule() {
     let source = "fn main() -> i32 { let xs: Array<u32> = [1u32, 2u32, 3u32]; let ys: Array<u32> = [10u32, 20u32, 30u32]; var acc: u32 = 4u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } if acc == 10u32 { return 0; } return 1; }";
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();

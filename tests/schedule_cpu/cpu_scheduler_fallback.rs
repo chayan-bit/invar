@@ -4,7 +4,7 @@ use std::process::Command;
 const SOURCE: &str = "fn main() -> i32 { let xs: Array<u32> = [1u32,2u32,3u32,4u32,5u32,6u32,7u32]; var first: Array<u32> = filled_u32(len(xs),0u32); for i in 0u32 .. len(xs) { first[i] = wrapping_add(xs[i],3u32); } let stable: Array<u32> = move first; var second: Array<u32> = filled_u32(len(stable),0u32); for j in 0u32 .. len(stable) { second[j] = wrapping_mul(stable[j],7u32); } if second[6u32] == 70u32 { return 0; } return 1; }";
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_map_workers_agree_with_serial() {
+fn cpu_scheduler_fallback_map_workers_agree_with_serial() {
     let checked = check(parse(SOURCE.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
     let reference = eval::observe(&checked, 100_000);
@@ -19,7 +19,7 @@ fn issue_m2_05_cpu_scheduler_fallback_map_workers_agree_with_serial() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_cli_engine_and_workers() {
+fn cpu_scheduler_fallback_cli_engine_and_workers() {
     let path = std::env::temp_dir().join(format!("invar-m2-05-{}.inv", std::process::id()));
     std::fs::write(&path, SOURCE).unwrap();
     let reference = Command::new(env!("CARGO_BIN_EXE_invar"))
@@ -171,7 +171,7 @@ fn prefix_scan_source(len: usize, exclusive: bool) -> String {
 /// under every worker count, through the library and the CLI, exactly as the
 /// reference engine evaluates them.
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_prefix_scans_publish_as_one_family() {
+fn cpu_scheduler_fallback_prefix_scans_publish_as_one_family() {
     for exclusive in [false, true] {
         for len in [3, 65] {
             let source = prefix_scan_source(len, exclusive);
@@ -256,7 +256,7 @@ fn zip_source(len: usize) -> String {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_unequal_inputs_true_guard() {
+fn cpu_scheduler_fallback_unequal_inputs_true_guard() {
     let source = zip_source(257);
     let (checked, program) = lower(&source);
     let reference = eval::observe(&checked, 1_000_000);
@@ -273,7 +273,7 @@ fn issue_m2_05_cpu_scheduler_fallback_unequal_inputs_true_guard() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup() {
+fn cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup() {
     for len in [0, 1, 3, 7, 65, 257] {
         for (kind, source) in [
             (schedule::PlanKind::FusedMap, map_source(len)),
@@ -379,7 +379,7 @@ fn cpu_workers_one_two_four_and_hardware_width_match_serial() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers() {
+fn cpu_scheduler_fallback_false_guard_is_serial_before_workers() {
     let source = "fn main() -> i32 { let left: Array<u32> = [1u32,2u32,3u32]; let right: Array<u32> = [4u32,5u32]; var first: Array<u32> = filled_u32(len(left),0u32); for i in 0u32 .. len(left) { first[i] = wrapping_add(left[i],right[i]); } let stable: Array<u32> = move first; var second: Array<u32> = filled_u32(len(stable),0u32); for j in 0u32 .. len(stable) { second[j] = wrapping_mul(stable[j],7u32); } return 0; }";
     let (checked, program) = lower(source);
     let reference = eval::observe(&checked, 100_000);
@@ -396,7 +396,7 @@ fn issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_checked_overflow_stays_serial() {
+fn cpu_scheduler_fallback_checked_overflow_stays_serial() {
     let source = "fn main() -> i32 { let xs: Array<i32> = [2147483647, 1]; var acc: i32 = 0; for i in 0u32 .. len(xs) { acc = acc + xs[i]; } return acc; }";
     let (checked, program) = lower(source);
     let reference = eval::observe(&checked, 100_000);
@@ -415,7 +415,7 @@ fn issue_m2_05_cpu_scheduler_fallback_checked_overflow_stays_serial() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_injected_failures_publish_nothing() {
+fn cpu_scheduler_fallback_injected_failures_publish_nothing() {
     use std::sync::atomic::Ordering;
     let workers = std::thread::available_parallelism()
         .map_or(2, |count| count.get())
@@ -515,7 +515,7 @@ fn issue_m2_05_cpu_scheduler_fallback_injected_failures_publish_nothing() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_cli_validation_and_scalar_serial() {
+fn cpu_scheduler_fallback_cli_validation_and_scalar_serial() {
     let source = "fn main() -> i32 { return 42; }";
     let (checked, program) = lower(source);
     let reference = eval::observe(&checked, 100);
@@ -571,7 +571,7 @@ fn issue_m2_05_cpu_scheduler_fallback_cli_validation_and_scalar_serial() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_fuel_limit_preserves_failure_prefix() {
+fn cpu_scheduler_fallback_fuel_limit_preserves_failure_prefix() {
     let source = map_source(257);
     let (checked, program) = lower(&source);
     for fuel in [1, 100, 2_000] {
@@ -589,7 +589,7 @@ fn issue_m2_05_cpu_scheduler_fallback_fuel_limit_preserves_failure_prefix() {
 }
 
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_preloop_trap_and_fuel_precede_worker_fault() {
+fn cpu_scheduler_fallback_preloop_trap_and_fuel_precede_worker_fault() {
     let source = map_source(257).replacen("let xs:", "let boom: i32 = 1 / 0; let xs:", 1);
     let (checked, program) = lower(&source);
     let reference = eval::observe(&checked, 1_000_000);
@@ -658,7 +658,7 @@ fn explain_kinds(source: &str) -> Vec<(usize, usize, schedule::PlanKind, String)
 
 /// `explain` reports exactly the plan the CPU scheduler publishes for every region.
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_explain_matches_executed_plans() {
+fn cpu_scheduler_fallback_explain_matches_executed_plans() {
     let xs = (0..70)
         .map(|i| format!("{}u32", (i as u32).wrapping_mul(2_654_435_761)))
         .collect::<Vec<_>>()
