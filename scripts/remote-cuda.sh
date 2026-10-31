@@ -29,7 +29,7 @@ done | paste -sd, -)
 # none of them a CUDA result (libtest --skip substrings):
 skips=(
     system::substep_admission::     # S1405 manifest path checks assume Unix paths
-    a1_grid_cuda_completed_equality     # uses /bin/false as the failing compiler
+    grid_cuda_completed_equality     # uses /bin/false as the failing compiler
     issue_m3_05_gpu_full_m2_probe_corpus  # needs INVAR_M3_05_CORPUS_DIR
     issue_m5_01_benchmark_manifest_validation_and_rejections  # needs a git checkout
     source_packet_reverification_binds_source_key_dimensions_generation_and_input_bytes  # order-dependent on any OS
@@ -40,15 +40,15 @@ skips=(
     task_region::report  # CUDA bench report; needs P4B_OUT
     p8_calibrate_cuda  # opt-in; asserts INVAR_GPU_EXCLUSIVE=1
     p8_d5_cuda_session  # opt-in; asserts INVAR_GPU_EXCLUSIVE=1
-    v02_math_cuda_matches_upstream_core_math_bit_for_bit  # needs INVAR_COREMATH_UPSTREAM
-    v02_math_cuda_differential_catches_a_mutated_polynomial_coefficient  # needs INVAR_COREMATH_UPSTREAM
-    v02_math_matches_upstream_core_math_on_worst_cases_and_random_inputs  # host side; needs INVAR_COREMATH_UPSTREAM
-    v02_math_differential_catches_a_mutated_polynomial_coefficient  # host side; needs INVAR_COREMATH_UPSTREAM
-    v02_math_msl_host_build_matches_upstream_core_math  # needs INVAR_COREMATH_UPSTREAM
-    v02_math_msl_prelude_compiles_warning_free_on_the_host  # host C++ build assumes a 64-bit long; Windows is LLP64
-    v02_math_msl_soft_binary64_matches_the_host_fpu  # host C++ build assumes a 64-bit long; Windows is LLP64
-    v02_math_msl_host_build_matches_the_cpu_library  # host C++ build assumes a 64-bit long; Windows is LLP64
-    v02_math_msl_host_build_catches_a_mutated_polynomial_coefficient  # host C++ build assumes a 64-bit long; Windows is LLP64
+    math_cr_v1_cuda_matches_upstream_core_math_bit_for_bit  # needs INVAR_COREMATH_UPSTREAM
+    math_cr_v1_cuda_differential_catches_a_mutated_polynomial_coefficient  # needs INVAR_COREMATH_UPSTREAM
+    math_matches_upstream_core_math_on_worst_cases_and_random_inputs  # host side; needs INVAR_COREMATH_UPSTREAM
+    math_differential_catches_a_mutated_polynomial_coefficient  # host side; needs INVAR_COREMATH_UPSTREAM
+    math_msl_host_build_matches_upstream_core_math  # needs INVAR_COREMATH_UPSTREAM
+    math_msl_prelude_compiles_warning_free_on_the_host  # host C++ build assumes a 64-bit long; Windows is LLP64
+    math_msl_soft_binary64_matches_the_host_fpu  # host C++ build assumes a 64-bit long; Windows is LLP64
+    math_msl_host_build_matches_the_cpu_library  # host C++ build assumes a 64-bit long; Windows is LLP64
+    math_msl_host_build_catches_a_mutated_polynomial_coefficient  # host C++ build assumes a 64-bit long; Windows is LLP64
 )
 [ "${REMOTE_CUDA_NO_SKIP:-0}" = 1 ] && skips=()
 [ -n "${REMOTE_CUDA_TESTS:-}" ] && tests=$REMOTE_CUDA_TESTS

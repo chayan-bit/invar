@@ -2,7 +2,7 @@
 //! to one verified IR for CUDA and Metal, host admission refusals, and the IR's
 //! independent reference model against the source expectation (CPU net oracle
 //! and reference evaluator) for every adversarial case. Device execution is in
-//! the ignored `gpu_cuda::m4_04` and `gpu_metal::m4_04` suites.
+//! the ignored `gpu_cuda::segmented` and `gpu_metal::segmented` suites.
 #![forbid(unsafe_code)]
 
 #[path = "../support/m4_04_cases.rs"]
@@ -140,7 +140,7 @@ fn issue_m4_04_segmented_flattening_compaction_device_ir_reference_matches_sourc
         }
         checked += 1;
     }
-    println!("m4_04 device IR reference cases agreeing with the source oracle: {checked}");
+    println!("segmented device IR reference cases agreeing with the source oracle: {checked}");
     assert!(checked >= 50);
 }
 

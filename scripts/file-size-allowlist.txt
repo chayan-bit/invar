@@ -26,13 +26,13 @@
 839 src/summary_source.rs
 1159 src/system/ros2.rs
 940 src/system/urdf.rs
+930 tests/fsum_math_sort_spatial/placement.rs
 1171 tests/issue_ai_02_spec_examples.rs
 849 tests/issue_m4_06_bounded_schedule_tuning.rs
 806 tests/m4_summary/issue_m4_07_summary_source.rs
 873 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
 831 tests/robotics/issue_s1_06_sequencer_binding.rs
 831 tests/support/gnet_device.rs
-930 tests/v02/v02_placement.rs
 952 tools/bench/acceptance.rs
 988 tools/qualification/device.rs
 1128 tools/tests/bench_tooling/issue_m5_01_benchmark_manifest.rs

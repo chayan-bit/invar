@@ -13,8 +13,8 @@ Used by [schedule](../schedule/README.md) (`schedule/metal.rs`) and `--artifact`
 
 ## Tests
 
-- `cargo nextest run --locked --test device` (`issue_metal_aot_format` checks the container on any host).
-- `tests/gpu_metal` (`metal_aot`, `metal_archives`) needs Apple Silicon and `--features metal`.
+- `cargo nextest run --locked --test device` (`metal_aot_container_format` checks the container on any host).
+- `tests/gpu_metal` (`metal_aot`, `backend_archives`) needs Apple Silicon and `--features metal`.
 
 ## Rules to keep
 

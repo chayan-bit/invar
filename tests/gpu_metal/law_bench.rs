@@ -56,16 +56,21 @@ fn p8_metal_zero_copy_warm_is_exact_and_mutation_is_killed() {
         let sources = bench::sources(kind, true);
         let kernels = sources
             .iter()
-            .map(|source| (source.clone(), invar::metal_aot::msl_entry_points(source)))
+            .map(|source| {
+                (
+                    source.clone(),
+                    invar::compiled_ahead::msl_entry_points(source),
+                )
+            })
             .collect::<Vec<_>>();
-        let bytes = invar::metal_aot::build::build(
-            invar::metal_aot::Route::Run,
+        let bytes = invar::compiled_ahead::build::build(
+            invar::compiled_ahead::Route::Run,
             "p8-zero-copy",
             b"P8 zero-copy qualification",
             &kernels,
         )
         .unwrap();
-        invar::metal_aot::decode(&bytes)
+        invar::compiled_ahead::decode(&bytes)
             .unwrap()
             .install(&mut device)
             .unwrap();

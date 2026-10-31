@@ -2,7 +2,7 @@
 //! over the whole runnable corpus with typed refusals, program-specific emitted
 //! CUDA/Metal structure, and the emitted device bodies executed by the CPU
 //! group model against the bounded CPU net oracle. The model is never a GPU
-//! claim; `gpu_cuda::gnet_03` and `gpu_metal::gnet_03` run the same
+//! claim; `gpu_cuda::general_net_abi5` and `gpu_metal::general_net_abi5` run the same
 //! harness on actual devices.
 #![forbid(unsafe_code)]
 
@@ -67,7 +67,7 @@ fn issue_gnet_03_device_corpus_admission_is_typed_and_target_independent() {
             _ => panic!("{}: targets disagree on admission", source.name),
         }
     }
-    println!("gnet_03 admission runnable={runnable} {tally:?}");
+    println!("general_net_abi5 admission runnable={runnable} {tally:?}");
     // Owners are device data paths: arrays no longer force a refusal.
     assert!(tally["admitted"] >= 250, "{tally:?}");
     assert_eq!(runnable, tally.values().sum::<usize>());
@@ -274,7 +274,7 @@ fn adversarial_case(target: Target, name: &str) {
         .find(|case| case.name == name)
         .unwrap_or_else(|| panic!("unknown adversarial case {name}"));
     let s = device::run_case(target, &label, &case, &mut backend);
-    println!("gnet_03 {label} {}: {s:?}", case.name);
+    println!("general_net_abi5 {label} {}: {s:?}", case.name);
     device::check_case(case.name, &s);
 }
 

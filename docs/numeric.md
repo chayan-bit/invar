@@ -160,7 +160,7 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 #### On the devices
 
 - A lowered fold needs no device law of its own: the slot store is an ordinary store loop, and the reduction is the same `sum_tree` or `sum_exact` call that forced CUDA and Metal already run on their fsum kernels, which are bit-identical to the CPU reduction (Appendix B of [the specification](spec/invar-v0.1.md)).
-- Tests: `tests/gpu_cuda/eng_03_tier.rs` (the H100, `--features cuda`) and `tests/gpu_metal/eng_03_tier.rs` (the Mac, `--features metal`), over one shared body in `tests/support/gpu_eng_03_tier.rs`, run Tree and Exact folds of 1, 4,096 and 100,003 cancelling terms forced on the device. They require the oracle's bits, and the fold's reduction receipt to name the device.
+- Tests: `tests/gpu_cuda/fold_tier.rs` (the H100, `--features cuda`) and `tests/gpu_metal/fold_tier.rs` (the Mac, `--features metal`), over one shared body in `tests/support/gpu_eng_03_tier.rs`, run Tree and Exact folds of 1, 4,096 and 100,003 cancelling terms forced on the device. They require the oracle's bits, and the fold's reduction receipt to name the device.
 
 ### Declaration
 

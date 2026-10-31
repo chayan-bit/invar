@@ -55,7 +55,7 @@ These are correctness bounds, not a performance or full general-GPU acceptance c
 
 ## Checks and held-out generator follow-up
 
-The default tests are the `issue_v01_pair_reduction` module of the `device` test binary.
+The default tests are the `pair_reduction_device` module of the `device` test binary.
 The `pair_reduction` modules of the `gpu_cuda` and `gpu_metal` targets require their backend features and are ignored unless explicitly selected.
 The source reference, serial MIR and scheduled CPU/device observations compare both results, source fuel and cleanup at boundary sizes.
 Independent widened-integer host expectations compare complete raw pairs through the maximum device length.

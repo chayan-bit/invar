@@ -13,7 +13,7 @@ Spawned by `engine` and the system commands.
 
 ## Tests
 
-- `cargo nextest run --locked --test gpu_cuda` needs `--features cuda` and a GPU; `tests/gpu_cuda/gnet_03_nvrtc_pipes.rs` covers the NVRTC pipes.
+- `cargo nextest run --locked --test gpu_cuda` needs `--features cuda` and a GPU; `tests/gpu_cuda/nvrtc_pipes.rs` covers the NVRTC pipes.
 
 ## Rules to keep
 

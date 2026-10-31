@@ -13,7 +13,7 @@ Used by [check](../check/README.md), [eval](../eval/README.md) and every test th
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_numeric_layout`, `--test numeric_tiers` and `--test v02`.
+- `cargo nextest run --locked --test m4_numeric_layout`, `--test numeric_tiers` and `--test fsum_math_sort_spatial`.
 
 ## Rules to keep
 

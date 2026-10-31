@@ -13,8 +13,8 @@ Checked by [check](../check/README.md), evaluated by [eval](../eval/README.md) a
 
 ## Tests
 
-- `cargo nextest run --locked --test v02` (`issue_v02_math_*`, `issue_c4_cr_default`).
-- Hardware: `tests/gpu_cuda/v02_math.rs`, `tests/gpu_metal/v02_math_msl.rs`.
+- `cargo nextest run --locked --test fsum_math_sort_spatial` (`math_*`, `math_cr_default`).
+- Hardware: `tests/gpu_cuda/math_cr_v1.rs`, `tests/gpu_metal/math_msl.rs`.
 
 ## Rules to keep
 

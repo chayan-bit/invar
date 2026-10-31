@@ -309,7 +309,7 @@ impl Denominator {
     }
     pub fn print(&self, label: &str) {
         println!(
-            "gnet_03 {label}: runnable={} device_executed={} {:?} refused_with_reason={} {:?} device_storage_limit={} fallback={} candidate_programs={} frontier_programs={} committed_children={} peak_private_width={} epochs={}",
+            "general_net_abi5 {label}: runnable={} device_executed={} {:?} refused_with_reason={} {:?} device_storage_limit={} fallback={} candidate_programs={} frontier_programs={} committed_children={} peak_private_width={} epochs={}",
             self.runnable,
             self.executed_total(),
             self.executed,

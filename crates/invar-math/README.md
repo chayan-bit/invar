@@ -15,7 +15,7 @@ The numeric library behind [src/math](../../src/math/README.md); evaluated by th
 
 ## Tests
 
-- `cargo nextest run --locked -p invar-math` and `cargo nextest run --locked --test v02`.
+- `cargo nextest run --locked -p invar-math` and `cargo nextest run --locked --test fsum_math_sort_spatial`.
 
 ## Rules to keep
 

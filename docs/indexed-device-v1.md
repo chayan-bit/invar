@@ -89,7 +89,7 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo clippy --locked --features cuda --all-targets -- -D warnings
 cargo clippy --locked --features metal --all-targets -- -D warnings
 # NVIDIA host with NVRTC 12.9:
-cargo test --locked --features cuda --test gpu_cuda m4_05:: -- --ignored --nocapture --test-threads=1
+cargo test --locked --features cuda --test gpu_cuda indexed:: -- --ignored --nocapture --test-threads=1
 # Apple Silicon host, no other GPU work running:
 cargo test --locked -p invar-metal --test issue_m4_05_metal_gpu -- --ignored --nocapture --test-threads=1
 ```
