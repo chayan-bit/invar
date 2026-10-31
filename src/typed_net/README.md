@@ -17,7 +17,7 @@ Used by [loops](../loops/README.md) and the source families; see the code tour s
 ## Tests
 
 - `cargo nextest run --locked --test mir` (`issue_m1_04` verifier, `issue_m1_05` rewrites and extraction).
-- `cargo nextest run --locked --test m4_summary` covers the bounded scans.
+- `cargo nextest run --locked --test summary` covers the bounded scans.
 
 ## Rules to keep
 

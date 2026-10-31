@@ -12,7 +12,7 @@ A family adapter used by [schedule](../schedule/README.md) for `f32` programs.
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_numeric_layout` (`issue_m4_01_source_f32`).
+- `cargo nextest run --locked --test numeric_layout` (`source_f32`).
 
 ## Rules to keep
 
