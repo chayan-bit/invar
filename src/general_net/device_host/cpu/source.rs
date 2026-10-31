@@ -42,13 +42,15 @@ inline void threadgroup_barrier(unsigned){group_barrier.arrive_and_wait();}}
 "#,
             );
             (
-                artifact
-                    .source()
-                    .replace("#include <metal_stdlib>", "")
-                    .replace(
-                        "threadgroup gnet_u root_done; threadgroup gnet_u deltas[8];",
-                        "static gnet_u root_done; static gnet_u deltas[8];",
-                    ),
+                shared_exits(
+                    &artifact
+                        .source()
+                        .replace("#include <metal_stdlib>", "")
+                        .replace(
+                            "threadgroup gnet_u root_done; threadgroup gnet_u deltas[8];",
+                            "static gnet_u root_done; static gnet_u deltas[8];",
+                        ),
+                )?,
                 r#"
 #undef thread
 #undef device
@@ -123,4 +125,60 @@ extern "C" INVAR_MODEL_EXPORT uint32_t @SYMBOL@(uint32_t command,void** opaque,c
 }
 "#.replace("@CALL@",call).replace("@SYMBOL@",symbol).replace("@ARGS@",&artifact.entry_layout().map_or(artifact.params().len(), |e|e.input_words()).to_string()).replace("@SLOTS@",&artifact.speculation_layout().ok_or("missing private layout")?.slots().to_string());
     Ok(format!("{shim}\n{source}\n{bridge}\n{driver}"))
+}
+
+/// Metal has no `goto`, so every one of the thousands of `GNET_STOP` and
+/// `GNET_YIELD` sites in a Metal `gnet_resume` expands its whole epilogue
+/// inline; clang -O1 with UBSan spent about 270 CPU-s on one such model. C++
+/// has `goto`, so, as the CUDA emitter does (`resume::exit_macro`), every site
+/// jumps to one copy of the same epilogue at the end of `gnet_resume`. The
+/// state bodies stay byte-identical; a site outside `gnet_resume`, or one
+/// that skips a declaration, fails to compile instead of changing meaning.
+fn shared_exits(source: &str) -> Result<String, String> {
+    let shape = || "CPU device model: unexpected Metal continuation shape".to_owned();
+    let resume = source
+        .find("\nGNET_FN bool gnet_resume(")
+        .ok_or_else(shape)?;
+    let define = |name: &str| {
+        let head = format!("\n#define {name} ");
+        let at = source[..resume].rfind(&head).ok_or_else(shape)? + 1;
+        let end = at + source[at..].find('\n').ok_or_else(shape)?;
+        Ok::<_, String>((at..end, &source[at + head.len() - 1..end]))
+    };
+    let (yield_line, yield_body) = define("GNET_YIELD")?;
+    let (stop_line, stop_body) = define("GNET_STOP")?;
+    // gnet_resume closes at column 0, right before the next kernel.
+    let close = resume + source[resume..].find("\n}\nkernel ").ok_or_else(shape)?;
+    let mut lines = [
+        (yield_line, "#define GNET_YIELD goto gnet_yield".to_owned()),
+        (stop_line, "#define GNET_STOP goto gnet_stop".to_owned()),
+        (
+            close..close,
+            format!("\ngnet_yield: {yield_body};\ngnet_stop: {stop_body};"),
+        ),
+    ];
+    lines.sort_by_key(|(range, _)| range.start);
+    let mut out = String::with_capacity(source.len() + 1024);
+    let mut at = 0;
+    for (range, text) in lines {
+        out.push_str(&source[at..range.start]);
+        out.push_str(&text);
+        at = range.end;
+    }
+    out.push_str(&source[at..]);
+    Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn metal_exits_jump_to_one_shared_epilogue_in_gnet_resume() {
+        let source = "x\n#define GNET_YIELD GNET_SAVE; return false\n#define GNET_STOP gnet_finish(); return true\nGNET_FN bool gnet_resume(int x) {\nif (x) { GNET_STOP; } GNET_YIELD;\n}\nkernel void k() {}\n#define GNET_STOP return false\n";
+        assert_eq!(
+            super::shared_exits(source).unwrap(),
+            "x\n#define GNET_YIELD goto gnet_yield\n#define GNET_STOP goto gnet_stop\nGNET_FN bool gnet_resume(int x) {\nif (x) { GNET_STOP; } GNET_YIELD;\ngnet_yield: GNET_SAVE; return false;\ngnet_stop: gnet_finish(); return true;\n}\nkernel void k() {}\n#define GNET_STOP return false\n"
+        );
+        assert!(super::shared_exits(&source.replace("kernel", "void")).is_err());
+        assert!(super::shared_exits(&source.replace("GNET_YIELD G", "GNET_Y G")).is_err());
+    }
 }
