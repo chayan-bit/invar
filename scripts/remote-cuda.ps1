@@ -121,7 +121,8 @@ try {
     $timedOut = -not $p.WaitForExit([math]::Max(1, ($deadline - (Get-Date)).TotalMilliseconds))
     # taskkill can be refused over ssh; this run's own binaries all live under $base.
     function StopTree($proc) {
-        & taskkill.exe /T /F /PID $proc.Id 2>$null | Out-Null
+        # Inside cmd: Windows PowerShell turns redirected native stderr into a terminating error under Stop.
+        & cmd.exe /c "taskkill /T /F /PID $($proc.Id) >nul 2>&1" | Out-Null
         Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($base) } |
             Stop-Process -Force -ErrorAction SilentlyContinue
     }
