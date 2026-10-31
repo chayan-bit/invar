@@ -82,7 +82,7 @@ One run holds the lock at a time, and a run waits for three quiet GPU samples (a
 `REMOTE_CUDA_SHARED=1` runs beside another tenant when memory allows; such runs check correctness only and their timings are not valid.
 Exit codes: 0 pass, 1 test failures, no test run, or a filter that matched no test, 2 build failure, 3 busy, 4 timeout, 5 ssh dropped (the run finished remotely; read the log).
 The full log lands in `target/remote-cuda/<run>.log`.
-The skip list in the script names Windows-only gaps, none of them a CUDA result; `REMOTE_CUDA_NO_SKIP=1` runs them, `REMOTE_CUDA_EXTRA_SKIPS` adds skips and `REMOTE_CUDA_TESTS` replaces the target list.
+The skip list in the script names Windows-only gaps and opt-in tests that need inputs the runner does not supply (`P4B_OUT`, `INVAR_COREMATH_UPSTREAM`, `INVAR_GPU_EXCLUSIVE=1`), none of them a CUDA result; `REMOTE_CUDA_NO_SKIP=1` runs them, `REMOTE_CUDA_EXTRA_SKIPS` adds skips and `REMOTE_CUDA_TESTS` replaces the target list.
 
 ## Later implementation and hardware acceptance
 
