@@ -132,8 +132,8 @@ all supplied ticks and makes no source-step equivalence assertion.
 This deliberately corrects the historical bare-owner return undercount without
 amending the frozen specification: successful runs gain one source step per
 executed bare owner-name return. The existing `[3,5]` maker golden, now pinned by
-`tests/language/issue_m0_owner_return_fuel_spec.rs`, changes from 11 to 12; the explicit-move
-12 and borrowed-view 17 goldens in `tests/mir/issue_m1_01_owned_return_fuel.rs` remain unchanged. The new return-fuel regressions
+`tests/language/owner_return_fuel.rs`, changes from 11 to 12; the explicit-move
+12 and borrowed-view 17 goldens in `tests/mir/mir_owner_return_fuel.rs` remain unchanged. The new return-fuel regressions
 pin the nested cleanup fixture at 22 (historically 21), and paired nested returns
 at 19 (historically 17). Untaken paths add no runtime steps. Retaining the Tick
 also changes derived MIR/net digests, instruction/token positions and transition

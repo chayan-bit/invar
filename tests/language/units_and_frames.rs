@@ -1,9 +1,10 @@
+//! Issue label R1-01.
 use std::process::Command;
 
 use crate::engines::agree;
 
 #[test]
-fn issue_r1_01_units_frames_quantity_erasure_is_byte_identical() {
+fn units_and_frames_quantity_erasure_is_byte_identical() {
     let typed = "fn main() -> i32 { let x: Quantity<i32,m> = quantity::<m>(1i32); let y: Quantity<i32,m> = quantity::<m>(1i32); if x == y { return 1; } return 0; }";
     let type_pad = " ".repeat("Quantity<i32,m>".len() - "i32".len());
     let call_pad = " ".repeat("quantity::<m>(".len());
@@ -35,7 +36,7 @@ fn issue_r1_01_units_frames_quantity_erasure_is_byte_identical() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_frame_type_erasure_is_byte_identical() {
+fn units_and_frames_frame_type_erasure_is_byte_identical() {
     let typed = "frame world; fn f(v: read Vector3<i32,um,world>) -> i32 { return 7; } fn main() -> i32 { return 1; }";
     let prefix_pad = " ".repeat("frame world; ".len());
     let type_pad = " ".repeat("Vector3<i32,um,world>".len() - "Array<i32>".len());
@@ -64,7 +65,7 @@ fn issue_r1_01_units_frames_frame_type_erasure_is_byte_identical() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_device_text_is_byte_identical() {
+fn units_and_frames_device_text_is_byte_identical() {
     let kernel = "let xs: Array<u32> = [1u32,2u32,3u32];
         var ys: Array<u32> = filled_u32(len(xs),0u32);
         for i in 0u32 .. len(xs) { ys[i] = wrapping_add(xs[i],3u32); }";
@@ -111,7 +112,7 @@ fn issue_r1_01_units_frames_device_text_is_byte_identical() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_quantities_erase_and_engines_agree() {
+fn units_and_frames_quantities_erase_and_engines_agree() {
     agree(
         include_str!("../fixtures/r1_01_quantity_basic.inv"),
         1000,
@@ -120,7 +121,7 @@ fn issue_r1_01_units_frames_quantities_erase_and_engines_agree() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_quantity_source_errors() {
+fn units_and_frames_quantity_source_errors() {
     for (fixture, code) in [
         ("mismatched-units.inv", "UNIT_MISMATCH"),
         ("unknown-unit.inv", "UNIT_UNKNOWN"),
@@ -149,12 +150,12 @@ fn issue_r1_01_units_frames_quantity_source_errors() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_transform_chain_agrees() {
+fn units_and_frames_transform_chain_agrees() {
     agree(include_str!("../fixtures/r1_01_frame_values.inv"), 10000, 1);
 }
 
 #[test]
-fn issue_r1_01_units_frames_twenty_kinematics_programs_agree() {
+fn units_and_frames_twenty_kinematics_programs_agree() {
     for case in 0..20i32 {
         let x = 100 + case * 17;
         let y = 50 + case;
@@ -201,7 +202,7 @@ fn issue_r1_01_units_frames_twenty_kinematics_programs_agree() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_quantity_chain_respects_two_mib_stack() {
+fn units_and_frames_quantity_chain_respects_two_mib_stack() {
     let expression = vec!["distance"; 180].join(" + ");
     let source = format!(
         "fn main() -> i32 {{ let distance: Quantity<i32,m> = quantity::<m>(1); let sum: Quantity<i32,m> = {expression}; return 0; }}"
@@ -227,7 +228,7 @@ fn issue_r1_01_units_frames_quantity_chain_respects_two_mib_stack() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_generated_traps_have_source_spans() {
+fn units_and_frames_generated_traps_have_source_spans() {
     let source = include_str!("../fixtures/r1_01/frame-overflow.inv");
     let checked =
         invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
@@ -269,7 +270,7 @@ fn issue_r1_01_units_frames_generated_traps_have_source_spans() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_scale_fix_applies_through_cli() {
+fn units_and_frames_scale_fix_applies_through_cli() {
     let source = include_str!("../fixtures/r1_01/mismatched-units.inv");
     let path = std::env::temp_dir().join(format!("invar-r1-unit-fix-{}.inv", std::process::id()));
     std::fs::write(&path, source).unwrap();
@@ -303,7 +304,7 @@ fn issue_r1_01_units_frames_scale_fix_applies_through_cli() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_record_fields_preserve_units() {
+fn units_and_frames_record_fields_preserve_units() {
     let source = include_str!("../fixtures/r1_01_record_quantity.inv");
     let checked =
         invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), true).unwrap();
@@ -314,7 +315,7 @@ fn issue_r1_01_units_frames_record_fields_preserve_units() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_dimension_products_quotients_and_rates() {
+fn units_and_frames_dimension_products_quotients_and_rates() {
     agree(
         include_str!("../fixtures/r1_01_dimension_algebra.inv"),
         1000,
@@ -323,12 +324,12 @@ fn issue_r1_01_units_frames_dimension_products_quotients_and_rates() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_exact_scale_conversion_agrees() {
+fn units_and_frames_exact_scale_conversion_agrees() {
     agree(include_str!("../fixtures/r1_01_conversion.inv"), 1000, 1);
 }
 
 #[test]
-fn issue_r1_01_units_frames_scale_traps_agree() {
+fn units_and_frames_scale_traps_agree() {
     use invar::eval::{EvalError, TrapCategory};
     for (source, category, code) in [
         (
@@ -363,12 +364,12 @@ fn issue_r1_01_units_frames_scale_traps_agree() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_certified_angle_conversion_agrees() {
+fn units_and_frames_certified_angle_conversion_agrees() {
     agree(include_str!("../fixtures/r1_01_angles.inv"), 1000, 1);
 }
 
 #[test]
-fn issue_r1_01_units_frames_angle_overflow_agrees() {
+fn units_and_frames_angle_overflow_agrees() {
     use invar::eval::{EvalError, TrapCategory};
     let source = include_str!("../fixtures/r1_01/angle-overflow.inv");
     let checked =
@@ -397,7 +398,7 @@ fn issue_r1_01_units_frames_angle_overflow_agrees() {
 }
 
 #[test]
-fn issue_r1_01_units_frames_nominal_tree_public_check() {
+fn units_and_frames_nominal_tree_public_check() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/fixtures/r1_01_frames.inv"

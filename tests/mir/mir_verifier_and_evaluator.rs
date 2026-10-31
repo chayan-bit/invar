@@ -1,3 +1,4 @@
+//! Issue label M1-01.
 use invar::{check::check, eval, front::parse, mir, mir_eval};
 
 use crate::corpus::CORPUS;
@@ -8,7 +9,7 @@ fn lower(source: &str) -> mir::Program {
 }
 
 #[test]
-fn issue_m1_01_typed_mir_independent_evaluator() {
+fn mir_verifier_and_evaluator_typed_mir_independent_evaluator() {
     for &(source, fuel) in CORPUS {
         let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
         let lowered = mir::lower(&checked).unwrap();
@@ -22,7 +23,7 @@ fn issue_m1_01_typed_mir_independent_evaluator() {
 }
 
 #[test]
-fn issue_m1_01_typed_mir_verifier_rejects_mutations() {
+fn mir_verifier_and_evaluator_typed_mir_verifier_rejects_mutations() {
     let original = lower("fn main() -> i32 { return 1; }");
     let mut missing = original.clone();
     missing.functions[0].blocks[0].end = None;
@@ -210,7 +211,7 @@ fn issue_m1_01_typed_mir_verifier_rejects_mutations() {
 }
 
 #[test]
-fn issue_m1_01_differential_detects_semantic_mutation() {
+fn mir_verifier_and_evaluator_differential_detects_semantic_mutation() {
     let source = "fn main() -> i32 { return 2 + 3; }";
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let mut lowered = mir::lower(&checked).unwrap();
