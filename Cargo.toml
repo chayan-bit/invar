@@ -76,3 +76,10 @@ opt-level = 1
 debug-assertions = true
 overflow-checks = true
 debug = 0
+
+# CUDA hardware suites on the remote runner (scripts/remote-cuda.sh). The same checks as `ci-debug`, so
+# every `cfg!(debug_assertions)` workload is the Debug one, at opt-level 3: the suites' host side
+# (checkpoint hashing, CPU oracles, census admission) bounds their runtime, not the device.
+[profile.device-test]
+inherits = "ci-debug"
+opt-level = 3

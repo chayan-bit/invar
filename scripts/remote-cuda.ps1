@@ -11,7 +11,7 @@ param(
     [string]$Filter = '',
     [string]$Skip = '',
     [string]$Revision = '',
-    [string]$Profile = 'test',
+    [string]$Profile = 'device-test',
     [string]$Mingw = 'toolchains\llvm-mingw-20261006-ucrt-x86_64\bin',
     [int]$TimeoutMin = 90,
     [int]$WaitMin = 30,

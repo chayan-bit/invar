@@ -11,7 +11,7 @@
 # to run beside another tenant's GPU job (correctness only, timings invalid),
 # REMOTE_CUDA_NO_SKIP=1 to run the known gaps below, REMOTE_CUDA_TESTS to replace
 # the target list, REMOTE_CUDA_EXTRA_SKIPS (comma-separated) to add skips,
-# REMOTE_CUDA_PROFILE (test) for the cargo profile the suites build with.
+# REMOTE_CUDA_PROFILE (device-test) for the cargo profile the suites build with.
 # Exit: 0 pass, 1 test failures (or no test ran, or a filter matched none), 2 build failure, 3 GPU or runner busy, 4 timeout,
 # 5 ssh dropped mid-run (the run finished remotely; read its log for the result).
 set -euo pipefail
@@ -69,7 +69,7 @@ ssh_=(ssh -o ConnectTimeout=20 -o ServerAliveInterval=30 "$host")
 "${ssh_[@]}" "mkdir $dir\\runs\\$run"
 scp -q "$here/remote-cuda.ps1" "$tmp/src.tgz" "$host:$dir/runs/$run/"
 args=(-Run "$run" -Base "$dir" -Tests "$tests" -Revision "$sha"
-    -Profile "${REMOTE_CUDA_PROFILE:-test}" -TimeoutMin "${REMOTE_CUDA_TIMEOUT_MIN:-90}" -WaitMin "${REMOTE_CUDA_WAIT_MIN:-30}"
+    -Profile "${REMOTE_CUDA_PROFILE:-device-test}" -TimeoutMin "${REMOTE_CUDA_TIMEOUT_MIN:-90}" -WaitMin "${REMOTE_CUDA_WAIT_MIN:-30}"
     -MinFreeMiB "${REMOTE_CUDA_MIN_FREE_MIB:-8192}" -MaxUtil "${REMOTE_CUDA_MAX_UTIL:-20}")
 # ssh joins argv with spaces, so quote the filter list for the remote command line.
 [ -n "$filter" ] && args+=(-Filter "\"$filter\"")
