@@ -73,6 +73,7 @@ Run them locally on a CUDA-capable Linux host or an Apple Silicon Mac when a cha
 
 `just test-gpu-cuda-remote <ref> [filters]` (`scripts/remote-cuda.sh`) runs a ref's CUDA suites on a remote Windows CUDA host over ssh.
 It ships `git archive <ref>` to the host, builds with the per-user Rust `x86_64-pc-windows-gnullvm` toolchain linked by a per-user llvm-mingw, and runs the lib tests plus every test binary that names the `cuda` feature or `CudaDevice`, with `--include-ignored`.
+It builds the `device-test` profile (`REMOTE_CUDA_PROFILE` overrides it; a ref older than that profile needs `REMOTE_CUDA_PROFILE=test`): the Debug checks and `cfg!(debug_assertions)` workloads at opt-level 3, because the suites' host side, not the device, bounds their runtime.
 Set `REMOTE_CUDA_HOST` to the host's ssh alias; the script names no host.
 On the host, everything lives under `%USERPROFILE%\<REMOTE_CUDA_DIR>` (default `invar-remote-cuda`): `nvrtc\` holds the NVRTC DLLs, and the cargo home, target directory, sources, run logs and the runner lock sit beside it.
 The pinned llvm-mingw lives under `%USERPROFILE%\toolchains\` (`REMOTE_CUDA_MINGW` overrides the path).

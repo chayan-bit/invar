@@ -11,6 +11,7 @@ param(
     [string]$Filter = '',
     [string]$Skip = '',
     [string]$Revision = '',
+    [string]$Profile = 'device-test',
     [string]$Mingw = 'toolchains\llvm-mingw-20261006-ucrt-x86_64\bin',
     [int]$TimeoutMin = 90,
     [int]$WaitMin = 30,
@@ -86,7 +87,9 @@ try {
     if (-not $env:INVAR_TEST_TIMEOUT_SCALE) { $env:INVAR_TEST_TIMEOUT_SCALE = '8' }
     # build.rs embeds this revision; the extracted archive has no git checkout to read it from.
     if ($Revision) { $env:INVAR_SOURCE_REVISION = $Revision }
-    $env:INVAR_NVRTC_HELPER = Join-Path $base 'target\debug\invar-nvrtc.exe'
+    $out = @{ dev = 'debug'; test = 'debug'; release = 'release'; bench = 'release' }[$Profile]
+    if (-not $out) { $out = $Profile }
+    $env:INVAR_NVRTC_HELPER = Join-Path $base "target\$out\invar-nvrtc.exe"
     $env:INVAR_NVRTC_COMPILER = $env:INVAR_NVRTC_HELPER
     # cudarc loads nvcuda.dll from System32 and the NVRTC DLL from PATH.
     # GNU timeout for test-support/child_deadline.rs comes from a per-user Portable Git, appended last.
@@ -99,7 +102,7 @@ try {
     $targets = ($Tests.Split(',') | Where-Object { $_ } | ForEach-Object { "--test $_" }) -join ' '
     $cargo = Join-Path $env:USERPROFILE '.cargo\bin\cargo.exe'
     $skips = ($Skip.Split(',') | Where-Object { $_ } | ForEach-Object { "--skip $_" }) -join ' '
-    $cmd = "`"$cargo`" test --locked --features cuda --no-fail-fast --lib $targets -- --include-ignored $skips $Filter > `"$log`" 2>&1"
+    $cmd = "`"$cargo`" test --locked --profile $Profile --features cuda --no-fail-fast --lib $targets -- --include-ignored $skips $Filter > `"$log`" 2>&1"
     $expected = $Tests.Split(',').Count + 1
     Push-Location $src
     $p = Start-Process cmd.exe -ArgumentList '/c', "`"$cmd`"" -NoNewWindow -PassThru
