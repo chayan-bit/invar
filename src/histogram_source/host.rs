@@ -636,7 +636,7 @@ mod diagnostic_tests {
     const SOURCE: &[u8] = b"fn h(a: read Array<u32>, x: read Array<u32>, n: u32) -> Array<u32> { var o = filled_u32(n,0u32); for i in 0u32..len(x) { o[x[i]] = wrapping_add(o[x[i]],a[i]); } return o; } fn main() -> i32 { let a: Array<u32> = [0u32]; let o = h(a,a,1u32); return 7; }";
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_histogram_publication_faults() {
+    fn machine_diagnostics_histogram_publication_faults() {
         let checked = check::check(front::parse(SOURCE).unwrap(), true).unwrap();
         let mut injected = Vec::new();
         for fault in 0..14 {
@@ -723,7 +723,7 @@ mod diagnostic_tests {
         // - HISTOGRAM_PRIVATE_ALLOCATION needs an allocator failure of the
         //   bounded private attempt reservation.
         // HISTOGRAM_COUNT (both counters) is injected for real by
-        // `mir_eval::histogram::atomic_tests::issue_ai_01_machine_diagnostics_histogram_publication_harness_faults`.
+        // `mir_eval::histogram::atomic_tests::machine_diagnostics_histogram_publication_harness_faults`.
         let constructed = ["HISTOGRAM_FUEL", "HISTOGRAM_PRIVATE_ALLOCATION"].map(|code| {
             (
                 code,
@@ -738,9 +738,7 @@ mod diagnostic_tests {
             .as_array()
             .unwrap()
             .iter()
-            .filter(|e| {
-                e["fault_test"] == "issue_ai_01_machine_diagnostics_histogram_publication_faults"
-            })
+            .filter(|e| e["fault_test"] == "machine_diagnostics_histogram_publication_faults")
             .map(|e| e["code"].as_str().unwrap())
             .collect::<Vec<_>>();
         registered.sort_unstable();

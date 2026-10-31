@@ -226,7 +226,7 @@ pub fn run_source(source: &[u8], fuel: u64, budget: Budget) -> Result<Run, Error
 #[cfg(test)]
 mod diagnostic_tests {
     #[test]
-    fn issue_ai_01_machine_diagnostics_summary_plan_fault() {
+    fn machine_diagnostics_summary_plan_fault() {
         for message in [
             "verified source scan extraction failed",
             "private source scan binding failed",

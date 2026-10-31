@@ -1,5 +1,5 @@
 //! `invar-qualify` refuses a bad invocation with a registered, machine-readable diagnostic.
-//! The registry coverage test (`tests/diagnostics/issue_ai_01_machine_diagnostics.rs`) leaves these two codes
+//! The registry coverage test (`tests/diagnostics/machine_diagnostics.rs`) leaves these two codes
 //! to this file because only this package can launch the binary.
 use serde_json::Value;
 use std::{path::Path, process::Command};

@@ -374,7 +374,7 @@ fn caught_panics_leave_caller_buffers_unchanged() {
 /// AI-01 invariant fault test for `INTERNAL_HOST_READ`: a read owner
 /// changed during the call is reported, nothing is committed.
 #[test]
-fn issue_ai_01_machine_diagnostics_host_read_changed_read_argument_fault() {
+fn machine_diagnostics_host_read_changed_read_argument_fault() {
     let mut xs = [5, 6, 7];
     let o = bump(
         &mut xs,
@@ -397,7 +397,7 @@ fn issue_ai_01_machine_diagnostics_host_read_changed_read_argument_fault() {
 /// AI-01 invariant fault test for `INTERNAL_HOST_COMMIT`: a failed
 /// writeback precheck is reported and writes nothing.
 #[test]
-fn issue_ai_01_machine_diagnostics_host_commit_precheck_fault() {
+fn machine_diagnostics_host_commit_precheck_fault() {
     for inject in [Inject::BorrowedAtCommit, Inject::ResizedAtCommit] {
         let mut xs = [5, 6, 7];
         let o = bump(&mut xs, &[40], 2, STAGING_LIMIT_BYTES, inject);

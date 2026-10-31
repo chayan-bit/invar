@@ -466,7 +466,7 @@ mod tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_grid_admission_faults() {
+    fn machine_diagnostics_grid_admission_faults() {
         let source = fixtures::transpose(false, 3, 5, false, true);
         let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
         let program = mir::lower(&checked).unwrap();

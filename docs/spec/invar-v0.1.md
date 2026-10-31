@@ -2,8 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=28138 estimator=bytes/3 limit=30000
-
+Size record: tokens=27946 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -558,7 +557,7 @@ fn main() -> i32 {
 [N6.1.2] The known units are `one m mm um kg g s ms us ns A K mol cd rad urad deg Hz N Nm px`, with dimension product, quotient and integer power in the type. `src/check/unit_math.rs`
 [N6.1.3] `+`, `-` and comparison need identical units, `*` and `/` combine dimensions, and `1 / s` is `Hz`. `tests/language/units_and_frames.rs::units_and_frames_dimension_products_quotients_and_rates`
 [N6.1.4] `to::<unit>(q)` is the only conversion between scales, there is no implicit conversion, and a unit is not a value. `tests/language/units_and_frames.rs::units_and_frames_quantity_source_errors`
-[N6.1.5] A scale conversion that is not exact traps with `UNIT_CONVERSION_INEXACT`. `tests/diagnostics/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_conversion_trap_is_versioned`
+[N6.1.5] A scale conversion that is not exact traps with `UNIT_CONVERSION_INEXACT`. `tests/diagnostics/machine_diagnostics/indexed_and_versions.rs::machine_diagnostics_conversion_trap_is_versioned`
 [N6.1.6] `rad` and `deg` conversions use a certified bound on pi and round to nearest even. `src/angle.rs`
 [N6.1.7] `px` is a nominal camera unit distinct from `one` and every SI unit. `spec/grammar.ebnf`
 
@@ -639,10 +638,10 @@ fn main() -> i32 { return 0i32; }
 
 ### 6.3 Robotics vocabulary
 
-[N6.3.1] `std::robotics` is the shipped qualified module of generic record types for poses, twists, wrenches, joint vectors, stamps and camera models, with C layouts and ROS mappings. `tests/robotics/issue_s1_11_robotics_vocabulary.rs::issue_s1_11_robotics_vocabulary_standard_module_checks`
+[N6.3.1] `std::robotics` is the shipped qualified module of generic record types for poses, twists, wrenches, joint vectors, stamps and camera models, with C layouts and ROS mappings. `tests/robotics/robotics_vocabulary.rs::robotics_vocabulary_standard_module_checks`
 [N6.3.2] `f32` and `f64` are accepted as wire types of ports. `spec/grammar.ebnf`
-[N6.3.3] Camera intrinsics use pixel units, and a focal length in metres is `UNIT_MISMATCH`. `tests/robotics/issue_s1_11_robotics_vocabulary.rs::issue_s1_11_robotics_vocabulary_pixel_is_nominal`
-[N6.3.4] Joint-vector types carry their count, and a count mismatch is rejected. `tests/robotics/issue_s1_11_robotics_vocabulary.rs::issue_s1_11_robotics_vocabulary_rejects_mismatched_units_and_joint_counts`
+[N6.3.3] Camera intrinsics use pixel units, and a focal length in metres is `UNIT_MISMATCH`. `tests/robotics/robotics_vocabulary.rs::robotics_vocabulary_pixel_is_nominal`
+[N6.3.4] Joint-vector types carry their count, and a count mismatch is rejected. `tests/robotics/robotics_vocabulary.rs::robotics_vocabulary_rejects_mismatched_units_and_joint_counts`
 
 ## 7. Bytes, strings and the C ABI
 
@@ -722,8 +721,8 @@ fn main() -> i32 {
 [N8.1.4] `connect a.p -> b.q policy P;` joins an output to an input where the policy is `sample-and-hold`, `queue(n)` or `decimate(n)`. `docs/system-integration-v1.md`
 [N8.1.5] Constants are exact decimal literals with units, evaluated as exact rationals and serialized as canonical decimal strings. `docs/system-integration-v1.md`
 [N8.1.6] A source needs exactly one `product` and one `system`, and an instance is `name: Component;` inside the system. `tests/fixtures/s1_01/negative/S1005-no-product.inv`
-[N8.1.7] An optional input or an unconnected output is the warning `S1011`, and other well-formedness failures are `S1000` to `S1010` errors. `tests/robotics/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_optional_input_and_output_warning`
-[N8.1.8] `connect` requires equal type, unit and frame at both ends, else `S1002`. `tests/robotics/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_negative_fixtures_have_registered_spans`
+[N8.1.7] An optional input or an unconnected output is the warning `S1011`, and other well-formedness failures are `S1000` to `S1010` errors. `tests/robotics/system_dialect.rs::system_dialect_optional_input_and_output_warning`
+[N8.1.8] `connect` requires equal type, unit and frame at both ends, else `S1002`. `tests/robotics/system_dialect.rs::system_dialect_negative_fixtures_have_registered_spans`
 [N8.1.9] A system has no runtime semantics, and it is evaluated at compile time within the usual fuel and size limits. `docs/system-integration-v1.md`
 
 ```invar outcome=system:ok
@@ -804,24 +803,24 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 ### 8.2 The invar-system IR
 
-[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-v12`, byte-identical for identical input, and validated by `schema/invar-system-v12.schema.json`. `tests/robotics/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_emits_checked_canonical_ir`
+[N8.2.1] A checked system is serialized as canonical JSON named `invar-system-v12`, byte-identical for identical input, and validated by `schema/invar-system-v12.schema.json`. `tests/robotics/system_dialect.rs::system_dialect_emits_checked_canonical_ir`
 [N8.2.2] Every source emits v12, and the `robots` and `cells` arrays appear only when the source declares a robot or cell model. `src/system/compiler.rs::models`
-[N8.2.3] An unknown version is rejected, and relabelling a document does not make it valid. `tests/robotics/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
-[N8.2.4] Permuting module order of the same system gives byte-identical IR. `tests/robotics/issue_s1_01_system_dialect.rs::issue_s1_01_system_dialect_module_permutation_is_byte_identical`
-[N8.2.5] Deserializing an IR does not establish a source check, and only a source-compiled model can pass the graph checks. `tests/robotics/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
+[N8.2.3] An unknown version is rejected, and relabelling a document does not make it valid. `tests/robotics/graph_checks.rs::graph_checks_twelve_component_cell_and_golden_report`
+[N8.2.4] Permuting module order of the same system gives byte-identical IR. `tests/robotics/system_dialect.rs::system_dialect_module_permutation_is_byte_identical`
+[N8.2.5] Deserializing an IR does not establish a source check, and only a source-compiled model can pass the graph checks. `tests/robotics/graph_checks.rs::graph_checks_twelve_component_cell_and_golden_report`
 
 ### 8.3 Generators
 
 [N8.3.1] Every generator is a pure function of the checked IR with byte-identical output, and it reads no source text, environment, clock or network. `docs/system-integration-v1.md`
-[N8.3.2] `invar system gen ros2|mjcf|urdf PATH --out NEW_DIRECTORY` writes a new directory and refuses an existing one. `tests/robotics/issue_s1_04_ros2_target.rs::issue_s1_04_ros2_target_public_errors_leave_no_output`
-[N8.3.3] The ROS 2 target needs a graph-checked system, else `S1500`, and its output is deterministic. `tests/robotics/issue_s1_04_ros2_target.rs::issue_s1_04_ros2_target_public_generation_is_deterministic`
+[N8.3.2] `invar system gen ros2|mjcf|urdf PATH --out NEW_DIRECTORY` writes a new directory and refuses an existing one. `tests/robotics/ros2_target.rs::ros2_target_public_errors_leave_no_output`
+[N8.3.3] The ROS 2 target needs a graph-checked system, else `S1500`, and its output is deterministic. `tests/robotics/ros2_target.rs::ros2_target_public_generation_is_deterministic`
 [N8.3.4] A system with a robot and cell model also generates MJCF and, where it can be preserved, URDF, and unsupported URDF features are `S1607`. `docs/system-integration-v1.md`
 [N8.3.5] A generated ROS 2 workspace is mock-hardware accepted on ARM64 only, and a live simulation run is not claimed. `README.md`
 
 ## 9. Graph checks
 
-[N9.0.1] Graph checks run on every source-compiled system. `tests/robotics/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_twelve_component_cell_and_golden_report`
-[N9.0.2] Diagnostics are ordered by family and then span, and the same input gives the same output. `tests/robotics/issue_s1_03_graph_checks.rs::issue_s1_03_graph_checks_diagnostic_families_keep_stable_order`
+[N9.0.1] Graph checks run on every source-compiled system. `tests/robotics/graph_checks.rs::graph_checks_twelve_component_cell_and_golden_report`
+[N9.0.2] Diagnostics are ordered by family and then span, and the same input gives the same output. `tests/robotics/graph_checks.rs::graph_checks_diagnostic_families_keep_stable_order`
 [N9.0.3] The checker proves structure only, and deadlines and WCET are declared budgets and not measurements. `docs/system-integration-v1.md`
 
 ### 9.1 Rates and queues
@@ -1013,25 +1012,25 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 [N10.1.1] An `extern component` declares `abi c "prefix"`, `lifecycle init, configure, step, shutdown`, typed ports with C layouts, resources, an SPDX license, isolation, `golden`, `property` and `shim` clauses. `tests/fixtures/s1_02/manifest-valid.inv`
 [N10.1.2] `config c "name"` names a registered typed layout and `input "path"` declares an extra dependency, and the registered layouts are `inv_fk_config_v1` (model path, its length and model kind), `inv_planar2_config_v1` (two f64 link lengths) and the planner config. `src/system/foreign_layout.rs::inv_fk_config_v1`
-[N10.1.3] A `golden` clause may state up to eight nonnegative exact-decimal absolute tolerances, and an unsupported layout or property text is `S1400`. `tests/robotics/issue_s1_02_foreign_manifests.rs::issue_s1_02_foreign_manifests_typed_config_and_tolerance_are_checked`
+[N10.1.3] A `golden` clause may state up to eight nonnegative exact-decimal absolute tolerances, and an unsupported layout or property text is `S1400`. `tests/robotics/foreign_manifests.rs::foreign_manifests_typed_config_and_tolerance_are_checked`
 [N10.1.4] The foreign-component diagnostics are `S1400` to `S1499`. `docs/system-integration-v1.md`
 [N10.1.5] A manifest file holds one `extern component` and its frames, its ports keep explicit `@` rates, and shim, golden and input paths are relative to the manifest and must resolve under the project root, and golden tolerances are in metres or radians. `src/system/foreign.rs`
 
 ### 10.2 Contract tests and evidence
 
-[N10.2.1] `invar component generate MANIFEST --output NEW_DIRECTORY` writes a deterministic C header and binding. `tests/robotics/issue_s1_02_foreign_manifests.rs::issue_s1_02_foreign_manifests_header_is_deterministic_and_c11_layout_checked`
-[N10.2.2] `invar component test MANIFEST` runs the generated contract-test harness and records evidence bound to a hash of the declared transitive inputs. `tests/robotics/issue_s1_02_foreign_manifests.rs::issue_s1_02_foreign_manifests_hash_tracks_declared_transitive_inputs`
-[N10.2.3] The harness checks layout round trip, lifecycle order and golden vectors, and process crashes and malformed output are typed failures. `tests/robotics/issue_s1_02_foreign_manifests.rs::issue_s1_02_foreign_manifests_env_process_crash_is_typed`
+[N10.2.1] `invar component generate MANIFEST --output NEW_DIRECTORY` writes a deterministic C header and binding. `tests/robotics/foreign_manifests.rs::foreign_manifests_header_is_deterministic_and_c11_layout_checked`
+[N10.2.2] `invar component test MANIFEST` runs the generated contract-test harness and records evidence bound to a hash of the declared transitive inputs. `tests/robotics/foreign_manifests.rs::foreign_manifests_hash_tracks_declared_transitive_inputs`
+[N10.2.3] The harness checks layout round trip, lifecycle order and golden vectors, and process crashes and malformed output are typed failures. `tests/robotics/foreign_manifests.rs::foreign_manifests_env_process_crash_is_typed`
 [N10.2.4] The checker proves that the binding matches the manifest and that recorded tests passed, and it does not measure the library beyond its goldens. `docs/system-integration-v1.md`
 
 ### 10.3 Cell imports
 
-[N10.3.1] `import component "relative/path/manifest.inv" [for robot menagerie::name];` inserts one checked manifest from beneath the source directory into the IR. `tests/robotics/issue_s1_06_integration_start.rs`
-[N10.3.2] The import needs a current passing contract-test record, and a missing or changed record is `S1405` before generation. `tests/robotics/issue_s1_06_integration_start.rs`
+[N10.3.1] `import component "relative/path/manifest.inv" [for robot menagerie::name];` inserts one checked manifest from beneath the source directory into the IR. `tests/robotics/integration_start.rs`
+[N10.3.2] The import needs a current passing contract-test record, and a missing or changed record is `S1405` before generation. `tests/robotics/integration_start.rs`
 [N10.3.3] A path that escapes the cell directory is `S1400`, and a project root is the nearest ancestor holding `.git`. `src/system.rs`
 [N10.3.4] An ordinary port may use `std::robotics::JointPositions<f64,robot_dof>`, resolved from the selected Panda or UR5e product robot to a seven or six joint type, and a missing or unsupported robot is `S1001`. `src/system/compiler.rs::robot_dof`
-[N10.3.5] With several same-name manifests `for robot` must select exactly one by the product robot, duplicate or mixed selectors fail, and only the selected one needs current evidence. `tests/robotics/issue_s1_06_integration_start.rs`
-[N10.3.6] Frames used by an imported manifest's ports must be declared in the importing source, and an import loads no library and adds no transform. `tests/robotics/issue_s1_06_integration_start.rs`
+[N10.3.5] With several same-name manifests `for robot` must select exactly one by the product robot, duplicate or mixed selectors fail, and only the selected one needs current evidence. `tests/robotics/integration_start.rs`
+[N10.3.6] Frames used by an imported manifest's ports must be declared in the importing source, and an import loads no library and adds no transform. `tests/robotics/integration_start.rs`
 
 ### 10.4 Grasp poses and tool projection
 
@@ -1118,15 +1117,15 @@ fn main() -> i32 {
 ### 13.1 Diagnostics
 
 [N13.1.1] Diagnostics use the schema `invar-diagnostics-v3` with `schema`, `schema_version`, `status` and `diagnostics`, and a document carries at most 64 diagnostics. `schema/invar-diagnostics-v3.schema.json`
-[N13.1.2] A diagnostic has a stable `code`, a `severity`, a message, a primary span with byte offsets and one-based line and column, secondary spans, notes and suggested fixes. `tests/diagnostics/issue_ai_01_machine_diagnostics/contracts.rs::issue_ai_01_machine_diagnostics_positions_and_fix`
+[N13.1.2] A diagnostic has a stable `code`, a `severity`, a message, a primary span with byte offsets and one-based line and column, secondary spans, notes and suggested fixes. `tests/diagnostics/machine_diagnostics/contracts.rs::machine_diagnostics_positions_and_fix`
 [N13.1.3] Codes, span semantics and fix edits are the contract and messages may change wording. `schema/diagnostic-codes-v1.json`
 [N13.1.4] The status is one of `ok`, `source_error`, `tool_error`, `trap` and `evaluation_limit`, with exit codes 0, 1, 2, 3 and 4. `schema/invar-diagnostics-v3.schema.json`
 
 ### 13.2 Registry
 
-[N13.2.1] Every emitted code is in a committed registry, `schema/diagnostic-codes-v1.json` plus the extension files, and a test scans the source in both directions. `tests/diagnostics/issue_ai_01_machine_diagnostics/registry.rs::issue_ai_01_machine_diagnostics_registry_covers_emitted_literals`
-[N13.2.2] Each code declares `reachability` of `source`, `invariant` or `external`, and checked source never emits an `invariant` code. `tests/diagnostics/issue_ai_01_machine_diagnostics/documents.rs::issue_ai_01_machine_diagnostics_corpus_has_no_invariant_codes`
-[N13.2.3] Only `source` codes carry fixes. `tests/diagnostics/issue_ai_01_machine_diagnostics/registry.rs::issue_ai_01_machine_diagnostics_registry_covers_emitted_literals`
+[N13.2.1] Every emitted code is in a committed registry, `schema/diagnostic-codes-v1.json` plus the extension files, and a test scans the source in both directions. `tests/diagnostics/machine_diagnostics/registry.rs::machine_diagnostics_registry_covers_emitted_literals`
+[N13.2.2] Each code declares `reachability` of `source`, `invariant` or `external`, and checked source never emits an `invariant` code. `tests/diagnostics/machine_diagnostics/documents.rs::machine_diagnostics_corpus_has_no_invariant_codes`
+[N13.2.3] Only `source` codes carry fixes. `tests/diagnostics/machine_diagnostics/registry.rs::machine_diagnostics_registry_covers_emitted_literals`
 [N13.2.4] The `S1xxx` ranges are 1000 system dialect, 1100 to 1399 graph checks, 1400 foreign manifests, 1500 ROS 2, 1600 robot and cell, 1700 vocabulary, 1800 acceptance and 1900 reserved. `schema/diagnostic-codes-v1.json`
 
 ### 13.3 Explain

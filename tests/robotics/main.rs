@@ -2,36 +2,36 @@
 #[path = "../../test-support/child_deadline.rs"]
 mod child_deadline;
 // Shared fixtures, each loaded once and used by several modules below.
+mod controller_bridge;
 mod file_hash;
-mod issue_s1_01_system_dialect;
-mod issue_s1_02_foreign_manifests;
-mod issue_s1_03_graph_checks;
-mod issue_s1_04_ros2_target;
-mod issue_s1_04_ros2_target_env;
-mod issue_s1_05_robot_cell_mujoco;
-mod issue_s1_05_robot_cell_mujoco_env;
-mod issue_s1_06_controller_bridge;
-mod issue_s1_06_grasp_v10;
-mod issue_s1_06_integration_start;
-mod issue_s1_06_integration_start_env;
-mod issue_s1_06_mount_exclusion;
-mod issue_s1_06_panda_inertia;
-mod issue_s1_06_planner_boundary;
-mod issue_s1_06_planner_contract;
-mod issue_s1_06_planner_requests;
-mod issue_s1_06_planner_ros_build;
-mod issue_s1_06_planner_ros_messages;
-mod issue_s1_06_planner_ros_node;
-mod issue_s1_06_planner_runtime;
-mod issue_s1_06_planner_transport;
-mod issue_s1_06_sequencer_binding;
-mod issue_s1_06_sequencer_preparation;
-mod issue_s1_06_tool_projection;
-mod issue_s1_11_robotics_vocabulary;
+mod foreign_manifests;
+mod graph_checks;
+mod grasp_v10;
+mod integration_start;
+mod integration_start_env;
+mod mount_exclusion;
+mod panda_inertia;
+mod planner_boundary;
+mod planner_contract;
+mod planner_requests;
+mod planner_ros_build;
 #[allow(dead_code)]
 #[path = "../support/planner_ros_build.rs"]
 mod planner_ros_build_support;
+mod planner_ros_messages;
+mod planner_ros_node;
+mod planner_runtime;
+mod planner_transport;
+mod robot_cell_mujoco;
+mod robot_cell_mujoco_env;
+mod robotics_vocabulary;
+mod ros2_target;
+mod ros2_target_env;
+mod sequencer_binding;
 #[allow(dead_code)]
 #[path = "../support/sequencer_binding.rs"]
 mod sequencer_binding_support;
+mod sequencer_preparation;
 mod substep_admission_source;
+mod system_dialect;
+mod tool_projection;

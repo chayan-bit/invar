@@ -29,7 +29,7 @@
 930 tests/fsum_math_sort_spatial/placement.rs
 1171 tests/issue_ai_02_spec_examples.rs
 849 tests/issue_m4_06_bounded_schedule_tuning.rs
-831 tests/robotics/issue_s1_06_sequencer_binding.rs
+831 tests/robotics/sequencer_binding.rs
 806 tests/summary/summary_source.rs
 831 tests/support/gnet_device.rs
 873 tests/transpose_stencil/stencil_source.rs

@@ -189,11 +189,11 @@ Machine-readable diagnostics, source fixes and source-level debugging.
 
 | Module | Covers |
 | --- | --- |
-| `issue_ai_01_machine_diagnostics` | The diagnostics schema, the code registry, fixtures and CLI documents (a file plus a directory of submodules). |
-| `issue_dx_20_debug_command` | `invar debug` builds with debug info in a private directory. |
-| `issue_dx_20_debug_info` | DWARF 5 emitted by the native backend, read back and checked. |
-| `issue_dx_20_debugger_helpers` | The gdb helper script in a live debugger session. |
-| `issue_dx_22_fix_coverage` | `check --fix`: each fix kind, rounds, the diff output and `--write` (a directory of submodules). |
+| `machine_diagnostics` | The diagnostics schema, the code registry, fixtures and CLI documents (a file plus a directory of submodules). |
+| `debug_command` | `invar debug` builds with debug info in a private directory. |
+| `dwarf_debug_info` | DWARF 5 emitted by the native backend, read back and checked. |
+| `gdb_helper` | The gdb helper script in a live debugger session. |
+| `check_fix` | `check --fix`: each fix kind, rounds, the diff output and `--write` (a directory of submodules). |
 
 ### `exports`
 
@@ -201,15 +201,15 @@ Selected scalar and array exports, host array arguments and the Python boundary 
 
 | Module | Covers |
 | --- | --- |
-| `issue_l1_06_export_failure_contract` | End-to-end failure behavior of the scalar export API. |
-| `issue_l1_06_export_lineage` | Exports keep their source lineage across engines. |
-| `issue_l1_06_native_arrays` | Array parameters of exports: admission and copying entry. |
-| `issue_l1_06_native_f32_arrays` | `f32` array parameters of native exports. |
-| `issue_l1_06_python_binding` | Core-independent policy gates of the Python binding. |
-| `issue_l1_06_scalar_export_core` | Admission, identity, visibility and limits of scalar exports. |
-| `issue_l1_06_scalar_export_corpus` | Scalar source corpus for exports. |
-| `issue_numeric_host_mut_reference` | `mut` host array arguments on the copying reference engine. |
-| `issue_numeric_host_read_reference` | Read-only host array arguments. |
+| `export_failure_contract` | End-to-end failure behavior of the scalar export API. |
+| `export_lineage` | Exports keep their source lineage across engines. |
+| `native_arrays` | Array parameters of exports: admission and copying entry. |
+| `native_f32_arrays` | `f32` array parameters of native exports. |
+| `python_binding_policy` | Core-independent policy gates of the Python binding. |
+| `scalar_export_core` | Admission, identity, visibility and limits of scalar exports. |
+| `scalar_export_corpus` | Scalar source corpus for exports. |
+| `host_mut_array_reference` | `mut` host array arguments on the copying reference engine. |
+| `host_read_array_reference` | Read-only host array arguments. |
 
 ### `gnet05_corpus`
 
@@ -446,31 +446,31 @@ The system dialect, foreign components, generated ROS 2 and MuJoCo targets, the 
 | Module | Covers |
 | --- | --- |
 | `file_hash` | Helper: SHA-256 of a file. |
-| `issue_s1_01_system_dialect` | Parsing and canonical IR of the system dialect. |
-| `issue_s1_02_foreign_manifests` | `extern component` manifests and typed configuration. |
-| `issue_s1_03_graph_checks` | Rates, latency, frames and resources of a system graph. |
-| `issue_s1_04_ros2_target` | Deterministic ROS 2 workspace generation. |
-| `issue_s1_04_ros2_target_env` | Building and launching the generated ROS 2 workspace. |
-| `issue_s1_05_robot_cell_mujoco` | Typed robot cells and generated MJCF. |
-| `issue_s1_05_robot_cell_mujoco_env` | Generated models load and step in MuJoCo. |
-| `issue_s1_06_controller_bridge` | The generated controller bridge. |
-| `issue_s1_06_grasp_v10` | Explicit grasp semantics. |
-| `issue_s1_06_integration_start` | A one-robot reference cell and its imported evidence. |
-| `issue_s1_06_integration_start_env` | Recorded task acceptance in simulation. |
-| `issue_s1_06_mount_exclusion` | The cell mount relation. |
-| `issue_s1_06_panda_inertia` | Vendored Panda inertia in principal axes. |
-| `issue_s1_06_planner_boundary` | Planner configuration, header and wire types. |
-| `issue_s1_06_planner_contract` | Public CLI with CPU planner doubles. |
-| `issue_s1_06_planner_requests` | Generator of the pinned planner requests. |
-| `issue_s1_06_planner_ros_build` | CPU preparation and the explicit ROS build gate. |
-| `issue_s1_06_planner_ros_messages` | ROS message bounds and joint counts. |
-| `issue_s1_06_planner_ros_node` | The separate planner ROS node. |
-| `issue_s1_06_planner_runtime` | Planner runtime lifecycle and untrusted output. |
-| `issue_s1_06_planner_transport` | The planner transport with a CPU child double. |
-| `issue_s1_06_sequencer_binding` | The generated sequencer binding and its Rust process. |
-| `issue_s1_06_sequencer_preparation` | Sequencer preparation on synthetic telemetry. |
-| `issue_s1_06_tool_projection` | CPU tool projection adapter. |
-| `issue_s1_11_robotics_vocabulary` | The shipped robotics vocabulary module. |
+| `system_dialect` | Parsing and canonical IR of the system dialect. |
+| `foreign_manifests` | `extern component` manifests and typed configuration. |
+| `graph_checks` | Rates, latency, frames and resources of a system graph. |
+| `ros2_target` | Deterministic ROS 2 workspace generation. |
+| `ros2_target_env` | Building and launching the generated ROS 2 workspace. |
+| `robot_cell_mujoco` | Typed robot cells and generated MJCF. |
+| `robot_cell_mujoco_env` | Generated models load and step in MuJoCo. |
+| `controller_bridge` | The generated controller bridge. |
+| `grasp_v10` | Explicit grasp semantics. |
+| `integration_start` | A one-robot reference cell and its imported evidence. |
+| `integration_start_env` | Recorded task acceptance in simulation. |
+| `mount_exclusion` | The cell mount relation. |
+| `panda_inertia` | Vendored Panda inertia in principal axes. |
+| `planner_boundary` | Planner configuration, header and wire types. |
+| `planner_contract` | Public CLI with CPU planner doubles. |
+| `planner_requests` | Generator of the pinned planner requests. |
+| `planner_ros_build` | CPU preparation and the explicit ROS build gate. |
+| `planner_ros_messages` | ROS message bounds and joint counts. |
+| `planner_ros_node` | The separate planner ROS node. |
+| `planner_runtime` | Planner runtime lifecycle and untrusted output. |
+| `planner_transport` | The planner transport with a CPU child double. |
+| `sequencer_binding` | The generated sequencer binding and its Rust process. |
+| `sequencer_preparation` | Sequencer preparation on synthetic telemetry. |
+| `tool_projection` | CPU tool projection adapter. |
+| `robotics_vocabulary` | The shipped robotics vocabulary module. |
 | `substep_admission_source` | Substep admission source checks and refusals. |
 
 ### `fsum_math_sort_spatial`
