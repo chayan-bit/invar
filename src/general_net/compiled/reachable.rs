@@ -73,7 +73,7 @@ mod tests {
     }
 
     /// The L1-04 foreign-oracle program, inline: compiler sources must not name
-    /// fixture paths (`issue_gnet_05_corpus_compiler_sources_never_name_the_corpus`).
+    /// fixture paths (`corpus_compiler_sources_never_name_the_corpus`).
     const FOREIGN_ORACLE: &str = "\
 extern c fn c_add(left: i32, right: i32) -> Result<i32, ForeignError> oracle add_oracle;
 

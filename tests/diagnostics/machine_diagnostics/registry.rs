@@ -20,7 +20,7 @@ fn valid_registry_entry(entry: &Value) -> bool {
                         || name.starts_with("foreign_manifests_")
                         || name.starts_with("issue_l1_06_python_binding_")
                         || name.starts_with("machine_diagnostics_qualification_")
-                        || name.starts_with("issue_m5_02_full_pipeline_qualification_")
+                        || name.starts_with("full_pipeline_qualification_")
                         || (name.starts_with("test_")
                             && include_str!("../../../crates/invar-python/tests/test_binding.py")
                                 .contains(&format!("def {name}(")))
@@ -321,7 +321,7 @@ fn machine_diagnostics_registry_covers_emitted_literals() {
             let test = format!("fn {}(", entry["boundary_test"].as_str().unwrap());
             assert!(
                 include_str!("../../schedule_tuning.rs").contains(&test)
-                    || include_str!("../../../tools/tests/bench_tooling/issue_m5_02_device_qualification.rs")
+                    || include_str!("../../../tools/tests/bench_tooling/device_qualification.rs")
                         .contains(&test)
                     || OWN_SOURCES.iter().any(|source| source.contains(&test))
                     || include_str!("../../../tools/tests/bench_tooling/qualification_faults.rs").contains(&test)

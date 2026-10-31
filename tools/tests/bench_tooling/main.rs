@@ -14,14 +14,14 @@ mod invar_bin;
 #[path = "../../qualification/mod.rs"]
 mod qualification;
 
-mod issue_eng_10_domain_suites;
-mod issue_gnet_05_parity_report;
-mod issue_m3_03_cold_process;
-mod issue_m5_01_benchmark_manifest;
-mod issue_m5_01_build_lineage;
-mod issue_m5_01_heldout_generators;
-mod issue_m5_02_device_qualification;
-mod issue_m5_02_full_pipeline_qualification;
-mod issue_m5_03_cuda_performance_acceptance;
+mod benchmark_manifest;
+mod build_lineage;
+mod cold_process;
+mod cuda_performance_acceptance;
+mod device_qualification;
+mod domain_suites;
+mod full_pipeline_qualification;
+mod gnet_parity_report;
+mod heldout_generators;
 mod qualification_faults;
 mod qualify_cli;
