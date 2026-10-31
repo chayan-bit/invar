@@ -16,7 +16,7 @@ First stage. Its output feeds [check](../check/README.md).
 
 ## Tests
 
-- `cargo nextest run --locked --test language` (grammar, precedence, spans and limits are in `issue_m0_02`).
+- `cargo nextest run --locked --test language` (grammar, precedence, spans and limits are in `syntax_and_limits`).
 - `cargo nextest run --locked --test diagnostics` for diagnostic documents.
 
 ## Rules to keep

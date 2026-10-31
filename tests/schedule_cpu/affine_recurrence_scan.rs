@@ -1,7 +1,8 @@
+//! Issue label M2-04.
 use invar::{check::check, eval, front::parse, mir, mir_eval, recurrence};
 
 #[test]
-fn issue_m2_04_affine_recurrence_infers_source_coefficients_and_prefixes() {
+fn affine_recurrence_scan_affine_recurrence_infers_source_coefficients_and_prefixes() {
     let source = "fn main() -> i32 { let aa: Array<u32> = [2u32, 3u32, 5u32]; let bb: Array<u32> = [7u32, 11u32, 13u32]; var state: u32 = 17u32; var out: Array<u32> = filled_u32(len(aa), 0u32); for i in 0u32 .. len(aa) { state = wrapping_add(wrapping_mul(aa[i], state), bb[i]); out[i] = state; } if out[0u32] != 41u32 { return 1; } if out[1u32] != 134u32 { return 1; } if out[2u32] != 683u32 { return 1; } return 0; }";
     let checked = check(parse(source.as_bytes()).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
@@ -102,7 +103,7 @@ fn source_case(len: usize, prefixes: bool, reordered: bool) -> Case {
 }
 
 #[test]
-fn issue_m2_04_affine_recurrence_shapes_final_and_every_prefix() {
+fn affine_recurrence_scan_affine_recurrence_shapes_final_and_every_prefix() {
     for len in [0, 1, 3, 7, 17, 257] {
         for prefixes in [false, true] {
             let (source, expected, final_state, [a, b]) = source_case(len, prefixes, len % 2 == 1);
@@ -143,7 +144,7 @@ fn issue_m2_04_affine_recurrence_shapes_final_and_every_prefix() {
 }
 
 #[test]
-fn issue_m2_04_affine_recurrence_rejects_near_matches_with_reasons() {
+fn affine_recurrence_scan_affine_recurrence_rejects_near_matches_with_reasons() {
     let (base, _, _, _) = source_case(3, true, false);
     let variants = [
         (
@@ -210,7 +211,7 @@ fn issue_m2_04_affine_recurrence_rejects_near_matches_with_reasons() {
 }
 
 #[test]
-fn issue_m2_04_affine_recurrence_full_width_and_constant_coefficients() {
+fn affine_recurrence_scan_affine_recurrence_full_width_and_constant_coefficients() {
     let sources = [
         (
             "fn main() -> i32 { let aa: Array<u32> = [4294967295u32, 2u32]; let bb: Array<u32> = [1u32, 4294967295u32]; var state: u32 = 4294967295u32; var out: Array<u32> = filled_u32(len(aa), 0u32); for i in 0u32 .. len(aa) { state = wrapping_add(wrapping_mul(aa[i], state), bb[i]); out[i] = state; } if out[0u32] != 2u32 { return 1; } if out[1u32] != 3u32 { return 1; } return 0; }",
@@ -274,7 +275,7 @@ fn assert_cpu_agrees_with_reference(source: &str) {
 
 /// `ys[i] = s` before the update publishes the exclusive prefix (seed first).
 #[test]
-fn issue_m2_04_affine_recurrence_regression_store_before_update_is_exclusive() {
+fn affine_recurrence_scan_affine_recurrence_regression_store_before_update_is_exclusive() {
     for len in [0usize, 1, 63, 64, 65, 257] {
         let xs = (0..len)
             .map(|i| format!("{}u32", (i as u32).wrapping_mul(2_654_435_761)))
@@ -325,7 +326,7 @@ fn issue_m2_04_affine_recurrence_regression_store_before_update_is_exclusive() {
 
 /// Scans read live coefficient arrays and seeds; the graph drives execution.
 #[test]
-fn issue_m2_04_affine_recurrence_live_inputs_and_graph_rewiring() {
+fn affine_recurrence_scan_affine_recurrence_live_inputs_and_graph_rewiring() {
     let source = "fn run(aa: read Array<u32>, bb: read Array<u32>, seed: u32) -> u32 { var s: u32 = seed; var out: Array<u32> = filled_u32(len(aa), 0u32); for i in 0u32 .. len(aa) { s = wrapping_add(wrapping_mul(s, aa[i]), bb[i]); out[i] = s; } return wrapping_add(s, out[0u32]); } \
         fn main() -> i32 { let aa: Array<u32> = filled_u32(70u32, 3u32); let bb: Array<u32> = [1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32, 9u32, 10u32, 11u32, 12u32, 13u32, 14u32, 15u32, 16u32, 17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32, 25u32, 26u32, 27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32, 34u32, 35u32, 36u32, 37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 43u32, 44u32, 45u32, 46u32, 47u32, 48u32, 49u32, 50u32, 51u32, 52u32, 53u32, 54u32, 55u32, 56u32, 57u32, 58u32, 59u32, 60u32, 61u32, 62u32, 63u32, 64u32, 65u32, 66u32, 67u32, 68u32, 69u32, 70u32]; \
         if run(aa, bb, 11u32) == 0u32 { return 1; } return 0; }";
