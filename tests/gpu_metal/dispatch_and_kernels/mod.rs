@@ -8,22 +8,18 @@ static GPU_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 /// The program's compiled-ahead Metal container, built as `invar build
 /// --target metal` builds it. These suites run the production path.
-fn prebuilt(source: &[u8]) -> invar::compiled_ahead::Image {
+fn prebuilt(source: &[u8]) -> invar::metal_aot::Image {
     let checked = check::check(front::parse(source).unwrap(), true).unwrap();
     let program = mir::lower(&checked).unwrap();
-    let kernels = invar::compiled_ahead::run_kernels(source, &program).unwrap();
-    let bytes = invar::compiled_ahead::build::build(
-        invar::compiled_ahead::Route::Run,
-        "main",
-        source,
-        &kernels,
-    )
-    .expect("the Metal Toolchain builds the container");
-    invar::compiled_ahead::decode(&bytes).unwrap()
+    let kernels = invar::metal_aot::run_kernels(source, &program).unwrap();
+    let bytes =
+        invar::metal_aot::build::build(invar::metal_aot::Route::Run, "main", source, &kernels)
+            .expect("the Metal Toolchain builds the container");
+    invar::metal_aot::decode(&bytes).unwrap()
 }
 
 /// Calibrate placement with the probe from `image`.
-fn calibrate(source: &[u8], image: &invar::compiled_ahead::Image) -> invar::plan::DeviceCostModel {
+fn calibrate(source: &[u8], image: &invar::metal_aot::Image) -> invar::plan::DeviceCostModel {
     use invar::schedule::metal::{Kernels, calibrate, open_device};
     calibrate(&mut || open_device(source, Kernels::Prebuilt(image))).unwrap()
 }

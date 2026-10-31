@@ -5,9 +5,9 @@
 //! Needs the `metal` feature, an Apple7+ GPU and Apple's Metal Toolchain.
 
 use invar::{
-    admission, check,
-    compiled_ahead::{self, Route},
-    device_ir, eval, front, mir,
+    admission, check, device_ir, eval, front,
+    metal_aot::{self, Route},
+    mir,
     plan::Execution,
     schedule::metal::{self as scheduler, Kernels},
 };
@@ -54,12 +54,12 @@ fn lowered(source: &str) -> (check::CheckedProgram, mir::Program) {
 }
 
 /// The container `invar build --target metal` writes, built in process.
-fn prebuilt(source: &str) -> compiled_ahead::Image {
+fn prebuilt(source: &str) -> metal_aot::Image {
     let (_, program) = lowered(source);
-    let kernels = compiled_ahead::run_kernels(source.as_bytes(), &program).unwrap();
-    let bytes = compiled_ahead::build::build(Route::Run, "main", source.as_bytes(), &kernels)
+    let kernels = metal_aot::run_kernels(source.as_bytes(), &program).unwrap();
+    let bytes = metal_aot::build::build(Route::Run, "main", source.as_bytes(), &kernels)
         .expect("Apple's Metal Toolchain builds the container");
-    compiled_ahead::decode(&bytes).unwrap()
+    metal_aot::decode(&bytes).unwrap()
 }
 
 fn scratch() -> PathBuf {
@@ -340,7 +340,7 @@ fn refusals_are_typed_and_never_compile_source() {
     let last = corrupt.len() - 9;
     corrupt[last] ^= 0x40;
     let corrupt_path = dir.join("corrupt.metallibc");
-    compiled_ahead::build::write_atomic(&corrupt_path, &corrupt).unwrap();
+    metal_aot::build::write_atomic(&corrupt_path, &corrupt).unwrap();
     let report = json(&armed(&[
         "run",
         other.to_str().unwrap(),
@@ -358,8 +358,8 @@ fn refusals_are_typed_and_never_compile_source() {
         invar_device::PROBE_MSL.to_owned(),
         vec![invar_device::PROBE_FUNCTION.to_owned()],
     )];
-    let partial = compiled_ahead::decode(
-        &compiled_ahead::build::build(Route::Run, "main", MAP.as_bytes(), &probe_only).unwrap(),
+    let partial = metal_aot::decode(
+        &metal_aot::build::build(Route::Run, "main", MAP.as_bytes(), &probe_only).unwrap(),
     )
     .unwrap();
     let mut device = scheduler::open_device(MAP.as_bytes(), Kernels::Prebuilt(&partial)).unwrap();
@@ -560,8 +560,8 @@ fn run_f32(device: &mut MetalDevice) -> Vec<u32> {
 #[ignore = "requires a real Apple7+ Metal GPU and the Metal Toolchain"]
 fn pinned_options_keep_strict_f32_contraction_off_and_subnormal_behaviour() {
     let _gpu = lock();
-    let functions = compiled_ahead::msl_entry_points(F32_MSL);
-    let bytes = compiled_ahead::build::build(
+    let functions = metal_aot::msl_entry_points(F32_MSL);
+    let bytes = metal_aot::build::build(
         Route::Gnet,
         "f32",
         b"strict-f32 probe",
@@ -570,7 +570,7 @@ fn pinned_options_keep_strict_f32_contraction_off_and_subnormal_behaviour() {
     .unwrap();
     assert_eq!(
         bytes,
-        compiled_ahead::build::build(
+        metal_aot::build::build(
             Route::Gnet,
             "f32",
             b"strict-f32 probe",
@@ -579,7 +579,7 @@ fn pinned_options_keep_strict_f32_contraction_off_and_subnormal_behaviour() {
         .unwrap(),
         "strict-f32 containers must also be byte-reproducible"
     );
-    let image = compiled_ahead::decode(&bytes).unwrap();
+    let image = metal_aot::decode(&bytes).unwrap();
     let mut aot = MetalDevice::open().unwrap();
     image.install(&mut aot).unwrap();
     let mut runtime = MetalDevice::open_runtime_source().unwrap();
@@ -755,9 +755,8 @@ fn tensor_contractions_run_from_built_libraries_with_the_tripwire_armed() {
     assert_eq!(kernels.len(), 3);
     let probe_only = dir.join("probe-only.metallibc");
     let bytes =
-        compiled_ahead::build::build(Route::Tensor, "mat", TENSOR.as_bytes(), &kernels[..1])
-            .unwrap();
-    compiled_ahead::build::write_atomic(&probe_only, &bytes).unwrap();
+        metal_aot::build::build(Route::Tensor, "mat", TENSOR.as_bytes(), &kernels[..1]).unwrap();
+    metal_aot::build::write_atomic(&probe_only, &bytes).unwrap();
     let partial = armed(&[&device[..], &["--artifact", probe_only.to_str().unwrap()]].concat());
     assert!(partial.status.success(), "{}", json(&partial));
     let partial = json(&partial);

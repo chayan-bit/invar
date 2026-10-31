@@ -1,6 +1,6 @@
 //! Fresh-process backend archive qualification. Source compilation is armed
 //! to abort for AOT tests, and FailOnBinaryArchiveMiss proves physical hits.
-use invar::compiled_ahead::{self, Route};
+use invar::metal_aot::{self, Route};
 use invar_metal::MetalDevice;
 use serde_json::{Value, json};
 use std::{
@@ -94,7 +94,7 @@ fn collect_bounded(mut cmd: Command, seconds: u64) -> Result<Value, Value> {
     Ok(row)
 }
 fn build_image(root: &Path, source: &str) -> PathBuf {
-    let bytes = compiled_ahead::build::build(
+    let bytes = metal_aot::build::build(
         Route::Run,
         "main",
         b"p5b archive probe",
@@ -102,7 +102,7 @@ fn build_image(root: &Path, source: &str) -> PathBuf {
     )
     .unwrap();
     let file = root.join("probe.invmetal");
-    compiled_ahead::build::write_atomic(&file, &bytes).unwrap();
+    metal_aot::build::write_atomic(&file, &bytes).unwrap();
     file
 }
 fn cache_file(root: &Path) -> PathBuf {
@@ -139,7 +139,7 @@ fn cold_process_hit_corruption_rebuild_and_concurrent_publication() {
     let file = cache_file(&cache);
     let mut bytes = fs::read(&file).unwrap();
     *bytes.last_mut().unwrap() ^= 1;
-    compiled_ahead::build::write_atomic(&file, &bytes).unwrap();
+    metal_aot::build::write_atomic(&file, &bytes).unwrap();
     let rebuilt = collect(child(&cache, Some(&image), None, "corrupt"));
     assert_eq!(rebuilt["state"], "Rebuilt(Digest)");
     assert_eq!(rebuilt["writes"], 1);
@@ -152,7 +152,7 @@ fn cold_process_hit_corruption_rebuild_and_concurrent_publication() {
     let garbage = [0u8; 64];
     forged[40..72].copy_from_slice(&Sha256::digest(garbage));
     forged.extend_from_slice(&garbage);
-    compiled_ahead::build::write_atomic(&file, &forged).unwrap();
+    metal_aot::build::write_atomic(&file, &forged).unwrap();
     let refused = collect(child(&cache, Some(&image), None, "invalid-metal"));
     assert_eq!(refused["state"], "Rebuilt(Metal)");
     assert_eq!(refused["writes"], 1);
@@ -174,7 +174,7 @@ fn cold_process_hit_corruption_rebuild_and_concurrent_publication() {
     mismatched.truncate(72);
     mismatched[40..72].copy_from_slice(&Sha256::digest(payload));
     mismatched.extend_from_slice(payload);
-    compiled_ahead::build::write_atomic(&file, &mismatched).unwrap();
+    metal_aot::build::write_atomic(&file, &mismatched).unwrap();
     let refused = collect(child(&cache, Some(&image), None, "pipeline-miss"));
     assert_eq!(refused["state"], "Rebuilt(PipelineMiss)");
     assert_eq!(refused["writes"], 1);
@@ -220,15 +220,15 @@ fn archive_child() {
         )
     } else {
         let image =
-            compiled_ahead::build::read(Path::new(&std::env::var_os("INVAR_P5B_IMAGE").unwrap()))
+            metal_aot::build::read(Path::new(&std::env::var_os("INVAR_P5B_IMAGE").unwrap()))
                 .unwrap();
         let mut device = MetalDevice::open().unwrap();
         if let Ok(suffix) = std::env::var("INVAR_P5B_COMPILER_SUFFIX") {
             let mut header = image.header().clone();
             header.toolchain.metal.push_str(&suffix);
             let libraries: Vec<_> = image.libraries().map(|(_, bytes)| bytes.to_vec()).collect();
-            let bytes = compiled_ahead::encode(&header, &libraries).unwrap();
-            compiled_ahead::decode(&bytes)
+            let bytes = metal_aot::encode(&header, &libraries).unwrap();
+            metal_aot::decode(&bytes)
                 .unwrap()
                 .install(&mut device)
                 .unwrap();
@@ -333,7 +333,7 @@ fn memory_hit_reports_the_reused_identity_and_keeps_cumulative_counts() {
     let root = scratch("memory-identity");
     let image = build_image(&root, MSL);
     let before = device.cache_report();
-    compiled_ahead::build::read(&image)
+    metal_aot::build::read(&image)
         .unwrap()
         .install(&mut device)
         .unwrap();
