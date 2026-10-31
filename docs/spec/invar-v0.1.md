@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27948 estimator=bytes/3 limit=30000
+Size record: tokens=28046 estimator=bytes/3 limit=30000
 
 ## 1. Conventions and scope
 
@@ -38,10 +38,10 @@ Note: this file is machine checked by `tests/spec_examples.rs`; the checks are d
 ### 2.1 Lexical rules
 
 [N2.1.1] A source file is one valid UTF-8 text of at most 1,048,576 bytes with syntactic nesting at most 32. `src/front.rs::MAX_SOURCE_BYTES`
-[N2.1.2] Invalid UTF-8 is the tool error `INVALID_UTF8`, and lexically invalid UTF-8 text is a source error. `tests/language/issue_m0_02.rs::issue_m0_02_tool_limits_and_encoding`
+[N2.1.2] Invalid UTF-8 is the tool error `INVALID_UTF8`, and lexically invalid UTF-8 text is a source error. `tests/language/syntax_and_limits.rs::syntax_and_limits_tool_limits_and_encoding`
 [N2.1.3] Source paths must end in the extension .inv. `src/main.rs::read_source`
-[N2.1.4] Comments are `//` to end of line or nested `/* */`, and an unterminated comment is a lexical error. `tests/language/issue_m0_02.rs::issue_m0_02_lexical_spans_and_json`
-[N2.1.5] Spans are zero-based half-open UTF-8 byte intervals, and CRLF does not change byte offsets. `tests/language/issue_m0_02.rs::issue_m0_02_lexical_spans_and_json`
+[N2.1.4] Comments are `//` to end of line or nested `/* */`, and an unterminated comment is a lexical error. `tests/language/syntax_and_limits.rs::syntax_and_limits_lexical_spans_and_json`
+[N2.1.5] Spans are zero-based half-open UTF-8 byte intervals, and CRLF does not change byte offsets. `tests/language/syntax_and_limits.rs::syntax_and_limits_lexical_spans_and_json`
 [N2.1.6] Identifiers are `[A-Za-z_][A-Za-z0-9_]*` and keywords are reserved. `src/front/lexer.rs`
 
 ```invar outcome=value:3
@@ -52,8 +52,8 @@ fn main() -> i32 { return 1 + 2; } // trailing
 ### 2.2 Literals and reserved words
 
 [N2.2.1] A decimal integer literal has an optional `i32` or `u32` suffix, and an unsuffixed literal takes its type from context and otherwise defaults to i32. `src/check.rs`
-[N2.2.2] An identifier character directly after a numeric token is a malformed literal and is not split into two tokens. `tests/language/issue_m0_02.rs::issue_m0_02_lexical_spans_and_json`
-[N2.2.3] The spelling `-2147483648` is a valid i32, the positive `2147483648i32` is rejected, and an out-of-range literal is rejected at compile time even in unreachable code. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
+[N2.2.2] An identifier character directly after a numeric token is a malformed literal and is not split into two tokens. `tests/language/syntax_and_limits.rs::syntax_and_limits_lexical_spans_and_json`
+[N2.2.3] The spelling `-2147483648` is a valid i32, the positive `2147483648i32` is rejected, and an out-of-range literal is rejected at compile time even in unreachable code. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
 [N2.2.4] The words `async await scope break continue total effects requires ensures` are reserved and rejected as `UNSUPPORTED_FEATURE`. `src/front/lexer.rs::unsupported`
 
 ```invar outcome=diag:LEX_INVALID_LITERAL
@@ -75,12 +75,12 @@ fn main() -> i32 {
 
 ### 3.1 Types and values
 
-[N3.1.1] The scalar types are `Bool`, `i32`, `u32` and, as a source increment, `f32`; `Unit` is legal only as a function return type. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
+[N3.1.1] The scalar types are `Bool`, `i32`, `u32` and, as a source increment, `f32`; `Unit` is legal only as a function return type. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
 [N3.1.2] Scalars are Copy; an `Array<T>` is a non-Copy owner of a fixed-length, fully initialized sequence. `src/eval/value.rs`
-[N3.1.3] Lengths and indices are `u32`, and there is no numeric promotion or implicit conversion between integer types. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.1.4] Array literals, empty or not, need an expected `Array<T>` from an annotation, parameter, return type or assignment destination. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.1.5] `main` is exactly `fn main() -> i32` for `run`; `check` accepts library files without `main`. `tests/language/issue_m0_03.rs::issue_m0_03_cli_check_json_and_status`
-[N3.1.6] A `main` with the wrong signature is the source error `ENTRYPOINT_SIGNATURE` and a missing `main` under `run` is `ENTRYPOINT_MISSING`. `tests/language/issue_m0_07.rs::issue_m0_07_real_cli_examples_and_statuses`
+[N3.1.3] Lengths and indices are `u32`, and there is no numeric promotion or implicit conversion between integer types. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.1.4] Array literals, empty or not, need an expected `Array<T>` from an annotation, parameter, return type or assignment destination. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.1.5] `main` is exactly `fn main() -> i32` for `run`; `check` accepts library files without `main`. `tests/language/names_types_and_calls.rs::names_types_and_calls_cli_check_json_and_status`
+[N3.1.6] A `main` with the wrong signature is the source error `ENTRYPOINT_SIGNATURE` and a missing `main` under `run` is `ENTRYPOINT_MISSING`. `tests/language/cli_examples_and_exit_codes.rs::cli_examples_and_exit_codes_real_cli_examples_and_statuses`
 
 ```invar outcome=diag:TYPE_MISMATCH
 fn main() -> i32 {
@@ -92,11 +92,11 @@ fn main() -> i32 {
 
 ### 3.2 Bindings and mutability
 
-[N3.2.1] `let` prevents rebinding and element mutation, and `var` permits both when ownership allows. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.2.2] Local and parameter names are block-scoped, unique within a function, and may not hide a function or an intrinsic. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.2.3] Every non-Unit function must return on all conservatively analysed paths, and a loop never establishes definite return. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.2.4] A `Unit` function may fall through, an `if` ends its path only when it has an `else` and both arms end it, and every function and statement is checked, including uncalled functions and unreachable code. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.2.5] Functions resolve across the whole file, duplicate functions, wrong arity, unknown names and redefined intrinsics are errors, and functions are not values. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
+[N3.2.1] `let` prevents rebinding and element mutation, and `var` permits both when ownership allows. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.2.2] Local and parameter names are block-scoped, unique within a function, and may not hide a function or an intrinsic. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.2.3] Every non-Unit function must return on all conservatively analysed paths, and a loop never establishes definite return. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.2.4] A `Unit` function may fall through, an `if` ends its path only when it has an `else` and both arms end it, and every function and statement is checked, including uncalled functions and unreachable code. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.2.5] Functions resolve across the whole file, duplicate functions, wrong arity, unknown names and redefined intrinsics are errors, and functions are not values. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
 [N3.2.6] A `mut` parameter grants element mutation and a `read` parameter never does, parameters cannot be rebound, and a `take` parameter is immutable unless moved into a local `var`. `src/ownership.rs`
 
 ```invar outcome=diag:RETURN_MISSING
@@ -111,11 +111,11 @@ fn main() -> i32 { return spin(1); }
 
 ### 3.3 Evaluation order and control flow
 
-[N3.3.1] Expressions and call arguments evaluate left to right, and `and` and `or` short-circuit. `tests/language/issue_m0_04.rs::issue_m0_04_scalar_order_demand_and_calls`
-[N3.3.2] Only the selected `if` arm runs, and conditions and the operands of `not`, `and` and `or` must be `Bool` with no truthiness conversion. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
+[N3.3.1] Expressions and call arguments evaluate left to right, and `and` and `or` short-circuit. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_scalar_order_demand_and_calls`
+[N3.3.2] Only the selected `if` arm runs, and conditions and the operands of `not`, `and` and `or` must be `Bool` with no truthiness conversion. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
 [N3.3.3] `for i in lo .. hi` evaluates both `u32` bounds once, iterates the half-open range, binds an immutable induction variable and increments it only after a completed body, so reaching `hi` never overflows. `src/eval/engine.rs`
 [N3.3.4] An assignment evaluates its right side first, then the destination index, then bounds, then stores. `src/eval/engine.rs`
-[N3.3.5] Direct recursion and forward calls are allowed, and recursion is not assumed total. `tests/language/issue_m0_03.rs::issue_m0_03_forward_calls_recursion_and_typed_order`
+[N3.3.5] Direct recursion and forward calls are allowed, and recursion is not assumed total. `tests/language/names_types_and_calls.rs::names_types_and_calls_forward_calls_recursion_and_typed_order`
 [N3.3.6] The destination index is evaluated once and may read but not mutably borrow or consume the destination owner, and a right side that consumes the destination owner is rejected. `src/ownership.rs`
 [N3.3.7] Whole-owner assignment needs an available unborrowed local `var` and a fresh or moved array, a moved binding is never reinitialized, and `return;` is allowed only in a `Unit` function. `src/ownership.rs`
 
@@ -150,14 +150,14 @@ fn main() -> i32 {
 
 ### 3.4 Integer arithmetic and traps
 
-[N3.4.1] `+ - *` on `i32` and `u32` and unary `-` on `i32` check representability and trap with `INTEGER_OVERFLOW`, and unary `-` on `u32` is rejected. `tests/language/issue_m0_04.rs::issue_m0_04_arithmetic_boundaries`
-[N3.4.2] Division and remainder by zero trap with `DIVISION_BY_ZERO`, and `i32::MIN / -1` traps with `INTEGER_OVERFLOW`. `tests/language/issue_m0_04.rs::issue_m0_04_arithmetic_boundaries`
-[N3.4.3] Signed division truncates toward zero, the remainder has the dividend's sign, and `MIN % -1` is `0`. `tests/language/issue_m0_04.rs::issue_m0_04_arithmetic_boundaries`
-[N3.4.4] `wrapping_add` and `wrapping_mul` take two `u32` operands and compute modulo 2^32. `tests/language/issue_m0_04.rs::issue_m0_04_arithmetic_boundaries`
+[N3.4.1] `+ - *` on `i32` and `u32` and unary `-` on `i32` check representability and trap with `INTEGER_OVERFLOW`, and unary `-` on `u32` is rejected. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_arithmetic_boundaries`
+[N3.4.2] Division and remainder by zero trap with `DIVISION_BY_ZERO`, and `i32::MIN / -1` traps with `INTEGER_OVERFLOW`. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_arithmetic_boundaries`
+[N3.4.3] Signed division truncates toward zero, the remainder has the dividend's sign, and `MIN % -1` is `0`. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_arithmetic_boundaries`
+[N3.4.4] `wrapping_add` and `wrapping_mul` take two `u32` operands and compute modulo 2^32. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_arithmetic_boundaries`
 [N3.4.5] Arithmetic behaves identically in debug and release builds. `docs/rust-engineering.md`
 [N3.4.6] The source trap categories are `INTEGER_OVERFLOW`, `DIVISION_BY_ZERO`, `INDEX_OUT_OF_BOUNDS` and the unit trap `UNIT_CONVERSION_INEXACT` (6.1.5), and a trap records the operator or index span of the first failing operation in evaluation order. `src/eval/error.rs::UNIT_CONVERSION_INEXACT`
 [N3.4.7] A trap performs no language-level cleanup, and it is distinct from an evaluation limit and from a tool error. `docs/validation.md`
-[N3.4.8] `u32` division floors, its remainder lies in `[0, divisor)`, and `u32` subtraction below zero traps with `INTEGER_OVERFLOW`. `tests/language/issue_m0_04.rs::issue_m0_04_arithmetic_boundaries`
+[N3.4.8] `u32` division floors, its remainder lies in `[0, divisor)`, and `u32` subtraction below zero traps with `INTEGER_OVERFLOW`. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_arithmetic_boundaries`
 
 ```invar outcome=trap:INTEGER_OVERFLOW
 fn main() -> i32 {
@@ -201,10 +201,10 @@ fn main() -> i32 {
 
 ### 3.5 Arrays and intrinsics
 
-[N3.5.1] `len(xs)` returns the `u32` length, and `filled_i32(n, x)` and `filled_u32(n, x)` evaluate `n` then `x` once and build owned arrays of `n` copies. `tests/language/issue_m0_05.rs::issue_m0_05_array_values_indexing_and_filling`
-[N3.5.2] Indexing needs a `u32` index and an out-of-range index traps with `INDEX_OUT_OF_BOUNDS`. `tests/language/issue_m0_05.rs::issue_m0_05_array_values_indexing_and_filling`
-[N3.5.3] Array equality and array arithmetic are unsupported. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N3.5.4] Allocation failure is a tool error and not a program result, reads copy scalar elements, and stores need exclusive access. `tests/language/issue_m0_05.rs::issue_m0_05_bounded_array_allocation`
+[N3.5.1] `len(xs)` returns the `u32` length, and `filled_i32(n, x)` and `filled_u32(n, x)` evaluate `n` then `x` once and build owned arrays of `n` copies. `tests/language/arrays_ownership_and_cleanup.rs::arrays_ownership_and_cleanup_array_values_indexing_and_filling`
+[N3.5.2] Indexing needs a `u32` index and an out-of-range index traps with `INDEX_OUT_OF_BOUNDS`. `tests/language/arrays_ownership_and_cleanup.rs::arrays_ownership_and_cleanup_array_values_indexing_and_filling`
+[N3.5.3] Array equality and array arithmetic are unsupported. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N3.5.4] Allocation failure is a tool error and not a program result, reads copy scalar elements, and stores need exclusive access. `tests/language/arrays_ownership_and_cleanup.rs::arrays_ownership_and_cleanup_bounded_array_allocation`
 
 ```invar outcome=trap:INDEX_OUT_OF_BOUNDS
 fn main() -> i32 {
@@ -216,10 +216,10 @@ fn main() -> i32 {
 ### 3.6 Fuel
 
 [N3.6.1] Each expression evaluation and statement dispatch consumes one unit of fuel, and the default limit is 1,000,000. `src/eval/engine.rs::charge`
-[N3.6.2] Exhausting fuel reports `evaluation_limit` with `steps_used` equal to the limit and is never a proof of divergence. `tests/language/issue_m0_04.rs::issue_m0_04_fuel_and_call_depth`
+[N3.6.2] Exhausting fuel reports `evaluation_limit` with `steps_used` equal to the limit and is never a proof of divergence. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_fuel_and_call_depth`
 [N3.6.3] A literal, name or intrinsic is an expression step, a call adds no step for entering its function, and a block or parentheses add no step of their own. `src/eval/engine.rs`
-[N3.6.4] A `for` is charged once on entry and once before each iteration, a `while` condition on every evaluation, and resource bookkeeping and static checking consume no fuel. `tests/language/issue_m0_04.rs::issue_m0_04_fuel_and_call_depth`
-[N3.6.5] With fuel `N` exactly `N` steps run, `--fuel N` takes a positive decimal, and fuel is a tool limit and never an optimization fact. `tests/language/issue_m0_04.rs::issue_m0_04_fuel_and_call_depth`
+[N3.6.4] A `for` is charged once on entry and once before each iteration, a `while` condition on every evaluation, and resource bookkeeping and static checking consume no fuel. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_fuel_and_call_depth`
+[N3.6.5] With fuel `N` exactly `N` steps run, `--fuel N` takes a positive decimal, and fuel is a tool limit and never an optimization fact. `tests/language/arithmetic_fuel_and_demand.rs::arithmetic_fuel_and_demand_fuel_and_call_depth`
 
 ```invar outcome=limit fuel=1000
 fn main() -> i32 {
@@ -233,8 +233,8 @@ fn main() -> i32 {
 
 ### 4.1 Moves
 
-[N4.1.1] An array owner moves only with `move name`, from a fresh expression, or by `return name` or `return move name`, a bare owner-to-owner binding is rejected rather than copied, and `move` on a scalar is rejected. `tests/language/issue_m0_05.rs::issue_m0_05_rejects_invalid_ownership`
-[N4.1.2] Reading a moved owner is `OWN_USE_AFTER_MOVE`, and a move of an outer binding inside a loop is rejected. `tests/language/issue_m0_05.rs::issue_m0_05_rejects_invalid_ownership`
+[N4.1.1] An array owner moves only with `move name`, from a fresh expression, or by `return name` or `return move name`, a bare owner-to-owner binding is rejected rather than copied, and `move` on a scalar is rejected. `tests/language/arrays_ownership_and_cleanup.rs::arrays_ownership_and_cleanup_rejects_invalid_ownership`
+[N4.1.2] Reading a moved owner is `OWN_USE_AFTER_MOVE`, and a move of an outer binding inside a loop is rejected. `tests/language/arrays_ownership_and_cleanup.rs::arrays_ownership_and_cleanup_rejects_invalid_ownership`
 [N4.1.3] At a join of continuing `if` paths an owner is usable only if usable on every continuing path, and a returning branch takes no part in the join. `src/ownership.rs`
 
 ```invar outcome=diag:OWN_USE_AFTER_MOVE
@@ -249,14 +249,14 @@ fn main() -> i32 {
 
 ### 4.2 Call loans
 
-[N4.2.1] An array parameter has exactly one mode: `read`, `mut` or `take`, and scalar parameters take no mode. `tests/language/issue_m0_03.rs::issue_m0_03_rejects_names_types_and_returns`
-[N4.2.2] Borrowed arguments are bare names, read loans may coexist, and a mutable loan excludes every other access to that array. `tests/language/issue_m0_06.rs::issue_m0_06_rejects_conflicts_at_call_boundary`
-[N4.2.3] A loan is acquired after its argument is evaluated and held until the outer call completes, with no two-phase borrow. `tests/language/issue_m0_06.rs::issue_m0_06_rejects_conflicts_at_call_boundary`
-[N4.2.4] A `read` or `mut` parameter cannot be returned as an owner, and a borrower cannot escape its call. `tests/language/issue_m0_06.rs::issue_m0_06_rejects_conflicts_at_call_boundary`
+[N4.2.1] An array parameter has exactly one mode: `read`, `mut` or `take`, and scalar parameters take no mode. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
+[N4.2.2] Borrowed arguments are bare names, read loans may coexist, and a mutable loan excludes every other access to that array. `tests/language/call_loans.rs::call_loans_rejects_conflicts_at_call_boundary`
+[N4.2.3] A loan is acquired after its argument is evaluated and held until the outer call completes, with no two-phase borrow. `tests/language/call_loans.rs::call_loans_rejects_conflicts_at_call_boundary`
+[N4.2.4] A `read` or `mut` parameter cannot be returned as an owner, and a borrower cannot escape its call. `tests/language/call_loans.rs::call_loans_rejects_conflicts_at_call_boundary`
 [N4.2.5] Rejected borrows never trigger implicit cloning or reference counting. `docs/architecture.md`
-[N4.2.6] `read` accepts an owner or a compatible borrowed parameter, `mut` a mutable local owner or a `mut` parameter, and `take` only an owned array. `tests/language/issue_m0_06.rs::issue_m0_06_read_read_and_take`
-[N4.2.7] In `f(xs, g(xs))` a mutable first loan bars `g` from reading `xs`, a read loan bars `g` from mutating or consuming it, and one actual passed twice mutably or both borrowed and consumed is rejected. `tests/language/issue_m0_06.rs::issue_m0_06_rejects_conflicts_at_call_boundary`
-[N4.2.8] A nested call may reborrow a `mut` parameter as `read` or `mut`, suspending the parent access until it returns. `tests/language/issue_m0_06.rs::issue_m0_06_mut_reborrow_restores_caller_access`
+[N4.2.6] `read` accepts an owner or a compatible borrowed parameter, `mut` a mutable local owner or a `mut` parameter, and `take` only an owned array. `tests/language/call_loans.rs::call_loans_read_read_and_take`
+[N4.2.7] In `f(xs, g(xs))` a mutable first loan bars `g` from reading `xs`, a read loan bars `g` from mutating or consuming it, and one actual passed twice mutably or both borrowed and consumed is rejected. `tests/language/call_loans.rs::call_loans_rejects_conflicts_at_call_boundary`
+[N4.2.8] A nested call may reborrow a `mut` parameter as `read` or `mut`, suspending the parent access until it returns. `tests/language/call_loans.rs::call_loans_mut_reborrow_restores_caller_access`
 
 ```invar outcome=diag:OWN_BORROW_CONFLICT
 fn both(a: mut Array<i32>, b: read Array<i32>) -> i32 { return a[0u32] + b[0u32]; }
@@ -269,16 +269,16 @@ fn main() -> i32 {
 
 ### 4.3 Cleanup
 
-[N4.3.1] Normal exits release still-owned arrays in reverse declaration order for each exited scope, and a move suppresses release. `tests/language/issue_m0_05.rs::issue_m0_05_cleanup_and_failure_order`
+[N4.3.1] Normal exits release still-owned arrays in reverse declaration order for each exited scope, and a move suppresses release. `tests/language/arrays_ownership_and_cleanup.rs::arrays_ownership_and_cleanup_and_failure_order`
 [N4.3.2] The reference evaluator records a cleanup trace, which is a test observation and not a source feature. `docs/validation.md`
 
 ## 5. Language extensions
 
 ### 5.1 Modules and imports
 
-[N5.1.1] A `module` has `pub` and private items, `import m::name;` brings a public item into scope, and forward references inside the file are allowed. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_forward_module_resolution_agrees_across_engines`
+[N5.1.1] A `module` has `pub` and private items, `import m::name;` brings a public item into scope, and forward references inside the file are allowed. `tests/language/records_variants_result.rs::records_variants_result_forward_module_resolution_agrees_across_engines`
 [N5.1.2] Duplicate names, invalid visibility, malformed imports and import cycles are source errors, and there are at most 32 modules and 256 imports. `src/check/modules.rs::MAX_MODULES`
-[N5.1.3] Module resolution is deterministic and the whole program is one file. `tests/language/issue_l1_01_language_core.rs`
+[N5.1.3] Module resolution is deterministic and the whole program is one file. `tests/language/records_variants_result.rs`
 
 ```invar outcome=value:21
 import math::triple;
@@ -304,8 +304,8 @@ fn main() -> i32 { return 0; }
 ### 5.2 Records
 
 [N5.2.1] A `struct` has 1 to 16 fields of scalar, array, quantity or nested record types and is built with every field named exactly once, evaluated in source order. `src/check/modules.rs::MAX_RECORD_FIELDS`
-[N5.2.2] Reading a scalar field copies it, and an array field needs `move owner.field`, which makes that field unavailable. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_moves_record_array_field_once`
-[N5.2.3] A moved record cannot be used again and a missing field is rejected. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_rejects_record_use_after_move`
+[N5.2.2] Reading a scalar field copies it, and an array field needs `move owner.field`, which makes that field unavailable. `tests/language/records_variants_result.rs::records_variants_result_moves_record_array_field_once`
+[N5.2.3] A moved record cannot be used again and a missing field is rejected. `tests/language/records_variants_result.rs::records_variants_result_rejects_record_use_after_move`
 
 ```invar outcome=value:9
 struct Bundle { items: Array<i32>, code: i32 }
@@ -330,8 +330,8 @@ fn main() -> i32 {
 ### 5.3 Variants and match
 
 [N5.3.1] An `enum` has 1 to 16 arms with zero or one scalar payload, and a `match` must cover every arm. `src/check/modules.rs::MAX_VARIANT_ARMS`
-[N5.3.2] `match owner` borrows the payload and `match move owner` consumes the owner and gives the selected payload to the arm. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_owned_and_borrowed_patterns`
-[N5.3.3] Only the selected arm is evaluated, and a missing arm is `MATCH_NONEXHAUSTIVE`. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_rejects_nonexhaustive_variant_match`
+[N5.3.2] `match owner` borrows the payload and `match move owner` consumes the owner and gives the selected payload to the arm. `tests/language/records_variants_result.rs::records_variants_result_owned_and_borrowed_patterns`
+[N5.3.3] Only the selected arm is evaluated, and a missing arm is `MATCH_NONEXHAUSTIVE`. `tests/language/records_variants_result.rs::records_variants_result_rejects_nonexhaustive_variant_match`
 
 ```invar outcome=value:11
 enum Choice { Low, High(i32) }
@@ -356,9 +356,9 @@ fn main() -> i32 {
 
 ### 5.4 Result
 
-[N5.4.1] `Result<T,E>` is a built-in variant with `Ok(T)` and `Err(E)`, nests to depth four, and its constructors need an expected `Result` type. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_result_rejects_wrong_ownership_and_conversion`
-[N5.4.2] Postfix `?` yields the `Ok` payload or returns `Err(E)` from the enclosing `Result<U,E>` function after normal cleanup, and the error type must match exactly. `tests/language/issue_l1_01_language_core.rs::issue_l1_01_language_core_nested_result_and_propagation`
-[N5.4.3] An `Err` is an ordinary value, distinct from a source trap, an evaluation limit and a tool failure. `tests/language/issue_l1_01_language_core.rs`
+[N5.4.1] `Result<T,E>` is a built-in variant with `Ok(T)` and `Err(E)`, nests to depth four, and its constructors need an expected `Result` type. `tests/language/records_variants_result.rs::records_variants_result_rejects_wrong_ownership_and_conversion`
+[N5.4.2] Postfix `?` yields the `Ok` payload or returns `Err(E)` from the enclosing `Result<U,E>` function after normal cleanup, and the error type must match exactly. `tests/language/records_variants_result.rs::records_variants_result_nested_result_and_propagation`
+[N5.4.3] An `Err` is an ordinary value, distinct from a source trap, an evaluation limit and a tool failure. `tests/language/records_variants_result.rs`
 
 ```invar outcome=value:28
 fn leaf(ok: Bool) -> Result<i32, u32> {
@@ -406,14 +406,14 @@ fn main() -> i32 {
 
 ### 5.5 Borrowed views
 
-[N5.5.1] `View<T>` and `MutView<T>` over `i32` and `u32` are non-owning views made by `view(owner, start, end[, stride])` and `view_mut(...)` from a bare array or view name. `tests/language/issue_l1_02_borrowed_views.rs::issue_l1_02_borrowed_views_reference_mir_native_agree`
-[N5.5.2] The length is `ceil((end-start)/stride)`, the stride is a positive `u32`, and range, stride and composition are checked in `u32` arithmetic. `tests/language/issue_l1_02_borrowed_views.rs::issue_l1_02_borrowed_views_range_and_stride_trap_identically`
-[N5.5.3] An invalid range or stride traps as `INDEX_OUT_OF_BOUNDS`, identically in the reference, MIR and native engines. `tests/language/issue_l1_02_borrowed_views.rs::issue_l1_02_borrowed_views_range_and_stride_trap_identically`
-[N5.5.4] An owner cannot be moved, dropped or mutated while a view of it is live, and mutable views of one owner need provably disjoint intervals. `tests/language/issue_l1_02_borrowed_views.rs::issue_l1_02_borrowed_views_public_check_and_negative_sources`
-[N5.5.5] A function returns a view only with `-> View<T> from xs` where `xs` is a parameter, and a view of a local owner cannot be returned. `tests/language/issue_l1_02_borrowed_views.rs::issue_l1_02_borrowed_views_read_return_from_mut_parameter`
+[N5.5.1] `View<T>` and `MutView<T>` over `i32` and `u32` are non-owning views made by `view(owner, start, end[, stride])` and `view_mut(...)` from a bare array or view name. `tests/language/borrowed_views.rs::borrowed_views_reference_mir_native_agree`
+[N5.5.2] The length is `ceil((end-start)/stride)`, the stride is a positive `u32`, and range, stride and composition are checked in `u32` arithmetic. `tests/language/borrowed_views.rs::borrowed_views_range_and_stride_trap_identically`
+[N5.5.3] An invalid range or stride traps as `INDEX_OUT_OF_BOUNDS`, identically in the reference, MIR and native engines. `tests/language/borrowed_views.rs::borrowed_views_range_and_stride_trap_identically`
+[N5.5.4] An owner cannot be moved, dropped or mutated while a view of it is live, and mutable views of one owner need provably disjoint intervals. `tests/language/borrowed_views.rs::borrowed_views_public_check_and_negative_sources`
+[N5.5.5] A function returns a view only with `-> View<T> from xs` where `xs` is a parameter, and a view of a local owner cannot be returned. `tests/language/borrowed_views.rs::borrowed_views_read_return_from_mut_parameter`
 [N5.5.6] There are at most 4096 view facts per program, and views have no view parameters, no view fields and no `f32` element type. `src/check/views.rs`
 [N5.5.7] Views have lexical scope and no cleanup event, element `i` of a nested view is at its parent physical origin plus `start + i*stride` parent strides, two read views may overlap, and unknown bounds never prove disjointness. `src/check/views.rs`
-[N5.5.8] A mutable view suspends direct reads of its owner, a `MutView` return needs a `mut` parameter, the caller owner stays borrowed while the returned view lives, and copying a view needs an explicit reborrow. `tests/language/issue_l1_02_borrowed_views.rs`
+[N5.5.8] A mutable view suspends direct reads of its owner, a `MutView` return needs a `mut` parameter, the caller owner stays borrowed while the returned view lives, and copying a view needs an explicit reborrow. `tests/language/borrowed_views.rs`
 
 ```invar outcome=value:65
 fn first(xs: read Array<i32>) -> View<i32> from xs {
@@ -454,9 +454,9 @@ fn main() -> i32 {
 
 ### 5.6 Generics
 
-[N5.6.1] A generic function has one or two parameters bounded by `Value`, which stands for any complete concrete non-view value type and implies no operations. `tests/language/issue_l1_03_bounded_generics_closures.rs::issue_l1_03_bounded_generics_closures_monomorphized_functions_agree`
-[N5.6.2] Type arguments are inferred only from exact argument types, never from the expected result, or are given with `f::<T, U>(...)`. `tests/language/issue_l1_03_bounded_generics_closures.rs::issue_l1_03_bounded_generics_closures_public_check_rejects_invalid_sources`
-[N5.6.3] An instance is identified by the qualified function name and its concrete type arguments, is built once and reused, and recursive instantiation is rejected. `tests/language/issue_l1_03_bounded_generics_closures.rs::issue_l1_03_bounded_generics_closures_module_identity_and_unused_take_cleanup`
+[N5.6.1] A generic function has one or two parameters bounded by `Value`, which stands for any complete concrete non-view value type and implies no operations. `tests/language/generics_and_closures.rs::generics_and_closures_monomorphized_functions_agree`
+[N5.6.2] Type arguments are inferred only from exact argument types, never from the expected result, or are given with `f::<T, U>(...)`. `tests/language/generics_and_closures.rs::generics_and_closures_public_check_rejects_invalid_sources`
+[N5.6.3] An instance is identified by the qualified function name and its concrete type arguments, is built once and reused, and recursive instantiation is rejected. `tests/language/generics_and_closures.rs::generics_and_closures_module_identity_and_unused_take_cleanup`
 [N5.6.4] Expansion is limited to 16 generic frames and 128 lowered functions, and traits and higher-kinded syntax are unsupported. `src/check/generics.rs::MAX_GENERIC_DEPTH`
 [N5.6.5] A parameter or result may be a bare type parameter, or `Array<T>` when `T` is `i32` or `u32`, and missing or conflicting type arguments are source errors. `src/check/generics.rs`
 
@@ -482,10 +482,10 @@ fn main() -> i32 { return same(1i32, 2u32); }
 ### 5.7 Affine closures
 
 [N5.7.1] A local closure lists explicit captures `copy`, `read` or `take`, has at most 8 captures, 8 parameters and 65,536 source bytes, and is called at most once in its block. `src/check/closures.rs::MAX_CAPTURES`
-[N5.7.2] `read` borrows the owner until the call or scope exit, `take` moves the owner at creation and cleans it up if the closure is never called. `tests/language/issue_l1_03_bounded_generics_closures.rs::issue_l1_03_bounded_generics_closures_module_identity_and_unused_take_cleanup`
-[N5.7.3] A closure cannot escape, be assigned, passed or returned, and its body may use only its captures, parameters and global functions. `tests/language/issue_l1_03_bounded_generics_closures.rs::issue_l1_03_bounded_generics_closures_public_check_rejects_invalid_sources`
+[N5.7.2] `read` borrows the owner until the call or scope exit, `take` moves the owner at creation and cleans it up if the closure is never called. `tests/language/generics_and_closures.rs::generics_and_closures_module_identity_and_unused_take_cleanup`
+[N5.7.3] A closure cannot escape, be assigned, passed or returned, and its body may use only its captures, parameters and global functions. `tests/language/generics_and_closures.rs::generics_and_closures_public_check_rejects_invalid_sources`
 [N5.7.4] Captures are named and typed, `copy` snapshots an integer or Bool at creation, and while a `read` capture lives the captured owner cannot be used directly. `src/check/closures.rs`
-[N5.7.5] A closure call is a straight-line statement outside any condition, captures are set up left to right at creation, and a call delivers captures in declaration order and then evaluates its arguments left to right. `tests/language/issue_l1_03_bounded_generics_closures.rs`
+[N5.7.5] A closure call is a straight-line statement outside any condition, captures are set up left to right at creation, and a call delivers captures in declaration order and then evaluates its arguments left to right. `tests/language/generics_and_closures.rs`
 
 ```invar outcome=value:10
 fn main() -> i32 {
@@ -554,10 +554,10 @@ fn main() -> i32 {
 
 ### 6.1 Quantities and dimension algebra
 
-[N6.1.1] `Quantity<T, Unit>` carries a unit in its type, built by `quantity::<unit>(x)`, and the unit is erased before MIR so generated code equals the unit-free program. `tests/language/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_quantity_erasure_is_byte_identical`
+[N6.1.1] `Quantity<T, Unit>` carries a unit in its type, built by `quantity::<unit>(x)`, and the unit is erased before MIR so generated code equals the unit-free program. `tests/language/units_and_frames.rs::units_and_frames_quantity_erasure_is_byte_identical`
 [N6.1.2] The known units are `one m mm um kg g s ms us ns A K mol cd rad urad deg Hz N Nm px`, with dimension product, quotient and integer power in the type. `src/check/unit_math.rs`
-[N6.1.3] `+`, `-` and comparison need identical units, `*` and `/` combine dimensions, and `1 / s` is `Hz`. `tests/language/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_dimension_products_quotients_and_rates`
-[N6.1.4] `to::<unit>(q)` is the only conversion between scales, there is no implicit conversion, and a unit is not a value. `tests/language/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_quantity_source_errors`
+[N6.1.3] `+`, `-` and comparison need identical units, `*` and `/` combine dimensions, and `1 / s` is `Hz`. `tests/language/units_and_frames.rs::units_and_frames_dimension_products_quotients_and_rates`
+[N6.1.4] `to::<unit>(q)` is the only conversion between scales, there is no implicit conversion, and a unit is not a value. `tests/language/units_and_frames.rs::units_and_frames_quantity_source_errors`
 [N6.1.5] A scale conversion that is not exact traps with `UNIT_CONVERSION_INEXACT`. `tests/diagnostics/issue_ai_01_machine_diagnostics/indexed_and_versions.rs::issue_ai_01_machine_diagnostics_conversion_trap_is_versioned`
 [N6.1.6] `rad` and `deg` conversions use a certified bound on pi and round to nearest even. `src/angle.rs`
 [N6.1.7] `px` is a nominal camera unit distinct from `one` and every SI unit. `spec/grammar.ebnf`
@@ -593,9 +593,9 @@ fn main() -> i32 {
 
 ### 6.2 Frames and transforms
 
-[N6.2.1] `frame Name;` declares a root and `frame Name: Parent;` a child, and the tree needs exactly one root, no cycle, no duplicate and no unknown parent. `tests/language/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_nominal_tree_public_check`
-[N6.2.2] `Vector3<T,unit,frame>`, `Point<T,frame>` and `Transform<From,To>` are nominal and are made by `vector3`, `point` and `transform`. `tests/language/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_transform_chain_agrees`
-[N6.2.3] `Transform<A,B> * Transform<B,C>` is `Transform<A,C>`, any other composition is `FRAME_MISMATCH`, and a transform also applies to a point or vector in its source frame. `tests/language/issue_r1_01_units_frames.rs::issue_r1_01_units_frames_transform_chain_agrees`
+[N6.2.1] `frame Name;` declares a root and `frame Name: Parent;` a child, and the tree needs exactly one root, no cycle, no duplicate and no unknown parent. `tests/language/units_and_frames.rs::units_and_frames_nominal_tree_public_check`
+[N6.2.2] `Vector3<T,unit,frame>`, `Point<T,frame>` and `Transform<From,To>` are nominal and are made by `vector3`, `point` and `transform`. `tests/language/units_and_frames.rs::units_and_frames_transform_chain_agrees`
+[N6.2.3] `Transform<A,B> * Transform<B,C>` is `Transform<A,C>`, any other composition is `FRAME_MISMATCH`, and a transform also applies to a point or vector in its source frame. `tests/language/units_and_frames.rs::units_and_frames_transform_chain_agrees`
 [N6.2.4] A transform rotation is a constant proper signed permutation, and Point and translation coordinates are integer micrometres. `spec/grammar.ebnf`
 [N6.2.5] There are at most 128 frames. `src/check/frames.rs::MAX_FRAMES`
 
@@ -648,9 +648,9 @@ fn main() -> i32 { return 0i32; }
 
 ### 7.1 Bytes and String
 
-[N7.1.1] `Bytes` and `String` are distinct immutable owned values of at most 1,048,576 bytes, `len` is the byte length, and each live byte counts as one element toward the ceiling of N12.1.1. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_large_bounded_value` `src/eval.rs::record_cleanup`
-[N7.1.2] `b"..."` allows `\xNN` escapes and arbitrary bytes, `"..."` must be valid UTF-8 without `\xNN`, and there is no normalization or implicit conversion. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_utf8_and_byte_values_agree`
-[N7.1.3] `Bytes` indexing yields a `u32`, an out-of-range index traps with `INDEX_OUT_OF_BOUNDS`, and `String` has no indexing. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_public_failures`
+[N7.1.1] `Bytes` and `String` are distinct immutable owned values of at most 1,048,576 bytes, `len` is the byte length, and each live byte counts as one element toward the ceiling of N12.1.1. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_large_bounded_value` `src/eval.rs::record_cleanup`
+[N7.1.2] `b"..."` allows `\xNN` escapes and arbitrary bytes, `"..."` must be valid UTF-8 without `\xNN`, and there is no normalization or implicit conversion. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_utf8_and_byte_values_agree`
+[N7.1.3] `Bytes` indexing yields a `u32`, an out-of-range index traps with `INDEX_OUT_OF_BOUNDS`, and `String` has no indexing. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_public_failures`
 
 ```invar outcome=value:7
 fn main() -> i32 {
@@ -671,8 +671,8 @@ fn main() -> i32 {
 
 ### 7.2 UTF-8 conversions
 
-[N7.2.1] `bytes_slice(owner, a, b)` copies a range into `Bytes`, `utf8_slice` returns `Result<String,Utf8Error>`, `utf8_decode` validates and `utf8_encode` copies. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_utf8_and_byte_values_agree`
-[N7.2.2] These borrow a bare named owner, a reversed or out-of-range range traps, and malformed UTF-8 or a split code point is an ordinary `Err(Utf8Error)` value. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_public_failures`
+[N7.2.1] `bytes_slice(owner, a, b)` copies a range into `Bytes`, `utf8_slice` returns `Result<String,Utf8Error>`, `utf8_decode` validates and `utf8_encode` copies. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_utf8_and_byte_values_agree`
+[N7.2.2] These borrow a bare named owner, a reversed or out-of-range range traps, and malformed UTF-8 or a split code point is an ordinary `Err(Utf8Error)` value. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_public_failures`
 
 ```invar outcome=value:1
 fn main() -> i32 {
@@ -684,11 +684,11 @@ fn main() -> i32 {
 
 ### 7.3 Foreign C declarations
 
-[N7.3.1] A top-level `extern c fn symbol(args) -> Result<T,ForeignError> oracle name;` declares at most 8 arguments from `i32`, `u32`, `read` or `take` `Bytes` and `String`. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_unsupported_signatures_reject_publicly`
-[N7.3.2] The named oracle is an ordinary Invar function with the exact signature, and `check` never loads a library. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_foreign_oracle_declares_and_checks`
-[N7.3.3] Reference and MIR execution run the oracle, and native execution needs an explicit absolute `--c-library`. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_foreign_buffers_and_failures_agree`
+[N7.3.1] A top-level `extern c fn symbol(args) -> Result<T,ForeignError> oracle name;` declares at most 8 arguments from `i32`, `u32`, `read` or `take` `Bytes` and `String`. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_unsupported_signatures_reject_publicly`
+[N7.3.2] The named oracle is an ordinary Invar function with the exact signature, and `check` never loads a library. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_foreign_oracle_declares_and_checks`
+[N7.3.3] Reference and MIR execution run the oracle, and native execution needs an explicit absolute `--c-library`. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_foreign_buffers_and_failures_agree`
 [N7.3.4] A `take` argument is consumed even when C reports an error, so a later use is `OWN_USE_AFTER_MOVE`. `tests/fixtures/l1_04/foreign-use-after-take.inv`
-[N7.3.5] Callbacks, borrowed returns, mutable buffers, C strings and general FFI are rejected. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_unsupported_signatures_reject_publicly`
+[N7.3.5] Callbacks, borrowed returns, mutable buffers, C strings and general FFI are rejected. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_unsupported_signatures_reject_publicly`
 [N7.3.6] Foreign code is outside the safe-language claims, and the C ABI does not make native dependencies safe. `docs/architecture.md`
 [N7.3.7] Native execution loads only the library named by `--c-library`, never a source-relative or current-directory path, and `build --target native` records that path without loading it. `src/native_command.rs`
 
@@ -708,9 +708,9 @@ fn main() -> i32 {
 ### 7.4 The C ABI shim
 
 [N7.4.1] The C shim is `int32_t symbol(const inv_arg_v1 *args, uint32_t argc, inv_result_v1 *out)` with tags, modes and 64-bit lengths frozen in `include/invar_foreign_v1.h`. `include/invar_foreign_v1.h`
-[N7.4.2] The library must export `inv_abi_version_v1() == 1`, and a wrong version or missing symbol becomes `Err(ForeignError::Failure())`. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_detectable_foreign_failures_are_typed`
+[N7.4.2] The library must export `inv_abi_version_v1() == 1`, and a wrong version or missing symbol becomes `Err(ForeignError::Failure())`. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_detectable_foreign_failures_are_typed`
 [N7.4.3] Buffer arguments are valid only during the call, and a C-owned result buffer must supply a release callback that runs exactly once after validation and copy. `tests/fixtures/l1_04/foreign.c`
-[N7.4.4] A result buffer over 1 MiB, bad tag or version, a null with nonzero length or invalid UTF-8 is a typed error and never truncates. `tests/language/issue_l1_04_bytes_strings_cabi.rs::issue_l1_04_bytes_strings_cabi_detectable_foreign_failures_are_typed`
+[N7.4.4] A result buffer over 1 MiB, bad tag or version, a null with nonzero length or invalid UTF-8 is a typed error and never truncates. `tests/language/bytes_strings_and_c_abi.rs::bytes_strings_and_c_abi_detectable_foreign_failures_are_typed`
 
 ## 8. System dialect
 
@@ -1044,11 +1044,11 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 ### 11.1 CLI and exit codes
 
 [N11.1.1] The commands are `check` (with `--fix`), `run` (with `--debug`), `explain`, `build`, `calibrate`, `debug`, `system`, `component`, `import`, `source-device` and `gnet-device`, and `build` targets `native`, `metal` or, for the general-net route, `cuda`. `src/lib.rs::help` `src/main.rs`
-[N11.1.2] The exit codes are 0 ok, 1 source error, 2 tool error, 3 trap and 4 evaluation limit, and a completed `main` is 0 whatever it returns. `tests/language/issue_m0_07.rs::issue_m0_07_real_cli_examples_and_statuses`
+[N11.1.2] The exit codes are 0 ok, 1 source error, 2 tool error, 3 trap and 4 evaluation limit, and a completed `main` is 0 whatever it returns. `tests/language/cli_examples_and_exit_codes.rs::cli_examples_and_exit_codes_real_cli_examples_and_statuses`
 [N11.1.3] With `--format json` exactly one JSON document is printed on standard output with no logs, and a document over 1,000,000 bytes is the tool error `DIAGNOSTIC_DOCUMENT_LIMIT`. `src/main.rs::print_run_json`
 [N11.1.4] The engines are `reference`, `native-serial`, `cpu-parallel --workers 1..64`, `cuda`, `metal` and `auto`, and an unavailable engine is a typed error and never a silent substitute. `src/lib.rs::help`
 [N11.1.5] `invar build PATH --target metal` writes a Metal library ahead of time, and `--artifact METAL_LIBRARY` makes `run`, `explain` and the device commands load it instead of compiling Metal source at run time. `src/lib.rs::help`
-[N11.1.6] Invalid CLI arguments are a usage tool error, and human output never turns the returned `main` value into the exit code. `tests/language/issue_m0_07.rs::issue_m0_07_invalid_arguments_are_usage_errors`
+[N11.1.6] Invalid CLI arguments are a usage tool error, and human output never turns the returned `main` value into the exit code. `tests/language/cli_examples_and_exit_codes.rs::cli_examples_and_exit_codes_invalid_arguments_are_usage_errors`
 
 ### 11.2 Reference, MIR and native serial
 
@@ -1061,9 +1061,9 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 ### 11.3 CPU parallel and admitted regions
 
 [N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
-[N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/schedule_cpu/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
-[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/schedule_cpu/issue_m2_03.rs::issue_m2_03_lawful_reduction_scan_rejects_unproved_source_laws`
-[N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/schedule_cpu/issue_m2_05.rs::issue_m2_05_cpu_scheduler_fallback_false_guard_is_serial_before_workers`
+[N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
+[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
+[N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_false_guard_is_serial_before_workers`
 [N11.3.5] The worker count is bounded by `MAX_WORKERS` (64) and by the available hardware. `src/schedule/workers.rs::MAX_WORKERS`
 
 ```invar outcome=value:7
@@ -1083,7 +1083,7 @@ fn main() -> i32 {
 [N11.4.1] The library recognizes ordinary source for transpose, five-point stencil, segmented reduction and map, stable compaction, gather, histogram, ordered affine pair reduction, bounded summary, matrix contraction and bounded frontier families, each through a `from_checked` or `from_source` contract that rejects near matches. `tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs`
 [N11.4.2] Ordinary `invar run` offers every reached loop to a family registry in precedence order `core`, `tensor`, `grid`, `segmented` and `indexed`, the first match at a span wins, and a loop no family takes runs as serial MIR, except that under `cpu-parallel`, and `auto` without a device feature, a program no parallel path claims first goes through the checked normal form. `src/schedule/families.rs::families` `src/engine.rs::serial_only`
 [N11.4.3] A recognizer reparses exact source bytes and compares annotations, and a stale or forged checked program is refused. `tests/m4_indexed/issue_m4_05_gather_preflight.rs`
-[N11.4.4] `invar source-device PATH tensor|transpose ENTRY cpu-model|cuda|metal FUEL` runs the matrix or transpose source and labels the CPU model completion. `tests/cli/issue_m4_source_device_cli.rs::source_device_command_runs_real_source_and_labels_model_completion`
+[N11.4.4] `invar source-device PATH tensor|transpose ENTRY cpu-model|cuda|metal FUEL` runs the matrix or transpose source and labels the CPU model completion. `tests/cli/source_device_command.rs::source_device_command_runs_real_source_and_labels_model_completion`
 [N11.4.5] The ordered affine pair law is `(a,b) then (c,d) = (c*a, c*b+d)` modulo 2^32 with identity `(1,0)`, applied left then right. `docs/pair-reduction-v1.md`
 
 ### 11.5 GPU targets
@@ -1269,7 +1269,7 @@ fn main() -> i32 {
 [NB.4.4] `invar-math-cr-v1` provides `sqrt`, `cbrt`, `hypot`, the trigonometric, hyperbolic, exponential and logarithmic functions, `pow`, `floor`, `ceil`, `trunc`, `round`, `abs`, `copysign`, `min` and `max`, overloaded on `f32` and `f64` and correctly rounded. `src/math.rs`
 [NB.4.5] Every NaN that leaves a library function or a float to float conversion is the canonical quiet NaN, and `min` and `max` ignore a single NaN operand. `src/math.rs`
 [NB.4.6] Metal has no binary64, so a program that uses `f64` runs on the CPU with the reason `metal-no-f64`. `src/engine.rs::metal-no-f64`
-[NB.4.7] An `extern c fn` of N7.3.1 also accepts `f64` as a value argument, the result `T` stays `i32`, `u32`, `Bytes` or `String`, and an `f64` result or any `f32` argument or result is `TYPE_MISMATCH`. `tests/language/issue_l1_04_bytes_strings_cabi.rs::v02_f64_foreign_scalar_argument_matches_its_oracle` `src/check.rs::valid_result`
+[NB.4.7] An `extern c fn` of N7.3.1 also accepts `f64` as a value argument, the result `T` stays `i32`, `u32`, `Bytes` or `String`, and an `f64` result or any `f32` argument or result is `TYPE_MISMATCH`. `tests/language/bytes_strings_and_c_abi.rs::f64_foreign_scalar_argument_matches_its_oracle` `src/check.rs::valid_result`
 [NB.4.8] An `f64` argument has tag `INV_TAG_F64_V1` (5) and mode `INV_MODE_VALUE_V1`, and its `scalar` holds the binary64 encoding, which C reads with `memcpy` into a `double`. `include/invar_foreign_v1.h` `tests/fixtures/l1_04/foreign.c`
 [NB.4.9] `round` rounds half away from zero, `copysign` reads a NaN sign source as positive, `min` and `max` are IEEE 754-2019 minimumNumber and maximumNumber with `-0 < +0`, and every library name is reserved. `src/math.rs`
 Note: the binary64 CUDA kernels whose CORE-MATH sources declare an anonymous struct inside a union (`cos`, `tan`, `atan2`, `log`, `log10` and `pow`) need NVRTC 12.9 or newer, every other CUDA unit keeps the 12.4 floor of N11.5.2.

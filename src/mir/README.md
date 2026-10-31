@@ -14,7 +14,7 @@ After [check](../check/README.md). Consumed by [mir_eval](../mir_eval/README.md)
 
 ## Tests
 
-- `cargo nextest run --locked --test mir` (`issue_m1_01` covers the verifier and its mutations).
+- `cargo nextest run --locked --test mir` (`mir_verifier_and_evaluator` covers the verifier and its mutations).
 - `cargo nextest run --locked --test limits` covers the size limits.
 
 ## Rules to keep

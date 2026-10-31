@@ -1,3 +1,4 @@
+//! Issue label M1-02.
 #![cfg(feature = "native")]
 
 use invar::{
@@ -73,7 +74,7 @@ const EXTRA: &[(&str, u64)] = &[
 ];
 
 #[test]
-fn issue_m1_02_native_cpu_trap_abi_differential() {
+fn native_cpu_trap_abi_differential() {
     for &(source, fuel) in CORPUS.iter().chain(EXTRA) {
         let (checked, program) = lower(source);
         let reference = eval::observe(&checked, fuel);
@@ -110,7 +111,7 @@ fn issue_m1_02_native_cpu_trap_abi_differential() {
 }
 
 #[test]
-fn issue_m1_02_native_cpu_trap_abi_cli_build_and_run() {
+fn native_cpu_trap_abi_cli_build_and_run() {
     let directory = std::env::temp_dir().join(format!("invar-native-cli-{}", scratch::unique()));
     std::fs::create_dir(&directory).unwrap();
     let source = directory.join("program.inv");
@@ -177,7 +178,7 @@ fn issue_m1_02_native_cpu_trap_abi_cli_build_and_run() {
 }
 
 #[test]
-fn issue_m1_02_native_cpu_trap_abi_rejects_invalid_mir_and_ir_promises() {
+fn native_cpu_trap_abi_rejects_invalid_mir_and_ir_promises() {
     let (_, program) = lower("fn main() -> i32 { return 2 + 3; }");
     let object = native::emit_mir(&program).unwrap();
     for forbidden in [

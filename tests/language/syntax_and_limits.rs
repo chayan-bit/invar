@@ -1,7 +1,8 @@
+//! Issue label M0-02.
 use invar::front::{BinaryOp, ElseArm, ErrorKind, ExprKind, StmtKind, parse};
 
 #[test]
-fn issue_m0_02_examples_and_grammar() {
+fn syntax_and_limits_examples_and_grammar() {
     for source in [
         include_bytes!("../../examples/sum.inv").as_slice(),
         include_bytes!("../../examples/ownership.inv").as_slice(),
@@ -44,7 +45,7 @@ fn issue_m0_02_examples_and_grammar() {
 }
 
 #[test]
-fn issue_m0_02_precedence_and_exclusions() {
+fn syntax_and_limits_precedence_and_exclusions() {
     let program = parse(b"fn f() -> Bool { return 1 + 2 * 3 == 7 or false and true; }").unwrap();
     let StmtKind::Return(Some(expr)) = &program.functions[0].body.statements[0].kind else {
         panic!("return")
@@ -90,7 +91,7 @@ fn issue_m0_02_precedence_and_exclusions() {
 }
 
 #[test]
-fn issue_m0_02_lexical_spans_and_json() {
+fn syntax_and_limits_lexical_spans_and_json() {
     let source = "/* λ /* inner */ */\r\nfn f() -> i32 { return 1; }";
     let program = parse(source.as_bytes()).unwrap();
     assert_eq!(program.functions[0].span.start, source.find("fn").unwrap());
@@ -140,7 +141,7 @@ fn issue_m0_02_lexical_spans_and_json() {
 }
 
 #[test]
-fn issue_m0_02_tool_limits_and_encoding() {
+fn syntax_and_limits_tool_limits_and_encoding() {
     let error = parse(b"\xff").unwrap_err();
     assert_eq!(error.kind, ErrorKind::Tool);
     assert_eq!(error.code, "INVALID_UTF8");
