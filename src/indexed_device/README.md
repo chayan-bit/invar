@@ -13,7 +13,7 @@ Uses [indexed_source](../indexed_source/README.md), [histogram_source](../histog
 ## Tests
 
 - `cargo nextest run --locked --test indexed` (`device`).
-- Hardware: `tests/gpu_cuda/indexed.rs` and `crates/invar-metal/tests/issue_m4_05_metal_gpu.rs`.
+- Hardware: `tests/gpu_cuda/indexed.rs` and `crates/invar-metal/tests/indexed_gpu.rs`.
 
 ## Rules to keep
 

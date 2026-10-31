@@ -5,7 +5,7 @@ mod child_deadline;
 #[path = "../../test-support/gnet_words.rs"]
 mod gnet_words;
 
-mod issue_gnet_05_provenance;
-mod issue_gnet_05_provenance_owned;
-mod issue_gnet_10_provenance;
-mod issue_gnet_11_provenance_source;
+mod abi11_source_provenance;
+mod f32_array_provenance;
+mod provenance;
+mod provenance_owned;

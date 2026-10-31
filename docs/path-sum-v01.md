@@ -90,7 +90,7 @@ Consumed:
 
 ## Checks
 
-* `tests/normal_form/gnet_p4a_path_sum.rs` runs a differential of every lowered program against the CPU net oracle.
+* `tests/normal_form/path_sum.rs` runs a differential of every lowered program against the CPU net oracle.
   The inputs come from trap-heavy generators plus the 96 scored rows of the P4a kernel profile.
 * The CPU model compiles with `-DPROOF_CHECK` under UBSan.
   Every narrow operator aborts on an out-of-type result, so an unsound licence fails loudly.

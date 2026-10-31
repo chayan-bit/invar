@@ -3,7 +3,7 @@
 Ordinary Invar source for the general-net GPU track (GNET-05; obligations in `src/general_net/CONTRACT.md`).
 It is additive: the hand-written fixture corpora elsewhere under `bench/general-net-v01` are unchanged.
 Every file here is generator output: `generate.rs` is the only hand-written input.
-Tests: `tests/gnet05_corpus/issue_gnet_05_corpus.rs`.
+Tests: `tests/gnet05_corpus/corpus.rs`.
 
 ## Files
 
@@ -15,7 +15,7 @@ Tests: `tests/gnet05_corpus/issue_gnet_05_corpus.rs`.
 | `manifest.json` | Per-program provenance: family, ordinal, seed, drawn shape, inputs, negative inputs, large-input ladder, the calibrated large input and the deep input, the declared step budget of every input, split, source and normalized SHA-256; default and maximum budgets; pinned held-out digest |
 | `validation.json` | Per-input reference status, steps and oracle outcome; per-target device admission; counted denominators; the deep inputs' outcomes, counted apart (Release run) |
 
-Regenerate with `INVAR_GNET05_WRITE=1 cargo test --release --locked --test gnet05_corpus issue_gnet_05_corpus::` (Release writes `validation.json`, because the deep inputs run only there; about 40 seconds on a 32-core x86_64 host).
+Regenerate with `INVAR_GNET05_WRITE=1 cargo test --release --locked --test gnet05_corpus corpus::` (Release writes `validation.json`, because the deep inputs run only there; about 40 seconds on a 32-core x86_64 host).
 A Debug run skips the deep inputs and checks every other recorded outcome and denominator (about two minutes).
 Without the variable the tests fail if any file differs from the generator.
 
@@ -72,7 +72,7 @@ The device configuration caps fuel at 1,000,000, so the device harness runs a de
 
 Every combine in the other recursive families is linear modulo a prime, so a path-sum law removes their fork-join; `forkjoin` is the tier that keeps it (D5's residual fork-join gate).
 Its 12 programs draw one of three non-linear combines and a divide-and-conquer or branch-tree shape; operands are reduced modulo 10007 first so products stay below 2^31.
-`issue_gnet_05_corpus_forkjoin_combines_are_not_linear` checks that every forkjoin program multiplies two child results or branches on them, and that no other program does.
+`corpus_forkjoin_combines_are_not_linear` checks that every forkjoin program multiplies two child results or branches on them, and that no other program does.
 With the net-laws prototype at the large input, none of the 12 is a path-sum, each keeps 129 to 2,021 fork-join tasks, and its average parallelism is 9 to 158.
 9 of the 12 are admitted by device admission today.
 

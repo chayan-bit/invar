@@ -23,7 +23,8 @@ use invar::{
 };
 use task_model::normal_form_support as support;
 
-mod gnet_p4a_path_sum;
+mod auto_placement;
+mod gnet05_run;
 mod law_programs;
 mod net_normal_form_annotations;
 mod net_normal_form_corpus;
@@ -32,7 +33,6 @@ mod net_normal_form_laws;
 mod net_regions;
 mod net_task_region;
 mod normal_form_residue_seed;
+mod normal_form_run;
+mod path_sum;
 mod pnf_family_admission;
-mod v01_gnet05_run;
-mod v01_gnet_auto_placement;
-mod v01_normal_form_run;

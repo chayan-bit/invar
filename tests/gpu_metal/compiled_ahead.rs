@@ -155,7 +155,7 @@ fn fresh_processes_run_built_libraries_with_the_source_tripwire_armed() {
         library,
     ]);
     assert!(device.status.success(), "{}", json(&device));
-    // leaf(5) + leaf(5), as issue_gnet_04_host_cli checks on the CPU model.
+    // leaf(5) + leaf(5), as host_cli checks on the CPU model.
     assert_eq!(json(&device)["result"], 12);
     assert_eq!(json(&device)["image"]["runtime_compiler"], "none");
     // The tripwire is live: the developer source path aborts under it.

@@ -9,7 +9,7 @@ use std::{
 };
 
 /// Memory reserved for each running compile. Over the 475 compiles of
-/// `issue_gnet_03_device_corpus_cpu_model_agrees_with_oracle` on a Linux test machine
+/// `device_model_corpus_cpu_model_agrees_with_oracle` on a Linux test machine
 /// (g++, -O1, UBSan) peak RSS is 458 MiB at the median, 706 MiB at p90 and
 /// 833 MiB at most.
 const COMPILE_RESERVE_BYTES: u64 = 1 << 30;
