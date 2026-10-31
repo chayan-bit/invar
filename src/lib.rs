@@ -46,6 +46,7 @@ pub mod native;
 #[cfg(any(feature = "native", test))]
 mod native_foreign_source;
 pub mod numeric_contract;
+pub mod nvrtc_cache;
 pub mod ownership;
 pub mod pair_reduction;
 pub mod placement;
