@@ -139,14 +139,13 @@ fn shared_exits(source: &str) -> Result<String, String> {
     let resume = source
         .find("\nGNET_FN bool gnet_resume(")
         .ok_or_else(shape)?;
-    let define = |name: &str| {
-        let head = format!("\n#define {name} ");
-        let at = source[..resume].rfind(&head).ok_or_else(shape)? + 1;
+    let define = |head: &str| {
+        let at = source[..resume].rfind(head).ok_or_else(shape)? + 1;
         let end = at + source[at..].find('\n').ok_or_else(shape)?;
         Ok::<_, String>((at..end, &source[at + head.len() - 1..end]))
     };
-    let (yield_line, yield_body) = define("GNET_YIELD")?;
-    let (stop_line, stop_body) = define("GNET_STOP")?;
+    let (yield_line, yield_body) = define("\n#define GNET_YIELD ")?;
+    let (stop_line, stop_body) = define("\n#define GNET_STOP ")?;
     // gnet_resume closes at column 0, right before the next kernel.
     let close = resume + source[resume..].find("\n}\nkernel ").ok_or_else(shape)?;
     let mut lines = [
