@@ -103,4 +103,4 @@ The mapping panics on any result no compiled ABI encodes, so an unexpected oracl
 ## SplitMix64
 
 `split_mix.rs` holds the SplitMix64 `Rng::next` that the law, normal-form and numeric-tier test binaries draw their deterministic cases from.
-Each including module adds its own draws (`below`, `range`, `i32`) in a local `impl Rng`; `issue_eng_03_numeric_tiers` keeps its `below` without the zero guard on purpose.
+Each including module adds its own draws (`below`, `range`, `i32`) in a local `impl Rng`; `numeric_tiers` keeps its `below` without the zero guard on purpose.

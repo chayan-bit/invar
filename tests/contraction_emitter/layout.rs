@@ -30,7 +30,7 @@ fn verify(ir: Ir) -> Result<invar_device::Verified, Error> {
 }
 
 #[test]
-fn issue_eng_06_layout_element_types_are_sized_and_storage_types_marked() {
+fn layout_element_types_are_sized_and_storage_types_marked() {
     let all = [
         (ElementType::U32, 4, false),
         (ElementType::I32, 4, false),
@@ -50,7 +50,7 @@ fn issue_eng_06_layout_element_types_are_sized_and_storage_types_marked() {
 }
 
 #[test]
-fn issue_eng_06_layout_strided_views_verify_rank_and_bounds() {
+fn layout_strided_views_verify_rank_and_bounds() {
     let dense = Strided::row_major(ElementType::F32, &[2, 3, 4]).unwrap();
     assert_eq!(dense.rank, 3);
     assert_eq!(dense.extents, [2, 3, 4, 0]);
@@ -105,7 +105,7 @@ fn issue_eng_06_layout_strided_views_verify_rank_and_bounds() {
 }
 
 #[test]
-fn issue_eng_06_layout_current_families_refuse_strided_buffers_and_planes() {
+fn layout_current_families_refuse_strided_buffers_and_planes() {
     let ir = admitted();
     assert_eq!(ir.geometry.planes, 1);
     assert_eq!(

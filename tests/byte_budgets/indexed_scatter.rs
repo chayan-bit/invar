@@ -28,7 +28,7 @@ fn scatter_reference(values: &[u32], indices: &[u32], n: u32) -> Vec<u32> {
 }
 
 #[test]
-fn issue_eng_08_gather_past_the_old_cap_is_admitted_and_exact() {
+fn gather_past_the_old_cap_is_admitted_and_exact() {
     let mut cases = 0;
     let gather = contract(GATHER, "gather");
     for n in [4097u32, 6000, 10_007] {
@@ -48,7 +48,7 @@ fn issue_eng_08_gather_past_the_old_cap_is_admitted_and_exact() {
 }
 
 #[test]
-fn issue_eng_08_injective_scatter_past_the_old_cap_is_admitted_and_exact() {
+fn injective_scatter_past_the_old_cap_is_admitted_and_exact() {
     let mut cases = 0;
     let scatter = contract(SCATTER, "scatter");
     assert_eq!(scatter.family(), Family::InjectiveScatter);
@@ -69,7 +69,7 @@ fn issue_eng_08_injective_scatter_past_the_old_cap_is_admitted_and_exact() {
 }
 
 #[test]
-fn issue_eng_08_affine_scatter_past_the_old_cap_is_certified_and_exact() {
+fn affine_scatter_past_the_old_cap_is_certified_and_exact() {
     let mut cases = 0;
     for n in [4097u32, 6000, 20_000] {
         let source = format!(
@@ -86,7 +86,7 @@ fn issue_eng_08_affine_scatter_past_the_old_cap_is_certified_and_exact() {
 }
 
 #[test]
-fn issue_eng_08_one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() {
+fn one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() {
     let gather = contract(GATHER, "gather");
     let scatter = contract(SCATTER, "scatter");
     let mut cases = 0;
@@ -150,7 +150,7 @@ fn issue_eng_08_one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() 
 }
 
 #[test]
-fn issue_eng_08_refusal_keeps_the_source_path_with_identical_results() {
+fn refusal_keeps_the_source_path_with_identical_results() {
     // A refused region runs the retained source path, so the program's result is unchanged.
     let n = 5000u32;
     let values: Vec<u32> = (0..n).map(|i| i ^ 0x55).collect();
@@ -166,7 +166,7 @@ fn issue_eng_08_refusal_keeps_the_source_path_with_identical_results() {
 }
 
 #[test]
-fn issue_eng_08_footprint_overflow_is_a_refusal_not_a_panic() {
+fn footprint_overflow_is_a_refusal_not_a_panic() {
     let gather = contract(GATHER, "gather");
     let scatter = contract(SCATTER, "scatter");
     // The largest u32 scatter length needs about 20 GB of host bytes: refused, never allocated.
@@ -192,7 +192,7 @@ fn issue_eng_08_footprint_overflow_is_a_refusal_not_a_panic() {
 }
 
 #[test]
-fn issue_eng_08_footprints_match_measured_candidate_allocations() {
+fn footprints_match_measured_candidate_allocations() {
     let gather = contract(GATHER, "gather");
     let scatter = contract(SCATTER, "scatter");
     // `candidate` re-verifies the contract's MIR first; that fixed cost is the empty-input total.
@@ -228,7 +228,7 @@ fn issue_eng_08_footprints_match_measured_candidate_allocations() {
 }
 
 #[test]
-fn issue_eng_08_affine_scatter_footprint_matches_measured_allocation() {
+fn affine_scatter_footprint_matches_measured_allocation() {
     // The output length is part of the source, so each size is its own contract. Re-verifying a
     // contract costs the same for literals of equal width, so within a width group the allocation
     // difference between two sizes is exactly the footprint difference.
@@ -259,7 +259,7 @@ fn issue_eng_08_affine_scatter_footprint_matches_measured_allocation() {
 }
 
 #[test]
-fn issue_eng_08_affine_device_bind_expands_past_the_old_cap_and_refuses_short_values() {
+fn affine_device_bind_expands_past_the_old_cap_and_refuses_short_values() {
     let n = 20_000u32;
     let source = format!(
         "fn scatter(a: read Array<u32>) -> Array<u32> {{ var out: Array<u32> = filled_u32({n}u32,0u32); for i in 0u32..{n}u32 {{ out[i] = a[i]; }} return out; }}"

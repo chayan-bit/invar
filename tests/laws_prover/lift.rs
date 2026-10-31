@@ -36,7 +36,7 @@ fn proved(sort: Sort, derived: &Term, expected: Term) {
 }
 
 #[test]
-fn issue_eng_02_lift_kadane_steps_are_max_forms() {
+fn lift_kadane_steps_are_max_forms() {
     let lifted = steps(KADANE).expect("kadane lifts");
     assert_eq!(lifted.sort, Sort::Int);
     assert_eq!(lifted.induction, "i");
@@ -54,7 +54,7 @@ fn issue_eng_02_lift_kadane_steps_are_max_forms() {
 }
 
 #[test]
-fn issue_eng_02_lift_wrapping_and_guarded_steps() {
+fn lift_wrapping_and_guarded_steps() {
     let wrapping = steps(WRAPPING).expect("wrapping lifts");
     assert_eq!(wrapping.sort, Sort::Bv32);
     proved(
@@ -78,7 +78,7 @@ fn issue_eng_02_lift_wrapping_and_guarded_steps() {
 }
 
 #[test]
-fn issue_eng_02_lift_refuses_outside_the_fragment() {
+fn lift_refuses_outside_the_fragment() {
     let refused = [
         "fn f(xs: read Array<i32>, n: u32) -> i32 { var s = 0; for i in 0u32 .. n { s = s + xs[i + 1u32]; } return s; }",
         "fn f(xs: read Array<i32>, n: u32) -> i32 { var s = 1; for i in 0u32 .. n { s = s / xs[i]; } return s; }",

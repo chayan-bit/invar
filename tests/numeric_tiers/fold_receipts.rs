@@ -38,7 +38,7 @@ fn receipt(source: &str) -> Option<Value> {
 }
 
 #[test]
-fn issue_eng_03_fold_receipt_names_each_declared_tier_and_its_algorithm() {
+fn fold_receipt_names_each_declared_tier_and_its_algorithm() {
     let tree = folding(0, "#[numeric(fold = \"tree\")]", "acc + xs[i]");
     let exact = folding(1, "#[numeric(fold = \"exact\")]", "acc + xs[i]");
     let relaxed = folding(2, "#[numeric(fold = \"relaxed\")]", "acc + xs[i]");
@@ -90,7 +90,7 @@ fn cli(dir: &std::path::Path, args: &[&str]) -> (i32, Value) {
 }
 
 #[test]
-fn issue_eng_03_only_placement_documents_carry_the_fold_receipt() {
+fn only_placement_documents_carry_the_fold_receipt() {
     let dir = std::env::temp_dir().join(format!("invar-fold-receipts-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let host = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);

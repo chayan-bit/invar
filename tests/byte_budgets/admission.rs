@@ -43,7 +43,7 @@ fn empty_loops(functions: usize, per_function: usize) -> String {
 }
 
 #[test]
-fn issue_eng_08_admission_footprint_counts_the_scheduler_peak() {
+fn admission_footprint_counts_the_scheduler_peak() {
     let guard = guard(MAP);
     assert_eq!(guard.inputs().len(), 1);
     // The input, the destination, the chunk results and the joined values: four u32 arrays.
@@ -53,7 +53,7 @@ fn issue_eng_08_admission_footprint_counts_the_scheduler_peak() {
 }
 
 #[test]
-fn issue_eng_08_admission_guard_follows_the_host_budget() {
+fn admission_guard_follows_the_host_budget() {
     let guard = guard(MAP);
     let lengths = [("xs", 1000), ("ys", 1000)];
     let exact = ByteBudget::standard().with_host_bytes(16_000);
@@ -100,7 +100,7 @@ fn least_analysis_bytes(source: &str) -> usize {
 }
 
 #[test]
-fn issue_eng_08_admission_region_count_is_bounded_by_analysis_bytes() {
+fn admission_region_count_is_bounded_by_analysis_bytes() {
     let one = empty_loops(1, 1);
     let three = empty_loops(1, 3);
     let (small, large) = (least_analysis_bytes(&one), least_analysis_bytes(&three));
@@ -123,7 +123,7 @@ fn issue_eng_08_admission_region_count_is_bounded_by_analysis_bytes() {
 }
 
 #[test]
-fn issue_eng_08_admission_has_no_region_count_cap() {
+fn admission_has_no_region_count_cap() {
     // 4800 regions used to trip ADMISSION_REGION_LIMIT at 4096. The byte budget admits them; the
     // serialized report (MAX_RECORD_BYTES, an interchange-format bound) is what now ends it.
     let source = empty_loops(120, 40);

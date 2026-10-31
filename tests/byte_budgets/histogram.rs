@@ -21,7 +21,7 @@ fn reference(values: &[u32], indices: &[u32], bins: usize) -> Vec<u32> {
 }
 
 #[test]
-fn issue_eng_08_histogram_past_the_old_caps_is_admitted_and_exact() {
+fn histogram_past_the_old_caps_is_admitted_and_exact() {
     let c = contract();
     let mut cases = 0;
     // 4097 elements and bins (old cap 4096) and 129+ contributions (old cap 128), spread and piled.
@@ -46,7 +46,7 @@ fn issue_eng_08_histogram_past_the_old_caps_is_admitted_and_exact() {
 }
 
 #[test]
-fn issue_eng_08_histogram_matches_every_cpu_engine_past_the_old_caps() {
+fn histogram_matches_every_cpu_engine_past_the_old_caps() {
     let mut engines = 0;
     for (n, bins) in [(4097u32, 97usize), (5000, 4500)] {
         let values: Vec<u32> = (0..n).map(|i| i ^ 0xa5a5).collect();
@@ -63,7 +63,7 @@ fn issue_eng_08_histogram_matches_every_cpu_engine_past_the_old_caps() {
 }
 
 #[test]
-fn issue_eng_08_one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() {
+fn one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() {
     let c = contract();
     let mut cases = 0;
     for (a, i, n) in [
@@ -108,7 +108,7 @@ fn issue_eng_08_one_byte_below_the_footprint_is_refused_and_at_it_is_admitted() 
 }
 
 #[test]
-fn issue_eng_08_footprint_matches_measured_allocation() {
+fn footprint_matches_measured_allocation() {
     let c = contract();
     let (fixed, _) = allocated_during(|| c.candidate(&[], &[], 0).unwrap());
     assert!(fixed > 0);
@@ -129,7 +129,7 @@ fn issue_eng_08_footprint_matches_measured_allocation() {
 }
 
 #[test]
-fn issue_eng_08_overflow_and_zero_budget_refuse_without_panicking() {
+fn overflow_and_zero_budget_refuse_without_panicking() {
     let c = contract();
     assert_eq!(
         histogram_source::footprint(usize::MAX, 1, 1).bytes(Resource::Host),
@@ -152,7 +152,7 @@ fn issue_eng_08_overflow_and_zero_budget_refuse_without_panicking() {
 }
 
 #[test]
-fn issue_eng_08_bounded_cost_has_no_element_or_contribution_cap() {
+fn bounded_cost_has_no_element_or_contribution_cap() {
     // Past the old caps only the staging bytes, the visit budget and overflow refuse.
     let mut cases = 0;
     for (a, i, n, admitted) in [
@@ -174,7 +174,7 @@ fn issue_eng_08_bounded_cost_has_no_element_or_contribution_cap() {
 }
 
 #[test]
-fn issue_eng_08_language_array_limit_still_refuses_below_the_byte_budget() {
+fn language_array_limit_still_refuses_below_the_byte_budget() {
     let c = contract();
     let over = invar::array_limits::MAX_ARRAY_LEN as u32 + 1;
     let (bytes, refused) = allocated_during(|| c.candidate(&[], &[], over));

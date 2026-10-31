@@ -51,7 +51,7 @@ fn emission(source: &str, dims: [u32; 3], caps: Capabilities) -> Option<DeviceEm
 }
 
 #[test]
-fn issue_eng_06_wiring_every_admitted_capability_selects_a_target() {
+fn wiring_every_admitted_capability_selects_a_target() {
     let registry = Registry::builtin().unwrap();
     let caps = admitted();
     for &c in &caps {
@@ -69,7 +69,7 @@ fn issue_eng_06_wiring_every_admitted_capability_selects_a_target() {
 }
 
 #[test]
-fn issue_eng_06_wiring_emitted_kernels_equal_the_fixed_templates() {
+fn wiring_emitted_kernels_equal_the_fixed_templates() {
     let (mut gemm_digest, mut tc_digest) = (0u64, 0u64);
     let (mut gemm_texts, mut tc_texts) = (0, 0);
     let fold =

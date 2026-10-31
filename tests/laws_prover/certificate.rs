@@ -76,7 +76,7 @@ fn sealed() -> (Partition, LawCertificate) {
 }
 
 #[test]
-fn issue_eng_02_certificate_max_subarray_is_accepted() {
+fn certificate_max_subarray_is_accepted() {
     let (partition, cert) = sealed();
     assert_eq!(
         (cert.solver.as_str(), cert.result.as_str()),
@@ -91,7 +91,7 @@ fn issue_eng_02_certificate_max_subarray_is_accepted() {
 }
 
 #[test]
-fn issue_eng_02_certificate_tampering_is_refused() {
+fn certificate_tampering_is_refused() {
     let (partition, cert) = sealed();
     let edit = |f: &dyn Fn(&mut LawCertificate)| {
         let mut forged = cert.clone();

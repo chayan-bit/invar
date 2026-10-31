@@ -31,7 +31,7 @@ pub struct NumericPolicy {
 
 /// The strict binary32 spelling stays `NumericPolicy { version: 1 }`: the
 /// general-net receipt snapshot embeds this `Debug` text, so frozen ABI1-11
-/// receipt ids stay byte-identical (`issue_eng_03_policy_v2_accepts_the_four_tiers_and_refuses_the_rest`).
+/// receipt ids stay byte-identical (`policy_v2_accepts_the_four_tiers_and_refuses_the_rest`).
 impl std::fmt::Debug for NumericPolicy {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut debug = f.debug_struct("NumericPolicy");

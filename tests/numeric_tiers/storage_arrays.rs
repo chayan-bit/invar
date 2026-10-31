@@ -156,7 +156,7 @@ fn round_trip(ty: &str, words: &[F], oracle: impl Fn(F) -> F) -> String {
 }
 
 #[test]
-fn issue_eng_03_f16_and_bf16_stores_round_like_the_oracle_on_every_engine() {
+fn f16_and_bf16_stores_round_like_the_oracle_on_every_engine() {
     let mut rng = Rng(0x2800_f16b);
     // Ties to even: f16 at 1 + 2^-11 and 1 + 3 * 2^-11, bf16 at 1 + 2^-8 and 1 + 3 * 2^-8.
     let f16 = words(&mut rng, &[0x3f80_1000, 0x3f80_3000]);
@@ -174,7 +174,7 @@ fn issue_eng_03_f16_and_bf16_stores_round_like_the_oracle_on_every_engine() {
 }
 
 #[test]
-fn issue_eng_03_i8_and_u8_loads_widen_and_in_range_stores_keep_their_value() {
+fn i8_and_u8_loads_widen_and_in_range_stores_keep_their_value() {
     let source = "fn main() -> i32 { var b = filled_i8(3u32, -128); b[1u32] = 127; \
                   let w: i32 = b[0u32] + b[1u32]; var c = filled_u8(2u32, 255u32); c[0u32] = 0u32; \
                   if w == -1 and c[1u32] == 255u32 and c[0u32] == 0u32 and len(b) == 3u32 { return 1; } return 0; }";
@@ -182,7 +182,7 @@ fn issue_eng_03_i8_and_u8_loads_widen_and_in_range_stores_keep_their_value() {
 }
 
 #[test]
-fn issue_eng_03_i8_and_u8_narrowing_traps_at_the_first_trap_in_source_order() {
+fn i8_and_u8_narrowing_traps_at_the_first_trap_in_source_order() {
     let cases = [
         (
             "fn main() -> i32 { var b = filled_i8(2u32, 0); b[0u32] = 100; b[1u32] = -129; b[0u32] = 300; return 1; }",
@@ -216,7 +216,7 @@ fn issue_eng_03_i8_and_u8_narrowing_traps_at_the_first_trap_in_source_order() {
 }
 
 #[test]
-fn issue_eng_03_storage_stores_parallelize_and_keep_fuel_prefixes() {
+fn storage_stores_parallelize_and_keep_fuel_prefixes() {
     let mut rng = Rng(0x5eed_0003);
     let xs: Vec<F> = (0..61)
         .map(|_| F::from_bits(0x3c00_0000 + (rng.next() as u32 & 0x07ff_ffff)))
@@ -254,7 +254,7 @@ fn code(source: &str) -> &'static str {
 }
 
 #[test]
-fn issue_eng_03_storage_arrays_refuse_arithmetic_crossings_and_views() {
+fn storage_arrays_refuse_arithmetic_crossings_and_views() {
     let main = "fn main() -> i32 { return 1; }";
     let refused = [
         // A storage array never crosses a function boundary yet.
