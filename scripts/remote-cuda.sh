@@ -24,7 +24,8 @@ here=$(cd "$(dirname "$0")" && pwd)
 sha=$(git rev-parse -q --verify "$ref^{commit}" || { git fetch -q origin "$ref" && git rev-parse FETCH_HEAD; })
 tests=$(for t in $(git grep -lE 'feature *= *"cuda"|CudaDevice' "$sha" -- tests |
     sed -nE -e "s|^$sha:tests/([^/]+)\\.rs$|\\1|p" -e "s|^$sha:tests/([^/]+)/.*|\\1|p" | sort -u); do
-    git cat-file -e "$sha:tests/$t.rs" 2>/dev/null || git cat-file -e "$sha:tests/$t/main.rs" 2>/dev/null && echo "$t"
+    # `if`, not `&&`: a last candidate that is no target (tests/support) must not fail the loop.
+    if git cat-file -e "$sha:tests/$t.rs" 2>/dev/null || git cat-file -e "$sha:tests/$t/main.rs" 2>/dev/null; then echo "$t"; fi
 done | paste -sd, -)
 # Known Windows gaps and opt-in tests whose inputs the runner does not supply,
 # none of them a CUDA result (libtest --skip substrings):
