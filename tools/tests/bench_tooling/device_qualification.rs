@@ -1,3 +1,4 @@
+//! Issue #9 (M5-02).
 #![forbid(unsafe_code)]
 #[cfg(feature = "cuda")]
 use crate::invar_bin;
@@ -6,7 +7,7 @@ use qualification::device::{self, Target};
 use serde_json::json;
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_controls() {
+fn full_pipeline_qualification_device_boundaries_and_mutation_controls() {
     let checks = device::boundary_checks().unwrap();
     // A build without the device feature refuses that target before any work.
     #[cfg(not(feature = "cuda"))]
@@ -40,7 +41,7 @@ fn issue_m5_02_full_pipeline_qualification_device_boundaries_and_mutation_contro
 }
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_device_corpus_all_families_prepare() {
+fn full_pipeline_qualification_device_corpus_all_families_prepare() {
     for target in [Target::Cuda, Target::Metal] {
         let inventory = device::inventory(target).unwrap();
         assert_eq!(inventory["families"].as_object().unwrap().len(), 10);
@@ -52,13 +53,13 @@ fn issue_m5_02_full_pipeline_qualification_device_corpus_all_families_prepare() 
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
 #[ignore = "requires the exact Apple M4; run under the exclusive Mac wrapper"]
-fn issue_m5_02_full_pipeline_qualification_metal_gpu() {
+fn full_pipeline_qualification_metal_gpu() {
     hardware(Target::Metal, None);
 }
 #[cfg(feature = "cuda")]
 #[test]
 #[ignore = "requires the exact RTX 5070 Ti and a local NVRTC helper"]
-fn issue_m5_02_full_pipeline_qualification_cuda_gpu() {
+fn full_pipeline_qualification_cuda_gpu() {
     hardware(Target::Cuda, Some(&invar_bin::invar_bin("invar-nvrtc")));
 }
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]

@@ -19,7 +19,7 @@ fn valid_registry_entry(entry: &Value) -> bool {
                         || name.starts_with("issue_s1_11_robotics_vocabulary_")
                         || name.starts_with("issue_s1_02_foreign_manifests_")
                         || name.starts_with("issue_l1_06_python_binding_")
-                        || name.starts_with("issue_m5_02_full_pipeline_qualification_")
+                        || name.starts_with("full_pipeline_qualification_")
                         || name.starts_with("issue_ai_01_machine_diagnostics_qualification_")
                         || (name.starts_with("test_")
                             && include_str!("../../../crates/invar-python/tests/test_binding.py")
@@ -321,7 +321,7 @@ fn issue_ai_01_machine_diagnostics_registry_covers_emitted_literals() {
             let test = format!("fn {}(", entry["boundary_test"].as_str().unwrap());
             assert!(
                 include_str!("../../issue_m4_06_bounded_schedule_tuning.rs").contains(&test)
-                    || include_str!("../../../tools/tests/bench_tooling/issue_m5_02_device_qualification.rs")
+                    || include_str!("../../../tools/tests/bench_tooling/device_qualification.rs")
                         .contains(&test)
                     || OWN_SOURCES.iter().any(|source| source.contains(&test))
                     || include_str!("../../../tools/tests/bench_tooling/qualification_faults.rs").contains(&test)

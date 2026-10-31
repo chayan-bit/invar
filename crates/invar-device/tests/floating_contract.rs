@@ -1,3 +1,4 @@
+//! Issue #1 (M4-01).
 #![forbid(unsafe_code)]
 #[allow(dead_code)]
 #[path = "../../../test-support/child_deadline.rs"]
@@ -53,7 +54,7 @@ fn refused(ir: Ir, error: Error) {
 }
 
 #[test]
-fn issue_m4_01_floating_versions_provenance_and_policy_mutations() {
+fn floating_versions_provenance_and_policy_mutations() {
     for (change, error) in [
         (0, Error::Version),
         (1, Error::Numeric),
@@ -84,7 +85,7 @@ fn issue_m4_01_floating_versions_provenance_and_policy_mutations() {
 }
 
 #[test]
-fn issue_m4_01_floating_shapes_bounds_strides_alignment_and_alias_mutations() {
+fn floating_shapes_bounds_strides_alignment_and_alias_mutations() {
     let mut ir = plan([3, 5, 7]);
     ir.dimensions[0] += 1;
     refused(ir, Error::Shape);
@@ -150,7 +151,7 @@ fn issue_m4_01_floating_shapes_bounds_strides_alignment_and_alias_mutations() {
 }
 
 #[test]
-fn issue_m4_01_floating_zero_one_odd_domains_and_physical_mapping() {
+fn floating_zero_one_odd_domains_and_physical_mapping() {
     for dimensions in [
         [0, 5, 3],
         [3, 0, 5],
@@ -187,7 +188,7 @@ fn issue_m4_01_floating_zero_one_odd_domains_and_physical_mapping() {
 }
 
 #[test]
-fn issue_m4_01_floating_capabilities_and_exact_emitter_option_identity() {
+fn floating_capabilities_and_exact_emitter_option_identity() {
     for caps in [
         Capabilities::Metal {
             apple_family: 6,
@@ -305,7 +306,7 @@ fn issue_m4_01_floating_capabilities_and_exact_emitter_option_identity() {
 }
 
 #[test]
-fn issue_m4_01_floating_metal_admission_emits_strict_msl_from_the_same_plan() {
+fn floating_metal_admission_emits_strict_msl_from_the_same_plan() {
     let metal = Capabilities::Metal {
         apple_family: 9,
         msl_major: 3,
@@ -437,7 +438,7 @@ fn dot_harness(a: &[u32], b: &[u32], expected: u32) -> String {
 }
 
 #[test]
-fn issue_m4_01_floating_emitted_cpu_exact_strict_edge_vectors() {
+fn floating_emitted_cpu_exact_strict_edge_vectors() {
     // Frozen integer/rational numeric oracle vectors: separate rounding,
     // increasing-k order, nearest-even, gradual underflow, zeros and NaN class.
     let cases: &[(&[u32], &[u32], u32)] = &[
@@ -481,7 +482,7 @@ fn issue_m4_01_floating_emitted_cpu_exact_strict_edge_vectors() {
 }
 
 #[test]
-fn issue_m4_01_floating_emitted_cpu_zero_one_odd_shapes_and_offsets() {
+fn floating_emitted_cpu_zero_one_odd_shapes_and_offsets() {
     for dimensions in [
         [0, 5, 3],
         [3, 5, 0],
@@ -514,7 +515,7 @@ fn issue_m4_01_floating_emitted_cpu_zero_one_odd_shapes_and_offsets() {
 }
 
 #[test]
-fn issue_m4_01_floating_emitted_cpu_refuses_bad_environment_and_runtime_aliases() {
+fn floating_emitted_cpu_refuses_bad_environment_and_runtime_aliases() {
     let p = admit(plan([1, 1, 1]));
     let harness = r#"
 #if defined(__SSE__)

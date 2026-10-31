@@ -1,3 +1,4 @@
+//! Issue #9 (M5-02).
 #![forbid(unsafe_code)]
 use crate::qualification;
 use invar::{check, front, mir, schedule};
@@ -5,7 +6,7 @@ use serde_json::{Value, json};
 use std::{fs, process::Command, sync::atomic::Ordering};
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_cpu_semantics_and_denominators() {
+fn full_pipeline_qualification_cpu_semantics_and_denominators() {
     let report = qualification::run(qualification::corpus::SEED).unwrap();
     assert_eq!(report["suite"], qualification::SUITE);
     let n = report["program_count"].as_u64().unwrap();
@@ -80,7 +81,7 @@ fn issue_m5_02_full_pipeline_qualification_cpu_semantics_and_denominators() {
 }
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_seeded_generation_and_bounded_front_fuzz() {
+fn full_pipeline_qualification_seeded_generation_and_bounded_front_fuzz() {
     let seed = qualification::corpus::SEED;
     assert_eq!(
         qualification::corpus::corpus(seed),
@@ -108,7 +109,7 @@ fn issue_m5_02_full_pipeline_qualification_seeded_generation_and_bounded_front_f
 }
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_mutations_are_detected() {
+fn full_pipeline_qualification_mutations_are_detected() {
     let report = qualification::mutations().unwrap();
     assert_eq!(report["survived"], 0);
     assert!(report["detected"].as_u64().unwrap() >= 13);
@@ -116,7 +117,7 @@ fn issue_m5_02_full_pipeline_qualification_mutations_are_detected() {
 }
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_failure_injections_publish_nothing() {
+fn full_pipeline_qualification_failure_injections_publish_nothing() {
     for body in [
         "ys[i] = wrapping_add(xs[i],7u32);",
         "acc = wrapping_add(acc,xs[i]);",
@@ -158,7 +159,7 @@ fn issue_m5_02_full_pipeline_qualification_failure_injections_publish_nothing() 
 }
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_missing_gpu_and_report_failure_are_atomic() {
+fn full_pipeline_qualification_missing_gpu_and_report_failure_are_atomic() {
     let directory = std::env::temp_dir().join(format!("invar-m502-report-{}", std::process::id()));
     fs::create_dir(&directory).unwrap();
     let path = directory.join("report.json");
@@ -188,7 +189,7 @@ fn issue_m5_02_full_pipeline_qualification_missing_gpu_and_report_failure_are_at
 }
 
 #[test]
-fn issue_m5_02_full_pipeline_qualification_frontend_and_lowering_resource_limits() {
+fn full_pipeline_qualification_frontend_and_lowering_resource_limits() {
     let too_large = vec![b' '; 1_048_577];
     let error = front::parse(&too_large).unwrap_err();
     assert_eq!(error.code, "SOURCE_SIZE_LIMIT");

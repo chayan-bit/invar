@@ -1,3 +1,4 @@
+//! Issue #10 (M5-03).
 #[path = "../../bench/acceptance.rs"]
 mod acceptance;
 use crate::hash;
@@ -25,7 +26,7 @@ fn result(raw: &[u8], plan: &Value, bundle: &Value) -> Value {
 }
 
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_gate_arithmetic_and_no_claim() {
+fn cuda_performance_acceptance_gate_arithmetic_and_no_claim() {
     let (raw, plan, bundle) = fixture();
     let report = acceptance::report(&raw, &plan, &bundle).unwrap();
     assert_eq!(report["status"], "synthetic_no_claim");
@@ -37,7 +38,7 @@ fn issue_m5_03_cuda_performance_acceptance_gate_arithmetic_and_no_claim() {
     assert!(acceptance::markdown(&report).contains("synthetic_no_claim"));
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_point_failure_and_uncertainty() {
+fn cuda_performance_acceptance_point_failure_and_uncertainty() {
     let (raw, plan, mut bundle) = fixture();
     for s in bundle["rows"][0]["sessions"].as_array_mut().unwrap() {
         s["generated"]["generated_result"]["device_resident_ms"] = json!(vec![1.01; 30]);
@@ -58,7 +59,7 @@ fn issue_m5_03_cuda_performance_acceptance_point_failure_and_uncertainty() {
     assert!(r["statistics"]["upper95"].as_f64().unwrap() > 1.05);
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_refusal_mutations() {
+fn cuda_performance_acceptance_refusal_mutations() {
     let (raw, plan, bundle) = fixture();
     let paths = [
         "/environment/host",
@@ -116,7 +117,7 @@ fn issue_m5_03_cuda_performance_acceptance_refusal_mutations() {
     );
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_unavailable_cannot_mutate_into_pass() {
+fn cuda_performance_acceptance_unavailable_cannot_mutate_into_pass() {
     let (raw, plan, mut bundle) = fixture();
     bundle["rows"][0]["status"] = json!("unavailable");
     bundle["rows"][0]["sessions"] = json!([]);
@@ -136,7 +137,7 @@ fn issue_m5_03_cuda_performance_acceptance_unavailable_cannot_mutate_into_pass()
     );
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_fastest_baseline_and_library_tracks() {
+fn cuda_performance_acceptance_fastest_baseline_and_library_tracks() {
     let (raw, mut plan, mut bundle) = fixture();
     plan["expected"][0]["gate"] = json!("library_ratio");
     for s in bundle["rows"][0]["sessions"].as_array_mut().unwrap() {
@@ -152,7 +153,7 @@ fn issue_m5_03_cuda_performance_acceptance_fastest_baseline_and_library_tracks()
     assert_ne!(result(&raw, &plan, &bundle)["status"], "passed");
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_warm_cold_and_budgets() {
+fn cuda_performance_acceptance_warm_cold_and_budgets() {
     let (raw, mut plan, bundle) = fixture();
     plan["expected"][0]["scope"] = json!("host_to_host");
     assert!(
@@ -178,7 +179,7 @@ fn issue_m5_03_cuda_performance_acceptance_warm_cold_and_budgets() {
 }
 
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_bandwidth_compute_heldout_dispatch() {
+fn cuda_performance_acceptance_bandwidth_compute_heldout_dispatch() {
     let (raw, mut plan, mut bundle) = fixture();
     for s in bundle["rows"][0]["sessions"].as_array_mut().unwrap() {
         s["generated"]["generated_result"]["acceptance_metrics"] = json!({"consecutive_runs":{"bandwidth":vec![0.8;10],"compute":vec![0.5;10],"dispatch":vec![1.1;10]},"copy_bytes_per_ms":1200,"measured_peak_ops_per_ms":1000,"auto_ms":vec![1.1;30],"forced_cpu_ms":vec![2.;30],"forced_gpu_ms":vec![1.;30],"dispatch_overhead_ms":vec![0.100;30],"held_out_sha256":"synthetic-held-out","held_out_bandwidth_fractions":vec![0.8;30],"worst_five_profiler":["synthetic1","synthetic2","synthetic3","synthetic4","synthetic5"]});
@@ -210,7 +211,7 @@ fn issue_m5_03_cuda_performance_acceptance_bandwidth_compute_heldout_dispatch() 
     assert_eq!(result(&raw, &plan, &bundle)["status"], "failed");
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_cli_preserves_outputs() {
+fn cuda_performance_acceptance_cli_preserves_outputs() {
     use std::{fs, process::Command};
     let (raw, plan, bundle) = fixture();
     let dir = std::env::temp_dir().join(format!("m5-03-synthetic-{}", std::process::id()));
@@ -269,7 +270,7 @@ fn issue_m5_03_cuda_performance_acceptance_cli_preserves_outputs() {
 }
 
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_missing_near_threshold_and_track_counts() {
+fn cuda_performance_acceptance_missing_near_threshold_and_track_counts() {
     let (raw, mut plan, mut bundle) = fixture();
     plan["expected"][0]["gate"] = json!("bandwidth");
     for s in bundle["rows"][0]["sessions"].as_array_mut().unwrap() {
@@ -299,7 +300,7 @@ fn issue_m5_03_cuda_performance_acceptance_missing_near_threshold_and_track_coun
 }
 
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_typed_dispatch_exception_has_no_parity_credit() {
+fn cuda_performance_acceptance_typed_dispatch_exception_has_no_parity_credit() {
     let (raw, mut plan, mut bundle) = fixture();
     let mut manifest: Value = serde_json::from_slice(&raw).unwrap();
     manifest["cases"][0]["performance_class"] = json!("placement_control");
@@ -324,7 +325,7 @@ fn issue_m5_03_cuda_performance_acceptance_typed_dispatch_exception_has_no_parit
     assert_eq!(result(&raw, &plan, &bundle)["status"], "pending");
 }
 #[test]
-fn issue_m5_03_cuda_performance_acceptance_prints_gpu_conditions_beside_every_timing() {
+fn cuda_performance_acceptance_prints_gpu_conditions_beside_every_timing() {
     let (raw, plan, bundle) = fixture();
     let report = acceptance::report(&raw, &plan, &bundle).unwrap();
     let conditions = &report["rows"][0]["gpu_conditions"];

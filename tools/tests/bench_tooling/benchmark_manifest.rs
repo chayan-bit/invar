@@ -52,7 +52,7 @@ fn validate(dir: &PathBuf, track: &str, gpu: bool) -> std::process::Output {
 }
 
 #[test]
-fn issue_m5_01_v2_byte_accounting_proposal_preserves_v1_and_corpus() {
+fn v2_byte_accounting_proposal_preserves_v1_and_corpus() {
     let dir = fixture();
     let manifest = dir.join("bench/manifest-v1.json");
     let corpus = dir.join("bench/corpus-v1.json");
@@ -150,7 +150,7 @@ fn issue_m5_01_v2_byte_accounting_proposal_preserves_v1_and_corpus() {
 /// `unavailable` cases, baselines and targets; the held-out hash, freeze status
 /// and the pending v2 proposal are untouched; no unavailable entry is measured.
 #[test]
-fn issue_m5_01_benchmark_manifest_provisional_families_are_unavailable_and_never_measured() {
+fn benchmark_manifest_provisional_families_are_unavailable_and_never_measured() {
     let dir = fixture();
     let path = dir.join("bench/manifest-v1.json");
     let raw = fs::read(&path).unwrap();
@@ -332,7 +332,7 @@ fn issue_m5_01_benchmark_manifest_provisional_families_are_unavailable_and_never
 }
 
 #[test]
-fn issue_m5_01_rejects_mismatched_saved_report_lineage() {
+fn rejects_mismatched_saved_report_lineage() {
     let dir = fixture();
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let generated = root
@@ -373,7 +373,7 @@ fn issue_m5_01_rejects_mismatched_saved_report_lineage() {
 }
 
 #[test]
-fn issue_m5_01_v2_rejects_reports_from_prior_proposal_digest() {
+fn v2_rejects_reports_from_prior_proposal_digest() {
     let dir = fixture();
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let proposal = Command::new(env!("CARGO_BIN_EXE_invar-bench"))
@@ -422,7 +422,7 @@ fn issue_m5_01_v2_rejects_reports_from_prior_proposal_digest() {
 }
 
 #[test]
-fn issue_m5_01_v2_clean_cold_pair_remains_review_pending() {
+fn v2_clean_cold_pair_remains_review_pending() {
     let dir = fixture();
     let prepare = Command::new(env!("CARGO_BIN_EXE_invar-bench"))
         .current_dir(&dir)
@@ -530,7 +530,7 @@ fn issue_m5_01_v2_clean_cold_pair_remains_review_pending() {
 }
 
 #[test]
-fn issue_m5_01_repeated_report_path_preserves_measurement_and_raw_artifact() {
+fn repeated_report_path_preserves_measurement_and_raw_artifact() {
     let dir = fixture();
     let report = dir.join("baseline.json");
     let raw = dir.join("attempt-00.json");
@@ -597,7 +597,7 @@ fn issue_m5_01_repeated_report_path_preserves_measurement_and_raw_artifact() {
 
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
-fn issue_m5_01_generated_metal_collective_records_verified_raw_samples() {
+fn generated_metal_collective_records_verified_raw_samples() {
     if invar_metal::MetalDevice::open().is_err() {
         return;
     }
@@ -641,7 +641,7 @@ fn issue_m5_01_generated_metal_collective_records_verified_raw_samples() {
 /// and refuses (never times) a plan whose output differs from the reference.
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
-fn issue_m5_01_generated_metal_map_records_verified_raw_samples() {
+fn generated_metal_map_records_verified_raw_samples() {
     let Ok(mut device) = invar_metal::MetalDevice::open_runtime_source() else {
         return;
     };
@@ -682,7 +682,7 @@ fn issue_m5_01_generated_metal_map_records_verified_raw_samples() {
 }
 
 #[test]
-fn issue_m5_01_benchmark_manifest_validation_and_rejections() {
+fn benchmark_manifest_validation_and_rejections() {
     let dir = fixture();
     let valid = validate(&dir, "generated", false);
     assert!(
@@ -880,7 +880,7 @@ fn issue_m5_01_benchmark_manifest_validation_and_rejections() {
 
 #[cfg(unix)]
 #[test]
-fn issue_m5_01_benchmark_manifest_rejects_wrong_baseline_output() {
+fn benchmark_manifest_rejects_wrong_baseline_output() {
     use std::os::unix::fs::PermissionsExt;
     let dir = fixture();
     let fake = dir.join("wrong-baseline.sh");

@@ -31,7 +31,7 @@ skips=(
     system::substep_admission::     # S1405 manifest path checks assume Unix paths
     a1_grid_cuda_completed_equality     # uses /bin/false as the failing compiler
     issue_m3_05_gpu_full_m2_probe_corpus  # needs INVAR_M3_05_CORPUS_DIR
-    issue_m5_01_benchmark_manifest_validation_and_rejections  # needs a git checkout
+    benchmark_manifest_validation_and_rejections  # needs a git checkout
     source_packet_reverification_binds_source_key_dimensions_generation_and_input_bytes  # order-dependent on any OS
     p2_cuda_handwritten_diagnostic  # timing diagnostic; needs INVAR_NVRTC and a locked session
     issue_gnet_05_robotics_baseline_outputs_match_reference  # needs INVAR_ROBOTICS_BASELINE_OUT

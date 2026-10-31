@@ -1,10 +1,11 @@
+//! Issue #5 (M4-05).
 #![forbid(unsafe_code)]
 #[cfg(target_os = "macos")]
 #[path = "../../../tests/support/m4_05_device.rs"]
 mod corpus;
 #[test]
 #[ignore = "requires real Apple7+ Metal GPU; missing hardware is failure"]
-fn issue_m4_05_metal_gpu() {
+fn indexed_gpu() {
     #[cfg(target_os = "macos")]
     {
         let mut device =
@@ -66,7 +67,7 @@ macro_rules! cap_test {
         }
     };
 }
-cap_test!(issue_m4_05_metal_caps_2_28_gather, "gather");
-cap_test!(issue_m4_05_metal_caps_2_28_scatter, "scatter");
-cap_test!(issue_m4_05_metal_caps_2_28_histogram, "histogram");
-cap_test!(issue_m4_05_metal_caps_2_28_frontier, "frontier");
+cap_test!(cap_2_28_gather, "gather");
+cap_test!(cap_2_28_scatter, "scatter");
+cap_test!(cap_2_28_histogram, "histogram");
+cap_test!(cap_2_28_frontier, "frontier");

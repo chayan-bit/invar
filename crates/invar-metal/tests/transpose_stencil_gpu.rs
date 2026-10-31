@@ -1,3 +1,4 @@
+//! Issue #2 (M4-02).
 #![cfg(target_os = "macos")]
 #[allow(dead_code)]
 #[path = "../../../tests/support/m402.rs"]
@@ -6,7 +7,7 @@ use invar_device::stencil::Boundary;
 use invar_metal::{Error, Fault, MetalDevice};
 #[test]
 #[ignore = "requires a real Apple7 or newer Metal GPU"]
-fn issue_m4_02_metal_gpu_transpose() {
+fn transpose() {
     let mut device =
         MetalDevice::open_runtime_source().expect("explicit Metal gate requires hardware");
     for &shape in support::SHAPES.iter().chain(&[[4096, 4096]]) {
@@ -29,7 +30,7 @@ fn issue_m4_02_metal_gpu_transpose() {
 }
 #[test]
 #[ignore = "requires a real Apple7 or newer Metal GPU"]
-fn issue_m4_02_metal_gpu_stencil_ping_pong() {
+fn stencil_ping_pong() {
     let mut device =
         MetalDevice::open_runtime_source().expect("explicit Metal gate requires hardware");
     for boundary in [Boundary::ConstantZero, Boundary::Clamp] {
@@ -62,7 +63,7 @@ fn issue_m4_02_metal_gpu_stencil_ping_pong() {
 }
 #[test]
 #[ignore = "requires a real Apple7 or newer Metal GPU"]
-fn issue_m4_02_metal_gpu_failures_do_not_publish() {
+fn failures_do_not_publish() {
     let mut device = MetalDevice::open_runtime_source().unwrap();
     let plan = support::stencil_plan([31, 33], 3, Boundary::Clamp, device.capabilities());
     let input = support::input([31, 33]);
@@ -101,7 +102,7 @@ fn issue_m4_02_metal_gpu_failures_do_not_publish() {
 
 #[test]
 #[ignore = "requires a real Apple7 or newer Metal GPU"]
-fn issue_m4_02_metal_gpu_physical_padding() {
+fn physical_padding() {
     let mut device = MetalDevice::open_runtime_source().unwrap();
     for steps in [2, 3] {
         let plan = support::padded_stencil(steps, device.capabilities());
@@ -115,7 +116,7 @@ fn issue_m4_02_metal_gpu_physical_padding() {
 
 #[test]
 #[ignore = "requires real hardware, 2^28 elements; run alone"]
-fn issue_m4_02_metal_gpu_cap_2_28_transpose() {
+fn cap_2_28_transpose() {
     let mut device =
         MetalDevice::open_runtime_source().expect("explicit hardware gate requires device");
     let shape = [16384, 16384];
@@ -133,7 +134,7 @@ fn issue_m4_02_metal_gpu_cap_2_28_transpose() {
 
 #[test]
 #[ignore = "requires real hardware, 2^28 elements; run alone"]
-fn issue_m4_02_metal_gpu_cap_2_28_stencil() {
+fn cap_2_28_stencil() {
     let mut device =
         MetalDevice::open_runtime_source().expect("explicit hardware gate requires device");
     let shape = [16384, 16384];

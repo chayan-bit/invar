@@ -20,7 +20,7 @@ const CHAIN: &str = "fn main() -> i32 { \
 
 #[test]
 #[ignore = "requires a CUDA GPU and NVRTC 12.4+"]
-fn issue_m3_03_gpu_cold_process_fused_map_matches_reference() {
+fn gpu_cold_process_fused_map_matches_reference() {
     let cold_started = Instant::now();
     let cold = Command::new(env!("CARGO_BIN_EXE_invar-m3-03-cold"))
         .arg(CHAIN)
