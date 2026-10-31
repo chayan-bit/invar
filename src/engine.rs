@@ -575,7 +575,7 @@ mod tests {
     use super::*;
     #[cfg(feature = "native")]
     #[test]
-    fn issue_ai_01_machine_diagnostics_native_backend_faults() {
+    fn machine_diagnostics_native_backend_faults() {
         let schema: serde_json::Value =
             serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
                 .unwrap();
@@ -598,7 +598,7 @@ mod tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_internal_main_fault() {
+    fn machine_diagnostics_internal_main_fault() {
         let observation = crate::eval::Observation {
             result: Ok(Value::Bool(true)),
             steps_used: 0,

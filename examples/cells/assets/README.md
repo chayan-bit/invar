@@ -15,4 +15,4 @@ model tree. The original full tree is recoverable at commit
 
 The retained XML is also the unstripped original that the vendored model derives from.
 The runnable copy under `../reach_place/assets/menagerie/` drops the visual-only geoms and their meshes.
-`issue_s1_06_ur5e_vendored_model_is_the_pinned_original_without_visual_geoms` proves that is the only difference.
+`ur5e_vendored_model_is_the_pinned_original_without_visual_geoms` proves that is the only difference.

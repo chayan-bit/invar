@@ -100,7 +100,7 @@ pub struct Projection {
 }
 
 /// (vendored cell model, pinned FK model) pairs with identical kinematics.
-/// `issue_s1_06_panda_inertia` proves the vendored Panda differs from the upstream copy
+/// `panda_inertia` proves the vendored Panda differs from the upstream copy
 /// the FK goldens pin only by the principal-inertia rewrite of `<inertial>` elements and
 /// the removal of visual-only geoms; the vendored UR5e differs from its pinned original
 /// only by that removal.

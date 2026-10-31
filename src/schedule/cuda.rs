@@ -537,7 +537,7 @@ fn calibrate_with_workers(workers: usize) -> Result<DeviceCostModel, Error> {
 #[cfg(test)]
 mod ai_01_fault_tests {
     #[test]
-    fn issue_ai_01_machine_diagnostics_cuda_backend_faults() {
+    fn machine_diagnostics_cuda_backend_faults() {
         let schema: serde_json::Value = serde_json::from_str(include_str!(
             "../../schema/invar-diagnostics-v3.schema.json"
         ))

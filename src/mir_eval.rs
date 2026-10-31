@@ -186,7 +186,7 @@ mod diagnostic_tests {
     use super::*;
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_mir_size_index_faults() {
+    fn machine_diagnostics_mir_size_index_faults() {
         let mut cases = vec![(
             mir_host_index(65_536, u16::MAX as u64).unwrap_err(),
             "MIR_INDEX",
@@ -204,7 +204,7 @@ mod diagnostic_tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_mir_fault_boundaries() {
+    fn machine_diagnostics_mir_fault_boundaries() {
         let source = b"fn main() -> i32 { return 1; }";
         let checked = crate::check::check(crate::front::parse(source).unwrap(), true).unwrap();
         let mut program = mir::lower(&checked).unwrap();
