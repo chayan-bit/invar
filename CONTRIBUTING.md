@@ -67,7 +67,7 @@ To run one test binary or one test, use nextest directly; the [testing guide](do
 
 ```sh
 cargo nextest run --locked --test language
-cargo nextest run --locked --test language -E 'test(/issue_m0_04/)'
+cargo nextest run --locked --test language -E 'test(/arithmetic_fuel_and_demand/)'
 ```
 
 ## Making a change

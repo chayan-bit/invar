@@ -15,7 +15,7 @@ After [mir](../mir/README.md); `plan::decide` in [../plan.rs](../plan.rs) classi
 
 ## Tests
 
-- `cargo nextest run --locked --test schedule_cpu` (`issue_m2_01` covers admission records and `explain`).
+- `cargo nextest run --locked --test schedule_cpu` (`admission_records` covers admission records and `explain`).
 - `cargo nextest run --locked --test byte_budgets` covers admission by bytes.
 - `cargo nextest run --locked --test cli` covers `explain` receipts.
 

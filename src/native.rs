@@ -581,7 +581,7 @@ mod tests {
     }
 
     #[test]
-    fn issue_m1_02_native_cpu_trap_abi_smoke() {
+    fn native_cpu_trap_abi_smoke() {
         let source = b"fn main() -> i32 { return 42; }";
         let parsed = front::parse(source).unwrap();
         let checked = check::check(parsed, true).unwrap();

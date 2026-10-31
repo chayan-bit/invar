@@ -1,3 +1,4 @@
+//! Issue label M0-04.
 use invar::{
     check::check,
     eval::{EvalError, TrapCategory, Value, run},
@@ -10,7 +11,7 @@ fn execute(source: &str, fuel: u64) -> Result<invar::eval::Outcome, EvalError> {
 }
 
 #[test]
-fn issue_m0_04_scalar_order_demand_and_calls() {
+fn arithmetic_fuel_and_demand_scalar_order_demand_and_calls() {
     let source = "fn main() -> i32 { return 1 + 2; }";
     assert_eq!(execute(source, 4).unwrap().value, Value::I32(3));
     assert_eq!(execute(source, 4).unwrap().steps_used, 4);
@@ -105,7 +106,7 @@ fn issue_m0_04_scalar_order_demand_and_calls() {
 }
 
 #[test]
-fn issue_m0_04_arithmetic_boundaries() {
+fn arithmetic_fuel_and_demand_arithmetic_boundaries() {
     let completed = [
         ("fn main() -> i32 { return -2147483648 % -1; }", 0),
         ("fn main() -> i32 { return -7 / 3; }", -2),
@@ -185,7 +186,7 @@ fn issue_m0_04_arithmetic_boundaries() {
 }
 
 #[test]
-fn issue_m0_04_fuel_and_call_depth() {
+fn arithmetic_fuel_and_demand_fuel_and_call_depth() {
     let source = "fn main() -> i32 { while false {} return 1; }";
     assert_eq!(execute(source, 4).unwrap().steps_used, 4);
     assert_eq!(

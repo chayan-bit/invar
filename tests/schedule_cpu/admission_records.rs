@@ -1,3 +1,4 @@
+//! Issue label M2-01.
 use invar::{admission, check::check, eval, front::parse, mir};
 use std::process::Command;
 
@@ -18,7 +19,7 @@ fn lowered(source: &str) -> mir::Program {
 }
 
 #[test]
-fn issue_m2_01_admission_records_round_trip_and_invalidation() {
+fn admission_records_round_trip_and_invalidation() {
     let program = lowered(SOURCE);
     let report = admission::analyze(SOURCE.as_bytes(), &program).unwrap();
     assert_eq!(report.regions().len(), 1);
@@ -63,7 +64,7 @@ fn issue_m2_01_admission_records_round_trip_and_invalidation() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_rejects_checked_arithmetic() {
+fn admission_records_rejects_checked_arithmetic() {
     let source = SOURCE.replace("wrapping_add(xs[i], 7u32)", "xs[i] + 7u32");
     let report = admission::analyze(source.as_bytes(), &lowered(&source)).unwrap();
     assert_eq!(report.regions().len(), 1);
@@ -75,7 +76,7 @@ fn issue_m2_01_admission_records_rejects_checked_arithmetic() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_rejects_unrelated_index_and_nonfresh_output() {
+fn admission_records_rejects_unrelated_index_and_nonfresh_output() {
     let extra = SOURCE.replace(
         "ys[i] = wrapping_add(xs[i], 7u32);",
         "let z: u32 = xs[99u32]; ys[i] = wrapping_add(xs[i], 7u32);",
@@ -96,7 +97,7 @@ fn issue_m2_01_admission_records_rejects_unrelated_index_and_nonfresh_output() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_explain_cli() {
+fn admission_records_explain_cli() {
     let path = std::env::temp_dir().join(format!("invar-m2-01-{}.inv", std::process::id()));
     std::fs::write(&path, SOURCE).unwrap();
     let output = Command::new(env!("CARGO_BIN_EXE_invar"))
@@ -116,7 +117,7 @@ fn issue_m2_01_admission_records_explain_cli() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_reports_unbounded_loop_as_unknown() {
+fn admission_records_reports_unbounded_loop_as_unknown() {
     let source =
         "fn main() -> i32 { var n: u32 = 0u32; while n < 2u32 { n = n + 1u32; } return 0; }";
     let report = admission::analyze(source.as_bytes(), &lowered(source)).unwrap();
@@ -133,7 +134,7 @@ fn issue_m2_01_admission_records_reports_unbounded_loop_as_unknown() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_rejects_near_matches() {
+fn admission_records_rejects_near_matches() {
     let variants = [
         (
             SOURCE.replace("0u32 .. len(xs)", "1u32 .. len(xs)"),
@@ -174,7 +175,7 @@ fn issue_m2_01_admission_records_rejects_near_matches() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_allows_read_read_sharing() {
+fn admission_records_allows_read_read_sharing() {
     let source = SOURCE.replace("wrapping_add(xs[i], 7u32)", "wrapping_add(xs[i], xs[i])");
     let report = admission::analyze(source.as_bytes(), &lowered(&source)).unwrap();
     assert_eq!(report.regions()[0].status(), admission::Status::Admitted);
@@ -184,7 +185,7 @@ fn issue_m2_01_admission_records_allows_read_read_sharing() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_false_guard_selects_serial_before_write() {
+fn admission_records_false_guard_selects_serial_before_write() {
     let source = SOURCE
         .replace(
             "var ys: Array<u32>",
@@ -214,7 +215,7 @@ fn issue_m2_01_admission_records_false_guard_selects_serial_before_write() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_reports_unsupported_nested_body() {
+fn admission_records_reports_unsupported_nested_body() {
     let source = SOURCE.replace(
         "ys[i] = wrapping_add(xs[i], 7u32);",
         "if true { ys[i] = wrapping_add(xs[i], 7u32); }",
@@ -225,7 +226,7 @@ fn issue_m2_01_admission_records_reports_unsupported_nested_body() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_offset_indexes_report_dependence() {
+fn admission_records_offset_indexes_report_dependence() {
     for body in [
         "ys[i] = wrapping_add(xs[i + 1u32], 7u32);",
         "ys[i] = wrapping_add(ys[i - 1u32], 7u32);",
@@ -250,7 +251,7 @@ fn issue_m2_01_admission_records_offset_indexes_report_dependence() {
 }
 
 #[test]
-fn issue_m2_01_admission_records_cleanup_is_a_trusted_rule() {
+fn admission_records_cleanup_is_a_trusted_rule() {
     let program = lowered(SOURCE);
     let report = admission::analyze(SOURCE.as_bytes(), &program).unwrap();
     let json = report.to_json();

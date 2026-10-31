@@ -1,3 +1,4 @@
+//! Issue label M0-07.
 use std::{path::Path, process::Command};
 
 fn cli(args: &[&str], exit: i32, status: &str) -> serde_json::Value {
@@ -32,7 +33,7 @@ fn run(path: &Path, extra: &[&str], exit: i32, status: &str) -> serde_json::Valu
 }
 
 #[test]
-fn issue_m0_07_real_cli_examples_and_statuses() {
+fn cli_examples_and_exit_codes_real_cli_examples_and_statuses() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     for (name, expected) in [("sum.inv", 10), ("ownership.inv", 41)] {
         let path = root.join("examples").join(name);
@@ -78,7 +79,7 @@ fn issue_m0_07_real_cli_examples_and_statuses() {
 }
 
 #[test]
-fn issue_m0_07_invalid_arguments_are_usage_errors() {
+fn cli_examples_and_exit_codes_invalid_arguments_are_usage_errors() {
     for args in [
         vec!["run", "missing.inv", "--engine", "native"],
         vec!["run", "missing.inv", "--engine", "reference", "--fuel", "0"],
