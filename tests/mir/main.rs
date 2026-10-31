@@ -7,10 +7,10 @@ mod term;
 mod scratch;
 
 mod corpus;
-mod issue_eng_18_native_regions;
-mod issue_eng_18_native_simd;
-mod issue_m1_01;
-mod issue_m1_01_owned_return_fuel;
-mod issue_m1_02;
-mod issue_m1_04;
-mod issue_m1_05;
+mod mir_owner_return_fuel;
+mod mir_verifier_and_evaluator;
+mod native_cpu_trap_abi;
+mod native_parallel_regions;
+mod native_simd_and_targets;
+mod typed_net_rewrite_extraction;
+mod typed_net_verifier;

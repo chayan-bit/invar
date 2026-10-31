@@ -1,3 +1,4 @@
+//! Issue label L1-01.
 use std::process::Command;
 
 use invar::{check, eval, front, mir, mir_eval};
@@ -26,7 +27,7 @@ fn cli_result(fixture: &str) -> serde_json::Value {
 }
 
 #[test]
-fn issue_l1_01_language_core_nested_result_and_propagation() {
+fn records_variants_result_nested_result_and_propagation() {
     let reference = agree(RESULT, 10_000, 28);
     assert_eq!(
         reference
@@ -43,7 +44,7 @@ fn issue_l1_01_language_core_nested_result_and_propagation() {
 }
 
 #[test]
-fn issue_l1_01_language_core_rejects_result_payload_theft_in_mir() {
+fn records_variants_result_rejects_result_payload_theft_in_mir() {
     let source = "fn peek(value: read Result<i32, u32>) -> i32 { return match value { Result::Ok(number) => number, Result::Err(code) => 0i32 }; } fn main() -> i32 { let result: Result<i32, u32> = Result::Ok(3i32); return peek(result); }";
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     let mut lowered = mir::lower(&checked).unwrap();
@@ -67,7 +68,7 @@ fn issue_l1_01_language_core_rejects_result_payload_theft_in_mir() {
 }
 
 #[test]
-fn issue_l1_01_language_core_result_rejects_wrong_ownership_and_conversion() {
+fn records_variants_result_rejects_wrong_ownership_and_conversion() {
     for (source, code) in [
         (
             include_str!("../fixtures/l1_01/result-wrong-error.inv"),
@@ -97,7 +98,7 @@ fn issue_l1_01_language_core_result_rejects_wrong_ownership_and_conversion() {
 }
 
 #[test]
-fn issue_l1_01_language_core_owned_and_borrowed_patterns() {
+fn records_variants_result_owned_and_borrowed_patterns() {
     agree(
         include_str!("../fixtures/l1_01/variant-owned-pattern.inv"),
         10_000,
@@ -136,7 +137,7 @@ fn issue_l1_01_language_core_owned_and_borrowed_patterns() {
 }
 
 #[test]
-fn issue_l1_01_language_core_moves_record_array_field_once() {
+fn records_variants_result_moves_record_array_field_once() {
     agree(MOVED_ARRAY, 10_000, 9);
 
     for (source, code) in [
@@ -163,7 +164,7 @@ fn issue_l1_01_language_core_moves_record_array_field_once() {
 }
 
 #[test]
-fn issue_l1_01_language_core_exhaustive_variant_match_agrees_across_engines() {
+fn records_variants_result_exhaustive_variant_match_agrees_across_engines() {
     agree(VARIANT, 10_000, 11);
     let low = VARIANT.replace("Choice::High(11i32)", "Choice::Low()");
     agree(&low, 10_000, 1);
@@ -182,7 +183,7 @@ fn issue_l1_01_language_core_exhaustive_variant_match_agrees_across_engines() {
 }
 
 #[test]
-fn issue_l1_01_language_core_rejects_nonexhaustive_variant_match() {
+fn records_variants_result_rejects_nonexhaustive_variant_match() {
     let source = "enum Choice { Low, High(i32) } fn main() -> i32 { let x: Choice = Choice::Low(); return match x { Choice::Low => 1i32 }; }";
     let error = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap_err();
     assert_eq!(error.code, "MATCH_NONEXHAUSTIVE");
@@ -190,7 +191,7 @@ fn issue_l1_01_language_core_rejects_nonexhaustive_variant_match() {
 }
 
 #[test]
-fn issue_l1_01_language_core_imported_variant_and_visibility() {
+fn records_variants_result_imported_variant_and_visibility() {
     let source = "module m { pub enum Choice { Low, High(i32) } } import m::Choice; fn main() -> i32 { let choice: Choice = Choice::High(9i32); return match choice { Choice::Low => 0i32, Choice::High(v) => v }; }";
     agree(source, 10_000, 9);
 
@@ -200,7 +201,7 @@ fn issue_l1_01_language_core_imported_variant_and_visibility() {
 }
 
 #[test]
-fn issue_l1_01_language_core_record_fields_agree_across_engines() {
+fn records_variants_result_record_fields_agree_across_engines() {
     agree(RECORD, 10_000, -7);
     assert_eq!(
         cli_result("record-fields.inv"),
@@ -209,7 +210,7 @@ fn issue_l1_01_language_core_record_fields_agree_across_engines() {
 }
 
 #[test]
-fn issue_l1_01_language_core_rejects_missing_record_field() {
+fn records_variants_result_rejects_missing_record_field() {
     let source = "struct Pair { left: i32, right: u32 } fn main() -> i32 { let pair: Pair = Pair { left: 1i32 }; return pair.left; }";
     let error = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap_err();
     assert_eq!(error.code, "TYPE_MISMATCH");
@@ -217,14 +218,14 @@ fn issue_l1_01_language_core_rejects_missing_record_field() {
 }
 
 #[test]
-fn issue_l1_01_language_core_named_condition_remains_a_block() {
+fn records_variants_result_named_condition_remains_a_block() {
     let source = "fn main() -> i32 { let ok: Bool = true; if ok { return 1; } else { return 2; } }";
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     assert_eq!(eval::run(&checked, 100).unwrap().value, eval::Value::I32(1));
 }
 
 #[test]
-fn issue_l1_01_language_core_record_borrow_and_take() {
+fn records_variants_result_record_borrow_and_take() {
     agree(
         include_str!("../fixtures/l1_01/record-borrow-take.inv"),
         10_000,
@@ -233,7 +234,7 @@ fn issue_l1_01_language_core_record_borrow_and_take() {
 }
 
 #[test]
-fn issue_l1_01_language_core_rejects_record_use_after_move() {
+fn records_variants_result_rejects_record_use_after_move() {
     let source = include_str!("../fixtures/l1_01/record-use-after-move.inv");
     let error = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap_err();
     assert_eq!(error.code, "OWN_USE_AFTER_MOVE");
@@ -241,7 +242,7 @@ fn issue_l1_01_language_core_rejects_record_use_after_move() {
 }
 
 #[test]
-fn issue_l1_01_language_core_forward_module_resolution_agrees_across_engines() {
+fn records_variants_result_forward_module_resolution_agrees_across_engines() {
     let checked = check::check(front::parse(MODULES.as_bytes()).unwrap(), true).unwrap();
     let reference = eval::run(&checked, 10_000).unwrap();
     assert_eq!(reference.value, eval::Value::I32(21));
@@ -266,7 +267,7 @@ fn issue_l1_01_language_core_forward_module_resolution_agrees_across_engines() {
 }
 
 #[test]
-fn issue_l1_01_language_core_rejects_visibility_duplicates_cycles_and_bad_imports() {
+fn records_variants_result_rejects_visibility_duplicates_cycles_and_bad_imports() {
     for (source, code) in [
         (
             "module m { fn hidden() -> i32 { return 1; } } import m::hidden; fn main() -> i32 { return hidden(); }",

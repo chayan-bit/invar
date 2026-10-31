@@ -18,7 +18,7 @@ For the meaning of the labels see the [glossary](glossary.md#issue-and-milestone
 | [crates/invar-python/tests/](../crates/invar-python/README.md) | Python binding tests (pytest) | `maturin develop --locked --extras test` then `pytest`, as the Build (python) CI job does |
 | Doctests | Examples in Rust doc comments | `cargo test --locked --doc` |
 
-A test's full name in nextest output is `<binary> <module>::<function>`, for example `invar::language issue_m0_04::issue_m0_04_fuel_and_call_depth`.
+A test's full name in nextest output is `<binary> <module>::<function>`, for example `invar::language arithmetic_fuel_and_demand::arithmetic_fuel_and_demand_fuel_and_call_depth`.
 By convention a function name starts with its module name.
 
 ## Running a subset
@@ -27,7 +27,7 @@ By convention a function name starts with its module name.
 just test-quick                                              # the fast loop: lib tests, the language and gnet_net binaries
 cargo nextest run --locked --test schedule_cpu              # one binary
 cargo nextest run --locked --test language -E 'test(~fuel)' # tests whose name contains "fuel"
-cargo test --locked --test language issue_m0_04             # the same without nextest, by name filter
+cargo test --locked --test language arithmetic_fuel_and_demand             # the same without nextest, by name filter
 ```
 
 Environment variables that change how the suite runs:
@@ -78,19 +78,19 @@ The source language itself: syntax, names, types, arithmetic, fuel, ownership, l
 | Module | Covers |
 | --- | --- |
 | `engines` | Helper: one check that every engine agrees on a program. |
-| `issue_m0_02` | Grammar, precedence, lexical spans, JSON diagnostics and the source-size and nesting limits. |
-| `issue_m0_03` | Name and type checking, forward calls, recursion, `check --format json` and its exit status. |
-| `issue_m0_04` | Evaluation order, demand (unselected branches), integer boundaries, traps, fuel and the call-depth limit. |
-| `issue_m0_05` | Array values, indexing, `filled_*`, ownership errors, cleanup order and the allocation bound. |
-| `issue_m0_06` | `read`, `mut` and `take` call loans: accepted combinations and conflicts at the call boundary. |
-| `issue_m0_07` | The real `invar` binary on the bootstrap examples: results, statuses and usage errors. |
-| `issue_m0_08` | A deterministic reference corpus, adversarial sources and the one-JSON-document rule. |
-| `issue_m0_owner_return_fuel_spec` | Fuel charged when a function returns an owner by bare name or explicit move. |
-| `issue_l1_01_language_core` | Records, variants, `match` and `Result`: propagation, moves of fields and ownership errors. |
-| `issue_l1_02_borrowed_views` | Borrowed views: reborrow chains, range and stride traps, and rejected escapes; all engines agree. |
-| `issue_l1_03_bounded_generics_closures` | Bounded generics, monomorphization, affine closures and their resource limits. |
-| `issue_l1_04_bytes_strings_cabi` | `Bytes`, `String`, UTF-8 conversion and the C ABI shim checked against a foreign C oracle. |
-| `issue_r1_01_units_frames` | Quantities, dimensions and frames: erasure is byte-identical, and transform chains agree across engines. |
+| `syntax_and_limits` | Grammar, precedence, lexical spans, JSON diagnostics and the source-size and nesting limits. |
+| `names_types_and_calls` | Name and type checking, forward calls, recursion, `check --format json` and its exit status. |
+| `arithmetic_fuel_and_demand` | Evaluation order, demand (unselected branches), integer boundaries, traps, fuel and the call-depth limit. |
+| `arrays_ownership_and_cleanup` | Array values, indexing, `filled_*`, ownership errors, cleanup order and the allocation bound. |
+| `call_loans` | `read`, `mut` and `take` call loans: accepted combinations and conflicts at the call boundary. |
+| `cli_examples_and_exit_codes` | The real `invar` binary on the bootstrap examples: results, statuses and usage errors. |
+| `reference_corpus_and_json` | A deterministic reference corpus, adversarial sources and the one-JSON-document rule. |
+| `owner_return_fuel` | Fuel charged when a function returns an owner by bare name or explicit move. |
+| `records_variants_result` | Records, variants, `match` and `Result`: propagation, moves of fields and ownership errors. |
+| `borrowed_views` | Borrowed views: reborrow chains, range and stride traps, and rejected escapes; all engines agree. |
+| `generics_and_closures` | Bounded generics, monomorphization, affine closures and their resource limits. |
+| `bytes_strings_and_c_abi` | `Bytes`, `String`, UTF-8 conversion and the C ABI shim checked against a foreign C oracle. |
+| `units_and_frames` | Quantities, dimensions and frames: erasure is byte-identical, and transform chains agree across engines. |
 
 ### `mir`
 
@@ -99,13 +99,13 @@ MIR, the typed net and the native backend: the independent MIR evaluator, the ty
 | Module | Covers |
 | --- | --- |
 | `corpus` | Helper: programs shared by the MIR differential suites. |
-| `issue_m1_01` | MIR lowering, the MIR verifier's rejections and the independent MIR evaluator against the reference. |
-| `issue_m1_01_owned_return_fuel` | Fuel for explicit move and borrowed returns is unchanged by MIR lowering. |
-| `issue_m1_02` | Native CPU lowering against the reference: trap ABI, CLI build and run, and refusal of unproved LLVM promises. |
-| `issue_m1_04` | Typed net built from public MIR: ports, ownership, demand order and failure provenance. |
-| `issue_m1_05` | Checked rewrites and extraction: beta and fusion change the extracted plan, and results match the reference. |
-| `issue_eng_18_native_regions` | Compiled `cpu-parallel` map and reduce regions. |
-| `issue_eng_18_native_simd` | The native optimization pipeline, CPU target selection and SIMD. |
+| `mir_verifier_and_evaluator` | MIR lowering, the MIR verifier's rejections and the independent MIR evaluator against the reference. |
+| `mir_owner_return_fuel` | Fuel for explicit move and borrowed returns is unchanged by MIR lowering. |
+| `native_cpu_trap_abi` | Native CPU lowering against the reference: trap ABI, CLI build and run, and refusal of unproved LLVM promises. |
+| `typed_net_verifier` | Typed net built from public MIR: ports, ownership, demand order and failure provenance. |
+| `typed_net_rewrite_extraction` | Checked rewrites and extraction: beta and fusion change the extracted plan, and results match the reference. |
+| `native_parallel_regions` | Compiled `cpu-parallel` map and reduce regions. |
+| `native_simd_and_targets` | The native optimization pipeline, CPU target selection and SIMD. |
 
 ### `schedule_cpu`
 
@@ -115,11 +115,11 @@ The CPU scheduler: admission records, fused maps, lawful reductions and scans, w
 | --- | --- |
 | `cpu_workers` | Worker-count selection and measurement. |
 | `recognition_corpus` | Generated corpus for the scheduler's recognition and fallback. |
-| `issue_m2_01` | Admission records: round trip, invalidation, rejection reasons and `explain`. |
-| `issue_m2_02` | Fusing adjacent maps through the typed graph, and when fusion must be refused. |
-| `issue_m2_03` | Reductions and scans that rely on a sealed law, with exhaustive bounded and seeded checks. |
-| `issue_m2_04` | Inference of an affine wrapping recurrence and its prefix scan, and near misses with reasons. |
-| `issue_m2_05` | Every family, shape and worker count equals the serial result; false guards fall back before any write. |
+| `admission_records` | Admission records: round trip, invalidation, rejection reasons and `explain`. |
+| `fused_map_extraction` | Fusing adjacent maps through the typed graph, and when fusion must be refused. |
+| `lawful_reductions_and_scans` | Reductions and scans that rely on a sealed law, with exhaustive bounded and seeded checks. |
+| `affine_recurrence_scan` | Inference of an affine wrapping recurrence and its prefix scan, and near misses with reasons. |
+| `cpu_scheduler_fallback` | Every family, shape and worker count equals the serial result; false guards fall back before any write. |
 
 ### `cli`
 
@@ -128,9 +128,9 @@ The `invar` binary as a user runs it.
 | Module | Covers |
 | --- | --- |
 | `cli_smoke` | Help text and typed refusals from the real binary. |
-| `issue_50_placement_receipts` | Placement runs record float-reduction receipts and intrinsic sites. |
-| `issue_50_unified_auto_schema` | Every `--engine auto` explain carries one schema version and `auto_path`. |
-| `issue_m4_source_device_cli` | `invar source-device` on real source, labeling CPU-model completion. |
+| `placement_receipts` | Placement runs record float-reduction receipts and intrinsic sites. |
+| `auto_explain_schema` | Every `--engine auto` explain carries one schema version and `auto_path`. |
+| `source_device_command` | `invar source-device` on real source, labeling CPU-model completion. |
 
 ### `byte_budgets`
 
@@ -348,8 +348,8 @@ Limits, deadlines and the test harness itself.
 | --- | --- |
 | `child_deadlines` | Scaled child-process deadlines and scratch directories. |
 | `ci_profile_canary` | The CI profile keeps debug assertions. |
-| `issue_eval_call_depth_stack` | The 64-call limit is reached without exhausting the host stack. |
-| `issue_test_exec_fixtures` | Generated executables survive parallel forks. |
+| `eval_call_depth_stack` | The 64-call limit is reached without exhausting the host stack. |
+| `exec_fixtures` | Generated executables survive parallel forks. |
 | `robustness_limits` | MIR size limits and live-array caps. |
 
 ### `m4_numeric_layout`
