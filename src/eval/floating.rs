@@ -380,7 +380,7 @@ impl TcInputs {
 
 #[cfg(test)]
 #[test]
-fn issue_ai_01_machine_diagnostics_tc_serial_completion_refuses_output_aliases() {
+fn machine_diagnostics_tc_serial_completion_refuses_output_aliases() {
     let a = Rc::new(RefCell::new(vec![F32Bits::from_bits(0x3f80_0000)]));
     let b = Rc::new(RefCell::new(vec![F32Bits::from_bits(0x4000_0000)]));
     for output in [&a, &b] {

@@ -423,7 +423,7 @@ fn ha1_f32_live_union_matches_i32_and_exact_aliases_count_once() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_python_invalid_checked_signature_fault_is_typed() {
+fn machine_diagnostics_python_invalid_checked_signature_fault_is_typed() {
     Python::attach(|py| {
         for invalid_parameter in [false, true] {
             let source = PyBytes::new(py, b"fn main() -> i32 { return 1; }");

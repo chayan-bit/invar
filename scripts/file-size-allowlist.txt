@@ -30,7 +30,7 @@
 849 tests/issue_m4_06_bounded_schedule_tuning.rs
 806 tests/m4_summary/issue_m4_07_summary_source.rs
 873 tests/m4_transpose_stencil/issue_m4_02_stencil_source.rs
-831 tests/robotics/issue_s1_06_sequencer_binding.rs
+831 tests/robotics/sequencer_binding.rs
 831 tests/support/gnet_device.rs
 930 tests/v02/v02_placement.rs
 952 tools/bench/acceptance.rs

@@ -434,7 +434,7 @@ pub fn infer(program: &mir::Program) -> Result<Report, Error> {
 #[cfg(test)]
 mod ai_01_fault_tests {
     #[test]
-    fn issue_ai_01_machine_diagnostics_recurrence_graph_fault() {
+    fn machine_diagnostics_recurrence_graph_fault() {
         let forged = super::Net::empty(0);
         let code = super::extract_graph(&forged).unwrap_err();
         assert_eq!(code, "GRAPH");

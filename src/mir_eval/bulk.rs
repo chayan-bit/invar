@@ -948,7 +948,7 @@ mod hardening_tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_pair_reduction_faults_validate() {
+    fn machine_diagnostics_pair_reduction_faults_validate() {
         let source = include_bytes!("../../examples/pair-reduction.inv");
         let checked = check::check(front::parse(source).unwrap(), true).unwrap();
         let mut program = mir::lower(&checked).unwrap();
@@ -1008,7 +1008,7 @@ mod hardening_tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_bulk_ambiguous_completion() {
+    fn machine_diagnostics_bulk_ambiguous_completion() {
         let (mut reached, gather) = completed(0);
         let (_, scatter) = completed(1);
         let plan = LoopOverride {

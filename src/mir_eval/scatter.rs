@@ -376,7 +376,7 @@ mod tests {
     /// owner replacement, held loans and both counters reach their typed
     /// codes with no write, debit or trace.
     #[test]
-    fn issue_ai_01_machine_diagnostics_scatter_publication_harness_faults() {
+    fn machine_diagnostics_scatter_publication_harness_faults() {
         let expected = [
             "SCATTER_OWNER", // output slot aliases the input owner
             "SCATTER_OWNER", // output slot is not owned
@@ -484,10 +484,7 @@ mod tests {
             .as_array()
             .unwrap()
             .iter()
-            .filter(|e| {
-                e["fault_test"]
-                    == "issue_ai_01_machine_diagnostics_scatter_publication_harness_faults"
-            })
+            .filter(|e| e["fault_test"] == "machine_diagnostics_scatter_publication_harness_faults")
             .map(|e| e["code"].as_str().unwrap())
             .collect::<Vec<_>>();
         registered.sort_unstable();
