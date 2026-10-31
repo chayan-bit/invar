@@ -12,7 +12,7 @@ A source family used by [schedule](../schedule/README.md).
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_summary`.
+- `cargo nextest run --locked --test summary`.
 
 ## Rules to keep
 

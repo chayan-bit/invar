@@ -352,81 +352,81 @@ Limits, deadlines and the test harness itself.
 | `exec_fixtures` | Generated executables survive parallel forks. |
 | `robustness_limits` | MIR size limits and live-array caps. |
 
-### `m4_numeric_layout`
+### `numeric_layout`
 
 `f32` source semantics and the logical-to-byte layout contract.
 
 | Module | Covers |
 | --- | --- |
-| `issue_m4_01_decimal_literals` | Exact decimal-to-binary32 literals, ties and subnormals. |
-| `issue_m4_01_layout_oracle` | Contiguous, transposed and holed layouts against the layout oracle. |
-| `issue_m4_01_numeric_layout_contracts` | Numeric and layout contracts, rank-1 source parity and mutation order. |
-| `issue_m4_01_numeric_oracle` | The software binary32 oracle and NaN classes. |
-| `issue_m4_01_source_f32` | Strict `f32` arithmetic, comparisons and rejected conversions in source. |
-| `issue_m4_01_tensor_cache` | Tensor cache keys are independent of storage. |
-| `issue_m4_01_tensor_host` | Host-side tensor contraction parity. |
+| `decimal_literals` | Exact decimal-to-binary32 literals, ties and subnormals. |
+| `layout_oracle` | Contiguous, transposed and holed layouts against the layout oracle. |
+| `numeric_layout_contracts` | Numeric and layout contracts, rank-1 source parity and mutation order. |
+| `numeric_oracle` | The software binary32 oracle and NaN classes. |
+| `source_f32` | Strict `f32` arithmetic, comparisons and rejected conversions in source. |
+| `tensor_cache` | Tensor cache keys are independent of storage. |
+| `tensor_host` | Host-side tensor contraction parity. |
 
-### `m4_transpose_stencil`
+### `transpose_stencil`
 
 Transpose and five-point stencil families.
 
 | Module | Covers |
 | --- | --- |
-| `issue_m4_02_combined_runtime` | One run publishing transpose and stencil loops together. |
-| `issue_m4_02_device_schedules` | Device plans for transpose and stencil, with mutations that must be refused. |
-| `issue_m4_02_stencil_runtime` | Bounded CPU stencil publication. |
-| `issue_m4_02_stencil_source` | Recognizing the stencil source form. |
-| `issue_m4_02_transpose_host` | Transpose publication keeps typed results, fuel and cleanup. |
-| `issue_m4_02_transpose_source` | Recognizing the transpose source form. |
-| `issue_m4_02_transpose_stencil_schedules` | The transpose contract entry point. |
+| `combined_runtime` | One run publishing transpose and stencil loops together. |
+| `device_schedules` | Device plans for transpose and stencil, with mutations that must be refused. |
+| `stencil_runtime` | Bounded CPU stencil publication. |
+| `stencil_source` | Recognizing the stencil source form. |
+| `transpose_host` | Transpose publication keeps typed results, fuel and cleanup. |
+| `transpose_source` | Recognizing the transpose source form. |
+| `schedules` | The transpose contract entry point. |
 
-### `m4_contraction`
+### `contraction`
 
 Tiled matrix contraction and the explicit `tc_mul_add` form.
 
 | Module | Covers |
 | --- | --- |
-| `issue_m4_03_matrix_contraction_tensor_core` | Contraction source family and contract. |
-| `issue_m4_03_matrix_contraction_tensor_core_device` | Tiled strict-f32 device schedule checked without a GPU. |
-| `issue_m4_03_matrix_contraction_tensor_core_tc` | The `tc-f16-f32-v1` explicit `tc_mul_add` source without a device. |
+| `matrix_contraction` | Contraction source family and contract. |
+| `matrix_contraction_device` | Tiled strict-f32 device schedule checked without a GPU. |
+| `matrix_contraction_tc` | The `tc-f16-f32-v1` explicit `tc_mul_add` source without a device. |
 
-### `m4_segmented`
+### `segmented`
 
 Segmented reductions and stable compaction.
 
 | Module | Covers |
 | --- | --- |
-| `issue_m4_04_compaction_allocation` | Compaction allocation sites and budgets. |
-| `issue_m4_04_segmented_device_ir` | Segmented-map recognizer and device IR on the CPU. |
-| `issue_m4_04_segmented_flattening_compaction` | Flattening and compaction through the checked source. |
-| `issue_m4_04_stable_compaction_source` | Stable compaction source forms. |
+| `compaction_allocation` | Compaction allocation sites and budgets. |
+| `segmented_device_ir` | Segmented-map recognizer and device IR on the CPU. |
+| `segmented_flattening_compaction` | Flattening and compaction through the checked source. |
+| `stable_compaction_source` | Stable compaction source forms. |
 
-### `m4_indexed`
+### `indexed`
 
 Gather, scatter, histogram and frontier families.
 
 | Module | Covers |
 | --- | --- |
-| `issue_m4_05_device` | Device IR and emitters on the shared corpus; mutations are refused. |
-| `issue_m4_05_frontier_source` | Dense-mask frontier source form. |
-| `issue_m4_05_gather_preflight` | Gather preflight costs and recipes. |
-| `issue_m4_05_gather_runtime` | Gather runtime outputs, aliasing and exact prefixes. |
-| `issue_m4_05_gather_scatter_frontier` | Gather, scatter and frontier contracts. |
-| `issue_m4_05_histogram_runtime` | Weighted histogram runtime, traps and fuel prefixes. |
-| `issue_m4_05_histogram_source` | Histogram source recognition. |
-| `issue_m4_05_static_scatter_proof` | Static injectivity and bounds certificates for scatter. |
-| `issue_m4_05_static_scatter_runtime` | Scatter runtime with a certificate. |
+| `device` | Device IR and emitters on the shared corpus; mutations are refused. |
+| `frontier_source` | Dense-mask frontier source form. |
+| `gather_preflight` | Gather preflight costs and recipes. |
+| `gather_runtime` | Gather runtime outputs, aliasing and exact prefixes. |
+| `gather_scatter_frontier` | Gather, scatter and frontier contracts. |
+| `histogram_runtime` | Weighted histogram runtime, traps and fuel prefixes. |
+| `histogram_source` | Histogram source recognition. |
+| `static_scatter_proof` | Static injectivity and bounds certificates for scatter. |
+| `static_scatter_runtime` | Scatter runtime with a certificate. |
 
-### `m4_summary`
+### `summary`
 
 Bounded summaries (finite-state and matrix scans).
 
 | Module | Covers |
 | --- | --- |
-| `issue_m4_07_bounded_summary_device` | Device lowering and reason codes. |
-| `issue_m4_07_bounded_summary_families` | Summary families and tables. |
-| `issue_m4_07_summary_source` | Summary source recognition and preparation. |
-| `issue_m4_07_typed_bounded_scan` | The typed bounded-scan graph. |
+| `bounded_summary_device` | Device lowering and reason codes. |
+| `bounded_summary_families` | Summary families and tables. |
+| `summary_source` | Summary source recognition and preparation. |
+| `typed_bounded_scan` | The typed bounded-scan graph. |
 
 ### `numeric_tiers`
 

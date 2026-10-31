@@ -68,7 +68,7 @@ Policy, IR version, layout version, target capability, compiler options, and gen
 
 ### Semantic fixtures
 
-The committed `issue_m4_01_numeric_oracle`, `issue_m4_01_decimal_literals`, and `issue_m4_01_source_f32` fixtures establish literal rounding, signed zeros, infinities, NaNs, cancellation, conversion traps, and independent exact CPU outcomes.
+The committed `numeric_oracle`, `decimal_literals`, and `source_f32` fixtures establish literal rounding, signed zeros, infinities, NaNs, cancellation, conversion traps, and independent exact CPU outcomes.
 The committed `issue_m4_01_device/corpus.rs` establishes zero, one, odd, rectangular, and subnormal contraction cases.
 Device or mock-only outcomes do not establish native, CPU-parallel, or hardware acceptance for a missing engine.
 

@@ -52,8 +52,8 @@ Sweep of compiled/process test deadlines:
 - `tests/gnet_device_model/{cuda_owned_numeric_model,resume_device_model}.rs`,
   `tests/gnet_numeric_host/f32_helpers_flag_independence.rs`:
   the existing process-group poll runners. CPU limits remain unchanged.
-- `tests/m4_transpose_stencil/issue_m4_02_{stencil_source,transpose_source}.rs`,
-  `tests/m4_contraction/issue_m4_03_matrix_contraction_tensor_core.rs`,
+- `tests/transpose_stencil/{stencil_source,transpose_source}.rs`,
+  `tests/contraction/matrix_contraction.rs`,
   `crates/invar-device/tests/m4_02_transpose.rs`: compiler and CPU-model runs.
   Embedded `alarm()` wall timers now use the parent group watchdog instead;
   stencil's independent CPU limit remains unchanged.
@@ -91,7 +91,7 @@ Count floors written for the whole corpus are divided by 8 for the sample; agree
 ## Term oracle
 
 `term_oracle.rs` is test support, included by path, with no production API.
-It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `typed_net_verifier`, `typed_net_rewrite_extraction` and `issue_m4_07_typed_bounded_scan` use as independent oracles.
+It holds the call-by-value term evaluator and the demand-ordered observation of verified `typed_net` graphs that `typed_net_verifier`, `typed_net_rewrite_extraction` and `typed_bounded_scan` use as independent oracles.
 
 ## GNET oracle words
 
