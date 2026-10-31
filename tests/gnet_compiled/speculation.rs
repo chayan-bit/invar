@@ -99,7 +99,7 @@ int main(int argc,char** argv) {{
         capacity: usize,
     ) -> Vec<i64> {
         let command = Command::new(self.dir.join("run"));
-        speculation::run(command, self.mode, args, limits, quantum, capacity)
+        speculation_support::run(command, self.mode, args, limits, quantum, capacity)
     }
     fn compare(
         &self,
@@ -111,7 +111,7 @@ int main(int argc,char** argv) {{
         capacity: usize,
     ) -> Vec<i64> {
         let words = self.run(args, limits, quantum, capacity);
-        let offset = speculation::compare(net, entry, args, limits, &words);
+        let offset = speculation_support::compare(net, entry, args, limits, &words);
         assert_eq!(offset, words.len());
         words
     }
