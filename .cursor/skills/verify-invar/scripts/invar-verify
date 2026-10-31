@@ -1143,7 +1143,8 @@ def drive_codegen(session: Session) -> None:
         session.skip(
             "codegen.cuda-hardware",
             feature,
-            "Skipped CUDA hardware execution and `just test-gpu-cuda`. "
+            "Skipped CUDA hardware execution, `just test-gpu-cuda`, and "
+            "`just test-gpu-cuda-remote` (needs REMOTE_CUDA_HOST, an ssh alias of a Windows CUDA host). "
             + nvidia["detail"]
             + ". The default binary also has no cuda feature, so a GPU run would not be honest.",
             ["just", "test-gpu-cuda"],

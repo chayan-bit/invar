@@ -19,6 +19,7 @@ Users can run an admitted source kernel on a CPU model of the device, or ask for
 - Run `invar run PATH --engine native-serial|cuda|metal --format json`.
 - Run `invar build PATH --target native|cuda|metal ...` when the matching feature is compiled in.
 - Run `just test-gpu-cuda` or `just test-metal` on matching hardware. Those are not the cloud proof.
+- Run `just test-gpu-cuda-remote <ref> [filters]` with `REMOTE_CUDA_HOST` set to the ssh alias of a Windows CUDA host. It runs that ref's CUDA suites there and exits 0 pass, 1 test failures, 2 build failure, 3 GPU busy, 4 timeout, or 5 ssh dropped. It is not the cloud proof either.
 
 ## Driving it with invar-verify
 
@@ -31,7 +32,7 @@ Preconditions:
 - **Fuel limit.** The same command with fuel `1` fails. `completed_regions` is 0 and `error` contains `EvaluationLimit`.
 - **Tensor CPU model.** The drive writes the contraction fixture from the source-device CLI test and runs `invar source-device <file> tensor mat cpu-model 100000`. `result` is 7 and `completed_regions` is 1.
 - **Refusals.** The drive runs `invar run examples/sum.inv --engine cuda --format json`, the metal engine, and the native-serial engine. Each exits 2 with `tool_error` and code `CUDA_UNAVAILABLE`, `METAL_UNAVAILABLE`, or `NATIVE_UNAVAILABLE`. Forced `gnet-device ... cuda` and `... metal` fail and the error names the missing feature.
-- **Skipped hardware.** The drive records `codegen.cuda-hardware` as skipped when `nvidia-smi` is missing or lists no device. It records `codegen.metal-hardware` as skipped when the host is not Darwin. It records `codegen.native-serial-run` as skipped when LLVM 21.1.8 is not installed and `LLVM_SYS_211_PREFIX` is unset. The skip names `just test-gpu-cuda`, `just test-metal`, or `cargo build --locked --features native`.
+- **Skipped hardware.** The drive records `codegen.cuda-hardware` as skipped when `nvidia-smi` is missing or lists no device. It records `codegen.metal-hardware` as skipped when the host is not Darwin. It records `codegen.native-serial-run` as skipped when LLVM 21.1.8 is not installed and `LLVM_SYS_211_PREFIX` is unset. The skip names `just test-gpu-cuda` (its reason also names `just test-gpu-cuda-remote`), `just test-metal`, or `cargo build --locked --features native`.
 
 ## Gotchas
 
