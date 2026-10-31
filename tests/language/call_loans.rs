@@ -1,3 +1,4 @@
+//! Issue label M0-06.
 use invar::{
     check::check,
     eval::{Value, run},
@@ -17,7 +18,7 @@ fn result(source: &str) -> i32 {
 }
 
 #[test]
-fn issue_m0_06_read_read_and_take() {
+fn call_loans_read_read_and_take() {
     assert_eq!(
         result(
             "fn pair(a: read Array<i32>, b: read Array<i32>) -> i32 { return a[0u32] + b[0u32]; } fn consume(a: take Array<i32>) -> i32 { return a[0u32]; } fn main() -> i32 { let xs: Array<i32> = [7]; let n: i32 = pair(xs, xs); return n + consume(move xs); }"
@@ -27,7 +28,7 @@ fn issue_m0_06_read_read_and_take() {
 }
 
 #[test]
-fn issue_m0_06_mut_reborrow_restores_caller_access() {
+fn call_loans_mut_reborrow_restores_caller_access() {
     assert_eq!(
         result(
             "fn read_one(a: read Array<i32>) -> i32 { return a[0u32]; } fn add(a: mut Array<i32>) -> Unit { a[0u32] = a[0u32] + read_one(a); return; } fn main() -> i32 { var xs: Array<i32> = [2]; add(xs); xs[0u32] = xs[0u32] + 1; return xs[0u32]; }"
@@ -43,7 +44,7 @@ fn issue_m0_06_mut_reborrow_restores_caller_access() {
 }
 
 #[test]
-fn issue_m0_06_rejects_conflicts_at_call_boundary() {
+fn call_loans_rejects_conflicts_at_call_boundary() {
     let cases = [
         (
             "fn f(a: mut Array<i32>, b: i32) -> Unit { return; } fn g(a: read Array<i32>) -> i32 { return 0; } fn main() -> i32 { var xs: Array<i32> = [1]; f(xs, g(xs)); return 0; }",

@@ -1,5 +1,5 @@
 //! Generated recognition corpus for the M2-05 CPU scheduler fallback.
-use super::issue_m2_05::lower;
+use super::cpu_scheduler_fallback::lower;
 use crate::corpus_sample;
 use invar::{eval, schedule};
 
@@ -169,7 +169,7 @@ fn assert_corpus_case(source: &str, expected: &[schedule::PlanKind], reason: Opt
 /// Pull-request CI runs the deterministic sample of `corpus_sample`, which keeps every
 /// family; `INVAR_FULL_CORPUS=1` runs every variant.
 #[test]
-fn issue_m2_05_cpu_scheduler_fallback_recognition_corpus() {
+fn cpu_scheduler_fallback_recognition_corpus() {
     const FAMILIES: [&str; 4] = ["map", "fused", "reduction", "scan"];
     let mut cases = Vec::new();
     for len in [0usize, 1, 63, 64, 65, 257] {

@@ -1,3 +1,4 @@
+//! Issue label M0-03.
 use invar::{
     check::check,
     front::{Type, parse},
@@ -9,7 +10,7 @@ fn checked(source: &str) -> Result<invar::check::CheckedProgram, invar::front::F
 }
 
 #[test]
-fn issue_m0_03_forward_calls_recursion_and_typed_order() {
+fn names_types_and_calls_forward_calls_recursion_and_typed_order() {
     let source = "fn main() -> i32 { return f(3); } fn f(n: i32) -> i32 { if n == 0 { return 0; } else { return f(n - 1); } } fn unused() -> Unit { let x: u32 = 1; }";
     let program = checked(source).unwrap();
     assert_eq!(program.program.functions.len(), 3);
@@ -31,7 +32,7 @@ fn issue_m0_03_forward_calls_recursion_and_typed_order() {
 }
 
 #[test]
-fn issue_m0_03_rejects_names_types_and_returns() {
+fn names_types_and_calls_rejects_names_types_and_returns() {
     let cases = [
         ("fn f() -> i32 { return x; }", "NAME_UNKNOWN"),
         ("fn f() -> i32 { return missing(1); }", "NAME_UNKNOWN"),
@@ -92,7 +93,7 @@ fn issue_m0_03_rejects_names_types_and_returns() {
 }
 
 #[test]
-fn issue_m0_03_cli_check_json_and_status() {
+fn names_types_and_calls_cli_check_json_and_status() {
     let path = std::env::temp_dir().join(format!(
         "invar-m0-03-{}-{}.inv",
         std::process::id(),

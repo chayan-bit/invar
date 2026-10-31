@@ -2,12 +2,12 @@
 #![forbid(unsafe_code)]
 
 #[path = "../support/gnet_speculation.rs"]
-mod speculation;
+mod speculation_support;
 
 use crate::child_deadline;
 use invar::eval;
 use invar::general_net::{Net, compiled, oracle};
-use speculation::{limits, lowered, spec, storage};
+use speculation_support::{limits, lowered, spec, storage};
 use std::{fs, path::PathBuf, process::Command};
 
 struct Cpu {

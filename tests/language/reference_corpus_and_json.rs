@@ -1,3 +1,4 @@
+//! Issue label M0-08.
 use invar::{
     check::check,
     eval::{Value, observe},
@@ -10,7 +11,7 @@ fn checked(source: &str) -> invar::check::CheckedProgram {
 }
 
 #[test]
-fn issue_m0_08_bounded_deterministic_reference_corpus() {
+fn reference_corpus_and_json_bounded_deterministic_reference_corpus() {
     // Fixed corpus, no random seed: every case is below the source and runtime limits.
     let cases = [
         (
@@ -46,7 +47,7 @@ fn issue_m0_08_bounded_deterministic_reference_corpus() {
 }
 
 #[test]
-fn issue_m0_08_adversarial_source_corpus() {
+fn reference_corpus_and_json_adversarial_source_corpus() {
     let cases = [
         ("fn main() -> i32 { return 1xyz; }", "LEX_INVALID_LITERAL"),
         ("fn main() -> i32 { /* unterminated", "LEX_INVALID_TOKEN"),
@@ -104,7 +105,7 @@ fn issue_m0_08_adversarial_source_corpus() {
 }
 
 #[test]
-fn issue_m0_08_json_escaping_and_single_document() {
+fn reference_corpus_and_json_escaping_and_single_document() {
     // Windows file names cannot hold `"`; there the temp directory's `\` needs escaping.
     let quote = if cfg!(windows) { "'" } else { "\"" };
     let path = std::env::temp_dir().join(format!(

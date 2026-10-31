@@ -1,3 +1,4 @@
+//! Issue label L1-03.
 use std::process::Command;
 
 use invar::{check, eval, front};
@@ -5,7 +6,7 @@ use invar::{check, eval, front};
 use crate::engines::agree;
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_monomorphized_functions_agree() {
+fn generics_and_closures_monomorphized_functions_agree() {
     let source = include_str!("../fixtures/l1_03_generics.inv");
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     assert_eq!(checked.program.functions.len(), 4);
@@ -13,7 +14,7 @@ fn issue_l1_03_bounded_generics_closures_monomorphized_functions_agree() {
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_array_type_substitution_agrees() {
+fn generics_and_closures_array_type_substitution_agrees() {
     agree(
         include_str!("../fixtures/l1_03_generic_array.inv"),
         1000,
@@ -22,7 +23,7 @@ fn issue_l1_03_bounded_generics_closures_array_type_substitution_agrees() {
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_affine_capture_engines_agree() {
+fn generics_and_closures_affine_capture_engines_agree() {
     let reference = agree(include_str!("../fixtures/l1_03_closures.inv"), 1000, 10);
     assert_eq!(
         reference.cleanup_trace,
@@ -40,7 +41,7 @@ fn issue_l1_03_bounded_generics_closures_affine_capture_engines_agree() {
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_module_identity_and_unused_take_cleanup() {
+fn generics_and_closures_module_identity_and_unused_take_cleanup() {
     agree(
         include_str!("../fixtures/l1_03_module_closure.inv"),
         1000,
@@ -55,7 +56,7 @@ fn issue_l1_03_bounded_generics_closures_module_identity_and_unused_take_cleanup
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_public_check_rejects_invalid_sources() {
+fn generics_and_closures_public_check_rejects_invalid_sources() {
     for fixture in [
         "l1_03_generics.inv",
         "l1_03_closures.inv",
@@ -97,7 +98,7 @@ fn issue_l1_03_bounded_generics_closures_public_check_rejects_invalid_sources() 
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_resource_limits() {
+fn generics_and_closures_resource_limits() {
     let locals = (0..9)
         .map(|i| format!("let x{i}: i32 = 0i32;"))
         .collect::<String>();
@@ -174,7 +175,7 @@ fn issue_l1_03_bounded_generics_closures_resource_limits() {
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_rejects_trait_and_higher_kind_syntax() {
+fn generics_and_closures_rejects_trait_and_higher_kind_syntax() {
     for (source, code) in [
         (
             "fn f<T: Add>(x: T) -> T { return x; } fn main() -> i32 { return 0i32; }",
@@ -190,7 +191,7 @@ fn issue_l1_03_bounded_generics_closures_rejects_trait_and_higher_kind_syntax() 
 }
 
 #[test]
-fn issue_l1_03_bounded_generics_closures_rejects_shadowed_closure_names() {
+fn generics_and_closures_rejects_shadowed_closure_names() {
     for source in [
         "fn main() -> i32 { let x = 1i32; let x = closure []() -> i32 { return 2i32; }; return x(); }",
         "fn f() -> i32 { return 1i32; } fn main() -> i32 { let f = closure []() -> i32 { return 2i32; }; return f(); }",

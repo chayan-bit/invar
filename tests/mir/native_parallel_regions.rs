@@ -74,7 +74,7 @@ fn ranges(len: usize) -> Vec<std::ops::Range<usize>> {
 }
 
 #[test]
-fn issue_eng_18_map_kernels_match_the_plan_interpreter() {
+fn map_kernels_match_the_plan_interpreter() {
     let _serial = always();
     use MapOp::{WrappingAdd as Add, WrappingMul as Mul};
     let plans = [
@@ -144,7 +144,7 @@ fn issue_eng_18_map_kernels_match_the_plan_interpreter() {
 /// Compile cost of one kernel (emit, audit, O3, link, load), printed to
 /// size `region::AUTO_MIN_ELEMENTS`; not a timing claim.
 #[test]
-fn issue_eng_18_kernel_compile_cost_is_reported() {
+fn kernel_compile_cost_is_reported() {
     let _serial = always();
     let plan = live(
         vec![vec![]],
@@ -163,7 +163,7 @@ fn issue_eng_18_kernel_compile_cost_is_reported() {
 }
 
 #[test]
-fn issue_eng_18_reduce_kernels_match_the_left_fold() {
+fn reduce_kernels_match_the_left_fold() {
     let _serial = always();
     for law in [Law::WrappingSum, Law::WrappingProduct] {
         let kernel = region::reduce_kernel(law, 1).unwrap();
@@ -178,7 +178,7 @@ fn issue_eng_18_reduce_kernels_match_the_left_fold() {
 /// The audited kernels carry facts for every promise and vectorize for the
 /// live CPU: their optimized IR holds vector operations.
 #[test]
-fn issue_eng_18_region_kernels_are_audited_and_vectorized() {
+fn region_kernels_are_audited_and_vectorized() {
     let _serial = always();
     let plan = live(
         vec![vec![], vec![]],
@@ -269,7 +269,7 @@ fn steps(observation: &str) -> u64 {
 /// kernels on and off, at every worker count, and on fuel prefixes that end
 /// before, inside and after the compiled regions.
 #[test]
-fn issue_eng_18_cpu_parallel_regions_observe_identically_with_kernels() {
+fn cpu_parallel_regions_observe_identically_with_kernels() {
     let _serial = always();
     let source = program(5000);
     let mir = lower(&source);
@@ -337,7 +337,7 @@ fn issue_eng_18_cpu_parallel_regions_observe_identically_with_kernels() {
 /// Checked arithmetic is never a kernel: an overflowing checked map traps in
 /// source order with kernels on, exactly as with them off.
 #[test]
-fn issue_eng_18_checked_overflow_traps_identically_with_kernels() {
+fn checked_overflow_traps_identically_with_kernels() {
     let _serial = always();
     let source = "fn main() -> i32 {
     var xs: Array<u32> = filled_u32(4096u32, 1u32);
