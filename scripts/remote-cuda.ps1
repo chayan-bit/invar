@@ -159,7 +159,7 @@ try {
     }
     Pop-Location
     Say "wall: $([int]((Get-Date) - $begun).TotalSeconds) s"
-    $lanes | ForEach-Object { Say "suite $($_.Suite): $($_.Seconds) s" }
+    $lanes | ForEach-Object { Say "suite $($_.Suite): $(if ($null -eq $_.Seconds) { 'stopped at the deadline' } else { "$($_.Seconds) s" })" }
 
     $text = Get-Content $log
     $rows = @(); $current = $null
