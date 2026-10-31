@@ -1,7 +1,8 @@
 # Testing guide
 
 This page explains how the test suite is organized, how to run the part you need, and what each test file covers.
-Many files are named after internal issue labels such as `issue_m4_05_*`; the tables below translate each name into plain words.
+Test files and modules are named for what they check; the issue that introduced one is recorded in its first doc comment (`Issue label M0-04.`), not in its name.
+A few fixture directories and helper files still carry the old issue-label prefix, and the tables below say what each covers.
 For the meaning of the labels see the [glossary](glossary.md#issue-and-milestone-labels), and for the required validation gates see [validation](validation.md).
 
 ## How the suite is laid out
@@ -52,22 +53,23 @@ Its per-test overrides name tests that need several threads or must run first, s
 - **`_env` robotics tests** need external tools such as ROS 2 or MuJoCo and are described in their file headers.
 - **Compiler-heavy tests** (the `gnet_*` binaries) compile generated C++ and need a C++17 compiler on `PATH`; CI uses the system compiler on Linux and llvm-mingw on Windows.
 
-## Reading the issue-label names
+## Reading the issue labels
 
-A module named `issue_<label>_<topic>` was written for one issue-tracker item; the label says which.
+The first doc comment of a test file or module names the issue-tracker item it was written for, for example `//! Issue label M0-04.`.
+Search for the label to find every test that belongs to one issue: `grep -rn "Issue label M0-04" tests`.
 
-| Label in a name | Meaning |
+| Label | Meaning |
 | --- | --- |
-| `m0` to `m5` | Milestones M0 (language core) to M5 (benchmarks, qualification, placement) |
-| `gnet_nn`, `gnet_pNN` | General-net work items and phases |
-| `eng_nn` | Engineering work items (laws prover, fold tiers, contraction emitter, byte budgets, native SIMD) |
-| `l1_nn`, `r1_nn`, `s1_nn` | Language extensions, units and frames, and system integration |
-| `a1`, `v01`, `v02` | The family adapters, the v0.1 acceptance work and the v0.2 features |
-| `ai_nn`, `dx_nn` | Tooling items: machine diagnostics and spec examples, debugger and fix tooling |
-| `issue_50_`, `issue_54_` | GitHub issue numbers (#50 auto placement receipts, #54 family lowerings) |
+| `M0` to `M5` | Milestones M0 (language core) to M5 (benchmarks, qualification, placement) |
+| `GNET-nn`, `GNET-Pn` | General-net work items and phases |
+| `ENG-nn` | Engineering work items (laws prover, fold tiers, contraction emitter, byte budgets, native SIMD) |
+| `L1-nn`, `R1-nn`, `S1-nn` | Language extensions, units and frames, and system integration |
+| `A1`, `V01`, `V02` | The family adapters, the v0.1 acceptance work and the v0.2 features |
+| `AI-nn`, `DX-nn` | Tooling items: machine diagnostics and spec examples, debugger and fix tooling |
+| `#50`, `#54` | GitHub issue numbers (#50 auto placement receipts, #54 family lowerings) |
 
-The tables name each module by its current file name and say what it covers.
-Renaming them to plain topic names is a possible follow-up; until then, use the tables to find the right file.
+Names that keep an old label are limited to fixture directories (`tests/issue_gnet_10_*_fixtures`, `tests/issue_gnet_11_*_fixtures`, `tests/issue_m4_0*_device`, `tests/a1_tensor`), shared helpers under `tests/support/`, the `tests/issue_m3_06_metal` binary, emitted data such as the qualification suite name, and some unit tests under `src/`.
+These are renamed only together with the data they identify.
 
 ## What each integration binary covers
 
