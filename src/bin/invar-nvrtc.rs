@@ -1,5 +1,7 @@
 //! Bounded NVRTC compiler subprocess. It accepts source on stdin and emits
 //! CUBIN bytes on stdout; the parent owns its deadline and output cap.
+//! `INVAR_NVRTC_CACHE_DIR` (test runs) replays verified earlier successes;
+//! see `invar::nvrtc_cache`.
 
 use std::io::{Read, Write};
 
@@ -54,6 +56,31 @@ fn main() {
             }) as u64,
         )
         .read_to_end(&mut input);
+    // Test runs only: a verified earlier success for these exact inputs.
+    let cache = std::env::var_os("INVAR_NVRTC_CACHE_DIR")
+        .filter(|_| read.is_ok())
+        .and_then(|dir| {
+            let version = invar_cuda::cuda::nvrtc_version().ok()?;
+            let args: Vec<String> = std::env::args().skip(1).collect();
+            let key = invar::nvrtc_cache::key(
+                env!("INVAR_NVRTC_COMPILER_DIGEST"),
+                version,
+                &args,
+                &input,
+            );
+            Some((std::path::PathBuf::from(dir), key))
+        });
+    if let Some((log, image)) = cache
+        .as_ref()
+        .and_then(|(dir, key)| invar::nvrtc_cache::get(dir, key))
+    {
+        // The same frame the compile below prints for this log.
+        eprintln!("{}", diagnostic_prefix(&format!("NVRTC_LOG={log:?}")));
+        if std::io::stdout().write_all(&image).is_ok() {
+            return;
+        }
+        std::process::exit(1);
+    }
     let result = read
         .map_err(|e| e.to_string())
         .and_then(|_| String::from_utf8(input).map_err(|e| e.to_string()))
@@ -77,6 +104,19 @@ fn main() {
                 "{}",
                 diagnostic_prefix(&format!("NVRTC_LOG={:?}", compiled.log))
             );
+            // GNET compiles keep their warning log; other modes store only
+            // clean compiles, so the log-bound test always compiles.
+            let store = compiled.log.is_empty() || mode.as_deref() == Some("--gnet-v5");
+            if let Some((dir, key)) = cache.as_ref().filter(|_| store) {
+                // A failed store only leaves the next run cold.
+                let _ = invar::nvrtc_cache::put(
+                    dir,
+                    key,
+                    &compiled.log,
+                    &compiled.image,
+                    invar::nvrtc_cache::MAX_BYTES,
+                );
+            }
             std::io::stdout()
                 .write_all(&compiled.image)
                 .map_err(|e| e.to_string())
