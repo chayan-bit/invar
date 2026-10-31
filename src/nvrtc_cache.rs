@@ -82,13 +82,7 @@ pub fn get(dir: &Path, key: &str) -> Option<(String, Vec<u8>)> {
 
 /// Store `log` and `image` atomically (write, then rename over), then evict the least
 /// recently used entries until the directory holds at most `max_bytes`.
-pub fn put(
-    dir: &Path,
-    key: &str,
-    log: &str,
-    image: &[u8],
-    max_bytes: u64,
-) -> std::io::Result<()> {
+pub fn put(dir: &Path, key: &str, log: &str, image: &[u8], max_bytes: u64) -> std::io::Result<()> {
     fs::create_dir_all(dir)?;
     let mut payload = (log.len() as u64).to_le_bytes().to_vec();
     payload.extend_from_slice(log.as_bytes());
