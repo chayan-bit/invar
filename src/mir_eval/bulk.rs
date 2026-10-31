@@ -746,7 +746,7 @@ mod hardening_tests {
     }
 
     fn stencil_completion() -> crate::stencil_source::host::Completion {
-        // Constant-zero boundary five-point stencil, as in issue_m4_02_stencil_source.
+        // Constant-zero boundary five-point stencil, as in stencil_source.
         const STENCIL: &str = "fn step(a:read Array<f32>,rows:u32,cols:u32)->Array<f32>{var b=filled_f32(rows*cols,0.0);for r in 0u32..rows{for c in 0u32..cols{var n=0.0; if r>0u32{n=a[(r-1u32)*cols+c];} var s=0.0; if r+1u32<rows{s=a[(r+1u32)*cols+c];} var w=0.0; if c>0u32{w=a[r*cols+(c-1u32)];} var e=0.0; if c+1u32<cols{e=a[r*cols+(c+1u32)];} b[r*cols+c]=(((a[r*cols+c]+n)+s)+w)+e;}}return b;}";
         let checked = check::check(front::parse(STENCIL.as_bytes()).unwrap(), false).unwrap();
         let contract = crate::stencil_source::Contract::from_checked(&checked, "step").unwrap();
@@ -786,7 +786,7 @@ mod hardening_tests {
     }
 
     fn transpose_completion() -> crate::transpose_source::host::Completion {
-        // u32 flip, as in issue_m4_02_transpose_source.
+        // u32 flip, as in transpose_source.
         const FLIP: &str = "fn flip(a: read Array<u32>, rows: u32, cols: u32) -> Array<u32> { var b = filled_u32(rows * cols,0u32); for r in 0u32..rows { for c in 0u32..cols { b[c * rows + r] = a[r * cols + c]; } } return b; }";
         let checked = check::check(front::parse(FLIP.as_bytes()).unwrap(), false).unwrap();
         let contract = crate::transpose_source::Contract::from_checked(&checked, "flip").unwrap();
@@ -794,7 +794,7 @@ mod hardening_tests {
     }
 
     fn tensor_completion() -> crate::tensor::host::Completion {
-        // f32 matrix product, as in issue_m4_01_tensor_host.
+        // f32 matrix product, as in tensor_host.
         const MAT: &str = "fn mat(a: read Array<f32>, b: read Array<f32>, rows: u32, inner: u32, cols: u32) -> Array<f32> { var c = filled_f32(rows * cols,0.0); for i in 0u32..rows { for j in 0u32..cols { var sum: f32 = 0.0; for k in 0u32..inner { sum = sum + a[i * inner + k] * b[k * cols + j]; } c[i * cols + j] = sum; } } return c; }";
         let checked = check::check(front::parse(MAT.as_bytes()).unwrap(), false).unwrap();
         let contraction = crate::tensor::Contraction::from_checked(&checked, "mat").unwrap();

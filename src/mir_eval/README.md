@@ -16,7 +16,7 @@ After [mir](../mir/README.md); driven by [schedule](../schedule/README.md).
 ## Tests
 
 - `cargo nextest run --locked --test mir` and `--test schedule_cpu` compare it with the reference evaluator and exercise publication.
-- The family binaries (`indexed`, `m4_segmented`, `m4_summary`, `m4_transpose_stencil`) cover each publication path.
+- The family binaries (`indexed`, `segmented`, `summary`, `transpose_stencil`) cover each publication path.
 
 ## Rules to keep
 
