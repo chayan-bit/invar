@@ -138,15 +138,15 @@ The byte-budget mechanism that bounds admission (host, device and analysis bytes
 
 | Module | Covers |
 | --- | --- |
-| `issue_eng_08_admission` | Admission bounded by bytes, not region counts. |
-| `issue_eng_08_array_limit` | The per-array language limit after the old element caps were removed. |
-| `issue_eng_08_budget_core` | The single `ByteBudget` mechanism and its refusal shape. |
-| `issue_eng_08_cpu_map` | The CPU map pass is bounded by host bytes. |
-| `issue_eng_08_frontier` | Dense-mask frontier admission by bytes. |
-| `issue_eng_08_histogram` | Weighted histogram admission by bytes. |
-| `issue_eng_08_indexed_scatter` | Gather, injective scatter and affine scatter admission by bytes. |
-| `issue_eng_08_loops` | Typed-graph limits come from the analysis byte budget. |
-| `issue_eng_08_summary` | Summary matcher has no fixed read-size cap. |
+| `admission` | Admission bounded by bytes, not region counts. |
+| `array_limit` | The per-array language limit after the old element caps were removed. |
+| `budget_core` | The single `ByteBudget` mechanism and its refusal shape. |
+| `cpu_map` | The CPU map pass is bounded by host bytes. |
+| `frontier` | Dense-mask frontier admission by bytes. |
+| `histogram` | Weighted histogram admission by bytes. |
+| `indexed_scatter` | Gather, injective scatter and affine scatter admission by bytes. |
+| `loops` | Typed-graph limits come from the analysis byte budget. |
+| `summary` | Summary matcher has no fixed read-size cap. |
 
 ### `contraction_emitter`
 
@@ -154,13 +154,13 @@ The generic matrix-contraction emitter (CUDA and Metal source) checked without a
 
 | Module | Covers |
 | --- | --- |
-| `issue_eng_06_emitter` | The move sequence of the generic emitter. |
-| `issue_eng_06_layout` | Strided layouts: rank, extents and strides. |
-| `issue_eng_06_moves` | Physical schedule moves over a generated grid. |
-| `issue_eng_06_pipeline` | Staged pipelines lowered as asynchronous copies. |
-| `issue_eng_06_targets` | Target description files parse and validate. |
-| `issue_eng_06_tc` | Matrix-atom (tensor core) schedules through the emitter. |
-| `issue_eng_06_wiring` | The shipped `gemm` and `tc` schedules emit through the generic path. |
+| `emitter` | The move sequence of the generic emitter. |
+| `layout` | Strided layouts: rank, extents and strides. |
+| `moves` | Physical schedule moves over a generated grid. |
+| `pipeline` | Staged pipelines lowered as asynchronous copies. |
+| `targets` | Target description files parse and validate. |
+| `tc` | Matrix-atom (tensor core) schedules through the emitter. |
+| `wiring` | The shipped `gemm` and `tc` schedules emit through the generic path. |
 
 ### `device`
 
@@ -326,10 +326,10 @@ The in-repo prover for law formulas and lifting certificates.
 
 | Module | Covers |
 | --- | --- |
-| `issue_eng_02_certificate` | Lifting certificates (the Kadane example). |
-| `issue_eng_02_lift` | A loop iteration re-derived from the net as law formulas. |
-| `issue_eng_02_lifting_laws` | Laws beyond the sealed catalogue. |
-| `issue_eng_02_prove` | The decision procedure for law formulas. |
+| `certificate` | Lifting certificates (the Kadane example). |
+| `lift` | A loop iteration re-derived from the net as law formulas. |
+| `lifting_laws` | Laws beyond the sealed catalogue. |
+| `prove` | The decision procedure for law formulas. |
 
 ### `law_collective`
 
@@ -434,10 +434,10 @@ Floating-point fold tiers and storage-only types.
 
 | Module | Covers |
 | --- | --- |
-| `issue_eng_03_fold_receipts` | Fold tiers recorded in placement and explain documents. |
-| `issue_eng_03_numeric_tiers` | Numeric policy version 2 and its oracle. |
-| `issue_eng_03_storage_arrays` | `Array<f16|bf16|i8|u8>` on every CPU engine. |
-| `issue_eng_03_tier_engines` | Tree and Exact folds on every CPU engine. |
+| `fold_receipts` | Fold tiers recorded in placement and explain documents. |
+| `numeric_tiers` | Numeric policy version 2 and its oracle. |
+| `storage_arrays` | `Array<f16|bf16|i8|u8>` on every CPU engine. |
+| `tier_engines` | Tree and Exact folds on every CPU engine. |
 
 ### `robotics`
 

@@ -162,7 +162,7 @@ fn fsm_rep(form: &NormalForm) -> Option<Rep> {
 }
 
 #[test]
-fn issue_eng_02_l8_fsm_runs_match_the_net_oracle() {
+fn l8_fsm_runs_match_the_net_oracle() {
     for (m, fsm) in MACHINES.iter().enumerate() {
         let (net, proof, form) = compiled(fsm.source);
         assert!(
@@ -208,7 +208,7 @@ fn issue_eng_02_l8_fsm_runs_match_the_net_oracle() {
 }
 
 #[test]
-fn issue_eng_02_l8_table_entry_out_of_range_runs_serial() {
+fn l8_table_entry_out_of_range_runs_serial() {
     let (net, proof, form) = compiled(FSM3);
     // Entry 3 of a 3-state table: the guard fails, the loop runs in source
     // order, and the source reads t[1 * 2 + 1] = 3, then traps on t[3 * 2 + 1].
@@ -227,7 +227,7 @@ fn issue_eng_02_l8_table_entry_out_of_range_runs_serial() {
 }
 
 #[test]
-fn issue_eng_02_l8_wrong_combine_is_caught() {
+fn l8_wrong_combine_is_caught() {
     for (m, fsm) in MACHINES.iter().enumerate() {
         let (net, proof, form) = compiled(fsm.source);
         let mut rng = Rng(0xbad_0e02 + m as u64);
@@ -243,7 +243,7 @@ fn issue_eng_02_l8_wrong_combine_is_caught() {
 }
 
 #[test]
-fn issue_eng_02_l8_is_cost_gated_by_default() {
+fn l8_is_cost_gated_by_default() {
     for fsm in &MACHINES {
         let (net, proof) = support::compile(fsm.source);
         let form = normal_form::extract(&net, &proof).expect("extract");
@@ -260,7 +260,7 @@ fn issue_eng_02_l8_is_cost_gated_by_default() {
 }
 
 #[test]
-fn issue_eng_02_l8_tables_that_vary_in_the_loop_stay_serial() {
+fn l8_tables_that_vary_in_the_loop_stay_serial() {
     for (source, reason) in [
         (
             "fn f(t: mut Array<u32>, xs: read Array<u32>, n: u32) -> u32 { var s = 0u32; for i in 0u32 .. n { s = t[s * 2u32 + xs[i]]; t[i] = s; } return s; }",
@@ -282,7 +282,7 @@ fn issue_eng_02_l8_tables_that_vary_in_the_loop_stay_serial() {
 }
 
 #[test]
-fn issue_eng_02_l8_forged_certificates_are_rejected() {
+fn l8_forged_certificates_are_rejected() {
     let (net, proof, form) = compiled(FSM16);
     let at = form.functions[0].loops[0]
         .certificates
@@ -407,7 +407,7 @@ fn ai32(v: Vec<i32>) -> eval::Value {
 }
 
 #[test]
-fn issue_eng_02_large_k_l5_matches_the_net_oracle() {
+fn large_k_l5_matches_the_net_oracle() {
     for (r, (ring, k)) in [(Ring::Wrapping, 6), (Ring::Checked, 6), (Ring::Residue, 5)]
         .into_iter()
         .enumerate()
@@ -454,7 +454,7 @@ fn issue_eng_02_large_k_l5_matches_the_net_oracle() {
 }
 
 #[test]
-fn issue_eng_02_large_k_l5_is_cost_gated_and_bounded() {
+fn large_k_l5_is_cost_gated_and_bounded() {
     for k in [5, 6] {
         let (net, proof) = support::compile(&recurrence(Ring::Wrapping, k));
         let form = normal_form::extract(&net, &proof).expect("extract");

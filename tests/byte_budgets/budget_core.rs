@@ -6,7 +6,7 @@ use invar::budget::{
 };
 
 #[test]
-fn issue_eng_08_default_budget_derives_from_language_limits() {
+fn default_budget_derives_from_language_limits() {
     let b = ByteBudget::default();
     assert_eq!(b, ByteBudget::standard());
     assert_eq!(b.host_bytes, MAX_LIVE_ELEMENTS * 4);
@@ -22,7 +22,7 @@ fn issue_eng_08_default_budget_derives_from_language_limits() {
 }
 
 #[test]
-fn issue_eng_08_run_budget_and_live_device_only_tighten() {
+fn run_budget_and_live_device_only_tighten() {
     let run = ByteBudget::from_run_budget(1 << 20);
     assert_eq!(run.host_bytes, 1 << 20);
     assert_eq!(run.device_bytes, MAX_DEVICE_BYTES);
@@ -49,7 +49,7 @@ fn issue_eng_08_run_budget_and_live_device_only_tighten() {
 }
 
 #[test]
-fn issue_eng_08_admits_at_exactly_the_footprint_and_refuses_one_byte_below() {
+fn admits_at_exactly_the_footprint_and_refuses_one_byte_below() {
     let mut cases = 0;
     for (host, device, analysis) in [
         (1usize, 0usize, 0usize),
@@ -92,7 +92,7 @@ fn issue_eng_08_admits_at_exactly_the_footprint_and_refuses_one_byte_below() {
 }
 
 #[test]
-fn issue_eng_08_zero_budget_refuses_every_device_region_and_no_empty_one() {
+fn zero_budget_refuses_every_device_region_and_no_empty_one() {
     let mut refused = 0;
     for bytes in [1usize, 4, 4096, 1 << 30] {
         let device = Footprint::ZERO.device(Some(bytes));
@@ -114,7 +114,7 @@ fn issue_eng_08_zero_budget_refuses_every_device_region_and_no_empty_one() {
 }
 
 #[test]
-fn issue_eng_08_overflow_is_a_refusal_not_a_panic() {
+fn overflow_is_a_refusal_not_a_panic() {
     assert_eq!(array_bytes::<u32>(usize::MAX), None);
     assert_eq!(array_bytes::<u64>(usize::MAX / 8 + 1), None);
     assert_eq!(array_bytes::<u32>(1000), Some(4000));
@@ -147,7 +147,7 @@ fn issue_eng_08_overflow_is_a_refusal_not_a_panic() {
 }
 
 #[test]
-fn issue_eng_08_footprints_add_per_resource_for_running_totals() {
+fn footprints_add_per_resource_for_running_totals() {
     let mut total = Footprint::ZERO;
     let step = Footprint::ZERO.host(Some(100)).analysis(Some(10));
     let budget = ByteBudget::new(350, 0, 1000);
@@ -166,7 +166,7 @@ fn issue_eng_08_footprints_add_per_resource_for_running_totals() {
 }
 
 #[test]
-fn issue_eng_08_refusal_text_is_stable() {
+fn refusal_text_is_stable() {
     let e = BudgetExceeded {
         family: "histogram",
         resource: Resource::Analysis,

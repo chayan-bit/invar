@@ -57,13 +57,13 @@ fn check_len(len: usize, stages: usize, expected: PlanKind) -> usize {
 }
 
 #[test]
-fn issue_eng_08_cpu_map_past_the_old_element_cap_runs_in_parallel() {
+fn cpu_map_past_the_old_element_cap_runs_in_parallel() {
     let cases = check_len(PAST_OLD_CAP, 1, PlanKind::Map);
     assert_eq!(cases, 4);
 }
 
 #[test]
-fn issue_eng_08_cpu_fused_chain_past_the_old_element_cap_runs_in_parallel() {
+fn cpu_fused_chain_past_the_old_element_cap_runs_in_parallel() {
     let cases = check_len(PAST_OLD_CAP, 3, PlanKind::FusedMap);
     assert_eq!(cases, 4);
 }

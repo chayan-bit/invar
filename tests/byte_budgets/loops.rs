@@ -39,7 +39,7 @@ fn program_of(source: &str) -> (invar::check::CheckedProgram, mir::Program) {
 }
 
 #[test]
-fn issue_eng_08_graph_limits_follow_the_analysis_budget() {
+fn graph_limits_follow_the_analysis_budget() {
     let mut cases = 0;
     assert_eq!(GRAPH_LIMITS, graph_limits(DEFAULT_ANALYSIS_BYTES));
     // The old limits were 64 nodes, 128 ports, 16 map operations and 1_000_000 elements.
@@ -62,7 +62,7 @@ fn issue_eng_08_graph_limits_follow_the_analysis_budget() {
 }
 
 #[test]
-fn issue_eng_08_chains_past_the_fused_plan_size_fuse_in_segments_with_identical_results() {
+fn chains_past_the_fused_plan_size_fuse_in_segments_with_identical_results() {
     let mut cases = 0;
     for stages in [MAX_FUSED_STAGES + 1, 20, 33, 64] {
         let source = chain_source(stages);
@@ -101,7 +101,7 @@ fn issue_eng_08_chains_past_the_fused_plan_size_fuse_in_segments_with_identical_
 }
 
 #[test]
-fn issue_eng_08_chains_past_the_stage_bound_stay_correct_and_do_not_overflow_the_stack() {
+fn chains_past_the_stage_bound_stay_correct_and_do_not_overflow_the_stack() {
     let mut cases = 0;
     for stages in [MAX_FUSED_STAGES + 1, 200] {
         let source = chain_source(stages);
