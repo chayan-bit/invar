@@ -251,7 +251,7 @@ mod tests {
     static NEXT: AtomicU64 = AtomicU64::new(0);
 
     #[test]
-    fn bytes_strings_and_c_abi__c_owned_and_invar_owned_transfers() {
+    fn bytes_strings_and_c_abi_c_owned_and_invar_owned_transfers() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
         let directory = std::env::temp_dir().join(format!(
             "invar-foreign-test-{}-{}",
