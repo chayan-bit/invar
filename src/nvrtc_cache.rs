@@ -6,7 +6,9 @@
 //! arguments (CUDA version, sm, mode) and the exact source bytes, so a changed
 //! source, option or compiler can never hit. Each entry stores a SHA-256 over
 //! its key and payload; an entry that fails it is a miss and is overwritten.
-//! Refusals are never stored. Production builds never set the variable.
+//! Only clean compiles are stored: refusals and compiles with an NVRTC log
+//! (warnings) always run, so tests of refusals and log bounds still compile.
+//! Production builds never set the variable.
 #![forbid(unsafe_code)]
 
 use sha2::{Digest, Sha256};
@@ -19,12 +21,6 @@ use std::{
 const FORMAT: &[u8] = b"invar-nvrtc-cache-v1\0";
 /// Entries beyond this many bytes evict the least recently used first.
 pub const MAX_BYTES: u64 = 4 << 30;
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Entry {
-    pub log: String,
-    pub image: Vec<u8>,
-}
 
 pub fn key(compiler: &str, nvrtc: (u32, u32), args: &[String], source: &[u8]) -> String {
     let mut hash = Sha256::new();
@@ -59,18 +55,12 @@ fn seal(key: &str, payload: &[u8]) -> [u8; 32] {
         .into()
 }
 
-/// The verified entry for `key`, or `None` (absent, unreadable or corrupt).
-pub fn get(dir: &Path, key: &str) -> Option<Entry> {
+/// The verified CUBIN for `key`, or `None` (absent, unreadable or corrupt).
+pub fn get(dir: &Path, key: &str) -> Option<Vec<u8>> {
     let file = path(dir, key);
     let bytes = fs::read(&file).ok()?;
-    let (digest, payload) = bytes.split_at_checked(32)?;
-    if digest != seal(key, payload).as_slice() {
-        return None;
-    }
-    let (len, rest) = payload.split_at_checked(8)?;
-    let len = usize::try_from(u64::from_le_bytes(len.try_into().ok()?)).ok()?;
-    let (log, image) = rest.split_at_checked(len)?;
-    if image.is_empty() {
+    let (digest, image) = bytes.split_at_checked(32)?;
+    if digest != seal(key, image).as_slice() || image.is_empty() {
         return None;
     }
     // Recency for eviction; a failed touch only ages the entry.
@@ -78,21 +68,15 @@ pub fn get(dir: &Path, key: &str) -> Option<Entry> {
         .write(true)
         .open(&file)
         .and_then(|f| f.set_modified(SystemTime::now()));
-    Some(Entry {
-        log: String::from_utf8(log.to_vec()).ok()?,
-        image: image.to_vec(),
-    })
+    Some(image.to_vec())
 }
 
-/// Store `entry` atomically (write, then rename over), then evict the least
+/// Store `image` atomically (write, then rename over), then evict the least
 /// recently used entries until the directory holds at most `max_bytes`.
-pub fn put(dir: &Path, key: &str, entry: &Entry, max_bytes: u64) -> std::io::Result<()> {
+pub fn put(dir: &Path, key: &str, image: &[u8], max_bytes: u64) -> std::io::Result<()> {
     fs::create_dir_all(dir)?;
-    let mut payload = (entry.log.len() as u64).to_le_bytes().to_vec();
-    payload.extend_from_slice(entry.log.as_bytes());
-    payload.extend_from_slice(&entry.image);
-    let mut bytes = seal(key, &payload).to_vec();
-    bytes.extend_from_slice(&payload);
+    let mut bytes = seal(key, image).to_vec();
+    bytes.extend_from_slice(image);
     let partial = dir.join(format!("{key}.{}.partial", std::process::id()));
     fs::write(&partial, bytes)?;
     fs::rename(&partial, path(dir, key))?;
@@ -133,13 +117,6 @@ mod tests {
         dir
     }
 
-    fn entry(image: &[u8]) -> Entry {
-        Entry {
-            log: "warning: x".into(),
-            image: image.to_vec(),
-        }
-    }
-
     #[test]
     fn every_key_input_separates_entries() {
         let args = ["12".to_owned(), "9".into(), "86".into(), "--gnet-v5".into()];
@@ -157,8 +134,8 @@ mod tests {
         let dir = scratch("roundtrip");
         let (a, b) = (key("c", (12, 9), &[], b"a"), key("c", (12, 9), &[], b"b"));
         assert_eq!(get(&dir, &a), None);
-        put(&dir, &a, &entry(b"\x7fELF image"), MAX_BYTES).unwrap();
-        assert_eq!(get(&dir, &a), Some(entry(b"\x7fELF image")));
+        put(&dir, &a, b"\x7fELF image", MAX_BYTES).unwrap();
+        assert_eq!(get(&dir, &a).as_deref(), Some(&b"\x7fELF image"[..]));
         // An entry copied under another key fails its seal.
         fs::copy(path(&dir, &a), path(&dir, &b)).unwrap();
         assert_eq!(get(&dir, &b), None);
@@ -178,13 +155,13 @@ mod tests {
         let dir = scratch("cap");
         for i in 0..8u8 {
             let k = key("c", (12, 9), &[], &[i]);
-            put(&dir, &k, &entry(&[i; 1000]), 3000).unwrap();
+            put(&dir, &k, &[i; 1000], 3000).unwrap();
         }
         let total: u64 = fs::read_dir(&dir)
             .unwrap()
             .map(|f| f.unwrap().metadata().unwrap().len())
             .sum();
-        assert!((1050..=3000).contains(&total), "{total}");
+        assert!((1032..=3000).contains(&total), "{total}");
         fs::remove_dir_all(&dir).unwrap();
     }
 }
