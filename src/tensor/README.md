@@ -12,7 +12,7 @@ A source family used by [schedule](../schedule/README.md); cache keys are in [..
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_contraction`, `--test m4_numeric_layout` and `--test contraction_emitter`.
+- `cargo nextest run --locked --test contraction`, `--test numeric_layout` and `--test contraction_emitter`.
 
 ## Rules to keep
 

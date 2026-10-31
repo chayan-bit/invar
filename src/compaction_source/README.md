@@ -12,7 +12,7 @@ A source family: the registry in [schedule](../schedule/README.md) offers it eac
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_segmented`.
+- `cargo nextest run --locked --test segmented`.
 
 ## Rules to keep
 

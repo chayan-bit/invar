@@ -12,7 +12,7 @@ Used by the indexed families; see [indexed_source](../indexed_source/README.md).
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_indexed` (`static_scatter_proof`, `static_scatter_runtime`).
+- `cargo nextest run --locked --test indexed` (`static_scatter_proof`, `static_scatter_runtime`).
 
 ## Rules to keep
 
