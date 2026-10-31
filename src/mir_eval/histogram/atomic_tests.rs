@@ -255,7 +255,7 @@ fn issue_m4_05_gather_scatter_frontier_histogram_runtime_entry_precedes_producer
 /// publication counter and the host entry counter at their maximum reach
 /// HISTOGRAM_COUNT with no write, debit, trace or producer entry.
 #[test]
-fn issue_ai_01_machine_diagnostics_histogram_publication_harness_faults() {
+fn machine_diagnostics_histogram_publication_harness_faults() {
     let expected = [
         "HISTOGRAM_COUNT", // publication counter at its maximum
         "HISTOGRAM_COUNT", // host entry counter at its maximum
@@ -349,10 +349,7 @@ fn issue_ai_01_machine_diagnostics_histogram_publication_harness_faults() {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|e| {
-            e["fault_test"]
-                == "issue_ai_01_machine_diagnostics_histogram_publication_harness_faults"
-        })
+        .filter(|e| e["fault_test"] == "machine_diagnostics_histogram_publication_harness_faults")
         .map(|e| e["code"].as_str().unwrap())
         .collect::<Vec<_>>();
     assert_eq!(registered, ["HISTOGRAM_COUNT"]);

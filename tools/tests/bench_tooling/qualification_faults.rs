@@ -1,6 +1,6 @@
 //! Fault and boundary controls for the M5-02 qualification harness (`qualification/`). The harness is
 //! compiled into this binary (`main.rs`) to inject its faults. The diagnostic
-//! registry (`tests/diagnostics/issue_ai_01_machine_diagnostics.rs`) cites these tests by name.
+//! registry (`tests/diagnostics/machine_diagnostics.rs`) cites these tests by name.
 #![forbid(unsafe_code)]
 use crate::qualification;
 use invar::front::Span;
@@ -27,7 +27,7 @@ fn qualification_net(source: &[u8]) -> general_net::Net {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults() {
+fn machine_diagnostics_qualification_pipeline_stage_faults() {
     use qualification::{Bounds, corpus::Expected};
     let source = b"fn main()->i32 { return 7; }";
     let case = qualification_case(source, 1000, Expected::Value(7));
@@ -76,7 +76,7 @@ fn issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_refusal_shape_faults() {
+fn machine_diagnostics_qualification_refusal_shape_faults() {
     use front::ErrorKind::{Source, Tool};
     let span = |start, end| Some(Span { start, end });
     for (code, kind, at) in [("", Tool, None), ("X", Source, None)] {
@@ -94,7 +94,7 @@ fn issue_ai_01_machine_diagnostics_qualification_refusal_shape_faults() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_mutation_setup_fault() {
+fn machine_diagnostics_qualification_mutation_setup_fault() {
     qualification::mutations().unwrap();
     let none = invar::mir_net::Limits {
         functions: 0,
@@ -110,7 +110,7 @@ fn issue_ai_01_machine_diagnostics_qualification_mutation_setup_fault() {
 
 #[cfg(feature = "native")]
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_native_fault() {
+fn machine_diagnostics_qualification_native_fault() {
     use qualification::corpus::Expected;
     // Every engine before the native one accepts a zero fuel budget as the
     // typed INVALID_FUEL tool error; the native host alone refuses to run.
@@ -126,7 +126,7 @@ fn issue_ai_01_machine_diagnostics_qualification_native_fault() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_report_boundaries() {
+fn machine_diagnostics_qualification_report_boundaries() {
     let directory = std::env::temp_dir().join(format!("invar-ai01-report-{}", std::process::id()));
     std::fs::create_dir(&directory).unwrap();
     let status = "cpu_semantics_passed_device_qualification_pending";
@@ -149,7 +149,7 @@ fn issue_ai_01_machine_diagnostics_qualification_report_boundaries() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_device_rows_not_requested() {
+fn machine_diagnostics_qualification_device_rows_not_requested() {
     use qualification::corpus::Expected;
     let case = qualification_case(b"fn main()->i32 { return 7; }", 1000, Expected::Value(7));
     let program = qualification::run_case(&case).unwrap();
@@ -164,7 +164,7 @@ fn issue_ai_01_machine_diagnostics_qualification_device_rows_not_requested() {
 }
 
 #[test]
-fn issue_ai_01_machine_diagnostics_qualification_native_rows_follow_the_feature() {
+fn machine_diagnostics_qualification_native_rows_follow_the_feature() {
     use qualification::corpus::Expected;
     let case = qualification_case(b"fn main()->i32 { return 7; }", 1000, Expected::Value(7));
     let program = qualification::run_case(&case).unwrap();

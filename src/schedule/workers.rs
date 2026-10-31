@@ -433,7 +433,7 @@ mod ai_01_fault_tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_scheduler_faults() {
+    fn machine_diagnostics_scheduler_faults() {
         let schema: serde_json::Value = serde_json::from_str(include_str!(
             "../../schema/invar-diagnostics-v3.schema.json"
         ))

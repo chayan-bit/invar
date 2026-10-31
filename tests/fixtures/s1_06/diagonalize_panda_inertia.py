@@ -7,7 +7,7 @@ right-handed eigenvector matrix R of the full tensor I and quat represents R.
 MuJoCo 3.12.0's compile-time `mjuu_eig3` can stop early on the full form
 (the Panda link1 inertia keeps a 4.57e-7 off-diagonal); the principal form
 bypasses it. Decimals are the shortest positional binary64 strings, so the
-same text is valid Invar source and MJCF. `issue_s1_06_panda_inertia` checks
+same text is valid Invar source and MJCF. `panda_inertia` checks
 the result against the upstream tensors.
 Usage: diagonalize_panda_inertia.py UPSTREAM_PANDA_XML OUTPUT_PANDA_XML
 """

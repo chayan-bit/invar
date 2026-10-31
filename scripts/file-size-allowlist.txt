@@ -26,7 +26,7 @@
 839 src/summary_source.rs
 1159 src/system/ros2.rs
 940 src/system/urdf.rs
-831 tests/robotics/issue_s1_06_sequencer_binding.rs
+831 tests/robotics/sequencer_binding.rs
 849 tests/schedule_tuning.rs
 1171 tests/spec_examples.rs
 806 tests/summary/summary_source.rs

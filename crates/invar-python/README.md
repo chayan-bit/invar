@@ -229,8 +229,8 @@ it, then run:
 
 ```sh
 maturin develop --manifest-path crates/invar-python/Cargo.toml --locked --offline
-cargo test --locked --test exports issue_l1_06_python_binding
-cargo test --locked --release --test exports issue_l1_06_python_binding
+cargo test --locked --test exports python_binding_policy
+cargo test --locked --release --test exports python_binding_policy
 cargo clippy --manifest-path crates/invar-python/Cargo.toml --locked --offline --all-targets -- -D warnings
 python -m pytest crates/invar-python/tests -q
 # With a native-enabled core and the LLVM 21 toolchain, qualify both engines:
