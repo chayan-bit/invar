@@ -13,7 +13,7 @@ Read by [schedule](../schedule/README.md) (`profiled.rs`); `--engine auto` consu
 
 ## Tests
 
-- `cargo nextest run --locked --test device` (`v01_placement_calibration`), `--test cli` (`placement_receipts`, `auto_explain_schema`), `--test v02` and `--test normal_form`.
+- `cargo nextest run --locked --test device` (`placement_calibration`), `--test cli` (`placement_receipts`, `auto_explain_schema`), `--test fsum_math_sort_spatial` and `--test normal_form`.
 
 ## Rules to keep
 

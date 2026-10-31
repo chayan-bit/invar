@@ -17,7 +17,7 @@
 //! device faults with no publication), `stencil_runtime` and
 //! `combined_runtime` (CPU-model stencil and combined runtimes).
 //!
-//! Unavailable (GPU, not run here): `gpu_cuda::m4_02` under `--features cuda`
+//! Unavailable (GPU, not run here): `gpu_cuda::transpose_stencil` under `--features cuda`
 //! (device, driver, transfers, completion and timing on real hardware), device
 //! transpose/stencil runtime execution, and the 4096x4096 device transpose.
 #![forbid(unsafe_code)]

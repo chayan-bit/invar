@@ -151,8 +151,8 @@ pub fn denominator<B: Backend>(
         }
         assert!(spawned > 0, "{label} {}: frontier executed", source.name);
     }
-    println!("gnet_03 {label} parallel slice wide={wide:?}");
-    println!("gnet_03 {label} parallel slice serial={serial:?}");
+    println!("general_net_abi5 {label} parallel slice wide={wide:?}");
+    println!("general_net_abi5 {label} parallel slice serial={serial:?}");
     assert!(wide.committed > 0 && wide.peak_width >= 4, "{wide:?}");
     assert!(wide.traps > 0 && wide.traps == serial.traps);
     (wide, serial)
@@ -206,8 +206,8 @@ mod faults {
                 hit.add(f, trapped, epochs);
             }
         }
-        println!("gnet_03 {label} fault {fault:?} base={base:?}");
-        println!("gnet_03 {label} fault {fault:?} injected={hit:?}");
+        println!("general_net_abi5 {label} fault {fault:?} base={base:?}");
+        println!("general_net_abi5 {label} fault {fault:?} injected={hit:?}");
         assert_eq!(base.traps, hit.traps);
         match fault {
             Fault::StaleCompletion | Fault::PoisonedStale => {

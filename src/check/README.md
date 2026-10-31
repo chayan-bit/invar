@@ -18,7 +18,7 @@ Second stage, after [front](../front/README.md). Its output feeds [eval](../eval
 ## Tests
 
 - `cargo nextest run --locked --test language` covers checking, ownership, views, generics, closures, units and bytes.
-- `cargo nextest run --locked --test numeric_tiers` and `--test v02` cover the numeric and reduction checks.
+- `cargo nextest run --locked --test numeric_tiers` and `--test fsum_math_sort_spatial` cover the numeric and reduction checks.
 
 ## Rules to keep
 

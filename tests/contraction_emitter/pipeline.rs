@@ -5,7 +5,7 @@
 //! complete before it is read and never overwritten while it can still be
 //! read, and the per-cell accumulation is the tiled schedule's (so results
 //! stay bit-identical to the strict oracle). Device rows run in
-//! `tests/gpu_cuda/eng_06_pipeline.rs`.
+//! `tests/gpu_cuda/cp_async_pipeline.rs`.
 #![forbid(unsafe_code)]
 
 use crate::corpus;

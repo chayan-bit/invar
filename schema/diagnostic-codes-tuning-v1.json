@@ -7,7 +7,7 @@
       "meaning": "a calibration profile could not be read or published without overwriting an existing path",
       "reachability": "external",
       "justification": "Profile files and output paths are external inputs; an IO failure never changes the selected engine.",
-      "boundary_test": "issue_v02_placement_bounded_loader_atomic_publish_and_no_clobber"
+      "boundary_test": "placement_bounded_loader_atomic_publish_and_no_clobber"
     },
     {
       "code": "TUNING_ADMISSION",

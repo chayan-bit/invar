@@ -12,7 +12,7 @@ Checked by [check](../check/README.md); programs that use it keep their other re
 
 ## Tests
 
-- `cargo nextest run --locked --test v02` (`v02_spatial_*`); hardware in `tests/gpu_cuda/v02_spatial.rs` and `tests/gpu_metal/v02_spatial.rs`.
+- `cargo nextest run --locked --test fsum_math_sort_spatial` (`spatial_*`); hardware in `tests/gpu_cuda/spatial.rs` and `tests/gpu_metal/spatial.rs`.
 
 ## Rules to keep
 

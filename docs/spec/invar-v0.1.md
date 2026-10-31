@@ -2,8 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27826 estimator=bytes/3 limit=30000
-
+Size record: tokens=27843 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1092,7 +1091,7 @@ fn main() -> i32 {
 [N11.5.2] CUDA admits NVRTC 12.4 or newer in the 12.x series and compute capability 5.0 or newer, compiled for the explicit `sm` of device zero. `docs/cuda-target-v1.md`
 [N11.5.3] Metal needs Apple7 or newer with MSL 3.1, a kernel needing more than 31 buffer arguments is Metal-ineligible, and the general-net task cascade additionally needs MSL 3.2 and otherwise uses its staged form. `docs/gnet-task-v01.md`
 [N11.5.4] The device IR admits `u32` maps (fused chains of 2 to 16 stages), reductions and affine scans through one verifier, and only a verified plan reaches code emission. `tests/device_reductions_scans.rs::device_reductions_scans_graph_plans_lower_to_shared_ir`
-[N11.5.5] Unknown completion is `CUDA_PENDING` or `METAL_PENDING`, permits no CPU replay, and keeps loans and quarantine. `tests/gpu_cuda/m3_05.rs::issue_m3_05_gpu_failure_prefix_and_quarantine`
+[N11.5.5] Unknown completion is `CUDA_PENDING` or `METAL_PENDING`, permits no CPU replay, and keeps loans and quarantine. `tests/gpu_cuda/guarded_integration.rs::gpu_failure_prefix_and_quarantine`
 [N11.5.6] `auto` chooses by a once-per-process measured cost model with a 10 percent device win margin and may fall back to the CPU only before submission or after confirmed quiescence. `docs/explain.md`
 [N11.5.7] Hardware tests are ignored in the default suite, and device results are pinned to their recorded hosts. `docs/validation.md`
 [N11.5.8] Map DAGs, wrapping reductions and affine scans admit up to 2^28 `u32` elements on the device. `docs/cuda-target-v1.md`
@@ -1294,9 +1293,9 @@ fn main() -> i32 {
 
 ### B.5 Placement profiles
 
-[NB.5.1] `invar calibrate [--out NEW_PATH] [--family placement.wrapping_add1.u32] [--host-class CLASS]` measures the single family `placement.wrapping_add1.u32` and publishes a new provisional `invar-placement-v1` profile, by default at `calibration/<os>-<arch>.json`, and never replaces an existing path. `tests/v02/v02_placement.rs::calibrate_cli_exports_a_valid_provisional_profile` `tests/v02/v02_placement.rs::issue_v02_placement_bounded_loader_atomic_publish_and_no_clobber`
+[NB.5.1] `invar calibrate [--out NEW_PATH] [--family placement.wrapping_add1.u32] [--host-class CLASS]` measures the single family `placement.wrapping_add1.u32` and publishes a new provisional `invar-placement-v1` profile, by default at `calibration/<os>-<arch>.json`, and never replaces an existing path. `tests/fsum_math_sort_spatial/placement.rs::calibrate_cli_exports_a_valid_provisional_profile` `tests/fsum_math_sort_spatial/placement.rs::placement_bounded_loader_atomic_publish_and_no_clobber`
 [NB.5.2] `run` and `explain` with `--engine auto` accept `--profile PROFILE`, `--host-class CLASS` and `--trust-provisional`, and a provisional profile influences placement only with `--trust-provisional`. `src/lib.rs::--trust-provisional` `spec/placement-v1.md`
-[NB.5.3] Placement owns `--engine auto` only when one of those flags is given or the live host's default profile is not a matching provisional one, and every other auto run keeps the established path of N11.5.6, whose documents take the versions of NB.5.6. `src/auto_command.rs::placement_requested` `tests/v02/v02_placement.rs::auto_stays_on_the_established_path_unless_placement_is_asked_for`
-[NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/v02/v02_placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
+[NB.5.3] Placement owns `--engine auto` only when one of those flags is given or the live host's default profile is not a matching provisional one, and every other auto run keeps the established path of N11.5.6, whose documents take the versions of NB.5.6. `src/auto_command.rs::placement_requested` `tests/fsum_math_sort_spatial/placement.rs::auto_stays_on_the_established_path_unless_placement_is_asked_for`
+[NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/fsum_math_sort_spatial/placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
 [NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement adds `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run has no `placement` and records `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`

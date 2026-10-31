@@ -13,7 +13,7 @@
       "host_class": "apple-m4",
       "workers": 10,
       "load_average_1m": 4.1,
-      "harness": "tests/gpu_metal/v02_fsum.rs v02_fsum_metal_crossover (median of 15 after 5 warmups)",
+      "harness": "tests/gpu_metal/fsum.rs fsum_metal_crossover (median of 15 after 5 warmups)",
       "one_worker_ms_at_2^26": {"fsum.sum_tree.f32": 43.79, "fsum.dot_tree.f32": 33.08, "fsum.sum_exact.f32": 208.64, "fsum.dot_exact.f32": 153.49},
       "ten_workers_ms_at_2^10_to_2^12_max": 0.0893,
       "cpu_crossover_measured": {"fsum.sum_tree.f32": "2^18", "fsum.dot_tree.f32": "2^18", "fsum.sum_exact.f32": "2^16", "fsum.dot_exact.f32": "2^16"},

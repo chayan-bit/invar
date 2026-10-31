@@ -47,7 +47,7 @@ Its per-test overrides name tests that need several threads or must run first, s
 - **GPU tests.** [tests/gpu_cuda](../tests/gpu_cuda/main.rs) needs `--features cuda` and an NVIDIA GPU; [tests/gpu_metal](../tests/gpu_metal/main.rs) needs `--features metal` on Apple Silicon.
   Each test in them is marked `#[ignore]`, so a default run skips them, and CI only compiles them.
   Without the hardware you do not need to run them; say so in your pull request.
-  With it: `just test-gpu-cuda` or `just test-metal`, or one family with `cargo test --features cuda --test gpu_cuda -- --ignored m3_01::`.
+  With it: `just test-gpu-cuda` or `just test-metal`, or one family with `cargo test --features cuda --test gpu_cuda -- --ignored runtime_round_trip::`.
 - **Native tests** need `--features native` and LLVM 21; several `language` and `mir` tests exercise the native backend only in such a build.
 - **`_env` robotics tests** need external tools such as ROS 2 or MuJoCo and are described in their file headers.
 - **Compiler-heavy tests** (the `gnet_*` binaries) compile generated C++ and need a C++17 compiler on `PATH`; CI uses the system compiler on Linux and llvm-mingw on Windows.
@@ -168,20 +168,20 @@ Device plans checked on the CPU: the shared device IR, its verifier, CUDA and Me
 
 | Module | Covers |
 | --- | --- |
-| `a1_grid` | Run-path evidence for the grid (spatial) adapters on the CPU boundary. |
-| `a1_tensor_dispatch` | Tensor dispatch through the CLI and owning devices. |
-| `issue_a1_indexed` | Ordinary indexed-source routing. |
-| `issue_a1_segmented` | CLI refusals for forced engines on programs with no device candidate. |
-| `issue_gnet_cuda_aot_format` | Every field of the compiled-ahead CUDA container is validated on load. |
-| `issue_metal_aot_format` | Every field of the compiled-ahead Metal container is validated on load. |
-| `issue_m3_01_cuda_runtime` | The CUDA runtime driver against a mock device: prepare, submit, complete, read. |
-| `issue_m3_02_device_ir_verifier` | Device IR for admitted maps: determinism, malformed plans and no device fallback. |
-| `issue_m3_03_cuda_fused_maps` | Fused map chains and zip DAGs lowered to device plans with CPU parity. |
-| `issue_m3_05_guarded_gpu_integration` | Verified-graph plans, forged cache artifacts and the measured-cost rule. |
-| `issue_m4_01_metal_emission` | Metal source emission shares the verified IR with CUDA. |
-| `issue_v01_pair_reduction` | Ordered affine-pair reduction cost facts, reference, MIR and chunked CPU. |
-| `issue_v01_shared_device_cap` | Shared map, reduction and scan admission against the device byte cap. |
-| `v01_placement_calibration` | The `invar-placement-v1` calibration protocol and profile loader. |
+| `grid_adapters` | Run-path evidence for the grid (spatial) adapters on the CPU boundary. |
+| `tensor_dispatch` | Tensor dispatch through the CLI and owning devices. |
+| `indexed_routing` | Ordinary indexed-source routing. |
+| `segmented_refusals` | CLI refusals for forced engines on programs with no device candidate. |
+| `cuda_aot_container_format` | Every field of the compiled-ahead CUDA container is validated on load. |
+| `metal_aot_container_format` | Every field of the compiled-ahead Metal container is validated on load. |
+| `cuda_runtime_mock` | The CUDA runtime driver against a mock device: prepare, submit, complete, read. |
+| `device_ir_verifier` | Device IR for admitted maps: determinism, malformed plans and no device fallback. |
+| `fused_map_device_plans` | Fused map chains and zip DAGs lowered to device plans with CPU parity. |
+| `guarded_device_integration` | Verified-graph plans, forged cache artifacts and the measured-cost rule. |
+| `metal_emission` | Metal source emission shares the verified IR with CUDA. |
+| `pair_reduction_device` | Ordered affine-pair reduction cost facts, reference, MIR and chunked CPU. |
+| `shared_device_cap` | Shared map, reduction and scan admission against the device byte cap. |
+| `placement_calibration` | The `invar-placement-v1` calibration protocol and profile loader. |
 
 ### `diagnostics`
 
@@ -473,31 +473,31 @@ The system dialect, foreign components, generated ROS 2 and MuJoCo targets, the 
 | `robotics_vocabulary` | The shipped robotics vocabulary module. |
 | `substep_admission_source` | Substep admission source checks and refusals. |
 
-### `v02`
+### `fsum_math_sort_spatial`
 
 Features added after v0.1: deterministic float reductions, binary64, the cr-v1 math library, stable sort and spatial grid queries.
 
 | Module | Covers |
 | --- | --- |
-| `issue_c4_cr_default` | `f32` `sin`, `cos` and `sqrt` use cr-v1 on every engine. |
-| `issue_v02_f64_oracle` | The exact-rational binary64 oracle. |
-| `issue_v02_f64_source` | Executable `f64` and the math library from ordinary source. |
-| `issue_v02_fk_panda` | Panda forward kinematics in `f64` reproduces the reference. |
-| `issue_v02_math_differential` | cr-v1 against an independent build of CORE-MATH. |
-| `issue_v02_math_engines` | Every library function on every engine. |
-| `issue_v02_math_msl` | cr-v1 binary32 for Metal. |
+| `math_cr_default` | `f32` `sin`, `cos` and `sqrt` use cr-v1 on every engine. |
+| `f64_oracle` | The exact-rational binary64 oracle. |
+| `f64_source` | Executable `f64` and the math library from ordinary source. |
+| `fk_panda` | Panda forward kinematics in `f64` reproduces the reference. |
+| `math_differential` | cr-v1 against an independent build of CORE-MATH. |
+| `math_engines` | Every library function on every engine. |
+| `math_msl` | cr-v1 binary32 for Metal. |
 | `sort_fsum` | Programs that also sort or query space keep their float reductions. |
-| `v02_fsum_cli` | Deterministic reductions through the real CLI. |
-| `v02_fsum_oracle` | The fast reduction code against its reference semantics. |
-| `v02_placement` | Placement for the v0.2 families. |
-| `v02_sort_contract` | Sort contract, explain schema and oracle. |
-| `v02_sort_device` | Sort device admission and CUDA/Metal differential. |
-| `v02_sort_lowering` | The radix sort core and its boundaries. |
-| `v02_spatial_checker` | Spatial checking and opaque affine ownership. |
-| `v02_spatial_demo` | A point-cloud radius demo against an independent oracle. |
-| `v02_spatial_oracle` | The all-pairs spatial oracle. |
-| `v02_spatial_placement` | Spatial explain families and unmeasured placement. |
-| `v02_spatial_reference` | Source-to-reference differential for spatial queries. |
+| `fsum_cli` | Deterministic reductions through the real CLI. |
+| `fsum_oracle` | The fast reduction code against its reference semantics. |
+| `placement` | Placement for the v0.2 families. |
+| `sort_contract` | Sort contract, explain schema and oracle. |
+| `sort_device` | Sort device admission and CUDA/Metal differential. |
+| `sort_lowering` | The radix sort core and its boundaries. |
+| `spatial_checker` | Spatial checking and opaque affine ownership. |
+| `spatial_demo` | A point-cloud radius demo against an independent oracle. |
+| `spatial_oracle` | The all-pairs spatial oracle. |
+| `spatial_placement` | Spatial explain families and unmeasured placement. |
+| `spatial_reference` | Source-to-reference differential for spatial queries. |
 
 ### `gpu_cuda`
 
@@ -505,36 +505,36 @@ Every CUDA hardware test, one module per family. Each is `#[ignore]`d unless run
 
 | Module | Covers |
 | --- | --- |
-| `a1_grid` | Grid adapters on a real CUDA device. |
-| `a1_indexed` | Indexed source routing on CUDA. |
-| `a1_segmented` | Segmented publication on CUDA. |
-| `a1_tensor_dispatch` | Tensor dispatch on CUDA. |
-| `eng_03_tier` | Fold-tier device test shared with Metal. |
-| `eng_06_pipeline` | Asynchronous-copy pipelines on a GPU of compute capability 8.0 or newer. |
-| `gnet_03` | The ordinary-source general-net ABI5 on CUDA. |
-| `gnet_03_nvrtc_pipes` | The bounded NVRTC subprocess keeps only a capped log prefix. |
+| `grid` | Grid adapters on a real CUDA device. |
+| `indexed_routing` | Indexed source routing on CUDA. |
+| `segmented_publication` | Segmented publication on CUDA. |
+| `tensor_dispatch` | Tensor dispatch on CUDA. |
+| `fold_tier` | Fold-tier device test shared with Metal. |
+| `cp_async_pipeline` | Asynchronous-copy pipelines on a GPU of compute capability 8.0 or newer. |
+| `general_net_abi5` | The ordinary-source general-net ABI5 on CUDA. |
+| `nvrtc_pipes` | The bounded NVRTC subprocess keeps only a capped log prefix. |
 | `gnet_cuda_aot` | Compiled-ahead CUDA on the actual device. |
-| `gnet_p0b` | General-net entry corpus against the CPU oracle. |
+| `general_net_entry` | General-net entry corpus against the CPU oracle. |
 | `law_bench` | Law-collective calibration and sessions. |
 | `law_collective` | Law-collective emitters on CUDA. |
-| `m3_01` | A live CUDA round trip. |
-| `m3_02` | Generated map and verifier rejections. |
-| `m3_03` | Fused maps. |
-| `m3_04` | Reductions, scans, sanitizer and cold-process runs. |
-| `m3_05` | Forced and auto runs, module cache, hints, faults and CLI. |
-| `m4_01` | Strict binary32 contraction. |
-| `m4_01_nvrtc_modes` | NVRTC private modes and bounded warning logs. |
-| `m4_02` | Transpose and stencil kernels. |
-| `m4_03` | Shared tiled-contraction tests plus CUDA-only ones. |
-| `m4_04` | Segmented tests plus CUDA admission refusals. |
-| `m4_05` | Indexed families, fault paths and 2^28-element runs. |
-| `m4_07` | Summary families and the largest scans. |
+| `runtime_round_trip` | A live CUDA round trip. |
+| `generated_map` | Generated map and verifier rejections. |
+| `fused_maps` | Fused maps. |
+| `reductions_scans` | Reductions, scans, sanitizer and cold-process runs. |
+| `guarded_integration` | Forced and auto runs, module cache, hints, faults and CLI. |
+| `f32_contraction` | Strict binary32 contraction. |
+| `nvrtc_modes` | NVRTC private modes and bounded warning logs. |
+| `transpose_stencil` | Transpose and stencil kernels. |
+| `tiled_contraction` | Shared tiled-contraction tests plus CUDA-only ones. |
+| `segmented` | Segmented tests plus CUDA admission refusals. |
+| `indexed` | Indexed families, fault paths and 2^28-element runs. |
+| `summary` | Summary families and the largest scans. |
 | `pair_reduction` | Pair-reduction tests shared with Metal. |
 | `sort_fsum` | Sorting programs with float reductions. |
 | `task_region` | The emitted fork-join task region. |
-| `v02_fsum` | v0.2 reductions on a live device. |
-| `v02_math` | cr-v1 bit for bit against independent oracles. |
-| `v02_spatial` | Spatial tests shared with Metal and size lists. |
+| `fsum` | v0.2 reductions on a live device. |
+| `math_cr_v1` | cr-v1 bit for bit against independent oracles. |
+| `spatial` | Spatial tests shared with Metal and size lists. |
 
 ### `gpu_metal`
 
@@ -542,28 +542,28 @@ Every Metal hardware test, one module per family; `#[ignore]`d unless run with `
 
 | Module | Covers |
 | --- | --- |
-| `a1_grid` | Grid adapters on a real Metal device. |
-| `a1_indexed` | Indexed source routing on Metal. |
-| `a1_segmented` | Segmented publication on Metal. |
-| `a1_tensor_dispatch` | Tensor dispatch on Metal. |
-| `eng_03_tier` | Fold-tier device test shared with CUDA. |
-| `gnet_03` | The ordinary-source general-net ABI5 on Metal. |
-| `gnet_p0b` | General-net entry corpus against the CPU oracle. |
+| `grid` | Grid adapters on a real Metal device. |
+| `indexed_routing` | Indexed source routing on Metal. |
+| `segmented_publication` | Segmented publication on Metal. |
+| `tensor_dispatch` | Tensor dispatch on Metal. |
+| `fold_tier` | Fold-tier device test shared with CUDA. |
+| `general_net_abi5` | The ordinary-source general-net ABI5 on Metal. |
+| `general_net_entry` | General-net entry corpus against the CPU oracle. |
 | `law_bench` | Law-collective pilot and calibration. |
 | `law_collective` | Law-collective emitters on Metal. |
-| `m3_06` | Live MIR dispatch, auto choice, CLI explain and device kernels (a directory). |
-| `m4_01` | Strict binary32 contraction. |
-| `m4_03` | Tiled contraction on Metal. |
-| `m4_04` | Segmented tests plus Metal refusals. |
-| `m4_07` | Summary families and look-back schedules. |
-| `metal_aot` | Fresh processes run from built containers. |
-| `metal_archives` | Fresh-process backend archive qualification. |
+| `dispatch_and_kernels` | Live MIR dispatch, auto choice, CLI explain and device kernels (a directory). |
+| `f32_contraction` | Strict binary32 contraction. |
+| `tiled_contraction` | Tiled contraction on Metal. |
+| `segmented` | Segmented tests plus Metal refusals. |
+| `summary` | Summary families and look-back schedules. |
+| `compiled_ahead` | Fresh processes run from built containers. |
+| `backend_archives` | Fresh-process backend archive qualification. |
 | `pair_reduction` | Pair-reduction tests shared with CUDA. |
 | `sort_fsum` | Sorting programs with float reductions. |
 | `task_region` | The emitted fork-join task region. |
-| `v02_fsum` | v0.2 reductions on a live device. |
-| `v02_math_msl` | cr-v1 binary32 on a real GPU against CORE-MATH. |
-| `v02_spatial` | Spatial tests shared with CUDA and size lists. |
+| `fsum` | v0.2 reductions on a live device. |
+| `math_msl` | cr-v1 binary32 on a real GPU against CORE-MATH. |
+| `spatial` | Spatial tests shared with CUDA and size lists. |
 
 ### Binaries outside the directory layout
 

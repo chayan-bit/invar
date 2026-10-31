@@ -15,7 +15,7 @@ fn valid_registry_entry(entry: &Value) -> bool {
                 .is_some_and(|sentence| sentence.len() > 20 && sentence.ends_with('.'))
                 && entry["boundary_test"].as_str().is_some_and(|name| {
                     name.starts_with("schedule_tuning_")
-                        || name.starts_with("issue_v02_placement_")
+                        || name.starts_with("placement_")
                         || name.starts_with("robotics_vocabulary_")
                         || name.starts_with("foreign_manifests_")
                         || name.starts_with("issue_l1_06_python_binding_")
@@ -325,7 +325,7 @@ fn machine_diagnostics_registry_covers_emitted_literals() {
                         .contains(&test)
                     || OWN_SOURCES.iter().any(|source| source.contains(&test))
                     || include_str!("../../../tools/tests/bench_tooling/qualification_faults.rs").contains(&test)
-                    || include_str!("../../v02/v02_placement.rs").contains(&test)
+                    || include_str!("../../fsum_math_sort_spatial/placement.rs").contains(&test)
                     || include_str!("../../robotics/robotics_vocabulary.rs").contains(&test)
                     || include_str!("../../robotics/foreign_manifests.rs").contains(&test)
                     || include_str!("../../../crates/invar-python/src/tests.rs").contains(&test)
