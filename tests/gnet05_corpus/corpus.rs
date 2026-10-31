@@ -544,73 +544,36 @@ fn corpus_compiler_sources_never_name_the_corpus() {
 /// Device execution of every admitted program and input, exact against the
 /// oracle, wide and as a capacity-0 serial control. Returns
 /// (programs executed, inputs executed, traps, spawned, committed, peak width).
+/// Programs are independent: `INVAR_GNET05_DEVICE_JOBS` (default 1) runs that
+/// many at once, each with its own backends; the totals do not depend on it.
 #[cfg(any(feature = "metal", feature = "cuda"))]
 fn device_corpus<B: device_host::Backend>(
     target: Target,
     label: &str,
-    mut backend: impl FnMut() -> B,
+    backend: impl Fn() -> B + Sync,
 ) -> [u64; 6] {
+    let start = std::time::Instant::now();
+    let programs = calibrated();
+    let jobs = std::env::var("INVAR_GNET05_DEVICE_JOBS")
+        .ok()
+        .and_then(|n| n.parse().ok())
+        .unwrap_or(1);
+    let runs = device::bounded_pool(&programs, jobs, |p| {
+        let plan =
+            Plan::from_source(p.source.as_bytes(), "run", target, parallel::limits()).ok()?;
+        println!("gnet05 {label} {} at {:?}", p.id, start.elapsed());
+        Some(device_program(target, label, &backend, p, &plan))
+    });
     let mut totals = [0u64; 6];
     let mut deep = 0;
-    let start = std::time::Instant::now();
-    for p in calibrated() {
-        let Ok(plan) = Plan::from_source(p.source.as_bytes(), "run", target, parallel::limits())
-        else {
-            continue;
-        };
-        println!("gnet05 {label} {} at {:?}", p.id, start.elapsed());
-        totals[0] += 1;
-        for (i, &pair) in p.inputs.iter().enumerate() {
-            let values = args(&p, pair);
-            let context = format!("{label} {} {pair:?}", p.id);
-            if Some(i) == p.deep_input {
-                // Deep inputs run on the device on request, only within the
-                // device configuration's 1,000,000-step fuel cap, and with a
-                // larger admission buffer budget for their trace; they are
-                // counted apart.
-                if std::env::var_os("INVAR_GNET05_DEEP_DEVICE").is_some()
-                    && p.budgets[i] <= DEVICE_CAP
-                {
-                    let limits = device_host::Limits {
-                        buffer_bytes: DEEP_BUFFER_BYTES,
-                        ..parallel::limits()
-                    };
-                    let plan = Plan::from_source(p.source.as_bytes(), "run", target, limits)
-                        .unwrap_or_else(|e| panic!("{context}: deep plan {e:?}"));
-                    let budget = p.budgets[i];
-                    exact_with_budget(
-                        &context,
-                        &plan,
-                        &mut backend,
-                        &values,
-                        parallel::SLOTS,
-                        budget,
-                    );
-                    let (serial, _, _) =
-                        exact_with_budget(&context, &plan, &mut backend, &values, 0, budget);
-                    assert_eq!(serial.spawned, 0, "{context}");
-                    deep += 1;
-                }
-                continue;
-            }
-            let (f, trapped, _) =
-                parallel::exact(&context, &plan, &mut backend, &values, parallel::SLOTS);
-            let (serial, _, _) = parallel::exact(
-                &format!("{context} serial"),
-                &plan,
-                &mut backend,
-                &values,
-                0,
-            );
-            assert_eq!(serial.spawned, 0, "{context}");
-            totals[1] += 1;
-            totals[2] += u64::from(trapped);
-            totals[3] += f.spawned;
-            totals[4] += f.committed;
-            totals[5] = totals[5].max(f.peak_width);
+    for (program, program_deep) in runs.into_iter().flatten() {
+        for i in 0..5 {
+            totals[i] += program[i];
         }
+        totals[5] = totals[5].max(program[5]);
+        deep += program_deep;
     }
-    println!("gnet05 {label} deep inputs executed={deep}");
+    println!("gnet05 {label} deep inputs executed={deep} jobs={jobs}");
     println!(
         "gnet05 {label} programs={} inputs={} traps={} spawned={} committed={} peak_width={}",
         totals[0], totals[1], totals[2], totals[3], totals[4], totals[5]
@@ -620,6 +583,65 @@ fn device_corpus<B: device_host::Backend>(
         "{label}: the corpus executed frontiers"
     );
     totals
+}
+
+/// Every input of one admitted program: its `device_corpus` totals and the
+/// number of deep inputs it ran.
+#[cfg(any(feature = "metal", feature = "cuda"))]
+fn device_program<B: device_host::Backend>(
+    target: Target,
+    label: &str,
+    backend: &impl Fn() -> B,
+    p: &Program,
+    plan: &Plan,
+) -> ([u64; 6], u64) {
+    let mut backend = || backend();
+    let mut totals = [1, 0, 0, 0, 0, 0];
+    let mut deep = 0;
+    for (i, &pair) in p.inputs.iter().enumerate() {
+        let values = args(p, pair);
+        let context = format!("{label} {} {pair:?}", p.id);
+        if Some(i) == p.deep_input {
+            // Deep inputs run on the device on request, only within the
+            // device configuration's 1,000,000-step fuel cap, and with a
+            // larger admission buffer budget for their trace; they are
+            // counted apart.
+            if std::env::var_os("INVAR_GNET05_DEEP_DEVICE").is_some() && p.budgets[i] <= DEVICE_CAP
+            {
+                let limits = device_host::Limits {
+                    buffer_bytes: DEEP_BUFFER_BYTES,
+                    ..parallel::limits()
+                };
+                let plan = Plan::from_source(p.source.as_bytes(), "run", target, limits)
+                    .unwrap_or_else(|e| panic!("{context}: deep plan {e:?}"));
+                let budget = p.budgets[i];
+                exact_with_budget(
+                    &context,
+                    &plan,
+                    &mut backend,
+                    &values,
+                    parallel::SLOTS,
+                    budget,
+                );
+                let (serial, _, _) =
+                    exact_with_budget(&context, &plan, &mut backend, &values, 0, budget);
+                assert_eq!(serial.spawned, 0, "{context}");
+                deep += 1;
+            }
+            continue;
+        }
+        let (f, trapped, _) =
+            parallel::exact(&context, plan, &mut backend, &values, parallel::SLOTS);
+        let (serial, _, _) =
+            parallel::exact(&format!("{context} serial"), plan, &mut backend, &values, 0);
+        assert_eq!(serial.spawned, 0, "{context}");
+        totals[1] += 1;
+        totals[2] += u64::from(trapped);
+        totals[3] += f.spawned;
+        totals[4] += f.committed;
+        totals[5] = totals[5].max(f.peak_width);
+    }
+    (totals, deep)
 }
 
 /// Device configuration cap on fuel, transitions and trace events
