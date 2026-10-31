@@ -52,7 +52,7 @@ Sweep of compiled/process test deadlines:
 - `tests/gnet_device_model/issue_gnet_{12_cuda_owned_numeric_model,resume_device_model}.rs`,
   `tests/gnet_numeric_host/issue_gnet_f32_helpers_flag_independence.rs`:
   the existing process-group poll runners. CPU limits remain unchanged.
-- `tests/transpose_stencil/issue_m4_02_{stencil_source,transpose_source}.rs`,
+- `tests/transpose_stencil/{stencil_source,transpose_source}.rs`,
   `tests/contraction/matrix_contraction.rs`,
   `crates/invar-device/tests/m4_02_transpose.rs`: compiler and CPU-model runs.
   Embedded `alarm()` wall timers now use the parent group watchdog instead;
