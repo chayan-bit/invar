@@ -54,7 +54,7 @@ Sweep of compiled/process test deadlines:
   the existing process-group poll runners. CPU limits remain unchanged.
 - `tests/transpose_stencil/{stencil_source,transpose_source}.rs`,
   `tests/contraction/matrix_contraction.rs`,
-  `crates/invar-device/tests/m4_02_transpose.rs`: compiler and CPU-model runs.
+  `crates/invar-device/tests/transpose_schedule.rs`: compiler and CPU-model runs.
   Embedded `alarm()` wall timers now use the parent group watchdog instead;
   stencil's independent CPU limit remains unchanged.
 - `crates/invar-cuda/src/cuda/{floating_tests,transpose_tests}.rs`: mock compiler
@@ -65,7 +65,7 @@ Sweep of compiled/process test deadlines:
 - `src/native.rs`: only the `cfg(test)` elapsed-time assertions around child
   output/draining and executable-writer checks; the real 30-second process
   watchdog and 250 ms executable-writer retry budget remain unchanged.
-- `tools/tests/bench_tooling/issue_m5_01_build_lineage.rs`: successful fixture build budgets, executable
+- `tools/tests/bench_tooling/build_lineage.rs`: successful fixture build budgets, executable
   and FIFO probes, and harness elapsed-time assertions. Deliberate 200/250 ms
   timeout requests retain their exact durations and typed `Error::Timeout`.
   Scaled non-timeout requests saturate at the product's existing 600-second

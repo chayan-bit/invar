@@ -109,32 +109,32 @@ fn check_suite(suite: &'static str, shard: usize) {
 }
 
 #[test]
-fn issue_eng_10_ml_programs_match_their_oracle_on_every_engine_0() {
+fn ml_programs_match_their_oracle_on_every_engine_0() {
     check_suite("ml", 0);
 }
 
 #[test]
-fn issue_eng_10_ml_programs_match_their_oracle_on_every_engine_1() {
+fn ml_programs_match_their_oracle_on_every_engine_1() {
     check_suite("ml", 1);
 }
 
 #[test]
-fn issue_eng_10_games_programs_match_their_oracle_on_every_engine_0() {
+fn games_programs_match_their_oracle_on_every_engine_0() {
     check_suite("games", 0);
 }
 
 #[test]
-fn issue_eng_10_games_programs_match_their_oracle_on_every_engine_1() {
+fn games_programs_match_their_oracle_on_every_engine_1() {
     check_suite("games", 1);
 }
 
 #[test]
-fn issue_eng_10_robotics_programs_match_their_oracle_on_every_engine_0() {
+fn robotics_programs_match_their_oracle_on_every_engine_0() {
     check_suite("robotics", 0);
 }
 
 #[test]
-fn issue_eng_10_robotics_programs_match_their_oracle_on_every_engine_1() {
+fn robotics_programs_match_their_oracle_on_every_engine_1() {
     check_suite("robotics", 1);
 }
 
@@ -153,7 +153,7 @@ fn with_wrong_first_value(source: &str) -> String {
 }
 
 #[test]
-fn issue_eng_10_the_self_check_is_not_vacuous() {
+fn the_self_check_is_not_vacuous() {
     on_big_stack(|| {
         for suite in domains::SUITES {
             for program in domains::programs(suite).unwrap() {
@@ -167,7 +167,7 @@ fn issue_eng_10_the_self_check_is_not_vacuous() {
 }
 
 #[test]
-fn issue_eng_10_cr_exp_agrees_with_f64_libm_to_one_ulp() {
+fn cr_exp_agrees_with_f64_libm_to_one_ulp() {
     for k in -2000i32..2000 {
         let x = k as f32 * 0.01;
         let got = domains::oracle::exp(x);
@@ -184,7 +184,7 @@ fn entries<'a>(manifest: &'a mut Value, suite: &str) -> &'a mut Vec<Value> {
 }
 
 #[test]
-fn issue_eng_10_trig_oracle_is_within_one_ulp_of_f64_libm() {
+fn trig_oracle_is_within_one_ulp_of_f64_libm() {
     for k in -3000i32..3000 {
         let x = k as f32 * 0.01 + 0.003;
         for (got, wide) in [
@@ -198,7 +198,7 @@ fn issue_eng_10_trig_oracle_is_within_one_ulp_of_f64_libm() {
 }
 
 #[test]
-fn issue_eng_10_manifest_validation_refuses_every_tampering() {
+fn manifest_validation_refuses_every_tampering() {
     let good = domains::manifest::build().unwrap();
     domains::manifest::validate(&good).unwrap();
     assert_eq!(
@@ -275,7 +275,7 @@ fn renamed(source: &str, from: &str, to: &str) -> String {
 }
 
 #[test]
-fn issue_eng_10_held_out_programs_are_refused_on_every_tuning_path() {
+fn held_out_programs_are_refused_on_every_tuning_path() {
     for suite in domains::SUITES {
         let (index, tuning) = domains::manifest::tuning_programs(suite).unwrap();
         assert!(index.len() > 0 && !tuning.is_empty(), "{suite}");
@@ -319,7 +319,7 @@ fn issue_eng_10_held_out_programs_are_refused_on_every_tuning_path() {
 }
 
 #[test]
-fn issue_eng_10_no_compiler_file_keys_on_a_suite() {
+fn no_compiler_file_keys_on_a_suite() {
     let needles = domains::keying::needles().unwrap();
     // The scan covers the compiler (`src/`, `crates/`) next to this package, not the harness.
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -380,7 +380,7 @@ fn issue_eng_10_no_compiler_file_keys_on_a_suite() {
 }
 
 #[test]
-fn issue_eng_10_the_coverage_report_accounts_for_every_program() {
+fn the_coverage_report_accounts_for_every_program() {
     let spawn = |suite: &str| {
         std::process::Command::new(env!("CARGO_BIN_EXE_invar-bench"))
             .args(["--domain-report", suite])

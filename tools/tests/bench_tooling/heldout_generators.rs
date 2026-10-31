@@ -1,3 +1,4 @@
+//! Issue #7 (M5-01).
 #![forbid(unsafe_code)]
 use crate::{corpus, hash, heldout};
 use invar::{check, front};
@@ -192,7 +193,7 @@ fn cli_refuses_overwrite_and_every_frozen_or_altered_proposal() {
 }
 
 #[test]
-fn issue_m5_01_heldout_exclusion_tuning_paths_never_see_held_out_programs_or_inputs() {
+fn heldout_exclusion_tuning_paths_never_see_held_out_programs_or_inputs() {
     let all = heldout::generate(corpus::SEED).unwrap();
     let programs = all["programs"].as_array().unwrap();
     let held: Vec<&Value> = programs
@@ -267,7 +268,7 @@ fn issue_m5_01_heldout_exclusion_tuning_paths_never_see_held_out_programs_or_inp
 }
 
 #[test]
-fn issue_m5_01_heldout_forms_added_after_106_are_recognized_and_held_out() {
+fn heldout_forms_added_after_106_are_recognized_and_held_out() {
     let all = heldout::generate(corpus::SEED).unwrap();
     let programs = all["programs"].as_array().unwrap();
     for (family, form) in [

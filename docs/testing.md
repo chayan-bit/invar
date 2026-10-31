@@ -579,19 +579,19 @@ Every Metal hardware test, one module per family; `#[ignore]`d unless run with `
 
 | File | Covers |
 | --- | --- |
-| `tools/tests/bench_tooling/issue_eng_10_domain_suites.rs` | Benchmark domain suites. |
-| `tools/tests/bench_tooling/issue_gnet_05_parity_report.rs` | The GNET parity report. |
-| `tools/tests/bench_tooling/issue_m3_03_cold_process.rs` | Fresh-process CUDA timing control. |
-| `tools/tests/bench_tooling/issue_m5_01_benchmark_manifest.rs` | Benchmark manifest validation and rejections. |
-| `tools/tests/bench_tooling/issue_m5_01_build_lineage.rs` | Build lineage and bounded child builds. |
-| `tools/tests/bench_tooling/issue_m5_01_heldout_generators.rs` | Held-out corpus generators and the exclusion from tuning. |
-| `tools/tests/bench_tooling/issue_m5_02_device_qualification.rs` | Device rows of full-pipeline qualification. |
-| `tools/tests/bench_tooling/issue_m5_02_full_pipeline_qualification.rs` | CPU semantics, denominators, fuzzing and mutation detection. |
-| `tools/tests/bench_tooling/issue_m5_03_cuda_performance_acceptance.rs` | The performance gate arithmetic and refusal mutations. |
-| `crates/invar-device/tests/m4_01_floating.rs` | Floating device contract versions and provenance. |
-| `crates/invar-device/tests/m4_02_stencil.rs` | Stencil schedule physical mutations. |
-| `crates/invar-device/tests/m4_02_transpose.rs` | Transpose version, provenance and capability mutations. |
-| `crates/invar-metal/tests/issue_m4_02_metal_gpu.rs` | Transpose and stencil on a real Metal GPU. |
-| `crates/invar-metal/tests/issue_m4_05_metal_gpu.rs` | Indexed families on a real Metal GPU. |
+| `tools/tests/bench_tooling/domain_suites.rs` | Benchmark domain suites. |
+| `tools/tests/bench_tooling/gnet_parity_report.rs` | The GNET parity report. |
+| `tools/tests/bench_tooling/cold_process.rs` | Fresh-process CUDA timing control. |
+| `tools/tests/bench_tooling/benchmark_manifest.rs` | Benchmark manifest validation and rejections. |
+| `tools/tests/bench_tooling/build_lineage.rs` | Build lineage and bounded child builds. |
+| `tools/tests/bench_tooling/heldout_generators.rs` | Held-out corpus generators and the exclusion from tuning. |
+| `tools/tests/bench_tooling/device_qualification.rs` | Device rows of full-pipeline qualification. |
+| `tools/tests/bench_tooling/full_pipeline_qualification.rs` | CPU semantics, denominators, fuzzing and mutation detection. |
+| `tools/tests/bench_tooling/cuda_performance_acceptance.rs` | The performance gate arithmetic and refusal mutations. |
+| `crates/invar-device/tests/floating_contract.rs` | Floating device contract versions and provenance. |
+| `crates/invar-device/tests/stencil_schedule.rs` | Stencil schedule physical mutations. |
+| `crates/invar-device/tests/transpose_schedule.rs` | Transpose version, provenance and capability mutations. |
+| `crates/invar-metal/tests/transpose_stencil_gpu.rs` | Transpose and stencil on a real Metal GPU. |
+| `crates/invar-metal/tests/indexed_gpu.rs` | Indexed families on a real Metal GPU. |
 
 The remaining files in `tools/tests/bench_tooling/` (`qualification_faults.rs`, `qualify_cli.rs`) and the Python tests are named for what they test already.

@@ -1,3 +1,4 @@
+//! Issue #2 (M4-02).
 use invar_device::{
     Capabilities, Provenance, Span,
     floating::{self, Buffer},
@@ -38,7 +39,7 @@ fn admit(ir: Ir) -> stencil::Verified {
     stencil::verify(ir, Capabilities::cuda_12_9_sm89(), origin()).unwrap()
 }
 #[test]
-fn issue_m4_02_transpose_stencil_schedules_physical_mutations() {
+fn stencil_schedule_physical_mutations() {
     for change in 0..20 {
         let mut p = ir([3, 5], Boundary::Clamp);
         let error = match change {
@@ -150,7 +151,7 @@ fn issue_m4_02_transpose_stencil_schedules_physical_mutations() {
     assert_eq!(p.validate_launch([16, 16, 1], [3, 1, 1]), Ok(()));
 }
 #[test]
-fn issue_m4_02_transpose_stencil_schedules_independent_halo_maps() {
+fn stencil_schedule_independent_halo_maps() {
     for dims in [
         [0, 33],
         [33, 0],
@@ -211,7 +212,7 @@ fn issue_m4_02_transpose_stencil_schedules_independent_halo_maps() {
 }
 
 #[test]
-fn issue_m4_02_stencil_cap_2_28_physical_verifier() {
+fn stencil_cap_2_28_physical_verifier() {
     for dims in [[16384, 16384], [1, 1 << 28], [1 << 28, 1]] {
         let p = admit(ir(dims, Boundary::Clamp));
         assert_eq!(

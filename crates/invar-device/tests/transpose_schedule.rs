@@ -1,3 +1,4 @@
+//! Issue #2 (M4-02).
 #![forbid(unsafe_code)]
 #[allow(dead_code)]
 #[path = "../../../test-support/child_deadline.rs"]
@@ -47,7 +48,7 @@ fn refused(ir: Ir, error: Error) {
 }
 
 #[test]
-fn issue_m4_02_transpose_version_provenance_capability_mutations() {
+fn transpose_version_provenance_capability_mutations() {
     for (change, error) in [
         (0, Error::Version),
         (1, Error::Layout),
@@ -126,7 +127,7 @@ fn issue_m4_02_transpose_version_provenance_capability_mutations() {
 }
 
 #[test]
-fn issue_m4_02_transpose_layout_bounds_empty_and_alias_mutations() {
+fn transpose_layout_bounds_empty_and_alias_mutations() {
     for slot in 0..2 {
         for change in 0..10 {
             let mut ir = plan([3, 5], [1, 2], 3);
@@ -247,7 +248,7 @@ fn pattern(index: usize) -> u32 {
 }
 
 #[test]
-fn issue_m4_02_transpose_cuda_uniform_barriers_edge_masks_and_tile_access_map() {
+fn transpose_cuda_uniform_barriers_edge_masks_and_tile_access_map() {
     for dimensions in [
         [0, 33],
         [1, 1],
@@ -336,7 +337,7 @@ fn issue_m4_02_transpose_cuda_uniform_barriers_edge_masks_and_tile_access_map() 
 }
 
 #[test]
-fn issue_m4_02_transpose_artifact_identity_and_exact_options() {
+fn transpose_artifact_identity_and_exact_options() {
     let ir = plan([3, 5], [1, 2], 5);
     let p = admit(ir.clone());
     let cuda = emit_cuda(&p).unwrap();
@@ -464,7 +465,7 @@ fn binary(words: &[u32]) -> Vec<u8> {
 }
 
 #[test]
-fn issue_m4_02_transpose_stencil_schedules_cpu_bit_transpose_roundtrip() {
+fn stencil_schedule_cpu_bit_transpose_roundtrip() {
     for (dimensions, offsets, padding) in [
         ([0, 33], [0, 0], 0),
         ([33, 0], [2, 5], 7),
@@ -549,7 +550,7 @@ fn issue_m4_02_transpose_stencil_schedules_cpu_bit_transpose_roundtrip() {
 }
 
 #[test]
-fn issue_m4_02_transpose_cpu_refuses_runtime_overlap_alignment_and_null_before_writes() {
+fn transpose_cpu_refuses_runtime_overlap_alignment_and_null_before_writes() {
     let p = admit(plan([3, 5], [1, 2], 3));
     let harness = r#"
 #include <vector>

@@ -42,8 +42,8 @@ Run CPU commands with a private target directory and bounded memory, swap and ru
 ```sh
 cargo run --locked -p invar-tools --bin invar-heldout -- --write-proposal tools/bench/heldout-v1-proposal.json
 cargo run --locked -p invar-tools --bin invar-heldout -- --check-proposal tools/bench/heldout-v1-proposal.json
-cargo test --locked -p invar-tools --test bench_tooling issue_m5_01_heldout_generators
-cargo test --locked --release -p invar-tools --test bench_tooling issue_m5_01_heldout_generators
+cargo test --locked -p invar-tools --test bench_tooling heldout_generators
+cargo test --locked --release -p invar-tools --test bench_tooling heldout_generators
 ```
 
 The write command exclusively creates a new file and refuses overwrite.

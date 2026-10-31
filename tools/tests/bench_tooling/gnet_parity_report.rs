@@ -1,3 +1,4 @@
+//! Issue label GNET-05.
 use crate::{hash, invar_bin};
 use serde_json::{Value, json};
 use std::{

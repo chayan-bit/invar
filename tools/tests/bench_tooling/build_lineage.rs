@@ -1,4 +1,4 @@
-#![forbid(unsafe_code)]
+#![forbid(unsafe_code)] // Issue #7 (M5-01).
 #![cfg(unix)]
 
 #[allow(dead_code)]
@@ -6,9 +6,9 @@
 mod child_deadline;
 
 #[path = "../../bench/build_lineage.rs"]
-mod build_lineage;
+mod lineage;
 
-use build_lineage::{BuildRequest, Error, Invocation, build, verify};
+use lineage::{BuildRequest, Error, Invocation, build, verify};
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeMap,
@@ -164,7 +164,7 @@ fn failure(fixture: &Fixture, request: &BuildRequest, expected: Error) {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_clean_build_and_pinned_receipt() {
+fn build_lineage_clean_build_and_pinned_receipt() {
     let _deadlines = shared();
     let fixture = Fixture::new(
         "cp input.txt artifacts/binary\nprintf 'build output'\nprintf 'diagnostic' >&2\n",
@@ -226,7 +226,7 @@ fn issue_m5_01_build_lineage_clean_build_and_pinned_receipt() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_dirty_untracked_and_hidden_index_flags_fail() {
+fn build_lineage_dirty_untracked_and_hidden_index_flags_fail() {
     let _deadlines = shared();
     for mode in ["dirty", "untracked", "assume", "skip"] {
         let fixture = Fixture::new("cp input.txt artifacts/binary\n");
@@ -247,7 +247,7 @@ fn issue_m5_01_build_lineage_dirty_untracked_and_hidden_index_flags_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_stale_revision_and_wrong_or_missing_input_fail() {
+fn build_lineage_stale_revision_and_wrong_or_missing_input_fail() {
     let _deadlines = shared();
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
     let mut request = fixture.request();
@@ -263,7 +263,7 @@ fn issue_m5_01_build_lineage_stale_revision_and_wrong_or_missing_input_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_source_or_head_changed_during_build_fail() {
+fn build_lineage_source_or_head_changed_during_build_fail() {
     let _deadlines = shared();
     for script in [
         "printf changed >> input.txt\ncp input.txt artifacts/binary\n",
@@ -276,7 +276,7 @@ fn issue_m5_01_build_lineage_source_or_head_changed_during_build_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_binary_and_receipt_tampering_fail() {
+fn build_lineage_binary_and_receipt_tampering_fail() {
     let _deadlines = shared();
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
     let request = fixture.request();
@@ -347,7 +347,7 @@ fn issue_m5_01_build_lineage_binary_and_receipt_tampering_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_stale_output_and_receipt_overwrite_fail() {
+fn build_lineage_stale_output_and_receipt_overwrite_fail() {
     let _deadlines = shared();
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
     let request = fixture.request();
@@ -363,7 +363,7 @@ fn issue_m5_01_build_lineage_stale_output_and_receipt_overwrite_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_path_traversal_unignored_and_symlink_fail() {
+fn build_lineage_path_traversal_unignored_and_symlink_fail() {
     let _deadlines = shared();
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
@@ -403,7 +403,7 @@ fn issue_m5_01_build_lineage_path_traversal_unignored_and_symlink_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_nonzero_missing_output_and_output_symlink_fail() {
+fn build_lineage_nonzero_missing_output_and_output_symlink_fail() {
     let _deadlines = shared();
     for (script, expected) in [
         ("exit 7\n", Error::ProcessFailed),
@@ -416,7 +416,7 @@ fn issue_m5_01_build_lineage_nonzero_missing_output_and_output_symlink_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_concurrent_capped_streams_and_timeout_fail() {
+fn build_lineage_concurrent_capped_streams_and_timeout_fail() {
     let _deadlines = exclusive();
     let fixture = Fixture::new("yes stdout &\nyes stderr >&2 &\nwait\n");
     let mut request = fixture.request();
@@ -438,7 +438,7 @@ fn issue_m5_01_build_lineage_concurrent_capped_streams_and_timeout_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_descendant_pipe_timeout_kills_process_group() {
+fn build_lineage_descendant_pipe_timeout_kills_process_group() {
     let _deadlines = exclusive();
     // The parent exits successfully; its background descendant keeps pipes open.
     // After the helper returns, that descendant must not perform a delayed write.
@@ -453,7 +453,7 @@ fn issue_m5_01_build_lineage_descendant_pipe_timeout_kills_process_group() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_nonsecret_environment_and_raw_output_policy() {
+fn build_lineage_nonsecret_environment_and_raw_output_policy() {
     let _deadlines = shared();
     let fixture = Fixture::new(
         "[ -z \"$HOME\" ] && [ -z \"$AWS_SECRET_ACCESS_KEY\" ] || exit 9\nprintf 'fixture-sensitive-output'\ncp input.txt artifacts/binary\n",
@@ -478,7 +478,7 @@ fn issue_m5_01_build_lineage_nonsecret_environment_and_raw_output_policy() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_invalid_limits_and_empty_contract_fail() {
+fn build_lineage_invalid_limits_and_empty_contract_fail() {
     let _deadlines = shared();
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
     let mut request = fixture.request();
@@ -496,7 +496,7 @@ fn issue_m5_01_build_lineage_invalid_limits_and_empty_contract_fail() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_tool_binary_change_is_detected() {
+fn build_lineage_tool_binary_change_is_detected() {
     let _deadlines = shared();
     use std::os::unix::fs::PermissionsExt;
     let fixture = Fixture::new("printf changed > artifacts/tool\ncp input.txt artifacts/binary\n");
@@ -512,7 +512,7 @@ fn issue_m5_01_build_lineage_tool_binary_change_is_detected() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_receipt_publication_race_preserves_existing_file() {
+fn build_lineage_receipt_publication_race_preserves_existing_file() {
     let _deadlines = shared();
     let fixture = Fixture::new(
         "cp input.txt artifacts/binary\nprintf 'existing receipt' > artifacts/receipt.json\n",
@@ -535,7 +535,7 @@ fn issue_m5_01_build_lineage_receipt_publication_race_preserves_existing_file() 
 }
 
 #[test]
-fn issue_m5_01_build_lineage_binary_digest_matches_external_sha256sum() {
+fn build_lineage_binary_digest_matches_external_sha256sum() {
     let _deadlines = shared();
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
     let receipt = build(&fixture.request()).unwrap();
@@ -556,7 +556,7 @@ fn issue_m5_01_build_lineage_binary_digest_matches_external_sha256sum() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_git_stat_cache_cannot_hide_source_change() {
+fn build_lineage_git_stat_cache_cannot_hide_source_change() {
     let _deadlines = shared();
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
     let request = fixture.request();
@@ -590,7 +590,7 @@ fn issue_m5_01_build_lineage_git_stat_cache_cannot_hide_source_change() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_ignored_filemode_changes_are_rejected() {
+fn build_lineage_ignored_filemode_changes_are_rejected() {
     let _deadlines = shared();
     use std::os::unix::fs::PermissionsExt;
     let fixture = Fixture::new("cp input.txt artifacts/binary\n");
@@ -606,7 +606,7 @@ fn issue_m5_01_build_lineage_ignored_filemode_changes_are_rejected() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_build_cannot_redirect_receipt_parent() {
+fn build_lineage_build_cannot_redirect_receipt_parent() {
     let _deadlines = shared();
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new(
@@ -643,14 +643,14 @@ fn issue_m5_01_build_lineage_build_cannot_redirect_receipt_parent() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_oversized_output_is_rejected_without_reading_it() {
+fn build_lineage_oversized_output_is_rejected_without_reading_it() {
     let _deadlines = shared();
     let fixture = Fixture::new("truncate -s 268435457 artifacts/binary\n");
     failure(&fixture, &fixture.request(), Error::SizeLimit);
 }
 
 #[test]
-fn issue_m5_01_build_lineage_version_probe_failures_prevent_build() {
+fn build_lineage_version_probe_failures_prevent_build() {
     let _deadlines = exclusive();
     // Only the hanging probe needs a short deadline; the others get one no
     // loaded host's git preflight can exhaust, so the deadline cannot race them.
@@ -681,7 +681,7 @@ fn issue_m5_01_build_lineage_version_probe_failures_prevent_build() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_real_cpu_rustc_build() {
+fn build_lineage_real_cpu_rustc_build() {
     let _deadlines = shared();
     // Locate the provisioned compiler, then bypass ambient rustup selection for
     // the sealed build and version probe. No tool installation or network use.
@@ -791,7 +791,7 @@ fn issue_m5_01_build_lineage_real_cpu_rustc_build() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_linker_probe_change_after_build_fails_verify() {
+fn build_lineage_linker_probe_change_after_build_fails_verify() {
     let _deadlines = shared();
     // A fake linker driver, probed and hashed exactly like the real one, is
     // rewritten after a successful build; generic receipt verification must
@@ -828,7 +828,7 @@ fn issue_m5_01_build_lineage_linker_probe_change_after_build_fails_verify() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_linker_selection_fails_rather_than_skips() {
+fn build_lineage_linker_selection_fails_rather_than_skips() {
     let _deadlines = shared();
     let dir = std::env::temp_dir().join(format!(
         "invar-lineage-linker-{}-{}",
@@ -862,7 +862,7 @@ fn issue_m5_01_build_lineage_linker_selection_fails_rather_than_skips() {
 }
 
 #[test]
-fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
+fn build_lineage_fifo_receipt_fails_before_open() {
     let _deadlines = shared();
     const CHILD_FLAG: &str = "INVAR_LINEAGE_FIFO_REPRO";
     if let Some(repository) = std::env::var_os(CHILD_FLAG) {
@@ -897,7 +897,7 @@ fn issue_m5_01_build_lineage_fifo_receipt_fails_before_open() {
         .arg(std::env::current_exe().unwrap())
         .args([
             "--exact",
-            "issue_m5_01_build_lineage::issue_m5_01_build_lineage_fifo_receipt_fails_before_open",
+            "build_lineage::build_lineage_fifo_receipt_fails_before_open",
             "--nocapture",
         ])
         .env(CHILD_FLAG, &fixture.0)

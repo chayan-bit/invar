@@ -35,5 +35,5 @@
 930 tests/v02/v02_placement.rs
 952 tools/bench/acceptance.rs
 988 tools/qualification/device.rs
-1128 tools/tests/bench_tooling/issue_m5_01_benchmark_manifest.rs
-914 tools/tests/bench_tooling/issue_m5_01_build_lineage.rs
+1128 tools/tests/bench_tooling/benchmark_manifest.rs
+914 tools/tests/bench_tooling/build_lineage.rs

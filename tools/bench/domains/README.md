@@ -16,4 +16,4 @@ Device timings and baseline comparisons (#109) are pending until real hardware r
 
 Quantized matmul (i8 storage, i32 accumulate) is recorded pending in the proposal until the ENG-03 storage types exist.
 
-The no-keying rule is enforced by `tools/tests/bench_tooling/issue_eng_10_domain_suites.rs`: no file under `src/` or `crates/` may name a suite program, kernel, fixture path, held-out hash or spell a domain word (`ml`, `games`, `robotics`) as a string literal, in any position or case.
+The no-keying rule is enforced by `tools/tests/bench_tooling/domain_suites.rs`: no file under `src/` or `crates/` may name a suite program, kernel, fixture path, held-out hash or spell a domain word (`ml`, `games`, `robotics`) as a string literal, in any position or case.
