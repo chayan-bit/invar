@@ -14,7 +14,7 @@ fn valid_registry_entry(entry: &Value) -> bool {
                 .as_str()
                 .is_some_and(|sentence| sentence.len() > 20 && sentence.ends_with('.'))
                 && entry["boundary_test"].as_str().is_some_and(|name| {
-                    name.starts_with("issue_m4_06_bounded_schedule_tuning_")
+                    name.starts_with("schedule_tuning_")
                         || name.starts_with("issue_v02_placement_")
                         || name.starts_with("robotics_vocabulary_")
                         || name.starts_with("foreign_manifests_")
@@ -320,7 +320,7 @@ fn machine_diagnostics_registry_covers_emitted_literals() {
         } else if entry["reachability"] == "external" {
             let test = format!("fn {}(", entry["boundary_test"].as_str().unwrap());
             assert!(
-                include_str!("../../issue_m4_06_bounded_schedule_tuning.rs").contains(&test)
+                include_str!("../../schedule_tuning.rs").contains(&test)
                     || include_str!("../../../tools/tests/bench_tooling/device_qualification.rs")
                         .contains(&test)
                     || OWN_SOURCES.iter().any(|source| source.contains(&test))

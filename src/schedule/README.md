@@ -17,7 +17,7 @@ After [admission](../admission/README.md) and [plan](../../src/plan.rs); driven 
 ## Tests
 
 - `cargo nextest run --locked --test schedule_cpu` (workers, fallback, every family and worker count).
-- `cargo nextest run --locked --test device` and `--test issue_54_family_lowerings` for device plans and family dispatch.
+- `cargo nextest run --locked --test device` and `--test family_lowerings` for device plans and family dispatch.
 - [tests.rs](tests.rs) holds unit tests; CUDA and Metal hardware suites are `tests/gpu_cuda` and `tests/gpu_metal` (ignored by default).
 
 ## Rules to keep

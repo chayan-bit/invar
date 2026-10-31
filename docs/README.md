@@ -20,7 +20,7 @@ Where one disagrees with the code, one of the two is wrong and the disagreement 
 
 | Document | Specifies |
 | --- | --- |
-| [v0.1 language specification](spec/invar-v0.1.md) | The language and the tool surface; every code block runs and every normative statement cites a file, both checked by `tests/issue_ai_02_spec_examples.rs` |
+| [v0.1 language specification](spec/invar-v0.1.md) | The language and the tool surface; every code block runs and every normative statement cites a file, both checked by `tests/spec_examples.rs` |
 | [Grammar](../spec/grammar.ebnf) | The complete syntax |
 | [Placement profile v1](../spec/placement-v1.md) | `--engine auto` placement receipts and calibration profiles |
 | [Explain JSON](explain.md) | The `invar-explain-v5` admission receipt and device execution reports |

@@ -863,7 +863,7 @@ fn repo_contains(path: &str, name: &str) -> bool {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_every_spec_block_runs_with_its_tagged_outcome() {
+fn spec_examples_every_spec_block_runs_with_its_tagged_outcome() {
     let spec = read(SPEC);
     let blocks = extract_blocks(&spec).unwrap();
     let executed: Vec<&Block> = blocks.iter().filter(|b| b.outcome != "none").collect();
@@ -885,7 +885,7 @@ fn issue_ai_02_spec_examples_every_spec_block_runs_with_its_tagged_outcome() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_normative_statements_cite_existing_sources() {
+fn spec_examples_normative_statements_cite_existing_sources() {
     let stats = check_spec_text(&read(SPEC), &repo_has, &repo_contains)
         .unwrap_or_else(|e| panic!("{}", e.join("\n")));
     assert!(stats.statements >= 100, "{stats:?}");
@@ -910,7 +910,7 @@ fn issue_ai_02_spec_examples_normative_statements_cite_existing_sources() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_token_count_is_below_the_target_and_recorded() {
+fn spec_examples_token_count_is_below_the_target_and_recorded() {
     let spec = read(SPEC);
     let measured = spec_tokens(&spec);
     assert!(measured < TOKEN_LIMIT, "{measured} tokens");
@@ -923,7 +923,7 @@ fn issue_ai_02_spec_examples_token_count_is_below_the_target_and_recorded() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expected_output() {
+fn spec_examples_index_validates_and_every_example_matches_its_expected_output() {
     let index: Value = serde_json::from_str(&read(INDEX)).unwrap();
     let schema: Value = serde_json::from_str(&read(INDEX_SCHEMA)).unwrap();
     let sections = section_ids(&read(SPEC));
@@ -956,7 +956,7 @@ fn issue_ai_02_spec_examples_index_validates_and_every_example_matches_its_expec
 }
 
 #[test]
-fn issue_ai_02_spec_examples_active_docs_have_no_link_to_a_removed_file() {
+fn spec_examples_active_docs_have_no_link_to_a_removed_file() {
     let docs = active_docs();
     assert!(docs.len() > 20);
     let broken = broken_links(&docs, &repo_has);
@@ -977,7 +977,7 @@ fn block(outcome: &str, body: &str) -> Block {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_an_untagged_spec_block() {
+fn spec_examples_rejects_an_untagged_spec_block() {
     assert!(
         extract_blocks("text\n```invar\nfn main() -> i32 { return 1; }\n```\n")
             .unwrap_err()
@@ -991,7 +991,7 @@ fn issue_ai_02_spec_examples_rejects_an_untagged_spec_block() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_a_block_whose_outcome_differs() {
+fn spec_examples_rejects_a_block_whose_outcome_differs() {
     let program = "fn main() -> i32 { return 7; }";
     assert!(run_block(&block("value:7", program)).is_ok());
     assert!(run_block(&block("value:8", program)).is_err());
@@ -1014,7 +1014,7 @@ fn issue_ai_02_spec_examples_rejects_a_block_whose_outcome_differs() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_statements_without_a_valid_citation() {
+fn spec_examples_rejects_statements_without_a_valid_citation() {
     let has = |p: &str| p == "src/check.rs";
     let contains = |_: &str, n: &str| n == "check";
     assert!(check_spec_text("[N1.1] Fine. `src/check.rs::check`\n", &has, &contains).is_ok());
@@ -1048,7 +1048,7 @@ fn issue_ai_02_spec_examples_rejects_statements_without_a_valid_citation() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_an_oversized_or_unrecorded_spec() {
+fn spec_examples_rejects_an_oversized_or_unrecorded_spec() {
     let big = "x".repeat(TOKEN_LIMIT * 3 + 3);
     assert!(spec_tokens(&big) >= TOKEN_LIMIT);
     assert_eq!(
@@ -1067,7 +1067,7 @@ fn sample_index(path: &str, section: &str) -> Value {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_bad_example_indexes() {
+fn spec_examples_rejects_bad_example_indexes() {
     let mut schema: Value = serde_json::from_str(&read(INDEX_SCHEMA)).unwrap();
     // Reduce the family enum so these synthetic indexes can focus on the other rules.
     schema["$defs"]["family"]["enum"] = serde_json::json!(["core"]);
@@ -1146,7 +1146,7 @@ fn issue_ai_02_spec_examples_rejects_bad_example_indexes() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_an_example_whose_output_differs() {
+fn spec_examples_rejects_an_example_whose_output_differs() {
     let entry = serde_json::json!({"path": "examples/sum.inv", "engines": ["reference", "mir"],
         "expect": {"command": "run", "status": "ok", "value": 10}});
     assert_eq!(run_example(&entry).unwrap(), (2, 0));
@@ -1159,7 +1159,7 @@ fn issue_ai_02_spec_examples_rejects_an_example_whose_output_differs() {
 }
 
 #[test]
-fn issue_ai_02_spec_examples_rejects_a_docs_link_to_a_removed_file() {
+fn spec_examples_rejects_a_docs_link_to_a_removed_file() {
     let exists = |p: &str| p == "docs/present.md" || p == "README.md";
     let ok = [("docs/a.md".to_owned(), "[x](present.md) [y](../README.md#top) [z](https://example.org/x.md)\n```\n[c](gone.md)\n```".to_owned())];
     assert!(broken_links(&ok, &exists).is_empty());

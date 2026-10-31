@@ -1,4 +1,4 @@
-//! Live CUDA reductions, scans, sanitizer and cold-process runs; the CPU graph and verifier tests stay in `tests/issue_m3_04_cuda_reductions_scans.rs`.
+//! Live CUDA reductions, scans, sanitizer and cold-process runs; the CPU graph and verifier tests stay in `tests/device_reductions_scans.rs`.
 use invar::laws;
 use invar::{admission, check::check, device_ir, front::parse, mir};
 use invar_device::{CollectiveKind, Provenance};

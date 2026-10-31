@@ -569,10 +569,10 @@ Every Metal hardware test, one module per family; `#[ignore]`d unless run with `
 
 | File | Covers |
 | --- | --- |
-| `tests/issue_54_family_lowerings.rs` | Families are lowerings of checked normal-form nodes: every recognizer choice on the corpus is the dispatcher's choice or a named refusal, and a forged form is refused before any step. |
-| `tests/issue_ai_02_spec_examples.rs` | Runs every spec code block, checks every normative citation, validates `examples/index.json`, runs every example and checks documentation links. |
-| `tests/issue_m3_04_cuda_reductions_scans.rs` | Reductions and scans lowered to the shared device IR, verifier rejections and the CPU shape corpus. |
-| `tests/issue_m4_06_bounded_schedule_tuning.rs` | Bounded device schedule selection, hints and cost models. |
+| `tests/family_lowerings.rs` | Families are lowerings of checked normal-form nodes: every recognizer choice on the corpus is the dispatcher's choice or a named refusal, and a forged form is refused before any step. |
+| `tests/spec_examples.rs` | Runs every spec code block, checks every normative citation, validates `examples/index.json`, runs every example and checks documentation links. |
+| `tests/device_reductions_scans.rs` | Reductions and scans lowered to the shared device IR, verifier rejections and the CPU shape corpus. |
+| `tests/schedule_tuning.rs` | Bounded device schedule selection, hints and cost models. |
 | `tests/issue_m3_06_metal/main.rs` | Metal emission on the CPU, and the missing-device error off Apple Silicon. |
 
 ### Tool and crate tests

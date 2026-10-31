@@ -107,13 +107,13 @@ fn selection_parity(dirs: &[&str], sampled: bool, least: usize) {
 }
 
 #[test]
-fn issue_54_selection_parity_on_the_corpus() {
+fn selection_parity_on_the_corpus() {
     selection_parity(oracle::CORPUS, true, oracle::sample::floor(600));
 }
 
 /// The fast Tier 1 slice of the corpus pass above.
 #[test]
-fn issue_54_selection_parity_on_the_examples() {
+fn selection_parity_on_the_examples() {
     selection_parity(&["examples"], false, 40);
 }
 
@@ -130,7 +130,7 @@ fn same(a: &eval::Observation, b: &eval::Observation) -> bool {
 }
 
 #[test]
-fn issue_54_equal_to_reference_at_1_2_7_64_workers() {
+fn equal_to_reference_at_1_2_7_64_workers() {
     let results = oracle::each(oracle::CORPUS, true, |program| {
         let reference = eval::observe(&program.checked, FUEL);
         let mut published = 0;
@@ -207,7 +207,7 @@ fn changes(program: &oracle::Program, forge: fn(&mut NormalForm)) -> bool {
 }
 
 #[test]
-fn issue_54_forged_certificates_are_refused_before_any_step() {
+fn forged_certificates_are_refused_before_any_step() {
     let forges = [
         (
             "wrong-fingerprint",
@@ -255,7 +255,7 @@ fn issue_54_forged_certificates_are_refused_before_any_step() {
 }
 
 #[test]
-fn issue_54_a_certified_loop_without_a_lowering_is_a_typed_gap() {
+fn a_certified_loop_without_a_lowering_is_a_typed_gap() {
     // L3 certifies the checked sum; no family lowers a checked fold.
     let source = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 0u32; for i in 0u32..n { s = s + a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); if run(a, 8u32) != 16u32 { return 1; } return 0; }";
     let checked =
@@ -270,7 +270,7 @@ fn issue_54_a_certified_loop_without_a_lowering_is_a_typed_gap() {
 }
 
 #[test]
-fn issue_54_u32_and_f32_stencils_lower_to_the_grid_family() {
+fn u32_and_f32_stencils_lower_to_the_grid_family() {
     // The PNF stencil admission once took only f32 grids, so a u32 stencil
     // the source contract binds lost its region under the dispatcher.
     for floating in [false, true] {
@@ -290,7 +290,7 @@ fn issue_54_u32_and_f32_stencils_lower_to_the_grid_family() {
 }
 
 #[test]
-fn issue_54_a_grid_contract_bound_to_other_mir_is_refused_by_both() {
+fn a_grid_contract_bound_to_other_mir_is_refused_by_both() {
     // Production binds the grid contract to the run's MIR by its function
     // fingerprint; the oracle must refuse the same mismatch, or parity could
     // not see that binding regress.
@@ -329,7 +329,7 @@ fn issue_54_a_grid_contract_bound_to_other_mir_is_refused_by_both() {
 }
 
 #[test]
-fn issue_54_scalar_direct_and_explicit_tc_contractions_lower_to_tensor() {
+fn scalar_direct_and_explicit_tc_contractions_lower_to_tensor() {
     // The PNF tensor admission once took only the strict `acc + a*b` step, so
     // an explicit `tc_mul_add` contraction lost its region under the dispatcher.
     for source in [
@@ -353,7 +353,7 @@ fn issue_54_scalar_direct_and_explicit_tc_contractions_lower_to_tensor() {
 /// once followed an array literal one hop further than its checker, so a
 /// chain of 9 or more maps from a literal had its whole form refused.
 #[test]
-fn issue_54_long_fusion_chains_keep_a_checkable_form() {
+fn long_fusion_chains_keep_a_checkable_form() {
     for stages in 1..=20 {
         let mut source = "fn main() -> i32 { let xs: Array<u32> = [1u32,2u32,3u32]; let ws: Array<u32> = [4u32,0u32,6u32]; ".to_owned();
         let mut input = "xs".to_owned();
@@ -378,7 +378,7 @@ fn issue_54_long_fusion_chains_keep_a_checkable_form() {
 }
 
 #[test]
-fn issue_54_no_production_path_reaches_a_family_recognizer() {
+fn no_production_path_reaches_a_family_recognizer() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
     let registry = std::fs::read_to_string(root.join("src/schedule/families.rs")).unwrap();
     for family in oracle::FAMILIES {

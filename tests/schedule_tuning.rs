@@ -1,10 +1,10 @@
+//! Issue #8 (M4-06).
 use invar::{
     admission, check, device_cache, eval, front, mir,
     plan::DeviceCostModel,
     schedule::{self, tuning::*},
 };
 use invar_device::{Capabilities, Geometry};
-
 #[path = "support/pair_reduction.rs"]
 mod pair_reduction_support;
 
@@ -34,7 +34,7 @@ fn model() -> DeviceCostModel {
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals() {
+fn schedule_tuning_enumeration_and_refusals() {
     let r = region();
     let caps = Capabilities::cuda_12_9_sm89();
     let empty = enumerate(&r, 0, caps, [variant()]).unwrap();
@@ -121,7 +121,7 @@ fn issue_m4_06_bounded_schedule_tuning_enumeration_and_refusals() {
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_cost_residency_and_controls() {
+fn schedule_tuning_cost_residency_and_controls() {
     let c = candidates(100_000);
     let plan = c[0].plan();
     let (host, h) = select_map(plan, Residency::HOST, model(), Control::Auto, 0).unwrap();
@@ -207,7 +207,7 @@ fn issue_m4_06_bounded_schedule_tuning_cost_residency_and_controls() {
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_replays() {
+fn schedule_tuning_every_failure_is_typed_and_pending_never_replays() {
     let r = CostRecord::from_plan(candidates(3)[0].plan(), Residency::HOST, model()).unwrap();
     for (guard, available, record, reason) in [
         (false, true, Some(&r), Refusal::Guard),
@@ -265,7 +265,7 @@ fn issue_m4_06_bounded_schedule_tuning_every_failure_is_typed_and_pending_never_
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_cache_identity_and_revalidation() {
+fn schedule_tuning_cache_identity_and_revalidation() {
     let r = region();
     let c = candidates(3);
     let hint = device_cache::expected_candidate(MAP.as_bytes(), &r, &c[0]).unwrap();
@@ -319,7 +319,7 @@ fn issue_m4_06_bounded_schedule_tuning_cache_identity_and_revalidation() {
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_cache_disk_miss_hit_corrupt_and_limits() {
+fn schedule_tuning_cache_disk_miss_hit_corrupt_and_limits() {
     let root = std::env::temp_dir().join(format!("invar-m406-cache-{}", std::process::id()));
     std::fs::create_dir(&root).unwrap();
     let c = candidates(3);
@@ -353,7 +353,7 @@ fn issue_m4_06_bounded_schedule_tuning_cache_disk_miss_hit_corrupt_and_limits() 
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_source_semantics_lifetimes_and_filename_independence() {
+fn schedule_tuning_source_semantics_lifetimes_and_filename_independence() {
     let checked = check::check(front::parse(MAP.as_bytes()).unwrap(), true).unwrap();
     let reference = eval::observe(&checked, 1_000_000);
     assert_eq!(reference.result, Ok(eval::Value::I32(0)));
@@ -455,7 +455,7 @@ fn hardware_case(caps: Capabilities) -> (admission::Region, Candidate, Vec<u32>,
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
 #[ignore = "requires real Apple7+ Metal; deterministic cost model is not calibration"]
-fn issue_m4_06_metal_gpu_resident_dispatch_and_full_output() {
+fn metal_gpu_resident_dispatch_and_full_output() {
     use invar::schedule::tuning_resident::{self, Output};
     let mut device = invar_metal::MetalDevice::open_runtime_source()
         .expect("explicit Metal qualification requires a device");
@@ -533,7 +533,7 @@ fn issue_m4_06_metal_gpu_resident_dispatch_and_full_output() {
 #[cfg(feature = "cuda")]
 #[test]
 #[ignore = "requires real CUDA GPU and compatible NVRTC; missing device fails qualification"]
-fn issue_m4_06_gpu_resident_dispatch_and_full_output() {
+fn gpu_resident_dispatch_and_full_output() {
     use invar::schedule::tuning_resident::{self, Output};
     let compiler = std::path::Path::new(env!("CARGO_BIN_EXE_invar-nvrtc"));
     let mut device = invar_cuda::cuda::CudaDevice::open()
@@ -607,7 +607,7 @@ fn issue_m4_06_gpu_resident_dispatch_and_full_output() {
 #[cfg(all(feature = "metal", target_os = "macos"))]
 #[test]
 #[ignore = "requires Metal; injected failures must preserve source publication"]
-fn issue_m4_06_metal_gpu_failure_paths_preserve_publication() {
+fn metal_gpu_failure_paths_preserve_publication() {
     use invar::schedule::metal::{self, Fault};
     let (r, _, _, _) = hardware_case(
         invar_metal::MetalDevice::open_runtime_source()
@@ -658,7 +658,7 @@ fn issue_m4_06_metal_gpu_failure_paths_preserve_publication() {
 #[cfg(feature = "cuda")]
 #[test]
 #[ignore = "requires CUDA; injected failures must preserve source publication"]
-fn issue_m4_06_gpu_failure_paths_preserve_publication() {
+fn gpu_failure_paths_preserve_publication() {
     use invar::schedule::cuda::{self, Fault};
     let source = MAP.replace("[0u32,4294967295u32,7u32]", "filled_u32(100000u32,1u32)");
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
@@ -703,7 +703,7 @@ fn issue_m4_06_gpu_failure_paths_preserve_publication() {
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_live_guard_and_source_trap_are_preserved() {
+fn schedule_tuning_live_guard_and_source_trap_are_preserved() {
     let source = MAP.replace("filled_u32(len(xs),0u32)", "filled_u32(2u32,0u32)");
     let checked = check::check(front::parse(source.as_bytes()).unwrap(), true).unwrap();
     let reference = eval::observe(&checked, 1_000_000);
@@ -716,7 +716,7 @@ fn issue_m4_06_bounded_schedule_tuning_live_guard_and_source_trap_are_preserved(
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_reproducible_selection_receipts_and_keys() {
+fn schedule_tuning_reproducible_selection_receipts_and_keys() {
     let r = region();
     let caps = Capabilities::cuda_12_9_sm89();
     let schedules = [
@@ -771,7 +771,7 @@ fn issue_m4_06_bounded_schedule_tuning_reproducible_selection_receipts_and_keys(
 }
 
 #[test]
-fn issue_m4_06_bounded_schedule_tuning_collective_cost_facts() {
+fn schedule_tuning_collective_cost_facts() {
     let pair = pair_reduction_support::source(&[2, 3, 4], &[1, 2, 3], [1, 0]);
     // The pair case crosses the 64-block Metal chunk boundary without allocating inputs.
     for (source, length, output_bytes, cuda_temporary, metal_temporary, metal_launches) in [

@@ -27,7 +27,7 @@ test-group = 'metal-gpu'
 
 [[profile.default.overrides]]
 # #54 corpus passes spread the corpus over oracle::THREADS (8) threads.
-filter = 'binary(issue_54_family_lowerings) & test(/_on_the_corpus$|_at_1_2_7_64_workers$|_refused_before_any_step$/)'
+filter = 'binary(family_lowerings) & test(/_on_the_corpus$|_at_1_2_7_64_workers$|_refused_before_any_step$/)'
 threads-required = 8
 
 [[profile.default.overrides]]
