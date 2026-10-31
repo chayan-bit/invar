@@ -14,7 +14,8 @@ The repository's own checks are `scripts/check-file-size`, `cargo test`, and the
 - Run `cargo test --locked --bin invar issue_ai_01_machine_diagnostics_document_size_limit`.
 - Run `just test-quick` for the fast nextest profile.
 - Run `just test` for Debug nextest, Release nextest, and doctests, with `INVAR_FULL_CORPUS=1`.
-- Run `just test-gpu-cuda` or `just test-metal` only on matching hardware. Those skips are on the codegen feature.
+- Run `just test-gpu-cuda`, `just test-gpu-cuda-remote <ref>`, or `just test-metal` only on matching hardware. Those skips are on the codegen feature.
+- `docs/testing.md` maps each test binary and module to what it covers.
 
 ## Driving it with invar-verify
 
@@ -33,6 +34,6 @@ Preconditions:
 - `cargo test` uses a different profile from `cargo build`, so the focused test rebuilds the package. Give it the cargo lock. Do not start it beside `invar-verify build`.
 - A filter that matches nothing still exits 0 with `0 passed`. The drive fails unless it sees `1 passed`.
 - `just test-quick` omits `general_net`, `schedule`, and `system` library tests. It is not a substitute for `just test`.
-- Pull-request CI samples the corpus 1-in-8. `just test` and pushes to main set `INVAR_FULL_CORPUS=1`. Quoting a sampled run as the full corpus is wrong.
+- Pull-request CI samples the corpus 1-in-8. The CPU-model corpus test runs as two CI jobs (`INVAR_CORPUS_PART=1/2` and `2/2`) outside the four test shards. `just test` and pushes to main set `INVAR_FULL_CORPUS=1`. Quoting a sampled run as the full corpus is wrong.
 - `scripts/check-file-size --update` and `--regenerate` rewrite the allowlist. `--dry-run` on `invar-verify` does not pass those flags, and the drive never calls them.
 - GPU tests are `#[ignore]` unless the feature is on and the runner passes `--include-ignored`. A default `cargo test` that exits 0 did not run them.
