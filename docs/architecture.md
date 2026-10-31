@@ -121,7 +121,7 @@ For the example's region the document says:
 | `runtime_guard` | upper bound `length` of `xs`, inputs `xs`, output `ys` |
 | `obligations` | the ten above: `RANGE`, `TERMINATION`, `OWNERSHIP`, `ALIAS`, `FRESH_OUTPUT`, `DEPENDENCE` and `EFFECT_ORDER` are `checked_invariant`; `TOTALITY` and `CLEANUP` are `trusted_rule`; `PHYSICAL_BOUNDS` is `runtime_guard` |
 
-The test `tests/issue_ai_02_spec_examples.rs` runs this example and checks that its region is an admitted `map`.
+The test `tests/spec_examples.rs` runs this example and checks that its region is an admitted `map`.
 Field meanings and the full schema are in [explain JSON](explain.md).
 To see a rejection, change the store to `ys[0u32] = ...`.
 The store index is no longer the induction variable, so `analyze_region` returns its `FOOTPRINT` rejection, `first_rejected_obligation` names it instead of `null`, and the loop runs as serial MIR.

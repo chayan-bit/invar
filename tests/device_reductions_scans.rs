@@ -1,3 +1,4 @@
+//! Issue label M3-04.
 use invar::{
     admission, check::check, device_ir, eval, front::parse, mir, mir_eval, plan::PlanKind,
 };
@@ -11,7 +12,7 @@ mod m3_04_programs;
 use m3_04_programs::{EXCLUSIVE, FINAL, INCLUSIVE, PRODUCT, SUM};
 
 #[test]
-fn issue_m3_04_cuda_reductions_scans_graph_plans_lower_to_shared_ir() {
+fn device_reductions_scans_graph_plans_lower_to_shared_ir() {
     for (source, kind) in [
         (SUM, PlanKind::Reduction),
         (PRODUCT, PlanKind::Reduction),
@@ -50,7 +51,7 @@ fn issue_m3_04_cuda_reductions_scans_graph_plans_lower_to_shared_ir() {
 }
 
 #[test]
-fn issue_m3_04_cuda_reductions_scans_verifier_rejects_invalid_collectives() {
+fn device_reductions_scans_verifier_rejects_invalid_collectives() {
     let program = mir::lower(&check(parse(SUM.as_bytes()).unwrap(), true).unwrap()).unwrap();
     let report = admission::analyze(SUM.as_bytes(), &program).unwrap();
     let base = device_ir::from_region(&report.regions()[0], 3).unwrap();
@@ -116,7 +117,7 @@ fn issue_m3_04_cuda_reductions_scans_verifier_rejects_invalid_collectives() {
 }
 
 #[test]
-fn issue_m3_04_cuda_reductions_scans_cpu_serial_shape_corpus() {
+fn device_reductions_scans_cpu_serial_shape_corpus() {
     let plans = [SUM, PRODUCT].map(|source| {
         let program = mir::lower(&check(parse(source.as_bytes()).unwrap(), true).unwrap()).unwrap();
         let report = admission::analyze(source.as_bytes(), &program).unwrap();

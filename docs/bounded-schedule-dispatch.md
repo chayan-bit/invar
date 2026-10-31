@@ -110,8 +110,8 @@ reviewed M5 freeze to be wired into this boundary by a later change. An arbitrar
 runtime flag or caller-supplied hash cannot bypass it. `Budget::check` provides
 compile/time/workspace limits for that future driver; no actual tuner runs now.
 
-Tests live in `tests/issue_m4_06_bounded_schedule_tuning.rs`. CUDA hardware checks
-are feature-gated, ignored and named `issue_m4_06_gpu`; Metal uses
-`issue_m4_06_metal_gpu`. Explicit invocation requires real hardware and fails
+Tests live in `tests/schedule_tuning.rs`. CUDA hardware checks
+are feature-gated, ignored and named `gpu_*`; Metal uses
+`metal_gpu_*`. Explicit invocation requires real hardware and fails
 when it is absent. Synthetic choices and ignored tests never close a hardware or
 performance gate. The classification table records the remaining (b)/(c) work.
