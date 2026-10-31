@@ -14,7 +14,7 @@ Runs on the diagnostics of [check](../check/README.md).
 
 ## Tests
 
-- `cargo nextest run --locked --test diagnostics` (`issue_dx_22_fix_coverage` has one module per fix kind).
+- `cargo nextest run --locked --test diagnostics` (`check_fix` has one module per fix kind).
 
 ## Rules to keep
 

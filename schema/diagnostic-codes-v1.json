@@ -53,28 +53,28 @@
       "meaning": "admission record has an unsupported schema version",
       "reachability": "invariant",
       "justification": "The CLI never accepts a persisted admission record, so checked source cannot supply an unsupported record schema.",
-      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_admission_fault_fixtures_validate"
     },
     {
       "code": "ADMISSION_SOURCE",
       "meaning": "admission region span lies outside source bytes",
       "reachability": "invariant",
       "justification": "CLI admission uses source bytes and MIR lowered from those same bytes, so checked source cannot create an out-of-bounds MIR span.",
-      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_admission_fault_fixtures_validate"
     },
     {
       "code": "ADMISSION_SOURCE_LIMIT",
       "meaning": "source exceeds the admission byte limit",
       "reachability": "invariant",
       "justification": "The parser rejects source above its byte limit before admission runs.",
-      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_admission_fault_fixtures_validate"
     },
     {
       "code": "ADMISSION_STALE",
       "meaning": "persisted admission record disagrees with fresh analysis",
       "reachability": "invariant",
       "justification": "The CLI recomputes admission facts and never accepts a persisted record supplied by source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_admission_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_admission_fault_fixtures_validate"
     },
     {
       "code": "ALIAS",
@@ -106,63 +106,63 @@
       "meaning": "cpu cancelled",
       "reachability": "invariant",
       "justification": "CPU_CANCELLED requires a worker fault or malformed chunk state that checked source cannot construct.",
-      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+      "fault_test": "machine_diagnostics_scheduler_faults"
     },
     {
       "code": "CPU_CANDIDATE",
       "meaning": "cpu candidate",
       "reachability": "invariant",
       "justification": "The scheduler verifies the compiler-selected candidate before dispatch, so checked source cannot supply forged candidate metadata.",
-      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_fault_fixtures_validate"
     },
     {
       "code": "CPU_CHUNK_OVERLAP",
       "meaning": "cpu chunk overlap",
       "reachability": "invariant",
       "justification": "CPU_CHUNK_OVERLAP requires a worker fault or malformed chunk state that checked source cannot construct.",
-      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+      "fault_test": "machine_diagnostics_scheduler_faults"
     },
     {
       "code": "CPU_JOIN",
       "meaning": "cpu join",
       "reachability": "invariant",
       "justification": "CPU_JOIN requires a worker fault or malformed chunk state that checked source cannot construct.",
-      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+      "fault_test": "machine_diagnostics_scheduler_faults"
     },
     {
       "code": "CPU_SPAWN",
       "meaning": "cpu spawn",
       "reachability": "invariant",
       "justification": "CPU_SPAWN requires a worker fault or malformed chunk state that checked source cannot construct.",
-      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+      "fault_test": "machine_diagnostics_scheduler_faults"
     },
     {
       "code": "CPU_TIMEOUT",
       "meaning": "cpu timeout",
       "reachability": "invariant",
       "justification": "CPU_TIMEOUT requires a worker fault or malformed chunk state that checked source cannot construct.",
-      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+      "fault_test": "machine_diagnostics_scheduler_faults"
     },
     {
       "code": "CPU_WORKERS",
       "meaning": "cpu workers",
       "reachability": "invariant",
       "justification": "The CLI rejects worker counts outside the supported range before it loads source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_fault_fixtures_validate"
     },
     {
       "code": "CPU_WORKER_PANIC",
       "meaning": "cpu worker panic",
       "reachability": "invariant",
       "justification": "CPU_WORKER_PANIC requires a worker fault or malformed chunk state that checked source cannot construct.",
-      "fault_test": "issue_ai_01_machine_diagnostics_scheduler_faults"
+      "fault_test": "machine_diagnostics_scheduler_faults"
     },
     {
       "code": "CUDA_PENDING",
       "meaning": "cuda pending",
       "reachability": "invariant",
       "justification": "A pending CUDA result is a device execution state and cannot be encoded by a checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_cuda_backend_faults"
+      "fault_test": "machine_diagnostics_cuda_backend_faults"
     },
     {
       "code": "CUDA_UNAVAILABLE",
@@ -184,14 +184,14 @@
       "meaning": "device toolchain mismatch",
       "reachability": "invariant",
       "justification": "A device toolchain mismatch depends on the installed driver or runtime, not checked program semantics.",
-      "fault_test": "issue_ai_01_machine_diagnostics_cuda_backend_faults"
+      "fault_test": "machine_diagnostics_cuda_backend_faults"
     },
     {
       "code": "DIAGNOSTIC_COUNT_LIMIT",
       "meaning": "too many diagnostics to emit in one document",
       "reachability": "invariant",
       "justification": "The public check, run and explain paths stop at their first error, so checked source cannot construct a document with more than 64 diagnostics.",
-      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_fault_fixtures_validate"
     },
     {
       "code": "DIAGNOSTIC_DOCUMENT_LIMIT",
@@ -228,7 +228,7 @@
       "meaning": "candidate cannot be extracted into a supported graph",
       "reachability": "invariant",
       "justification": "Map admission establishes the extraction preconditions, so checked source cannot make extraction fail afterward.",
-      "fault_test": "issue_ai_01_machine_diagnostics_planner_extraction_fault"
+      "fault_test": "machine_diagnostics_planner_extraction_fault"
     },
     {
       "code": "FILE_EXTENSION",
@@ -295,28 +295,28 @@
       "meaning": "candidate graph is invalid or unavailable",
       "reachability": "invariant",
       "justification": "The recurrence graph builder receives a compiler-validated affine shape, so checked source cannot make its typed graph invalid.",
-      "fault_test": "issue_ai_01_machine_diagnostics_recurrence_graph_fault"
+      "fault_test": "machine_diagnostics_recurrence_graph_fault"
     },
     {
       "code": "INDEXED_SOURCE_BINDING",
       "meaning": "indexed admission contract disagrees with its checked source or MIR",
       "reachability": "invariant",
       "justification": "Production admission derives the indexed contract from the same checked source and MIR; a mismatch indicates stale or invalid internal binding.",
-      "fault_test": "issue_ai_01_machine_diagnostics_indexed_admission_binding_fault"
+      "fault_test": "machine_diagnostics_indexed_admission_binding_fault"
     },
     {
       "code": "GRID_MIR_MISMATCH",
       "meaning": "grid source and MIR disagree",
       "reachability": "invariant",
       "justification": "Grid recognition receives the MIR lowered from its checked source, so ordinary source cannot supply a different MIR function.",
-      "fault_test": "issue_ai_01_machine_diagnostics_grid_admission_faults"
+      "fault_test": "machine_diagnostics_grid_admission_faults"
     },
     {
       "code": "GRID_SOURCE",
       "meaning": "grid source failed validation",
       "reachability": "invariant",
       "justification": "The grid recognizer receives source that has already been parsed and checked, so ordinary source cannot reach this internal revalidation failure.",
-      "fault_test": "issue_ai_01_machine_diagnostics_grid_admission_faults"
+      "fault_test": "machine_diagnostics_grid_admission_faults"
     },
     {
       "code": "INDEX_OUT_OF_BOUNDS",
@@ -333,98 +333,98 @@
       "meaning": "evaluator array copy invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_ARRAY_COPY requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INTERNAL_ARRAY_SIZE",
       "meaning": "evaluator array length conversion failed",
       "reachability": "invariant",
       "justification": "INTERNAL_ARRAY_SIZE requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_eval_faults"
+      "fault_test": "machine_diagnostics_eval_faults"
     },
     {
       "code": "INTERNAL_BINDING",
       "meaning": "evaluator binding invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_BINDING requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INTERNAL_BORROW",
       "meaning": "evaluator borrow invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_BORROW requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INTERNAL_CALL",
       "meaning": "evaluator call invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_CALL requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INTERNAL_HOST_COMMIT",
       "meaning": "host mut writeback precheck invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_HOST_COMMIT requires a mut owner whose type, borrow or length changed during a call to a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_host_commit_precheck_fault"
+      "fault_test": "machine_diagnostics_host_commit_precheck_fault"
     },
     {
       "code": "INTERNAL_HOST_READ",
       "meaning": "host read argument invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_HOST_READ requires a read argument to change during a call to a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_host_read_changed_read_argument_fault"
+      "fault_test": "machine_diagnostics_host_read_changed_read_argument_fault"
     },
     {
       "code": "INTERNAL_INDEX",
       "meaning": "evaluator index conversion invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_INDEX requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_eval_faults"
+      "fault_test": "machine_diagnostics_eval_faults"
     },
     {
       "code": "INTERNAL_LITERAL",
       "meaning": "evaluator literal invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_LITERAL requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INTERNAL_MAIN",
       "meaning": "checked main returned a value other than i32",
       "reachability": "invariant",
       "justification": "INTERNAL_MAIN requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_internal_main_fault"
+      "fault_test": "machine_diagnostics_internal_main_fault"
     },
     {
       "code": "INTERNAL_RETURN",
       "meaning": "evaluator return invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_RETURN requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INTERNAL_SCOPE",
       "meaning": "evaluator or checker scope invariant failed",
       "reachability": "invariant",
       "justification": "INTERNAL_SCOPE requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_missing_runtime_scope"
+      "fault_test": "machine_diagnostics_missing_runtime_scope"
     },
     {
       "code": "INTERNAL_TYPE",
       "meaning": "runtime value disagreed with its checked type",
       "reachability": "invariant",
       "justification": "INTERNAL_TYPE requires evaluator state inconsistent with a successfully checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_checked_ir_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_checked_ir_fault_fixtures_validate"
     },
     {
       "code": "INVALID_FUEL",
       "meaning": "invalid fuel",
       "reachability": "invariant",
       "justification": "The CLI rejects zero fuel before loading the program, so checked source cannot pass invalid fuel to an evaluator.",
-      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_fault_fixtures_validate"
     },
     {
       "code": "INVALID_UTF8",
@@ -451,7 +451,7 @@
       "meaning": "metal pending",
       "reachability": "invariant",
       "justification": "A pending Metal result is a device execution state and cannot be encoded by a checked program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_metal_backend_faults"
+      "fault_test": "machine_diagnostics_metal_backend_faults"
     },
     {
       "code": "METAL_UNAVAILABLE",
@@ -463,70 +463,70 @@
       "meaning": "verified MIR references a missing block",
       "reachability": "invariant",
       "justification": "MIR_BLOCK requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "MIR_CALL",
       "meaning": "verified MIR has an invalid call",
       "reachability": "invariant",
       "justification": "MIR_CALL requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "MIR_FOR",
       "meaning": "verified MIR has an invalid counted loop",
       "reachability": "invariant",
       "justification": "MIR_FOR requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "MIR_INDEX",
       "meaning": "verified MIR has an invalid index",
       "reachability": "invariant",
       "justification": "MIR_INDEX requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_size_index_faults"
+      "fault_test": "machine_diagnostics_mir_size_index_faults"
     },
     {
       "code": "MIR_INVALID",
       "meaning": "MIR verifier rejected an invalid program",
       "reachability": "invariant",
       "justification": "The CLI verifies MIR produced by lowering before it is executed, so checked source cannot supply a forged MIR schema or graph.",
-      "fault_test": "issue_ai_01_machine_diagnostics_fault_fixtures_validate"
+      "fault_test": "machine_diagnostics_fault_fixtures_validate"
     },
     {
       "code": "MIR_LOAN",
       "meaning": "verified MIR violates a runtime loan invariant",
       "reachability": "invariant",
       "justification": "MIR_LOAN requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "MIR_PLACE",
       "meaning": "verified MIR references an unavailable place",
       "reachability": "invariant",
       "justification": "MIR_PLACE requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "MIR_SIZE",
       "meaning": "MIR exceeds a documented size limit",
       "reachability": "invariant",
       "justification": "MIR_SIZE requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_size_index_faults"
+      "fault_test": "machine_diagnostics_mir_size_index_faults"
     },
     {
       "code": "MIR_TYPE",
       "meaning": "verified MIR runtime value has the wrong type",
       "reachability": "invariant",
       "justification": "MIR_TYPE requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "MIR_VALUE",
       "meaning": "verified MIR references a missing value",
       "reachability": "invariant",
       "justification": "MIR_VALUE requires MIR state that the lowering and verifier reject before checked source executes.",
-      "fault_test": "issue_ai_01_machine_diagnostics_mir_fault_boundaries"
+      "fault_test": "machine_diagnostics_mir_fault_boundaries"
     },
     {
       "code": "M5_LIBRARY_PATH",
@@ -563,28 +563,28 @@
       "meaning": "native abi",
       "reachability": "invariant",
       "justification": "The native host ABI handshake is produced by the compiler and host process, not checked source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+      "fault_test": "machine_diagnostics_native_backend_faults"
     },
     {
       "code": "NATIVE_BACKEND",
       "meaning": "native backend",
       "reachability": "invariant",
       "justification": "Native backend availability is determined by the compiler toolchain, not checked source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+      "fault_test": "machine_diagnostics_native_backend_faults"
     },
     {
       "code": "NATIVE_BUILD",
       "meaning": "native build",
       "reachability": "invariant",
       "justification": "A native build tool failure is an environment or compiler failure, not a property supplied by checked source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+      "fault_test": "machine_diagnostics_native_backend_faults"
     },
     {
       "code": "NATIVE_TOOL",
       "meaning": "native tool",
       "reachability": "invariant",
       "justification": "The native tool executable is resolved by the environment and cannot be named by checked source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_native_backend_faults"
+      "fault_test": "machine_diagnostics_native_backend_faults"
     },
     {
       "code": "NATIVE_TRACE_LIMIT",
@@ -711,7 +711,7 @@
       "meaning": "TC completion disagrees with its recognized fresh-output contraction",
       "reachability": "invariant",
       "justification": "Checked TC source has fixed argument types, validated extents and a fresh output owner, so a mismatched private completion cannot arise from valid source.",
-      "fault_test": "issue_ai_01_machine_diagnostics_tc_serial_completion_refuses_output_aliases"
+      "fault_test": "machine_diagnostics_tc_serial_completion_refuses_output_aliases"
     },
     {
       "code": "TC_INPUT_RANGE",
@@ -723,7 +723,7 @@
       "meaning": "no target description selects the device",
       "reachability": "invariant",
       "justification": "Whether a target description selects the device depends on the installed GPU and the built-in target files, not checked program semantics.",
-      "fault_test": "issue_ai_01_machine_diagnostics_target_unknown_fault"
+      "fault_test": "machine_diagnostics_target_unknown_fault"
     },
     {
       "code": "TERMINATION",
@@ -813,7 +813,7 @@
       "meaning": "abi type unavailable",
       "reachability": "invariant",
       "justification": "Checked L1-04 signatures admit only the frozen scalar and byte/text tags. The binding rejects a corrupt internal signature before loading or calling any library.",
-      "fault_test": "issue_ai_01_machine_diagnostics_python_invalid_checked_signature_fault_is_typed"
+      "fault_test": "machine_diagnostics_python_invalid_checked_signature_fault_is_typed"
     },
     {
       "code": "PY_ARGUMENT_COUNT",

@@ -390,7 +390,7 @@ HA-1 it was refused with `ARRAY_SIZE_LIMIT`.
 | 4 | empty extents never alias, including one strictly inside another buffer | read slice |
 | 5 | any overlap involving `mut` is refused with zero steps and unchanged bytes | stage 1: synthetic metadata (safe `&mut` borrows cannot overlap) plus every constructible refusal through `observe_host_call` |
 | 6 | reference `mut`: commit on normal return including `Err`, equal to the in-source owner; unchanged bytes after traps, every fuel prefix, tool limits, failed reservations, failed prechecks and caught injected panics | stage 1 |
-| 6n | native `mut`: restore after non-normal outcomes; snapshot reservation failure is a typed refusal | HA-1.3: integer suites plus `tests/exports/issue_l1_06_native_f32_arrays.rs`, `test_native_f32_arrays.py`, foreign guard and real native decode fault tests |
+| 6n | native `mut`: restore after non-normal outcomes; snapshot reservation failure is a typed refusal | HA-1.3: integer suites plus `tests/exports/native_f32_arrays.rs`, `test_native_f32_arrays.py`, foreign guard and real native decode fault tests |
 | 7 | native same-address `i32`/`u32`/`f32` read/mut arrays; reference disclosed as copying | HA-1.3: same files |
 | 7r | returned arrays remain copying through `call_reference`; never counted as zero-copy | `test_reference_arrays.py`, `test_native_arrays.py` |
 | 8 | NumPy `take` refused before any step; pin guard holds the export (a resize attempt raises) | binding |

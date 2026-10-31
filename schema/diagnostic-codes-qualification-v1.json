@@ -63,7 +63,7 @@
       "meaning": "the device rows were not requested in this CPU qualification run",
       "reachability": "external",
       "justification": "A CPU-only qualification run records every device row as unavailable by request; this is an environment outcome, not source behaviour.",
-      "boundary_test": "issue_ai_01_machine_diagnostics_qualification_device_rows_not_requested"
+      "boundary_test": "machine_diagnostics_qualification_device_rows_not_requested"
     },
     {
       "code": "M5_DEVICE_OOM",
@@ -126,14 +126,14 @@
       "meaning": "the interaction-net encoding or verification of a qualified program failed",
       "reachability": "invariant",
       "justification": "The harness encodes only programs that already passed the checker and MIR verifier, so a failing encoding is a harness or engine defect.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
+      "fault_test": "machine_diagnostics_qualification_pipeline_stage_faults"
     },
     {
       "code": "M5_INVALID_DIAGNOSTIC_SPAN",
       "meaning": "a refusal carries a span outside the refused input",
       "reachability": "invariant",
       "justification": "The front end bounds every refusal span by the input it refused; a span past the input end or reversed is a front-end defect the fuzz denominator would expose.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_refusal_shape_faults"
+      "fault_test": "machine_diagnostics_qualification_refusal_shape_faults"
     },
     {
       "code": "M5_LIBRARY_DISAGREEMENT",
@@ -189,7 +189,7 @@
       "meaning": "a mutation control could not build its unmutated baseline",
       "reachability": "invariant",
       "justification": "Mutation controls start from fixed valid programs that always encode and verify; a baseline that fails to build is a harness defect.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_mutation_setup_fault"
+      "fault_test": "machine_diagnostics_qualification_mutation_setup_fault"
     },
     {
       "code": "M5_MUTATION_SURVIVED",
@@ -203,21 +203,21 @@
       "meaning": "the native engine failed to compile or run a qualified program",
       "reachability": "invariant",
       "justification": "The native engine runs only MIR that already verified and agreed with the reference; a build, link or host failure is an engine defect.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_native_fault"
+      "fault_test": "machine_diagnostics_qualification_native_fault"
     },
     {
       "code": "M5_NET",
       "meaning": "the executable-net lowering or verification of a qualified program failed",
       "reachability": "invariant",
       "justification": "The harness lowers only programs that already passed the checker, so a net that fails to lower, verify or compile is an engine defect.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
+      "fault_test": "machine_diagnostics_qualification_pipeline_stage_faults"
     },
     {
       "code": "M5_NET_ORACLE",
       "meaning": "the net oracle refused a verified candidate",
       "reachability": "invariant",
       "justification": "The oracle runs only the net and proof the harness just verified, so a refusal means a stale or mismatched proof, an engine defect.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
+      "fault_test": "machine_diagnostics_qualification_pipeline_stage_faults"
     },
     {
       "code": "M5_NVRTC_REQUIRED",
@@ -252,21 +252,21 @@
       "meaning": "a qualification report could not be written without replacing an existing one",
       "reachability": "external",
       "justification": "Report publication touches the host filesystem; a missing directory, a full disk or an existing report is refused and never overwritten.",
-      "boundary_test": "issue_ai_01_machine_diagnostics_qualification_report_boundaries"
+      "boundary_test": "machine_diagnostics_qualification_report_boundaries"
     },
     {
       "code": "M5_REPORT_LIMIT",
       "meaning": "a qualification report exceeds its 4 MiB bound",
       "reachability": "external",
       "justification": "Reports are harness documents bounded by the publisher, not by checked source; an oversized report is refused before any file is created.",
-      "boundary_test": "issue_ai_01_machine_diagnostics_qualification_report_boundaries"
+      "boundary_test": "machine_diagnostics_qualification_report_boundaries"
     },
     {
       "code": "M5_SEMANTIC_DISAGREEMENT",
       "meaning": "two engines disagree on a program's observable semantics",
       "reachability": "invariant",
       "justification": "Every engine must reproduce the reference observation exactly; a disagreement is an engine defect, never a property of the source program.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
+      "fault_test": "machine_diagnostics_qualification_pipeline_stage_faults"
     },
     {
       "code": "M5_SOURCE_DEVICE_INELIGIBLE",
@@ -315,21 +315,21 @@
       "meaning": "the front end refused a corpus program the corpus did not expect to be refused",
       "reachability": "invariant",
       "justification": "Corpus programs state their expected outcome; an unexpected refusal means the corpus and the front end disagree, a harness defect.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_pipeline_stage_faults"
+      "fault_test": "machine_diagnostics_qualification_pipeline_stage_faults"
     },
     {
       "code": "M5_UNTYPED_REFUSAL",
       "meaning": "a refusal lacks a code or a source span",
       "reachability": "invariant",
       "justification": "The front end gives every refusal a code and every source error a span; an untyped refusal is a front-end defect the fuzz denominator would expose.",
-      "fault_test": "issue_ai_01_machine_diagnostics_qualification_refusal_shape_faults"
+      "fault_test": "machine_diagnostics_qualification_refusal_shape_faults"
     },
     {
       "code": "NATIVE_FEATURE_REQUIRED",
       "meaning": "the native qualification rows need a binary built with the native feature",
       "reachability": "external",
       "justification": "A qualification binary built without the native feature records the native rows as unavailable; this is a build outcome, not source behaviour.",
-      "boundary_test": "issue_ai_01_machine_diagnostics_qualification_native_rows_follow_the_feature"
+      "boundary_test": "machine_diagnostics_qualification_native_rows_follow_the_feature"
     }
   ]
 }

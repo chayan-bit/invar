@@ -59,7 +59,7 @@ TENSOR_SOURCE = (
 )
 PARSE_ERROR_SOURCE = "fn main( -> i32 { return 1; }\n"
 
-FOCUSED_TEST = "issue_ai_01_machine_diagnostics_document_size_limit"
+FOCUSED_TEST = "machine_diagnostics_document_size_limit"
 
 
 class VerifyError(Exception):
