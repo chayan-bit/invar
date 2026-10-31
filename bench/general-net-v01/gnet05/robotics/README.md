@@ -2,7 +2,7 @@
 
 Ordinary Invar source for the robotics workload categories of the general-net GPU track.
 Every file here except the Rust modules is generator output.
-Tests: `tests/gnet05_corpus/issue_gnet_05_robotics.rs` and `tests/gnet05_corpus/issue_gnet_05_robotics_array.rs`.
+Tests: `tests/gnet05_corpus/robotics_corpus.rs` and `tests/gnet05_corpus/robotics_array.rs`.
 Handwritten baselines (comparison D): `tools/bench/baselines/{robotics-kernels.h,metal-robotics-handwritten.mm,cuda-robotics-handwritten.cu,robotics-baselines.py}`.
 Calls per timing sample, calibrated per case to 5 ms of GPU time: `tools/bench/baselines/robotics-batch-metal.json` (Apple M4) and `tools/bench/baselines/robotics-batch-cuda.json` (RTX 5070 Ti).
 
@@ -23,7 +23,7 @@ Calls per timing sample, calibrated per case to 5 ms of GPU time: `tools/bench/b
 | `array/manifest.json`, `array/programs/*.inv` | 48 host-array variants, one per seed program (same split and inputs), with their signature and the stack they require |
 | `array/validation.json` | Per input of each variant: reference result, steps, output words and the SHA-256 of the seed-program output prefix (Release run on the merged stack) |
 
-Regenerate with `INVAR_GNET05_WRITE=1 cargo test --release --locked --test gnet05_corpus issue_gnet_05_robotics::` (about 23 minutes on a 32-core x86_64 host; only a Release run writes `validation.json`, because the scored inputs run there).
+Regenerate with `INVAR_GNET05_WRITE=1 cargo test --release --locked --test gnet05_corpus robotics_corpus::` (about 23 minutes on a 32-core x86_64 host; only a Release run writes `validation.json`, because the scored inputs run there).
 `tools/bench/baselines/robotics-tables.h` is written by the same run.
 
 ## Composition

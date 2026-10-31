@@ -9,10 +9,10 @@ mod generator;
 #[path = "../support/language_limits.rs"]
 mod language_limits;
 
-mod issue_gnet_01;
-mod issue_gnet_02;
-mod issue_gnet_02_aggregates;
-mod issue_gnet_02_corpus;
-mod issue_gnet_02_generated;
-mod issue_gnet_02_native;
-mod issue_gnet_net_oracle_gaps;
+mod net_boundary;
+mod net_native_cpu;
+mod net_oracle_aggregates;
+mod net_oracle_arrays;
+mod net_oracle_corpus;
+mod net_oracle_gaps;
+mod net_oracle_generated;

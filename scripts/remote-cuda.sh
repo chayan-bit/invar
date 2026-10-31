@@ -34,7 +34,7 @@ skips=(
     issue_m5_01_benchmark_manifest_validation_and_rejections  # needs a git checkout
     source_packet_reverification_binds_source_key_dimensions_generation_and_input_bytes  # order-dependent on any OS
     p2_cuda_handwritten_diagnostic  # timing diagnostic; needs INVAR_NVRTC and a locked session
-    issue_gnet_05_robotics_baseline_outputs_match_reference  # needs INVAR_ROBOTICS_BASELINE_OUT
+    robotics_baseline_outputs_match_reference  # needs INVAR_ROBOTICS_BASELINE_OUT
     task_region::pilot  # CUDA bench; needs P4B_OUT
     task_region::session  # CUDA bench; needs P4B_OUT and P4B_SESSION
     task_region::report  # CUDA bench report; needs P4B_OUT
