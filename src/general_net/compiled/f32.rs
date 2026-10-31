@@ -39,6 +39,25 @@ GNET_FN unsigned gnet_f32_sqrt(unsigned x) {
 }
 "#;
 
+/// CUDA keeps the soft-float arithmetic entry points out of line: inlined at
+/// each of hundreds of call sites they dominate NVRTC time (#278). The
+/// arithmetic is exact integer code, so where it is compiled changes no bit.
+/// A host compiler (the CPU model of CUDA sources) still inlines them.
+const OUTLINED: [&str; 4] = ["add", "mul", "fma", "div"];
+const CUDA_CALL: &str = r#"
+#ifdef __CUDACC__
+#define GNET_CALL __device__ __noinline__
+#else
+#define GNET_CALL GNET_FN
+#endif"#;
+
+fn outlined(text: &str) -> String {
+    OUTLINED.iter().fold(text.to_owned(), |text, op| {
+        let head = format!(" gnet_u gnet_f32_{op}(gnet_u a");
+        text.replacen(&format!("GNET_FN{head}"), &format!("GNET_CALL{head}"), 1)
+    })
+}
+
 pub(super) fn preamble(w: &mut Writer, p: &Program<'_>) -> Result<(), Error> {
     if p.numeric.is_none() {
         return Ok(());
@@ -53,7 +72,12 @@ static_assert(sizeof(gnet_u)==8 && sizeof(gnet_w)==8 && (gnet_u)0-1ULL==18446744
 #include <climits>
 static_assert(CHAR_BIT==8 && sizeof(gnet_u)==8 && sizeof(gnet_w)==8 && ULLONG_MAX==18446744073709551615ULL,"GNET exact numeric words require64 bits");"#
     })?;
-    w.push(invar_device::EXACT_F32)?;
+    if p.target == Target::Cuda {
+        w.push(CUDA_CALL)?;
+        w.push(&outlined(invar_device::EXACT_F32))?;
+    } else {
+        w.push(invar_device::EXACT_F32)?;
+    }
     let calls = p
         .mir
         .functions
@@ -152,7 +176,7 @@ pub(super) fn trim_unused(source: String) -> String {
     let helpers: BTreeMap<_, _> = source
         .lines()
         .filter_map(|line| {
-            if !line.starts_with("GNET_FN ")
+            if !(line.starts_with("GNET_FN ") || line.starts_with("GNET_CALL "))
                 || !line.contains(" gnet_f32_")
                 || !line.ends_with(" }")
             {
@@ -190,4 +214,18 @@ pub(super) fn trim_unused(source: String) -> String {
         result.push('\n');
     }
     result
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn cuda_outlines_every_soft_float_entry_point_once() {
+        let text = super::outlined(invar_device::EXACT_F32);
+        for op in super::OUTLINED {
+            let head = format!(" gnet_u gnet_f32_{op}(gnet_u a");
+            assert_eq!(text.matches(&format!("GNET_CALL{head}")).count(), 1, "{op}");
+            assert!(!text.contains(&format!("GNET_FN{head}")), "{op}");
+        }
+        assert_eq!(text.matches("GNET_CALL ").count(), super::OUTLINED.len());
+    }
 }
