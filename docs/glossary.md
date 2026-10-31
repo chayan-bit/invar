@@ -262,8 +262,9 @@ It is associative, so reductions and scans over it can be regrouped legally.
 
 ## Issue and milestone labels
 
-These are names from the issue tracker that also appear in test and file names.
-The [testing guide](testing.md) maps the test files that carry them to what they cover.
+These are names from the issue tracker.
+They appear in the first doc comment of test files (`Issue label M0-04.`) and in a few remaining fixture and helper names.
+The [testing guide](testing.md) maps the test files to what they cover.
 
 | Label | Meaning |
 | --- | --- |
