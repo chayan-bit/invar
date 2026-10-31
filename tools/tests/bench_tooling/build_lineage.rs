@@ -6,9 +6,9 @@
 mod child_deadline;
 
 #[path = "../../bench/build_lineage.rs"]
-mod build_lineage;
+mod lineage;
 
-use build_lineage::{BuildRequest, Error, Invocation, build, verify};
+use lineage::{BuildRequest, Error, Invocation, build, verify};
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeMap,
