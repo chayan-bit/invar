@@ -70,13 +70,13 @@ fn main() {
             );
             Some((std::path::PathBuf::from(dir), key))
         });
-    if let Some(hit) = cache
+    if let Some((log, image)) = cache
         .as_ref()
         .and_then(|(dir, key)| invar::nvrtc_cache::get(dir, key))
     {
-        // Only clean compiles are stored, so the log is empty, as it was.
-        eprintln!("NVRTC_LOG=\"\"");
-        if std::io::stdout().write_all(&hit).is_ok() {
+        // The same frame the compile below prints for this log.
+        eprintln!("{}", diagnostic_prefix(&format!("NVRTC_LOG={log:?}")));
+        if std::io::stdout().write_all(&image).is_ok() {
             return;
         }
         std::process::exit(1);
@@ -104,11 +104,15 @@ fn main() {
                 "{}",
                 diagnostic_prefix(&format!("NVRTC_LOG={:?}", compiled.log))
             );
-            if let Some((dir, key)) = cache.as_ref().filter(|_| compiled.log.is_empty()) {
+            // GNET compiles keep their warning log; other modes store only
+            // clean compiles, so the log-bound test always compiles.
+            let store = compiled.log.is_empty() || mode.as_deref() == Some("--gnet-v5");
+            if let Some((dir, key)) = cache.as_ref().filter(|_| store) {
                 // A failed store only leaves the next run cold.
                 let _ = invar::nvrtc_cache::put(
                     dir,
                     key,
+                    &compiled.log,
                     &compiled.image,
                     invar::nvrtc_cache::MAX_BYTES,
                 );
