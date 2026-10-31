@@ -494,7 +494,7 @@ include!("eval/engine.rs");
 #[cfg(test)]
 mod tests {
     #[test]
-    fn issue_ai_01_machine_diagnostics_eval_faults() {
+    fn machine_diagnostics_eval_faults() {
         let mut errors = vec![(
             super::host_index(65_536, u16::MAX as u64).unwrap_err(),
             "INTERNAL_INDEX",
@@ -515,7 +515,7 @@ mod tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_missing_runtime_scope() {
+    fn machine_diagnostics_missing_runtime_scope() {
         let mut env = super::Env { scopes: Vec::new() };
         let error = env.bind("x", super::Value::I32(1)).unwrap_err();
         let document = error.to_diagnostics_json("fixture.inv", b"");

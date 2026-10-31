@@ -1009,7 +1009,7 @@ mod diagnostic_tests {
 
     #[cfg(feature = "native")]
     #[test]
-    fn issue_ai_01_machine_diagnostics_native_build_fault() {
+    fn machine_diagnostics_native_build_fault() {
         let error = native_command::build_error("injected linker failure".into());
         let document = error.to_diagnostics_json("fixture.inv", b"");
         assert_eq!(document["diagnostics"][0]["code"], "NATIVE_BUILD");
@@ -1020,7 +1020,7 @@ mod diagnostic_tests {
     }
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_document_size_limit() {
+    fn machine_diagnostics_document_size_limit() {
         let oversized = serde_json::json!({"payload": "x".repeat(1_000_001)});
         assert_eq!(print_run_json(oversized, &OsString::from("x.inv")), 2);
     }

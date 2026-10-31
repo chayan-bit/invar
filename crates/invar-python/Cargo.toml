@@ -14,8 +14,8 @@ name = "invar_python"
 crate-type = ["cdylib", "rlib"]
 
 [[test]]
-name = "issue_l1_06_python_binding"
-path = "../../tests/exports/issue_l1_06_python_binding.rs"
+name = "python_binding_policy"
+path = "../../tests/exports/python_binding_policy.rs"
 
 [features]
 extension-module = ["pyo3/extension-module"]

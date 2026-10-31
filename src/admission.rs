@@ -757,7 +757,7 @@ fn analyze_region(
 #[cfg(test)]
 mod ai_01_fault_tests {
     #[test]
-    fn issue_ai_01_machine_diagnostics_planner_extraction_fault() {
+    fn machine_diagnostics_planner_extraction_fault() {
         let source = include_bytes!("../examples/generated-map.inv");
         let checked = crate::check::check(crate::front::parse(source).unwrap(), true).unwrap();
         let mir = crate::mir::lower(&checked).unwrap();

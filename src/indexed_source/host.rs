@@ -550,7 +550,7 @@ mod diagnostic_tests {
     const SOURCE: &[u8] = b"fn gather(a: read Array<u32>, ix: read Array<u32>) -> Array<u32> { var out = filled_u32(len(ix),0u32); for i in 0u32..len(ix) { out[i] = a[ix[i]]; } return out; } fn main() -> i32 { let a: Array<u32> = [7u32,11u32]; let ix: Array<u32> = [1u32,0u32,1u32]; let out = gather(a,ix); return 7; }";
 
     #[test]
-    fn issue_ai_01_machine_diagnostics_gather_publication_faults() {
+    fn machine_diagnostics_gather_publication_faults() {
         let checked = check::check(front::parse(SOURCE).unwrap(), true).unwrap();
         let program = mir::lower(&checked).unwrap();
         let mut injected = Vec::new();
@@ -611,7 +611,7 @@ mod diagnostic_tests {
         // Only GATHER_FUEL remains constructor-only: it is dead code, because
         // GATHER_LOOP_BINDING first requires ticks <= fuel_limit - steps_used, so
         // steps_used + ticks cannot overflow. GATHER_OWNER, GATHER_LOAN and GATHER_COUNT are injected for
-        // real by `mir_eval::gather::tests::issue_ai_01_machine_diagnostics_gather_publication_harness_faults`.
+        // real by `mir_eval::gather::tests::machine_diagnostics_gather_publication_harness_faults`.
         let constructed = ["GATHER_FUEL"].map(|code| {
             (
                 code,
@@ -626,9 +626,7 @@ mod diagnostic_tests {
             .as_array()
             .unwrap()
             .iter()
-            .filter(|e| {
-                e["fault_test"] == "issue_ai_01_machine_diagnostics_gather_publication_faults"
-            })
+            .filter(|e| e["fault_test"] == "machine_diagnostics_gather_publication_faults")
             .map(|e| e["code"].as_str().unwrap())
             .collect::<Vec<_>>();
         registered.sort_unstable();
