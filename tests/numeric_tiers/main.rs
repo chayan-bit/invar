@@ -1,7 +1,7 @@
 #[path = "../../test-support/split_mix.rs"]
 mod split_mix;
 
-mod issue_eng_03_fold_receipts;
-mod issue_eng_03_numeric_tiers;
-mod issue_eng_03_storage_arrays;
-mod issue_eng_03_tier_engines;
+mod fold_receipts;
+mod numeric_tiers;
+mod storage_arrays;
+mod tier_engines;

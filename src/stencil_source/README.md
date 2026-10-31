@@ -12,7 +12,7 @@ A source family used by [schedule](../schedule/README.md).
 
 ## Tests
 
-- `cargo nextest run --locked --test m4_transpose_stencil`.
+- `cargo nextest run --locked --test transpose_stencil`.
 
 ## Rules to keep
 
