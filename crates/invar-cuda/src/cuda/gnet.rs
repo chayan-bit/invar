@@ -1,11 +1,78 @@
 //! Physical twelve-buffer ABI5 ownership. This boundary accepts compiler-owned
 //! source/layout only; root performs source/type/provenance/fence admission.
 use super::*;
-use cudarc::driver::DevicePtr;
+use cudarc::driver::{DevicePtr, HostSlice, SyncOnDrop, result};
+
+/// Page-locked host words in ordinary cacheable memory: the workset's upload
+/// and readback staging. cudarc's `alloc_pinned` maps write-combined pages,
+/// which the CPU reads uncached (about 0.19 GB/s measured on an RTX A6000
+/// host), and every epoch reads the whole workset back twice.
+struct Staging {
+    ptr: *mut u64,
+    len: usize,
+    stream: Arc<CudaStream>,
+}
+// SAFETY: Staging exclusively owns its allocation, as PinnedHostSlice does.
+unsafe impl Send for Staging {}
+unsafe impl Sync for Staging {}
+impl Staging {
+    fn zeroed(stream: &Arc<CudaStream>, words: usize) -> Result<Self, DriverError> {
+        stream.context().bind_to_thread()?;
+        // SAFETY: flags 0 is cacheable page-locked memory; it is zeroed below
+        // before any use and freed only by Drop.
+        let ptr = unsafe { result::malloc_host(words * 8, 0) }?.cast::<u64>();
+        assert!(!ptr.is_null() && ptr.is_aligned());
+        // SAFETY: the allocation holds exactly `words` writable u64 slots.
+        unsafe { std::ptr::write_bytes(ptr, 0, words) };
+        Ok(Self {
+            ptr,
+            len: words,
+            stream: stream.clone(),
+        })
+    }
+    /// Callers read only after the work's event confirmed every transfer.
+    fn as_slice(&self) -> &[u64] {
+        // SAFETY: `len` initialized words owned by self.
+        unsafe { std::slice::from_raw_parts(self.ptr, self.len) }
+    }
+    /// Callers write only while no transfer uses these pages.
+    fn as_mut_slice(&mut self) -> &mut [u64] {
+        // SAFETY: `len` initialized words exclusively borrowed from self.
+        unsafe { std::slice::from_raw_parts_mut(self.ptr, self.len) }
+    }
+}
+impl HostSlice<u64> for Staging {
+    fn len(&self) -> usize {
+        self.len
+    }
+    unsafe fn stream_synced_slice<'a>(
+        &'a self,
+        _stream: &'a CudaStream,
+    ) -> (&'a [u64], SyncOnDrop<'a>) {
+        // Work orders every transfer before its own recorded event.
+        (self.as_slice(), SyncOnDrop::Sync(None))
+    }
+    unsafe fn stream_synced_mut_slice<'a>(
+        &'a mut self,
+        _stream: &'a CudaStream,
+    ) -> (&'a mut [u64], SyncOnDrop<'a>) {
+        (self.as_mut_slice(), SyncOnDrop::Sync(None))
+    }
+}
+impl Drop for Staging {
+    fn drop(&mut self) {
+        // A transfer may still target the pages: free them only after the
+        // stream drained, and leak them if that cannot be confirmed.
+        if self.stream.synchronize().is_ok() {
+            // SAFETY: allocated by malloc_host in `zeroed` and freed once.
+            let _ = unsafe { result::free_host(self.ptr.cast()) };
+        }
+    }
+}
 
 pub struct Work {
     buffers: Vec<CudaSlice<u64>>,
-    staging: Vec<PinnedHostSlice<u64>>,
+    staging: Vec<Staging>,
     function: CudaFunction,
     resolver: Option<CudaFunction>,
     stream: Arc<CudaStream>,
@@ -80,7 +147,7 @@ impl Work {
         }
         let mut outputs: [Vec<u64>; 12] = std::array::from_fn(|_| Vec::new());
         for (out, host) in outputs.iter_mut().zip(&self.staging) {
-            let values = host.as_slice().map_err(driver_error)?;
+            let values = host.as_slice();
             out.try_reserve_exact(values.len())
                 .map_err(|_| Error::OutOfMemory)?;
             out.extend_from_slice(values);
@@ -225,26 +292,19 @@ impl CudaDevice {
             // Primary buffers0..6 are allocated before any private slots7..11.
             for n in bytes {
                 let words = n / 8;
-                // SAFETY: Work retains each initialized pinned word and every
-                // asynchronous transfer. Readback writes only this exact extent.
-                let mut host =
-                    unsafe { self.context.alloc_pinned::<u64>(words) }.map_err(driver_error)?;
-                let ptr = host.as_mut_ptr().map_err(driver_error)?;
-                // SAFETY: the allocation owns words disjoint writable u64 slots.
-                unsafe { std::ptr::write_bytes(ptr, 0, words) };
-                work.staging.push(host);
+                // Work retains each staging page and every asynchronous
+                // transfer. Readback writes only this exact extent.
+                work.staging
+                    .push(Staging::zeroed(&self.stream, words).map_err(driver_error)?);
                 work.buffers.push(
                     self.stream
                         .alloc_zeros::<u64>(words)
                         .map_err(driver_error)?,
                 );
             }
-            let input_ptr = work.staging[0].as_mut_ptr().map_err(driver_error)?;
-            // SAFETY: input capacity validated; these slots remain in Work.
-            unsafe { std::ptr::copy_nonoverlapping(input.as_ptr(), input_ptr, input.len()) };
-            let config_ptr = work.staging[3].as_mut_ptr().map_err(driver_error)?;
-            // SAFETY: config allocation is exactly six initialized words.
-            unsafe { std::ptr::copy_nonoverlapping(config.as_ptr(), config_ptr, 6) };
+            // Input capacity was validated and config is exactly six words.
+            work.staging[0].as_mut_slice()[..input.len()].copy_from_slice(input);
+            work.staging[3].as_mut_slice().copy_from_slice(&config);
             for i in [0, 3] {
                 self.stream
                     .memcpy_htod(&work.staging[i], &mut work.buffers[i])
@@ -287,12 +347,9 @@ impl CudaDevice {
         )?);
         let result = (|| {
             for (i, words) in image.iter().enumerate() {
-                let ptr = work.staging[i].as_mut_ptr().map_err(driver_error)?;
-                // SAFETY: idle pinned allocation has exactly this word extent;
-                // all writes finish before its asynchronous upload starts.
-                unsafe {
-                    std::ptr::copy_nonoverlapping(words.as_ptr(), ptr, words.len());
-                }
+                // Idle staging of exactly this word extent; the write finishes
+                // before its asynchronous upload starts.
+                work.staging[i].as_mut_slice().copy_from_slice(words);
                 self.stream
                     .memcpy_htod(&work.staging[i], &mut work.buffers[i])
                     .map_err(driver_error)?;
