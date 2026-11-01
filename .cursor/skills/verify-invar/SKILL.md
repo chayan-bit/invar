@@ -21,6 +21,8 @@ Ready means `target/debug/invar` exists and `invar --help` exits 0 with a first 
 
 The build writes `target/`. `--dry-run` prints the cargo command and does not run it.
 
+If doctor's `reason` says `rustc` is not 1.95 while a system Rust is first on `PATH`, put the rustup proxies first (`PATH=$HOME/.cargo/bin:$PATH`) so `rust-toolchain.toml` selects 1.95.0. A build with the wrong `rustc` fails on `rust-version`, and that is not a product failure.
+
 ## Doctor
 
 ```sh
@@ -97,9 +99,10 @@ The default suite records these as `skipped` when the probe says so:
 - `codegen.metal-hardware` — not an Apple Silicon Mac. This covers `just test-metal`.
 - `robotics.ros2-runtime` — `ros2` is not on PATH and there is no robot. Generation of the workspace is still checked.
 - `robotics.component-test` — needs a foreign shared library and the fixture server.
+- `parallelism.gnet-cpu-model-cuda` and `parallelism.gnet-cpu-model-metal` — neither `c++` nor `g++` can compile a C++20 program that includes `<barrier>` (doctor's `host.cxx.compiler` is null). A `gcc` without `cc1plus` does not count.
 - `tests.full-nextest` — `cargo-nextest` is absent, and the full Debug+Release corpus is the CI gate rather than the cloud proof.
 
-CPU reference, `cpu-parallel`, explain, `source-device` CPU model, and `gnet-device` CPU model are not in that list. They run.
+CPU reference, `cpu-parallel`, explain, and `source-device` CPU model are not in that list. They always run. `gnet-device` CPU model runs whenever a C++20 compiler with `<barrier>` is present.
 
 ## Maintenance
 

@@ -19,6 +19,7 @@ Users can run an admitted source kernel on a CPU model of the device, or ask for
 - Run `invar run PATH --engine native-serial|cuda|metal --format json`.
 - Run `invar build PATH --target native|cuda|metal ...` when the matching feature is compiled in.
 - Run `just test-gpu-cuda` or `just test-metal` on matching hardware. Those are not the cloud proof.
+- Run `just test-gpu-cuda-remote REF [FILTER]` (`scripts/remote-cuda.sh`, needs `REMOTE_CUDA_HOST`) to run a ref's CUDA suites on a remote Windows CUDA host. It builds every suite once with the `device-test` Cargo profile (`REMOTE_CUDA_PROFILE` overrides it) and replays verified NVRTC compiles from `INVAR_NVRTC_CACHE_DIR` (`src/nvrtc_cache.rs`). A cache hit is still a CUDA run. The cache only skips the NVRTC compile. The default drive never calls this recipe.
 
 ## Driving it with invar-verify
 
