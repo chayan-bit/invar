@@ -13,7 +13,7 @@ The checker accepts a parsed program only when names, types, ownership, call loa
 
 - Run `invar check PATH --format json`.
 - Open a view example under `examples/views/` or a foreign example under `examples/bytes/`.
-- `invar check PATH --fix` prints suggested edits. `invar check PATH --fix --write` rewrites the file. The harness never passes `--write`.
+- `invar check PATH --fix` prints suggested edits as a unified diff. `invar check PATH --fix --write` rewrites the file. The harness never passes `--write`.
 
 ## Driving it with invar-verify
 
@@ -30,6 +30,6 @@ Preconditions:
 ## Gotchas
 
 - A green `check` is not a run. The reference feature is the execution proof.
-- `invar check PATH --fix --write` rewrites source. Dry-run does not exist on that flag. Do not pass `--write` from a verification drive.
+- `invar check PATH --fix` alone is the dry run: it prints a unified diff and writes nothing. `--fix --write` rewrites source. Do not pass `--write` from a verification drive. `--fix` must be the third argument and does not combine with `--format json`. It refuses system files with exit 2.
 - Foreign programs that typecheck still need an absolute `--c-library` before `invar run`. The reference engine executes the Invar oracle. It does not load the library. That is not a C ABI proof.
 - View diagnostics are ownership codes (`OWN_...`), not parser codes.

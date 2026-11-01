@@ -32,7 +32,7 @@ Preconditions:
 
 - `cargo test` uses a different profile from `cargo build`, so the focused test rebuilds the package. Give it the cargo lock. Do not start it beside `invar-verify build`.
 - A filter that matches nothing still exits 0 with `0 passed`. The drive fails unless it sees `1 passed`.
-- `just test-quick` omits `general_net`, `schedule`, and `system` library tests. It is not a substitute for `just test`.
+- `just test-quick` runs only the library tests minus `general_net`, `schedule`, and `system`, the `language` binary minus `owner_return_fuel`, `bytes_strings_and_c_abi`, and `units_and_frames`, and the `net_boundary` tests of `gnet_net` (`[profile.quick]` in `.config/nextest.toml`). It is not a substitute for `just test`.
 - Pull-request CI samples the corpus 1-in-8. `just test` and pushes to main set `INVAR_FULL_CORPUS=1`. Quoting a sampled run as the full corpus is wrong.
 - `scripts/check-file-size --update` and `--regenerate` rewrite the allowlist. `--dry-run` on `invar-verify` does not pass those flags, and the drive never calls them.
 - GPU tests are `#[ignore]` unless the feature is on and the runner passes `--include-ignored`. A default `cargo test` that exits 0 did not run them.
