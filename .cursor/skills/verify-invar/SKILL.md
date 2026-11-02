@@ -21,6 +21,8 @@ Ready means `target/debug/invar` exists and `invar --help` exits 0 with a first 
 
 The build writes `target/`. `--dry-run` prints the cargo command and does not run it.
 
+The helper runs whatever `cargo` and `rustc` come first on `PATH`. A system cargo older than 1.95 there fails the build with `rustc 1.85.1 is not supported` (or similar), and doctor reports `toolchain_ok: false`. If rustup has the pinned toolchain under `~/.cargo/bin`, put that first: `export PATH="$HOME/.cargo/bin:$PATH"`.
+
 ## Doctor
 
 ```sh
