@@ -19,6 +19,7 @@ Users can run an admitted source kernel on a CPU model of the device, or ask for
 - Run `invar run PATH --engine native-serial|cuda|metal --format json`.
 - Run `invar build PATH --target native|cuda|metal ...` when the matching feature is compiled in.
 - Run `just test-gpu-cuda` or `just test-metal` on matching hardware. Those are not the cloud proof.
+- Run `just test-gpu-cuda-remote REF [FILTERS]` (`scripts/remote-cuda.sh`) to run a ref's CUDA suites on a remote Windows CUDA host over ssh. It builds the `device-test` cargo profile (`REMOTE_CUDA_PROFILE` overrides it) and needs `REMOTE_CUDA_HOST`. Without it the script exits 1 before contacting a host. See `docs/validation.md`.
 
 ## Driving it with invar-verify
 
@@ -40,3 +41,4 @@ Preconditions:
 - `invar build --target native` refuses an existing output path and needs a filesystem that supports hard links. The default drive does not invoke it.
 - Rustc 1.95 ships its own LLVM. That LLVM does not satisfy the `native` feature. The pinned backend is LLVM 21.1.8.
 - Building `--features cuda` or `--features metal` on a host that cannot run them is not a hardware pass.
+- `INVAR_NVRTC_CACHE_DIR` lets `invar-nvrtc` replay verified earlier compiles in test runs (`src/nvrtc_cache.rs`). A run that hit that cache did not compile those kernels. The default drive neither sets it nor runs NVRTC.
