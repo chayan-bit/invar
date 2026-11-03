@@ -11,7 +11,7 @@ The feature map is [`references/features/README.md`](references/features/README.
 
 ## Launch
 
-From the repository root, with Rust 1.95.0 (the `rust-toolchain.toml` pin):
+From the repository root, with Rust 1.95.0 (the `rust-toolchain.toml` pin). The helper calls `cargo` and `rustc` from `PATH`. Without the rustup proxies, a system Rust shadows the pin, and doctor reports `toolchain_ok: false`. In that case put the 1.95.0 toolchain's `bin` first, for example `PATH=$HOME/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin:$PATH`:
 
 ```sh
 .cursor/skills/verify-invar/scripts/invar-verify build --jobs 2 --format json
@@ -98,8 +98,9 @@ The default suite records these as `skipped` when the probe says so:
 - `robotics.ros2-runtime` — `ros2` is not on PATH and there is no robot. Generation of the workspace is still checked.
 - `robotics.component-test` — needs a foreign shared library and the fixture server.
 - `tests.full-nextest` — `cargo-nextest` is absent, and the full Debug+Release corpus is the CI gate rather than the cloud proof.
+- `parallelism.gnet-cpu-model-cuda` and `parallelism.gnet-cpu-model-metal` — neither `c++` nor `g++` can compile a C++20 program that includes `<barrier>`. Doctor reports this as `host.cxx.compiler: null`.
 
-CPU reference, `cpu-parallel`, explain, `source-device` CPU model, and `gnet-device` CPU model are not in that list. They run.
+CPU reference, `cpu-parallel`, explain, and the `source-device` CPU model are not in that list. They run on any host where doctor is ready. The `source-device` model is Rust and needs no C++ compiler.
 
 ## Maintenance
 
