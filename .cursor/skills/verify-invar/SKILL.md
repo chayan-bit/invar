@@ -27,7 +27,7 @@ The build writes `target/`. `--dry-run` prints the cargo command and does not ru
 .cursor/skills/verify-invar/scripts/invar-verify doctor --format json
 ```
 
-Read-only. Exit 0 when `ready` is true: the binary answers `--help`, `rustc` is 1.95, and `cargo` is on `PATH`. Exit 1 when the report was produced but the tree is not worth driving (build first). The report also records LLVM 21, `nvidia-smi`, Metal (Darwin or not), `ros2`, `cargo-nextest`, and `just`. Those facts decide later skips. Doctor does not install anything and does not start a GPU.
+Read-only. Exit 0 when `ready` is true: the binary answers `--help`, `rustc` is 1.95, and `cargo` is on `PATH`. Exit 1 when the report was produced but the tree is not worth driving (build first). The report also records LLVM 21, `nvidia-smi`, Metal (Darwin or not), `ros2`, `cargo-nextest`, `just`, and `cxx` (the C++20 `<barrier>` compiler for the `gnet-device` CPU model). Those facts decide later skips. If `rustc` is not 1.95 but rustup is installed, the system `cargo` is shadowing it: put `~/.cargo/bin` first on `PATH` so the `rust-toolchain.toml` pin applies, then build. Doctor does not install anything and does not start a GPU.
 
 ## Drive
 
@@ -98,8 +98,9 @@ The default suite records these as `skipped` when the probe says so:
 - `robotics.ros2-runtime` — `ros2` is not on PATH and there is no robot. Generation of the workspace is still checked.
 - `robotics.component-test` — needs a foreign shared library and the fixture server.
 - `tests.full-nextest` — `cargo-nextest` is absent, and the full Debug+Release corpus is the CI gate rather than the cloud proof.
+- `parallelism.gnet-cpu-model-cuda` and `parallelism.gnet-cpu-model-metal` — neither `CXX`/`c++` nor `g++` can compile a C++20 program that includes `<barrier>`. Doctor's `host.cxx` records this. The CPU model needs no GPU, so install a C++20 compiler rather than accept the skip.
 
-CPU reference, `cpu-parallel`, explain, `source-device` CPU model, and `gnet-device` CPU model are not in that list. They run.
+CPU reference, `cpu-parallel`, explain, and the `source-device` CPU model are not in that list. They always run. The `gnet-device` CPU model runs whenever a C++20 compiler is present.
 
 ## Maintenance
 
