@@ -5,7 +5,7 @@ The parser accepts an Invar source file and rejects malformed tokens with a sour
 ## Sub-features
 
 - `parser.accept-sum` accepts `examples/sum.inv` through syntax, names, and types.
-- `parser.reject-token` rejects a function parameter that is missing its type.
+- `parser.reject-token` rejects an unclosed parameter list (`fn main( -> ...`) where a parameter name is expected.
 
 ## How to get to it (user POV)
 
