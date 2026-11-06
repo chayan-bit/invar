@@ -27,7 +27,7 @@ The build writes `target/`. `--dry-run` prints the cargo command and does not ru
 .cursor/skills/verify-invar/scripts/invar-verify doctor --format json
 ```
 
-Read-only. Exit 0 when `ready` is true: the binary answers `--help`, `rustc` is 1.95, and `cargo` is on `PATH`. Exit 1 when the report was produced but the tree is not worth driving (build first). The report also records LLVM 21, `nvidia-smi`, Metal (Darwin or not), `ros2`, `cargo-nextest`, and `just`. Those facts decide later skips. Doctor does not install anything and does not start a GPU.
+Read-only. Exit 0 when `ready` is true: the binary answers `--help`, `rustc` is 1.95, and `cargo` is on `PATH`. Exit 1 when the report was produced but the tree is not worth driving (build first). The report also records LLVM 21, `nvidia-smi`, Metal (Darwin or not), `ros2`, `cargo-nextest`, and `just`. Those facts decide later skips. Doctor does not install anything and does not start a GPU. Doctor and the build use the `rustc` and `cargo` first on `PATH`. If doctor reports a distro `rustc` while rustup already has 1.95.0, put `~/.cargo/bin` first on `PATH` and run doctor again.
 
 ## Drive
 
@@ -93,7 +93,7 @@ Useful environment:
 The default suite records these as `skipped` when the probe says so:
 
 - `codegen.native-serial-run` — LLVM 21.1.8 is not installed (`native` is not rustc's LLVM).
-- `codegen.cuda-hardware` — no NVIDIA GPU, and the binary has no `cuda` feature. This covers `just test-gpu-cuda`.
+- `codegen.cuda-hardware` — no NVIDIA GPU, and the binary has no `cuda` feature. This covers `just test-gpu-cuda`. `just test-gpu-cuda-remote REF` runs those suites on a remote Windows CUDA host when `REMOTE_CUDA_HOST` is set. That is a result for the remote host and ref, not for this host.
 - `codegen.metal-hardware` — not an Apple Silicon Mac. This covers `just test-metal`.
 - `robotics.ros2-runtime` — `ros2` is not on PATH and there is no robot. Generation of the workspace is still checked.
 - `robotics.component-test` — needs a foreign shared library and the fixture server.
