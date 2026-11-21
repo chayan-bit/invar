@@ -37,7 +37,7 @@
         {
           "name": "string.quoted.double.bytes.invar",
           "begin": "b\"",
-          "end": "\"",
+          "end": "\"|$",
           "patterns": [
             { "name": "constant.character.escape.invar", "match": "\\\\(?:[\"\\\\nrt]|x[0-9A-Fa-f]{2})" },
             { "name": "invalid.illegal.escape.invar", "match": "\\\\." }
@@ -46,7 +46,7 @@
         {
           "name": "string.quoted.double.invar",
           "begin": "\"",
-          "end": "\"",
+          "end": "\"|$",
           "patterns": [
             { "name": "constant.character.escape.invar", "match": "\\\\[\"\\\\nrt]" },
             { "name": "invalid.illegal.escape.invar", "match": "\\\\." }
