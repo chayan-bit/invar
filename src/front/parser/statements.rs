@@ -181,10 +181,12 @@ impl Parser {
             return Stmt::new(StmtKind::While { condition, body }, span);
         }
         if let Some(start) = self.take_keyword("for") {
-            let (name, _) = self.expect_name()?;
+            let (name, name_span) = self.expect_name()?;
             self.expect_keyword("in")?;
             let lower = self.expression()?;
-            self.expect_symbol("..")?;
+            if self.take_symbol("..").is_none() {
+                return self.for_each(start.start, name, name_span, lower);
+            }
             let upper = self.expression()?;
             let body = self.block()?;
             let span = Span {
