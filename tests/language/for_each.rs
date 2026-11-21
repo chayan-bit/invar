@@ -67,26 +67,26 @@ fn for_each_by_value_is_the_counted_loop() {
 #[test]
 fn a_written_element_is_the_array_place() {
     let owner = "var xs: Array<u32> = [1u32, 2u32, 4u32];";
-    // The plain index sorts where the hidden `each@N` does among the locals.
+    // Written through, the index takes the element name.
     let read_back = "for i in 0u32 .. len(xs) { sum += xs[i]; }";
     for (sugared, plain) in [
         (
             "for x in xs { x *= 2u32; }",
-            "for e in 0u32 .. len(xs) { xs[e] = xs[e] * 2u32; }",
+            "for x in 0u32 .. len(xs) { xs[x] = xs[x] * 2u32; }",
         ),
         (
             "for x in xs { if x > 1u32 { x = x + x; } }",
-            "for e in 0u32 .. len(xs) { if xs[e] > 1u32 { xs[e] = xs[e] + xs[e]; } }",
+            "for x in 0u32 .. len(xs) { if xs[x] > 1u32 { xs[x] = xs[x] + xs[x]; } }",
         ),
         (
             "if true { let w = view_mut(xs, 0u32, 3u32); for x in w { x += 1u32; } }",
-            "if true { let w = view_mut(xs, 0u32, 3u32); for e in 0u32 .. len(w) { w[e] = w[e] + 1u32; } }",
+            "if true { let w = view_mut(xs, 0u32, 3u32); for x in 0u32 .. len(w) { w[x] = w[x] + 1u32; } }",
         ),
     ] {
         same(
             &main_with(owner, &format!("{sugared} {read_back}")),
             &main_with(owner, &format!("{plain} {read_back}")),
-            &[("x", "e")],
+            &[],
         );
     }
     let mut_parameter = |body: &str| {
@@ -100,8 +100,8 @@ fn a_written_element_is_the_array_place() {
     };
     same(
         &mut_parameter("for x in xs { x *= 2u32; }"),
-        &mut_parameter("for e in 0u32 .. len(xs) { xs[e] = xs[e] * 2u32; }"),
-        &[("x", "e")],
+        &mut_parameter("for x in 0u32 .. len(xs) { xs[x] = xs[x] * 2u32; }"),
+        &[],
     );
 }
 
@@ -157,6 +157,16 @@ fn for_each_refuses_what_the_counted_loop_refuses() {
             "NAME_DUPLICATE",
         ),
         ("for x in xs { x = 1u32; let y = move x; }", "OWNERSHIP"),
+        // Written through, the element name is still reserved for the function.
+        (
+            "let x: u32 = 0u32; for x in xs { x = 2u32; }",
+            "NAME_DUPLICATE",
+        ),
+        (
+            "for x in xs { x = 2u32; } let x: u32 = 0u32;",
+            "NAME_DUPLICATE",
+        ),
+        ("for main in xs { main = 2u32; }", "NAME_DUPLICATE"),
     ] {
         let source = main_with("var xs: Array<u32> = [1u32];", body);
         assert_eq!(first_code(&source), code, "{body}");
