@@ -177,7 +177,7 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 - Execution:
   - A `reassoc_add` fold folds by its function's tier, and as Tree in a Strict function; the rest of a Strict function stays strict.
   - Tree, Exact and Relaxed lower as below; a Relaxed fold gives the Tree result with the Tree program's fuel.
-- Code: `numeric_attribute` in `src/front/parser.rs`, `src/check/numeric.rs`.
+- Code: `REGISTRY` in `src/front/items.rs`, `src/check/numeric.rs`.
 
 ### The Relaxed bound
 

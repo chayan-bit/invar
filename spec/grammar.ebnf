@@ -2,8 +2,8 @@
 (* v0.2 spatial queries use opaque VoxelGrid and built-in Neighbors/Knn
    records through ordinary bindings and field moves. No tuple binding. *)
 program       = { top_item } ;
-top_item      = module | import | component_import | frame | system_item | foreign_function | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
-module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
+top_item      = module | import | component_import | frame | system_item | foreign_function | [ attribute ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
+module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ attribute ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
 import        = "import", identifier, { "::", identifier }, "::", identifier, ";" ;
 component_import = "import", "component", string_literal, [ "for", "robot", path ], ";" ;
 frame         = "frame", identifier, [ ":", identifier ], ";" ;
@@ -97,7 +97,8 @@ record_field  = identifier, ":", type ;
 variant       = "enum", identifier, "{", [ variant_arms, [ "," ] ], "}" ;
 variant_arms  = variant_arm, { ",", variant_arm } ;
 variant_arm   = identifier, [ "(", type, ")" ] ;
-numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric.md *)
+attribute     = "#", "[", identifier, "(", attr_arg, { ",", attr_arg }, ")", "]" ;  (* closed registry: docs/spec/invar-v0.2-axes.md *)
+attr_arg      = identifier, "=", string_literal ;
 function      = "fn", identifier, [ generic_params ], "(", [ params ], ")", "->", type, [ "from", identifier ], block ;
 foreign_function = "extern", "c", "fn", identifier, "(", [ params ], ")", "->", result_type, "oracle", identifier, ";" ;
 generic_params = "<", generic_param, { ",", generic_param }, ">" ;

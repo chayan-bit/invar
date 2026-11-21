@@ -713,7 +713,7 @@ def drive_parser(session: Session) -> None:
         feature,
         invar(session, "check", str(bad), "--format", "json"),
         timeout=60,
-        summary="a missing parameter type is PARSE_EXPECTED_TOKEN",
+        summary="a `->` where a parameter name belongs is PARSE_EXPECTED_TOKEN",
         expect=expect_json_status(1, "source_error", "PARSE_EXPECTED_TOKEN"),
     )
 
