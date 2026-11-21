@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=307 citations=333
-Size record: tokens=28768 estimator=bytes/3 limit=30000
+Counts: statements=308 citations=335
+Size record: tokens=28906 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1339,3 +1339,4 @@ fn main() -> i32 {
     return 0;
 }
 ```
+[NB.7.6] `for x in xs { b }` over a named array, `View` or `MutView` is `for i in 0u32 .. len(xs) { let x = xs[i]; b }` with a hidden `i`, desugared before checking and family recognition, except that a body assigning `x` names `i` as `x`, reserving it alike, and makes every `x` the place `xs[i]`, so loans, traps and fuel are the counted loop's (#255). `src/front/parser/loops.rs` `tests/language/for_each.rs`

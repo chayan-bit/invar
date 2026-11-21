@@ -6,6 +6,7 @@ mod bytes_strings_and_c_abi;
 mod call_loans;
 mod cli_examples_and_exit_codes;
 mod engines;
+mod for_each;
 mod generics_and_closures;
 mod names_types_and_calls;
 mod owner_return_fuel;
