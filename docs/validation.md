@@ -88,6 +88,31 @@ Exit codes: 0 pass, 1 test failures, no test run, or a filter that matched no te
 The full log lands in `target/remote-cuda/<run>.log`.
 The skip list in the script names Windows-only gaps and opt-in tests that need inputs the runner does not supply (`P4B_OUT`, `INVAR_COREMATH_UPSTREAM`, `INVAR_GPU_EXCLUSIVE=1`), none of them a CUDA result; `REMOTE_CUDA_NO_SKIP=1` runs them, `REMOTE_CUDA_EXTRA_SKIPS` adds skips and `REMOTE_CUDA_TESTS` replaces the target list.
 
+### Shared Linux CUDA host
+
+The same recipe drives a shared Linux CUDA host: the script runs `uname -s` on the host and, when it prints `Linux` (or `REMOTE_CUDA_OS=Linux`), ships `scripts/remote-cuda-linux.sh` instead of the PowerShell half.
+The Windows-only skips are dropped there; the opt-in skips stay.
+The Linux half keeps everything under `$HOME/<REMOTE_CUDA_DIR>`: `.rustup/` and `.cargo/` hold a per-user rustup install, `nvrtc/lib/` holds NVIDIA's NVRTC redistributable (`cuda_nvrtc-linux-x86_64-12.9.*-archive.tar.xz` from the CUDA redist index, sha256 checked against its `redistrib_<version>.json`), and the target directory, sources, `nvrtc-cache/`, the ten newest run directories and the lock sit beside them.
+NVRTC 12.9 is needed for `sm_120` and for the binary64 correctly rounded kernels; its SASS loads on a CUDA 13 driver (#288).
+`libcuda` comes from the host's driver; `LD_LIBRARY_PATH` puts `nvrtc/lib` first so the redistributable shadows an older system NVRTC.
+Setup on a fresh host, all per-user (no root):
+
+```sh
+mkdir -p ~/invar-gpu && cd ~/invar-gpu
+curl -fsSLO https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init{,.sha256}
+sha256sum -c rustup-init.sha256 && chmod +x rustup-init
+RUSTUP_HOME=$PWD/.rustup CARGO_HOME=$PWD/.cargo ./rustup-init -y --no-modify-path --profile minimal --default-toolchain none
+# then unpack the NVRTC archive with --strip-components=1 into nvrtc/ (the *_static.a files can go)
+```
+
+The run is built for the other tenants of the host, so it is low impact by default.
+It starts detached (`setsid`), so a dropped ssh session never stops it, and the driver reattaches to its output; exit 5 then means only that the result file is missing.
+It re-executes itself inside a `systemd-run --user --scope` with `MemoryMax` (`REMOTE_CUDA_MEM_MAX`, 12G), `MemorySwapMax=0` and `CPUQuota` (`REMOTE_CUDA_CPU_QUOTA`, 800%), under `nice -n 19` and `ionice -c3`; without a user systemd it keeps nice and ionice and says that no cap applies (`ulimit -v` would break CUDA's address-space reservation).
+Cargo builds with `REMOTE_CUDA_JOBS` (4) jobs, each test process uses as many test threads, at most `REMOTE_CUDA_LANES` (2) suites run at once, and `INVAR_GNET05_DEVICE_JOBS` is `REMOTE_CUDA_DEVICE_JOBS` (2).
+Before it starts, the GPU must show three idle samples 5 s apart: at most `REMOTE_CUDA_MAX_UTIL` (5) percent busy, `REMOTE_CUDA_MIN_FREE_MIB` free and a one-minute load average under `REMOTE_CUDA_MAX_LOAD` (8); otherwise it checks again every 5 minutes for `REMOTE_CUDA_WAIT_MIN` (120) minutes and exits 3.
+`REMOTE_CUDA_TIMEOUT_MIN` defaults to 240 there.
+The summary reports the run's own footprint: peak CPU cores over 5 s windows and the scope's memory peak from its cgroup, the peak resident set of its processes, and the peak GPU memory of the processes whose binaries live under the run directory.
+
 ## Later implementation and hardware acceptance
 
 After M0, use each GitHub issue's acceptance contract. List filtered tests and require a nonzero relevant count before running them in Debug/Release. Default CPU CI and real CUDA qualification are distinct: skipped, mock-only or unavailable-device checks cannot close a hardware issue. [Performance acceptance](performance-acceptance.md) defines independent baselines, numerical policy and the frozen per-family targets; no performance claim follows from this specification or the standalone recurrence probe.

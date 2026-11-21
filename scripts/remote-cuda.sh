@@ -92,7 +92,7 @@ if [ "$os" = Linux ]; then
     "${ssh_[@]}" "mkdir -p $rd"
     scp -q "$here/remote-cuda-linux.sh" "$tmp/src.tgz" "$tmp/run.env" "$host:$rd/"
     # Detached, so a dropped ssh session never stops the run; follow its output.
-    pid=$("${ssh_[@]}" "cd $rd && setsid nohup bash remote-cuda-linux.sh >out 2>&1 </dev/null & echo \$!")
+    pid=$("${ssh_[@]}" "cd $rd || exit; setsid nohup bash remote-cuda-linux.sh >out 2>&1 </dev/null & echo \$!")
     while :; do
         rc=0
         "${ssh_[@]}" "tail -n +1 -F --pid=$pid $rd/out 2>/dev/null" || rc=$?

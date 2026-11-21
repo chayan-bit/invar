@@ -27,6 +27,8 @@ if [ -z "${REMOTE_CUDA_SCOPED:-}" ]; then
     exec "${low[@]}"
 fi
 trap 'rc=$?; rm -rf "$here/tmp" "$here/src.tgz"; echo "$rc" >"$here/rc"' EXIT
+# A stopped run must never record a pass.
+trap 'exit 143' TERM INT HUP
 log=$here/cargo.log
 src=$base/src
 cg=/sys/fs/cgroup$(cut -d: -f3 /proc/self/cgroup)
@@ -71,6 +73,9 @@ say "gpu: $g_name, driver $g_driver, util $g_util%, free $g_free MiB; load $load
 rm -rf "$src" && mkdir -p "$src" "$here/tmp"
 # -m: archive mtimes are the commit time, which can predate the last build and hide changes from cargo.
 tar -xmzf "$here/src.tgz" -C "$src" || { say 'extract failed'; exit 2; }
+# Component manifests resolve their inputs against the nearest ancestor holding
+# .git (src/system/imports.rs), as in a checkout; the archive has none.
+git init -q "$src" || { say 'git init failed'; exit 2; }
 channel=$(sed -nE 's/^channel *= *"([^"]+)".*/\1/p' "$src/rust-toolchain.toml")
 export RUSTUP_HOME=$base/.rustup CARGO_HOME=$base/.cargo RUSTUP_TOOLCHAIN=$channel
 export PATH=$base/.cargo/bin:$PATH CCACHE_DISABLE=1 TMPDIR=$here/tmp
@@ -110,7 +115,10 @@ sample() {
 sample &
 sampler=$!
 
-read -ra suites <<<"--lib $(tr ',' '\n' <<<"$TESTS" | sed '/^$/d; s/^/--test /' | paste -sd' ')"
+# One element per suite: the flag and its target, split again where used.
+suites=(--lib)
+IFS=, read -ra test_list <<<"$TESTS"
+for t in "${test_list[@]}"; do [ -n "$t" ] && suites+=("--test $t"); done
 read -ra filters <<<"$FILTER"
 skips=()
 IFS=, read -ra skip_list <<<"$SKIP"
@@ -120,7 +128,8 @@ deadline=$((SECONDS + TIMEOUT_MIN * 60))
 left() { echo $((deadline > SECONDS ? deadline - SECONDS : 1)); }
 cd "$src" || exit 2
 begun=$SECONDS
-timeout -k 30 "$(left)" cargo test "${common[@]}" --no-run "${suites[@]}" >"$log" 2>&1
+# shellcheck disable=SC2068 # each suite is a flag and its value
+timeout -k 30 "$(left)" cargo test "${common[@]}" --no-run ${suites[@]} >"$log" 2>&1
 build_rc=$?
 say "build: $((SECONDS - begun)) s"
 timed_out=0
