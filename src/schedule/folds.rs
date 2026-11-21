@@ -313,9 +313,9 @@ fn carry_fold<T: Copy + Into<i64> + Sync>(
     })
 }
 
-/// #207: an L7 select loop on CPU workers. Each chunk keeps its local
-/// records; the ordered combine yields the last update and how often the `if`
-/// was taken. Published as a completed region, so MIR re-derives the fuel and
+/// #207: an L7 select loop on CPU workers. The chunks' extrema and an ordered
+/// combine yield the last update; a second pass over the same chunks counts
+/// how often the `if` was taken. Published as a completed region, so MIR re-derives the fuel and
 /// branch counts before anything is written. The body cannot trap once the
 /// live input covers the trip count, which is checked here first.
 pub(super) fn select_fold_step(
@@ -432,21 +432,33 @@ fn select_records<T: crate::select_fold::Key>(
     workers: usize,
     hooks: &Hooks,
 ) -> Result<Selected<T>, Error> {
-    use crate::select_fold::{combine, records};
+    use crate::select_fold::{combine, run};
     let (order, strict) = (select.order, select.strict);
-    let (chunks_records, chunks, joined) = parallel_chunks_with_limit(
-        values.len(),
-        workers,
-        hooks,
-        crate::array_limits::MAX_LIVE_ELEMENTS,
-        |range| Ok(records(order, strict, &values[range.clone()], range.start)),
-    )?;
-    let outcome = combine(
+    let limit = crate::array_limits::MAX_LIVE_ELEMENTS;
+    let (extrema, chunks, joined) =
+        parallel_chunks_with_limit(values.len(), workers, hooks, limit, |range| {
+            Ok(run(order, strict, None, &values[range.clone()], range.start).last)
+        })?;
+    let combined = combine(
         order,
         strict,
         seed,
-        &chunks_records,
+        &extrema,
         hooks.fault == Fault::RightmostTie,
     );
-    Ok(((outcome.taken, outcome.last), chunks, joined))
+    // The same chunk plan again: each chunk counts its updates from the best
+    // entering it.
+    let (counts, again, _) =
+        parallel_chunks_with_limit(values.len(), workers, hooks, limit, |range| {
+            let chunk = chunks
+                .binary_search_by_key(&range.start, |r| r.start)
+                .map_err(|_| Error::Candidate)?;
+            let best = combined.incoming[chunk];
+            Ok(run(order, strict, Some(best), &values[range], 0).taken)
+        })?;
+    if again != chunks {
+        return Err(Error::Candidate);
+    }
+    let taken = counts.iter().sum();
+    Ok(((taken, combined.last), chunks, joined))
 }

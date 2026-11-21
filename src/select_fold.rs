@@ -3,16 +3,18 @@
 //! `for i in 0u32 .. n { if a[i] < m { m = a[i]; at = i; } }` (also `<=`, `>`
 //! and `>=`, either operand order, any number of `c = i` companions) keeps the
 //! running extremum `m` and the companions of its last update. A chunk's local
-//! records are its elements that beat every earlier element of the chunk. In
-//! serial order an element updates `m` iff it is a local record and beats the
-//! best entering its chunk. Local records are monotone (strictly, for a strict
-//! compare), so the ones that beat the incoming best are a suffix, found by
-//! binary search. The ordered combine over chunks yields the final value and
-//! companions (the last such record's) and how often the `if` was taken, which
-//! the completed region states so MIR re-derives the exact fuel. A NaN is
-//! never a record and nothing beats a NaN seed; ties go to the left for a
-//! strict compare and to the right for a non-strict one, as in the serial
-//! loop. Value bits, companions and fuel equal the serial loop (level C0).
+//! records are its elements that beat every earlier element of the chunk; its
+//! extremum is the last one. In serial order an element updates `m` iff it is
+//! a local record and beats the best entering its chunk, and local records are
+//! monotone, so the chunk changes `m` iff its extremum beats the incoming best,
+//! and then the extremum is the chunk's last update. Two passes over the input
+//! with memory per chunk, not per element: the chunks' extrema, an ordered
+//! combine for the incoming bests and the last update, then each chunk counts
+//! how often the `if` is taken from its incoming best, which the completed
+//! region states so MIR re-derives the exact fuel. A NaN is never a record and
+//! nothing beats a NaN seed; ties go to the left for a strict compare and to
+//! the right for a non-strict one, as in the serial loop. Value bits,
+//! companions and fuel equal the serial loop (level C0).
 
 use crate::{
     counted::{Defs, counted_head, element_of, induction_name, local_is, steps_back},
@@ -84,32 +86,6 @@ pub fn beats<T: Key>(order: Order, strict: bool, x: T, best: T) -> bool {
     x.holds(op, best)
 }
 
-/// A chunk's local records in source order, and the index of the last one.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Records<T> {
-    pub values: Vec<T>,
-    pub last: Option<usize>,
-}
-
-/// The local records of `values`, whose first element has index `start`.
-pub fn records<T: Key>(order: Order, strict: bool, values: &[T], start: usize) -> Records<T> {
-    let mut out = Records {
-        values: Vec::new(),
-        last: None,
-    };
-    for (k, &x) in values.iter().enumerate() {
-        let record = match out.values.last() {
-            None => x.ordered(),
-            Some(&best) => beats(order, strict, x, best),
-        };
-        if record {
-            out.values.push(x);
-            out.last = Some(start + k);
-        }
-    }
-    out
-}
-
 /// The serial loop's effect: how often the `if` was taken, and the index and
 /// value of the last update.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -118,34 +94,73 @@ pub struct Outcome<T> {
     pub last: Option<(usize, T)>,
 }
 
-/// Ordered combine of the chunks' records from `seed`. `right_ties` is the
-/// injected mutation that lets a later chunk win a tie of a strict compare.
-pub fn combine<T: Key>(
+/// The serial loop over `values` (whose first element has index `start`)
+/// from the running best `best`; `None` is a seed every ordered element
+/// beats, so the result's `last` is the chunk's own extremum under the
+/// loop's tie rule.
+pub fn run<T: Key>(
     order: Order,
     strict: bool,
-    seed: T,
-    chunks: &[Records<T>],
-    right_ties: bool,
+    best: Option<T>,
+    values: &[T],
+    start: usize,
 ) -> Outcome<T> {
-    let incoming = strict && !right_ties;
+    let mut best = best;
     let mut outcome = Outcome {
         taken: 0,
         last: None,
     };
-    let mut best = seed;
-    for chunk in chunks {
-        let first = chunk
-            .values
-            .partition_point(|&r| !beats(order, incoming, r, best));
-        if let (Some(&value), Some(index)) =
-            (chunk.values.get(first..).and_then(<[T]>::last), chunk.last)
-        {
-            outcome.taken += (chunk.values.len() - first) as u64;
-            outcome.last = Some((index, value));
-            best = value;
+    for (k, &x) in values.iter().enumerate() {
+        let replaces = match best {
+            None => x.ordered(),
+            Some(b) => beats(order, strict, x, b),
+        };
+        if replaces {
+            best = Some(x);
+            outcome.taken += 1;
+            outcome.last = Some((start + k, x));
         }
     }
     outcome
+}
+
+/// The ordered combine of the chunks' extrema from `seed`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Combined<T> {
+    /// The running best entering each chunk.
+    pub incoming: Vec<T>,
+    /// The loop's last update.
+    pub last: Option<(usize, T)>,
+}
+
+/// Folds `seed` with each chunk's extremum in order. A chunk changes the
+/// running best iff its extremum beats it, and then its extremum is the last
+/// update so far. `right_ties` is the injected mutation that lets a later
+/// chunk win a tie of a strict compare.
+pub fn combine<T: Key>(
+    order: Order,
+    strict: bool,
+    seed: T,
+    extrema: &[Option<(usize, T)>],
+    right_ties: bool,
+) -> Combined<T> {
+    let strict = strict && !right_ties;
+    let mut best = seed;
+    let mut last = None;
+    let incoming = extrema
+        .iter()
+        .map(|extremum| {
+            let entering = best;
+            if let Some((index, value)) = *extremum
+                && beats(order, strict, value, best)
+            {
+                best = value;
+                last = Some((index, value));
+            }
+            entering
+        })
+        .collect();
+    Combined { incoming, last }
 }
 
 /// A counted select loop recognized from MIR.
@@ -343,43 +358,42 @@ pub(crate) fn select_in(function: &Function, defs: &Defs<'_>, head: usize) -> Op
 mod tests {
     use super::*;
 
-    fn serial<T: Key>(order: Order, strict: bool, seed: T, values: &[T]) -> Outcome<T> {
-        let (mut best, mut outcome) = (
-            seed,
-            Outcome {
-                taken: 0,
-                last: None,
-            },
-        );
-        for (k, &x) in values.iter().enumerate() {
-            if beats(order, strict, x, best) {
-                best = x;
-                outcome.taken += 1;
-                outcome.last = Some((k, x));
-            }
-        }
-        outcome
-    }
-
-    fn split<T: Key>(order: Order, strict: bool, values: &[T], width: usize) -> Vec<Records<T>> {
-        values
+    /// Both passes over chunks of `width`, as the CPU step runs them.
+    fn chunked<T: Key>(
+        order: Order,
+        strict: bool,
+        seed: T,
+        values: &[T],
+        width: usize,
+        right_ties: bool,
+    ) -> Outcome<T> {
+        let extrema: Vec<_> = values
             .chunks(width)
             .enumerate()
-            .map(|(c, chunk)| records(order, strict, chunk, c * width))
-            .collect()
+            .map(|(c, chunk)| run(order, strict, None, chunk, c * width).last)
+            .collect();
+        let combined = combine(order, strict, seed, &extrema, right_ties);
+        let taken = values
+            .chunks(width)
+            .zip(&combined.incoming)
+            .map(|(chunk, &best)| run(order, strict, Some(best), chunk, 0).taken)
+            .sum();
+        Outcome {
+            taken,
+            last: combined.last,
+        }
     }
 
     #[test]
-    fn issue_207_records_combine_equals_the_serial_select_at_every_split() {
+    fn issue_207_chunked_select_equals_the_serial_select_at_every_split() {
         let values = [5, 3, 3, 9, 1, 1, 7, 1, 0, 0, 4, -2, -2, 8];
         for order in [Order::Min, Order::Max] {
             for strict in [true, false] {
                 for seed in [i32::MIN, -2, 0, 3, i32::MAX] {
-                    let expected = serial(order, strict, seed, &values);
+                    let expected = run(order, strict, Some(seed), &values, 0);
                     for width in 1..=values.len() {
-                        let chunks = split(order, strict, &values, width);
                         assert_eq!(
-                            combine(order, strict, seed, &chunks, false),
+                            chunked(order, strict, seed, &values, width, false),
                             expected,
                             "{order:?} strict={strict} seed={seed} width={width}"
                         );
@@ -397,33 +411,30 @@ mod tests {
         for order in [Order::Min, Order::Max] {
             for strict in [true, false] {
                 for seed in [f(f32::INFINITY), f(f32::NEG_INFINITY), f(0.0), nan] {
-                    let expected = serial(order, strict, seed, &values);
+                    let expected = run(order, strict, Some(seed), &values, 0);
                     for width in 1..=values.len() {
-                        let chunks = split(order, strict, &values, width);
-                        assert_eq!(combine(order, strict, seed, &chunks, false), expected);
+                        let got = chunked(order, strict, seed, &values, width, false);
+                        assert_eq!(got, expected);
                     }
                 }
             }
         }
         // A strict min keeps the first of +0 and -0; a non-strict one the last.
         let zeros = [f(0.0), f(-0.0)];
-        let first = serial(Order::Min, true, f(1.0), &zeros).last;
-        let last = serial(Order::Min, false, f(1.0), &zeros).last;
+        let first = run(Order::Min, true, Some(f(1.0)), &zeros, 0).last;
+        let last = run(Order::Min, false, Some(f(1.0)), &zeros, 0).last;
         assert_eq!(first, Some((0, f(0.0))));
         assert_eq!(last, Some((1, f(-0.0))));
+        // An all-NaN chunk has no extremum.
+        assert_eq!(run(Order::Max, true, None, &[nan, nan], 4).last, None);
     }
 
     #[test]
     fn issue_207_the_rightmost_tie_mutation_changes_a_strict_select() {
         let values = [4, 1, 6, 1, 5];
-        let chunks = split(Order::Min, true, &values, 3);
-        assert_eq!(
-            combine(Order::Min, true, i32::MAX, &chunks, false).last,
-            Some((1, 1))
-        );
-        assert_eq!(
-            combine(Order::Min, true, i32::MAX, &chunks, true).last,
-            Some((3, 1))
-        );
+        let honest = chunked(Order::Min, true, i32::MAX, &values, 3, false);
+        let mutated = chunked(Order::Min, true, i32::MAX, &values, 3, true);
+        assert_eq!(honest.last, Some((1, 1)));
+        assert_eq!(mutated.last, Some((3, 1)));
     }
 }

@@ -1,5 +1,13 @@
 #[path = "../../test-support/corpus_sample.rs"]
 mod corpus_sample;
+#[path = "../../test-support/split_mix.rs"]
+mod split_mix;
+
+impl split_mix::Rng {
+    fn below(&mut self, n: u64) -> u64 {
+        self.next() % n
+    }
+}
 
 mod admission_records;
 mod affine_recurrence_scan;

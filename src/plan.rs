@@ -337,12 +337,12 @@ fn select_fold_facts() -> Vec<Obligation> {
         fact(
             "DEPENDENCE",
             "checked_invariant",
-            "running extremum with induction companions regrouped by PNF law L7: per-chunk local records, ordered combine; ties and NaN as the serial compare",
+            "running extremum with induction companions regrouped by PNF law L7: per-chunk extrema and an ordered combine, then a per-chunk if-taken count from the incoming best; ties and NaN as the serial compare",
         ),
         fact(
             "TOTALITY",
             "checked_invariant",
-            "no trap once the live input covers the trip count; the if-taken count is the number of records that beat the incoming best, from which MIR re-derives fuel",
+            "no trap once the live input covers the trip count; MIR re-derives fuel from the if-taken count",
         ),
         fact(
             "SEED",

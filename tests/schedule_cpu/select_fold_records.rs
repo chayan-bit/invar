@@ -12,18 +12,10 @@ use invar::{
     schedule::{self, Fault, Hooks, PlanKind},
 };
 
-#[path = "../../test-support/split_mix.rs"]
-mod split_mix;
-use split_mix::Rng;
+use crate::split_mix::Rng;
 
 const FUEL: u64 = 1_000_000;
 const WORKERS: [usize; 5] = [1, 2, 7, 16, 64];
-
-impl Rng {
-    fn below(&mut self, n: u64) -> u64 {
-        self.next() % n
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 enum Ty {
@@ -225,7 +217,10 @@ fn assert_agrees(
             _ => panic!("{workers} workers ran {kinds:?} for {source}"),
         };
         if let Some(expected) = published {
-            assert_eq!(this, expected, "{workers} workers published={this} {source}");
+            assert_eq!(
+                this, expected,
+                "{workers} workers published={this} {source}"
+            );
         }
         assert!(
             decided.replace(this).is_none_or(|before| before == this),
