@@ -272,7 +272,8 @@ fn machine_diagnostics_registry_covers_emitted_literals() {
     }
     let registry = code_registry();
     let fault_test_sources = [
-        include_str!("../../../src/admission.rs"),
+        include_str!("../../../src/admission/ai_01_fault_tests.rs"),
+        include_str!("../../../src/axes/rules/tests.rs"),
         include_str!("../../../src/engine.rs"),
         include_str!("../../../src/eval.rs"),
         include_str!("../../../src/eval/host_read.rs"),

@@ -1,0 +1,11 @@
+#[region(c = "c0")]
+fn add_all(xs: read Array<u32>) -> u32 {
+    var acc: u32 = 0u32;
+    for i in 0u32..len(xs) { acc = wrapping_add(acc, xs[i]); }
+    return acc;
+}
+fn main() -> i32 {
+    let xs = filled_u32(64u32, 7u32);
+    if add_all(xs) == 448u32 { return 1; }
+    return 0;
+}

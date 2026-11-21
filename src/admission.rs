@@ -13,6 +13,8 @@ use crate::{
     typed_net::{MapOp, ZipOp},
 };
 
+#[cfg(test)]
+mod ai_01_fault_tests;
 mod fold_hint;
 
 /// `invar explain` documents: the admission report plus the explain fields.
@@ -151,13 +153,15 @@ pub struct Region {
     span: Span,
     pub(crate) head: BlockId,
     candidate_identity: String,
-    axes: crate::axes::Axes,
+    pub(crate) axes: crate::axes::Axes,
     pub(crate) status: Status,
     pub(crate) first_rejected_obligation: Option<&'static str>,
     pub(crate) guard: Option<Guard>,
     pub(crate) shape: Option<MapShape>,
     pub(crate) obligations: Vec<Obligation>,
     pub(crate) execution: Execution,
+    /// The rule the C level gate refused (NA3.14).
+    pub(crate) c_refused: Option<&'static str>,
 }
 
 #[derive(Clone, Debug)]
@@ -259,6 +263,7 @@ impl Region {
         // v6 is v5 plus the axis fields (docs/spec/invar-v0.2-axes.md section 6).
         if let Some(fields) = record.as_object_mut() {
             fields.extend(self.axes.receipt());
+            fields.extend(crate::axes::rules::receipt(&rules, self.c_refused));
         }
         record
     }
@@ -426,6 +431,7 @@ pub fn analyze_within(
             .get(&region.function)
             .copied()
             .unwrap_or_default();
+        crate::axes::rules::gate(region);
         region.candidate_identity = candidate_identity(source, region)?;
     }
     // Planning attached graphs, fusion obligations and identities; the settled list must fit.
@@ -493,6 +499,7 @@ fn reject(
         shape: None,
         obligations: facts,
         execution: Execution::Serial,
+        c_refused: None,
     }
 }
 
@@ -765,35 +772,6 @@ fn analyze_region(
         shape: Some(shape),
         obligations: facts,
         execution: Execution::Serial,
-    }
-}
-
-#[cfg(test)]
-mod ai_01_fault_tests {
-    #[test]
-    fn machine_diagnostics_planner_extraction_fault() {
-        let source = include_bytes!("../examples/generated-map.inv");
-        let checked = crate::check::check(crate::front::parse(source).unwrap(), true).unwrap();
-        let mir = crate::mir::lower(&checked).unwrap();
-        let mut report = super::analyze(source, &mir).unwrap();
-        assert_eq!(report.regions[0].status, super::Status::Admitted);
-        report.regions[0].shape = None;
-        crate::plan::decide(&mir, &mut report.regions);
-        let code = report.regions[0].first_rejected_obligation.unwrap();
-        assert_eq!(code, "EXTRACTION");
-        let document = crate::diagnostics::document(
-            "tool_error",
-            vec![crate::diagnostics::diagnostic(
-                code,
-                "forged admitted region",
-                "fixture.inv",
-                source,
-                None,
-            )],
-        );
-        let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schema/invar-diagnostics-v3.schema.json"))
-                .unwrap();
-        assert!(jsonschema::is_valid(&schema, &document), "{document}");
+        c_refused: None,
     }
 }
