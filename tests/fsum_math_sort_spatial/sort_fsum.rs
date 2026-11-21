@@ -37,7 +37,7 @@ fn sort_and_spatial_runs_reduce_like_the_fsum_only_program() {
     let alone = format!("fn main() -> i32 {{ {REDUCTIONS}");
     for prefix in [SORT, SPATIAL] {
         let with = format!("fn main() -> i32 {{ {prefix}{REDUCTIONS}");
-        for workers in [1, 2, 4] {
+        for workers in [1, 2, 4, 16, 64] {
             let (expected, actual) = (run(&alone, workers), run(&with, workers));
             assert_eq!(expected.observation.result, actual.observation.result);
             assert_eq!(
@@ -55,7 +55,9 @@ fn sort_and_spatial_runs_reduce_like_the_fsum_only_program() {
                 !actual.executed.is_empty(),
                 "the sort or query ran: {prefix}"
             );
-            if workers > 1 {
+            // The measured cost may keep 70,000 elements serial at 16 and 64
+            // workers; fsum_oracle forces those counts.
+            if (2..=4).contains(&workers) {
                 assert!(
                     actual
                         .reductions
