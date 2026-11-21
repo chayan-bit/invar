@@ -180,6 +180,12 @@ pub(super) fn compile(
     }
     watched?;
     let status = status?;
+    // Deadline and limit kills returned above, so a signal here came from
+    // outside (an OOM kill, a crash): a host fault, never a compile error.
+    #[cfg(unix)]
+    if let Some(signal) = std::os::unix::process::ExitStatusExt::signal(&status) {
+        return Err(Error::Driver(format!("compiler killed by signal {signal}")));
+    }
     let (Some(wrote), Some(image), Some(log)) = (streams.wrote, streams.image, streams.log) else {
         return Err(Error::Timeout);
     };
@@ -348,6 +354,17 @@ pub(super) mod tests {
             begun.elapsed() < Duration::from_secs(5),
             "{:?}",
             begun.elapsed()
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn compiler_child_killed_by_a_signal_is_a_host_fault_not_a_compile_error() {
+        let result = run("killed.sh", None, Duration::from_secs(20));
+        assert!(
+            matches!(&result, Err(Error::Driver(m)) if m == "compiler killed by signal 9"),
+            "{:?}",
+            result.as_ref().err()
         );
     }
 
