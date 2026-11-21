@@ -305,6 +305,11 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
                 b"<=" => Some("<="),
                 b">=" => Some(">="),
                 b"=>" => Some("=>"),
+                b"+=" => Some("+="),
+                b"-=" => Some("-="),
+                b"*=" => Some("*="),
+                b"/=" => Some("/="),
+                b"%=" => Some("%="),
                 _ => None,
             };
             if let Some(symbol) = symbol {
