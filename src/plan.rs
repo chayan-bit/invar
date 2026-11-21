@@ -6,6 +6,7 @@ use serde_json::{Value, json};
 
 use crate::{
     admission::{self, Obligation, Region, Status, fact},
+    checked_fold,
     front::Span,
     laws, loops,
     mir::{self, Function, Operation, ValueId},
@@ -105,6 +106,8 @@ pub enum Execution {
     Reduction(Box<laws::Reduction>),
     PairReduction(Box<crate::pair_reduction::Reduction>),
     Scan(Box<recurrence::Candidate>),
+    /// A checked integer sum regrouped by the exact carry of PNF law L3 (#204).
+    CheckedFold(Box<checked_fold::Fold>),
 }
 
 impl Execution {
@@ -134,6 +137,9 @@ impl Execution {
                 .saturating_add(scan.state.capacity())
                 .saturating_add(loops::names_bytes(&scan.arrays))
                 .saturating_add(scan.output.as_ref().map_or(0, String::capacity)),
+            Self::CheckedFold(fold) => size_of::<checked_fold::Fold>()
+                .saturating_add(fold.state.capacity())
+                .saturating_add(fold.input.capacity()),
         }
     }
 
@@ -145,7 +151,9 @@ impl Execution {
             | Self::FusedConsumer { .. }
             | Self::DagProducer(_)
             | Self::DagConsumer { .. } => PlanKind::FusedMap,
-            Self::Reduction(_) | Self::PairReduction(_) => PlanKind::Reduction,
+            Self::Reduction(_) | Self::PairReduction(_) | Self::CheckedFold(_) => {
+                PlanKind::Reduction
+            }
             Self::Scan(_) => PlanKind::Scan,
         }
     }
@@ -164,6 +172,7 @@ impl Execution {
                 vec![crate::pair_reduction::RULE_REVISION, laws::RULE_REVISION]
             }
             Self::Scan(_) => vec![recurrence::RULE_REVISION, laws::RULE_REVISION],
+            Self::CheckedFold(_) => vec![checked_fold::RULE_REVISION],
         }
     }
 
@@ -178,6 +187,7 @@ impl Execution {
             Self::Reduction(_) => "wrapping-reduction-if-guard",
             Self::PairReduction(_) => "ordered-affine-pair-reduction-if-guard",
             Self::Scan(_) => "affine-scan-if-guard",
+            Self::CheckedFold(_) => "checked-sum-carry-if-guard",
         }
     }
 
@@ -214,6 +224,7 @@ impl Execution {
                 None,
             ),
             Self::PairReduction(_) => ("pair-reduction", None, Some("ordered-affine-pair"), None),
+            Self::CheckedFold(_) => ("reduction", None, Some("checked-sum-carry"), None),
             Self::Scan(candidate) => (
                 "scan",
                 None,
@@ -268,6 +279,31 @@ fn family_facts(dependence: &'static str, publication: Option<&'static str>) -> 
         "seed read from the live state at loop entry; no write before the region completes",
     ));
     facts
+}
+
+fn checked_fold_facts() -> Vec<Obligation> {
+    vec![
+        fact(
+            "RANGE",
+            "checked_invariant",
+            "zero-based counted for; trip count and live input length checked at loop entry",
+        ),
+        fact(
+            "DEPENDENCE",
+            "checked_invariant",
+            "one accumulator; checked sum regrouped by the associative (total, min prefix, max prefix) carry of PNF law L3, exact in 64 bits",
+        ),
+        fact(
+            "TOTALITY",
+            "checked_invariant",
+            "the combined carry decides whether and in which chunk the first overflow occurs; that chunk reruns serially from its exact seed",
+        ),
+        fact(
+            "SEED",
+            "runtime_guard",
+            "seed read from the live state at loop entry; no write before the region completes",
+        ),
+    ]
 }
 
 fn scan_facts(candidate: &recurrence::Candidate) -> Vec<Obligation> {
@@ -338,6 +374,12 @@ fn classify(context: &mut Context<'_>, region: &mut Region) {
     } else if let Some(reduction) = laws::reduction_in(function, defs, region.head) {
         let facts = family_facts("one accumulator combined by a sealed law", None);
         admit(region, Execution::Reduction(Box::new(reduction)), facts);
+    } else if let Some(fold) = checked_fold::fold_in(function, defs, region.head) {
+        admit(
+            region,
+            Execution::CheckedFold(Box::new(fold)),
+            checked_fold_facts(),
+        );
     } else if let Err(reason) = scan
         && region.first_rejected_obligation == Some("EFFECT_ORDER")
         && !matches!(reason, "RANGE" | "EFFECT_ORDER")
