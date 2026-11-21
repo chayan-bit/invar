@@ -1,0 +1,8 @@
+// A literal zero step in a for range is refused before checking.
+fn main() -> i32 {
+    var n: u32 = 0u32;
+    for i in 0u32 .. 10u32 step 0u32 {
+        n += i;
+    }
+    return 0;
+}
