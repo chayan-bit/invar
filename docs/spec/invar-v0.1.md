@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=302 citations=324
-Size record: tokens=27918 estimator=bytes/3 limit=30000
+Counts: statements=307 citations=333
+Size record: tokens=28768 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1061,7 +1061,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 [N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
 [N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
-[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
+[N11.3.3] A checked `i32` sum is not reassociated as a wrapping law, because regrouping can change which addition traps; it runs in parallel only by the exact carry of v0.2 NA3.11, which keeps the first trap. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
 [N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_false_guard_is_serial_before_workers`
 [N11.3.5] The worker count is bounded by `MAX_WORKERS` (64) and by the available hardware. `src/schedule/workers.rs::MAX_WORKERS`
 
@@ -1303,3 +1303,39 @@ fn main() -> i32 {
 ### B.6 Attributes, contract axes and receipts
 
 Note: the attribute registry, the contract axes and their receipts are specified in the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, which has its own size record and budget.
+
+### B.7 Language surface
+
+[NB.7.1] An integer literal may separate digits with single `_` characters and take a `0x`, `0o` or `0b` radix prefix, and its token value is the decimal literal it denotes, so the range checks of N2.2.3 and every later stage are unchanged (#253). `src/front/lexer.rs::integer_literal` `tests/language/surface_sugar.rs::literal_spellings_give_identical_mir_outcomes_and_receipts`
+[NB.7.2] A leading, trailing or doubled `_`, a digit outside the radix, a radix value above 128 bits, or a separator or prefix before a decimal point is `LEX_INVALID_LITERAL`. `tests/language/surface_sugar.rs::literal_separators_and_radix_prefixes_lex_to_the_same_token_value`
+
+```invar outcome=value:1
+fn main() -> i32 {
+    let mask: u32 = 0xFFFF_0000u32;
+    if mask == 4_294_901_760u32 and 0b1010 == 10 { return 1; }
+    return 0;
+}
+```
+
+```invar outcome=diag:LEX_INVALID_LITERAL
+fn main() -> i32 { return 1__0; }
+```
+[NB.7.3] `p op= e;` with `op` one of `+ - * / %` is exactly `p = p op (e);`, desugared before checking and family recognition, except that an index other than a name or literal is first bound to a hidden immutable `u32` local, so it evaluates once and before `e` (#254). `src/front/parser/statements.rs::compound_assignment` `tests/language/surface_sugar.rs::compound_assignment_evaluates_a_computed_index_once`
+
+```invar outcome=trap:INDEX_OUT_OF_BOUNDS
+fn main() -> i32 {
+    var ys: Array<u32> = [1u32, 2u32];
+    ys[0u32] *= 3u32;
+    ys[ys[0u32]] += 1u32;
+    return 0;
+}
+```
+[NB.7.4] `assert(c, "m")` takes a `Bool` condition and a string-literal message and returns `Unit`, costs one step plus its condition, never evaluates the message, and on a false condition traps `ASSERTION_FAILED` at the call span, which the CLI reports with the message (#258). `src/eval/engine.rs` `tests/language/assertions.rs::the_cli_reports_the_assertion_message_and_span`
+[NB.7.5] The reference, MIR, net oracle, native and cpu-parallel engines agree on that trap and its fuel prefix, a loop holding an assert is not admitted, so its first failing iteration in source order traps, and the compiled net route refuses it as `unsupported_call`. `tests/language/assertions.rs::a_false_assert_traps_identically_on_every_engine` `tests/language/assertions.rs::a_loop_with_an_assert_is_not_admitted_and_runs_serially`
+
+```invar outcome=trap:ASSERTION_FAILED
+fn main() -> i32 {
+    assert(2 + 2 == 5, "arithmetic");
+    return 0;
+}
+```

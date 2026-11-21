@@ -396,8 +396,19 @@ fn cpu_scheduler_fallback_false_guard_is_serial_before_workers() {
 }
 
 #[test]
-fn cpu_scheduler_fallback_checked_overflow_stays_serial() {
-    let source = "fn main() -> i32 { let xs: Array<i32> = [2147483647, 1]; var acc: i32 = 0; for i in 0u32 .. len(xs) { acc = acc + xs[i]; } return acc; }";
+fn cpu_scheduler_fallback_checked_overflow_traps_like_serial_mir() {
+    // #204: a checked sum runs through the exact L3 carry and traps where MIR does.
+    let sum = "fn main() -> i32 { let xs: Array<i32> = [2147483647, 1]; var acc: i32 = 0; for i in 0u32 .. len(xs) { acc = acc + xs[i]; } return acc; }";
+    let (checked, program) = lower(sum);
+    let serial = mir_eval::observe(&program, 100_000);
+    assert_eq!(serial.result, eval::observe(&checked, 100_000).result);
+    let run = schedule::run_source(sum.as_bytes(), &program, 100_000, 4).unwrap();
+    assert_eq!(run.plan, schedule::PlanKind::Reduction);
+    assert_eq!(run.observation.result, serial.result);
+    assert_eq!(run.observation.steps_used, serial.steps_used);
+    assert_eq!(run.observation.cleanup_trace, serial.cleanup_trace);
+    // A checked product has no admitted carry: it never starts a worker.
+    let source = "fn main() -> i32 { let xs: Array<i32> = [2147483647, 2]; var acc: i32 = 1; for i in 0u32 .. len(xs) { acc = acc * xs[i]; } return acc; }";
     let (checked, program) = lower(source);
     let reference = eval::observe(&checked, 100_000);
     let serial = mir_eval::observe(&program, 100_000);
@@ -703,6 +714,12 @@ fn cpu_scheduler_fallback_explain_matches_executed_plans() {
         (
             format!(
                 "{prefix} var acc: u32 = 0u32; for i in 0u32 .. len(xs) {{ acc = acc + xs[i]; }} return 0; }}"
+            ),
+            vec![schedule::PlanKind::Reduction],
+        ),
+        (
+            format!(
+                "{prefix} var acc: u32 = 1u32; for i in 0u32 .. len(xs) {{ acc = acc * xs[i]; }} return 0; }}"
             ),
             vec![schedule::PlanKind::Serial],
         ),

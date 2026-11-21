@@ -1,8 +1,8 @@
 # Invar v0.2: attributes, axes and receipts
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
-Counts: statements=43 citations=46
-Size record: tokens=5105 estimator=bytes/3 limit=6000
+Counts: statements=45 citations=48
+Size record: tokens=5428 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
@@ -67,6 +67,8 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 [NA3.8] The C axis has no C3 or C4, and older prose that names them means S1 or S2 and N4. `src/axes.rs::level_names_round_trip_and_c3_c4_are_not_levels`
 [NA3.9] Each numeric contract on `main` maps to exactly one level by the table below, and a test checks that the mapping is total and that the table matches the code. `src/axes.rs::every_contract_maps_to_exactly_one_level_as_the_spec_says`
 [NA3.10] An intrinsic that names its contract, such as `sum_tree` or `tc_mul_add`, applies it at that call, and a fold tier applies it to that function's folds; neither raises the level of the rest of the region. `src/axes.rs::CONTRACTS`
+[NA3.11] A C0 checked fold may be evaluated by any associative summary that reproduces its value and its first trap position, and `cpu-parallel` evaluates a counted `s = s + a[i]` over `i32` or `u32` by the exact (total, minimum prefix, maximum prefix) carry in 64 bits, rerunning only the chunk that holds the first overflow. `src/checked_fold.rs::Carry`
+[NA3.12] The value, trap category, trap span, fuel prefix and cleanup of such a fold equal the serial fold at every worker count, and `explain` names the plan `checked-sum-carry-if-guard` and the rule `pnf-l3-checked-sum-carry-v1`. `tests/schedule_cpu/checked_fold_carry.rs`
 
 | Level | May vary | Must not vary | Evidence | Minimum receipt |
 | --- | --- | --- | --- | --- |
@@ -133,6 +135,17 @@ fn main() -> i32 {
     let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     if relaxed_sum(xs) == 16777218.0 { return 2; }
     return 0;
+}
+```
+
+Note: the C0 checked-fold fixture: the first prefix leaves the `i32` range at the second element, so the run traps there although the full sum fits.
+
+```invar outcome=trap:INTEGER_OVERFLOW
+fn main() -> i32 {
+    let a: Array<i32> = [2147483647, 1, -5];
+    var s: i32 = 0;
+    for i in 0u32..len(a) { s = s + a[i]; }
+    return s;
 }
 ```
 

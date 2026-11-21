@@ -12,6 +12,7 @@ use crate::front::{
 
 mod compiler;
 mod components;
+mod euler;
 pub mod foreign;
 mod foreign_layout;
 mod generate;

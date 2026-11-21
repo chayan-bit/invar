@@ -1,5 +1,6 @@
 mod arithmetic_fuel_and_demand;
 mod arrays_ownership_and_cleanup;
+mod assertions;
 mod borrowed_views;
 mod bytes_strings_and_c_abi;
 mod call_loans;
@@ -10,5 +11,6 @@ mod names_types_and_calls;
 mod owner_return_fuel;
 mod records_variants_result;
 mod reference_corpus_and_json;
+mod surface_sugar;
 mod syntax_and_limits;
 mod units_and_frames;

@@ -87,6 +87,40 @@ fn ident_continue(byte: u8) -> bool {
     ident_start(byte) || byte.is_ascii_digit()
 }
 
+/// The canonical token text of an integer literal (decimal digits plus the
+/// optional suffix), or `None` when it is malformed. `_` may appear only
+/// between two digits, and `0x`, `0o` and `0b` select the radix (issue #253).
+fn integer_literal(word: &str) -> Option<String> {
+    let (body, suffix) = match word.len().checked_sub(3).map(|at| word.split_at(at)) {
+        Some((body, suffix @ ("i32" | "u32"))) => (body, suffix),
+        _ => (word, ""),
+    };
+    let (radix, digits) = match body.get(..2) {
+        Some("0x") => (16, &body[2..]),
+        Some("0o") => (8, &body[2..]),
+        Some("0b") => (2, &body[2..]),
+        _ => (10, body),
+    };
+    let well_formed = digits
+        .split('_')
+        .all(|group| !group.is_empty() && group.chars().all(|digit| digit.is_digit(radix)));
+    if !well_formed {
+        return None;
+    }
+    let digits = digits.replace('_', "");
+    if radix == 10 {
+        return Some(digits + suffix);
+    }
+    // Radix values above u128 are refused here; every integer type is far narrower,
+    // and a value in range of u128 reaches the ordinary range check unchanged.
+    let value = digits.chars().try_fold(0u128, |value, digit| {
+        value
+            .checked_mul(u128::from(radix))?
+            .checked_add(u128::from(digit.to_digit(radix)?))
+    })?;
+    Some(format!("{value}{suffix}"))
+}
+
 fn quoted(source: &str, index: &mut usize, bytes_literal: bool) -> Result<TokenKind, FrontError> {
     let input = source.as_bytes();
     let start = *index;
@@ -239,14 +273,21 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
             while i < bytes.len() && ident_continue(bytes[i]) {
                 i += 1;
             }
-            if i > digits_end && !matches!(&source[digits_end..i], "i32" | "u32") {
+            let span = Span { start, end: i };
+            let value = integer_literal(&source[start..i]).ok_or_else(|| {
+                FrontError::source("LEX_INVALID_LITERAL", "malformed integer literal", span)
+            })?;
+            if i > digits_end
+                && bytes.get(i) == Some(&b'.')
+                && bytes.get(i + 1).is_some_and(u8::is_ascii_digit)
+            {
                 return Err(FrontError::source(
                     "LEX_INVALID_LITERAL",
-                    "malformed integer literal",
-                    Span { start, end: i },
+                    "a decimal literal takes no separator, radix or suffix before its point",
+                    span,
                 ));
             }
-            TokenKind::Integer(source[start..i].to_owned())
+            TokenKind::Integer(value)
         } else if bytes[i] == b'"' {
             quoted(source, &mut i, false)?
         } else {
@@ -264,6 +305,11 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
                 b"<=" => Some("<="),
                 b">=" => Some(">="),
                 b"=>" => Some("=>"),
+                b"+=" => Some("+="),
+                b"-=" => Some("-="),
+                b"*=" => Some("*="),
+                b"/=" => Some("/="),
+                b"%=" => Some("%="),
                 _ => None,
             };
             if let Some(symbol) = symbol {
@@ -315,6 +361,14 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
         span: Span { start: i, end: i },
     });
     Ok(tokens)
+}
+
+/// The value of the last string literal token in `text`, if it lexes.
+pub fn last_string_literal(text: &str) -> Option<String> {
+    lex(text).ok()?.into_iter().rev().find_map(|token| match token.kind {
+        TokenKind::StringLit(value) => Some(value),
+        _ => None,
+    })
 }
 
 /// Byte spans of the matched `{`...`}` pairs in `source`, in closing order,

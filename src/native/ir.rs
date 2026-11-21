@@ -537,6 +537,12 @@ impl Ir<'_> {
                         let (start, end) = self.site(at)?;
                         self.line(format!("{value} = call i64 @invar_angle_convert_v1(i64 {input}, i32 {direction}, i32 {signed}, i32 {start}, i32 {end})"));
                     }
+                    ("assert", [condition]) => {
+                        let failed = self.tmp();
+                        self.line(format!("{failed} = icmp eq i64 {condition}, 0"));
+                        self.trap_if(&failed, 5, at)?;
+                        self.line(format!("{value} = add i64 0, 0"));
+                    }
                     ("wrapping_add", [a, b]) | ("wrapping_mul", [a, b]) => {
                         let opcode = if name == "wrapping_add" { "add" } else { "mul" };
                         let wide = self.tmp();
