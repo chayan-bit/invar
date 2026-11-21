@@ -59,6 +59,21 @@ pub struct Observation {
 enum Flow {
     Continue,
     Return(Value),
+    /// `break` and `continue` acting this many loops out (#261).
+    Break(usize),
+    Next(usize),
+}
+
+/// What a loop does with its body's flow: `None` runs the next trip,
+/// `Some(Flow::Continue)` leaves normally, anything else leaves with that flow.
+fn after_trip(flow: Flow) -> Option<Flow> {
+    match flow {
+        Flow::Continue | Flow::Next(0) => None,
+        Flow::Break(0) => Some(Flow::Continue),
+        Flow::Break(depth) => Some(Flow::Break(depth - 1)),
+        Flow::Next(depth) => Some(Flow::Next(depth - 1)),
+        Flow::Return(value) => Some(Flow::Return(value)),
+    }
 }
 
 struct Scope {
@@ -490,6 +505,14 @@ pub mod named;
 pub(crate) mod stack;
 
 include!("eval/engine.rs");
+
+fn named_array(expr: &Expr) -> Option<&str> {
+    match &expr.kind {
+        ExprKind::Name(name) => Some(name),
+        ExprKind::Group(inner) => named_array(inner),
+        _ => None,
+    }
+}
 
 #[cfg(test)]
 mod tests {

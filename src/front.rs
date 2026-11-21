@@ -488,54 +488,6 @@ pub enum Type {
     Named(String),
 }
 
-pub(crate) fn result_parts(name: &str) -> Option<(Type, Type)> {
-    fn component(value: &str, depth: usize) -> Option<Type> {
-        match value {
-            "i32" => Some(Type::I32),
-            "u32" => Some(Type::U32),
-            "f32" => Some(Type::F32),
-            "f64" => Some(Type::F64),
-            "Bool" => Some(Type::Bool),
-            "Bytes" | "String" | "Utf8Error" | "ForeignError" => {
-                Some(Type::Named(value.to_owned()))
-            }
-            _ if depth < 4 && parts(value, depth + 1).is_some() => {
-                Some(Type::Named(value.to_owned()))
-            }
-            _ => None,
-        }
-    }
-    fn parts(name: &str, depth: usize) -> Option<(Type, Type)> {
-        let inside = name.strip_prefix("Result<")?.strip_suffix('>')?;
-        let mut level = 0usize;
-        for (index, byte) in inside.bytes().enumerate() {
-            match byte {
-                b'<' => level = level.checked_add(1)?,
-                b'>' => level = level.checked_sub(1)?,
-                b',' if level == 0 => {
-                    return Some((
-                        component(&inside[..index], depth)?,
-                        component(&inside[index + 1..], depth)?,
-                    ));
-                }
-                _ => {}
-            }
-        }
-        None
-    }
-    parts(name, 1)
-}
-
-pub(crate) fn view_parts(name: &str) -> Option<(Type, bool)> {
-    match name {
-        "View<i32>" => Some((Type::I32, false)),
-        "View<u32>" => Some((Type::U32, false)),
-        "MutView<i32>" => Some((Type::I32, true)),
-        "MutView<u32>" => Some((Type::U32, true)),
-        _ => None,
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Block {
     pub statements: Vec<Stmt>,
@@ -563,14 +515,15 @@ pub struct Stmt {
 
 impl Stmt {
     pub(crate) fn new(kind: StmtKind, span: Span) -> Result<Self, FrontError> {
-        let expr = |expr: &Expr| expr.height;
         let child_height = match &kind {
-            StmtKind::Binding { value, .. } | StmtKind::Expr(value) => value.height,
+            StmtKind::Binding { value, .. }
+            | StmtKind::Expr(value)
+            | StmtKind::Return(Some(value)) => value.height,
             StmtKind::Assign { place, value } => match place {
                 Place::Name(..) => value.height,
                 Place::Index { index, .. } => index.height.max(value.height),
             },
-            StmtKind::Return(value) => value.as_ref().map_or(0, expr),
+            StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => 0,
             StmtKind::If {
                 condition,
                 then_block,
@@ -622,6 +575,9 @@ pub enum StmtKind {
         value: Expr,
     },
     Return(Option<Expr>),
+    /// Exit, or start the next trip of, the loop this many loops out (#261).
+    Break(usize),
+    Continue(usize),
     If {
         condition: Expr,
         then_block: Block,
@@ -782,6 +738,7 @@ pub use query::{named, ungroup};
 include!("front/lexer.rs");
 
 include!("front/parser.rs");
+include!("front/type_names.rs");
 
 pub fn parse_system(bytes: &[u8]) -> Result<Program, FrontError> {
     parse(bytes).map_err(|failure| {

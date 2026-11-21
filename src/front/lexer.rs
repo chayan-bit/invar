@@ -65,6 +65,8 @@ fn keyword(word: &str) -> Option<&'static str> {
         "if" => "if",
         "else" => "else",
         "while" => "while",
+        "break" => "break",
+        "continue" => "continue",
         "for" => "for",
         "in" => "in",
         "or" => "or",
@@ -83,8 +85,6 @@ fn unsupported(word: &str) -> bool {
         "async"
             | "await"
             | "scope"
-            | "break"
-            | "continue"
             | "total"
             | "effects"
             | "requires"

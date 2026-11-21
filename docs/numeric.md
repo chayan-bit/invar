@@ -124,7 +124,8 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 - A tiered fold is one update `acc = acc + term` (or `acc = term + acc`) directly in the body of a counted `for i in lower..upper` loop, where:
   - `acc` is declared `f32`, by annotation, a float literal or a parameter;
   - `acc` is declared at the loop's own depth;
-  - the loop reads or writes `acc` nowhere else.
+  - the loop reads or writes `acc` nowhere else;
+  - the loop holds no `break` or `continue` (#261).
 - Its summands are `init` (the accumulator's value before the loop) and one slot per iteration: slot `j` holds the term of iteration `lower + j`. Each iteration reaches its update at most once, and a slot whose update is not reached holds `-0`, the exact additive identity.
 - With `slots` the M = `upper - lower` slots (none when `upper <= lower`) and `N = M + 1`:
 

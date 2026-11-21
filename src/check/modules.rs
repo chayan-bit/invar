@@ -308,6 +308,7 @@ fn resolve_statement(
                 }
                 resolve_expr(value, scope, functions, aliases)?;
             }
+            StmtKind::Break(_) | StmtKind::Continue(_) => {}
             StmtKind::Return(value) => {
                 if let Some(value) = value {
                     resolve_expr(value, scope, functions, aliases)?;
@@ -431,6 +432,7 @@ fn resolve_record_statement(
             }
             resolve_record_expr(value, scope, records, aliases, generic_params)?;
         }
+        StmtKind::Break(_) | StmtKind::Continue(_) => {}
         StmtKind::Return(value) => {
             if let Some(value) = value {
                 resolve_record_expr(value, scope, records, aliases, generic_params)?;

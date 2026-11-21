@@ -657,6 +657,11 @@
       "reachability": "source"
     },
     {
+      "code": "PARSE_LOOP_CONTROL",
+      "meaning": "break or continue reaches no enclosing loop",
+      "reachability": "source"
+    },
+    {
       "code": "PARSE_ZERO_STEP",
       "meaning": "for step is a literal zero",
       "reachability": "source"

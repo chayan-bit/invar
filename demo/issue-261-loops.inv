@@ -1,0 +1,14 @@
+// #261: break, continue and labelled loops.
+fn main() -> i32 {
+    var hits = 0;
+    outer: for i in 0u32 .. 9u32 {
+        var j = 0u32;
+        while j < 9u32 {
+            j += 1u32;
+            if j == i { continue outer; }
+            if i * j > 20u32 { break outer; }
+            hits += 1;
+        }
+    }
+    return hits;
+}

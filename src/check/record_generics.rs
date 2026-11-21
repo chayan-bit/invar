@@ -134,6 +134,7 @@ fn collect_statement(statement: &Stmt, names: &mut Vec<String>) {
             collect_expr(value, names);
         }
         StmtKind::Expr(value) => collect_expr(value, names),
+        StmtKind::Break(_) | StmtKind::Continue(_) => {}
         StmtKind::Return(value) => {
             if let Some(value) = value {
                 collect_expr(value, names);

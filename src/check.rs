@@ -88,23 +88,6 @@ fn is_array(ty: &Type) -> bool {
     )
 }
 
-/// Fixed-signature float conversions: (input, result).
-pub(crate) fn conversion(name: &str) -> Option<(Type, Type)> {
-    Some(match name {
-        "f32_from_i32" => (Type::I32, Type::F32),
-        "f32_from_u32" => (Type::U32, Type::F32),
-        "f64_from_i32" => (Type::I32, Type::F64),
-        "f64_from_u32" => (Type::U32, Type::F64),
-        "f64_from_f32" => (Type::F32, Type::F64),
-        "f32_from_f64" => (Type::F64, Type::F32),
-        "i32_from_f32" => (Type::F32, Type::I32),
-        "u32_from_f32" => (Type::F32, Type::U32),
-        "i32_from_f64" => (Type::F64, Type::I32),
-        "u32_from_f64" => (Type::F64, Type::U32),
-        _ => return storage::store(name),
-    })
-}
-
 /// An unsuffixed decimal literal, possibly grouped or negated, whose float
 /// type comes from context (default `f32`).
 fn flexible_float(expr: &Expr) -> bool {
@@ -497,6 +480,7 @@ mod closures;
 mod frames;
 mod generics;
 mod intrinsics;
+pub(crate) use intrinsics::conversion;
 mod literals;
 mod numeric;
 mod record_generics;
@@ -738,6 +722,7 @@ impl FunctionChecker<'_> {
                 }
                 Ok(true)
             }
+            StmtKind::Break(_) | StmtKind::Continue(_) => Ok(true),
             StmtKind::If { .. } => {
                 let mut branch = statement;
                 let mut returns = true;

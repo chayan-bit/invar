@@ -1,0 +1,25 @@
+// break leaves a loop and continue starts its next trip; a label picks an outer loop.
+fn main() -> i32 {
+    let xs: Array<i32> = [4, 9, 2, 7, 7, 1];
+    var first: i32 = -1;
+    for i in 0u32 .. len(xs) {
+        if xs[i] == 7 {
+            first = xs[i];
+            break;
+        }
+    }
+    var odd: i32 = 0;
+    for x in xs {
+        if x % 2 == 0 { continue; }
+        odd += x;
+    }
+    var pairs: i32 = 0;
+    rows: for a in 0u32 .. 4u32 {
+        for b in 0u32 .. 4u32 {
+            if b > a { continue rows; }
+            if a + b == 5u32 { break rows; }
+            pairs += 1;
+        }
+    }
+    return first * 1000 + odd * 10 + pairs;
+}
