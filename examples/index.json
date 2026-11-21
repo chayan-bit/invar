@@ -924,6 +924,23 @@
       }
     },
     {
+      "path": "examples/language/doc-comment-misplaced.inv",
+      "intent": "A doc comment that documents no item is PARSE_DOC_COMMENT_MISPLACED.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_DOC_COMMENT_MISPLACED"
+      }
+    },
+    {
       "path": "examples/language/division-by-zero.inv",
       "intent": "Division by a zero i32 traps with DIVISION_BY_ZERO.",
       "family": "core",

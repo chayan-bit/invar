@@ -8,7 +8,6 @@
 1675 src/check.rs
 992 src/component_test/planner.rs
 824 src/eval/host_read.rs
-817 src/front.rs
 874 src/general_net/compiled/mod.rs
 1179 src/general_net/normal_form/certificate/loops.rs
 830 src/general_net/normal_form/exec/lanes.rs

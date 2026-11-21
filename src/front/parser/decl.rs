@@ -8,18 +8,21 @@ impl Parser {
         let mut records = Vec::new();
         let mut variants = Vec::new();
         let mut system_items = Vec::new();
+        let (mut items, mut bodies) = (Vec::new(), Vec::new());
         while !matches!(self.current().kind, TokenKind::Eof) {
+            let item_start = self.current().span.start;
             if let Some(start) = self.take_keyword("module") {
                 let (mut name, _) = self.expect_name()?;
                 if self.take_symbol("::").is_some() {
                     name.push_str("::");
                     name.push_str(&self.expect_name()?.0);
                 }
-                self.expect_symbol("{")?;
+                let open = self.expect_symbol("{")?.end;
                 while !self.is_symbol("}") {
                     if matches!(self.current().kind, TokenKind::Eof) {
                         return Err(self.expected("}"));
                     }
+                    let inner_start = self.current().span.start;
                     if self.is_component_import() {
                         system_items.push(self.component_import(Some(&name))?);
                     } else if self.is_keyword("import") {
@@ -38,12 +41,14 @@ impl Parser {
                             functions.push(Function { fold, ..self.function(Some(&name), public)? });
                         }
                     }
+                    items.push(self.since(inner_start));
                 }
                 let end = self.expect_symbol("}")?.end;
                 modules.push(ModuleDecl {
                     name,
                     span: Span { start: start.start, end },
                 });
+                bodies.push((open, Span { start: start.start, end }));
             } else if self.is_component_import() {
                 system_items.push(self.component_import(None)?);
             } else if self.is_keyword("import") {
@@ -64,8 +69,10 @@ impl Parser {
                     functions.push(Function { fold, ..self.function(None, public)? });
                 }
             }
+            items.push(self.since(item_start));
         }
-        Ok(Program { functions, foreign_functions, closures: std::mem::take(&mut self.closures), frames, modules, imports, records, variants, system_items })
+        let docs = self.attach_docs(items, &bodies)?;
+        Ok(Program { functions, foreign_functions, closures: std::mem::take(&mut self.closures), frames, modules, imports, records, variants, system_items, docs })
     }
 
     fn is_component_import(&self) -> bool {
