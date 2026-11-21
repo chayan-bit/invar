@@ -1,7 +1,6 @@
 //! Deterministic ROS 2 Lyrical workspace files from checked system IR.
 
 use crate::hex::sha256_hex;
-use invar_math::Function;
 use std::collections::{BTreeMap, BTreeSet};
 
 use serde_json::{Value, json};
@@ -320,25 +319,7 @@ fn cell_control_files(
             return Err(invalid("S1504", "robot rotation has no finite orientation"));
         }
         let (w, x, y, z) = (q[0] / norm, q[1] / norm, q[2] / norm, q[3] / norm);
-        // Correctly rounded (invar-math-cr-v1), so the tree is identical on every platform.
-        let cr = |function: Function, x: f64, y: f64| {
-            f64::from_bits(invar_math::f64_bits(function, x.to_bits(), y.to_bits()))
-        };
-        let roll = cr(
-            Function::Atan2,
-            2.0 * (w * x + y * z),
-            1.0 - 2.0 * (x * x + y * y),
-        );
-        let pitch = cr(
-            Function::Asin,
-            (2.0 * (w * y - z * x)).clamp(-1.0, 1.0),
-            0.0,
-        );
-        let yaw = cr(
-            Function::Atan2,
-            2.0 * (w * z + x * y),
-            1.0 - 2.0 * (y * y + z * z),
-        );
+        let (roll, pitch, yaw) = super::euler::rpy(w, x, y, z);
         Ok(format!(
             "<origin xyz=\"{xyz}\" rpy=\"{roll} {pitch} {yaw}\"/>"
         ))
