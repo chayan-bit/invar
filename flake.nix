@@ -31,6 +31,37 @@
           buildInputs = [ pkgs.libffi ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.libiconv ];
           LLVM_SYS_211_PREFIX = "${llvm.dev}";
         };
+      # Contributor shell: the rust-toolchain.toml compiler, cargo-nextest at the
+      # version CI and CONTRIBUTING.md pin, just, and the platform C/C++ toolchain
+      # (mkShell supplies `cc`, `c++` and the linker).
+      rustShell = system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ rust-overlay.overlays.default ];
+          };
+          # nixpkgs lags the pinned version; keep its derivation and patches.
+          nextest = pkgs.cargo-nextest.overrideAttrs (old: rec {
+            version = "0.9.146";
+            src = pkgs.fetchFromGitHub {
+              owner = "nextest-rs";
+              repo = "nextest";
+              tag = "cargo-nextest-${version}";
+              hash = "sha256-2ndrHZ1pmu1oBZGlq5pyv0vhSEUf23gNRyyenNw0fdk=";
+            };
+            cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
+              inherit src;
+              hash = "sha256-ZW0/JQ9RECxfDn479ww4bO4ixoMGaM+GtGUOCWy2Cyg=";
+            };
+          });
+        in
+        pkgs.mkShell {
+          packages = [
+            (pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml)
+            nextest
+            pkgs.just
+          ];
+        };
       rosShells = system:
         let
           pkgs = import nixpkgs {
@@ -69,8 +100,8 @@
     {
       devShells =
         nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ]
-          (system: rosShells system // { python = pythonShell system; })
-        // { aarch64-darwin.python = pythonShell "aarch64-darwin"; };
+          (system: rosShells system // { python = pythonShell system; default = rustShell system; })
+        // { aarch64-darwin = { python = pythonShell "aarch64-darwin"; default = rustShell "aarch64-darwin"; }; };
     };
 
   nixConfig = {
