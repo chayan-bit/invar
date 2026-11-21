@@ -40,6 +40,8 @@ pub struct Program {
     pub lowered_folds: crate::numeric_contract::LoweredFolds,
     /// The declared `#[region(...)]` axes of each function that has them, by name.
     pub region_axes: std::collections::BTreeMap<String, crate::axes::Axes>,
+    /// The `#[region(...)]` loops of each function that has them: loop span and levels (#355).
+    pub loop_axes: std::collections::BTreeMap<String, Vec<(Span, crate::axes::Axes)>>,
     pub functions: Vec<Function>,
     pub records: Vec<crate::front::RecordDecl>,
     pub variants: Vec<crate::front::VariantDecl>,
@@ -389,6 +391,19 @@ pub fn lower(source: &CheckedProgram) -> Result<Program, Error> {
             .iter()
             .filter(|function| function.axes.is_declared())
             .map(|function| (function.name.clone(), function.axes))
+            .collect(),
+        loop_axes: source
+            .program
+            .functions
+            .iter()
+            .filter(|function| !function.loop_axes.is_empty())
+            .map(|function| {
+                let loops = function
+                    .loop_axes
+                    .iter()
+                    .map(|(span, _, axes)| (*span, *axes));
+                (function.name.clone(), loops.collect())
+            })
             .collect(),
         functions,
         records: source.program.records.clone(),

@@ -122,7 +122,7 @@ integer_type  = "i32" | "u32" ;
 float_type    = "f32" | "f64" ;
 block         = "{", { statement }, "}" ;
 statement     = binding | assignment | return_stmt | if_stmt
-              | [ identifier, ":" ], ( while_stmt | for_stmt )
+              | [ attribute ], [ identifier, ":" ], ( while_stmt | for_stmt )
               | ( "break" | "continue" ), [ identifier ], ";"  (* #261 *)
               | expression, ";" ;
 binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;

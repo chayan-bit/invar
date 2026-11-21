@@ -49,6 +49,7 @@ pub fn parse(bytes: &[u8]) -> Result<Program, FrontError> {
         closures: Vec::new(),
         hoisted: Vec::new(),
         loops: Vec::new(),
+        loop_axes: Vec::new(),
     }
     .program()
 }
