@@ -1,0 +1,15 @@
+fn main() -> i32 {
+    var a = filled_f32(4194304u32, 2.5);
+    a[1000] = 0.0 / 0.0; // a NaN is never selected
+    a[3000000] = -1.0;
+    a[4000000] = -1.0; // a tie: the strict compare keeps the first
+    var m: f32 = 1.0 / 0.0;
+    var at = 0u32;
+    for i in 0u32..4194304u32 {
+        if a[i] < m {
+            m = a[i];
+            at = i;
+        }
+    }
+    return i32_from_f32(f32_from_u32(at));
+}

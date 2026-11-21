@@ -66,9 +66,10 @@ fn legacy(source: &str, checked: &check::CheckedProgram, program: &mir::Program)
                 Some(Family::Map)
             }
             Execution::FusedConsumer { .. } | Execution::DagConsumer { .. } => Some(Family::Map),
-            Execution::Reduction(_) | Execution::PairReduction(_) | Execution::CheckedFold(_) => {
-                Some(Family::Reduce)
-            }
+            Execution::Reduction(_)
+            | Execution::PairReduction(_)
+            | Execution::CheckedFold(_)
+            | Execution::SelectFold(_) => Some(Family::Reduce),
             Execution::Scan(_) => Some(Family::Scan),
             Execution::Serial => None,
         };

@@ -54,6 +54,14 @@ impl<'a> super::bulk::LiveLoop<'a> {
         }
     }
 
+    /// Current elements of a live `Array<f32>` owner, borrowed for this loop head only.
+    pub(crate) fn array_f32(&self, name: &str) -> Option<std::cell::Ref<'a, Vec<F32Bits>>> {
+        match self.slots.get(name)?.value.as_ref()? {
+            Value::ArrayF32(values) => values.try_borrow().ok(),
+            _ => None,
+        }
+    }
+
     /// The live value of a scalar place, as a completed region states its seed.
     pub(crate) fn scalar(&self, name: &str) -> Option<Scalar> {
         Scalar::of(self.slots.get(name)?.value.as_ref()?)
