@@ -1,5 +1,6 @@
 include!("parser/cursor.rs");
 include!("parser/decl.rs");
+include!("parser/docs.rs");
 include!("parser/types.rs");
 include!("parser/statements.rs");
 include!("parser/loops.rs");
@@ -39,9 +40,10 @@ pub fn parse(bytes: &[u8]) -> Result<Program, FrontError> {
     }
     let source = std::str::from_utf8(bytes)
         .map_err(|_| FrontError::tool("INVALID_UTF8", "source file is not valid UTF-8"))?;
-    let tokens = lex(source)?;
+    let (tokens, docs) = lex_with_docs(source)?;
     Parser {
         tokens,
+        docs,
         pos: 0,
         depth: 0,
         closures: Vec::new(),

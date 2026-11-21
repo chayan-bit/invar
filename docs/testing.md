@@ -11,7 +11,7 @@ For the meaning of the labels see the [glossary](glossary.md#issue-and-milestone
 | --- | --- | --- |
 | `src/**` (`#[cfg(test)]` modules) | Unit tests next to the code, for example [src/schedule/tests.rs](../src/schedule/tests.rs) | `cargo nextest run --locked --lib` |
 | `tests/<target>/main.rs` | One integration-test binary per directory; each file in the directory is a module of that binary | `cargo nextest run --locked --test <target>` |
-| `tests/*.rs` | Four single-file integration binaries | `cargo nextest run --locked --test <file stem>` |
+| `tests/*.rs` | Five single-file integration binaries | `cargo nextest run --locked --test <file stem>` |
 | `tests/support/`, [test-support/](../test-support/README.md) | Shared helpers included by `#[path]`, not tests themselves | - |
 | `tests/fixtures/`, `tests/*_fixtures/`, `tests/a1_tensor/` | Input programs and data | - |
 | [tools/tests/](../tools/README.md) | Tests of the benchmark and qualification binaries (package `invar-tools`) | `cargo nextest run --locked -p invar-tools` |
@@ -574,6 +574,7 @@ Every Metal hardware test, one module per family; `#[ignore]`d unless run with `
 | `tests/family_lowerings.rs` | Families are lowerings of checked normal-form nodes: every recognizer choice on the corpus is the dispatcher's choice or a named refusal, and a forged form is refused before any step. |
 | `tests/spec_examples.rs` | Runs every spec code block, checks every normative citation, validates `examples/index.json`, runs every example and checks documentation links. |
 | `tests/device_reductions_scans.rs` | Reductions and scans lowered to the shared device IR, verifier rejections and the CPU shape corpus. |
+| `tests/editor_grammar.rs` | The VS Code TextMate grammar in `editors/vscode` names exactly the lexer's keywords and reserved words, every lexer keyword is a terminal of `spec/grammar.ebnf`, and the grammar's intrinsic and type names are words of that spec grammar. |
 | `tests/schedule_tuning.rs` | Bounded device schedule selection, hints and cost models. |
 | `tests/issue_m3_06_metal/main.rs` | Metal emission on the CPU, and the missing-device error off Apple Silicon. |
 

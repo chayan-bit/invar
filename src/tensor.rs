@@ -126,6 +126,7 @@ pub(crate) fn recheck<E>(
                 .collect(),
             variants: p.variants.clone(),
             system_items: p.system_items.clone(),
+            docs: p.docs.clone(),
         },
         false,
     )

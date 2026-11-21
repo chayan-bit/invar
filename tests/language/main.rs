@@ -5,6 +5,7 @@ mod borrowed_views;
 mod bytes_strings_and_c_abi;
 mod call_loans;
 mod cli_examples_and_exit_codes;
+mod doc_comments;
 mod engines;
 mod for_each;
 mod generics_and_closures;

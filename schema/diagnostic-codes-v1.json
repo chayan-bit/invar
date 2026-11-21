@@ -647,6 +647,11 @@
       "reachability": "source"
     },
     {
+      "code": "PARSE_DOC_COMMENT_MISPLACED",
+      "meaning": "doc comment documents no item",
+      "reachability": "source"
+    },
+    {
       "code": "PARSE_EXPECTED_TOKEN",
       "meaning": "parse expected token",
       "reachability": "source"
