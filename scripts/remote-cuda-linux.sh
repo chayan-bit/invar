@@ -17,26 +17,37 @@ say() { echo "remote-cuda: $*"; }
 # Low load: a user scope capping memory (no swap) and CPU, at nice 19 and the
 # idle I/O class; every child inherits all four.
 if [ -z "${REMOTE_CUDA_SCOPED:-}" ]; then
-    export REMOTE_CUDA_SCOPED=1
     low=(nice -n 19 ionice -c3 bash "$here/${0##*/}")
     if systemd-run --user --scope -q true 2>/dev/null; then
+        export REMOTE_CUDA_SCOPED=scope
         # OOMPolicy=continue: the cap kills only the process over it, which then fails its suite.
         exec systemd-run --user --scope -q -p MemoryMax="$MEM_MAX" -p MemorySwapMax=0 \
             -p CPUQuota="$CPU_QUOTA" -p OOMPolicy=continue "${low[@]}"
     fi
     # ulimit -v would break CUDA, which reserves far more address space than it uses.
     say "no systemd user scope: nice and ionice only, no memory or CPU cap"
+    export REMOTE_CUDA_SCOPED=nice
     exec "${low[@]}"
 fi
-# Background jobs (sampler, suites) hold the lock fd: stop them, and their
-# timeouts (which pass the signal to their process group), on any exit.
-stop_jobs() { local p; for p in $(jobs -p); do pkill -TERM -P "$p"; kill "$p"; done 2>/dev/null; }
-trap 'rc=$?; stop_jobs; rm -rf "$here/tmp" "$here/src.tgz"; echo "$rc" >"$here/rc"' EXIT
-# A stopped run must never record a pass.
-trap 'exit 143' TERM INT HUP
 log=$here/cargo.log
 src=$base/src
 cg=/sys/fs/cgroup$(cut -d: -f3 /proc/self/cgroup)
+# Every child inherits the lock fd, so nothing may outlive the run: the sampler,
+# the suites and test helpers that start their own process group. The scope's
+# cgroup holds them all; without a scope, stop the jobs and their timeouts
+# (which pass the signal to their process group).
+stop_children() {
+    local p procs
+    if [ "$REMOTE_CUDA_SCOPED" = scope ]; then
+        procs=$(cat "$cg/cgroup.procs")
+        for p in $procs; do [ "$p" = $$ ] || kill -KILL "$p"; done
+    else
+        for p in $(jobs -p); do pkill -TERM -P "$p"; kill "$p"; done
+    fi 2>/dev/null
+}
+trap 'rc=$?; stop_children; rm -rf "$here/tmp" "$here/src.tgz"; echo "$rc" >"$here/rc"' EXIT
+# A stopped run must never record a pass.
+trap 'exit 143' TERM INT HUP
 
 # One run at a time: the target dir and the GPU are shared. The kernel drops the
 # lock when the last process holding it (this script or a child) exits.
