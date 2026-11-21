@@ -5,7 +5,7 @@ The parser accepts an Invar source file and rejects malformed tokens with a sour
 ## Sub-features
 
 - `parser.accept-sum` accepts `examples/sum.inv` through syntax, names, and types.
-- `parser.reject-token` rejects a function parameter that is missing its type.
+- `parser.reject-token` rejects `->` where a parameter name belongs (`expected identifier`).
 
 ## How to get to it (user POV)
 
@@ -21,7 +21,7 @@ Preconditions:
 - `examples/sum.inv` is the checked sum from the example index.
 
 - **Accept a program.** Run `invar-verify drive parser --format json`. The check `parser.accept-sum` runs `invar check examples/sum.inv --format json`. Exit 0, `status` is `ok`, and `checks_completed` contains `syntax`, `names`, and `types`.
-- **Reject a token.** The same drive writes a scratch file `fn main( -> i32 { return 1; }` and runs `invar check` on it with `--format json`. Exit 1, `status` is `source_error`, and the diagnostic code is `PARSE_EXPECTED_TOKEN`.
+- **Reject a token.** The same drive writes a scratch file `fn main( -> i32 { return 1; }` and runs `invar check` on it with `--format json`. Exit 1, `status` is `source_error`, and the diagnostic code is `PARSE_EXPECTED_TOKEN` with message `expected identifier`.
 - **One step, without the bundle.** Run `invar-verify run -- check examples/sum.inv --format json`. The captured document matches the accept check above.
 
 ## Gotchas

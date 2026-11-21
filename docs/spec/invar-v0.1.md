@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=28122 estimator=bytes/3 limit=30000
+Size record: tokens=27918 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1300,16 +1300,6 @@ fn main() -> i32 {
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
 [NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement adds `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run has no `placement` and records `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`
 
-### B.6 Parallel checked folds
+### B.6 Attributes, contract axes and receipts
 
-[NB.6.1] A C0 checked fold may be evaluated by any associative summary that reproduces its value and its first trap position, and `cpu-parallel` evaluates a counted `s = s + a[i]` over `i32` or `u32` by the exact (total, minimum prefix, maximum prefix) carry in 64 bits, rerunning only the chunk that holds the first overflow. `src/checked_fold.rs::Carry`
-[NB.6.2] The value, trap category, trap span, fuel prefix and cleanup equal the serial fold at every worker count, and `explain` names the plan `checked-sum-carry-if-guard` and the rule `pnf-l3-checked-sum-carry-v1`. `tests/schedule_cpu/checked_fold_carry.rs`
-
-```invar outcome=trap:INTEGER_OVERFLOW
-fn main() -> i32 {
-    let a: Array<i32> = [2147483647, 1, -5];
-    var s: i32 = 0;
-    for i in 0u32..len(a) { s = s + a[i]; }
-    return s;
-}
-```
+Note: the attribute registry, the contract axes and their receipts are specified in the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, which has its own size record and budget.
