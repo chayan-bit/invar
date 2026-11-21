@@ -907,6 +907,23 @@
       }
     },
     {
+      "path": "examples/language/zero-step.inv",
+      "intent": "A literal zero step in a for range is PARSE_ZERO_STEP.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_ZERO_STEP"
+      }
+    },
+    {
       "path": "examples/language/division-by-zero.inv",
       "intent": "Division by a zero i32 traps with DIVISION_BY_ZERO.",
       "family": "core",

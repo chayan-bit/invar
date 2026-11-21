@@ -12,6 +12,7 @@ mod names_types_and_calls;
 mod owner_return_fuel;
 mod records_variants_result;
 mod reference_corpus_and_json;
+mod stepped_ranges;
 mod surface_sugar;
 mod syntax_and_limits;
 mod units_and_frames;
