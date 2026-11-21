@@ -2,8 +2,8 @@
 (* v0.2 spatial queries use opaque VoxelGrid and built-in Neighbors/Knn
    records through ordinary bindings and field moves. No tuple binding. *)
 program       = { top_item } ;
-top_item      = module | import | component_import | frame | system_item | foreign_function | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
-module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ numeric_attr ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
+top_item      = module | import | component_import | frame | system_item | foreign_function | [ attribute ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
+module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ attribute ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
 import        = "import", identifier, { "::", identifier }, "::", identifier, ";" ;
 component_import = "import", "component", string_literal, [ "for", "robot", path ], ";" ;
 frame         = "frame", identifier, [ ":", identifier ], ";" ;
@@ -97,7 +97,8 @@ record_field  = identifier, ":", type ;
 variant       = "enum", identifier, "{", [ variant_arms, [ "," ] ], "}" ;
 variant_arms  = variant_arm, { ",", variant_arm } ;
 variant_arm   = identifier, [ "(", type, ")" ] ;
-numeric_attr  = "#", "[", "numeric", "(", "fold", "=", string_literal, ")", "]" ;  (* docs/numeric.md *)
+attribute     = "#", "[", identifier, "(", attr_arg, { ",", attr_arg }, ")", "]" ;  (* closed registry: docs/spec/invar-v0.2-axes.md *)
+attr_arg      = identifier, "=", string_literal ;
 function      = "fn", identifier, [ generic_params ], "(", [ params ], ")", "->", type, [ "from", identifier ], block ;
 foreign_function = "extern", "c", "fn", identifier, "(", [ params ], ")", "->", result_type, "oracle", identifier, ";" ;
 generic_params = "<", generic_param, { ",", generic_param }, ">" ;
@@ -123,7 +124,7 @@ block         = "{", { statement }, "}" ;
 statement     = binding | assignment | return_stmt | if_stmt
               | while_stmt | for_stmt | expression, ";" ;
 binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;
-assignment    = place, "=", expression, ";" ;
+assignment    = place, ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ), expression, ";" ;  (* #254 *)
 place         = identifier, [ "[", expression, "]" ] ;
 return_stmt   = "return", [ expression ], ";" ;
 if_stmt       = "if", expression, block, [ "else", ( block | if_stmt ) ] ;
@@ -154,7 +155,12 @@ arguments     = expression, { ",", expression }, [ "," ] ;
 identifier    = identifier_start, { identifier_continue } ;
 identifier_start = letter | "_" ;
 identifier_continue = identifier_start | digit ;
-integer_literal = digit, { digit }, [ "i32" | "u32" ] ;
+integer_literal = ( digit, { [ "_" ], digit } | "0x", hex_digit, { [ "_" ], hex_digit }
+                  | "0o", octal_digit, { [ "_" ], octal_digit }
+                  | "0b", binary_digit, { [ "_" ], binary_digit } ), [ "i32" | "u32" ] ;  (* #253 *)
+hex_digit     = digit | "A" .. "F" | "a" .. "f" ;
+octal_digit   = "0" .. "7" ;
+binary_digit  = "0" | "1" ;
 decimal_literal = digit, { digit }, ".", digit, { digit }, [ float_type ] ;
 letter        = "A" .. "Z" | "a" .. "z" ;
 digit         = "0" .. "9" ;

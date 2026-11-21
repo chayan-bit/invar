@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=302 citations=324
-Size record: tokens=27843 estimator=bytes/3 limit=30000
+Counts: statements=305 citations=329
+Size record: tokens=28421 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1299,3 +1299,34 @@ fn main() -> i32 {
 [NB.5.4] A profile whose identity differs from the live host, CPU, device, driver, compiler build or LLVM version is refused with `TUNING_HINT_INVALID`, a frozen profile is refused with `TUNING_FREEZE_REQUIRED` until M5-01 provides a trusted freeze manifest, and both keep the CPU. `spec/placement-v1.md` `tests/fsum_math_sort_spatial/placement.rs::real_cli_profile_trust_identity_contract_and_cpu_decision`
 [NB.5.5] A device is chosen only when its total cost is below 0.95 of the CPU cost, an unknown cost keeps the CPU, and only the measured family can leave the CPU. `src/placement.rs::select` `spec/placement-v1.md`
 [NB.5.6] A placement run receipt carries a `placement` object, and `explain --engine auto` under placement adds `placement` and `execution`, both recording `auto_path` as `placement`; an established auto run has no `placement` and records `auto_path` as `established`. `docs/explain.md` `schema/explain-v5.schema.json`
+
+### B.6 Attributes, contract axes and receipts
+
+Note: the attribute registry, the contract axes and their receipts are specified in the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, which has its own size record and budget.
+
+### B.7 Language surface
+
+[NB.7.1] An integer literal may separate digits with single `_` characters and take a `0x`, `0o` or `0b` radix prefix, and its token value is the decimal literal it denotes, so the range checks of N2.2.3 and every later stage are unchanged (#253). `src/front/lexer.rs::integer_literal` `tests/language/surface_sugar.rs::literal_spellings_give_identical_mir_outcomes_and_receipts`
+[NB.7.2] A leading, trailing or doubled `_`, a digit outside the radix, a radix value above 128 bits, or a separator or prefix before a decimal point is `LEX_INVALID_LITERAL`. `tests/language/surface_sugar.rs::literal_separators_and_radix_prefixes_lex_to_the_same_token_value`
+
+```invar outcome=value:1
+fn main() -> i32 {
+    let mask: u32 = 0xFFFF_0000u32;
+    if mask == 4_294_901_760u32 and 0b1010 == 10 { return 1; }
+    return 0;
+}
+```
+
+```invar outcome=diag:LEX_INVALID_LITERAL
+fn main() -> i32 { return 1__0; }
+```
+[NB.7.3] `p op= e;` with `op` one of `+ - * / %` is exactly `p = p op (e);`, desugared before checking and family recognition, except that an index other than a name or literal is first bound to a hidden immutable `u32` local, so it evaluates once and before `e` (#254). `src/front/parser/statements.rs::compound_assignment` `tests/language/surface_sugar.rs::compound_assignment_evaluates_a_computed_index_once`
+
+```invar outcome=trap:INDEX_OUT_OF_BOUNDS
+fn main() -> i32 {
+    var ys: Array<u32> = [1u32, 2u32];
+    ys[0u32] *= 3u32;
+    ys[ys[0u32]] += 1u32;
+    return 0;
+}
+```
