@@ -124,7 +124,7 @@ block         = "{", { statement }, "}" ;
 statement     = binding | assignment | return_stmt | if_stmt
               | while_stmt | for_stmt | expression, ";" ;
 binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;
-assignment    = place, "=", expression, ";" ;
+assignment    = place, ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ), expression, ";" ;  (* #254 *)
 place         = identifier, [ "[", expression, "]" ] ;
 return_stmt   = "return", [ expression ], ";" ;
 if_stmt       = "if", expression, block, [ "else", ( block | if_stmt ) ] ;

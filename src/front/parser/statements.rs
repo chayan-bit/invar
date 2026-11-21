@@ -1,4 +1,99 @@
 impl Parser {
+    fn compound_operator(&mut self) -> Option<(BinaryOp, Span)> {
+        let op = match self.current().kind {
+            TokenKind::Symbol("+=") => BinaryOp::Add,
+            TokenKind::Symbol("-=") => BinaryOp::Sub,
+            TokenKind::Symbol("*=") => BinaryOp::Mul,
+            TokenKind::Symbol("/=") => BinaryOp::Div,
+            TokenKind::Symbol("%=") => BinaryOp::Rem,
+            _ => return None,
+        };
+        Some((op, self.bump().span))
+    }
+
+    /// `place op= value;` is `place = place op (value);` (#254). A name or a
+    /// name- or literal-indexed place is repeated as written; any other index
+    /// is bound once to a hidden immutable `u32` local placed before the
+    /// statement, so it evaluates exactly once.
+    fn compound_assignment(
+        &mut self,
+        target: Expr,
+        op: BinaryOp,
+        op_span: Span,
+    ) -> Result<Stmt, FrontError> {
+        let span = target.span;
+        let mut hoisted = None;
+        let (place, read) = match target.kind {
+            ExprKind::Name(name) => (
+                Place::Name(name.clone(), span),
+                Expr::new(ExprKind::Name(name), span)?,
+            ),
+            ExprKind::Index { base, index } if matches!(base.kind, ExprKind::Name(_)) => {
+                let ExprKind::Name(name) = base.kind.clone() else {
+                    unreachable!("matched name")
+                };
+                let index = if matches!(index.kind, ExprKind::Name(_) | ExprKind::Integer(_)) {
+                    *index
+                } else {
+                    let at = index.span;
+                    let hidden = format!("index@{}", at.start);
+                    let binding = StmtKind::Binding {
+                        mutable: false,
+                        name: hidden.clone(),
+                        annotation: Some(Type::U32),
+                        value: *index,
+                    };
+                    hoisted = Some(Stmt::new(binding, at)?);
+                    Expr::new(ExprKind::Name(hidden), at)?
+                };
+                let read = Expr::new(
+                    ExprKind::Index {
+                        base,
+                        index: Box::new(index.clone()),
+                    },
+                    span,
+                )?;
+                (Place::Index { name, index, span }, read)
+            }
+            _ => {
+                return Err(FrontError::source(
+                    "PARSE_EXPECTED_TOKEN",
+                    "expected assignment place",
+                    span,
+                ));
+            }
+        };
+        let value = self.expression()?;
+        let value = if matches!(value.kind, ExprKind::Binary { .. }) {
+            let at = value.span;
+            Expr::new(ExprKind::Group(Box::new(value)), at)?
+        } else {
+            value
+        };
+        let end = self.expect_symbol(";")?.end;
+        self.hoisted = hoisted;
+        let value_span = Span {
+            start: span.start,
+            end: value.span.end,
+        };
+        let value = Expr::new(
+            ExprKind::Binary {
+                left: Box::new(read),
+                op,
+                op_span,
+                right: Box::new(value),
+            },
+            value_span,
+        )?;
+        Stmt::new(
+            StmtKind::Assign { place, value },
+            Span {
+                start: span.start,
+                end,
+            },
+        )
+    }
+
     fn block(&mut self) -> Result<Block, FrontError> {
         self.nested(|parser| {
             let start = parser.expect_symbol("{")?.start;
@@ -7,7 +102,9 @@ impl Parser {
                 if matches!(parser.current().kind, TokenKind::Eof) {
                     return Err(parser.expected("}"));
                 }
-                statements.push(parser.statement()?);
+                let statement = parser.statement()?;
+                statements.extend(parser.hoisted.take());
+                statements.push(statement);
             }
             let end = parser.expect_symbol("}")?.end;
             Block::new(statements, Span { start, end })
@@ -106,6 +203,9 @@ impl Parser {
         }
         let starts_with_name = matches!(self.current().kind, TokenKind::Name(_));
         let expr = self.expression()?;
+        if let Some((op, op_span)) = self.compound_operator() {
+            return self.compound_assignment(expr, op, op_span);
+        }
         if self.take_symbol("=").is_some() {
             let span = expr.span;
             if !starts_with_name {
