@@ -1,0 +1,22 @@
+// #255: for-each over an array, a view and a mutable view.
+fn main() -> i32 {
+    var xs: Array<u32> = [3u32, 1u32, 4u32, 1u32, 5u32];
+    var sum: u32 = 0u32;
+    for x in xs {
+        sum += x;
+    }
+    if true {
+        let tail = view_mut(xs, 2u32, 5u32);
+        for t in tail {
+            t *= 10u32;
+        }
+    }
+    let evens = view(xs, 0u32, 5u32, 2u32);
+    for e in evens {
+        sum += e;
+    }
+    if sum == 107u32 {
+        return 1;
+    }
+    return 0;
+}

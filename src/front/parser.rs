@@ -2,6 +2,7 @@ include!("parser/cursor.rs");
 include!("parser/decl.rs");
 include!("parser/types.rs");
 include!("parser/statements.rs");
+include!("parser/loops.rs");
 include!("parser/expressions.rs");
 
 fn if_statement(
