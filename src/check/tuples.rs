@@ -39,6 +39,13 @@ impl FunctionChecker<'_> {
         }
     }
 
+    /// Whether `base.name` is a pair field: `base` is known to be a pair, or
+    /// `name` is positional, which only a pair has (a record gets
+    /// `TYPE_MISMATCH`, not an unknown field).
+    pub(super) fn positional(&self, base: &Expr, name: &str) -> bool {
+        self.is_pair(base) || name.starts_with(|c: char| c.is_ascii_digit())
+    }
+
     /// Whether `base` is known, without checking it, to have a pair type.
     pub(super) fn is_pair(&self, base: &Expr) -> bool {
         matches!(self.hint(base), Some(Type::Pair(_)))

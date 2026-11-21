@@ -1022,7 +1022,7 @@ impl FunctionChecker<'_> {
             }
             ExprKind::Match { value, arms } => self.match_expr(value, arms, expected, expr.span)?,
             ExprKind::Pair(first, second) => self.pair(first, second, expected, expr.span)?,
-            ExprKind::Field { base, name } if self.is_pair(base) => {
+            ExprKind::Field { base, name } if self.positional(base, name) => {
                 self.pair_field(base, name, expr.span)?
             }
             ExprKind::Field { base, name } => {

@@ -91,6 +91,10 @@ fn malformed_pairs_are_refused_with_exact_codes() {
             "TYPE_MISMATCH",
         ),
         (
+            "struct R { a: i32, b: i32 } fn main() -> i32 { let (x, y) = R { a: 1, b: 2 }; return x; }",
+            "TYPE_MISMATCH",
+        ),
+        (
             "struct R { p: (i32, i32) } fn main() -> i32 { return 0; }",
             "UNSUPPORTED_FEATURE",
         ),
