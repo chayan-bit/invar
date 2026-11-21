@@ -22,7 +22,7 @@ Type "time invar run $P --engine reference --fuel 200000000" Enter
 Sleep 8s
 Type "clear; cat issue-204-overflow.inv" Enter
 Sleep 2s
-Type "# The first overflow wins at every worker count, with the reference's trap span and fuel:" Enter
+Type "# The first overflow wins at every worker count, at the reference trap span:" Enter
 Type `for e in reference 'cpu-parallel --workers 1' 'cpu-parallel --workers 7' 'cpu-parallel --workers 64'; do printf '%-26s' "$e"; invar run issue-204-overflow.inv --engine $e --format json | jq -c '.trap'; done` Enter
 Sleep 5s
 Type "# Refusal: a[i] * 2 is not the L3 sum shape, so the loop stays serial:" Enter

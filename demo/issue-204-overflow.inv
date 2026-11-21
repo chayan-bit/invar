@@ -1,5 +1,5 @@
 // #204: the first overflow in source order wins, even when a later chunk
-// also leaves the i32 range; every engine traps at the same `+` and fuel.
+// also leaves the i32 range; every engine traps at the same `+`.
 fn main() -> i32 {
     var a = filled_i32(1000u32, 3100000);
     a[900u32] = -2147483647;
