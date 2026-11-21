@@ -28,9 +28,9 @@ fn read(path: &str) -> String {
 /// The text of `signature`'s function in the lexer, up to the closing brace in column 0.
 fn lexer_function(signature: &str) -> String {
     let source = read("src/front/lexer.rs");
-    let start = source
-        .find(signature)
-        .unwrap_or_else(|| panic!("src/front/lexer.rs has no `{signature}`; update tests/editor_grammar.rs"));
+    let start = source.find(signature).unwrap_or_else(|| {
+        panic!("src/front/lexer.rs has no `{signature}`; update tests/editor_grammar.rs")
+    });
     let rest = &source[start..];
     rest[..rest.find("\n}\n").expect("end of lexer function")].to_owned()
 }
@@ -40,7 +40,9 @@ fn quoted_words(text: &str) -> BTreeSet<String> {
     text.split('"')
         .skip(1)
         .step_by(2)
-        .filter(|word| !word.is_empty() && word.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_'))
+        .filter(|word| {
+            !word.is_empty() && word.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+        })
         .map(str::to_owned)
         .collect()
 }
@@ -53,7 +55,10 @@ fn grammar() -> Value {
 fn match_words(pattern: &str) -> BTreeSet<String> {
     let inner = pattern
         .strip_prefix("\\b(")
-        .and_then(|rest| rest.strip_suffix(")\\b").or_else(|| rest.strip_suffix(")(?=\\s*\\()")))
+        .and_then(|rest| {
+            rest.strip_suffix(")\\b")
+                .or_else(|| rest.strip_suffix(")(?=\\s*\\()"))
+        })
         .unwrap_or_else(|| panic!("grammar regex is not of the form \\b(a|b)\\b: {pattern}"));
     inner.split('|').map(str::to_owned).collect()
 }
@@ -69,13 +74,21 @@ fn rule_words(grammar: &Value, rule: &str) -> BTreeSet<String> {
 fn lexer_keywords() -> BTreeSet<String> {
     // Each arm is `"word" => "word"`; both sides are the same word.
     let words = quoted_words(&lexer_function("fn keyword("));
-    assert!(words.len() > 30, "found only {} lexer keywords: {words:?}", words.len());
+    assert!(
+        words.len() > 30,
+        "found only {} lexer keywords: {words:?}",
+        words.len()
+    );
     words
 }
 
 fn lexer_reserved() -> BTreeSet<String> {
     let words = quoted_words(&lexer_function("fn unsupported("));
-    assert!(words.len() >= 5, "found only {} reserved words: {words:?}", words.len());
+    assert!(
+        words.len() >= 5,
+        "found only {} reserved words: {words:?}",
+        words.len()
+    );
     words
 }
 
@@ -94,7 +107,10 @@ fn editor_grammar_keywords_are_the_lexer_keywords() {
     let mut named = BTreeSet::new();
     for rule in KEYWORD_RULES {
         for word in rule_words(&grammar, rule) {
-            assert!(named.insert(word.clone()), "`{word}` is in two keyword rules of the grammar");
+            assert!(
+                named.insert(word.clone()),
+                "`{word}` is in two keyword rules of the grammar"
+            );
         }
     }
     let lexer = lexer_keywords();
@@ -118,17 +134,32 @@ fn editor_grammar_reserved_words_are_the_lexer_reserved_words() {
     );
     let keywords = lexer_keywords();
     let both: Vec<_> = lexer.intersection(&keywords).collect();
-    assert!(both.is_empty(), "{both:?} are both keywords and reserved words in the lexer");
+    assert!(
+        both.is_empty(),
+        "{both:?} are both keywords and reserved words in the lexer"
+    );
 }
 
 #[test]
 fn editor_grammar_spec_grammar_lists_every_lexer_word() {
     let spec = read("spec/grammar.ebnf");
     let terminals = quoted_words(&spec);
-    let unquoted: Vec<_> = lexer_keywords().into_iter().filter(|word| !terminals.contains(word)).collect();
-    assert!(unquoted.is_empty(), "lexer keywords that are not terminals of spec/grammar.ebnf: {unquoted:?}");
-    let unlisted: Vec<_> = lexer_reserved().into_iter().filter(|word| !whole_word(&spec, word)).collect();
-    assert!(unlisted.is_empty(), "lexer reserved words that spec/grammar.ebnf does not mention: {unlisted:?}");
+    let unquoted: Vec<_> = lexer_keywords()
+        .into_iter()
+        .filter(|word| !terminals.contains(word))
+        .collect();
+    assert!(
+        unquoted.is_empty(),
+        "lexer keywords that are not terminals of spec/grammar.ebnf: {unquoted:?}"
+    );
+    let unlisted: Vec<_> = lexer_reserved()
+        .into_iter()
+        .filter(|word| !whole_word(&spec, word))
+        .collect();
+    assert!(
+        unlisted.is_empty(),
+        "lexer reserved words that spec/grammar.ebnf does not mention: {unlisted:?}"
+    );
 }
 
 #[test]
@@ -141,21 +172,39 @@ fn editor_grammar_builtin_names_are_words_of_the_spec_grammar() {
     assert_eq!(types["name"], "support.type.builtin.invar");
     let mut words = match_words(functions["match"].as_str().unwrap());
     words.extend(match_words(types["match"].as_str().unwrap()));
-    let unknown: Vec<_> = words.iter().filter(|word| !whole_word(&spec, word)).collect();
-    assert!(unknown.is_empty(), "grammar names that spec/grammar.ebnf never mentions: {unknown:?}");
+    let unknown: Vec<_> = words
+        .iter()
+        .filter(|word| !whole_word(&spec, word))
+        .collect();
+    assert!(
+        unknown.is_empty(),
+        "grammar names that spec/grammar.ebnf never mentions: {unknown:?}"
+    );
 }
 
 #[test]
 fn editor_grammar_extension_manifest_packages_the_grammar() {
-    let manifest: Value = serde_json::from_str(&read("editors/vscode/package.json")).expect("package.json is JSON");
+    let manifest: Value =
+        serde_json::from_str(&read("editors/vscode/package.json")).expect("package.json is JSON");
     let contributes = &manifest["contributes"];
     assert_eq!(contributes["languages"][0]["id"], "invar");
     assert_eq!(contributes["languages"][0]["extensions"][0], ".inv");
     let packaged = &contributes["grammars"][0];
     assert_eq!(packaged["scopeName"], grammar()["scopeName"]);
-    for path in [packaged["path"].as_str().unwrap(), contributes["languages"][0]["configuration"].as_str().unwrap()] {
-        let file = Path::new(env!("CARGO_MANIFEST_DIR")).join("editors/vscode").join(path);
-        assert!(file.is_file(), "the extension manifest names {path}, which does not exist");
-        serde_json::from_str::<Value>(&fs::read_to_string(&file).unwrap()).unwrap_or_else(|e| panic!("{path} is not JSON: {e}"));
+    for path in [
+        packaged["path"].as_str().unwrap(),
+        contributes["languages"][0]["configuration"]
+            .as_str()
+            .unwrap(),
+    ] {
+        let file = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("editors/vscode")
+            .join(path);
+        assert!(
+            file.is_file(),
+            "the extension manifest names {path}, which does not exist"
+        );
+        serde_json::from_str::<Value>(&fs::read_to_string(&file).unwrap())
+            .unwrap_or_else(|e| panic!("{path} is not JSON: {e}"));
     }
 }
