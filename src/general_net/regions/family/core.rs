@@ -1,5 +1,5 @@
 use super::*;
-use crate::general_net::normal_form::{ArrayLaw, Carried, IntTy, Rep, Ring};
+use crate::general_net::normal_form::{ArrayLaw, Carried, IntTy, Rep, Ring, ScalarTy};
 use crate::laws::Law;
 
 fn operand<'a>(e: &'a Expr, i: &str) -> Option<&'a str> {
@@ -101,6 +101,14 @@ pub(super) fn reduce(cx: &Context<'_>) -> bool {
     if let Rep::LiftedSum(ty) = carried.rep {
         return !carried.scan && cx.node.arrays.is_empty() && checked_sum(cx, i, ty);
     }
+    if let Rep::Select {
+        elem, companions, ..
+    } = &carried.rep
+    {
+        // `scan` is set by the compare reading `m`; `select` admits no other
+        // read, so the loop needs the reduction, not the prefixes.
+        return cx.node.arrays.is_empty() && select(cx, i, &carried.var, *elem, companions);
+    }
     if carried.scan || !matches!(carried.rep, Rep::Sealed(_)) || !cx.node.arrays.is_empty() {
         return false;
     }
@@ -139,6 +147,52 @@ fn checked_sum(cx: &Context<'_>, i: &str, ty: IntTy) -> bool {
             named(state, name)
                 && operand(e, i).is_some_and(|input| input != name && cx.ty(input, array.clone()))
         })
+}
+
+/// #207: `if a[i] op m { m = a[i]; c = i; .. }` (either operand order, no
+/// else), `m` the L7 selected value and every companion assigned `i`.
+fn select(cx: &Context<'_>, i: &str, best: &str, elem: ScalarTy, companions: &[String]) -> bool {
+    let (scalar, array) = match elem {
+        ScalarTy::I32 => (Type::I32, Type::ArrayI32),
+        ScalarTy::U32 => (Type::U32, Type::ArrayU32),
+        ScalarTy::F32 => (Type::F32, Type::ArrayF32),
+    };
+    let [Stmt::If { cond, yes, no }] = cx.inner.body.as_slice() else {
+        return false;
+    };
+    let Some((a, b)) = [BinaryOp::Lt, BinaryOp::Le, BinaryOp::Gt, BinaryOp::Ge]
+        .into_iter()
+        .find_map(|op| binary(cond, op))
+    else {
+        return false;
+    };
+    let Some(input) = [(a, b), (b, a)]
+        .into_iter()
+        .find_map(|(e, m)| operand(e, i).filter(|_| named(m, best)))
+    else {
+        return false;
+    };
+    let mut assigned = Vec::new();
+    for stmt in yes {
+        match stmt {
+            Stmt::Assign { name, value } if name == best && operand(value, i) == Some(input) => {}
+            Stmt::Assign { name, value } if named(value, i) && companions.contains(name) => {}
+            _ => return false,
+        }
+        let Stmt::Assign { name, .. } = stmt else {
+            return false;
+        };
+        if assigned.contains(&name) {
+            return false;
+        }
+        assigned.push(name);
+    }
+    no.is_empty()
+        && assigned.len() == companions.len() + 1
+        && input != best
+        && cx.mutable(best, scalar)
+        && cx.ty(input, array)
+        && companions.iter().all(|c| cx.mutable(c, Type::U32))
 }
 
 /// A read-only `Array<u32>` local (A0's `local_is(.., ArrayU32, false)`).

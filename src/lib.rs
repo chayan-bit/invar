@@ -59,6 +59,7 @@ pub mod scatter_proof;
 pub mod schedule;
 pub mod segmented_device;
 pub mod segmented_source;
+pub mod select_fold;
 mod sort_cpu;
 pub mod sorting;
 pub mod spatial;

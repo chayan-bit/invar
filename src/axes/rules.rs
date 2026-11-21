@@ -1,5 +1,5 @@
 //! The lowest C level each rule a plan or the normal-form route names needs
-//! (`docs/spec/invar-v0.2-axes.md` NA8.2 to NA8.4), and the admission gate
+//! (`docs/spec/invar-v0.2-regions.md` NA8.2 to NA8.4), and the admission gate
 //! that keeps a region from running a rule above its declared level.
 
 use super::{C_AXIS, CLevel};
@@ -12,7 +12,7 @@ use crate::{
 /// Every rule identity a plan names in `rule_identities`, with the lowest C
 /// level that admits it. A contract named at a call site (NA3.10) is not a
 /// region rule; its level is in `CONTRACTS`.
-pub const RULES: [(&str, CLevel); 7] = [
+pub const RULES: [(&str, CLevel); 8] = [
     (crate::admission::RULE_REVISION, CLevel::C0),
     (crate::typed_net::MAP_FUSION_RULE, CLevel::C0),
     (crate::typed_net::DAG_FUSION_RULE, CLevel::C0),
@@ -20,6 +20,7 @@ pub const RULES: [(&str, CLevel); 7] = [
     (crate::pair_reduction::RULE_REVISION, CLevel::C0),
     (crate::recurrence::RULE_REVISION, CLevel::C0),
     (crate::checked_fold::RULE_REVISION, CLevel::C0),
+    (crate::select_fold::RULE_REVISION, CLevel::C0),
 ];
 
 /// The obligation a region fails when its plan names a rule above its level.

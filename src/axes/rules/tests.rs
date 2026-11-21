@@ -32,7 +32,7 @@ fn with_tags<T>(rules: &[String], level: CLevel, body: impl FnOnce() -> T) -> T 
 
 /// One program per plan rule, each admitted today; the rule is the one its
 /// plan adds over the others.
-const PLANS: [(&str, &str); 7] = [
+const PLANS: [(&str, &str); 8] = [
     (
         crate::admission::RULE_REVISION,
         "fn main() -> i32 { let a = filled_u32(64u32, 1u32); var out = filled_u32(64u32, 0u32); for i in 0u32..64u32 { out[i] = wrapping_add(a[i], 3u32); } if out[5u32] == 4u32 { return 1; } return 0; }",
@@ -60,6 +60,10 @@ const PLANS: [(&str, &str); 7] = [
     (
         crate::checked_fold::RULE_REVISION,
         "fn main() -> i32 { let a: Array<i32> = [2147483647, 1, -5]; var s: i32 = 0; for i in 0u32..len(a) { s = s + a[i]; } return s; }",
+    ),
+    (
+        crate::select_fold::RULE_REVISION,
+        "fn main() -> i32 { let a: Array<u32> = [9u32, 4u32, 7u32, 4u32]; var m: u32 = 4294967295u32; var at = 0u32; for i in 0u32..len(a) { if a[i] < m { m = a[i]; at = i; } } if at == 1u32 { return 1; } return 0; }",
     ),
 ];
 
