@@ -198,8 +198,9 @@ fn spatial_checker_rejects_tuples_and_reserved_builtin_types() {
         rejects(&format!("{declaration} {QUERIES}"), "NAME_DUPLICATE");
     }
     rejects(
+        // Pair binding (#262) takes only pairs of scalars, not query records.
         &QUERIES.replace("let near: Neighbors", "let (counts, idx)"),
-        "PARSE_EXPECTED_TOKEN",
+        "TYPE_MISMATCH",
     );
     rejects(
         &QUERIES.replace(

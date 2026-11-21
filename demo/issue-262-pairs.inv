@@ -1,0 +1,13 @@
+// Pairs of scalars: return two values, bind both.
+fn divmod(a: i32, b: i32) -> (i32, i32) {
+    return (a / b, a % b);
+}
+
+fn main() -> i32 {
+    let (q, r) = divmod(23, 4);
+    var fib = (0, 1);
+    for i in 0u32 .. 10u32 {
+        fib = (fib.1, fib.0 + fib.1);
+    }
+    return q * 1000 + r * 100 + fib.0;
+}

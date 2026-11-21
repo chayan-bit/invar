@@ -5,13 +5,13 @@ use crate::surface_sugar::first_code;
 use invar::general_net::{Limits, Net, oracle};
 use invar::{check, engine, eval, front, mir, mir_eval};
 
-fn checked(source: &str) -> check::CheckedProgram {
+pub(crate) fn checked(source: &str) -> check::CheckedProgram {
     let parsed = front::parse(source.as_bytes()).unwrap_or_else(|e| panic!("{source}: {e:?}"));
     check::check(parsed, true).unwrap_or_else(|e| panic!("{source}: {e:?}"))
 }
 
 /// The cpu-parallel receipt of `source` at `fuel`.
-fn parallel(source: &str, fuel: u64) -> Result<serde_json::Value, eval::EvalError> {
+pub(crate) fn parallel(source: &str, fuel: u64) -> Result<serde_json::Value, eval::EvalError> {
     let lowered = mir::lower(&checked(source)).unwrap();
     engine::run_mir(
         source.as_bytes(),
@@ -28,6 +28,12 @@ fn parallel(source: &str, fuel: u64) -> Result<serde_json::Value, eval::EvalErro
 /// feature) native engines, and at every fuel short of completion the MIR
 /// and cpu-parallel engines stop where the reference does.
 fn everywhere(source: &str, expected: Result<i32, eval::TrapCategory>) {
+    agree(source, expected, true);
+}
+
+/// [`everywhere`], leaving out the net oracle when `net` is false (for
+/// constructs GNET refuses, such as pairs, #262).
+pub(crate) fn agree(source: &str, expected: Result<i32, eval::TrapCategory>, net: bool) {
     let checked = checked(source);
     let reference = eval::observe(&checked, 1_000_000);
     match (&reference.result, expected) {
@@ -45,18 +51,20 @@ fn everywhere(source: &str, expected: Result<i32, eval::TrapCategory>) {
         observed.cleanup_trace, reference.cleanup_trace,
         "MIR\n{source}"
     );
-    let net = Net::lower(&checked, Limits::default()).unwrap();
-    let proof = net.verify().unwrap();
-    let net_run = oracle::observe(&net, &proof, oracle::Limits::default()).unwrap();
-    assert_eq!(net_run.failure, None, "{source}");
-    assert_eq!(
-        net_run.semantic.result, reference.result,
-        "oracle\n{source}"
-    );
-    assert_eq!(
-        net_run.semantic.steps_used, reference.steps_used,
-        "oracle\n{source}"
-    );
+    if net {
+        let net = Net::lower(&checked, Limits::default()).unwrap();
+        let proof = net.verify().unwrap();
+        let net_run = oracle::observe(&net, &proof, oracle::Limits::default()).unwrap();
+        assert_eq!(net_run.failure, None, "{source}");
+        assert_eq!(
+            net_run.semantic.result, reference.result,
+            "oracle\n{source}"
+        );
+        assert_eq!(
+            net_run.semantic.steps_used, reference.steps_used,
+            "oracle\n{source}"
+        );
+    }
     let full = reference.steps_used;
     for fuel in [full, full - 1, full / 2, 1] {
         let serial = eval::observe(&checked, fuel);

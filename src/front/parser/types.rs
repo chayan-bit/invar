@@ -101,6 +101,9 @@ impl Parser {
             }
             return Ok(Type::Named(name));
         }
+        if let Some(start) = self.take_symbol("(") {
+            return self.pair_type(start);
+        }
         if self.take_keyword("i32").is_some() {
             return Ok(Type::I32);
         }

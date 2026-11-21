@@ -358,6 +358,8 @@ pub(super) fn accepts_type(ty: &Type, program: &mir::Program) -> bool {
             | Type::ArrayU32 => {}
             // The GNET net contract has no binary64 words yet (v0.2 f64math).
             Type::F64 | Type::ArrayF64 => return false,
+            // Pairs (#262) have no net word layout.
+            Type::Pair(_) => return false,
             // Utf8Error is the payload-free error of the checked UTF-8 intrinsics.
             Type::Named(name) if matches!(name.as_str(), "Bytes" | "String" | "Utf8Error") => {}
             // Integer borrowed views (`View<T>`, `MutView<T>`); f32 views do not check.
@@ -561,6 +563,18 @@ pub(super) fn operation(
         }
         _ => return Err(internal()),
     })
+}
+
+/// Whether two host values share storage.
+pub(in crate::general_net) fn external_alias(a: &Value, b: &Value) -> bool {
+    use std::rc::Rc;
+    match (a, b) {
+        (Value::ArrayI32(a), Value::ArrayI32(b)) => Rc::ptr_eq(a, b),
+        (Value::ArrayU32(a), Value::ArrayU32(b)) => Rc::ptr_eq(a, b),
+        (Value::ArrayF32(a), Value::ArrayF32(b)) => Rc::ptr_eq(a, b),
+        (Value::Record(a), Value::Record(b)) => Rc::ptr_eq(a, b),
+        _ => false,
+    }
 }
 
 #[cfg(test)]

@@ -38,6 +38,7 @@ impl Type {
             Type::ArrayF64 => "Array<f64>",
             Type::ArrayBool => "Array<Bool>",
             Type::Named(name) => name,
+            Type::Pair(pair) => super::pair_source_name(&pair.0, &pair.1),
         }
     }
 }

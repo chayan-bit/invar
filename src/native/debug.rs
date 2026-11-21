@@ -152,6 +152,8 @@ impl<'a> Module<'a> {
             Type::F32 => self.node(base("f32", 32, "DW_ATE_float")),
             Type::F64 => self.node(base("f64", 64, "DW_ATE_float")),
             Type::Bool => self.node(base("Bool", 8, "DW_ATE_boolean")),
+            // A pair (#262) is its packed 64-bit slot word, not a handle.
+            Type::Pair(_) => self.node(base(&name, 64, "DW_ATE_unsigned")),
             _ => {
                 // Arrays, records, variants and views are host-owned handles in
                 // an i64 slot (`native_host.rs`), so the type is an 8-byte
@@ -411,6 +413,8 @@ pub(super) fn host_types(program: &Program) -> String {
         Type::F64 => "DebugKind::F64".to_owned(),
         Type::Bool => "DebugKind::Bool".to_owned(),
         Type::Unit => "DebugKind::Unit".to_owned(),
+        // A packed pair (#262) renders as its raw slot word.
+        Type::Pair(_) => "DebugKind::Raw".to_owned(),
         Type::ArrayI32 => "DebugKind::Type(0)".to_owned(),
         Type::ArrayU32 => "DebugKind::Type(1)".to_owned(),
         Type::ArrayF32 => "DebugKind::Type(2)".to_owned(),
