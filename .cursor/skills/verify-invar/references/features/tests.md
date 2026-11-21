@@ -1,6 +1,6 @@
 # Tests
 
-The repository's own checks are `scripts/check-file-size`, `cargo test`, and the nextest profiles in the justfile. The default verification drive runs the ratchet and one binary test that does not need LLVM or a GPU. The full corpus stays a separate command.
+The repository's own checks are `scripts/check-file-size`, `cargo test`, and the justfile recipes that run the nextest profiles in `.config/nextest.toml`. The default verification drive runs the ratchet and one binary test that does not need LLVM or a GPU. The full corpus stays a separate command.
 
 ## Sub-features
 
@@ -32,7 +32,7 @@ Preconditions:
 
 - `cargo test` uses a different profile from `cargo build`, so the focused test rebuilds the package. Give it the cargo lock. Do not start it beside `invar-verify build`.
 - A filter that matches nothing still exits 0 with `0 passed`. The drive fails unless it sees `1 passed`.
-- `just test-quick` omits `general_net`, `schedule`, and `system` library tests. It is not a substitute for `just test`.
+- `just test-quick` (`--profile quick`) runs only the library tests, the `language` binary, and `gnet_net`'s `net_boundary::` tests. It omits `general_net`, `schedule`, and `system` library tests and the `owner_return_fuel`, `bytes_strings_and_c_abi`, and `units_and_frames` language tests. It is not a substitute for `just test`.
 - Pull-request CI samples the corpus 1-in-8. `just test` and pushes to main set `INVAR_FULL_CORPUS=1`. Quoting a sampled run as the full corpus is wrong.
 - `scripts/check-file-size --update` and `--regenerate` rewrite the allowlist. `--dry-run` on `invar-verify` does not pass those flags, and the drive never calls them.
 - GPU tests are `#[ignore]` unless the feature is on and the runner passes `--include-ignored`. A default `cargo test` that exits 0 did not run them.
