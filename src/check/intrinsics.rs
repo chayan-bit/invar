@@ -31,6 +31,7 @@ pub(crate) fn intrinsic(name: &str) -> bool {
                 | "reassoc_add"
         )
         || conversion(name).is_some()
+        || crate::extremum::Kind::from_name(name).is_some()
         || storage::filled(name).is_some()
         || crate::math::MathFn::from_name(name).is_some()
 }

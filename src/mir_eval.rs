@@ -29,7 +29,7 @@ mod values;
 pub(crate) use bulk::{LiveLoop, LoopOverride};
 use bulk::{live_loop, live_trips};
 use frame::{Frame, Slot, copied, park, record_cleanup};
-pub use reduce::{ReduceCall, Reducer, serial_reduction};
+pub use reduce::{ReduceCall, Reducer, SelectCall, Selector, serial_reduction};
 #[cfg(test)]
 use values::mir_host_index;
 use values::{array_length, binary, filled, indexed, mir_len_u32, store_index, unary};
@@ -60,6 +60,8 @@ struct Interpreter<'a> {
     sorts: Option<&'a mut SortProvider<'a>>,
     /// Engine hook for reached `sum_tree`/`dot_tree`/`sum_exact`/`dot_exact` calls.
     reducer: Option<&'a mut Reducer<'a>>,
+    /// Engine hook for reached `min_of`/`max_of`/`argmin`/`argmax` calls (#207).
+    selector: Option<&'a mut Selector<'a>>,
     fuel_limit: u64,
     steps_used: u64,
     call_depth: usize,
@@ -112,6 +114,7 @@ pub(crate) fn observe_offers<'a>(
 
 /// [`observe_offers`] with an engine reducer for reached float reductions.
 /// The reducer returns `None` to keep the serial MIR result for one call.
+#[cfg_attr(not(any(feature = "cuda", feature = "metal")), allow(dead_code))]
 pub(crate) fn observe_engine<'a>(
     program: &'a mir::Program,
     fuel_limit: u64,
@@ -119,6 +122,17 @@ pub(crate) fn observe_engine<'a>(
     reducer: Option<&'a mut Reducer<'a>>,
 ) -> (Observation, Vec<bool>) {
     observe_all(program, fuel_limit, provider, None, reducer)
+}
+
+/// [`observe_engine`] with an engine selector for reached extremum calls (#207).
+pub(crate) fn observe_selecting<'a>(
+    program: &'a mir::Program,
+    fuel_limit: u64,
+    provider: Option<&'a mut BulkProvider<'a>>,
+    reducer: Option<&'a mut Reducer<'a>>,
+    selector: Option<&'a mut Selector<'a>>,
+) -> (Observation, Vec<bool>) {
+    observe_hooks(program, fuel_limit, provider, None, reducer, selector)
 }
 
 /// Run with every hook: bulk plans, explicit sorts (sort and spatial runs,
@@ -129,6 +143,17 @@ pub(crate) fn observe_all<'a>(
     provider: Option<&'a mut BulkProvider<'a>>,
     sorts: Option<&'a mut SortProvider<'a>>,
     reducer: Option<&'a mut Reducer<'a>>,
+) -> (Observation, Vec<bool>) {
+    observe_hooks(program, fuel_limit, provider, sorts, reducer, None)
+}
+
+fn observe_hooks<'a>(
+    program: &'a mir::Program,
+    fuel_limit: u64,
+    provider: Option<&'a mut BulkProvider<'a>>,
+    sorts: Option<&'a mut SortProvider<'a>>,
+    reducer: Option<&'a mut Reducer<'a>>,
+    selector: Option<&'a mut Selector<'a>>,
 ) -> (Observation, Vec<bool>) {
     if fuel_limit == 0 {
         return (
@@ -160,6 +185,7 @@ pub(crate) fn observe_all<'a>(
                 provider,
                 sorts,
                 reducer,
+                selector,
                 fuel_limit,
                 steps_used: 0,
                 call_depth: 0,
@@ -236,6 +262,7 @@ mod diagnostic_tests {
             provider: None,
             sorts: None,
             reducer: None,
+            selector: None,
             fuel_limit: 100,
             steps_used: 0,
             call_depth: 0,

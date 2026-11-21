@@ -295,6 +295,27 @@ fn check_operation(
                 }
                 Some(Type::F32)
             }
+            extremum if crate::extremum::Kind::from_name(extremum).is_some() => {
+                let [arg] = args.as_slice() else {
+                    return Err(invalid("extremum arity mismatch"));
+                };
+                let source = types.get(arg).ok_or_else(|| invalid("extremum operand missing"))?;
+                let named = source.position
+                    .and_then(|position| function.blocks[source.block].instructions.get(position))
+                    .is_some_and(|item| matches!(&item.kind, Operation::ArrayRef { loan: None, .. }));
+                let item = match ty(arg)? {
+                    Type::ArrayI32 => Type::I32,
+                    Type::ArrayU32 => Type::U32,
+                    Type::ArrayF32 => Type::F32,
+                    Type::ArrayF64 => Type::F64,
+                    _ => return Err(invalid("extremum operand must be a named array")),
+                };
+                if !named {
+                    return Err(invalid("extremum operand must be a named array"));
+                }
+                let is_index = crate::extremum::Kind::from_name(extremum).is_some_and(crate::extremum::Kind::is_index);
+                Some(if is_index { Type::U32 } else { item })
+            }
             "filled_i32"
                 if args.len() == 2
                     && ty(&args[0])? == &Type::U32

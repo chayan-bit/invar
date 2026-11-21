@@ -372,11 +372,12 @@ pub fn link_with_library(
         let foreign_source = crate::native_foreign_source::standalone();
         let sort_source = format!("mod invar_sort_cpu {{ {} }}\n", include_str!("sort_cpu.rs"));
         let host = format!(
-            "{}\n#[allow(dead_code)] mod invar_tc {{ {} }}\n{sort_source}\nconst MAX_ARRAY_LEN: usize = {max_array};\nconst MAX_LIVE_ELEMENTS: usize = {max_live};\nconst NAMES: &[&str] = &[{names}];\nconst BLOBS: &[(&[u8], bool)] = &[{blobs}];\nconst C_LIBRARY: &str = {library:?};\nconst FOREIGN: &[Option<(&str, u32, &[(u32,u32,usize)])>] = &[{foreign}];\n#[cfg(invar_has_foreign)] mod invar_foreign {{ {} }}\n#[allow(dead_code)] mod fsum {{ {} }}\n{}\n{}",
+            "{}\n#[allow(dead_code)] mod invar_tc {{ {} }}\n{sort_source}\nconst MAX_ARRAY_LEN: usize = {max_array};\nconst MAX_LIVE_ELEMENTS: usize = {max_live};\nconst NAMES: &[&str] = &[{names}];\nconst BLOBS: &[(&[u8], bool)] = &[{blobs}];\nconst C_LIBRARY: &str = {library:?};\nconst FOREIGN: &[Option<(&str, u32, &[(u32,u32,usize)])>] = &[{foreign}];\n#[cfg(invar_has_foreign)] mod invar_foreign {{ {} }}\n#[allow(dead_code)] mod fsum {{ {} }}\n#[allow(dead_code)] mod extremum {{ {} }}\n{}\n{}",
             include_str!("angle.rs"),
             include_str!("../crates/invar-device/src/tc/reference.rs"),
             foreign_source,
             include_str!("fsum.rs"),
+            include_str!("extremum/fold.rs"),
             include_str!("native_host.rs"),
             debug::host_source(object.debug.as_deref()),
             max_array = crate::array_limits::MAX_ARRAY_LEN,

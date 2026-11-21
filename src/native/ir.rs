@@ -490,6 +490,15 @@ impl Ir<'_> {
                         _ => return Err(error("verified sort key type missing")),
                     }
                 } else { 0 };
+                // #207: the element code of an extremum operand (f32 and u32
+                // arrays share the host's word storage).
+                let extremum_elem = match args.first().and_then(|id| self.value_types.get(id)) {
+                    Some(Type::ArrayI32) => 1,
+                    Some(Type::ArrayU32) => 2,
+                    Some(Type::ArrayF32) => 3,
+                    Some(Type::ArrayF64) => 4,
+                    _ => 0,
+                };
                 let args = args.iter().map(|id| self.load(*id)).collect::<Vec<_>>();
                 let value = self.tmp();
                 if let Some(word) = self.float_intrinsic(name, &args, &arg_types, at)? {
@@ -591,6 +600,19 @@ impl Ir<'_> {
                         let b = args.get(1).unwrap_or(a);
                         let (span_start, span_end) = self.site(at)?;
                         self.line(format!("{value} = call i64 @invar_fsum_v1(i32 {code}, i64 {a}, i64 {b}, i32 {span_start}, i32 {span_end})"));
+                    }
+                    (extremum, [a]) if crate::extremum::Kind::from_name(extremum).is_some() => {
+                        if self.exporting {
+                            return Err(error("native exports do not admit extremum intrinsics"));
+                        }
+                        let code = crate::extremum::Kind::from_name(extremum)
+                            .ok_or_else(|| error("verified extremum missing"))?
+                            .code();
+                        if extremum_elem == 0 {
+                            return Err(error("verified extremum operand type missing"));
+                        }
+                        let (span_start, span_end) = self.site(at)?;
+                        self.line(format!("{value} = call i64 @invar_extremum_v1(i32 {code}, i32 {extremum_elem}, i64 {a}, i32 {span_start}, i32 {span_end})"));
                     }
                     ("utf8_decode", [owner]) | ("utf8_encode", [owner]) => {
                         let kind = if name == "utf8_decode" { 3 } else { 4 };

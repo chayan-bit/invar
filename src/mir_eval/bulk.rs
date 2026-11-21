@@ -557,6 +557,7 @@ mod hardening_tests {
             provider: None,
             sorts: None,
             reducer: None,
+            selector: None,
             fuel_limit: 1000,
             steps_used: 17,
             call_depth: 0,

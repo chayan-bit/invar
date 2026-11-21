@@ -672,7 +672,9 @@ fn expr(
                 }
                 return Ok(());
             }
-            if crate::fsum::Kind::from_name(name).is_some() {
+            if crate::fsum::Kind::from_name(name).is_some()
+                || crate::extremum::Kind::from_name(name).is_some()
+            {
                 // Every operand is a read loan for the call; both dot operands
                 // may name the same array.
                 for arg in args {

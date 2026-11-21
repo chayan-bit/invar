@@ -98,3 +98,49 @@ impl Interpreter<'_> {
         Ok(Value::F32(serial_reduction(&call)))
     }
 }
+
+impl Interpreter<'_> {
+    /// `min_of`, `max_of`, `argmin`, `argmax` (#207): the engine's selector
+    /// may compute a reached call on its workers; the serial result is the
+    /// same bits and index by the fold's associativity.
+    pub(super) fn extremum(
+        &mut self,
+        function: &Function,
+        name: &str,
+        args: &[ValueId],
+        span: Span,
+        frame: &Frame,
+    ) -> Result<Value, EvalError> {
+        let kind = crate::extremum::Kind::from_name(name)
+            .ok_or_else(|| tool("MIR_CALL", "unknown extremum"))?;
+        let [arg] = args else {
+            return Err(tool("MIR_CALL", "invalid extremum arity"));
+        };
+        let operand = frame.value(*arg)?;
+        if let Some(selector) = self.selector.as_mut() {
+            let call = SelectCall {
+                function: &function.name,
+                span,
+                kind,
+                operand: &operand,
+            };
+            if let Some(value) = selector(&call)? {
+                return Ok(value);
+            }
+        }
+        crate::extremum::evaluate(kind, &operand, span)
+    }
+}
+
+/// One reached `min_of`/`max_of`/`argmin`/`argmax` call (#207).
+pub struct SelectCall<'a> {
+    pub function: &'a str,
+    pub span: Span,
+    pub kind: crate::extremum::Kind,
+    /// The borrowed array operand.
+    pub operand: &'a Value,
+}
+
+/// Returns `Some(result)` when the engine computed the call (or its
+/// empty-input trap), `None` to keep the serial MIR result.
+pub type Selector<'a> = dyn FnMut(&SelectCall<'_>) -> Result<Option<Value>, EvalError> + 'a;

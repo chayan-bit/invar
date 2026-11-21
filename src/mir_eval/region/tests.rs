@@ -81,6 +81,7 @@ impl<'p> Machine<'p> {
                 provider: None,
                 sorts: None,
                 reducer: None,
+                selector: None,
                 fuel_limit: LIMIT,
                 steps_used: 0,
                 call_depth: 0,

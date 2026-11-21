@@ -300,6 +300,7 @@ pub(crate) fn run_cpu_with(
         fallback_reason: None,
         executed,
         reductions: Vec::new(),
+        selections: Vec::new(),
     })
 }
 

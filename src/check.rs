@@ -841,6 +841,17 @@ impl FunctionChecker<'_> {
                     .first()
                     .and_then(|arg| self.hint(arg))
                     .and_then(|ty| element(&ty)),
+                extremum if reductions::extremum_kind(extremum).is_some() => {
+                    reductions::extremum_kind(extremum).and_then(|kind| {
+                        if kind.is_index() {
+                            Some(Type::U32)
+                        } else {
+                            args.first()
+                                .and_then(|arg| self.hint(arg))
+                                .and_then(|ty| element(&ty))
+                        }
+                    })
+                }
                 _ => self
                     .checker
                     .functions
@@ -1529,6 +1540,9 @@ impl FunctionChecker<'_> {
             }
             reduction if reductions::is_reduction(reduction) => {
                 self.reduction(reduction, args, span)
+            }
+            extremum if reductions::extremum_kind(extremum).is_some() => {
+                self.extremum(extremum, args, span)
             }
             "len" => {
                 if args.len() != 1 {
