@@ -9,6 +9,7 @@
 pub mod admission;
 mod angle;
 pub mod array_limits;
+pub mod axes;
 pub mod bounded_summary;
 pub mod budget;
 pub mod check;
