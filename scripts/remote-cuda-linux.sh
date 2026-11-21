@@ -145,7 +145,9 @@ if [ "$build_rc" = 0 ]; then
         (
             t=$SECONDS
             # shellcheck disable=SC2086 # the suite is a flag and its value
-            timeout -k 30 "$(left)" ${rss_of[@]+"${rss_of[@]}" "$here/suite-$i.rss"} \
+            meter=()
+            [ ${#rss_of[@]} -gt 0 ] && meter=("${rss_of[@]}" "$here/suite-$i.rss")
+            timeout -k 30 "$(left)" "${meter[@]}" \
                 cargo test "${common[@]}" ${suites[$i]} -- --include-ignored "${skips[@]}" \
                 "${filters[@]}" >"$here/suite-$i.log" 2>&1
             echo "$? $((SECONDS - t))" >"$here/suite-$i.rc"
