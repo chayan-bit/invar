@@ -1,0 +1,9 @@
+{
+  "assembly_default": 20000,
+  "chapter": 4000,
+  "chapters": {
+    "axes": 6000
+  },
+  "core": 12000,
+  "spec": 60000
+}

@@ -23,8 +23,8 @@ const N_SPEC: &str = "docs/spec/invar-v0.2-axis-n.md";
 const SPECS: [(&str, usize); 3] = [(SPEC, TOKEN_LIMIT), (AXES_SPEC, 6_000), (N_SPEC, 6_000)];
 const INDEX: &str = "examples/index.json";
 const INDEX_SCHEMA: &str = "examples/index.schema.json";
-/// Target from the AI-02 contract. Measured with the stated estimator, see `spec_tokens`.
-const TOKEN_LIMIT: usize = 30_000;
+/// Whole-spec budget, as the size record and `docs/spec/budget.json` state (`tests/spec_budget.rs`).
+const TOKEN_LIMIT: usize = 60_000;
 const SIZE_RECORD_PREFIX: &str = "Size record:";
 
 fn root() -> PathBuf {

@@ -722,6 +722,21 @@
       "reachability": "source"
     },
     {
+      "code": "SPEC_BUDGET_EXCEEDED",
+      "meaning": "invar spec assembly is over its token budget",
+      "reachability": "source"
+    },
+    {
+      "code": "SPEC_UNKNOWN_CHAPTER",
+      "meaning": "invar spec names a chapter that does not exist",
+      "reachability": "source"
+    },
+    {
+      "code": "SPEC_UNKNOWN_TOPIC",
+      "meaning": "invar spec names a topic no chapter carries",
+      "reachability": "source"
+    },
+    {
       "code": "STATE_DEPENDENCE",
       "meaning": "recurrence has an unsupported state dependence",
       "reachability": "source"
