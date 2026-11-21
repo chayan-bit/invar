@@ -56,8 +56,22 @@ impl Parser {
             ));
         };
         let at = iterable.span;
+        let first_closure = self.closures.len();
         let body = self.block()?;
         let by_place = assigns(&body.statements, &element);
+        // Closure captures resolve by name outside the rewritten body, where
+        // `x` names the index, so a by-place element cannot be captured.
+        let captured = self.closures[first_closure..]
+            .iter()
+            .flat_map(|closure| &closure.captures)
+            .find(|capture| capture.name == element);
+        if let (true, Some(capture)) = (by_place, captured) {
+            return Err(FrontError::source(
+                "OWNERSHIP",
+                "an element written in its for-each body is an array place and cannot be captured; capture a `let` copy of it",
+                capture.span,
+            ));
+        }
         // By place, the index takes the element name, which every `x` reads
         // through, so the checker reserves the name as `let x` does by value.
         let index = if by_place {

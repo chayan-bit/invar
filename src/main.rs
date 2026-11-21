@@ -26,6 +26,10 @@ fn main() {
 }
 
 fn run(args: Vec<OsString>) -> i32 {
+    let args = match cli::region_options(args) {
+        Ok(args) => args,
+        Err(code) => return code,
+    };
     if let Some(code) = native_command::debug_command(&args) {
         return code;
     }
@@ -83,29 +87,14 @@ fn run(args: Vec<OsString>) -> i32 {
     {
         return system_command(&args[3], SystemAction::Report(Some(&args[5])));
     }
-    if args.len() == 7
-        && args[1] == "system"
-        && args[2] == "gen"
-        && args[3] == "ros2"
-        && args[5] == "--out"
-    {
-        return system_gen_ros2(&args[4], &args[6]);
-    }
-    if args.len() == 7
-        && args[1] == "system"
-        && args[2] == "gen"
-        && args[3] == "mjcf"
-        && args[5] == "--out"
-    {
-        return system_gen_robot(&args[4], &args[6], "mjcf");
-    }
-    if args.len() == 7
-        && args[1] == "system"
-        && args[2] == "gen"
-        && args[3] == "urdf"
-        && args[5] == "--out"
-    {
-        return system_gen_robot(&args[4], &args[6], "urdf");
+    if args.len() == 7 && args[1] == "system" && args[2] == "gen" && args[5] == "--out" {
+        match args[3].to_str() {
+            Some("ros2") => return system_gen_ros2(&args[4], &args[6]),
+            Some(format @ ("mjcf" | "urdf")) => {
+                return system_gen_robot(&args[4], &args[6], format);
+            }
+            _ => {}
+        }
     }
     if args.len() == 6
         && args[1] == "system"

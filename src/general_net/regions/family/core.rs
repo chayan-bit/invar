@@ -1,5 +1,5 @@
 use super::*;
-use crate::general_net::normal_form::{ArrayLaw, Carried, Rep, Ring};
+use crate::general_net::normal_form::{ArrayLaw, Carried, IntTy, Rep, Ring};
 use crate::laws::Law;
 
 fn operand<'a>(e: &'a Expr, i: &str) -> Option<&'a str> {
@@ -98,6 +98,9 @@ pub(super) fn reduce(cx: &Context<'_>) -> bool {
         [x, y] => return pair(cx, i, x, y),
         _ => return false,
     };
+    if let Rep::LiftedSum(ty) = carried.rep {
+        return !carried.scan && cx.node.arrays.is_empty() && checked_sum(cx, i, ty);
+    }
     if carried.scan || !matches!(carried.rep, Rep::Sealed(_)) || !cx.node.arrays.is_empty() {
         return false;
     }
@@ -116,6 +119,26 @@ pub(super) fn reduce(cx: &Context<'_>) -> bool {
     [(a, b), (b, a)].into_iter().any(|(state, e)| {
         named(state, name) && operand(e, i).is_some_and(|input| cx.ty(input, Type::ArrayU32))
     })
+}
+
+/// #204: `s = s + x[i]` (either order) with checked `+`, `s` a mutable
+/// integer of the L3 representation's type and `x` an array of that type.
+fn checked_sum(cx: &Context<'_>, i: &str, ty: IntTy) -> bool {
+    let (scalar, array) = match ty {
+        IntTy::I32 => (Type::I32, Type::ArrayI32),
+        IntTy::U32 => (Type::U32, Type::ArrayU32),
+    };
+    let [Stmt::Assign { name, value }] = cx.inner.body.as_slice() else {
+        return false;
+    };
+    let Some((a, b)) = binary(value, BinaryOp::Add) else {
+        return false;
+    };
+    cx.mutable(name, scalar)
+        && [(a, b), (b, a)].into_iter().any(|(state, e)| {
+            named(state, name)
+                && operand(e, i).is_some_and(|input| input != name && cx.ty(input, array.clone()))
+        })
 }
 
 /// A read-only `Array<u32>` local (A0's `local_is(.., ArrayU32, false)`).

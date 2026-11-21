@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=310 citations=338
-Size record: tokens=29136 estimator=bytes/3 limit=30000
+Size record: tokens=29189 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1061,7 +1061,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 [N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
 [N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
-[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
+[N11.3.3] A checked `i32` sum is not reassociated as a wrapping law, because regrouping can change which addition traps; it runs in parallel only by the exact carry of v0.2 NA3.11, which keeps the first trap. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
 [N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_false_guard_is_serial_before_workers`
 [N11.3.5] The worker count is bounded by `MAX_WORKERS` (64) and by the available hardware. `src/schedule/workers.rs::MAX_WORKERS`
 
@@ -1339,6 +1339,6 @@ fn main() -> i32 {
     return 0;
 }
 ```
-[NB.7.6] `for x in xs { b }` over a named array, `View` or `MutView` is `for i in 0u32 .. len(xs) { let x = xs[i]; b }` with a hidden `i`, desugared before checking and family recognition, except that a body assigning `x` names `i` as `x`, reserving it alike, and makes every `x` the place `xs[i]`, so loans, traps and fuel are the counted loop's (#255). `src/front/parser/loops.rs` `tests/language/for_each.rs`
+[NB.7.6] `for x in xs { b }` over a named array, `View` or `MutView` is `for i in 0u32 .. len(xs) { let x = xs[i]; b }` with a hidden `i`, desugared before checking and family recognition, except that a body assigning `x` names `i` as `x`, reserving it alike, and makes every `x` the place `xs[i]`, so loans, traps and fuel are the counted loop's; such an `x` cannot be moved or captured (`OWNERSHIP`) (#255). `src/front/parser/loops.rs` `tests/language/for_each.rs`
 [NB.7.7] `for i in lo .. hi step k` binds `lo`, `hi` and `k` once, in order, to hidden `u32` locals and runs the counted loop over `0 .. ceil((hi - lo) / k)` trips, none when `hi <= lo`, with `i = lo + j * k`, the view stride rule of N5.5.2; a literal zero `k`, in any parentheses, is `PARSE_ZERO_STEP`, and a zero `k` traps `DIVISION_BY_ZERO` over the header only on a non-empty range (#256). `tests/language/stepped_ranges.rs`
 [NB.7.8] A `///` line comment documents the item whose first token follows it and a `//!` line comment the file or module it opens before any item; both are trivia kept with that item's span in `Program::docs`, never reach checking, MIR or plans, and anywhere else are `PARSE_DOC_COMMENT_MISPLACED` (#257). `src/front/parser/docs.rs` `tests/language/doc_comments.rs`

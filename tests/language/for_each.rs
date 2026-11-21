@@ -157,6 +157,14 @@ fn for_each_refuses_what_the_counted_loop_refuses() {
             "NAME_DUPLICATE",
         ),
         ("for x in xs { x = 1u32; let y = move x; }", "OWNERSHIP"),
+        (
+            "for x in xs { let c = closure [copy x: u32]() -> u32 { return x; }; x = c(); }",
+            "OWNERSHIP",
+        ),
+        (
+            "for x in xs { let v: u32 = x; let c = closure [copy v: u32]() -> u32 { return v; }; x = c(); }",
+            "OK",
+        ),
         // Written through, the element name is still reserved for the function.
         (
             "let x: u32 = 0u32; for x in xs { x = 2u32; }",
