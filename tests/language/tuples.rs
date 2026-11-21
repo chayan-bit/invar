@@ -47,6 +47,20 @@ fn pairs_agree_on_every_cpu_engine() {
         Ok(84),
         false,
     );
+    // Unsuffixed elements take the expected pair's types, from an annotation
+    // or a return type, and a literal's positional field needs no hint.
+    agree(
+        "fn flag() -> (u32, Bool) { return (7, false); }
+        fn main() -> i32 {
+            let p: (u32, Bool) = (1, false);
+            let q = flag();
+            let x = (1, 2.5).1;
+            if p.0 == 1u32 and not q.1 and q.0 == 7u32 and x == 2.5f32 { return 3; }
+            return 0;
+        }",
+        Ok(3),
+        false,
+    );
     // Element arithmetic keeps Invar's checked overflow trap.
     agree(
         "fn main() -> i32 { let p = (2147483647, 1); return p.0 + p.1; }",
@@ -93,6 +107,14 @@ fn malformed_pairs_are_refused_with_exact_codes() {
         (
             "struct R { a: i32, b: i32 } fn main() -> i32 { let (x, y) = R { a: 1, b: 2 }; return x; }",
             "TYPE_MISMATCH",
+        ),
+        (
+            "fn main() -> i32 { let p = (quantity::<m>(1), 2); return p.1; }",
+            "TUPLE_SHAPE",
+        ),
+        (
+            "fn main() -> i32 { let q: Quantity<i32,m> = quantity::<m>(1); let p = (2, q); return p.0; }",
+            "TUPLE_SHAPE",
         ),
         (
             "struct R { p: (i32, i32) } fn main() -> i32 { return 0; }",
