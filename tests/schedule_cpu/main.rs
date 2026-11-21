@@ -9,3 +9,4 @@ mod cpu_workers;
 mod fused_map_extraction;
 mod lawful_reductions_and_scans;
 mod recognition_corpus;
+mod select_fold_records;

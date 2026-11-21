@@ -312,3 +312,141 @@ fn carry_fold<T: Copy + Into<i64> + Sync>(
         joined,
     })
 }
+
+/// #207: an L7 select loop on CPU workers. Each chunk keeps its local
+/// records; the ordered combine yields the last update and how often the `if`
+/// was taken. Published as a completed region, so MIR re-derives the fuel and
+/// branch counts before anything is written. The body cannot trap once the
+/// live input covers the trip count, which is checked here first.
+pub(super) fn select_fold_step(
+    select: &crate::select_fold::Select,
+    live: &LiveLoop<'_>,
+    workers: usize,
+    hooks: &Hooks,
+) -> Result<Option<Step>, Error> {
+    use crate::{mir_eval::region::Scalar, select_fold::Elem};
+    let len = live.iterations;
+    if len == 0
+        || len > crate::array_limits::MAX_LIVE_ELEMENTS
+        || live.lengths.get(&select.input).is_none_or(|n| *n < len)
+    {
+        return Ok(None);
+    }
+    let (outcome, chunks, joined) = match (select.elem, live.scalar(&select.best)) {
+        (Elem::I32, Some(Scalar::I32(seed))) => match live.array_i32(&select.input) {
+            Some(values) => lift(
+                select_records(select, seed, &values[..len], workers, hooks)?,
+                Scalar::I32,
+            ),
+            None => return Ok(None),
+        },
+        (Elem::U32, Some(Scalar::U32(seed))) => match live.array(&select.input) {
+            Some(values) => lift(
+                select_records(select, seed, &values[..len], workers, hooks)?,
+                Scalar::U32,
+            ),
+            None => return Ok(None),
+        },
+        (Elem::F32, Some(Scalar::F32(seed))) => match live.array_f32(&select.input) {
+            Some(values) => lift(
+                select_records(select, seed, &values[..len], workers, hooks)?,
+                Scalar::F32,
+            ),
+            None => return Ok(None),
+        },
+        _ => return Ok(None),
+    };
+    let (taken, last) = outcome;
+    let mut scalars = Vec::with_capacity(1 + select.companions.len());
+    let Some(before) = live.scalar(&select.best) else {
+        return Ok(None);
+    };
+    scalars.push(crate::mir_eval::region::ScalarState {
+        name: select.best.clone(),
+        before,
+        after: last.map_or(before, |(_, value)| value),
+    });
+    for companion in &select.companions {
+        let Some(before) = live.scalar(companion) else {
+            return Ok(None);
+        };
+        let after = match last {
+            Some((index, _)) => Scalar::U32(u32::try_from(index).map_err(|_| Error::Candidate)?),
+            None => before,
+        };
+        scalars.push(crate::mir_eval::region::ScalarState {
+            name: companion.clone(),
+            before,
+            after,
+        });
+    }
+    let n = len as u64;
+    let region = crate::mir_eval::region::CompletedRegion {
+        function: live.function.clone(),
+        span: select.source_span,
+        branches: vec![
+            crate::mir_eval::region::Branch {
+                span: select.source_span,
+                taken: n,
+                skipped: 1,
+            },
+            crate::mir_eval::region::Branch {
+                span: select.test_span,
+                taken,
+                skipped: n - taken,
+            },
+        ],
+        writes: Vec::new(),
+        scalars,
+        cleanup: Vec::new(),
+        fuel: select.fuel(n, taken).ok_or(Error::Candidate)?,
+        trap: None,
+    };
+    Ok(Some(Step {
+        plan: LoopOverride::completed(region),
+        kind: PlanKind::Reduction,
+        chunks,
+        joined,
+    }))
+}
+
+/// The if-taken count and last update, the chunks and the joined worker count.
+type Selected<T> = (
+    (u64, Option<(usize, T)>),
+    Vec<std::ops::Range<usize>>,
+    usize,
+);
+
+fn lift<T>(
+    (outcome, chunks, joined): Selected<T>,
+    scalar: impl Fn(T) -> crate::mir_eval::region::Scalar,
+) -> Selected<crate::mir_eval::region::Scalar> {
+    let (taken, last) = outcome;
+    ((taken, last.map(|(k, v)| (k, scalar(v)))), chunks, joined)
+}
+
+fn select_records<T: crate::select_fold::Key>(
+    select: &crate::select_fold::Select,
+    seed: T,
+    values: &[T],
+    workers: usize,
+    hooks: &Hooks,
+) -> Result<Selected<T>, Error> {
+    use crate::select_fold::{combine, records};
+    let (order, strict) = (select.order, select.strict);
+    let (chunks_records, chunks, joined) = parallel_chunks_with_limit(
+        values.len(),
+        workers,
+        hooks,
+        crate::array_limits::MAX_LIVE_ELEMENTS,
+        |range| Ok(records(order, strict, &values[range.clone()], range.start)),
+    )?;
+    let outcome = combine(
+        order,
+        strict,
+        seed,
+        &chunks_records,
+        hooks.fault == Fault::RightmostTie,
+    );
+    Ok(((outcome.taken, outcome.last), chunks, joined))
+}
