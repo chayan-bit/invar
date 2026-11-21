@@ -87,6 +87,11 @@
       "reachability": "source"
     },
     {
+      "code": "ASSERTION_FAILED",
+      "meaning": "assert condition was false",
+      "reachability": "source"
+    },
+    {
       "code": "CALL_DEPTH_LIMIT",
       "meaning": "call depth limit",
       "reachability": "source"

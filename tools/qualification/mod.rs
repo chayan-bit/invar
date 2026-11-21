@@ -109,6 +109,7 @@ fn expected(case: &Case, observed: &eval::Observation) -> bool {
                     eval::TrapCategory::DivisionByZero => "DIVISION_BY_ZERO",
                     eval::TrapCategory::IndexOutOfBounds => "INDEX_OUT_OF_BOUNDS",
                     eval::TrapCategory::UnitConversionInexact => "UNIT_CONVERSION_INEXACT",
+                    eval::TrapCategory::AssertionFailed => "ASSERTION_FAILED",
                 }
                 && span == actual
         }
