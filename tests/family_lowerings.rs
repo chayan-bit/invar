@@ -130,12 +130,12 @@ fn same(a: &eval::Observation, b: &eval::Observation) -> bool {
 }
 
 #[test]
-fn equal_to_reference_at_1_2_7_64_workers() {
+fn equal_to_reference_at_1_2_4_7_16_64_workers() {
     let results = oracle::each(oracle::CORPUS, true, |program| {
         let reference = eval::observe(&program.checked, FUEL);
         let mut published = 0;
         let mut differences = Vec::new();
-        for workers in [1, 2, 7, 64] {
+        for workers in [1, 2, 4, 7, 16, 64] {
             match schedule::run_source(&program.source, &program.mir, FUEL, workers) {
                 Ok(run) if same(&run.observation, &reference) => {
                     published += usize::from(!run.executed.is_empty());
@@ -256,15 +256,15 @@ fn forged_certificates_are_refused_before_any_step() {
 
 #[test]
 fn a_certified_loop_without_a_lowering_is_a_typed_gap() {
-    // L3 certifies the checked sum; no family lowers a checked fold.
-    let source = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 0u32; for i in 0u32..n { s = s + a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); if run(a, 8u32) != 16u32 { return 1; } return 0; }";
+    // L3 certifies the checked product; no family lowers its saturated carry.
+    let source = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 1u32; for i in 0u32..n { s = s * a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); if run(a, 8u32) != 256u32 { return 1; } return 0; }";
     let checked =
         invar::check::check(invar::front::parse(source.as_bytes()).unwrap(), false).unwrap();
     let program = invar::mir::lower(&checked).unwrap();
     let dispatched = schedule::selection(source.as_bytes(), &program, &Hooks::default()).unwrap();
     assert!(dispatched.selected.is_empty());
     let reasons: Vec<_> = dispatched.gaps.iter().map(|g| g.reason.as_str()).collect();
-    assert_eq!(reasons, ["no-lowering:reduce/lifted-sum"]);
+    assert_eq!(reasons, ["no-lowering:reduce/saturated-product"]);
     let run = schedule::run_source(source.as_bytes(), &program, FUEL, 4).unwrap();
     assert_eq!(run.observation.result, eval::observe(&checked, FUEL).result);
 }

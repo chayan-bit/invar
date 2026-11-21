@@ -12,8 +12,16 @@ fn core_op_sets_reject_checked_and_strict_f32_folds() {
             "{kind:?}"
         );
     }
+    // #204: a checked sum is the L3 carry, which the core family lowers.
+    let sum = REDUCE.replace("wrapping_add(s,a[i])", "s+a[i]");
+    assert!(
+        report(&sum)
+            .admissions
+            .iter()
+            .any(|a| a.family == Family::Reduce)
+    );
     for s in [
-        REDUCE.replace("wrapping_add(s,a[i])", "s+a[i]"),
+        REDUCE.replace("wrapping_add(s,a[i])", "s*a[i]"),
         SCAN.replace("wrapping_mul(s,3u32)", "s*3u32"),
         TENSOR.to_owned(),
     ] {

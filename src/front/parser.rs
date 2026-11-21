@@ -2,6 +2,7 @@ include!("parser/cursor.rs");
 include!("parser/decl.rs");
 include!("parser/types.rs");
 include!("parser/statements.rs");
+include!("parser/loops.rs");
 include!("parser/expressions.rs");
 
 fn if_statement(
@@ -44,7 +45,7 @@ pub fn parse(bytes: &[u8]) -> Result<Program, FrontError> {
         pos: 0,
         depth: 0,
         closures: Vec::new(),
-        hoisted: None,
+        hoisted: Vec::new(),
     }
     .program()
 }

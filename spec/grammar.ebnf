@@ -129,7 +129,7 @@ place         = identifier, [ "[", expression, "]" ] ;
 return_stmt   = "return", [ expression ], ";" ;
 if_stmt       = "if", expression, block, [ "else", ( block | if_stmt ) ] ;
 while_stmt    = "while", expression, block ;
-for_stmt      = "for", identifier, "in", expression, "..", expression, block ;
+for_stmt      = "for", identifier, "in", ( expression, "..", expression, [ "step", expression ] | identifier ), block ;
 expression    = or_expr ;
 or_expr       = and_expr, { "or", and_expr } ;
 and_expr      = compare_expr, { "and", compare_expr } ;
@@ -181,6 +181,7 @@ digit         = "0" .. "9" ;
    pow, floor, ceil, trunc, round, abs, copysign, min and max, overloaded on
    f32 or f64 and correctly rounded on every engine.
    sort, sort_by_key, argsort, segmented_sort are reserved ordinary calls.
+   assert(condition, string_literal) is a reserved Unit intrinsic (#258).
    Comparison chaining is syntactically excluded. Range syntax exists only
    in for statements. Assignment is a statement, not an expression.
    Modules are one source file; std::robotics is the shipped qualified module.

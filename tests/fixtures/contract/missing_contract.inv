@@ -1,0 +1,2 @@
+#[region(c = "c1")]
+fn main() -> i32 { return 0; }

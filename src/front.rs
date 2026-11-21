@@ -4,10 +4,9 @@ use serde_json::{Value, json};
 
 const MAX_SOURCE_BYTES: usize = 1_048_576;
 const MAX_NESTING: usize = 32;
-/// Bound on the height of the statement/expression tree along any path.
-/// Syntactic nesting is capped at [`MAX_NESTING`], but left-associative
-/// operator chains and `else if` chains deepen the tree without nesting, and
-/// every later pass walks it recursively. This keeps those walkers stack-safe
+/// Bound on the height of the statement/expression tree along any path. Syntactic nesting is capped
+/// at [`MAX_NESTING`], but left-associative operator chains and `else if` chains deepen the tree
+/// without nesting, and every later pass walks it recursively. This keeps those walkers stack-safe
 /// on a 2 MiB thread in Debug builds (see `tests/limits/robustness_limits.rs`).
 const MAX_TREE_HEIGHT: usize = 192;
 
@@ -453,6 +452,7 @@ pub struct Function {
     pub body: Block,
     pub span: Span,
     pub fold: crate::numeric_contract::FoldTier,
+    pub axes: crate::axes::Axes,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

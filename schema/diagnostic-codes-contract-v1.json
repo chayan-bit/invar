@@ -1,0 +1,26 @@
+{
+  "schema": "invar-diagnostic-codes-contract-v1",
+  "extends": "invar-diagnostic-codes-v1",
+  "codes": [
+    {
+      "code": "CONTRACT_CAP",
+      "meaning": "a function declares a level above a --max-c or --max-n cap",
+      "reachability": "source"
+    },
+    {
+      "code": "CONTRACT_MISMATCH",
+      "meaning": "a region's contract and C level disagree, a C1 or C2 level names no contract, or a function names its numeric contract twice",
+      "reachability": "source"
+    },
+    {
+      "code": "CONTRACT_UNAVAILABLE",
+      "meaning": "a region declares an axis level that is specified but not implemented",
+      "reachability": "source"
+    },
+    {
+      "code": "CONTRACT_UNKNOWN",
+      "meaning": "a region names an unknown axis key, level or contract",
+      "reachability": "source"
+    }
+  ]
+}

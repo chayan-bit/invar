@@ -232,7 +232,7 @@ fn check_workers(kind: Kind, a: &[F32Bits], b: &[F32Bits], want: u32, label: &st
         a,
         b: matches!(kind, Kind::DotTree | Kind::DotExact).then_some(b),
     };
-    for workers in [2, 3, 8] {
+    for workers in [1, 2, 3, 4, 8, 16, 64] {
         let got = reductions::cpu_on(&call, workers).unwrap().to_bits();
         assert_eq!(got, want, "{label}: {kind:?} on {workers} workers");
     }

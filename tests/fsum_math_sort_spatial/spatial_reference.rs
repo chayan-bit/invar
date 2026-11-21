@@ -96,7 +96,7 @@ fn differential(points: &[[F; 3]], queries: &[[F; 3]], cell: F, radius: F, strid
     assert_eq!(serial.result, observation.result);
     assert_eq!(serial.steps_used, observation.steps_used);
     assert_eq!(serial.cleanup_trace, observation.cleanup_trace);
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         let parallel =
             invar::schedule::run_source(source.as_bytes(), &mir, 100_000, workers).unwrap();
         assert_eq!(
@@ -239,7 +239,7 @@ fn trap_source(body: &str, category: eval::TrapCategory, marked: &str) {
     );
     let checked = checked(&source);
     let mir = invar::mir::lower(&checked).unwrap();
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         let actual =
             invar::schedule::run_source(source.as_bytes(), &mir, 100_000, workers).unwrap();
         assert_eq!(actual.observation.result, outcome.result);
@@ -331,7 +331,7 @@ fn spatial_reference_snapshot_moves_and_cleanup() {
     let serial = invar::mir_eval::observe(&mir, 10_000);
     assert_eq!(serial.result, observation.result);
     assert_eq!(serial.cleanup_trace, observation.cleanup_trace);
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         let run = invar::schedule::run_source(source.as_bytes(), &mir, 10_000, workers).unwrap();
         assert_eq!(run.observation.result, observation.result);
         assert_eq!(run.observation.cleanup_trace, observation.cleanup_trace);
@@ -490,7 +490,7 @@ fn spatial_result_limits_remain_tool_errors_before_filtering_or_work() {
         ));
         assert!(reference.cleanup_trace.is_empty());
         let mir = invar::mir::lower(&program).unwrap();
-        for workers in [1, 2, 4] {
+        for workers in [1, 2, 4, 16, 64] {
             let run =
                 invar::schedule::run_source(source.as_bytes(), &mir, 10_000, workers).unwrap();
             assert!(matches!(

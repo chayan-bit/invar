@@ -69,7 +69,7 @@ pub(super) fn live_trips(head: &mir::BasicBlock, condition: ValueId, frame: &Fra
 }
 
 pub(crate) struct LiveLoop<'a> {
-    slots: &'a HashMap<String, Slot>,
+    pub(super) slots: &'a HashMap<String, Slot>,
     pub function: String,
     pub span: Span,
     pub iterations: usize,

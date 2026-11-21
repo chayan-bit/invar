@@ -141,49 +141,6 @@ fn element(ty: &Type) -> Option<Type> {
     }
 }
 
-pub(crate) fn intrinsic(name: &str) -> bool {
-    crate::spatial::result(name).is_some()
-        || sort_modes(name).is_some()
-        || matches!(
-            name,
-            "len"
-                | "view"
-                | "view_mut"
-                | "fma"
-                | "sin"
-                | "cos"
-                | "sqrt"
-                | "tc_mul_add"
-                | "wrapping_add"
-                | "wrapping_mul"
-                | "bytes_slice"
-                | "utf8_slice"
-                | "utf8_decode"
-                | "utf8_encode"
-                | "quantity"
-                | "to"
-                | "sum_tree"
-                | "dot_tree"
-                | "sum_exact"
-                | "dot_exact"
-                | "reassoc_add"
-        )
-        || conversion(name).is_some()
-        || storage::filled(name).is_some()
-        || crate::math::MathFn::from_name(name).is_some()
-}
-
-/// Call-scoped loans for the reserved sort intrinsics, in argument order.
-pub(crate) fn sort_modes(name: &str) -> Option<&'static [Mode]> {
-    match name {
-        "sort" => Some(&[Mode::Mut]),
-        "sort_by_key" => Some(&[Mode::Mut, Mode::Mut]),
-        "argsort" => Some(&[Mode::Read]),
-        "segmented_sort" => Some(&[Mode::Mut, Mode::Read]),
-        _ => None,
-    }
-}
-
 /// Check names, types, and definite returns. Array ownership and loans are later gates.
 /// `require_main` is false for library-style `check`, true for an executable entrypoint.
 pub fn check(program: Program, require_main: bool) -> Result<CheckedProgram, FrontError> {
@@ -539,6 +496,7 @@ include!("check/modules.rs");
 mod closures;
 mod frames;
 mod generics;
+mod intrinsics;
 mod literals;
 mod numeric;
 mod record_generics;
@@ -548,6 +506,8 @@ mod storage;
 mod unit_math;
 mod units;
 mod views;
+
+pub(crate) use intrinsics::{intrinsic, sort_modes};
 use literals::{literal_type, split_literal};
 use result::synthesize_results;
 pub(crate) use units::{angle_call, is_frame_helper, scale_call};
@@ -882,7 +842,7 @@ impl FunctionChecker<'_> {
                     Some(Type::Named("Result<String,Utf8Error>".to_owned()))
                 }
                 "argsort" => Some(Type::ArrayU32),
-                "sort" | "sort_by_key" | "segmented_sort" => Some(Type::Unit),
+                "sort" | "sort_by_key" | "segmented_sort" | "assert" => Some(Type::Unit),
                 value if storage::filled(value).is_some() => {
                     storage::filled(value).map(|(_, array)| array)
                 }
@@ -1474,6 +1434,9 @@ impl FunctionChecker<'_> {
                 Some(if name == "Result::Ok" { &ok } else { &err }),
             )?;
             return Ok(Type::Named(nominal.clone()));
+        }
+        if name == "assert" {
+            return self.assert_call(args, span);
         }
         if let Some(modes) = sort_modes(name) {
             if args.len() != modes.len() {
