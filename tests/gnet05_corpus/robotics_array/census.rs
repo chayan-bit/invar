@@ -313,10 +313,10 @@ fn compile_pool(caps: invar_device::Capabilities, sources: &[&str]) -> Vec<Compi
         let result = cuda_nvrtc::compile_ahead(compiler, caps, source);
         // A typed refusal is a property of the program; compile_other is a host
         // fault (a child killed by the OOM killer, say) and must fail the run.
-        assert_ne!(
-            result.as_ref().err(),
-            Some(&cuda_nvrtc::CompileRefusal::Other),
-            "invar-nvrtc host fault, not a refusal"
+        assert!(
+            !matches!(result, Err(cuda_nvrtc::CompileRefusal::Other)),
+            "invar-nvrtc host fault, not a refusal: source {}",
+            hex(&source_key(source))
         );
         (result, started.elapsed().as_secs_f64())
     });
