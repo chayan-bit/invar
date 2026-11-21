@@ -121,7 +121,11 @@ fn planted(rng: &mut Rng, ty: Ty, n: usize) -> Case {
         values[t + 3] = min;
         values[t + 4] = min;
     }
-    Case { ty, seed: 0, values }
+    Case {
+        ty,
+        seed: 0,
+        values,
+    }
 }
 
 /// A random walk whose drift and spread place the first crossing anywhere
@@ -147,7 +151,11 @@ fn case(rng: &mut Rng) -> Case {
         1 => drift * 3,
         _ => span / 4,
     };
-    let sign = if ty == Ty::U32 || rng.below(2) == 0 { 1 } else { -1 };
+    let sign = if ty == Ty::U32 || rng.below(2) == 0 {
+        1
+    } else {
+        -1
+    };
     let values = (0..n)
         .map(|_| {
             let x = sign * drift + rng.between(-spread, spread);
@@ -177,18 +185,31 @@ fn assert_agrees_on(source: &str, fuel: u64, workers: &[usize]) -> eval::Observa
     let reference = eval::observe(&checked, fuel);
     let lowered = mir_eval::observe(&program, fuel);
     assert_eq!(lowered.result, reference.result, "MIR {source}");
-    assert_eq!(lowered.steps_used, reference.steps_used, "MIR fuel {source}");
+    assert_eq!(
+        lowered.steps_used, reference.steps_used,
+        "MIR fuel {source}"
+    );
     for &workers in workers {
         let run = schedule::run_source(source.as_bytes(), &program, fuel, workers).unwrap();
         let observed = &run.observation;
-        assert_eq!(observed.result, reference.result, "{workers} workers {source}");
-        assert_eq!(observed.steps_used, reference.steps_used, "{workers} fuel {source}");
+        assert_eq!(
+            observed.result, reference.result,
+            "{workers} workers {source}"
+        );
+        assert_eq!(
+            observed.steps_used, reference.steps_used,
+            "{workers} fuel {source}"
+        );
         assert_eq!(observed.cleanup_trace, reference.cleanup_trace);
         // With the fuel for the whole loop at its head, the carry must publish;
         // a tighter limit leaves the loop to serial MIR, which stops exactly.
         if fuel == FUEL {
             let published: Vec<_> = run.executed.iter().map(|e| e.kind).collect();
-            assert_eq!(published, [PlanKind::Reduction], "{workers} workers {source}");
+            assert_eq!(
+                published,
+                [PlanKind::Reduction],
+                "{workers} workers {source}"
+            );
         }
     }
     reference
@@ -202,7 +223,11 @@ fn checked_fold_carry_matches_the_serial_fold_over_3000_generated_cases() {
     for index in 0..3000 {
         let case = case(&mut rng);
         // Every worker count on the first 400 cases, one in rotation after.
-        let workers = if index < 400 { &WORKERS[..] } else { &WORKERS[index % 4..=index % 4] };
+        let workers = if index < 400 {
+            &WORKERS[..]
+        } else {
+            &WORKERS[index % 4..=index % 4]
+        };
         let reference = assert_agrees_on(&case.source(), FUEL, workers);
         assert_eq!(
             matches!(reference.result, Err(EvalError::Trap { .. })),
@@ -231,19 +256,47 @@ fn checked_fold_carry_edge_positions_and_exact_limits() {
     let min = i64::from(i32::MIN);
     let mut cases = vec![
         // Reaches the limits exactly without crossing.
-        Case { ty: Ty::I32, seed: max - 100, values: [vec![100], vec![-1; 99], vec![1; 99]].concat() },
-        Case { ty: Ty::I32, seed: min + 64, values: vec![-1; 64] },
-        Case { ty: Ty::U32, seed: i64::from(u32::MAX) - 70, values: vec![1; 70] },
+        Case {
+            ty: Ty::I32,
+            seed: max - 100,
+            values: [vec![100], vec![-1; 99], vec![1; 99]].concat(),
+        },
+        Case {
+            ty: Ty::I32,
+            seed: min + 64,
+            values: vec![-1; 64],
+        },
+        Case {
+            ty: Ty::U32,
+            seed: i64::from(u32::MAX) - 70,
+            values: vec![1; 70],
+        },
         // Traps on the first and on the last element.
-        Case { ty: Ty::I32, seed: max, values: vec![1; 100] },
-        Case { ty: Ty::I32, seed: 0, values: [vec![0; 99], vec![min], vec![-1]].concat() },
-        Case { ty: Ty::U32, seed: i64::from(u32::MAX), values: vec![1; 80] },
+        Case {
+            ty: Ty::I32,
+            seed: max,
+            values: vec![1; 100],
+        },
+        Case {
+            ty: Ty::I32,
+            seed: 0,
+            values: [vec![0; 99], vec![min], vec![-1]].concat(),
+        },
+        Case {
+            ty: Ty::U32,
+            seed: i64::from(u32::MAX),
+            values: vec![1; 80],
+        },
     ];
     // Crossings exactly at every chunk boundary of a 128-element split.
     for k in [16usize, 32, 63, 64, 65, 96, 127] {
         let mut values = vec![1; 128];
         values[k] = max;
-        cases.push(Case { ty: Ty::I32, seed: 0, values });
+        cases.push(Case {
+            ty: Ty::I32,
+            seed: 0,
+            values,
+        });
     }
     for case in &cases {
         let source = case.source();
@@ -264,7 +317,12 @@ fn checked_fold_carry_mutation_that_loses_the_minimum_prefix_is_caught() {
     values[100] = min;
     values[101] = -5;
     values[102] = i64::from(i32::MAX);
-    let source = Case { ty: Ty::I32, seed: 0, values }.source();
+    let source = Case {
+        ty: Ty::I32,
+        seed: 0,
+        values,
+    }
+    .source();
     let (checked, program) = compile(&source);
     let reference = eval::observe(&checked, FUEL);
     assert!(matches!(reference.result, Err(EvalError::Trap { .. })));
@@ -274,16 +332,21 @@ fn checked_fold_carry_mutation_that_loses_the_minimum_prefix_is_caught() {
         fault: Fault::LoseMinPrefix,
         ..Hooks::default()
     };
-    let mutated = schedule::run_source_with_hooks(source.as_bytes(), &program, FUEL, 7, &hooks)
-        .unwrap();
-    assert_ne!(mutated.observation.result, reference.result, "mutation survived");
+    let mutated =
+        schedule::run_source_with_hooks(source.as_bytes(), &program, FUEL, 7, &hooks).unwrap();
+    assert_ne!(
+        mutated.observation.result, reference.result,
+        "mutation survived"
+    );
 }
 
 #[test]
 fn checked_fold_carry_admits_a_2_pow_23_sum_and_the_receipt_names_the_law() {
     let source = "fn main() -> i32 { let a = filled_i32(8388608u32, 1); var s: i32 = -8388608; for i in 0u32 .. 8388608u32 { s = s + a[i]; } return s; }";
     let (_, program) = compile(source);
-    let report = schedule::regions(source.as_bytes(), &program).unwrap().to_json();
+    let report = schedule::regions(source.as_bytes(), &program)
+        .unwrap()
+        .to_json();
     let region = &report["regions"][0];
     assert_eq!(region["status"], "admitted");
     assert_eq!(region["chosen_plan"], "checked-sum-carry-if-guard");
@@ -312,8 +375,13 @@ fn checked_fold_carry_refuses_shapes_outside_the_law() {
     ];
     for source in refused {
         let (_, program) = compile(source);
-        let report = schedule::regions(source.as_bytes(), &program).unwrap().to_json();
-        assert_ne!(report["regions"][0]["chosen_plan"], "checked-sum-carry-if-guard", "{source}");
+        let report = schedule::regions(source.as_bytes(), &program)
+            .unwrap()
+            .to_json();
+        assert_ne!(
+            report["regions"][0]["chosen_plan"], "checked-sum-carry-if-guard",
+            "{source}"
+        );
         assert_agrees_without_publication(source);
     }
 }

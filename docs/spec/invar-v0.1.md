@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=302 citations=324
-Size record: tokens=27918 estimator=bytes/3 limit=30000
+Size record: tokens=27953 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1061,7 +1061,7 @@ system cell for Bench { sensor: Sensor; logger: Logger; }
 
 [N11.3.1] The planner admits a region only when the obligations hold, an unknown obligation rejects it, and a rejected region runs the serial MIR plan. `docs/explain.md`
 [N11.3.2] The admitted CPU shapes are a zero-based counted wrapping `u32` map, a lawful modular reduction and a prefix scan of an affine wrapping recurrence. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_all_families_shapes_workers_and_cleanup`
-[N11.3.3] A checked `i32` sum is not reassociated, because regrouping can change which addition traps. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
+[N11.3.3] A checked `i32` sum is not reassociated as a wrapping law, because regrouping can change which addition traps; it runs in parallel only by the exact carry of v0.2 NA3.11, which keeps the first trap. `tests/schedule_cpu/lawful_reductions_and_scans.rs::lawful_reductions_and_scans_lawful_reduction_scan_rejects_unproved_source_laws`
 [N11.3.4] A false runtime guard selects the serial plan before any write, and `cpu-parallel` results equal the reference for every worker count from 1 to 64. `tests/schedule_cpu/cpu_scheduler_fallback.rs::cpu_scheduler_fallback_false_guard_is_serial_before_workers`
 [N11.3.5] The worker count is bounded by `MAX_WORKERS` (64) and by the available hardware. `src/schedule/workers.rs::MAX_WORKERS`
 

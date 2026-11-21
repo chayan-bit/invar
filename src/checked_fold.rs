@@ -83,7 +83,11 @@ impl Carry {
 
 /// The first element whose checked addition leaves the range of `ty` when the
 /// fold starts at `seed`, with the accumulator value before it.
-pub fn first_trap(seed: i64, values: impl IntoIterator<Item = i64>, ty: Int) -> Option<(usize, i64)> {
+pub fn first_trap(
+    seed: i64,
+    values: impl IntoIterator<Item = i64>,
+    ty: Int,
+) -> Option<(usize, i64)> {
     let mut state = seed;
     for (k, x) in values.into_iter().enumerate() {
         if !ty.contains(state + x) {
@@ -207,7 +211,11 @@ mod tests {
             let (left, right) = values.split_at(split);
             assert_eq!(carry_of(left).then(carry_of(right)), whole, "split {split}");
         }
-        let (a, b, c) = (carry_of(&values[..2]), carry_of(&values[2..5]), carry_of(&values[5..]));
+        let (a, b, c) = (
+            carry_of(&values[..2]),
+            carry_of(&values[2..5]),
+            carry_of(&values[5..]),
+        );
         assert_eq!(a.then(b).then(c), a.then(b.then(c)));
         assert_eq!(Carry::IDENTITY.then(a), a);
         assert_eq!(a.then(Carry::IDENTITY), a);
@@ -218,7 +226,10 @@ mod tests {
         // Positive overflow at index 1, negative at index 3: the first wins.
         let values = [i64::from(i32::MAX), 1, i64::from(i32::MIN), -10];
         assert!(carry_of(&values).leaves(0, Int::I32));
-        assert_eq!(first_trap(0, values, Int::I32), Some((1, i64::from(i32::MAX))));
+        assert_eq!(
+            first_trap(0, values, Int::I32),
+            Some((1, i64::from(i32::MAX)))
+        );
         // A dip below zero that recovers still traps for u32.
         let dip = [3, -5, 10];
         assert_eq!(carry_of(&dip).total, 8);

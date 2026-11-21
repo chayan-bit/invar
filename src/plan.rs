@@ -375,7 +375,11 @@ fn classify(context: &mut Context<'_>, region: &mut Region) {
         let facts = family_facts("one accumulator combined by a sealed law", None);
         admit(region, Execution::Reduction(Box::new(reduction)), facts);
     } else if let Some(fold) = checked_fold::fold_in(function, defs, region.head) {
-        admit(region, Execution::CheckedFold(Box::new(fold)), checked_fold_facts());
+        admit(
+            region,
+            Execution::CheckedFold(Box::new(fold)),
+            checked_fold_facts(),
+        );
     } else if let Err(reason) = scan
         && region.first_rejected_obligation == Some("EFFECT_ORDER")
         && !matches!(reason, "RANGE" | "EFFECT_ORDER")
