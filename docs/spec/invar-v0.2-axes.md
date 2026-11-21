@@ -1,8 +1,8 @@
 # Invar v0.2: attributes, axes and receipts
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
-Counts: statements=32 citations=33
-Size record: tokens=3972 estimator=bytes/3 limit=6000
+Counts: statements=35 citations=37
+Size record: tokens=4512 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
@@ -190,5 +190,26 @@ fn main() -> i32 { return 0; }
 
 ```invar outcome=diag:CONTRACT_MISMATCH
 #[region(c = "c1", contract = "tc-f16-f32-v1")]
+fn main() -> i32 { return 0; }
+```
+
+## 5. Contract diagnostics
+
+[NA5.1] Each refusal of this chapter has its own code in `schema/diagnostic-codes-contract-v1.json`, an extension of the v0.1 registry, and every code is produced by a committed fixture. `tests/diagnostics/machine_diagnostics/documents.rs::machine_diagnostics_corpus_has_no_invariant_codes`
+[NA5.2] Each code carries a note, and a validated suggested fix where the table below names one. `src/fixes/contract.rs::note`
+[NA5.3] A fix rewrites one quoted value of the attribute and is offered only when the edited source checks clean. `src/fixes/contract.rs::replace`
+
+| Code | Refusal | Suggested fix |
+| --- | --- | --- |
+| `CONTRACT_UNKNOWN` | unknown or repeated axis key, unknown level or contract | the same spelling in lower case, when that is a level or contract |
+| `CONTRACT_UNAVAILABLE` | a specified level the engine does not honour: C5, S1, S2, N3, N4, T1 to T3 | the highest honoured level of that axis |
+| `CONTRACT_MISMATCH` | a contract at another C level, C1 or C2 without a contract, or the contract named twice | the C level the contract implies |
+| `CONTRACT_CAP` | a declared level above `--max-c` or `--max-n` | none; the cap is on the command line |
+
+Note: the older refusal names map here: a C4 run is an N4 declaration, a C5 digest mismatch and an illegal C3 (S1) move cannot arise until #201 and #246 implement those levels, so both are `CONTRACT_UNAVAILABLE` today.
+Note: no code is needed for widening a callee, because a declaration never reaches a callee (NA4.9).
+
+```invar outcome=diag:CONTRACT_UNAVAILABLE
+#[region(n = "n4")]
 fn main() -> i32 { return 0; }
 ```

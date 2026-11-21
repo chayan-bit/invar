@@ -323,3 +323,84 @@ fn caps_only_narrow_and_the_region_report_lists_every_function() {
         .collect();
     assert!(names.contains(&"m::one".into()), "{stdout}");
 }
+
+/// #210: each contract code carries its note, and a validated fix where one exists.
+#[test]
+fn contract_codes_carry_notes_and_validated_fixes() {
+    for (attribute, code, fixed) in [
+        (
+            "#[region(n = \"n4\")]",
+            "CONTRACT_UNAVAILABLE",
+            Some("#[region(n = \"n2\")]"),
+        ),
+        (
+            "#[region(s = \"s2\", t = \"t1\")]",
+            "CONTRACT_UNAVAILABLE",
+            Some("#[region(s = \"s0\", t = \"t0\")]"),
+        ),
+        ("#[region(c = \"c5\")]", "CONTRACT_UNAVAILABLE", None),
+        (
+            "#[region(c = \"c0\", contract = \"f32-exact-v2\")]",
+            "CONTRACT_MISMATCH",
+            Some("#[region(c = \"c1\", contract = \"f32-exact-v2\")]"),
+        ),
+        ("#[region(c = \"c1\")]", "CONTRACT_MISMATCH", None),
+        (
+            "#[region(c = \"C1\", contract = \"f32-tree-v2\")]",
+            "CONTRACT_UNKNOWN",
+            Some("#[region(c = \"c1\", contract = \"f32-tree-v2\")]"),
+        ),
+        ("#[region(c = \"c3\")]", "CONTRACT_UNKNOWN", None),
+    ] {
+        let source = format!("{attribute}\nfn main() -> i32 {{ return 0; }}\n");
+        let path = scratch("fix", &source);
+        let (status, stdout) = cli(&["check", path.to_str().unwrap(), "--format", "json"]);
+        assert_eq!(status, 1, "{attribute}");
+        let diagnostic = serde_json::from_str::<Value>(&stdout).unwrap()["diagnostics"][0].clone();
+        assert_eq!(diagnostic["code"], code, "{attribute}");
+        assert_eq!(
+            diagnostic["notes"].as_array().map(Vec::len),
+            Some(1),
+            "{attribute}"
+        );
+        let fixes = diagnostic["suggested_fixes"].as_array().unwrap();
+        let applied = fixes.first().map(|fix| {
+            let mut text = source.clone();
+            let mut edits: Vec<_> = fix["edits"].as_array().unwrap().iter().collect();
+            edits.sort_by_key(|edit| std::cmp::Reverse(edit["span"]["start"].as_u64()));
+            for edit in edits {
+                let (start, end) = (
+                    edit["span"]["start"].as_u64().unwrap(),
+                    edit["span"]["end"].as_u64().unwrap(),
+                );
+                text.replace_range(
+                    start as usize..end as usize,
+                    edit["replacement"].as_str().unwrap(),
+                );
+            }
+            text.lines().next().unwrap().to_owned()
+        });
+        assert_eq!(applied.as_deref(), fixed, "{attribute}");
+    }
+    let path = scratch(
+        "cap-note",
+        &program("#[region(contract = \"f32-tree-v2\")]"),
+    );
+    let (_, stdout) = cli(&[
+        "check",
+        path.to_str().unwrap(),
+        "--max-c",
+        "c0",
+        "--format",
+        "json",
+    ]);
+    let diagnostic = serde_json::from_str::<Value>(&stdout).unwrap()["diagnostics"][0].clone();
+    assert_eq!(
+        (
+            diagnostic["code"].as_str(),
+            diagnostic["notes"].as_array().map(Vec::len)
+        ),
+        (Some("CONTRACT_CAP"), Some(1))
+    );
+    assert_eq!(diagnostic["suggested_fixes"], serde_json::json!([]));
+}
