@@ -5,7 +5,7 @@
 959 bench/general-net-v01/gnet05/generate.rs
 963 crates/invar-cuda/src/cuda.rs
 993 crates/invar-device/src/segmented.rs
-1712 src/check.rs
+1675 src/check.rs
 992 src/component_test/planner.rs
 824 src/eval/host_read.rs
 817 src/front.rs
@@ -14,12 +14,12 @@
 830 src/general_net/normal_form/exec/lanes.rs
 1792 src/general_net/normal_form/loops.rs
 1235 src/general_net/numeric_owned_resume_host.rs
-1011 src/general_net/oracle.rs
+1010 src/general_net/oracle.rs
 868 src/general_net/oracle_arrays.rs
 1006 src/general_net/path_sum/emit.rs
 810 src/general_net/path_sum/range.rs
 913 src/histogram_source/bounded.rs
-1016 src/main.rs
+1014 src/main.rs
 1033 src/mir_eval/bulk.rs
 818 src/mir_eval/region/tests.rs
 897 src/placement/calibration.rs
@@ -29,7 +29,7 @@
 930 tests/fsum_math_sort_spatial/placement.rs
 831 tests/robotics/sequencer_binding.rs
 849 tests/schedule_tuning.rs
-1167 tests/spec_examples.rs
+1162 tests/spec_examples.rs
 806 tests/summary/summary_source.rs
 831 tests/support/gnet_device.rs
 873 tests/transpose_stencil/stencil_source.rs

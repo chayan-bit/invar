@@ -309,6 +309,7 @@ fn check_operation(
             {
                 Some(Type::ArrayU32)
             }
+            "assert" if args.len() == 1 && ty(&args[0])? == &Type::Bool => Some(Type::Unit),
             "wrapping_add" | "wrapping_mul"
                 if args.len() == 2 && args.iter().all(|arg| ty(arg).ok() == Some(&Type::U32)) =>
             {

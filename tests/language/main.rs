@@ -1,5 +1,6 @@
 mod arithmetic_fuel_and_demand;
 mod arrays_ownership_and_cleanup;
+mod assertions;
 mod borrowed_views;
 mod bytes_strings_and_c_abi;
 mod call_loans;

@@ -1,0 +1,6 @@
+// A false assert traps with ASSERTION_FAILED and the CLI reports its message.
+fn main() -> i32 {
+    let xs: Array<u32> = [3u32, 1u32, 2u32];
+    assert(xs[0u32] <= xs[1u32], "xs is sorted");
+    return 0;
+}

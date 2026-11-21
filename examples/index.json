@@ -888,6 +888,25 @@
       }
     },
     {
+      "path": "examples/language/assertion-failed.inv",
+      "intent": "A false assert traps with ASSERTION_FAILED and reports its message.",
+      "family": "core",
+      "tags": [
+        "trap"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "ASSERTION_FAILED"
+      }
+    },
+    {
       "path": "examples/language/division-by-zero.inv",
       "intent": "Division by a zero i32 traps with DIVISION_BY_ZERO.",
       "family": "core",

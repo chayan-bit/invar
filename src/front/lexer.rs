@@ -363,6 +363,14 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
     Ok(tokens)
 }
 
+/// The value of the last string literal token in `text`, if it lexes.
+pub fn last_string_literal(text: &str) -> Option<String> {
+    lex(text).ok()?.into_iter().rev().find_map(|token| match token.kind {
+        TokenKind::StringLit(value) => Some(value),
+        _ => None,
+    })
+}
+
 /// Byte spans of the matched `{`...`}` pairs in `source`, in closing order,
 /// for native debug scopes (DX-20). Comments and literals are skipped by the
 /// lexer, so their braces never count.
