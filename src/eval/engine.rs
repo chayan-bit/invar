@@ -315,17 +315,7 @@ impl Evaluator<'_> {
             ExprKind::Group(_) => unreachable!("group handled before charging"),
             ExprKind::Call { name, args } => {
                 if name == "assert" {
-                    let Value::Bool(holds) = self.expr(&args[0], env)? else {
-                        return Err(EvalError::tool("INTERNAL_TYPE", "checked assert condition"));
-                    };
-                    return if holds {
-                        Ok(Value::Unit)
-                    } else {
-                        Err(EvalError::Trap {
-                            category: TrapCategory::AssertionFailed,
-                            span: expr.span,
-                        })
-                    };
+                    return assertion(self.expr(&args[0], env)?, expr.span);
                 }
                 if crate::spatial::result(name).is_some() {
                     let reads = crate::spatial::read_count(name);

@@ -19,7 +19,7 @@ use crate::{
 mod error;
 mod value;
 pub use error::{CleanupEvent, EvalError, TrapCategory, annotate_assertion, assertion_message};
-pub(crate) use error::{checked_angle, checked_scale};
+pub(crate) use error::{assertion, checked_angle, checked_scale};
 pub use value::{Value, ViewRange};
 pub(crate) use value::{make_view, view_index, view_len};
 

@@ -554,13 +554,7 @@ fn recognize(module: &str, source: &[u8], entry: &str) -> Result<(), String> {
 }
 
 fn trap_code(category: eval::TrapCategory) -> &'static str {
-    match category {
-        eval::TrapCategory::IntegerOverflow => "INTEGER_OVERFLOW",
-        eval::TrapCategory::DivisionByZero => "DIVISION_BY_ZERO",
-        eval::TrapCategory::IndexOutOfBounds => "INDEX_OUT_OF_BOUNDS",
-        eval::TrapCategory::UnitConversionInexact => "UNIT_CONVERSION_INEXACT",
-        eval::TrapCategory::AssertionFailed => "ASSERTION_FAILED",
-    }
+    category.code()
 }
 
 /// Run one engine of one example; returns a counted result or an error text.
