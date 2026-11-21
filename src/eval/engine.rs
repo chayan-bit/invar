@@ -314,6 +314,9 @@ impl Evaluator<'_> {
             }
             ExprKind::Group(_) => unreachable!("group handled before charging"),
             ExprKind::Call { name, args } => {
+                if name == "assert" {
+                    return assertion(self.expr(&args[0], env)?, expr.span);
+                }
                 if crate::spatial::result(name).is_some() {
                     let reads = crate::spatial::read_count(name);
                     let mut values = Vec::with_capacity(args.len());

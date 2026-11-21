@@ -1,0 +1,19 @@
+// #258: assert(condition, "message") traps with ASSERTION_FAILED.
+fn mean(xs: read Array<u32>) -> u32 {
+    assert(len(xs) > 0u32, "mean of an empty array");
+    var sum: u32 = 0u32;
+    for i in 0u32 .. len(xs) {
+        sum = sum + xs[i];
+    }
+    return sum / len(xs);
+}
+
+fn main() -> i32 {
+    let xs: Array<u32> = [2u32, 4u32, 9u32];
+    assert(mean(xs) == 5u32, "mean rounds down");
+    let empty: Array<u32> = [];
+    if mean(empty) == 0u32 {
+        return 0;
+    }
+    return 1;
+}
