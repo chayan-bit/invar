@@ -1252,7 +1252,7 @@
     },
     {
       "path": "examples/parallel/reduction-checked-sum.inv",
-      "intent": "A checked sum that overflows; the planner rejects the region and the run traps.",
+      "intent": "A checked sum that overflows; the planner admits it through the exact L3 carry and every engine traps at the first overflow.",
       "family": "reduction",
       "tags": [
         "parallel",
@@ -1274,8 +1274,8 @@
           "regions": [
             {
               "function": "main",
-              "status": "rejected",
-              "kind": "serial"
+              "status": "admitted",
+              "kind": "reduction"
             }
           ]
         }
@@ -1361,7 +1361,7 @@
     },
     {
       "path": "examples/sum.inv",
-      "intent": "Checked i32 sum over a read-borrowed array; the planner rejects it because checked addition is not reassociated.",
+      "intent": "Checked i32 sum over a read-borrowed array; the planner admits it through the exact L3 carry, which keeps the first trap.",
       "family": "reduction",
       "tags": [
         "bootstrap",
@@ -1383,8 +1383,8 @@
           "regions": [
             {
               "function": "sum",
-              "status": "rejected",
-              "kind": "serial"
+              "status": "admitted",
+              "kind": "reduction"
             }
           ]
         }
