@@ -147,7 +147,7 @@ fn explain(args: &[&str]) -> serde_json::Value {
     let explain: serde_json::Value = serde_json::from_slice(&output.stdout)
         .unwrap_or_else(|_| panic!("{}", String::from_utf8_lossy(&output.stderr)));
     let schema: serde_json::Value =
-        serde_json::from_str(include_str!("../../schema/explain-v5.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../schema/explain-v6.schema.json")).unwrap();
     let validator = jsonschema::validator_for(&schema).unwrap();
     let errors: Vec<String> = validator
         .iter_errors(&explain)

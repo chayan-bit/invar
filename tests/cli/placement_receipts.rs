@@ -93,7 +93,7 @@ fn sites(choices: &Value) -> Vec<Value> {
 fn valid(run: &Value, explain: &Value, receipt: &str) {
     for (validator, document) in [
         (schema("invar-diagnostics-v3.schema.json"), run),
-        (schema("explain-v5.schema.json"), explain),
+        (schema("explain-v6.schema.json"), explain),
     ] {
         let errors: Vec<_> = validator
             .iter_errors(document)

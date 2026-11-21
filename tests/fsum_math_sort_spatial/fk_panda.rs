@@ -37,7 +37,7 @@ fn fk_panda_matches_pinocchio_on_every_cpu_engine() {
         .unwrap();
     let explain: serde_json::Value = serde_json::from_slice(&explain.stdout).unwrap();
     assert_eq!(explain["numeric_contracts"], contracts(), "{explain}");
-    valid("explain-v5.schema.json", &explain);
+    valid("explain-v6.schema.json", &explain);
 }
 
 /// The receipt fields this lane adds are part of the published schemas.
@@ -98,7 +98,7 @@ fn f64_on_metal_runs_on_the_cpu_with_metal_no_f64() {
             sites.iter().all(|c| c["backend"] == "mir-serial"),
             "{explain}"
         );
-        valid("explain-v5.schema.json", &explain);
+        valid("explain-v6.schema.json", &explain);
     }
     std::fs::remove_file(path).unwrap();
 }

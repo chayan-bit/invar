@@ -1,8 +1,8 @@
 # Invar v0.2: attributes, axes and receipts
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
-Counts: statements=35 citations=37
-Size record: tokens=4512 estimator=bytes/3 limit=6000
+Counts: statements=45 citations=48
+Size record: tokens=5428 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
@@ -213,3 +213,23 @@ Note: no code is needed for widening a callee, because a declaration never reach
 #[region(n = "n4")]
 fn main() -> i32 { return 0; }
 ```
+
+## 6. Receipts
+
+[NA6.1] `invar explain` emits `invar-explain-v6` with `schema_version` 6, checked by `schema/explain-v6.schema.json`, and v6 is v5 plus the fields of this section, every v5 field keeping its name and value. `src/admission.rs::SCHEMA`
+[NA6.2] Every region record carries `c_level`, `s_level`, `n_level` and `t_level`, its function's declared or safe level on each axis, and `contract_name`, the declared contract or null. `src/axes/receipt.rs::receipt`
+[NA6.3] `bound` is null at C0 and C1, and at C2 it is the error bound the contract states, as the table below lists. `src/axes/receipt.rs::contract_bound`
+[NA6.4] `deterministic` is false only at N4, and at N3 when the predicate admits several results; both are refused today, so every receipt this engine writes is deterministic. `src/axes/receipt.rs::receipt`
+[NA6.5] `n_justification` is null at N0 and `serial-reference-bits` at N1 and N2, naming the canonical result those levels meet today (NA4.5). `src/axes/receipt.rs::N_JUSTIFICATION`
+[NA6.6] `s_artifact` names the tuned schedule a region used and is null at S0, and a `c5` object with `trusted_rule`, `reference` and `differential_digest` appears only at C5. `schema/explain-v6.schema.json`
+[NA6.7] When some function declares a level or contract, `numeric_contracts.levels` lists the levels each axis uses across the program's functions, in level order. `src/axes/receipt.rs::record_levels`
+[NA6.8] A region's `candidate_identity` also covers its levels and contract unless every level is safe and no contract is named, and `source_identity` covers the attribute bytes, so a changed level changes both identities and misses every cache keyed by them or by the source. `tests/numeric_tiers/explain_v6.rs::changing_any_axis_level_changes_the_plan_identity`
+[NA6.9] Removing the fields of this section and restoring `schema` and `schema_version` turns the v6 document of an undeclared program into its v5 document byte for byte, and the v5 schema stays in the tree. `tests/numeric_tiers/explain_v6.rs::undeclared_documents_project_to_the_committed_v5_goldens`
+[NA6.10] `admission::validate_serialized` accepts only the current schema version, so a persisted v5 record is refused with `ADMISSION_SCHEMA`, never re-read as v6. `tests/diagnostics/machine_diagnostics/fault_fixtures.rs::machine_diagnostics_admission_fault_fixtures_validate`
+
+| Contract | Level | `bound` |
+| --- | --- | --- |
+| `f32-relaxed-v2` | C2 | `abs(r - exact) <= (n - 1) * 2^-24 * sum(abs(x_i))` |
+| `tc-f16-f32-v1` | C2 | `abs(r - exact) <= 2 * K * 2^-23 * sum(abs(p_i))` |
+
+Note: `n` is the number of summands and `K` the inner extent of the contraction; the bounds restate `src/numeric_contract/fold.rs::relaxed_admits` and `invar_device::tc`.

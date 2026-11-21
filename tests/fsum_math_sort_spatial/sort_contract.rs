@@ -36,7 +36,7 @@ fn returns_seven(source: &str) {
 #[test]
 fn sort_contract_explain_schema_and_registered_reasons() {
     let v5: serde_json::Value =
-        serde_json::from_str(include_str!("../../schema/explain-v5.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../schema/explain-v6.schema.json")).unwrap();
     let device_schema: serde_json::Value = serde_json::from_str(include_str!(
         "../../schema/invar-explain-device-v5.schema.json"
     ))
@@ -53,8 +53,8 @@ fn sort_contract_explain_schema_and_registered_reasons() {
         let output = command.output().unwrap();
         assert!(output.status.success(), "{output:?}");
         let document: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-        assert_eq!(document["schema"], "invar-explain-v5");
-        assert_eq!(document["schema_version"], 5);
+        assert_eq!(document["schema"], "invar-explain-v6");
+        assert_eq!(document["schema_version"], 6);
         assert!(jsonschema::is_valid(&v5, &document), "{document}");
         let mut relabelled = document.clone();
         relabelled["schema"] = "invar-explain-v1".into();
