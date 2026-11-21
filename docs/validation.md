@@ -84,7 +84,7 @@ GNU `timeout`, which the test harness needs on Windows, comes from a per-user Po
 For the binary64 correctly rounded kernels, `nvrtc\` must hold NVRTC 12.9 or newer; by CUDA minor-version compatibility its compiled-ahead images load on any CUDA 12.x driver (#288).
 One run holds the lock at a time, and a run waits for three quiet GPU samples (at most `REMOTE_CUDA_MAX_UTIL` percent busy and `REMOTE_CUDA_MIN_FREE_MIB` free) before it starts; it exits 3 when the GPU stays busy, and never stops another tenant's work.
 `REMOTE_CUDA_SHARED=1` runs beside another tenant when memory allows; such runs check correctness only and their timings are not valid.
-Exit codes: 0 pass, 1 test failures, no test run, or a filter that matched no test, 2 build failure, 3 busy, 4 timeout, 5 ssh dropped (the run finished remotely; read the log).
+Exit codes: 0 pass, 1 test failures, no test run, or a filter that matched no test, 2 build failure, 3 busy, 4 timeout, 5 ssh dropped (the run finished remotely; read the log), 143 the Linux runner was stopped by a signal (every process of the run is stopped with it, so the lock is free).
 The full log lands in `target/remote-cuda/<run>.log`.
 The skip list in the script names Windows-only gaps and opt-in tests that need inputs the runner does not supply (`P4B_OUT`, `INVAR_COREMATH_UPSTREAM`, `INVAR_GPU_EXCLUSIVE=1`), none of them a CUDA result; `REMOTE_CUDA_NO_SKIP=1` runs them, `REMOTE_CUDA_EXTRA_SKIPS` adds skips and `REMOTE_CUDA_TESTS` replaces the target list.
 

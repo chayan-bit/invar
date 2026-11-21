@@ -20,7 +20,8 @@
 # REMOTE_CUDA_COMPILE_JOBS (1 census NVRTC child), and
 # Linux defaults TIMEOUT_MIN 240, WAIT_MIN 120, MAX_UTIL 5.
 # Exit: 0 pass, 1 test failures (or no test ran, or a filter matched none), 2 build failure, 3 GPU or runner busy, 4 timeout,
-# 5 ssh dropped mid-run (the run finished remotely; read its log for the result).
+# 5 ssh dropped mid-run (the run finished remotely; read its log for the result),
+# 143 the Linux runner was stopped by a signal (its processes are stopped too).
 set -euo pipefail
 ref=${1:?usage: scripts/remote-cuda.sh <git-ref> [test-name-filters]}
 filter=${2:-}
