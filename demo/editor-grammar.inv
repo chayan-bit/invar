@@ -17,3 +17,8 @@ fn main() -> i32 {
     async acc;
     return 0;
 }
+
+fn literals() -> u32 {
+    let mask: u32 = 0xFFu32 + 1_000u32 + 0b1010;
+    return mask;
+}

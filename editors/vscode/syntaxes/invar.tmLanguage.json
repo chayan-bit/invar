@@ -115,7 +115,8 @@
     "numbers": {
       "patterns": [
         { "name": "constant.numeric.float.invar", "match": "\\b[0-9]+\\.[0-9]+(?:f32|f64)?\\b" },
-        { "name": "constant.numeric.integer.invar", "match": "\\b[0-9]+(?:i32|u32)?\\b" }
+        { "name": "constant.numeric.integer.radix.invar", "match": "\\b0[xob][0-9A-Fa-f](?:[0-9A-Fa-f_]*[0-9A-Fa-f])?(?:i32|u32)?\\b" },
+        { "name": "constant.numeric.integer.invar", "match": "\\b[0-9](?:[0-9_]*[0-9])?(?:i32|u32)?\\b" }
       ]
     },
     "types": {
