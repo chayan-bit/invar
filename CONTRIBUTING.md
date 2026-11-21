@@ -120,7 +120,6 @@ Every pull request runs [ci.yml](.github/workflows/ci.yml) on GitHub-hosted Linu
 - **Test (CPU-model corpus 1/2, 2/2)**: the device CPU-model corpus test, run alone, each job on one half of the corpus programs (`INVAR_CORPUS_PART`).
 - **Windows (msvc 1/4 to 4/4, gnullvm build)**: the default-feature suite on `windows-latest` with MSVC in four shards, a gnullvm build of every test target, and the CORE-MATH tests on both.
   It always runs the pull-request corpus sample.
-  One test is excluded there: the `system gen ros2` tree hash for `cell-ur5e.inv` depends on the platform libm's `asin`, which differs from glibc by one ulp on Windows.
 
 Pull requests run a deterministic 1-in-8 sample of the corpus sweeps that keeps every corpus directory; pushes to main and `just test` run the whole corpus (`INVAR_FULL_CORPUS=1`).
 
