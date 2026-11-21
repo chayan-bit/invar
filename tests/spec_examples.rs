@@ -17,6 +17,10 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 
 const SPEC: &str = "docs/spec/invar-v0.1.md";
+/// The v0.2 chapter on attributes, contract axes and receipts: checked like `SPEC`, its ids
+/// start with `NA`, and its budget is the one DX-25 (#86) proposes for a non-core chapter.
+const AXES_SPEC: &str = "docs/spec/invar-v0.2-axes.md";
+const SPECS: [(&str, usize); 2] = [(SPEC, TOKEN_LIMIT), (AXES_SPEC, 6_000)];
 const INDEX: &str = "examples/index.json";
 const INDEX_SCHEMA: &str = "examples/index.schema.json";
 /// Target from the AI-02 contract. Measured with the stated estimator, see `spec_tokens`.
@@ -864,62 +868,54 @@ fn repo_contains(path: &str, name: &str) -> bool {
 
 #[test]
 fn spec_examples_every_spec_block_runs_with_its_tagged_outcome() {
-    let spec = read(SPEC);
-    let blocks = extract_blocks(&spec).unwrap();
+    let specs = SPECS.map(|(path, _)| read(path));
+    let blocks: Vec<Block> = specs
+        .iter()
+        .flat_map(|spec| extract_blocks(spec).unwrap())
+        .collect();
     let executed: Vec<&Block> = blocks.iter().filter(|b| b.outcome != "none").collect();
     let failures: Vec<String> = executed.iter().filter_map(|b| run_block(b).err()).collect();
     assert!(failures.is_empty(), "{}", failures.join("\n"));
     for block in blocks.iter().filter(|b| b.outcome == "none") {
         run_block(block).unwrap();
     }
-    assert!(
-        executed.len() >= 40,
-        "only {} executable blocks",
-        executed.len()
-    );
-    eprintln!(
-        "spec blocks: {} total, {} executed",
-        blocks.len(),
-        executed.len()
-    );
+    let (total, run) = (blocks.len(), executed.len());
+    assert!(run >= 40, "only {run} executable blocks");
+    eprintln!("spec blocks: {total} total, {run} executed");
 }
 
 #[test]
 fn spec_examples_normative_statements_cite_existing_sources() {
-    let stats = check_spec_text(&read(SPEC), &repo_has, &repo_contains)
-        .unwrap_or_else(|e| panic!("{}", e.join("\n")));
-    assert!(stats.statements >= 100, "{stats:?}");
-    assert!(stats.citations >= stats.statements, "{stats:?}");
-    let spec = read(SPEC);
-    let counts = spec
-        .lines()
-        .find(|l| l.starts_with("Counts:"))
-        .expect("Counts: record");
-    assert!(
-        counts.contains(&format!("statements={}", stats.statements)),
-        "{counts} vs {stats:?}"
-    );
-    assert!(
-        counts.contains(&format!("citations={}", stats.citations)),
-        "{counts} vs {stats:?}"
-    );
-    eprintln!(
-        "spec statements: {}, citations: {}",
-        stats.statements, stats.citations
-    );
+    for (path, _) in SPECS {
+        let spec = read(path);
+        let stats = check_spec_text(&spec, &repo_has, &repo_contains)
+            .unwrap_or_else(|e| panic!("{path}: {}", e.join("\n")));
+        let (n, c, na) = (stats.statements, stats.citations, path == AXES_SPEC);
+        assert!(n >= if na { 1 } else { 100 } && c >= n, "{stats:?}");
+        let counts = format!("Counts: statements={n} citations={c}");
+        assert!(spec.lines().any(|l| l == counts), "{path}: {counts}");
+        let foreign = |l: &str| l.starts_with("[N") && l.starts_with("[NA") != na;
+        assert!(
+            !spec.lines().any(foreign),
+            "{path}: only the axes chapter uses NA ids"
+        );
+        eprintln!("{path}: {stats:?}");
+    }
 }
 
 #[test]
 fn spec_examples_token_count_is_below_the_target_and_recorded() {
-    let spec = read(SPEC);
-    let measured = spec_tokens(&spec);
-    assert!(measured < TOKEN_LIMIT, "{measured} tokens");
-    assert_eq!(
-        recorded_tokens(&spec),
-        Some(measured),
-        "update the Size record line to tokens={measured}"
-    );
-    eprintln!("spec tokens (bytes/3 estimator): {measured} of {TOKEN_LIMIT}");
+    for (path, limit) in SPECS {
+        let spec = read(path);
+        let measured = spec_tokens(&spec);
+        assert!(measured < limit, "{path}: {measured} tokens");
+        assert_eq!(
+            recorded_tokens(&spec),
+            Some(measured),
+            "{path}: update the Size record line to tokens={measured}"
+        );
+        eprintln!("{path} tokens (bytes/3 estimator): {measured} of {limit}");
+    }
 }
 
 #[test]
