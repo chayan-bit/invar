@@ -2,7 +2,7 @@
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
 Counts: statements=309 citations=336
-Size record: tokens=29006 estimator=bytes/3 limit=30000
+Size record: tokens=29013 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1340,4 +1340,4 @@ fn main() -> i32 {
 }
 ```
 [NB.7.6] `for x in xs { b }` over a named array, `View` or `MutView` is `for i in 0u32 .. len(xs) { let x = xs[i]; b }` with a hidden `i`, desugared before checking and family recognition, except that a body assigning `x` names `i` as `x`, reserving it alike, and makes every `x` the place `xs[i]`, so loans, traps and fuel are the counted loop's (#255). `src/front/parser/loops.rs` `tests/language/for_each.rs`
-[NB.7.7] `for i in lo .. hi step k` binds `lo`, `hi` and `k` once, in order, to hidden `u32` locals and runs the counted loop over `0 .. ceil((hi - lo) / k)` trips, none when `hi <= lo`, with `i = lo + j * k`, the view stride rule of N5.5.2; a literal zero `k` is `PARSE_ZERO_STEP`, and a zero `k` traps `DIVISION_BY_ZERO` over the header only on a non-empty range (#256). `tests/language/stepped_ranges.rs`
+[NB.7.7] `for i in lo .. hi step k` binds `lo`, `hi` and `k` once, in order, to hidden `u32` locals and runs the counted loop over `0 .. ceil((hi - lo) / k)` trips, none when `hi <= lo`, with `i = lo + j * k`, the view stride rule of N5.5.2; a literal zero `k`, in any parentheses, is `PARSE_ZERO_STEP`, and a zero `k` traps `DIVISION_BY_ZERO` over the header only on a non-empty range (#256). `tests/language/stepped_ranges.rs`

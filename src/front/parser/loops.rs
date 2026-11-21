@@ -375,7 +375,11 @@ impl Parser {
         upper: Expr,
     ) -> Result<Stmt, FrontError> {
         let step = self.expression()?;
-        if let ExprKind::Integer(value) = &step.kind
+        let mut literal = &step;
+        while let ExprKind::Group(inner) = &literal.kind {
+            literal = inner;
+        }
+        if let ExprKind::Integer(value) = &literal.kind
             && ["u32", "i32", ""]
                 .iter()
                 .find_map(|suffix| value.strip_suffix(suffix))

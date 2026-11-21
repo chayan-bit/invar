@@ -89,7 +89,7 @@ fn a_stepped_loop_is_its_counted_loop() {
 
 #[test]
 fn a_zero_step_is_refused_and_a_runtime_zero_traps_over_the_header() {
-    for step in ["0u32", "0", "0x0u32", "0_000u32"] {
+    for step in ["0u32", "0", "0x0u32", "0_000u32", "(0u32)", "((0))"] {
         let source = program(&format!(
             "for i in 0u32 .. 3u32 step {step} {{ sum += i; }}"
         ));
