@@ -42,6 +42,12 @@ Optional tools:
 - [just](https://github.com/casey/just) runs the recipes in the [justfile](justfile).
 - [cargo-nextest](https://nexte.st/) 0.9.146 runs the suite in parallel with the profiles in [nextest.toml](.config/nextest.toml).
 
+With [Nix](https://nixos.org/) and flakes enabled, `nix develop` is an alternative to installing these yourself.
+It opens a shell with the toolchain from `rust-toolchain.toml`, cargo-nextest 0.9.146, just and the platform C and C++ compilers, on x86_64 and aarch64 Linux and on Apple Silicon.
+It is optional; the rustup route above works on its own.
+Nix asks once whether to trust the flake's `ros.cachix.org` cache setting; that cache only speeds up the ROS 2 shell, so declining is fine.
+The Python-binding and ROS 2 shells stay available as `nix develop .#python` and `nix develop .#ros2` (Linux).
+
 On Windows (MSVC or `x86_64-pc-windows-gnullvm`):
 
 - MSVC builds compile the vendored CORE-MATH sources with clang-cl: install the Visual Studio component "C++ Clang Compiler for Windows", or set `CC=clang-cl`.
