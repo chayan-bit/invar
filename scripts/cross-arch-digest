@@ -5,8 +5,11 @@
 # Usage, from the repository root: scripts/cross-arch-digest TARGET/INVAR_BINARY
 set -eu
 bin=${1:?usage: scripts/cross-arch-digest PATH_TO_INVAR_BINARY}
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
 jq -r '.examples[] | select(.expect.command == "run") | .path' examples/index.json | LC_ALL=C sort |
 while IFS= read -r path; do
-    out=$(timeout 120 "$bin" run "$path" --engine reference --format json 2>/dev/null) && code=0 || code=$?
-    printf '%s %s %s\n' "$code" "$(printf '%s' "$out" | sha256sum | cut -d' ' -f1)" "$path"
+    # Hash the raw bytes from a file: command substitution would strip trailing newlines.
+    timeout 120 "$bin" run "$path" --engine reference --format json >"$tmp" 2>/dev/null && code=0 || code=$?
+    printf '%s %s %s\n' "$code" "$(sha256sum <"$tmp" | cut -d' ' -f1)" "$path"
 done
