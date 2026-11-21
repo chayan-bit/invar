@@ -7,6 +7,7 @@
 //! attribute is one table entry.
 
 use super::*;
+use crate::axes::{self, Axes};
 use crate::numeric_contract::FoldTier;
 
 /// Where an attribute may appear.
@@ -39,25 +40,61 @@ pub(super) struct Key {
 pub(super) struct Attribute {
     pub(super) name: &'static str,
     positions: &'static [Position],
+    /// The code of an unknown or repeated key.
+    unknown_key: &'static str,
     pub(super) keys: &'static [Key],
 }
 
 /// Every attribute Invar accepts.
-pub(super) const REGISTRY: &[Attribute] = &[Attribute {
-    name: "numeric",
-    positions: &[Position::Function],
-    keys: &[Key {
-        name: "fold",
-        what: "fold tier",
-        unknown: "numeric fold tier",
-        code: "NUMERIC_POLICY",
-        values: &["strict", "tree", "exact", "relaxed"],
-    }],
-}];
+pub(super) const REGISTRY: &[Attribute] = &[
+    Attribute {
+        name: "numeric",
+        positions: &[Position::Function],
+        unknown_key: "UNSUPPORTED_FEATURE",
+        keys: &[Key {
+            name: "fold",
+            what: "fold tier",
+            unknown: "numeric fold tier",
+            code: "NUMERIC_POLICY",
+            values: &["strict", "tree", "exact", "relaxed"],
+        }],
+    },
+    Attribute {
+        name: "region",
+        positions: &[Position::Function],
+        unknown_key: "CONTRACT_UNKNOWN",
+        keys: &[
+            level_key("c", "C level", axes::C_AXIS.levels),
+            Key {
+                name: "contract",
+                what: "contract name",
+                unknown: "contract",
+                code: "CONTRACT_UNKNOWN",
+                values: &axes::CONTRACT_NAMES,
+            },
+            level_key("s", "S level", axes::S_AXIS.levels),
+            level_key("n", "N level", axes::N_AXIS.levels),
+            level_key("t", "T level", axes::T_AXIS.levels),
+        ],
+    },
+];
+
+/// A `#[region]` axis key: its values are the axis's levels.
+const fn level_key(name: &'static str, what: &'static str, values: &'static [&'static str]) -> Key {
+    Key {
+        name,
+        what,
+        unknown: what,
+        code: "CONTRACT_UNKNOWN",
+        values,
+    }
+}
 
 /// One parsed attribute whose keys and values the registry accepted, in source order.
 pub(super) struct Parsed {
     pub(super) entry: &'static Attribute,
+    /// From the `#` to the closing `]`.
+    pub(super) span: Span,
     pub(super) values: Vec<(&'static str, String)>,
 }
 
@@ -105,23 +142,55 @@ impl Parser {
             && matches!(self.tokens.get(self.pos + 1).map(|token| &token.kind), Some(TokenKind::Name(name)) if name == "c")
     }
 
-    /// An optional attribute, which must precede `fn` or `pub fn`, then an
-    /// optional `pub`. Without `#[numeric]` a function is Strict. An unknown
-    /// tier is a compile error, never a silent strict fold.
-    pub(super) fn item_prefix(&mut self) -> Result<(FoldTier, bool), FrontError> {
-        let mut fold = FoldTier::Strict;
-        if self.take_symbol("#").is_some() {
-            let parsed = self.attribute()?;
-            let public_fn = self.is_keyword("pub")
-                && matches!(&self.tokens[self.pos + 1].kind, TokenKind::Keyword("fn"));
-            let position = (self.is_keyword("fn") || public_fn).then_some(Position::Function);
-            self.check_position(parsed.entry, position)?;
+    /// Optional attributes, each at most once, which must precede `fn` or
+    /// `pub fn`, then an optional `pub`. Without `#[numeric]` or a fold
+    /// contract a function is Strict. An unknown tier is a compile error, never
+    /// a silent strict fold, and a declared level the engine cannot honour is
+    /// refused, never run at another level.
+    pub(super) fn item_prefix(&mut self) -> Result<(FoldTier, Axes, bool), FrontError> {
+        let (mut fold, mut axes, mut seen) = (FoldTier::Strict, Axes::default(), Vec::new());
+        while let Some(start) = self.take_symbol("#") {
+            let parsed = self.attribute(start)?;
+            if seen
+                .iter()
+                .any(|(entry, _): &(&Attribute, Span)| entry.name == parsed.entry.name)
+            {
+                return Err(FrontError::source(
+                    "UNSUPPORTED_FEATURE",
+                    format!("#[{}] may appear only once on an item", parsed.entry.name),
+                    parsed.span,
+                ));
+            }
             if let Some(tier) = parsed.value("fold") {
                 // The registry admitted the spelling, so this always finds the tier.
                 fold = FoldTier::from_name(tier).unwrap_or(FoldTier::Strict);
             }
+            if parsed.entry.name == "region" {
+                axes = Axes::resolve(&parsed.values)
+                    .map_err(|(code, message)| FrontError::source(code, message, parsed.span))?;
+            }
+            seen.push((parsed.entry, parsed.span));
         }
-        Ok((fold, self.take_keyword("pub").is_some()))
+        let public_fn = self.is_keyword("pub")
+            && matches!(&self.tokens[self.pos + 1].kind, TokenKind::Keyword("fn"));
+        let position = (self.is_keyword("fn") || public_fn).then_some(Position::Function);
+        for (entry, _) in &seen {
+            self.check_position(entry, position)?;
+        }
+        if let [(_, first), (_, second)] = seen.as_slice()
+            && axes.declares_c()
+        {
+            return Err(FrontError::source(
+                "CONTRACT_MISMATCH",
+                "a function names its numeric contract once: #[numeric(fold = ...)] or #[region(c = ..., contract = ...)]",
+                Span {
+                    start: first.start,
+                    end: second.end,
+                },
+            ));
+        }
+        fold = axes.fold().unwrap_or(fold);
+        Ok((fold, axes, self.take_keyword("pub").is_some()))
     }
 
     /// Refuse an attribute whose following item is not one of its positions.
@@ -146,7 +215,7 @@ impl Parser {
     }
 
     /// The rest of `#[name(key = "value", ...)]` after the `#`, checked against `REGISTRY`.
-    fn attribute(&mut self) -> Result<Parsed, FrontError> {
+    fn attribute(&mut self, start: Span) -> Result<Parsed, FrontError> {
         self.expect_symbol("[")?;
         let (name, span) = self.expect_name()?;
         let entry = REGISTRY
@@ -161,12 +230,10 @@ impl Parser {
                 .keys
                 .iter()
                 .find(|key| key.name == name)
-                .ok_or_else(|| {
-                    FrontError::source("UNSUPPORTED_FEATURE", unknown_key(entry), span)
-                })?;
+                .ok_or_else(|| FrontError::source(entry.unknown_key, unknown_key(entry), span))?;
             if values.iter().any(|(seen, _)| *seen == key.name) {
                 return Err(FrontError::source(
-                    "UNSUPPORTED_FEATURE",
+                    entry.unknown_key,
                     format!("#[{}] takes the key {} at most once", entry.name, key.name),
                     span,
                 ));
@@ -178,8 +245,16 @@ impl Parser {
             }
         }
         self.expect_symbol(")")?;
-        self.expect_symbol("]")?;
-        Ok(Parsed { entry, values })
+        let end = self.expect_symbol("]")?.end;
+        let span = Span {
+            start: start.start,
+            end,
+        };
+        Ok(Parsed {
+            entry,
+            span,
+            values,
+        })
     }
 
     fn attribute_value(&mut self, key: &Key) -> Result<String, FrontError> {
@@ -243,7 +318,7 @@ mod tests {
             (
                 "#[inline]",
                 "UNSUPPORTED_FEATURE",
-                "the only attribute is #[numeric(fold = \"...\")]",
+                "the attributes are #[numeric(...)] and #[region(...)]",
                 "inline",
             ),
             (

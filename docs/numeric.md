@@ -166,7 +166,8 @@ A v2 policy is `{ version: 2, kind: "<base>-<fold>" }`.
 
 - A function declares its tier with one attribute before `fn` (or `pub fn`): `#[numeric(fold = "strict" | "tree" | "exact" | "relaxed")]`. Without it, a function is strict.
   - An unknown tier string, including `fast`, is a `NUMERIC_POLICY` compile error.
-  - Any other attribute or key, or the attribute on a record or variant, is `UNSUPPORTED_FEATURE`.
+  - Any other attribute name or `#[numeric]` key, or the attribute on a record or variant, is `UNSUPPORTED_FEATURE`.
+  - `#[region(contract = "f32-tree-v2" | "f32-exact-v2" | "f32-relaxed-v2")]` selects the same tier ([axes chapter](spec/invar-v0.2-axes.md) section 4); a function names its tier once.
 - The tier belongs to that function alone.
   - A callee keeps its own tier, whatever its caller declares.
   - A closure lifted from the function is strict.

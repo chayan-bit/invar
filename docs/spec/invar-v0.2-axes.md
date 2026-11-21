@@ -1,8 +1,8 @@
 # Invar v0.2: attributes, axes and receipts
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
-Counts: statements=18 citations=19
-Size record: tokens=2621 estimator=bytes/3 limit=6000
+Counts: statements=32 citations=33
+Size record: tokens=3972 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
@@ -67,6 +67,8 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 [NA3.8] The C axis has no C3 or C4, and older prose that names them means S1 or S2 and N4. `src/axes.rs::level_names_round_trip_and_c3_c4_are_not_levels`
 [NA3.9] Each numeric contract on `main` maps to exactly one level by the table below, and a test checks that the mapping is total and that the table matches the code. `src/axes.rs::every_contract_maps_to_exactly_one_level_as_the_spec_says`
 [NA3.10] An intrinsic that names its contract, such as `sum_tree` or `tc_mul_add`, applies it at that call, and a fold tier applies it to that function's folds; neither raises the level of the rest of the region. `src/axes.rs::CONTRACTS`
+[NA3.11] A C0 checked fold may be evaluated by any associative summary that reproduces its value and its first trap position, and `cpu-parallel` evaluates a counted `s = s + a[i]` over `i32` or `u32` by the exact (total, minimum prefix, maximum prefix) carry in 64 bits, rerunning only the chunk that holds the first overflow. `src/checked_fold.rs::Carry`
+[NA3.12] The value, trap category, trap span, fuel prefix and cleanup of such a fold equal the serial fold at every worker count, and `explain` names the plan `checked-sum-carry-if-guard` and the rule `pnf-l3-checked-sum-carry-v1`. `tests/schedule_cpu/checked_fold_carry.rs`
 
 | Level | May vary | Must not vary | Evidence | Minimum receipt |
 | --- | --- | --- | --- | --- |
@@ -86,7 +88,7 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 | `tc-f16-f32-v1` | `tc_mul_add` | c2 |
 
 Note: the C2 bounds are the Relaxed bound of `docs/numeric.md` and the amended D5 bound of `tc-f16-f32-v1`.
-Note: C5 has no implementation or fixture until #201; section 4 says how a declaration of it is refused.
+Note: C5 has no implementation until #201; its fixture is the refused declaration of section 4.
 
 Note: the C0 fixture: a strict fold is the source-order left fold, so the 1.0 is absorbed and the result is 0.5.
 
@@ -134,4 +136,59 @@ fn main() -> i32 {
     if relaxed_sum(xs) == 16777218.0 { return 2; }
     return 0;
 }
+```
+
+Note: the C0 checked-fold fixture: the first prefix leaves the `i32` range at the second element, so the run traps there although the full sum fits.
+
+```invar outcome=trap:INTEGER_OVERFLOW
+fn main() -> i32 {
+    let a: Array<i32> = [2147483647, 1, -5];
+    var s: i32 = 0;
+    for i in 0u32..len(a) { s = s + a[i]; }
+    return s;
+}
+```
+
+## 4. Region declarations
+
+[NA4.1] `#[region(c = "...", contract = "...", s = "...", n = "...", t = "...")]` before a function declares that function's level on the C, S, N and T axes, every key is optional, and an absent key is the safe level C0, S0, N0 or T0. `src/front/items.rs::REGISTRY`
+[NA4.2] An unknown key, level or contract name, or a repeated key, is `CONTRACT_UNKNOWN`. `src/front/items.rs::level_key`
+[NA4.3] The grammar accepts every specified level, `c0` to `c5` without C3 or C4, `s0` to `s2`, `n0` to `n4` and `t0` to `t3`, and a declared level the engine does not honour is `CONTRACT_UNAVAILABLE` and never runs at another level. `src/axes.rs::resolve`
+[NA4.4] The engine honours C0, C1, C2, S0, N0, N1, N2 and T0, and refuses C5, S1, S2, N3, N4, T1, T2 and T3. `src/axes.rs::N_AXIS`
+[NA4.5] N1 and N2 are honoured because every plan Invar admits already meets their oracle, bit equality with the serial reference, so declaring them admits no plan that N0 does not. `src/axes.rs::N_AXIS`
+[NA4.6] A contract implies its C level, a declared C level must equal its contract's level, C1 and C2 must name a contract, and a mismatch is `CONTRACT_MISMATCH`. `src/axes.rs::resolve`
+[NA4.7] `f32-tree-v2`, `f32-exact-v2` and `f32-relaxed-v2` select that fold tier for the function's folds, exactly as `#[numeric(fold = "...")]` does, and the other contracts change no lowering. `src/axes.rs::fold`
+[NA4.8] A function takes each attribute at most once, and naming a C level or contract in `#[region]` beside `#[numeric]` is `CONTRACT_MISMATCH`. `src/front/items.rs::item_prefix`
+[NA4.9] The declaration belongs to that function alone: a callee keeps its own levels, and a closure lifted from the function is C0, S0, N0 and T0. `tests/numeric_tiers/region_axes.rs::a_caller_region_never_reaches_its_callee_or_closure`
+[NA4.10] A declaration at the safe levels admits the same plan as no declaration. `tests/numeric_tiers/region_axes.rs::a_declared_region_admits_the_same_plan_as_the_implicit_one`
+[NA4.11] `run`, `check` and `explain` take `--max-c c0|c1|c2` and `--max-n n0|n1|n2|n3`, a function declared above a cap is `CONTRACT_CAP`, and a cap never raises a level. `src/cli.rs::region_options`
+[NA4.12] `check PATH --region-report` prints each function's level on every axis and its contract, as a table or with `--format json` as one `regions` array. `src/cli.rs::region_options`
+
+```invar outcome=value:3
+#[region(contract = "f32-exact-v2", n = "n1")]
+fn exact_sum(xs: read Array<f32>) -> f32 {
+    var acc: f32 = 0.0;
+    for i in 0u32..len(xs) { acc = acc + xs[i]; }
+    return acc;
+}
+fn main() -> i32 {
+    let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    if exact_sum(xs) == 16777224.0 { return 3; }
+    return 0;
+}
+```
+
+```invar outcome=diag:CONTRACT_UNAVAILABLE
+#[region(c = "c5")]
+fn main() -> i32 { return 0; }
+```
+
+```invar outcome=diag:CONTRACT_UNKNOWN
+#[region(c = "c3")]
+fn main() -> i32 { return 0; }
+```
+
+```invar outcome=diag:CONTRACT_MISMATCH
+#[region(c = "c1", contract = "tc-f16-f32-v1")]
+fn main() -> i32 { return 0; }
 ```

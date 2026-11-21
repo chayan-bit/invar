@@ -25,6 +25,7 @@ fn code_registry() -> Value {
         "diagnostic-codes-tuning-v1.json",
         "diagnostic-codes-fsum-v1.json",
         "diagnostic-codes-qualification-v1.json",
+        "diagnostic-codes-contract-v1.json",
     ] {
         let extension = schema(name);
         if name == "diagnostic-codes-robot-v1.json" {

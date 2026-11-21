@@ -1,0 +1,14 @@
+#[region(contract = "f32-exact-v2", n = "n1")]
+fn exact_sum(xs: read Array<f32>) -> f32 {
+    var acc: f32 = 0.0;
+    for i in 0u32..len(xs) { acc = acc + xs[i]; }
+    return acc;
+}
+
+fn main() -> i32 {
+    let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    let r = exact_sum(xs);
+    if r == 16777224.0 { return 3; }
+    if r == 16777218.0 { return 2; }
+    return 1;
+}
