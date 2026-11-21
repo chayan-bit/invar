@@ -92,6 +92,8 @@ export LD_LIBRARY_PATH=$base/nvrtc/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 # Verified compiles persist across runs (src/nvrtc_cache.rs, LRU-capped at 4 GiB).
 export INVAR_NVRTC_CACHE_DIR=$base/nvrtc-cache
 export INVAR_GNET05_DEVICE_JOBS=$DEVICE_JOBS
+# The census sizes its NVRTC pool from the cgroup limit as if alone in it; the scope is shared.
+export INVAR_GNET05_COMPILE_JOBS=$COMPILE_JOBS
 
 # Peak CPU (cores, 5 s windows) and memory of this run's scope, and peak GPU
 # memory of this run's own processes (binaries under $base).
@@ -194,7 +196,7 @@ for f in "${filters[@]}"; do
     grep -qF -- "$f" <<<"$ran" || { say "FILTER MATCHED NO TEST: $f"; exit 1; }
 done
 if [ "$failed_lane" = 1 ] || [ "$failed" -gt 0 ] || [ "$rows" -lt "${#suites[@]}" ]; then
-    [ "$rows" -lt "${#suites[@]}" ] && say 'some targets did not run (build error?); see the log'
+    [ "$rows" -lt "${#suites[@]}" ] && say "a target ended without a result (killed, crashed or not built); see its suite line and the log"
     exit 1
 fi
 say PASS
