@@ -1,4 +1,4 @@
-//! ENG-03 step 7 (D12): placement documents (explain-v5 and
+//! ENG-03 step 7 (D12): placement documents (explain-v6 and
 //! invar-diagnostics-v3) record in `numeric_contracts` each declared fold tier
 //! a lowered fold used and the algorithm that ran, and a program without a
 //! lowered fold is unchanged.
@@ -99,8 +99,8 @@ fn only_placement_documents_carry_the_fold_receipt() {
         folding(1, "#[numeric(fold = \"relaxed\")]", "acc + xs[i]"),
     ]);
     let plain = program(&[folding(0, "", "acc + xs[i]")]);
-    let (explain_v5, run_v3) = (
-        schema("explain-v5.schema.json"),
+    let (explain_v6, run_v3) = (
+        schema("explain-v6.schema.json"),
         schema("invar-diagnostics-v3.schema.json"),
     );
     for (source, fold) in [
@@ -108,7 +108,7 @@ fn only_placement_documents_carry_the_fold_receipt() {
         (&plain, Value::Null),
     ] {
         std::fs::write(dir.join("folds.inv"), source).unwrap();
-        for (command, validator) in [("run", &run_v3), ("explain", &explain_v5)] {
+        for (command, validator) in [("run", &run_v3), ("explain", &explain_v6)] {
             let placed = [
                 "--engine",
                 "auto",

@@ -5,7 +5,7 @@ Its report is the data behind `invar explain`.
 
 ## Where to start
 
-- `analyze(source, &program)` in [../admission.rs](../admission.rs) returns a `Report` of `Region`s; `Report::to_json` writes the `invar-explain-v5` document; `validate_serialized` re-analyzes a stored record.
+- `analyze(source, &program)` in [../admission.rs](../admission.rs) returns a `Report` of `Region`s; `Report::to_json` writes the `invar-explain-v6` document; `validate_serialized` re-analyzes a stored record.
 - `RULE_REVISION` names the map rule; `Guard`, `MapShape` and `Status` describe the result; `SCHEMA` and `DEVICE_SCHEMA` name the receipt schemas.
 - [fold_hint.rs](fold_hint.rs) adds the v0.2 hint for serial binary32 folds to rejected regions.
 

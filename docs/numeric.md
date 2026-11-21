@@ -224,7 +224,7 @@ Let `S` be the sum of `|x_i|` over the finite summands, and `B = (N - 1) * 2^-24
 
 ### Receipts
 
-- Placement documents record the lowered folds in `numeric_contracts.fold` (D12): the top-level explain-v5 document and the invar-diagnostics-v3 receipt of `invar run --engine auto`. Each declared tier a lowered fold used maps to the algorithm that ran. The run receipt embedded in v5 as `execution` carries no `numeric_contracts`.
+- Placement documents record the lowered folds in `numeric_contracts.fold` (D12): the top-level explain-v6 document and the invar-diagnostics-v3 receipt of `invar run --engine auto`. Each declared tier a lowered fold used maps to the algorithm that ran. The run receipt embedded in v5 as `execution` carries no `numeric_contracts`.
   - Example: `{"exact": "exact", "relaxed": "tree"}`.
   - A Strict function's `reassoc_add` folds record as `relaxed`.
   - Relaxed records `tree` today; the schema also admits `exact`, for a later cost-based choice.

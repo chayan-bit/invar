@@ -199,8 +199,8 @@ See [src/plan.rs](../src/plan.rs).
 
 **Receipt**
 A JSON record of what actually happened or was decided: which regions were admitted, which obligations had which evidence, which backend ran.
-`invar explain` writes an `invar-explain-v5` document, and `invar run --format json` writes an `invar-diagnostics-v3` document.
-See [explain JSON](explain.md) and the [schemas](../schema/explain-v5.schema.json).
+`invar explain` writes an `invar-explain-v6` document, and `invar run --format json` writes an `invar-diagnostics-v3` document.
+See [explain JSON](explain.md) and the [schemas](../schema/explain-v6.schema.json).
 
 **Reference evaluator**
 The tree-walking interpreter over checked source that defines what a program means.

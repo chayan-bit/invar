@@ -558,7 +558,7 @@ fn auto_stays_on_the_established_path_unless_placement_is_asked_for() {
         assert_eq!(
             established["schema"],
             if explain {
-                "invar-explain-v5"
+                "invar-explain-v6"
             } else {
                 "invar-diagnostics-v3"
             },
@@ -570,7 +570,7 @@ fn auto_stays_on_the_established_path_unless_placement_is_asked_for() {
         assert_eq!(placement["auto_path"], "placement");
         assert_eq!(placement["placement"]["profile_id"], profile(&v).id());
         if explain {
-            assert_eq!(placement["schema"], "invar-explain-v5");
+            assert_eq!(placement["schema"], "invar-explain-v6");
         }
     }
     // A frozen default is not silently skipped: placement reports the refusal
@@ -616,7 +616,7 @@ fn placement_documents_record_numeric_contracts() {
         assert_eq!(document["auto_path"], "placement");
         assert_eq!(document["numeric_contracts"], expected, "{document}");
         let schema: Value = serde_json::from_str(if explain {
-            include_str!("../../schema/explain-v5.schema.json")
+            include_str!("../../schema/explain-v6.schema.json")
         } else {
             DIAGNOSTICS_V3
         })
@@ -671,10 +671,10 @@ fn real_cli_profile_trust_identity_contract_and_cpu_decision() {
         assert_eq!(status, 0, "{trusted}");
         assert_eq!(trusted["auto_path"], "placement");
         if explain {
-            assert_eq!(trusted["schema"], "invar-explain-v5");
+            assert_eq!(trusted["schema"], "invar-explain-v6");
         }
         let schema: Value = serde_json::from_str(if explain {
-            include_str!("../../schema/explain-v5.schema.json")
+            include_str!("../../schema/explain-v6.schema.json")
         } else {
             DIAGNOSTICS_V3
         })
