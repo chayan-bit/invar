@@ -2,7 +2,7 @@
 
 Status: DRAFT; section 8 onward of the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, kept in its own file.
 Counts: statements=7 citations=8
-Size record: tokens=847 estimator=bytes/3 limit=6000
+Size record: tokens=867 estimator=bytes/3 limit=6000
 ## 8. Rule levels
 
 [NA8.1] This file holds section 8 onward of `docs/spec/invar-v0.2-axes.md`, follows its section 1 conventions and has its own 6,000-token budget. `tests/spec_examples.rs::SPECS`
@@ -22,6 +22,7 @@ Size record: tokens=847 estimator=bytes/3 limit=6000
 | `ordered-affine-pair-reduction-v1` | c0 | affine pair reduction |
 | `wrapping-affine-recurrence-v1` | c0 | affine scan |
 | `pnf-l3-checked-sum-carry-v1` | c0 | checked sum carry |
+| `pnf-l7-select-records-v1` | c0 | select with companions |
 | L1 to L20 | c0 | normal-form route |
 
 Note: every rule on `main` is exact, so no source program reaches `CONTRACT_LEVEL` today; the gate guards the rules that later levels add, and its tests tag a rule above C0 to reach it.

@@ -16,7 +16,7 @@ Show
 Type "head -1 $P && rules $P" Enter
 Sleep 4s
 Type "# Every rule on main is c0; the spec table and the code are checked row for row" Enter
-Type "grep -A9 '^| Rule | Level | Plan |' ../docs/spec/invar-v0.2-regions.md" Enter
+Type "grep -A10 '^| Rule | Level | Plan |' ../docs/spec/invar-v0.2-regions.md" Enter
 Sleep 4s
 Type "clear" Enter
 Type "# A rule tagged c2 in the tests: refused at c0 and c1 with CONTRACT_LEVEL, serial bits, trap and fuel; admitted at c2" Enter

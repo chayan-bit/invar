@@ -31,12 +31,13 @@ pub(crate) struct CountedLoop<'a> {
     pub induction_name: &'a str,
 }
 
-/// The counted loop whose head is block `head`, recognized from MIR alone.
-pub(crate) fn counted_loop<'a>(
-    function: &'a Function,
+/// The head of a zero-based counted loop: the body block its branch enters,
+/// the loop span and the induction parameter.
+pub(crate) fn counted_head(
+    function: &Function,
     defs: &Defs<'_>,
     head: usize,
-) -> Option<CountedLoop<'a>> {
+) -> Option<(usize, Span, ValueId)> {
     let block = function.blocks.get(head)?;
     let (
         Some((induction, Type::U32)),
@@ -58,31 +59,63 @@ pub(crate) fn counted_loop<'a>(
         .blocks
         .iter()
         .enumerate()
-        .filter_map(|(id, candidate)| match &candidate.end {
-            Some(Terminator::Goto { target, args, .. }) if *target == head && id != *yes => {
+        .filter_map(|(id, candidate)| {
+            match &candidate.end {
+            // The back edge `goto head(i + 1)` may leave any body block.
+            Some(Terminator::Goto { target, args, .. })
+                if *target == head
+                    && id != *yes
+                    && !args.first().is_some_and(|next| {
+                        matches!(defs.get(next), Some(Operation::ForNext(id)) if id == induction)
+                    }) =>
+            {
                 Some(args.first().copied())
             }
             _ => None,
+        }
         })
         .collect::<Vec<_>>();
     if !matches!(incoming.as_slice(), [Some(lower)] if matches!(defs.get(lower), Some(Operation::U32(0))))
     {
         return None;
     }
-    let body = function.blocks.get(*yes)?;
-    if !matches!(&body.end, Some(Terminator::Goto { target, args, .. }) if *target == head
-        && matches!(args.as_slice(), [next] if matches!(defs.get(next), Some(Operation::ForNext(id)) if id == induction)))
-    {
+    Some((*yes, *span, *induction))
+}
+
+/// Whether `block` closes one iteration: `goto head(i + 1)`.
+pub(crate) fn steps_back(
+    block: &BasicBlock,
+    defs: &Defs<'_>,
+    head: usize,
+    induction: ValueId,
+) -> bool {
+    matches!(&block.end, Some(Terminator::Goto { target, args, .. }) if *target == head
+        && matches!(args.as_slice(), [next] if matches!(defs.get(next), Some(Operation::ForNext(id)) if *id == induction)))
+}
+
+/// The name bound to the induction parameter in `block`.
+pub(crate) fn induction_name(block: &BasicBlock, induction: ValueId) -> Option<&str> {
+    block.instructions.iter().find_map(|i| match &i.kind {
+        Operation::Bind { name, value } if *value == induction => Some(name.as_str()),
+        _ => None,
+    })
+}
+
+/// The counted loop whose head is block `head`, recognized from MIR alone.
+pub(crate) fn counted_loop<'a>(
+    function: &'a Function,
+    defs: &Defs<'_>,
+    head: usize,
+) -> Option<CountedLoop<'a>> {
+    let (yes, span, induction) = counted_head(function, defs, head)?;
+    let body = function.blocks.get(yes)?;
+    if !steps_back(body, defs, head, induction) {
         return None;
     }
-    let induction_name = body.instructions.iter().find_map(|i| match &i.kind {
-        Operation::Bind { name, value } if value == induction => Some(name.as_str()),
-        _ => None,
-    })?;
     Some(CountedLoop {
         body,
-        span: *span,
-        induction_name,
+        span,
+        induction_name: induction_name(body, induction)?,
     })
 }
 
