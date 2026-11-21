@@ -1,11 +1,11 @@
-# Invar v0.2: rule levels
+# Invar v0.2: region rules
 
-Status: DRAFT; section 8 of the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, kept in its own file.
+Status: DRAFT; section 8 onward of the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, kept in its own file.
 Counts: statements=7 citations=8
-Size record: tokens=842 estimator=bytes/3 limit=6000
+Size record: tokens=849 estimator=bytes/3 limit=6000
 ## 8. Rule levels
 
-[NA8.1] This file is section 8 of `docs/spec/invar-v0.2-axes.md`, follows its section 1 conventions and has its own 6,000-token budget. `tests/spec_examples.rs::RULES_SPEC`
+[NA8.1] This file holds section 8 onward of `docs/spec/invar-v0.2-axes.md`, follows its section 1 conventions and has its own 6,000-token budget. `tests/spec_examples.rs::REGIONS_SPEC`
 [NA8.2] A C level selects the rules a region's plan may use (NA3.2), so each rule a plan names in `rule_identities` and each law of the normal-form route has exactly one lowest C level by the table below, and a test checks the table against the code row for row. `src/axes/rules.rs::RULES`
 [NA8.3] Admission refuses a candidate plan that names a rule above its region's C level, or a rule the table lacks, with the obligation `CONTRACT_LEVEL` and evidence `unknown`, and the region runs its serial plan; the serial plan itself is never refused. `src/axes/rules.rs::gate`
 [NA8.4] The normal-form route runs a whole program, so it applies no law above the lowest C level any function declares, and otherwise falls back with reason `contract-level`. `src/axes/rules.rs::laws_admitted`
