@@ -19,7 +19,7 @@ fn returns_seven(source: &str) {
     assert_eq!(observation.result, Ok(eval::Value::I32(7)), "{source}");
     let program = invar::mir::lower(&checked).unwrap();
     let mut actual = vec![invar::mir_eval::observe(&program, 100_000)];
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         actual.push(
             invar::schedule::run_source(source.as_bytes(), &program, 100_000, workers)
                 .unwrap()
@@ -259,7 +259,7 @@ fn sort_contract_mismatch_and_invalid_offsets_trap() {
         assert_eq!(mir.result, reference.result);
         assert_eq!(mir.steps_used, reference.steps_used);
         assert_eq!(mir.cleanup_trace, reference.cleanup_trace);
-        for workers in [1, 2, 4] {
+        for workers in [1, 2, 4, 16, 64] {
             let actual = invar::schedule::run_source(source.as_bytes(), &program, 100_000, workers)
                 .unwrap()
                 .observation;
@@ -443,7 +443,7 @@ fn sort_contract_cpu_parallel_reaches_workers_and_preserves_observation() {
     let checked = checked(source);
     let program = invar::mir::lower(&checked).unwrap();
     let reference = eval::observe(&checked, 100_000);
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         let run =
             invar::schedule::run_source(source.as_bytes(), &program, 100_000, workers).unwrap();
         assert_eq!(run.observation.result, reference.result);

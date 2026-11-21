@@ -80,6 +80,11 @@ fn corpus_positives(variant: usize) -> Vec<(String, Vec<schedule::PlanKind>)> {
     let reduction = format!(
         "var {s}: u32 = {c}u32; for {i} in 0u32 .. len(xs) {{ {s} = {reduction_op}; }} if {s} == pad {{ return 1; }} return 0;"
     );
+    // #204: a checked sum runs through the exact L3 carry; filled inputs overflow.
+    let checked_op = [format!("{s} + xs[{i}]"), format!("xs[{i}] + {s}")][variant % 2].clone();
+    let checked = format!(
+        "var {s}: u32 = {c}u32; for {i} in 0u32 .. len(xs) {{ {s} = {checked_op}; }} if {s} == pad {{ return 1; }} return 0;"
+    );
     let update = [
         format!("{s} = wrapping_add(wrapping_mul({c}u32, {s}), xs[{i}]);"),
         format!("{s} = wrapping_add(xs[{i}], wrapping_mul({s}, {c}u32));"),
@@ -102,6 +107,7 @@ fn corpus_positives(variant: usize) -> Vec<(String, Vec<schedule::PlanKind>)> {
         (fused, vec![FusedMap, FusedMap, Scan]),
         (reduction, vec![Reduction]),
         (scan, vec![Scan, Scan]),
+        (checked, vec![Reduction]),
     ]
 }
 
@@ -124,7 +130,7 @@ fn corpus_negatives() -> Vec<(String, &'static str, &'static str)> {
             "STATE_DEPENDENCE",
         ),
         (
-            "var s: u32 = 3u32; for i in 0u32 .. len(xs) { s = s + xs[i]; } return 0;".into(),
+            "var s: u32 = 3u32; for i in 0u32 .. len(xs) { s = s * xs[i]; } return 0;".into(),
             "",
             "NUMERIC_POLICY",
         ),
@@ -170,7 +176,7 @@ fn assert_corpus_case(source: &str, expected: &[schedule::PlanKind], reason: Opt
 /// family; `INVAR_FULL_CORPUS=1` runs every variant.
 #[test]
 fn cpu_scheduler_fallback_recognition_corpus() {
-    const FAMILIES: [&str; 4] = ["map", "fused", "reduction", "scan"];
+    const FAMILIES: [&str; 5] = ["map", "fused", "reduction", "scan", "checked"];
     let mut cases = Vec::new();
     for len in [0usize, 1, 63, 64, 65, 257] {
         for (index, input) in [Input::Literal, Input::Filled, Input::Parameter]
@@ -192,7 +198,7 @@ fn cpu_scheduler_fallback_recognition_corpus() {
             }
         }
     }
-    assert_eq!(cases.len(), 6 * 3 * (2 * 4 + 6));
+    assert_eq!(cases.len(), 6 * 3 * (2 * 5 + 6));
     let kept = corpus_sample::paths(
         cases
             .iter()

@@ -74,8 +74,12 @@
             "INTEGER_OVERFLOW",
             "DIVISION_BY_ZERO",
             "INDEX_OUT_OF_BOUNDS",
-            "UNIT_CONVERSION_INEXACT"
+            "UNIT_CONVERSION_INEXACT",
+            "ASSERTION_FAILED"
           ]
+        },
+        "message": {
+          "type": "string"
         },
         "span": {
           "type": "object",

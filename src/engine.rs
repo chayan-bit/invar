@@ -429,6 +429,7 @@ pub fn run_native_with(
         message,
     })?;
     annotate_native_document(&mut document, path, source);
+    crate::eval::annotate_assertion(&mut document, source);
     document["schema"] = serde_json::json!(crate::diagnostics::SCHEMA);
     Ok((status, document))
 }

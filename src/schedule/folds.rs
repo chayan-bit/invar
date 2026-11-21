@@ -181,3 +181,134 @@ pub(super) fn scan_step(
         joined,
     }))
 }
+
+/// #204: a checked `i32`/`u32` sum on CPU workers. Each chunk computes its
+/// carry; the ordered combine finds the first chunk whose prefix leaves the
+/// range, and only that chunk reruns serially to find the trap index. The
+/// result is published as a completed region, so MIR re-derives the fuel,
+/// counts and trap site before anything is written.
+pub(super) fn checked_fold_step(
+    fold: &crate::checked_fold::Fold,
+    live: &LiveLoop<'_>,
+    workers: usize,
+    hooks: &Hooks,
+) -> Result<Option<Step>, Error> {
+    use crate::{checked_fold::Int, mir_eval::region::Scalar};
+    let len = live.iterations;
+    // The 64-bit carry is exact for at most 2^28 elements of 2^32 magnitude.
+    if len == 0
+        || len > crate::array_limits::MAX_LIVE_ELEMENTS
+        || live.lengths.get(&fold.input).is_none_or(|n| *n < len)
+    {
+        return Ok(None);
+    }
+    let folded = match (fold.ty, live.scalar(&fold.state)) {
+        (Int::I32, Some(Scalar::I32(seed))) => match live.array_i32(&fold.input) {
+            Some(values) => carry_fold(fold, seed.into(), &values[..len], workers, hooks)?,
+            None => return Ok(None),
+        },
+        (Int::U32, Some(Scalar::U32(seed))) => match live.array(&fold.input) {
+            Some(values) => carry_fold(fold, seed.into(), &values[..len], workers, hooks)?,
+            None => return Ok(None),
+        },
+        _ => return Ok(None),
+    };
+    let Folded {
+        seed,
+        after,
+        trap,
+        chunks,
+        joined,
+    } = folded;
+    let scalar = |value: i64| match fold.ty {
+        Int::I32 => i32::try_from(value).ok().map(Scalar::I32),
+        Int::U32 => u32::try_from(value).ok().map(Scalar::U32),
+    };
+    let taken = trap.map_or(len, |k| k + 1) as u64;
+    // Out of range only when the injected mutation missed a trap: report an
+    // unsound candidate instead of wrapping.
+    let (Some(before), Some(after)) = (scalar(seed), scalar(after)) else {
+        return Err(Error::Candidate);
+    };
+    let region = crate::mir_eval::region::CompletedRegion {
+        function: live.function.clone(),
+        span: fold.source_span,
+        branches: vec![crate::mir_eval::region::Branch {
+            span: fold.source_span,
+            taken,
+            skipped: u64::from(trap.is_none()),
+        }],
+        writes: Vec::new(),
+        scalars: vec![crate::mir_eval::region::ScalarState {
+            name: fold.state.clone(),
+            before,
+            after,
+        }],
+        cleanup: Vec::new(),
+        fuel: fold.fuel(taken, trap.is_some()).ok_or(Error::Candidate)?,
+        trap: trap.map(|_| crate::mir_eval::region::FirstTrap {
+            category: crate::eval::TrapCategory::IntegerOverflow,
+            span: fold.operator,
+        }),
+    };
+    Ok(Some(Step {
+        plan: LoopOverride::completed(region),
+        kind: PlanKind::Reduction,
+        chunks,
+        joined,
+    }))
+}
+
+/// A carried fold: the seed, the accumulator after the last completed
+/// element, and the index of the trapping element, if any.
+struct Folded {
+    seed: i64,
+    after: i64,
+    trap: Option<usize>,
+    chunks: Vec<std::ops::Range<usize>>,
+    joined: usize,
+}
+
+fn carry_fold<T: Copy + Into<i64> + Sync>(
+    fold: &crate::checked_fold::Fold,
+    seed: i64,
+    values: &[T],
+    workers: usize,
+    hooks: &Hooks,
+) -> Result<Folded, Error> {
+    use crate::checked_fold::{Carry, first_trap};
+    let terms = |range: std::ops::Range<usize>| values[range].iter().map(|x| (*x).into());
+    let (carries, chunks, joined) = parallel_chunks_with_limit(
+        values.len(),
+        workers,
+        hooks,
+        crate::array_limits::MAX_LIVE_ELEMENTS,
+        |range| Ok(Carry::of(terms(range))),
+    )?;
+    let mut prefix = Carry::IDENTITY;
+    for (carry, range) in carries.iter().zip(&chunks) {
+        let mut next = prefix.then(*carry);
+        if hooks.fault == Fault::LoseMinPrefix {
+            next.low = prefix.low;
+        }
+        if next.leaves(seed, fold.ty) {
+            let (k, before) = first_trap(seed + prefix.total, terms(range.clone()), fold.ty)
+                .ok_or(Error::Candidate)?;
+            return Ok(Folded {
+                seed,
+                after: before,
+                trap: Some(range.start + k),
+                chunks,
+                joined,
+            });
+        }
+        prefix = next;
+    }
+    Ok(Folded {
+        seed,
+        after: seed + prefix.total,
+        trap: None,
+        chunks,
+        joined,
+    })
+}

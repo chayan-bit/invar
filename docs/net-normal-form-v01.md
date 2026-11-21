@@ -75,7 +75,7 @@ A `Ring` is `Wrapping32`, `Checked64(ty)` (checked arithmetic regrouped in `Z/2^
 | --- | --- | --- |
 | L1 map | iterations, owned arrays | `StrideNonZero(k)` for a store index `i * k + r` with an invariant local stride |
 | L2 sealed fold | `wrapping_add`, `wrapping_mul` folds | none |
-| L3 trap-lifted fold | checked sums and products | none (first trap located by per-lane replay) |
+| L3 trap-lifted fold | checked sums and products | none (the reference executor replays each lane; `cpu-parallel` finds the first trap of a checked sum from the 64-bit `LiftedSum` carry and reruns only that chunk, #204) |
 | L4 affine | `s = a s + b`, resets | residues: `ReducedSeed(s)` (`0 <= s < P`), `NonNegativeCoefficients(s)` |
 | L5 matrix | jointly linear groups | residues: both guards for every member |
 | L6 tropical | `max(s + a, b)` shapes (Kadane) | none |

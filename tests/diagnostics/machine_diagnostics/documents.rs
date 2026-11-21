@@ -256,6 +256,11 @@ fn machine_diagnostics_corpus_has_no_invariant_codes() {
             too_many_functions.as_bytes(),
             vec!["explain", "--format", "json"],
         ),
+        (
+            "contract-cap",
+            include_bytes!("../../fixtures/contract/relaxed.inv").as_slice(),
+            vec!["check", "--format", "json", "--max-c", "c1"],
+        ),
     ] {
         let path = fixture(name, source);
         let mut command = vec![args[0], path.to_str().unwrap()];

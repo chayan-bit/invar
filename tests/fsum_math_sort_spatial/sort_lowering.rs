@@ -22,7 +22,7 @@ fn expected(input: &[u32], kind: KeyKind) -> Vec<u32> {
 }
 #[test]
 fn radix_differential_raw_bits_stability_workers_and_boundaries() {
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         let mut keys = vec![7u32; 137];
         let ids: Vec<u32> = (0..137).collect();
         let mut payload = ids.clone();
@@ -57,7 +57,7 @@ fn radix_differential_raw_bits_stability_workers_and_boundaries() {
                     })
                     .collect();
                 let order = expected(&input, kind);
-                for workers in [1, 2, 4] {
+                for workers in [1, 2, 4, 16, 64] {
                     assert_eq!(argsort_words(&input, kind, workers).unwrap(), order);
                     let mut keys = input.clone();
                     let mut payload: Vec<u32> = (0..length as u32).collect();
@@ -84,7 +84,7 @@ fn radix_differential_raw_bits_stability_workers_and_boundaries() {
 }
 #[test]
 fn radix_offsets_and_failure_atomicity() {
-    for workers in [1, 2, 4] {
+    for workers in [1, 2, 4, 16, 64] {
         let mut keys = [9, 3, 1, 8];
         sort_words(
             &mut keys,

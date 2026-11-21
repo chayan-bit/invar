@@ -276,6 +276,17 @@ impl Interpreter<'_> {
                     let [value] = <[Value; 1]>::try_from(values)
                         .map_err(|_| tool("MIR_TYPE", "checked angle arity mismatch"))?;
                     Some(crate::eval::checked_angle(value, degrees_to_radians, span)?)
+                } else if name == "assert" {
+                    match values.as_slice() {
+                        [Value::Bool(true)] => Some(Value::Unit),
+                        [Value::Bool(false)] => {
+                            return Err(EvalError::Trap {
+                                category: crate::eval::TrapCategory::AssertionFailed,
+                                span,
+                            });
+                        }
+                        _ => return Err(tool("MIR_TYPE", "assert requires one Bool")),
+                    }
                 } else {
                     Some(self.invoke(name, values).map_err(|error| match error {
                         EvalError::Trap { category, .. } if crate::check::is_frame_helper(name) => {

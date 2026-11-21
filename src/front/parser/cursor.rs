@@ -3,8 +3,9 @@ struct Parser {
     pos: usize,
     depth: usize,
     closures: Vec<ClosureDecl>,
-    /// The hidden index binding a compound assignment places before itself (#254).
-    hoisted: Option<Stmt>,
+    /// Hidden bindings placed before the statement just parsed: a compound
+    /// assignment's index (#254) and a stepped loop's bounds and step (#256).
+    hoisted: Vec<Stmt>,
 }
 
 impl Parser {

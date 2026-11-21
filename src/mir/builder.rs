@@ -594,6 +594,14 @@ impl Builder<'_> {
                     let payload = args.first().map(|arg| self.expr(arg, false)).transpose()?;
                     return Ok(self.value(Operation::Variant { name: nominal.to_owned(), tag, payload }, ty, expr.span));
                 }
+                if name == "assert" {
+                    let condition = self.expr(&args[0], false)?;
+                    return Ok(self.value(
+                        Operation::Call { name: name.clone(), args: vec![condition] },
+                        ty,
+                        expr.span,
+                    ));
+                }
                 let function = self
                     .source
                     .program
