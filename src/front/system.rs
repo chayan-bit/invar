@@ -693,3 +693,24 @@ impl Parser {
         Ok(SystemItem { module: module.map(str::to_owned), kind, span: Span { start, end: self.tokens[self.pos - 1].span.end } })
     }
 }
+
+pub fn contains_system_declaration(bytes: &[u8]) -> bool {
+    std::str::from_utf8(bytes)
+        .ok()
+        .and_then(|source| lex(source).ok())
+        .is_some_and(|tokens| {
+            tokens.iter().enumerate().any(|(index, token)| {
+                if matches!(token.kind, TokenKind::Keyword("extern"))
+                    && matches!(tokens.get(index + 1).map(|next| &next.kind), Some(TokenKind::Name(name)) if name == "c")
+                {
+                    return false;
+                }
+                matches!(
+                    token.kind,
+                    TokenKind::Keyword(
+                        "component" | "extern" | "connect" | "flow" | "product" | "system"
+                    )
+                ) || matches!(&token.kind, TokenKind::Name(name) if matches!(name.as_str(), "robot" | "cell"))
+            })
+        })
+}

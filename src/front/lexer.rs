@@ -16,6 +16,19 @@ struct Token {
     span: Span,
 }
 
+/// A `///` (outer) or `//!` (inner) line comment: trivia kept beside the
+/// tokens with the item it documents (#257). It never reaches checking.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DocComment {
+    pub inner: bool,
+    /// The comment after its marker and one optional space.
+    pub text: String,
+    pub span: Span,
+    /// The documented item: the following item for `///`, and the file or
+    /// enclosing module for `//!`.
+    pub item: Span,
+}
+
 fn keyword(word: &str) -> Option<&'static str> {
     Some(match word {
         "fn" => "fn",
@@ -175,8 +188,13 @@ fn quoted(source: &str, index: &mut usize, bytes_literal: bool) -> Result<TokenK
 }
 
 fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
+    lex_with_docs(source).map(|(tokens, _)| tokens)
+}
+
+fn lex_with_docs(source: &str) -> Result<(Vec<Token>, Vec<DocComment>), FrontError> {
     let bytes = source.as_bytes();
     let mut tokens = Vec::new();
+    let mut docs = Vec::new();
     let mut i = 0;
     while i < bytes.len() {
         if matches!(bytes[i], b' ' | b'\t' | b'\n' | b'\r') {
@@ -188,6 +206,14 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
             i += 2;
             while i < bytes.len() && bytes[i] != b'\n' {
                 i += 1;
+            }
+            let comment = &source[start..i];
+            let inner = comment.starts_with("//!");
+            if inner || (comment.starts_with("///") && !comment.starts_with("////")) {
+                let text = &comment[3..];
+                let text = text.strip_prefix(' ').unwrap_or(text).trim_end_matches('\r');
+                let (span, item) = (Span { start, end: i }, Span { start, end: start });
+                docs.push(DocComment { inner, text: text.to_owned(), span, item });
             }
             continue;
         }
@@ -360,7 +386,7 @@ fn lex(source: &str) -> Result<Vec<Token>, FrontError> {
         kind: TokenKind::Eof,
         span: Span { start: i, end: i },
     });
-    Ok(tokens)
+    Ok((tokens, docs))
 }
 
 /// The value of the last string literal token in `text`, if it lexes.

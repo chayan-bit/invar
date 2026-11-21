@@ -182,6 +182,7 @@ digit         = "0" .. "9" ;
    f32 or f64 and correctly rounded on every engine.
    sort, sort_by_key, argsort, segmented_sort are reserved ordinary calls.
    assert(condition, string_literal) is a reserved Unit intrinsic (#258).
+   A /// line comment documents the next item, a //! line comment its file or module (#257).
    Comparison chaining is syntactically excluded. Range syntax exists only
    in for statements. Assignment is a statement, not an expression.
    Modules are one source file; std::robotics is the shipped qualified module.
