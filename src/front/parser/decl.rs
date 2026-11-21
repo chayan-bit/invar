@@ -29,13 +29,13 @@ impl Parser {
                     } else if self.is_system_item() {
                         system_items.push(self.system_item(Some(&name))?);
                     } else {
-                        let (fold, public) = self.item_prefix()?;
+                        let (fold, axes, public) = self.item_prefix()?;
                         if self.is_keyword("struct") {
                             records.push(self.record(Some(&name), public)?);
                         } else if self.is_keyword("enum") {
                             variants.push(self.variant(Some(&name), public)?);
                         } else {
-                            functions.push(Function { fold, ..self.function(Some(&name), public)? });
+                            functions.push(Function { fold, axes, ..self.function(Some(&name), public)? });
                         }
                     }
                 }
@@ -55,13 +55,13 @@ impl Parser {
             } else if self.is_system_item() {
                 system_items.push(self.system_item(None)?);
             } else {
-                let (fold, public) = self.item_prefix()?;
+                let (fold, axes, public) = self.item_prefix()?;
                 if self.is_keyword("struct") {
                     records.push(self.record(None, public)?);
                 } else if self.is_keyword("enum") {
                     variants.push(self.variant(None, public)?);
                 } else {
-                    functions.push(Function { fold, ..self.function(None, public)? });
+                    functions.push(Function { fold, axes, ..self.function(None, public)? });
                 }
             }
         }
@@ -267,6 +267,7 @@ impl Parser {
             },
             body,
             fold: crate::numeric_contract::FoldTier::Strict,
+            axes: crate::axes::Axes::default(),
         })
     }
 
