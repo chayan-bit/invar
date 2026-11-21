@@ -213,9 +213,15 @@ fn editor_grammar_extension_manifest_packages_the_grammar() {
 fn editor_grammar_strings_end_at_line_break() {
     // The lexer rejects a literal newline in a string, so an unclosed quote must not swallow later lines.
     let grammar = grammar();
-    let rules = grammar["repository"]["strings"]["patterns"].as_array().expect("string rules");
+    let rules = grammar["repository"]["strings"]["patterns"]
+        .as_array()
+        .expect("string rules");
     assert_eq!(rules.len(), 2);
     for rule in rules {
-        assert_eq!(rule["end"], "\"|$", "{} must end at a quote or a line break", rule["name"]);
+        assert_eq!(
+            rule["end"], "\"|$",
+            "{} must end at a quote or a line break",
+            rule["name"]
+        );
     }
 }
