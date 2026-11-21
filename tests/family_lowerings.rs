@@ -130,12 +130,12 @@ fn same(a: &eval::Observation, b: &eval::Observation) -> bool {
 }
 
 #[test]
-fn equal_to_reference_at_1_2_7_64_workers() {
+fn equal_to_reference_at_1_2_4_7_16_64_workers() {
     let results = oracle::each(oracle::CORPUS, true, |program| {
         let reference = eval::observe(&program.checked, FUEL);
         let mut published = 0;
         let mut differences = Vec::new();
-        for workers in [1, 2, 7, 64] {
+        for workers in [1, 2, 4, 7, 16, 64] {
             match schedule::run_source(&program.source, &program.mir, FUEL, workers) {
                 Ok(run) if same(&run.observation, &reference) => {
                     published += usize::from(!run.executed.is_empty());

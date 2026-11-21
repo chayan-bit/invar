@@ -59,7 +59,7 @@ fn workers_valid(workers: usize) -> Result<(), Error> {
     }
 }
 /// Stable argsort of u32/i32/f32 word encodings; input words are never modified.
-/// At most 2^28 keys and 1..=4 workers; allocation and worker failures are explicit.
+/// At most 2^28 keys and 1..=`MAX_WORKERS` workers; allocation and worker failures are explicit.
 pub fn argsort_words(keys: &[u32], kind: KeyKind, workers: usize) -> Result<Vec<u32>, Error> {
     argsort_counted(keys, kind, workers, &Cell::new(0))
 }
