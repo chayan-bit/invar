@@ -101,12 +101,11 @@ fn exact(call: &ReduceCall<'_>, workers: usize) -> Result<u32, Error> {
     let parts = ranges(a.len(), workers);
     let partials = scoped(parts.len(), |part| {
         let mut exact = fsum::Exact::new(dot);
-        for i in parts[part].clone() {
-            if dot {
-                exact.add_product(a[i].to_bits(), b[i].to_bits());
-            } else {
-                exact.add(a[i].to_bits());
-            }
+        let range = parts[part].clone();
+        if dot {
+            exact.add_products(&a[range.clone()], &b[range], F32Bits::to_bits);
+        } else {
+            exact.add_words(&a[range], F32Bits::to_bits);
         }
         exact
     })?;

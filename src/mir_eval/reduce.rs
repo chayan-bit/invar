@@ -36,14 +36,12 @@ pub fn serial_reduction(call: &ReduceCall<'_>) -> F32Bits {
         Kind::DotTree => fsum::tree(a.len(), |i| word(a[i]) * word(b[i])),
         Kind::SumExact => {
             let mut exact = fsum::Exact::new(false);
-            a.iter().for_each(|x| exact.add(x.to_bits()));
+            exact.add_words(a, F32Bits::to_bits);
             exact.finish()
         }
         Kind::DotExact => {
             let mut exact = fsum::Exact::new(true);
-            a.iter()
-                .zip(b)
-                .for_each(|(x, y)| exact.add_product(x.to_bits(), y.to_bits()));
+            exact.add_products(a, b, F32Bits::to_bits);
             exact.finish()
         }
     };
