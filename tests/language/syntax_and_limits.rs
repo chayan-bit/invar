@@ -123,7 +123,7 @@ fn syntax_and_limits_lexical_spans_and_json() {
     assert_eq!(error.span.unwrap().start, closing);
     assert_eq!(error.span.unwrap().end, closing + 1);
     assert!(parse(b"fn f() -> f32 { return 12.5; }").is_ok());
-    for bad in ["0x10", "12i32oops", "1_000", "12.5e3"] {
+    for bad in ["0xG0", "12i32oops", "1__000", "12.5e3"] {
         let source = format!("fn f() -> i32 {{ return {bad}; }}");
         assert_eq!(
             parse(source.as_bytes()).unwrap_err().code,

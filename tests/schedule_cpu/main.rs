@@ -3,6 +3,7 @@ mod corpus_sample;
 
 mod admission_records;
 mod affine_recurrence_scan;
+mod checked_fold_carry;
 mod cpu_scheduler_fallback;
 mod cpu_workers;
 mod fused_map_extraction;

@@ -300,6 +300,28 @@ fn caps_only_narrow_and_the_region_report_lists_every_function() {
         cli(&["run", file, "--engine", "reference", "--region-report"]).0,
         2
     );
+    // The report refuses what `check` refuses, and names a module function once.
+    let ill_typed = scratch("ill-typed", "fn main() -> i32 { return true; }");
+    let (exit, stdout) = cli(&["check", ill_typed.to_str().unwrap(), "--region-report"]);
+    assert_eq!(exit, 1, "{stdout}");
+    let source =
+        "fn main() -> i32 { return m::one(); }\nmodule m { pub fn one() -> i32 { return 1; } }";
+    let module = scratch("module", source);
+    let (exit, stdout) = cli(&[
+        "check",
+        module.to_str().unwrap(),
+        "--region-report",
+        "--format",
+        "json",
+    ]);
+    assert_eq!(exit, 0, "{stdout}");
+    let names: Vec<Value> = serde_json::from_str::<Value>(&stdout).unwrap()["regions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|row| row["function"].clone())
+        .collect();
+    assert!(names.contains(&"m::one".into()), "{stdout}");
 }
 
 /// #210: each contract code carries its note, and a validated fix where one exists.

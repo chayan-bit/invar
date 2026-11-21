@@ -106,6 +106,7 @@ fn trap(category: u32, start: u32, end: u32) -> ! {
         2 => "DIVISION_BY_ZERO",
         3 => "INDEX_OUT_OF_BOUNDS",
         4 => "UNIT_CONVERSION_INEXACT",
+        5 => "ASSERTION_FAILED",
         _ => tool(1),
     };
     report(

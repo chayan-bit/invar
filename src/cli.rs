@@ -72,18 +72,14 @@ pub(crate) fn region_options(args: Vec<OsString>) -> Result<Vec<OsString>, i32> 
     if !report {
         return Ok(kept);
     }
+    // The report stands in for `check`, so it refuses what `check` refuses.
+    crate::load_checked(path, false).map_err(|error| crate::report_front(error, path, json))?;
     let rows: Vec<_> = program
         .functions
         .iter()
         .map(|function| {
-            let name = function
-                .module
-                .as_ref()
-                .map_or(function.name.clone(), |module| {
-                    format!("{module}::{}", function.name)
-                });
-            let mut row =
-                serde_json::json!({"function": name, "contract": function.axes.contract()});
+            // `name` is already qualified by its module.
+            let mut row = serde_json::json!({"function": function.name, "contract": function.axes.contract()});
             for axis in AXES {
                 row[axis.key] = function.axes.level(axis).into();
             }

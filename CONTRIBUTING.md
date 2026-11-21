@@ -42,6 +42,12 @@ Optional tools:
 - [just](https://github.com/casey/just) runs the recipes in the [justfile](justfile).
 - [cargo-nextest](https://nexte.st/) 0.9.146 runs the suite in parallel with the profiles in [nextest.toml](.config/nextest.toml).
 
+With [Nix](https://nixos.org/) and flakes enabled, `nix develop` is an alternative to installing these yourself.
+It opens a shell with the toolchain from `rust-toolchain.toml`, cargo-nextest 0.9.146, just and the platform C and C++ compilers, on x86_64 and aarch64 Linux and on Apple Silicon.
+It is optional; the rustup route above works on its own.
+Nix asks once whether to trust the flake's `ros.cachix.org` cache setting; that cache only speeds up the ROS 2 shell, so declining is fine.
+The Python-binding and ROS 2 shells stay available as `nix develop .#python` and `nix develop .#ros2` (Linux).
+
 On Windows (MSVC or `x86_64-pc-windows-gnullvm`):
 
 - MSVC builds compile the vendored CORE-MATH sources with clang-cl: install the Visual Studio component "C++ Clang Compiler for Windows", or set `CC=clang-cl`.
@@ -114,7 +120,6 @@ Every pull request runs [ci.yml](.github/workflows/ci.yml) on GitHub-hosted Linu
 - **Test (CPU-model corpus 1/2, 2/2)**: the device CPU-model corpus test, run alone, each job on one half of the corpus programs (`INVAR_CORPUS_PART`).
 - **Windows (msvc 1/4 to 4/4, gnullvm build)**: the default-feature suite on `windows-latest` with MSVC in four shards, a gnullvm build of every test target, and the CORE-MATH tests on both.
   It always runs the pull-request corpus sample.
-  One test is excluded there: the `system gen ros2` tree hash for `cell-ur5e.inv` depends on the platform libm's `asin`, which differs from glibc by one ulp on Windows.
 
 Pull requests run a deterministic 1-in-8 sample of the corpus sweeps that keeps every corpus directory; pushes to main and `just test` run the whole corpus (`INVAR_FULL_CORPUS=1`).
 
