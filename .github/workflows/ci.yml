@@ -185,22 +185,22 @@ jobs:
         run: cargo build --locked --profile ci-debug --bin invar
       - name: Digest every example and record the evidence
         run: |
-          mkdir evidence
-          scripts/cross-arch-digest target/ci-debug/invar > evidence/digests.txt
+          mkdir cross-arch-evidence
+          scripts/cross-arch-digest target/ci-debug/invar > cross-arch-evidence/digests.txt
           {
             echo "revision: $GITHUB_SHA"
             echo "machine: $(uname -m)"
             echo "runner image: ${ImageOS:-unknown} ${ImageVersion:-unknown}"
             echo "glibc: $(ldd --version | head -n 1)"
             echo "llvm: not used (default-feature build)"
-            echo "digests: $(wc -l < evidence/digests.txt) examples"
+            echo "digests: $(wc -l < cross-arch-evidence/digests.txt) examples"
             rustc -vV
-          } > evidence/evidence.txt
-          cat evidence/evidence.txt
+          } > cross-arch-evidence/evidence.txt
+          cat cross-arch-evidence/evidence.txt
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: cross-arch-${{ matrix.name }}
-          path: evidence
+          path: cross-arch-evidence
 
   cross-arch-identity:
     name: Cross-arch identity
