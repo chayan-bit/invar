@@ -332,6 +332,26 @@ impl Ir<'_> {
                     Some(raw)
                 };
             }
+            // A pair (#262) packs its two 32-bit slot words into one i64:
+            // element 0 in the low half, element 1 in the high half.
+            Operation::Pair(first, second) => {
+                let (low, high) = (self.load(*first), self.load(*second));
+                let (masked, wide, shifted, packed) = (self.tmp(), self.tmp(), self.tmp(), self.tmp());
+                self.line(format!("{masked} = and i64 {low}, 4294967295"));
+                self.line(format!("{wide} = and i64 {high}, 4294967295"));
+                self.line(format!("{shifted} = shl i64 {wide}, 32"));
+                self.line(format!("{packed} = or i64 {masked}, {shifted}"));
+                result = Some(packed);
+            }
+            Operation::PairGet { pair, index } => {
+                let word = self.load(*pair);
+                let (half, narrow, widened) = (self.tmp(), self.tmp(), self.tmp());
+                self.line(format!("{half} = lshr i64 {word}, {}", 32 * index));
+                self.line(format!("{narrow} = trunc i64 {half} to i32"));
+                let extend = if matches!(output.map(|(_, ty)| ty), Some(Type::I32)) { "sext" } else { "zext" };
+                self.line(format!("{widened} = {extend} i32 {narrow} to i64"));
+                result = Some(widened);
+            }
             Operation::Unary {
                 op,
                 value,

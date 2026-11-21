@@ -354,6 +354,8 @@ fn net_boundary_all_current_mir_variants_have_explicit_inventory_entries() {
         O::ForNext(1),
         O::F32(invar::numeric_contract::F32Bits::POS_ZERO),
         O::F64(invar::numeric_contract::F64Bits::POS_ZERO),
+        O::Pair(1, 2),
+        O::PairGet { pair: 1, index: 0 },
     ];
     let terms = [
         mir::Terminator::Goto {

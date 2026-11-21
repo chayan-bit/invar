@@ -88,27 +88,6 @@ fn is_array(ty: &Type) -> bool {
     )
 }
 
-/// An unsuffixed decimal literal, possibly grouped or negated, whose float
-/// type comes from context (default `f32`).
-fn flexible_float(expr: &Expr) -> bool {
-    match &expr.kind {
-        ExprKind::Float(raw) => crate::numeric_contract::decimal_digits(raw).1.is_none(),
-        ExprKind::Group(inner) => flexible_float(inner),
-        ExprKind::Unary {
-            op: UnaryOp::Neg,
-            value,
-            ..
-        } => flexible_float(value),
-        ExprKind::Binary {
-            op: BinaryOp::Add | BinaryOp::Sub | BinaryOp::Mul | BinaryOp::Div,
-            left,
-            right,
-            ..
-        } => flexible_float(left) || flexible_float(right),
-        _ => false,
-    }
-}
-
 fn element(ty: &Type) -> Option<Type> {
     match ty {
         Type::ArrayI32 => Some(Type::I32),
@@ -487,12 +466,13 @@ mod record_generics;
 mod reductions;
 mod result;
 mod storage;
+mod tuples;
 mod unit_math;
 mod units;
 mod views;
 
 pub(crate) use intrinsics::{intrinsic, sort_modes};
-use literals::{literal_type, split_literal};
+use literals::{flexible_float, literal_type, split_literal};
 use result::synthesize_results;
 pub(crate) use units::{angle_call, is_frame_helper, scale_call};
 
@@ -859,6 +839,13 @@ impl FunctionChecker<'_> {
             ExprKind::Array(_) => None,
             ExprKind::Record { name, .. } => Some(Type::Named(name.clone())),
             ExprKind::Match { arms, .. } => arms.first().and_then(|arm| self.hint(&arm.value)),
+            ExprKind::Field { base, name } if self.is_pair(base) => {
+                self.pair_field_hint(base, name)
+            }
+            ExprKind::Pair(first, second) => Some(Type::Pair(Box::new((
+                self.hint(first)?,
+                self.hint(second)?,
+            )))),
             ExprKind::Field { base, name } => {
                 let Type::Named(record) = self.hint(base)? else {
                     return None;
@@ -1034,6 +1021,10 @@ impl FunctionChecker<'_> {
                 Type::Named(name.clone())
             }
             ExprKind::Match { value, arms } => self.match_expr(value, arms, expected, expr.span)?,
+            ExprKind::Pair(first, second) => self.pair(first, second, expected, expr.span)?,
+            ExprKind::Field { base, name } if self.is_pair(base) => {
+                self.pair_field(base, name, expr.span)?
+            }
             ExprKind::Field { base, name } => {
                 if !matches!(base.kind, ExprKind::Name(_)) {
                     return Err(FrontError::source(

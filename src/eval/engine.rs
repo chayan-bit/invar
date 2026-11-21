@@ -284,6 +284,8 @@ impl Evaluator<'_> {
                 }
                 result
             }
+            ExprKind::Pair(first, second) => Ok(Value::Pair(Box::new((self.expr(first, env)?, self.expr(second, env)?)))),
+            ExprKind::Field { base, name } if matches!(self.types.get(&base.span), Some(Type::Pair(_))) => pair_field(self.expr(base, env)?, name),
             ExprKind::Field { base, name } => {
                 let ExprKind::Name(binding) = &base.kind else {
                     return Err(EvalError::tool("INTERNAL_TYPE", "invalid checked field base"));

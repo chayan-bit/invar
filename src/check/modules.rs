@@ -387,7 +387,7 @@ fn resolve_expr(
             resolve_expr(value, scope, functions, aliases)?;
             for arm in arms { resolve_expr(&mut arm.value, scope, functions, aliases)?; }
         }
-        ExprKind::Index { base, index } | ExprKind::Binary { left: base, right: index, .. } => {
+        ExprKind::Pair(base, index) | ExprKind::Index { base, index } | ExprKind::Binary { left: base, right: index, .. } => {
             resolve_expr(base, scope, functions, aliases)?;
             resolve_expr(index, scope, functions, aliases)?;
         }
@@ -511,7 +511,7 @@ fn resolve_record_expr(
                 resolve_record_expr(item, scope, records, aliases, generic_params)?;
             }
         }
-        ExprKind::Index { base, index } | ExprKind::Binary { left: base, right: index, .. } => {
+        ExprKind::Pair(base, index) | ExprKind::Index { base, index } | ExprKind::Binary { left: base, right: index, .. } => {
             resolve_record_expr(base, scope, records, aliases, generic_params)?;
             resolve_record_expr(index, scope, records, aliases, generic_params)?;
         }

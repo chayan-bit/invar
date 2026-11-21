@@ -42,9 +42,12 @@ pub enum Rule {
     // Appended last so the discriminants that emitted sources and receipts
     // encode stay identical to the pre-f64 inventory.
     F64,
+    /// Pairs (#262) have no net representation; the oracle refuses them.
+    Pair,
+    PairGet,
 }
 
-pub const ALL_RULES: [Rule; 33] = [
+pub const ALL_RULES: [Rule; 35] = [
     Rule::Tick,
     Rule::I32,
     Rule::U32,
@@ -78,6 +81,8 @@ pub const ALL_RULES: [Rule; 33] = [
     Rule::Branch,
     Rule::Return,
     Rule::F64,
+    Rule::Pair,
+    Rule::PairGet,
 ];
 
 /// Conservative observations requiring the selected block's ordered token.
@@ -129,7 +134,8 @@ pub fn operands(op: &mir::Operation) -> Vec<mir::ValueId> {
         | O::DropValue(value) => vec![*value],
         O::Binary { left, right, .. } => vec![*left, *right],
         O::Index { array, index } => vec![*array, *index],
-        O::Field { record, .. } => vec![*record],
+        O::Field { record, .. } | O::PairGet { pair: record, .. } => vec![*record],
+        O::Pair(first, second) => vec![*first, *second],
         O::Variant { payload, .. } => payload.iter().copied().collect(),
         O::StoreIndex { index, value, .. } => vec![*index, *value],
     }
@@ -155,6 +161,8 @@ pub fn operation(op: &mir::Operation) -> (Rule, Observation) {
         O::Array(_) => (R::Array, E::Allocate),
         O::Record { .. } => (R::Record, E::Allocate),
         O::Field { .. } => (R::Field, E::ReadPlace),
+        O::Pair(..) => (R::Pair, E::Value),
+        O::PairGet { .. } => (R::PairGet, E::Value),
         O::Variant { .. } => (R::Variant, E::Allocate),
         O::VariantTag(_) => (R::VariantTag, E::Value),
         O::VariantPayload { .. } => (R::VariantPayload, E::ReadPlace),

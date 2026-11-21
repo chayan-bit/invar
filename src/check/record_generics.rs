@@ -83,6 +83,7 @@ fn collect_expr(expr: &Expr, names: &mut Vec<String>) {
             }
         }
         ExprKind::Binary { left, right, .. }
+        | ExprKind::Pair(left, right)
         | ExprKind::Index {
             base: left,
             index: right,

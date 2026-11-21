@@ -402,9 +402,20 @@ pub(super) fn check_expr(
             }
             PhysicalType::plain(Type::Named(name.clone()))
         }
+        ExprKind::Pair(first, second) => {
+            let first = check_expr(first, scope, context, None)?.scalar;
+            let second = check_expr(second, scope, context, None)?.scalar;
+            PhysicalType::plain(Type::Pair(Box::new((first, second))))
+        }
         ExprKind::Field { base, name } | ExprKind::MoveField { base, field: name } => {
             let base_ty = check_expr(base, scope, context, None)?;
-            if let Type::Named(record_name) = base_ty.scalar {
+            if let Type::Pair(pair) = &base_ty.scalar {
+                PhysicalType::plain(if name == "0" {
+                    pair.0.clone()
+                } else {
+                    pair.1.clone()
+                })
+            } else if let Type::Named(record_name) = base_ty.scalar {
                 context
                     .records
                     .get(&record_name)

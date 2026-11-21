@@ -21,6 +21,7 @@ pub(super) fn copied(value: &Value) -> Value {
         Value::ViewU32(values, range) => Value::ViewU32(Rc::clone(values), *range),
         Value::VoxelGrid(grid) => Value::VoxelGrid(Rc::clone(grid)),
         Value::Record(values) => Value::Record(Rc::clone(values)),
+        Value::Pair(pair) => crate::eval::copy_pair(pair),
         Value::Variant(values) => Value::Variant(Rc::clone(values)),
     }
 }

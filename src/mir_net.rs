@@ -96,7 +96,8 @@ fn operation_ports(op: &mut mir::Operation) -> Vec<&mut mir::ValueId> {
         | Operation::ForNext(value) => vec![value],
         Operation::Binary { left, right, .. } => vec![left, right],
         Operation::Index { array, index } => vec![array, index],
-        Operation::Field { record, .. } => vec![record],
+        Operation::Field { record, .. } | Operation::PairGet { pair: record, .. } => vec![record],
+        Operation::Pair(first, second) => vec![first, second],
         Operation::VariantTag(value)
         | Operation::VariantPayload { value, .. }
         | Operation::VariantTakePayload { value, .. }

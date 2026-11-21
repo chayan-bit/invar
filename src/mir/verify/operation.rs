@@ -126,6 +126,17 @@ fn check_operation(
             }
             Some(Type::Named(name.clone()))
         }
+        Operation::Pair(first, second) => {
+            let pair = (ty(first)?.clone(), ty(second)?.clone());
+            if !crate::front::pair_element(&pair.0) || !crate::front::pair_element(&pair.1) {
+                return Err(invalid("pair element is not a 32-bit scalar"));
+            }
+            Some(Type::Pair(Box::new(pair)))
+        }
+        Operation::PairGet { pair, index } => {
+            let Type::Pair(pair) = ty(pair)? else { return Err(invalid("pair field base is not a pair")); };
+            Some(match index { 0 => pair.0.clone(), 1 => pair.1.clone(), _ => return Err(invalid("pair field index out of bounds")) })
+        }
         Operation::Field { record, index } => {
             let Type::Named(name) = ty(record)? else { return Err(invalid("field base is not a record")); };
             let declaration = records.get(name.as_str()).ok_or_else(|| invalid("unknown MIR record"))?;

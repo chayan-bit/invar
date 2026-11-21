@@ -69,6 +69,7 @@ fn scan_expr(expr: &Expr, roots: &HashSet<String>) -> Result<(), FrontError> {
             Ok(())
         }
         ExprKind::Index { base, index }
+        | ExprKind::Pair(base, index)
         | ExprKind::Binary {
             left: base,
             right: index,
@@ -211,6 +212,7 @@ fn rewrite_expr(
             Ok(())
         }
         ExprKind::Index { base, index }
+        | ExprKind::Pair(base, index)
         | ExprKind::Binary {
             left: base,
             right: index,
@@ -246,6 +248,7 @@ fn contains_view_call(block: &Block) -> bool {
                 expr(value) || arms.iter().any(|arm| expr(&arm.value))
             }
             ExprKind::Index { base, index }
+            | ExprKind::Pair(base, index)
             | ExprKind::Binary {
                 left: base,
                 right: index,
