@@ -334,6 +334,8 @@ fn statement_check(
             }
             Ok(true)
         }
+        // Owners leave with the loop state, which a loop never merges back (#261).
+        StmtKind::Break(_) | StmtKind::Continue(_) => Ok(true),
         StmtKind::If {
             condition,
             then_block,

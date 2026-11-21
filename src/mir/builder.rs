@@ -150,6 +150,23 @@ impl Builder<'_> {
                     span: stmt.span,
                 });
             }
+            StmtKind::Break(depth) | StmtKind::Continue(depth) => {
+                let target = self.loops.len().checked_sub(depth + 1).map(|at| &self.loops[at]);
+                let target = target.ok_or_else(|| invalid("loop exit outside a loop"))?;
+                let (head, exit, induction) = (target.head, target.exit, target.induction);
+                // The same cleanup, innermost first, as the trip's normal end.
+                let names = self.scopes[target.scopes..].iter().rev();
+                let names = names.flat_map(|scope| scope.iter().rev().cloned()).collect();
+                self.emit(Operation::Drop(names), None, stmt.span);
+                let (target, args) = match (&stmt.kind, induction) {
+                    (StmtKind::Break(_), _) => (exit, Vec::new()),
+                    (_, None) => (head, Vec::new()),
+                    (_, Some((value, span))) => {
+                        (head, vec![self.value(Operation::ForNext(value), Type::U32, span)])
+                    }
+                };
+                self.end(Terminator::Goto { target, args, span: stmt.span });
+            }
             StmtKind::Expr(expr) => {
                 self.expr(expr, false)?;
             }
@@ -210,7 +227,10 @@ impl Builder<'_> {
                     span: stmt.span,
                 });
                 self.current = loop_body;
+                let scopes = self.scopes.len();
+                self.loops.push(LoopTarget { head, exit, induction: None, scopes });
                 self.block(body)?;
+                self.loops.pop();
                 if self.blocks[self.current].end.is_none() {
                     self.end(Terminator::Goto {
                         target: head,
@@ -273,8 +293,12 @@ impl Builder<'_> {
                     None,
                     stmt.span,
                 );
+                let scopes = self.scopes.len();
+                let next = Some((induction, stmt.span));
+                self.loops.push(LoopTarget { head, exit, induction: next, scopes });
                 self.scopes.push(vec![name.clone()]);
                 self.block(body)?;
+                self.loops.pop();
                 let names = self
                     .scopes
                     .pop()

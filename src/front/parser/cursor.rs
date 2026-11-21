@@ -8,6 +8,8 @@ struct Parser {
     /// Hidden bindings placed before the statement just parsed: a compound
     /// assignment's index (#254) and a stepped loop's bounds and step (#256).
     hoisted: Vec<Stmt>,
+    /// Labels of the loops enclosing the statement being parsed, innermost last (#261).
+    loops: Vec<Option<String>>,
 }
 
 impl Parser {

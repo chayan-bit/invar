@@ -42,6 +42,15 @@ impl Visit for Uses<'_> {
     }
 }
 
+/// Whether a body holds a `break` or `continue`, at any depth (#261).
+struct Exits(bool);
+
+impl Visit for Exits {
+    fn stmt(&mut self, s: &mut Stmt) {
+        self.0 |= matches!(s.kind, StmtKind::Break(_) | StmtKind::Continue(_));
+    }
+}
+
 /// Gives every node a fresh span inside the function, skipping the spans the
 /// source already uses. MIR verification wants nonempty spans inside the
 /// function and an operator span inside its expression's. Spans go row by
@@ -440,6 +449,14 @@ impl Rewriter {
 
     /// Why `acc` cannot take the tier lowering in this loop, if it cannot.
     fn misfit(&self, acc: &str, body: &mut Block, lower: &Expr, upper: &Expr) -> Option<String> {
+        let mut exits = Exits(false);
+        walk_block(body, &mut exits);
+        if exits.0 {
+            // An early exit skips terms that a full-length term buffer would sum.
+            return Some(format!(
+                "the for loop of the accumulator `{acc}` holds a break or continue"
+            ));
+        }
         let mut uses = Uses(acc, 0);
         walk_block(body, &mut uses);
         let (mut low, mut high) = (lower.clone(), upper.clone());

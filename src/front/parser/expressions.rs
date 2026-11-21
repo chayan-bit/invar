@@ -238,7 +238,11 @@ impl Parser {
                 self.expect_symbol(")")?;
                 self.expect_symbol("->")?;
                 let result = self.ty()?;
-                let body = self.block()?;
+                // A closure body is its own function: no enclosing loop is in reach (#261).
+                let loops = std::mem::take(&mut self.loops);
+                let body = self.block();
+                self.loops = loops;
+                let body = body?;
                 let span = Span { start: token.span.start, end: body.span.end };
                 let name = format!("$closure@{}", token.span.start);
                 self.closures.push(ClosureDecl { name: name.clone(), captures, params, result, body, span });

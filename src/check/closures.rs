@@ -120,7 +120,7 @@ fn scan_statement(statement: &Stmt, roots: &HashSet<String>) -> Result<(), Front
             scan_expr(lower, roots)?;
             scan_expr(upper, roots)
         }
-        StmtKind::Return(None) => Ok(()),
+        StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => Ok(()),
     }
 }
 
@@ -284,7 +284,7 @@ fn contains_view_call(block: &Block) -> bool {
             StmtKind::For {
                 lower, upper, body, ..
             } => expr(lower) || expr(upper) || contains_view_call(body),
-            StmtKind::Return(None) => false,
+            StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => false,
         }
     }
     block.statements.iter().any(statement)
@@ -631,7 +631,7 @@ fn rewrite_block(
                     used,
                 )?;
             }
-            StmtKind::Return(None) => {}
+            StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => {}
         }
         rewritten.push(statement);
     }

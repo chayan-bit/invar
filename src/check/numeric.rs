@@ -116,7 +116,7 @@ fn stmt(
         StmtKind::Binding { value, .. } | StmtKind::Return(Some(value)) | StmtKind::Expr(value) => {
             expr(value)
         }
-        StmtKind::Return(None) => Ok(()),
+        StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => Ok(()),
         StmtKind::If {
             condition,
             then_block,

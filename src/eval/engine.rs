@@ -44,7 +44,7 @@ impl Evaluator<'_> {
         match result? {
             Flow::Return(value) => match tc { Some(tc) => tc.finish(value), None => Ok(value) },
             Flow::Continue if function.result == Type::Unit => Ok(Value::Unit),
-            Flow::Continue => Err(EvalError::tool(
+            Flow::Continue | Flow::Break(_) | Flow::Next(_) => Err(EvalError::tool(
                 "INTERNAL_RETURN",
                 "checked function fell through",
             )),
@@ -107,6 +107,8 @@ impl Evaluator<'_> {
                 };
                 Ok(Flow::Return(value))
             }
+            StmtKind::Break(depth) => Ok(Flow::Break(*depth)),
+            StmtKind::Continue(depth) => Ok(Flow::Next(*depth)),
             StmtKind::If {
                 condition,
                 then_block,
@@ -127,8 +129,8 @@ impl Evaluator<'_> {
                     if self.expr(condition, env)? != Value::Bool(true) {
                         break;
                     }
-                    if let Flow::Return(value) = self.block(body, env)? {
-                        return Ok(Flow::Return(value));
+                    if let Some(flow) = after_trip(self.block(body, env)?) {
+                        return Ok(flow);
                     }
                 }
                 Ok(Flow::Continue)
@@ -152,8 +154,8 @@ impl Evaluator<'_> {
                     while i < hi {
                         self.charge()?;
                         env.bind(name, Value::U32(i))?;
-                        if let Flow::Return(value) = self.block(body, env)? {
-                            return Ok(Flow::Return(value));
+                        if let Some(flow) = after_trip(self.block(body, env)?) {
+                            return Ok(flow);
                         }
                         // i < hi <= u32::MAX, so the increment cannot overflow.
                         i += 1;
@@ -661,14 +663,6 @@ impl Evaluator<'_> {
                 "invalid checked literal type",
             )),
         }
-    }
-}
-
-fn named_array(expr: &Expr) -> Option<&str> {
-    match &expr.kind {
-        ExprKind::Name(name) => Some(name),
-        ExprKind::Group(inner) => named_array(inner),
-        _ => None,
     }
 }
 

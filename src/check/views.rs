@@ -510,7 +510,7 @@ impl Scan<'_> {
                 }
             }
             StmtKind::Return(Some(value)) | StmtKind::Expr(value) => self.expr(value)?,
-            StmtKind::Return(None) => {}
+            StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => {}
             StmtKind::If {
                 condition,
                 then_block,

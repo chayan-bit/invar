@@ -1,0 +1,8 @@
+// break and continue act only on an enclosing loop; a label names one.
+fn main() -> i32 {
+    var n: i32 = 0;
+    rows: for i in 0u32 .. 3u32 {
+        n += 1;
+    }
+    break rows;
+}

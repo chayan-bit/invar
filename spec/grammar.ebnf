@@ -122,7 +122,9 @@ integer_type  = "i32" | "u32" ;
 float_type    = "f32" | "f64" ;
 block         = "{", { statement }, "}" ;
 statement     = binding | assignment | return_stmt | if_stmt
-              | while_stmt | for_stmt | expression, ";" ;
+              | [ identifier, ":" ], ( while_stmt | for_stmt )
+              | ( "break" | "continue" ), [ identifier ], ";"  (* #261 *)
+              | expression, ";" ;
 binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;
 assignment    = place, ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ), expression, ";" ;  (* #254 *)
 place         = identifier, [ "[", expression, "]" ] ;
@@ -227,5 +229,7 @@ digit         = "0" .. "9" ;
    256 imports, 128 records, 128 variants and 128 functions. Module import
    cycles are rejected; forward references within the file are permitted.
    Reserved keywords also include later-feature starters:
-   async, await, scope, match, break, continue,
-   total, effects, requires, ensures, from. Diagnose unsupported use. *)
+   async, await, scope, match,
+   total, effects, requires, ensures, from. Diagnose unsupported use.
+   break and continue act on the innermost loop, or on the enclosing loop
+   whose label they name; a closure body is outside every loop (#261). *)

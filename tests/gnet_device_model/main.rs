@@ -15,5 +15,6 @@ mod parallel;
 mod cuda_owned_numeric_model;
 mod device_fault_injection;
 mod device_model;
+mod loop_control_model;
 mod resume_device_model;
 mod speculation_device_model;
