@@ -1,6 +1,7 @@
 #[path = "../../test-support/split_mix.rs"]
 mod split_mix;
 
+mod explain_v6;
 mod fold_receipts;
 mod numeric_tiers;
 mod region_axes;

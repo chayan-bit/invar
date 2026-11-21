@@ -16,8 +16,8 @@ use crate::{
 mod fold_hint;
 
 /// `invar explain` documents: the admission report plus the explain fields.
-pub const SCHEMA: &str = "invar-explain-v5";
-pub const SCHEMA_VERSION: u32 = 5;
+pub const SCHEMA: &str = "invar-explain-v6";
+pub const SCHEMA_VERSION: u32 = 6;
 /// The `device_execution` object of an explain document.
 pub const DEVICE_SCHEMA: &str = "invar-explain-device-v5";
 pub const RULE_REVISION: &str = "counted-wrapping-map-v1";
@@ -151,6 +151,7 @@ pub struct Region {
     span: Span,
     pub(crate) head: BlockId,
     candidate_identity: String,
+    axes: crate::axes::Axes,
     pub(crate) status: Status,
     pub(crate) first_rejected_obligation: Option<&'static str>,
     pub(crate) guard: Option<Guard>,
@@ -238,7 +239,7 @@ impl Region {
                 "cleanup": "original_serial_fallback_retained"
             })
         });
-        json!({
+        let mut record = json!({
             "function": self.function,
             "span": {"start": self.span.start, "end": self.span.end},
             "candidate_identity": self.candidate_identity,
@@ -254,7 +255,12 @@ impl Region {
             "runtime_guard": self.guard.as_ref().map(Guard::json),
             "facts": footprints,
             "obligations": self.obligations.iter().map(|fact| json!({"name": fact.name, "evidence": fact.evidence, "detail": fact.detail})).collect::<Vec<_>>()
-        })
+        });
+        // v6 is v5 plus the axis fields (docs/spec/invar-v0.2-axes.md section 6).
+        if let Some(fields) = record.as_object_mut() {
+            fields.extend(self.axes.receipt());
+        }
+        record
     }
 }
 
@@ -415,6 +421,11 @@ pub fn analyze_within(
         }
     }
     for region in &mut regions {
+        region.axes = program
+            .region_axes
+            .get(&region.function)
+            .copied()
+            .unwrap_or_default();
         region.candidate_identity = candidate_identity(source, region)?;
     }
     // Planning attached graphs, fusion obligations and identities; the settled list must fit.
@@ -445,7 +456,7 @@ fn admit_held(budget: &ByteBudget, held: usize) -> Result<(), Error> {
         .map_err(|e| error("RESOURCE_LIMIT", e.to_string()))
 }
 
-/// The region's source bytes and the rules of its chosen plan.
+/// The region's source bytes, the rules of its chosen plan and its declared axes.
 fn candidate_identity(source: &[u8], region: &Region) -> Result<String, Error> {
     let region_bytes = source
         .get(region.span.start..region.span.end)
@@ -455,6 +466,7 @@ fn candidate_identity(source: &[u8], region: &Region) -> Result<String, Error> {
         identity_bytes.extend_from_slice(rule.as_bytes());
     }
     identity_bytes.extend_from_slice(b"wrapping-u32-v1/cpu");
+    identity_bytes.extend(region.axes.identity_bytes());
     Ok(identity(&identity_bytes))
 }
 
@@ -474,6 +486,7 @@ fn reject(
         span,
         head: 0,
         candidate_identity: String::new(),
+        axes: crate::axes::Axes::default(),
         status: Status::Rejected,
         first_rejected_obligation: Some(name),
         guard: None,
@@ -745,6 +758,7 @@ fn analyze_region(
         span,
         head: 0,
         candidate_identity: String::new(),
+        axes: crate::axes::Axes::default(),
         status: Status::Admitted,
         first_rejected_obligation: None,
         guard: Some(guard),

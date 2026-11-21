@@ -370,7 +370,7 @@ fn every_normal_form_schema_accepts_the_typed_fallback() {
             "/properties/normal_form",
         ),
         (
-            "explain-v5.schema.json",
+            "explain-v6.schema.json",
             "/properties/device_execution/properties/normal_form",
         ),
     ] {
@@ -395,10 +395,10 @@ fn a_sort_program_keeps_its_versioned_explain_document() {
         false,
     );
     assert_eq!(status, 0, "{document}");
-    assert_eq!(document["schema"], "invar-explain-v5", "{document}");
+    assert_eq!(document["schema"], "invar-explain-v6", "{document}");
     assert!(document["device_execution"].get("normal_form").is_none());
     assert!(
-        jsonschema::is_valid(&schema("explain-v5.schema.json"), &document),
+        jsonschema::is_valid(&schema("explain-v6.schema.json"), &document),
         "{document}"
     );
     assert!(jsonschema::is_valid(
@@ -479,13 +479,13 @@ fn explain_auto_records_the_normal_form_route() {
         false,
     );
     assert_eq!(status, 0, "{document}");
-    assert_eq!(document["schema"], "invar-explain-v5");
+    assert_eq!(document["schema"], "invar-explain-v6");
     assert_eq!(document["auto_path"], "established");
     let device = &document["device_execution"];
     assert_eq!(device["normal_form"]["status"], "routed", "{document}");
     assert_eq!(device["result"], 42);
     assert!(jsonschema::is_valid(
-        &schema("explain-v5.schema.json"),
+        &schema("explain-v6.schema.json"),
         &document
     ));
     assert!(jsonschema::is_valid(

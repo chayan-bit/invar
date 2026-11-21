@@ -336,45 +336,35 @@ pub(super) fn scan(rep: &Rep, elems: &[Elem], wrong: bool) -> Result<(Vec<Elem>,
             combine(rep, l, r)
         }
     };
+    // The end value and, when `need_total`, the balanced reduce of `elems`.
+    // Each subtree total is joined once and reused by its parent (linear
+    // work), over the same join tree as a separate reduce of every left half.
     fn go(
         elems: &[Elem],
         offset: &Elem,
+        need_total: bool,
         join: &dyn Fn(&Elem, &Elem) -> Result<Elem, Stop>,
         out: &mut Vec<Elem>,
-    ) -> Result<Elem, Stop> {
+    ) -> Result<(Elem, Option<Elem>), Stop> {
         match elems {
-            [] => Ok(offset.clone()),
+            [] => Ok((offset.clone(), None)),
             [one] => {
                 out.push(offset.clone());
-                join(offset, one)
+                Ok((join(offset, one)?, need_total.then(|| one.clone())))
             }
             _ => {
                 let (left, right) = elems.split_at(elems.len() / 2);
-                let total_left = reduce(left, join)?;
-                let mut tail = Vec::new();
+                let (_, total_left) = go(left, offset, true, join, out)?;
+                let total_left = total_left.ok_or_else(|| Stop::internal("scan total"))?;
                 let mid = join(offset, &total_left)?;
-                go(left, offset, join, out)?;
-                let end = go(right, &mid, join, &mut tail)?;
-                out.extend(tail);
-                Ok(end)
-            }
-        }
-    }
-    fn reduce(
-        elems: &[Elem],
-        join: &dyn Fn(&Elem, &Elem) -> Result<Elem, Stop>,
-    ) -> Result<Elem, Stop> {
-        match elems {
-            [] => Err(Stop::internal("empty reduce")),
-            [one] => Ok(one.clone()),
-            _ => {
-                let (left, right) = elems.split_at(elems.len() / 2);
-                join(&reduce(left, join)?, &reduce(right, join)?)
+                let (end, total_right) = go(right, &mid, need_total, join, out)?;
+                let total = total_right.map(|r| join(&total_left, &r)).transpose()?;
+                Ok((end, total))
             }
         }
     }
     let mut out = Vec::with_capacity(elems.len());
-    let total = go(elems, &identity(rep), &join, &mut out)?;
+    let (total, _) = go(elems, &identity(rep), false, &join, &mut out)?;
     Ok((out, total))
 }
 
@@ -526,4 +516,51 @@ pub(super) fn apply(
 /// The scalar type a select element ranges over.
 pub(super) fn is_nan(value: &Val, elem: ScalarTy) -> bool {
     matches!((value, elem), (Val::F32(x), ScalarTy::F32) if x.is_nan())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Elem, IntTy, Rep, scan};
+
+    /// The balanced scan's prefixes and total equal a left-to-right fold of
+    /// the exact L3 sum element, at every length around the split points.
+    #[test]
+    fn scan_matches_a_sequential_fold() {
+        let rep = Rep::LiftedSum(IntTy::I32);
+        for n in 0..70_i128 {
+            let elems: Vec<Elem> = (0..n)
+                .map(|k| {
+                    let x = (k * 37 % 11) - 5;
+                    Elem::Sum {
+                        total: x,
+                        low: x.min(0),
+                        high: x.max(0),
+                    }
+                })
+                .collect();
+            let (pre, total) = scan(&rep, &elems, false).unwrap();
+            let (mut sum, mut low, mut high) = (0, 0, 0);
+            for (k, elem) in elems.iter().enumerate() {
+                let expected = Elem::Sum {
+                    total: sum,
+                    low,
+                    high,
+                };
+                assert_eq!(pre[k], expected, "prefix {k} of {n}");
+                let Elem::Sum { total: x, .. } = elem else {
+                    unreachable!()
+                };
+                sum += x;
+                low = low.min(sum);
+                high = high.max(sum);
+            }
+            assert_eq!(pre.len(), elems.len());
+            let expected = Elem::Sum {
+                total: sum,
+                low,
+                high,
+            };
+            assert_eq!(total, expected, "total of {n}");
+        }
+    }
 }

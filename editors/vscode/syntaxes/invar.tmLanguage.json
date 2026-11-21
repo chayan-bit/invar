@@ -1,0 +1,148 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Invar",
+  "scopeName": "source.invar",
+  "fileTypes": ["inv"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#attributes" },
+    { "include": "#function-declaration" },
+    { "include": "#keywords" },
+    { "include": "#numbers" },
+    { "include": "#types" },
+    { "include": "#functions" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.invar", "match": "//.*$" },
+        {
+          "name": "comment.block.invar",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "patterns": [{ "include": "#block-comment-nested" }]
+        }
+      ]
+    },
+    "block-comment-nested": {
+      "name": "comment.block.invar",
+      "begin": "/\\*",
+      "end": "\\*/",
+      "patterns": [{ "include": "#block-comment-nested" }]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.bytes.invar",
+          "begin": "b\"",
+          "end": "\"|$",
+          "patterns": [
+            { "name": "constant.character.escape.invar", "match": "\\\\(?:[\"\\\\nrt]|x[0-9A-Fa-f]{2})" },
+            { "name": "invalid.illegal.escape.invar", "match": "\\\\." }
+          ]
+        },
+        {
+          "name": "string.quoted.double.invar",
+          "begin": "\"",
+          "end": "\"|$",
+          "patterns": [
+            { "name": "constant.character.escape.invar", "match": "\\\\[\"\\\\nrt]" },
+            { "name": "invalid.illegal.escape.invar", "match": "\\\\." }
+          ]
+        }
+      ]
+    },
+    "attributes": {
+      "name": "meta.attribute.invar",
+      "begin": "#\\[",
+      "end": "\\]",
+      "beginCaptures": { "0": { "name": "punctuation.definition.attribute.invar" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.attribute.invar" } },
+      "patterns": [
+        { "include": "#strings" },
+        { "include": "#numbers" },
+        { "name": "entity.other.attribute-name.invar", "match": "[A-Za-z_][A-Za-z0-9_]*" }
+      ]
+    },
+    "function-declaration": {
+      "match": "\\b(fn)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.declaration.invar" },
+        "2": { "name": "entity.name.function.invar" }
+      }
+    },
+    "keywords": {
+      "patterns": [
+        { "include": "#keyword-control" },
+        { "include": "#keyword-declaration" },
+        { "include": "#keyword-modifier" },
+        { "include": "#keyword-operator" },
+        { "include": "#constant-language" },
+        { "include": "#type-keyword" },
+        { "include": "#reserved-word" }
+      ]
+    },
+    "keyword-control": {
+      "name": "keyword.control.invar",
+      "match": "\\b(if|else|while|for|in|return|match|break|continue)\\b"
+    },
+    "keyword-declaration": {
+      "name": "keyword.declaration.invar",
+      "match": "\\b(fn|module|frame|component|extern|connect|flow|product|system|import|from|struct|const|enum|let|var|closure)\\b"
+    },
+    "keyword-modifier": {
+      "name": "storage.modifier.invar",
+      "match": "\\b(pub|read|mut|take|copy|move)\\b"
+    },
+    "keyword-operator": {
+      "name": "keyword.operator.word.invar",
+      "match": "\\b(and|or|not)\\b"
+    },
+    "constant-language": {
+      "name": "constant.language.boolean.invar",
+      "match": "\\b(true|false)\\b"
+    },
+    "type-keyword": {
+      "name": "support.type.primitive.invar",
+      "match": "\\b(i32|u32|Bool|Unit|Array|View|MutView)\\b"
+    },
+    "reserved-word": {
+      "name": "invalid.illegal.reserved-word.invar",
+      "match": "\\b(async|await|scope|total|effects|requires|ensures)\\b"
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.float.invar", "match": "\\b[0-9]+\\.[0-9]+(?:f32|f64)?\\b" },
+        { "name": "constant.numeric.integer.radix.invar", "match": "\\b0[xob][0-9A-Fa-f](?:[0-9A-Fa-f_]*[0-9A-Fa-f])?(?:i32|u32)?\\b" },
+        { "name": "constant.numeric.integer.invar", "match": "\\b[0-9](?:[0-9_]*[0-9])?(?:i32|u32)?\\b" }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.builtin.invar",
+          "match": "\\b(f32|f64|i64|Bytes|String|Result|Utf8Error|ForeignError|Vector3|Point|Transform|Quantity|Frame|Value)\\b"
+        },
+        { "name": "entity.name.type.invar", "match": "\\b[A-Z][A-Za-z0-9_]*\\b" }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.invar",
+          "match": "\\b(sqrt|cbrt|hypot|sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|exp|exp2|expm1|log|log2|log10|log1p|pow|floor|ceil|trunc|round|abs|copysign|min|max|fma|len|sort|sort_by_key|argsort|segmented_sort|sum_tree|dot_tree|sum_exact|dot_exact|bytes_slice|utf8_slice|utf8_decode|utf8_encode|f32_from_i32|f32_from_u32|f64_from_i32|f64_from_u32|f64_from_f32|f32_from_f64|i32_from_f32|u32_from_f32|i32_from_f64|u32_from_f64)(?=\\s*\\()"
+        },
+        {
+          "name": "entity.name.function.call.invar",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*(?:::<[^>]*>)?\\s*\\()"
+        }
+      ]
+    },
+    "operators": {
+      "name": "keyword.operator.invar",
+      "match": "->|=>|::|\\.\\.|==|!=|<=|>=|[-+*/%=<>?@]"
+    }
+  }
+}

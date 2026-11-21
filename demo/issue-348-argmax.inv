@@ -1,0 +1,10 @@
+// #348: an L7 select loop no family lowers yet, so `invar run` takes the
+// normal-form route; its law executor scans the lane elements in linear work.
+fn main() -> i32 {
+    let a = filled_i32(1048576u32, 1);
+    var m = 0 - 1000;
+    var at = 0u32;
+    for i in 0u32..1048576u32 { if a[i] >= m { m = a[i]; at = i; } }
+    if at % 2u32 == 0u32 { return m; }
+    return m + 1;
+}

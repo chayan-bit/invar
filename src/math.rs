@@ -183,7 +183,7 @@ pub fn eval_f64(f: MathFn, args: &[F64Bits]) -> F64Bits {
     }
 }
 
-/// The `numeric_contracts.fold` receipt of explain-v5 and invar-diagnostics-v3
+/// The `numeric_contracts.fold` receipt of explain-v6 and invar-diagnostics-v3
 /// (ENG-03, D12): each declared tier a lowered fold used (`tree`, `exact`, or
 /// `relaxed`, which a Strict function's `reassoc_add` folds also record), to
 /// the algorithm that ran. `None` when no fold was lowered.

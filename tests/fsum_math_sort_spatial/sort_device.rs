@@ -319,9 +319,9 @@ fn sort_auto_unknown_cost_stays_on_cpu_without_opening_cuda() {
         "sort-cost-unmeasured"
     );
     // #50: an auto explain is the unified v5.
-    assert_eq!(json["schema"], "invar-explain-v5");
+    assert_eq!(json["schema"], "invar-explain-v6");
     let schema: serde_json::Value =
-        serde_json::from_str(include_str!("../../schema/explain-v5.schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../schema/explain-v6.schema.json")).unwrap();
     let device_schema: serde_json::Value = serde_json::from_str(include_str!(
         "../../schema/invar-explain-device-v5.schema.json"
     ))
