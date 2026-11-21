@@ -38,8 +38,9 @@ impl Element<'_> {
 impl Parser {
     /// `for x in xs { body }`. The element is bound by value with
     /// `let x = xs[each@N];`, except that a body assigning `x` iterates by
-    /// place: every use of `x` becomes `xs[each@N]`, so a `MutView` (or a
-    /// `var` array) is written through and reads see the current element.
+    /// place: the index is named `x` and every use of `x` becomes `xs[x]`, so
+    /// a `MutView` (or a `var` array) is written through and reads see the
+    /// current element.
     fn for_each(
         &mut self,
         start: usize,
@@ -55,16 +56,23 @@ impl Parser {
             ));
         };
         let at = iterable.span;
-        let index = format!("each@{}", element_span.start);
+        let body = self.block()?;
+        let by_place = assigns(&body.statements, &element);
+        // By place, the index takes the element name, which every `x` reads
+        // through, so the checker reserves the name as `let x` does by value.
+        let index = if by_place {
+            element.clone()
+        } else {
+            format!("each@{}", element_span.start)
+        };
         let site = Element {
             name: &element,
             array: &array,
             index: &index,
             origin: (start, element_span.start),
         };
-        let body = self.block()?;
         let mut statements = Vec::with_capacity(body.statements.len() + 1);
-        if assigns(&body.statements, &element) {
+        if by_place {
             for statement in body.statements {
                 statements.push(place_stmt(statement, &site)?);
             }
@@ -367,7 +375,11 @@ impl Parser {
         upper: Expr,
     ) -> Result<Stmt, FrontError> {
         let step = self.expression()?;
-        if let ExprKind::Integer(value) = &step.kind
+        let mut literal = &step;
+        while let ExprKind::Group(inner) = &literal.kind {
+            literal = inner;
+        }
+        if let ExprKind::Integer(value) = &literal.kind
             && ["u32", "i32", ""]
                 .iter()
                 .find_map(|suffix| value.strip_suffix(suffix))
