@@ -12,6 +12,7 @@ pub mod array_limits;
 pub mod bounded_summary;
 pub mod budget;
 pub mod check;
+pub mod checked_fold;
 pub mod compaction_source;
 pub mod contraction_source;
 mod counted;

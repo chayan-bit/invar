@@ -110,6 +110,19 @@ impl<'a> LiveLoop<'a> {
         self.arrays.get(name)?.try_borrow().ok()
     }
 
+    /// Current elements of a live `Array<i32>` owner, borrowed for this loop head only.
+    pub(crate) fn array_i32(&self, name: &str) -> Option<std::cell::Ref<'a, Vec<i32>>> {
+        match self.slots.get(name)?.value.as_ref()? {
+            Value::ArrayI32(values) => values.try_borrow().ok(),
+            _ => None,
+        }
+    }
+
+    /// The live value of a scalar place, as a completed region states its seed.
+    pub(crate) fn scalar(&self, name: &str) -> Option<super::region::Scalar> {
+        super::region::Scalar::of(self.slots.get(name)?.value.as_ref()?)
+    }
+
     /// Every live `Array<u32>` owner and its elements, sorted by name.
     pub fn snapshot(&self) -> Vec<(String, Vec<u32>)> {
         let mut arrays = self

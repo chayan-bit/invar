@@ -46,7 +46,7 @@ pub(crate) enum Scalar {
 }
 
 impl Scalar {
-    fn of(value: &Value) -> Option<Self> {
+    pub(crate) fn of(value: &Value) -> Option<Self> {
         match value {
             Value::U32(v) => Some(Self::U32(*v)),
             Value::I32(v) => Some(Self::I32(*v)),
