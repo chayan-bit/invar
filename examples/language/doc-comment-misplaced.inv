@@ -1,0 +1,7 @@
+//! A `///` documents the item that follows it, so one inside a body is refused.
+
+/// The answer.
+fn main() -> i32 {
+    /// Not an item.
+    return 42;
+}

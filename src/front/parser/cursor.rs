@@ -3,6 +3,8 @@ struct Parser {
     pos: usize,
     depth: usize,
     closures: Vec<ClosureDecl>,
+    /// Doc comments in source order, attached to items once all are parsed (#257).
+    docs: Vec<DocComment>,
     /// Hidden bindings placed before the statement just parsed: a compound
     /// assignment's index (#254) and a stepped loop's bounds and step (#256).
     hoisted: Vec<Stmt>,
