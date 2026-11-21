@@ -11,6 +11,7 @@ use crate::diagnostics::{location, valid_edit_spans};
 use crate::front::Span;
 
 mod builtin;
+mod contract;
 mod hoist;
 mod moves;
 mod names;
@@ -192,6 +193,9 @@ pub fn generate(code: &str, source: &[u8], span: Option<Span>) -> Generated {
         ("OWN_USE_AFTER_MOVE", Some(span)) => moves::relax_take(source, span),
         ("OWN_BORROW_SOURCE", Some(span)) => hoist::generate(source, span, hoist::Site::Argument),
         ("OWN_BORROW_CONFLICT", Some(span)) => hoist::generate(source, span, hoist::Site::Inside),
+        ("CONTRACT_UNAVAILABLE", Some(span)) => contract::unavailable(source, span),
+        ("CONTRACT_MISMATCH", Some(span)) => contract::mismatch(source, span),
+        ("CONTRACT_UNKNOWN", Some(span)) => contract::unknown(source, span),
         _ => Generated::none(),
     }
 }
@@ -216,6 +220,9 @@ pub fn notes(code: &str, source: &[u8], span: Option<Span>) -> Vec<String> {
     match (code, span) {
         ("OWN_USE_AFTER_MOVE", Some(span)) => moves::moved_here(source, span),
         ("OWN_RETURN_BORROW", Some(span)) => moves::return_borrow(source, span),
-        _ => Vec::new(),
+        _ => contract::note(code)
+            .map(str::to_owned)
+            .into_iter()
+            .collect(),
     }
 }
