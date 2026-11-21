@@ -37,7 +37,7 @@ pub(super) fn walk_stmt(statement: &mut Stmt, v: &mut impl Visit) {
             }
             walk_expr(value, v);
         }
-        StmtKind::Return(None) => {}
+        StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => {}
         StmtKind::If {
             condition,
             then_block,

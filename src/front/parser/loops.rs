@@ -220,6 +220,7 @@ fn place_stmt(stmt: Stmt, site: &Element) -> Result<Stmt, FrontError> {
             }
         }
         StmtKind::Return(value) => StmtKind::Return(value.map(expr).transpose()?),
+        kind @ (StmtKind::Break(_) | StmtKind::Continue(_)) => kind,
         StmtKind::If {
             condition,
             then_block,
@@ -486,5 +487,60 @@ impl Parser {
         // taken its own hoisted statements.
         self.hoisted.extend(hoisted);
         Stmt::new(kind, Span { start, end })
+    }
+}
+
+// `break` and `continue`, resolved here to how many loops out they act (#261).
+impl Parser {
+    /// `name:` before `for` or `while` labels that loop.
+    fn loop_label(&mut self) -> Result<Option<String>, FrontError> {
+        let TokenKind::Name(label) = &self.current().kind else {
+            return Ok(None);
+        };
+        if !matches!(self.tokens.get(self.pos + 1).map(|t| &t.kind), Some(TokenKind::Symbol(":"))) {
+            return Ok(None);
+        }
+        let (label, span) = (label.clone(), self.bump().span);
+        self.bump();
+        if self.loops.iter().any(|outer| outer.as_deref() == Some(label.as_str())) {
+            return Err(FrontError::source(
+                "PARSE_LOOP_CONTROL",
+                format!("loop label `{label}` already names an enclosing loop"),
+                span,
+            ));
+        }
+        Ok(Some(label))
+    }
+
+    /// `break [label];` or `continue [label];`.
+    fn loop_control(&mut self) -> Result<Option<Stmt>, FrontError> {
+        let next = self.is_keyword("continue");
+        if !next && !self.is_keyword("break") {
+            return Ok(None);
+        }
+        let start = self.bump().span.start;
+        let label = match &self.current().kind {
+            TokenKind::Name(label) => Some(label.clone()),
+            _ => None,
+        };
+        if label.is_some() {
+            self.bump();
+        }
+        let span = Span { start, end: self.expect_symbol(";")?.end };
+        let depth = match &label {
+            None if self.loops.is_empty() => None,
+            None => Some(0),
+            Some(label) => self.loops.iter().rev().position(|outer| outer.as_deref() == Some(label.as_str())),
+        };
+        let Some(depth) = depth else {
+            let word = if next { "continue" } else { "break" };
+            let message = match label {
+                Some(label) => format!("`{word} {label}` names no enclosing loop"),
+                None => format!("`{word}` outside a loop"),
+            };
+            return Err(FrontError::source("PARSE_LOOP_CONTROL", message, span));
+        };
+        let kind = if next { StmtKind::Continue(depth) } else { StmtKind::Break(depth) };
+        Stmt::new(kind, span).map(Some)
     }
 }

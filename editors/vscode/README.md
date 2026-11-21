@@ -14,7 +14,7 @@ To install it for every window, link the folder into your extensions directory (
 ## What it highlights
 
 - Keywords, split by role: control flow, declarations, ownership modifiers (`read`, `mut`, `take`, `copy`, `move`), word operators, `true` and `false`, and the primitive types the lexer treats as keywords.
-- Reserved words (`async`, `await`, `scope`, `break`, `continue`, `total`, `effects`, `requires`, `ensures`) with the `invalid.illegal` scope, so a theme shows them as unavailable rather than as keywords.
+- Reserved words (`async`, `await`, `scope`, `total`, `effects`, `requires`, `ensures`) with the `invalid.illegal` scope, so a theme shows them as unavailable rather than as keywords.
 - Integer literals with `_` separators, `0x`, `0o` and `0b` radix prefixes and their suffixes, decimal literals with their suffixes, text and `b"..."` byte strings with escapes, `//` and nested `/* */` comments, `#[...]` attributes, function declarations and calls, the correctly rounded math and conversion intrinsics, and the built-in type names.
 
 ## Keeping it in step with the language

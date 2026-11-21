@@ -252,7 +252,7 @@ fn substitute_statement(
             substitute_expr(upper, arguments);
             substitute_block(body, arguments)?;
         }
-        StmtKind::Return(None) => {}
+        StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => {}
     }
     Ok(())
 }
@@ -512,7 +512,7 @@ pub(super) fn rewrite_calls(
                 rewrite_expr(upper, function, calls);
                 rewrite_calls(body, function, calls);
             }
-            StmtKind::Return(None) => {}
+            StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => {}
         }
     }
     for statement in &mut block.statements {

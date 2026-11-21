@@ -66,3 +66,20 @@ impl FunctionChecker<'_> {
         Ok(Type::Unit)
     }
 }
+
+/// Fixed-signature float conversions: (input, result).
+pub(crate) fn conversion(name: &str) -> Option<(Type, Type)> {
+    Some(match name {
+        "f32_from_i32" => (Type::I32, Type::F32),
+        "f32_from_u32" => (Type::U32, Type::F32),
+        "f64_from_i32" => (Type::I32, Type::F64),
+        "f64_from_u32" => (Type::U32, Type::F64),
+        "f64_from_f32" => (Type::F32, Type::F64),
+        "f32_from_f64" => (Type::F64, Type::F32),
+        "i32_from_f32" => (Type::F32, Type::I32),
+        "u32_from_f32" => (Type::F32, Type::U32),
+        "i32_from_f64" => (Type::F64, Type::I32),
+        "u32_from_f64" => (Type::F64, Type::U32),
+        _ => return storage::store(name),
+    })
+}

@@ -51,6 +51,7 @@ pub(super) fn check_block(
                     actual.require(expected, value.span)?;
                 }
             }
+            StmtKind::Break(_) | StmtKind::Continue(_) => {}
             StmtKind::Return(value) => {
                 if let Some(value) = value {
                     check_expr(value, &local, context, Some(result))?
