@@ -1,0 +1,11 @@
+// #253: digit separators and 0x / 0o / 0b radix prefixes.
+fn main() -> i32 {
+    let mask: u32 = 0xFFFF_0000u32;
+    let n: u32 = 1_000_000u32;
+    let flags: u32 = 0b1010_0101u32;
+    let mode: u32 = 0o755u32;
+    if mask == 4294901760u32 and n == 1000000u32 and flags == 165u32 and mode == 493u32 {
+        return 1;
+    }
+    return 0;
+}
