@@ -19,7 +19,8 @@ pub enum TrapCategory {
 }
 
 impl TrapCategory {
-    fn code(self) -> &'static str {
+    /// The stable diagnostic code of the category.
+    pub fn code(self) -> &'static str {
         match self {
             Self::IntegerOverflow => "INTEGER_OVERFLOW",
             Self::DivisionByZero => "DIVISION_BY_ZERO",
@@ -35,6 +36,18 @@ impl TrapCategory {
 pub fn assertion_message(source: &[u8], span: Span) -> Option<String> {
     let call = std::str::from_utf8(source.get(span.start..span.end)?).ok()?;
     crate::front::last_string_literal(call)
+}
+
+/// The outcome of `assert` given its evaluated, checked `Bool` condition.
+pub(crate) fn assertion(condition: Value, span: Span) -> Result<Value, EvalError> {
+    match condition {
+        Value::Bool(true) => Ok(Value::Unit),
+        Value::Bool(false) => Err(EvalError::Trap {
+            category: TrapCategory::AssertionFailed,
+            span,
+        }),
+        _ => Err(EvalError::tool("INTERNAL_TYPE", "checked assert condition")),
+    }
 }
 
 /// Add the assertion message to a trap document whose span came from an
@@ -182,11 +195,17 @@ impl EvalError {
         }
     }
 
-    /// The stable code of a trap, or `None` for any other error.
-    pub fn trap_code(&self) -> Option<&'static str> {
+    /// The human CLI report: the error, then the message of a failed assert.
+    pub fn human(&self, source: &[u8]) -> String {
         match self {
-            Self::Trap { category, .. } => Some(category.code()),
-            _ => None,
+            Self::Trap {
+                category: TrapCategory::AssertionFailed,
+                span,
+            } => match assertion_message(source, *span) {
+                Some(message) => format!("{self:?}\nassertion failed: {message}"),
+                None => format!("{self:?}"),
+            },
+            _ => format!("{self:?}"),
         }
     }
 

@@ -19,6 +19,8 @@ mod aggregates;
 mod arrays;
 #[path = "oracle_f32.rs"]
 mod floating;
+#[path = "oracle_intrinsics.rs"]
+mod intrinsics;
 #[path = "oracle_units.rs"]
 mod units;
 
@@ -214,15 +216,7 @@ fn admit(net: &Net, program: &mir::Program) -> Result<(), OracleError> {
             ));
         }
         if let Some(CallTarget::Intrinsic(name)) = &agent.call
-            && !matches!(
-                name.as_str(),
-                "wrapping_add"
-                    | "wrapping_mul"
-                    | "filled_i32"
-                    | "filled_u32"
-                    | "filled_f32"
-                    | "assert"
-            )
+            && !intrinsics::is_direct(name)
             && !floating::supports_intrinsic(name)
             && units::rule(name).is_none()
             && !aggregates::is_text_intrinsic(name)
@@ -746,21 +740,8 @@ fn operation(
             if floating::supports_intrinsic(name) {
                 return floating::call(name, args, frame).map(Some);
             }
-            if matches!(name.as_str(), "filled_i32" | "filled_u32" | "filled_f32") {
-                return arrays::filled(name, args, frame, arena).map(Some);
-            }
-            if name == "assert" {
-                let [condition] = args.as_slice() else {
-                    return Err(internal());
-                };
-                return match frame.get(*condition)? {
-                    Scalar::Bool(true) => Ok(Some(Scalar::Unit)),
-                    Scalar::Bool(false) => Err(OracleError::from(EvalError::Trap {
-                        category: TrapCategory::AssertionFailed,
-                        span,
-                    })),
-                    _ => Err(internal()),
-                };
+            if let Some(value) = intrinsics::direct(name, args, frame, arena, span) {
+                return value.map(Some);
             }
             let [left, right] = args.as_slice() else {
                 return Err(internal());
