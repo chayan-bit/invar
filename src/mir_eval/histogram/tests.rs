@@ -102,8 +102,7 @@ fn run(
             Some(&mut provider)
         },
         sorts: None,
-        reducer: None,
-        selector: None,
+        calls: CallHooks::default(),
         fuel_limit: fuel,
         steps_used: 0,
         call_depth: 0,

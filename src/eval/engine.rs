@@ -390,13 +390,11 @@ impl Evaluator<'_> {
                     }
                     return floating::reduction(kind, &operands, expr.span);
                 }
-                if let Some(kind) = crate::extremum::Kind::from_name(name) {
-                    let [Expr { kind: ExprKind::Name(actual), .. }] = args.as_slice() else {
-                        return Err(EvalError::tool("INTERNAL_BORROW", "checked extremum operand is not named"));
-                    };
+                if let Some(kind) = crate::extremum::Kind::from_name(name)
+                    && let Some(ExprKind::Name(actual)) = args.first().map(|arg| &arg.kind)
+                {
                     self.charge()?;
-                    let operand = env.borrow_owned(actual)?;
-                    return crate::extremum::evaluate(kind, &operand, expr.span);
+                    return crate::extremum::evaluate(kind, &env.borrow_owned(actual)?, expr.span);
                 }
                 if name == "len" {
                     let Some(Expr {

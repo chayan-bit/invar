@@ -290,11 +290,7 @@ fn check_spec_text(
             ));
         }
     }
-    if errors.is_empty() {
-        Ok(stats)
-    } else {
-        Err(errors)
-    }
+    errors.is_empty().then_some(stats).ok_or(errors)
 }
 
 /// Estimator: UTF-8 bytes divided by 3, rounded up, excluding the size-record line.
@@ -425,11 +421,7 @@ fn validate_index(
             ));
         }
     }
-    if errors.is_empty() {
-        Ok(())
-    } else {
-        Err(errors)
-    }
+    errors.is_empty().then_some(()).ok_or(errors)
 }
 
 fn hex(bytes: &[u8]) -> String {

@@ -837,20 +837,8 @@ impl FunctionChecker<'_> {
                     args.iter().find_map(|arg| self.hint(arg).filter(is_float))
                 }
                 "tc_mul_add" => Some(Type::F32),
-                reduction if reductions::is_reduction(reduction) => args
-                    .first()
-                    .and_then(|arg| self.hint(arg))
-                    .and_then(|ty| element(&ty)),
-                extremum if reductions::extremum_kind(extremum).is_some() => {
-                    reductions::extremum_kind(extremum).and_then(|kind| {
-                        if kind.is_index() {
-                            Some(Type::U32)
-                        } else {
-                            args.first()
-                                .and_then(|arg| self.hint(arg))
-                                .and_then(|ty| element(&ty))
-                        }
-                    })
+                reduction if reductions::is_reduction(reduction) => {
+                    self.reduction_hint(reduction, args)
                 }
                 _ => self
                     .checker
@@ -1540,9 +1528,6 @@ impl FunctionChecker<'_> {
             }
             reduction if reductions::is_reduction(reduction) => {
                 self.reduction(reduction, args, span)
-            }
-            extremum if reductions::extremum_kind(extremum).is_some() => {
-                self.extremum(extremum, args, span)
             }
             "len" => {
                 if args.len() != 1 {

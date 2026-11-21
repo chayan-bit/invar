@@ -15,8 +15,9 @@ fn float_element(ty: &Type) -> Option<Type> {
     }
 }
 
+/// A float reduction or an extremum intrinsic.
 pub(crate) fn is_reduction(name: &str) -> bool {
-    crate::fsum::Kind::from_name(name).is_some()
+    crate::fsum::Kind::from_name(name).is_some() || extremum_kind(name).is_some()
 }
 
 impl FunctionChecker<'_> {
@@ -26,6 +27,9 @@ impl FunctionChecker<'_> {
         args: &[Expr],
         span: Span,
     ) -> Result<Type, FrontError> {
+        if extremum_kind(name).is_some() {
+            return self.extremum(name, args, span);
+        }
         let arity = if name.starts_with("dot_") { 2 } else { 1 };
         if args.len() != arity {
             return Err(mismatch(
@@ -61,12 +65,17 @@ pub(crate) fn extremum_kind(name: &str) -> Option<crate::extremum::Kind> {
 }
 
 impl FunctionChecker<'_> {
-    pub(super) fn extremum(
-        &mut self,
-        name: &str,
-        args: &[Expr],
-        span: Span,
-    ) -> Result<Type, FrontError> {
+    /// The expected result type of a reduction or extremum call.
+    pub(super) fn reduction_hint(&self, name: &str, args: &[Expr]) -> Option<Type> {
+        if extremum_kind(name).is_some_and(crate::extremum::Kind::is_index) {
+            return Some(Type::U32);
+        }
+        args.first()
+            .and_then(|arg| self.hint(arg))
+            .and_then(|ty| element(&ty))
+    }
+
+    fn extremum(&mut self, name: &str, args: &[Expr], span: Span) -> Result<Type, FrontError> {
         let [arg] = args else {
             return Err(mismatch(format!("{name} expects one named array"), span));
         };

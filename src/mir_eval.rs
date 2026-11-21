@@ -30,6 +30,7 @@ pub(crate) use bulk::{LiveLoop, LoopOverride};
 use bulk::{live_loop, live_trips};
 use frame::{Frame, Slot, copied, park, record_cleanup};
 pub use reduce::{ReduceCall, Reducer, SelectCall, Selector, serial_reduction};
+use reduce::CallHooks;
 #[cfg(test)]
 use values::mir_host_index;
 use values::{array_length, binary, filled, indexed, mir_len_u32, store_index, unary};
@@ -58,10 +59,8 @@ struct Interpreter<'a> {
     program: &'a mir::Program,
     provider: Option<&'a mut BulkProvider<'a>>,
     sorts: Option<&'a mut SortProvider<'a>>,
-    /// Engine hook for reached `sum_tree`/`dot_tree`/`sum_exact`/`dot_exact` calls.
-    reducer: Option<&'a mut Reducer<'a>>,
-    /// Engine hook for reached `min_of`/`max_of`/`argmin`/`argmax` calls (#207).
-    selector: Option<&'a mut Selector<'a>>,
+    /// Engine hooks for reached reduction and extremum calls.
+    calls: CallHooks<'a>,
     fuel_limit: u64,
     steps_used: u64,
     call_depth: usize,
@@ -184,8 +183,7 @@ fn observe_hooks<'a>(
                 program,
                 provider,
                 sorts,
-                reducer,
-                selector,
+                calls: CallHooks { reducer, selector },
                 fuel_limit,
                 steps_used: 0,
                 call_depth: 0,
@@ -261,8 +259,7 @@ mod diagnostic_tests {
             program: &program,
             provider: None,
             sorts: None,
-            reducer: None,
-            selector: None,
+            calls: CallHooks::default(),
             fuel_limit: 100,
             steps_used: 0,
             call_depth: 0,

@@ -90,7 +90,7 @@ impl Interpreter<'_> {
             a: &a,
             b: b.as_deref().map(Vec::as_slice),
         };
-        if let Some(reducer) = self.reducer.as_mut()
+        if let Some(reducer) = self.calls.reducer.as_mut()
             && let Some(bits) = reducer(&call)?
         {
             return Ok(Value::F32(bits));
@@ -117,7 +117,7 @@ impl Interpreter<'_> {
             return Err(tool("MIR_CALL", "invalid extremum arity"));
         };
         let operand = frame.value(*arg)?;
-        if let Some(selector) = self.selector.as_mut() {
+        if let Some(selector) = self.calls.selector.as_mut() {
             let call = SelectCall {
                 function: &function.name,
                 span,
@@ -130,6 +130,15 @@ impl Interpreter<'_> {
         }
         crate::extremum::evaluate(kind, &operand, span)
     }
+}
+
+/// The interpreter's engine hooks for reached calls.
+#[derive(Default)]
+pub(super) struct CallHooks<'a> {
+    /// `sum_tree`/`dot_tree`/`sum_exact`/`dot_exact`.
+    pub(super) reducer: Option<&'a mut Reducer<'a>>,
+    /// `min_of`/`max_of`/`argmin`/`argmax` (#207).
+    pub(super) selector: Option<&'a mut Selector<'a>>,
 }
 
 /// One reached `min_of`/`max_of`/`argmin`/`argmax` call (#207).
