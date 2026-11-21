@@ -17,7 +17,7 @@ say() { echo "remote-cuda: $*"; }
 # idle I/O class; every child inherits all four.
 if [ -z "${REMOTE_CUDA_SCOPED:-}" ]; then
     export REMOTE_CUDA_SCOPED=1
-    low=(nice -n 19 ionice -c3 "$0")
+    low=(nice -n 19 ionice -c3 bash "$here/${0##*/}")
     if systemd-run --user --scope -q true 2>/dev/null; then
         exec systemd-run --user --scope -q -p MemoryMax="$MEM_MAX" -p MemorySwapMax=0 \
             -p CPUQuota="$CPU_QUOTA" "${low[@]}"

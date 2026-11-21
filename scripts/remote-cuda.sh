@@ -101,7 +101,7 @@ if [ "$os" = Linux ]; then
         sleep 60
     done
     rc=$("${ssh_[@]}" "cat $rd/rc 2>/dev/null" || true)
-    "${ssh_[@]}" "gzip -c $rd/cargo.log" 2>/dev/null | gunzip >"$root/target/remote-cuda/$run.log" &&
+    "${ssh_[@]}" "gzip -c $rd/cargo.log" 2>/dev/null | gunzip 2>/dev/null >"$root/target/remote-cuda/$run.log" &&
         echo "remote-cuda: full log target/remote-cuda/$run.log"
     exit "${rc:-5}"
 fi
