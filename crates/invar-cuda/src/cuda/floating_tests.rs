@@ -138,23 +138,29 @@ fn issue_m4_floating_runtime_exact_capacities_identity_and_storage_budget() {
 fn issue_m4_floating_runtime_strict_child_options_and_early_identity_refusals() {
     let p = plan([1, 2, 1], 1);
     let source = ir::emit_cuda(&p).unwrap();
-    assert_eq!(strict_options(&source, CAPS).unwrap(), p.nvrtc_options());
+    assert_eq!(
+        strict_options(&source, CAPS, true).unwrap(),
+        p.nvrtc_options()
+    );
     for bad in [
         source.replace("strict-f32-v1", "relaxed"),
         source.replace("--ftz=false", "--ftz=true"),
         source.replace("compute_86", "compute_80"),
         source.replace("caps=Cuda", "caps=Unknown"),
     ] {
-        assert!(matches!(strict_options(&bad, CAPS), Err(Error::Compile(_))));
+        assert!(matches!(
+            strict_options(&bad, CAPS, true),
+            Err(Error::Compile(_))
+        ));
         // Identity failures return before the optional library presence probe.
         assert!(matches!(
             compile_floating_cubin(&bad, CAPS),
             Err(Error::Compile(_))
         ));
     }
-    assert_eq!(strict_options("\0", CAPS), Err(Error::Limit));
+    assert_eq!(strict_options("\0", CAPS, true), Err(Error::Limit));
     assert_eq!(
-        strict_options(&" ".repeat(invar_device::MAX_SOURCE_BYTES + 1), CAPS),
+        strict_options(&" ".repeat(invar_device::MAX_SOURCE_BYTES + 1), CAPS, true),
         Err(Error::Limit)
     );
     for caps in [
@@ -179,8 +185,56 @@ fn issue_m4_floating_runtime_strict_child_options_and_early_identity_refusals() 
             sm: 120,
         },
     ] {
-        assert_eq!(strict_options(&source, caps), Err(Error::Unavailable));
+        assert_eq!(strict_options(&source, caps, true), Err(Error::Unavailable));
     }
+}
+
+/// #163: a strict f32 source carrying the CORE-MATH text declares the cr-v1
+/// options and may use their larger cap; no other entry admits them.
+#[test]
+fn cr_v1_strict_sources_declare_their_own_options_and_cap() {
+    use invar_device::{
+        f32_ops::{self, Kind, Node, Program, Scalar},
+        v2,
+    };
+    let origin = Provenance {
+        source_identity: 1,
+        graph_revision: 1,
+    };
+    let emit = |nodes| {
+        let program = Program {
+            length: 4,
+            inputs: vec![Scalar::F32],
+            nodes,
+            kind: Kind::Map,
+        };
+        let ir = f32_ops::descriptor(program, Span { start: 0, end: 1 }, origin).unwrap();
+        f32_ops::emit(&v2::verify(ir, origin, CAPS).unwrap()).unwrap()
+    };
+    let trig = emit(vec![Node::Input(0), Node::Sin(0), Node::Cos(1)]);
+    let library = ir::cuda_cr_v1_options(CAPS).unwrap();
+    assert!(
+        trig.len() > invar_device::MAX_SOURCE_BYTES,
+        "{}",
+        trig.len()
+    );
+    assert_eq!(strict_options(&trig, CAPS, true).unwrap(), library);
+    assert!(strict_options(&trig, CAPS, false).is_err());
+    assert!(compile_tc_cubin(&trig, CAPS).is_err());
+    for bad in [
+        trig.replace("--device-int128 ", ""),
+        trig.replace("--fmad=false", "--fmad=true"),
+    ] {
+        // Without the declared cr-v1 options the ordinary cap applies first.
+        assert_eq!(strict_options(&bad, CAPS, true), Err(Error::Limit));
+    }
+    let padded = trig.clone() + &" ".repeat(f32_ops::MAX_CR_V1_SOURCE_BYTES - trig.len() + 1);
+    assert_eq!(strict_options(&padded, CAPS, true), Err(Error::Limit));
+    let plain = emit(vec![Node::Input(0), Node::Neg(0)]);
+    assert_eq!(
+        strict_options(&plain, CAPS, true).unwrap(),
+        ir::cuda_strict_options(CAPS).unwrap()
+    );
 }
 
 #[test]

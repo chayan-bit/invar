@@ -190,6 +190,16 @@ pub fn cuda_strict_options(caps: Capabilities) -> Option<Vec<String>> {
     })
 }
 
+/// [`cuda_strict_options`] for a strict source that carries the vendored
+/// CORE-MATH text: the same numeric options, plus the C++20, default-device
+/// and 128-bit integer support that `invar_math::CUDA_OPTIONS` gives it.
+pub fn cuda_cr_v1_options(caps: Capabilities) -> Option<Vec<String>> {
+    let mut options = cuda_strict_options(caps)?;
+    options[0] = "--std=c++20".to_owned();
+    options.extend(["-default-device", "--device-int128", "-w"].map(str::to_owned));
+    Some(options)
+}
+
 fn physical_index(buffer: &Buffer, index: [u32; 2]) -> Result<u64, Error> {
     if index.iter().zip(buffer.shape).any(|(&i, n)| i >= n) {
         return Err(Error::Index);

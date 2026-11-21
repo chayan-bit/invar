@@ -10,3 +10,5 @@ license.workspace = true
 # Target descriptions (src/target.rs). Both are already in the workspace lock.
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.151"
+# The vendored CORE-MATH text that f32 sources with `sin` or `cos` carry.
+invar-math = { path = "../invar-math" }

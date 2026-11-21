@@ -171,3 +171,56 @@ fn status_words_share_the_guard_encoding() {
     let head = metal.find("uint flag = 0u;\n").unwrap() + "uint flag = 0u;\n".len();
     assert!(metal[head..].starts_with(&msl_claim(METAL_STATUS)));
 }
+
+/// #163: only a program that calls `sin` or `cos` carries the CORE-MATH text,
+/// once per function and before the kernel; CUDA declares the cr-v1 options,
+/// Metal ends the library's `float` and `double` macros, and the helpers set
+/// no Metal guard flag.
+#[test]
+fn cr_v1_sources_carry_the_library_only_when_called() {
+    use invar_device::f32_ops::{self, Kind, Node, Program, Scalar};
+    let program = |nodes| Program {
+        length: 2,
+        inputs: vec![Scalar::F32],
+        nodes,
+        kind: Kind::Map,
+    };
+    let cuda_caps = Capabilities::cuda_12_9_sm89();
+    let trig = || {
+        program(vec![
+            Node::Input(0),
+            Node::Sin(0),
+            Node::Cos(1),
+            Node::Sin(2),
+        ])
+    };
+    let cuda = f32_ops::emit(&ops::plan(trig(), cuda_caps)).unwrap();
+    let metal = f32_ops::emit(&ops::plan(trig(), METAL)).unwrap();
+    let options = invar_device::floating::cuda_cr_v1_options(cuda_caps).unwrap();
+    assert!(cuda.contains(&format!("// required-options: {}\n", options.join(" "))));
+    for (source, kernel) in [(&cuda, "__global__ void"), (&metal, "kernel void")] {
+        let kernel = source.find(kernel).unwrap();
+        for f in ["sin", "cos"] {
+            let unit = format!("namespace invar_cm_{f}_32 {{");
+            assert_eq!(source.matches(&unit).count(), 1, "{f}");
+            assert!(source.find(&unit).unwrap() < kernel, "{f}");
+        }
+        assert!(
+            source.contains("v1 = invar_cr_sin(v0);") && source.contains("v3 = invar_cr_sin(v2);")
+        );
+        assert!(!source[kernel..].contains("flag |="));
+    }
+    let undef = metal.find("#undef double\n#undef float\n").unwrap();
+    assert!(undef > metal.find("namespace invar_cm_cos_32").unwrap());
+    assert!(undef < metal.find("static inline uint invar_cr_sin").unwrap());
+    let strict = invar_device::floating::cuda_strict_options(cuda_caps).unwrap();
+    for caps in [cuda_caps, METAL] {
+        let plain = program(vec![Node::Input(0), Node::Sqrt(0)]);
+        let plain = f32_ops::emit(&ops::plan(plain, caps)).unwrap();
+        assert!(!plain.contains("invar_cm_") && !plain.contains("invar_cr_"));
+        assert!(plain.len() <= invar_device::MAX_SOURCE_BYTES);
+        if caps == cuda_caps {
+            assert!(plain.contains(&format!("// required-options: {}\n", strict.join(" "))));
+        }
+    }
+}
