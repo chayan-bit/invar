@@ -32,7 +32,18 @@ pub struct Reduction {
     pub cost: Option<DeviceCost>,
     /// Device time for one completed submission, when a device ran it.
     pub kernel_ms: Option<f64>,
+    /// The law that admitted the split, when more than one worker or a
+    /// device ran the call: [`TREE_LAW`] or [`EXACT_LAW`].
+    pub law: Option<&'static str>,
 }
+
+/// `sum_tree`/`dot_tree` split on aligned power-of-two leaf chunks: each chunk
+/// is a node of the one fixed tree (NB.1.6), so the root is unchanged.
+pub const TREE_LAW: &str = "fsum-aligned-tree-v1";
+/// `sum_exact`/`dot_exact` merge integer partial accumulators: integer
+/// addition is associative and commutative, so every partition of the terms
+/// gives the same exact total, which rounds once (NB.1.3, NA3.15).
+pub const EXACT_LAW: &str = "fsum-exact-merge-v1";
 
 impl Reduction {
     pub(crate) fn new(call: &ReduceCall<'_>, backend: &'static str, reason: &'static str) -> Self {
@@ -47,6 +58,13 @@ impl Reduction {
             workers: 0,
             cost: None,
             kernel_ms: None,
+            law: matches!(backend, "cpu-parallel" | "cuda" | "metal").then(|| {
+                if call.kind.is_exact() {
+                    EXACT_LAW
+                } else {
+                    TREE_LAW
+                }
+            }),
         }
     }
 }

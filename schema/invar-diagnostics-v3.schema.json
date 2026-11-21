@@ -390,6 +390,13 @@
                 "type": "string",
                 "minLength": 1
               },
+              "law": {
+                "description": "The law that admitted a parallel or device plan for this reduction; absent when it ran on one worker.",
+                "enum": [
+                  "fsum-aligned-tree-v1",
+                  "fsum-exact-merge-v1"
+                ]
+              },
               "family_id": {
                 "enum": [
                   "spatial.voxel_grid_build.f32",
@@ -488,6 +495,13 @@
               "implementation": {
                 "type": "string",
                 "minLength": 1
+              },
+              "law": {
+                "description": "The law that admitted a parallel or device plan for this reduction; absent when it ran on one worker.",
+                "enum": [
+                  "fsum-aligned-tree-v1",
+                  "fsum-exact-merge-v1"
+                ]
               },
               "family_id": {
                 "enum": [

@@ -114,12 +114,16 @@ impl Launch {
 /// Shared deposit logic, written once in the common C subset of CUDA and MSL.
 /// `fsum_i64`/`fsum_u64` are the backend's 64-bit integer spellings.
 const DEPOSIT: &str = r#"
-static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint pos, uint value, bool neg) {
+// Every digit takes a predicated add with a constant index, so the digits
+// stay in registers; an indexed `d[q]` would put them in local memory.
+static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint digits, uint pos, uint value, bool neg) {
     fsum_u64 wide = ((fsum_u64)value) << (pos & 31u);
     uint q = pos >> 5;
     fsum_i64 lo = (fsum_i64)(wide & 0xffffffffull);
     fsum_i64 hi = (fsum_i64)(wide >> 32);
-    if (neg) { d[q] -= lo; d[q + 1] -= hi; } else { d[q] += lo; d[q + 1] += hi; }
+    if (neg) { lo = -lo; hi = -hi; }
+    #pragma unroll
+    for (uint k = 0u; k < digits; ++k) { d[k] += (k == q) ? lo : ((k == q + 1u) ? hi : (fsum_i64)0); }
 }
 
 static fsum_inline void fsum_deposit(fsum_thread fsum_i64* d, fsum_thread uint* flags, uint x) {
@@ -130,7 +134,7 @@ static fsum_inline void fsum_deposit(fsum_thread fsum_i64* d, fsum_thread uint* 
     if (e == 255u) { *flags |= (f != 0u) ? 1u : (neg ? 4u : 2u); return; }
     uint sig = (e != 0u) ? (f | 0x800000u) : f;
     uint pos = (e != 0u) ? (e - 1u) : 0u;
-    fsum_add_at(d, pos, sig, neg);
+    fsum_add_at(d, 9u, pos, sig, neg);
 }
 
 static fsum_inline void fsum_deposit_product(fsum_thread fsum_i64* d, fsum_thread uint* flags, uint x, uint y) {
@@ -149,8 +153,8 @@ static fsum_inline void fsum_deposit_product(fsum_thread fsum_i64* d, fsum_threa
     fsum_u64 sy = (fsum_u64)((ey != 0u) ? ((my & 0x7fffffu) | 0x800000u) : my);
     uint pos = ((ex != 0u) ? ex - 1u : 0u) + ((ey != 0u) ? ey - 1u : 0u);
     fsum_u64 product = sx * sy;
-    fsum_add_at(d, pos, (uint)(product & 0xffffffull), neg);
-    fsum_add_at(d, pos + 24u, (uint)(product >> 24), neg);
+    fsum_add_at(d, 18u, pos, (uint)(product & 0xffffffull), neg);
+    fsum_add_at(d, 18u, pos + 24u, (uint)(product >> 24), neg);
 }
 "#;
 
