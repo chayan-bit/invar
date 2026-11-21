@@ -2,7 +2,7 @@
 
 Status: DRAFT; section 7 of the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, kept in its own file.
 Counts: statements=12 citations=13
-Size record: tokens=1521 estimator=bytes/3 limit=6000
+Size record: tokens=1565 estimator=bytes/3 limit=6000
 ## 7. Nondeterminism axis N
 
 [NA7.1] This file is section 7 of `docs/spec/invar-v0.2-axes.md`, follows its section 1 conventions and has its own 6,000-token budget. `tests/spec_examples.rs::N_SPEC`
@@ -14,7 +14,7 @@ Size record: tokens=1521 estimator=bytes/3 limit=6000
 [NA7.7] N3 makes the result any member of a set that a checkable predicate defines, needs a source construct naming that predicate, and its oracle is predicate membership, with an optional recorded order for replay. `src/axes.rs::N_AXIS`
 [NA7.8] N4 admits bounded-error float results that may vary from run to run, is never chosen by the compiler, and its oracle is the declared error bound over a seeded corpus. `src/numeric_contract/fold.rs::relaxed_admits`
 [NA7.9] N0, N1 and N2 keep two runs bit-identical and record `deterministic: true`, while N4, and N3 when its predicate admits several results, record `deterministic: false`. `src/axes/receipt.rs::receipt`
-[NA7.10] A receipt names the rule behind its level in `n_justification`: a monoid proof at N1, the canonicalisation kind at N2, the predicate name at N3 and the bound at N4. `schema/explain-v6.schema.json`
+[NA7.10] A receipt names the rule behind its level in `n_justification`: `serial-reference-bits` for an N1 or N2 plan that already meets N0, a monoid proof for an N1 plan that frees the hardware order, the canonicalisation kind for an N2 plan that inserts one, the predicate name at N3 and the bound at N4. `schema/explain-v6.schema.json`
 [NA7.11] This engine honours N1 and N2 by admitting only plans that already meet N0, so their receipts name `serial-reference-bits`, and it refuses N3 and N4 with `CONTRACT_UNAVAILABLE`. `src/axes/receipt.rs::N_JUSTIFICATION`
 [NA7.12] The table below is the conformance column for N, a level without a passing test stays a hole, and the conformance suite of #208 will generate this column with its evidence. `tests/numeric_tiers/region_axes.rs`
 
