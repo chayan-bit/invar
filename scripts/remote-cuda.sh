@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and run a git ref's CUDA suites on a remote Windows CUDA host over ssh.
+# Build and run a git ref's CUDA suites on a remote Windows or Linux CUDA host over ssh.
 # Usage: scripts/remote-cuda.sh <git-ref> [test-name-filters]
 # Filters are libtest substrings separated by spaces. The suites are the root
 # package's lib tests plus every test binary (tests/<t>.rs or tests/<t>/main.rs)
@@ -11,7 +11,13 @@
 # to run beside another tenant's GPU job (correctness only, timings invalid),
 # REMOTE_CUDA_NO_SKIP=1 to run the known gaps below, REMOTE_CUDA_TESTS to replace
 # the target list, REMOTE_CUDA_EXTRA_SKIPS (comma-separated) to add skips,
-# REMOTE_CUDA_PROFILE (device-test) for the cargo profile the suites build with.
+# REMOTE_CUDA_PROFILE (device-test) for the cargo profile the suites build with,
+# REMOTE_CUDA_OS (Windows unless `uname -s` on the host prints Linux).
+# A Linux host (scripts/remote-cuda-linux.sh) runs at low load by default:
+# REMOTE_CUDA_LANES (2 suites at once), REMOTE_CUDA_JOBS (4 build jobs and test
+# threads), REMOTE_CUDA_MEM_MAX (12G, no swap), REMOTE_CUDA_CPU_QUOTA (800%),
+# REMOTE_CUDA_MAX_LOAD (8), REMOTE_CUDA_DEVICE_JOBS (2 GNET-05 programs), and
+# Linux defaults TIMEOUT_MIN 240, WAIT_MIN 120, MAX_UTIL 5.
 # Exit: 0 pass, 1 test failures (or no test ran, or a filter matched none), 2 build failure, 3 GPU or runner busy, 4 timeout,
 # 5 ssh dropped mid-run (the run finished remotely; read its log for the result).
 set -euo pipefail
@@ -27,11 +33,9 @@ tests=$(for t in $(git grep -lE 'feature *= *"cuda"|CudaDevice' "$sha" -- tests 
     # `if`, not `&&`: a last candidate that is no target (tests/support) must not fail the loop.
     if git cat-file -e "$sha:tests/$t.rs" 2>/dev/null || git cat-file -e "$sha:tests/$t/main.rs" 2>/dev/null; then echo "$t"; fi
 done | paste -sd, -)
-# Known Windows gaps and opt-in tests whose inputs the runner does not supply,
+# Opt-in tests whose inputs the runner does not supply, and known Windows gaps,
 # none of them a CUDA result (libtest --skip substrings):
 skips=(
-    system::substep_admission::     # S1405 manifest path checks assume Unix paths
-    grid_cuda_completed_equality     # uses /bin/false as the failing compiler
     issue_m3_05_gpu_full_m2_probe_corpus  # needs INVAR_M3_05_CORPUS_DIR
     benchmark_manifest_validation_and_rejections  # needs a git checkout
     source_packet_reverification_binds_source_key_dimensions_generation_and_input_bytes  # order-dependent on any OS
@@ -47,11 +51,18 @@ skips=(
     math_matches_upstream_core_math_on_worst_cases_and_random_inputs  # host side; needs INVAR_COREMATH_UPSTREAM
     math_differential_catches_a_mutated_polynomial_coefficient  # host side; needs INVAR_COREMATH_UPSTREAM
     math_msl_host_build_matches_upstream_core_math  # needs INVAR_COREMATH_UPSTREAM
+)
+windows_skips=(
+    system::substep_admission::     # S1405 manifest path checks assume Unix paths
+    grid_cuda_completed_equality     # uses /bin/false as the failing compiler
     math_msl_prelude_compiles_warning_free_on_the_host  # host C++ build assumes a 64-bit long; Windows is LLP64
     math_msl_soft_binary64_matches_the_host_fpu  # host C++ build assumes a 64-bit long; Windows is LLP64
     math_msl_host_build_matches_the_cpu_library  # host C++ build assumes a 64-bit long; Windows is LLP64
     math_msl_host_build_catches_a_mutated_polynomial_coefficient  # host C++ build assumes a 64-bit long; Windows is LLP64
 )
+ssh_=(ssh -o ConnectTimeout=20 -o ServerAliveInterval=30 "$host")
+os=${REMOTE_CUDA_OS:-$("${ssh_[@]}" uname -s 2>/dev/null | tr -d '\r' || true)}
+[ "$os" = Linux ] || skips+=("${windows_skips[@]}")
 [ "${REMOTE_CUDA_NO_SKIP:-0}" = 1 ] && skips=()
 [ -n "${REMOTE_CUDA_TESTS:-}" ] && tests=$REMOTE_CUDA_TESTS
 [ -n "${REMOTE_CUDA_EXTRA_SKIPS:-}" ] && IFS=, read -ra extra <<<"$REMOTE_CUDA_EXTRA_SKIPS" && skips+=("${extra[@]}")
@@ -63,9 +74,38 @@ trap 'rm -rf "$tmp"' EXIT
 mkdir "$tmp/src"
 git archive "$sha" | tar -xf - -C "$tmp/src"
 tar -czhf "$tmp/src.tgz" -C "$tmp/src" .
-echo "remote-cuda: ref $ref = $sha, run $run, $(tr ',' '\n' <<<"$tests" | wc -l | tr -d ' ') test targets + lib"
+echo "remote-cuda: ref $ref = $sha, run $run, $(tr ',' '\n' <<<"$tests" | wc -l | tr -d ' ') test targets + lib on ${os:-Windows}"
+mkdir -p "$root/target/remote-cuda"
 
-ssh_=(ssh -o ConnectTimeout=20 -o ServerAliveInterval=30 "$host")
+if [ "$os" = Linux ]; then
+    rd="$dir/runs/$run"
+    q() { printf '%s=%q\n' "$1" "$2"; }
+    {
+        q BASE "$dir"; q TESTS "$tests"; q FILTER "$filter"; q SKIP "$(IFS=,; echo "${skips[*]}")"
+        q REVISION "$sha"; q PROFILE "${REMOTE_CUDA_PROFILE:-device-test}"
+        q TIMEOUT_MIN "${REMOTE_CUDA_TIMEOUT_MIN:-240}"; q WAIT_MIN "${REMOTE_CUDA_WAIT_MIN:-120}"
+        q MIN_FREE_MIB "${REMOTE_CUDA_MIN_FREE_MIB:-8192}"; q MAX_UTIL "${REMOTE_CUDA_MAX_UTIL:-5}"
+        q MAX_LOAD "${REMOTE_CUDA_MAX_LOAD:-8}"; q SHARED "${REMOTE_CUDA_SHARED:-0}"
+        q LANES "${REMOTE_CUDA_LANES:-2}"; q JOBS "${REMOTE_CUDA_JOBS:-4}"; q DEVICE_JOBS "${REMOTE_CUDA_DEVICE_JOBS:-2}"
+        q MEM_MAX "${REMOTE_CUDA_MEM_MAX:-12G}"; q CPU_QUOTA "${REMOTE_CUDA_CPU_QUOTA:-800%}"
+    } >"$tmp/run.env"
+    "${ssh_[@]}" "mkdir -p $rd"
+    scp -q "$here/remote-cuda-linux.sh" "$tmp/src.tgz" "$tmp/run.env" "$host:$rd/"
+    # Detached, so a dropped ssh session never stops the run; follow its output.
+    pid=$("${ssh_[@]}" "cd $rd && setsid nohup bash remote-cuda-linux.sh >out 2>&1 </dev/null & echo \$!")
+    while :; do
+        rc=0
+        "${ssh_[@]}" "tail -n +1 -F --pid=$pid $rd/out 2>/dev/null" || rc=$?
+        [ "$rc" = 255 ] || break
+        echo "remote-cuda: ssh dropped; reconnecting to run $run"
+        sleep 60
+    done
+    rc=$("${ssh_[@]}" "cat $rd/rc 2>/dev/null" || true)
+    "${ssh_[@]}" "gzip -c $rd/cargo.log" 2>/dev/null | gunzip >"$root/target/remote-cuda/$run.log" &&
+        echo "remote-cuda: full log target/remote-cuda/$run.log"
+    exit "${rc:-5}"
+fi
+
 "${ssh_[@]}" "mkdir $dir\\runs\\$run"
 scp -q "$here/remote-cuda.ps1" "$tmp/src.tgz" "$host:$dir/runs/$run/"
 args=(-Run "$run" -Base "$dir" -Tests "$tests" -Revision "$sha"
@@ -86,7 +126,6 @@ if [ "$rc" = 255 ]; then
     done
     rc=5
 fi
-mkdir -p "$root/target/remote-cuda"
 scp -q "$host:$dir/runs/$run/cargo.log" "$root/target/remote-cuda/$run.log" 2>/dev/null &&
     echo "remote-cuda: full log target/remote-cuda/$run.log"
 exit "$rc"
