@@ -171,6 +171,20 @@ impl Parser {
             }
             return if_statement(start.start, condition, then_block, tail);
         }
+        if let Some(stmt) = self.loop_control()? {
+            return Ok(stmt);
+        }
+        let label = self.loop_label()?;
+        if label.is_some() || self.is_keyword("while") || self.is_keyword("for") {
+            self.loops.push(label);
+            let stmt = self.loop_statement();
+            self.loops.pop();
+            return stmt;
+        }
+        self.assignment_or_expression()
+    }
+
+    fn loop_statement(&mut self) -> Result<Stmt, FrontError> {
         if let Some(start) = self.take_keyword("while") {
             let condition = self.expression()?;
             let body = self.block()?;
@@ -207,6 +221,10 @@ impl Parser {
                 span,
             );
         }
+        Err(self.expected("for or while after a loop label"))
+    }
+
+    fn assignment_or_expression(&mut self) -> Result<Stmt, FrontError> {
         let starts_with_name = matches!(self.current().kind, TokenKind::Name(_));
         let expr = self.expression()?;
         if let Some((op, op_span)) = self.compound_operator() {

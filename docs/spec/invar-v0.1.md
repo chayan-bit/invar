@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=310 citations=338
-Size record: tokens=29189 estimator=bytes/3 limit=30000
+Counts: statements=313 citations=342
+Size record: tokens=29579 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -53,7 +53,7 @@ fn main() -> i32 { return 1 + 2; } // trailing
 [N2.2.1] A decimal integer literal has an optional `i32` or `u32` suffix, and an unsuffixed literal takes its type from context and otherwise defaults to i32. `src/check.rs`
 [N2.2.2] An identifier character directly after a numeric token is a malformed literal and is not split into two tokens. `tests/language/syntax_and_limits.rs::syntax_and_limits_lexical_spans_and_json`
 [N2.2.3] The spelling `-2147483648` is a valid i32, the positive `2147483648i32` is rejected, and an out-of-range literal is rejected at compile time even in unreachable code. `tests/language/names_types_and_calls.rs::names_types_and_calls_rejects_names_types_and_returns`
-[N2.2.4] The words `async await scope break continue total effects requires ensures` are reserved and rejected as `UNSUPPORTED_FEATURE`. `src/front/lexer.rs::unsupported`
+[N2.2.4] The words `async await scope total effects requires ensures` are reserved and rejected as `UNSUPPORTED_FEATURE`. `src/front/lexer.rs::unsupported`
 
 ```invar outcome=diag:LEX_INVALID_LITERAL
 fn main() -> i32 { return 12oops; }
@@ -1342,3 +1342,20 @@ fn main() -> i32 {
 [NB.7.6] `for x in xs { b }` over a named array, `View` or `MutView` is `for i in 0u32 .. len(xs) { let x = xs[i]; b }` with a hidden `i`, desugared before checking and family recognition, except that a body assigning `x` names `i` as `x`, reserving it alike, and makes every `x` the place `xs[i]`, so loans, traps and fuel are the counted loop's; such an `x` cannot be moved or captured (`OWNERSHIP`) (#255). `src/front/parser/loops.rs` `tests/language/for_each.rs`
 [NB.7.7] `for i in lo .. hi step k` binds `lo`, `hi` and `k` once, in order, to hidden `u32` locals and runs the counted loop over `0 .. ceil((hi - lo) / k)` trips, none when `hi <= lo`, with `i = lo + j * k`, the view stride rule of N5.5.2; a literal zero `k`, in any parentheses, is `PARSE_ZERO_STEP`, and a zero `k` traps `DIVISION_BY_ZERO` over the header only on a non-empty range (#256). `tests/language/stepped_ranges.rs`
 [NB.7.8] A `///` line comment documents the item whose first token follows it and a `//!` line comment the file or module it opens before any item; both are trivia kept with that item's span in `Program::docs`, never reach checking, MIR or plans, and anywhere else are `PARSE_DOC_COMMENT_MISPLACED` (#257). `src/front/parser/docs.rs` `tests/language/doc_comments.rs`
+[NB.7.9] `break;` leaves the innermost enclosing loop and `continue;` starts its next trip, `name: while` or `name: for` labels a loop for `break name;` and `continue name;`, and each costs one step, as `return;` does (#261). `tests/language/loop_control.rs::an_early_exit_costs_and_cleans_up_like_return`
+[NB.7.10] An exit drops the owners of every scope it leaves, innermost first, a loop never counts as returning, and an exit outside a loop, to an unknown label or under a duplicate label, including from a closure body, is `PARSE_LOOP_CONTROL`. `tests/language/loop_control.rs::loop_control_outside_its_loop_is_refused`
+[NB.7.11] All engines agree, an innermost `continue` takes the laws of its guarded form, any other exit keeps its loop serial without L15, and family recognizers and tiered folds refuse a loop holding an exit. `tests/language/loop_control.rs` `tests/gnet_device_model/loop_control_model.rs`
+
+```invar outcome=value:4
+fn main() -> i32 {
+    var n = 0;
+    rows: for i in 0u32 .. 4u32 {
+        for j in 0u32 .. 4u32 {
+            if j > i { continue rows; }
+            if i + j == 3u32 { break rows; }
+            n += 1;
+        }
+    }
+    return n;
+}
+```

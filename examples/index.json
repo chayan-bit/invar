@@ -869,6 +869,23 @@
       }
     },
     {
+      "path": "examples/language/break-outside-loop.inv",
+      "intent": "A break that names no enclosing loop is PARSE_LOOP_CONTROL.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_LOOP_CONTROL"
+      }
+    },
+    {
       "path": "examples/language/checked-overflow.inv",
       "intent": "Adding one to the largest i32 traps with INTEGER_OVERFLOW.",
       "family": "core",
@@ -1031,6 +1048,25 @@
         "command": "check",
         "status": "source_error",
         "code": "OWN_BORROW_CONFLICT"
+      }
+    },
+    {
+      "path": "examples/language/loop-control.inv",
+      "intent": "break, continue and a labelled continue and break across nested loops.",
+      "family": "core",
+      "tags": [
+        "loops"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 7248
       }
     },
     {

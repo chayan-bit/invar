@@ -234,6 +234,17 @@ struct Builder<'a> {
     scopes: Vec<Vec<String>>,
     locals: HashMap<String, Local>,
     declaration_order: Vec<String>,
+    loops: Vec<LoopTarget>,
+}
+
+/// Where `break` and `continue` jump from inside one loop (#261).
+struct LoopTarget {
+    head: BlockId,
+    exit: BlockId,
+    /// A `for` loop's induction, advanced on `continue`, and the loop span.
+    induction: Option<(ValueId, Span)>,
+    /// Scopes open outside the loop; the deeper ones close on leaving a trip.
+    scopes: usize,
 }
 
 include!("mir/builder.rs");
@@ -270,6 +281,7 @@ pub fn lower(source: &CheckedProgram) -> Result<Program, Error> {
                     )
                 })
                 .collect(),
+            loops: Vec::new(),
             declaration_order: function
                 .params
                 .iter()

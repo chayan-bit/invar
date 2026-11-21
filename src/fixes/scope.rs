@@ -189,6 +189,7 @@ fn walk_stmt<'a>(stmt: &'a Stmt, visit: &mut dyn FnMut(&'a Expr)) {
             }
             walk_expr(value, visit);
         }
+        StmtKind::Break(_) | StmtKind::Continue(_) => {}
         StmtKind::Return(value) => {
             if let Some(value) = value {
                 walk_expr(value, visit);

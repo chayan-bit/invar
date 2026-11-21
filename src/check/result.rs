@@ -80,7 +80,7 @@ fn collect_block(types: &mut BTreeMap<String, (Type, Type, Span)>, block: &Block
                 }
             }
             StmtKind::Return(Some(value)) => collect_expr(types, value),
-            StmtKind::Return(None) => {}
+            StmtKind::Return(None) | StmtKind::Break(_) | StmtKind::Continue(_) => {}
             StmtKind::If {
                 condition,
                 then_block,

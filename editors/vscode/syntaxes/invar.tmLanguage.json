@@ -86,7 +86,7 @@
     },
     "keyword-control": {
       "name": "keyword.control.invar",
-      "match": "\\b(if|else|while|for|in|return|match)\\b"
+      "match": "\\b(if|else|while|for|in|return|match|break|continue)\\b"
     },
     "keyword-declaration": {
       "name": "keyword.declaration.invar",
@@ -110,7 +110,7 @@
     },
     "reserved-word": {
       "name": "invalid.illegal.reserved-word.invar",
-      "match": "\\b(async|await|scope|break|continue|total|effects|requires|ensures)\\b"
+      "match": "\\b(async|await|scope|total|effects|requires|ensures)\\b"
     },
     "numbers": {
       "patterns": [
