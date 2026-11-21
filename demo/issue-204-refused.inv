@@ -1,0 +1,7 @@
+// #204: `a[i] * 2` is not the L3 sum shape, so the loop stays MIR serial.
+fn main() -> i32 {
+    let a = filled_i32(1000u32, 1);
+    var s: i32 = 0;
+    for i in 0u32..1000u32 { s = s + a[i] * 2; }
+    return s;
+}

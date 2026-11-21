@@ -287,7 +287,7 @@ fn schema(name: &str) -> Json {
     serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
 }
 
-const SUM: &str = "fn f(xs: read Array<i32>, n: u32, s0: i32) -> i32 { var s = s0; for i in 0u32 .. n { s = s + xs[i]; } return s; } fn main() -> i32 { let xs: Array<i32> = [4, 9, (0 - 3), 12]; return f(xs, 4u32, 20); }";
+const SUM: &str = "fn f(xs: read Array<i32>, n: u32, s0: i32) -> i32 { var s = s0; for i in 0u32 .. n { s = s * xs[i]; } return s; } fn main() -> i32 { let xs: Array<i32> = [4, 9, (0 - 3), 12]; return f(xs, 4u32, 2) + 2634; }";
 
 #[test]
 fn run_receipt_records_the_law_and_the_removed_opt_out_changes_nothing() {
@@ -322,8 +322,8 @@ fn run_receipt_records_the_law_and_the_removed_opt_out_changes_nothing() {
 }
 
 /// A core map makes the program not serial-only, so the route never runs; the
-/// checked sum L3 certifies has no family lowering and runs on the CPU path.
-const GAP: &str = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 0u32; for i in 0u32..n { s = s + a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); var out = filled_u32(8u32, 0u32); for i in 0u32..8u32 { out[i] = wrapping_add(a[i], 3u32); } if run(out, 8u32) != 40u32 { return 1; } return 42; }";
+/// checked product L3 certifies has no family lowering and runs on the CPU path.
+const GAP: &str = "fn run(a: read Array<u32>, n: u32) -> u32 { var s = 1u32; for i in 0u32..n { s = s * a[i]; } return s; } fn main() -> i32 { let a = filled_u32(8u32, 2u32); var out = filled_u32(8u32, 0u32); for i in 0u32..8u32 { out[i] = wrapping_add(a[i], 3u32); } if run(out, 8u32) != 390625u32 { return 1; } return 42; }";
 
 #[test]
 fn a_loop_no_family_lowers_records_a_typed_fallback() {
@@ -344,7 +344,7 @@ fn a_loop_no_family_lowers_records_a_typed_fallback() {
     assert_eq!(document["result"]["value"], 42);
     assert_eq!(
         document["normal_form"],
-        serde_json::json!({"status": "fallback", "reason": "no-lowering:reduce/lifted-sum"}),
+        serde_json::json!({"status": "fallback", "reason": "no-lowering:reduce/saturated-product"}),
         "{document}"
     );
     let v1 = schema("invar-diagnostics-v3.schema.json");
@@ -495,14 +495,14 @@ fn explain_auto_records_the_normal_form_route() {
 }
 
 /// 63 live `filled_i32` arrays of 2^22 elements and one of `last`, then the
-/// routed SUM law over a 4-element literal: `2^28 - 4 + last` live elements.
+/// routed checked-product law over a 4-element literal: `2^28 - 4 + last` live elements.
 fn live_arrays(last: u32) -> String {
     let lets: String = (0..63)
         .map(|k| format!("let a{k}: Array<i32> = filled_i32(4194304u32, 0); "))
         .collect();
     format!(
-        "fn f(xs: read Array<i32>, n: u32, s0: i32) -> i32 {{ var s = s0; for i in 0u32 .. n {{ s = s + xs[i]; }} return s; }} \
-         fn main() -> i32 {{ {lets}let last: Array<i32> = filled_i32({last}u32, 0); let xs: Array<i32> = [4, 9, (0 - 3), 12]; return f(xs, 4u32, 20); }}"
+        "fn f(xs: read Array<i32>, n: u32, s0: i32) -> i32 {{ var s = s0; for i in 0u32 .. n {{ s = s * xs[i]; }} return s; }} \
+         fn main() -> i32 {{ {lets}let last: Array<i32> = filled_i32({last}u32, 0); let xs: Array<i32> = [4, 9, (0 - 3), 12]; return f(xs, 4u32, 2) + 2634; }}"
     )
 }
 
