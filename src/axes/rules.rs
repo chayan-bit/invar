@@ -1,5 +1,5 @@
 //! The lowest C level each rule a plan or the normal-form route names needs
-//! (`docs/spec/invar-v0.2-axes.md` NA3.13 to NA3.15), and the admission gate
+//! (`docs/spec/invar-v0.2-axes.md` NA8.2 to NA8.4), and the admission gate
 //! that keeps a region from running a rule above its declared level.
 
 use super::{C_AXIS, CLevel};
@@ -88,7 +88,7 @@ pub fn laws_admitted(program: &crate::mir::Program, laws: impl IntoIterator<Item
 }
 
 /// Refuse a region whose plan names a rule above its declared level, or one
-/// `RULES` lacks: unknown legality is serial (NA3.14). Serial is the fallback
+/// `RULES` lacks: unknown legality is serial (NA8.3). Serial is the fallback
 /// and is never refused. Fused partners share a function, so a refusal of one
 /// is a refusal of the other.
 pub(crate) fn gate(region: &mut Region) {

@@ -20,7 +20,13 @@ const SPEC: &str = "docs/spec/invar-v0.1.md";
 /// The v0.2 chapters: checked like `SPEC`, `NA` ids, the DX-25 (#86) non-core chapter budget.
 const AXES_SPEC: &str = "docs/spec/invar-v0.2-axes.md";
 const N_SPEC: &str = "docs/spec/invar-v0.2-axis-n.md";
-const SPECS: [(&str, usize); 3] = [(SPEC, TOKEN_LIMIT), (AXES_SPEC, 6_000), (N_SPEC, 6_000)];
+const RULES_SPEC: &str = "docs/spec/invar-v0.2-rules.md";
+const SPECS: [(&str, usize); 4] = [
+    (SPEC, TOKEN_LIMIT),
+    (AXES_SPEC, 6_000),
+    (N_SPEC, 6_000),
+    (RULES_SPEC, 6_000),
+];
 const INDEX: &str = "examples/index.json";
 const INDEX_SCHEMA: &str = "examples/index.schema.json";
 /// Target from the AI-02 contract. Measured with the stated estimator, see `spec_tokens`.

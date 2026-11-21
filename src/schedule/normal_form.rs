@@ -99,7 +99,7 @@ pub fn route(program: &mir::Program, fuel: u64) -> Route {
     if form.functions.iter().any(|f| f.recursion.is_some()) {
         return Route::Fallback("recursion-law-not-routed");
     }
-    // NA3.15: a law above the level some function declares is never applied.
+    // NA8.4: a law above the level some function declares is never applied.
     if !crate::axes::rules::laws_admitted(program, form.certificates().map(|c| c.law)) {
         return Route::Fallback("contract-level");
     }

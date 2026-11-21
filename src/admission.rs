@@ -160,7 +160,7 @@ pub struct Region {
     pub(crate) shape: Option<MapShape>,
     pub(crate) obligations: Vec<Obligation>,
     pub(crate) execution: Execution,
-    /// The rule the C level gate refused (NA3.14).
+    /// The rule the C level gate refused (NA8.3).
     pub(crate) c_refused: Option<&'static str>,
 }
 

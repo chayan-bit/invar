@@ -115,7 +115,7 @@ fn every_plan_rule_has_one_level_and_the_spec_table_says_the_same() {
         }
     }
     assert_eq!(named, names.iter().map(|name| (*name).to_owned()).collect());
-    let spec = include_str!("../../../docs/spec/invar-v0.2-axes.md");
+    let spec = include_str!("../../../docs/spec/invar-v0.2-rules.md");
     let table = spec.split("| Rule | Level | Plan |").nth(1).unwrap();
     let rows: Vec<(&str, &str)> = table
         .lines()

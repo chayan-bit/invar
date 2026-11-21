@@ -1,14 +1,15 @@
 # Invar v0.2: attributes, axes and receipts
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
-Counts: statements=49 citations=52
-Size record: tokens=5844 estimator=bytes/3 limit=6000
+Counts: statements=45 citations=48
+Size record: tokens=5505 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
 [NA1.2] The chapter carries its own counts and size record, and its size stays below 6,000 tokens by the v0.1 estimator. `tests/spec_examples.rs::SPECS`
 [NA1.3] Statement ids in this chapter start with `NA` and are never reused by the v0.1 file. `tests/spec_examples.rs`
 Note: section 7, the nondeterminism axis N, is `docs/spec/invar-v0.2-axis-n.md`, checked the same way under its own budget.
+Note: section 8, the rule levels a C level admits, is `docs/spec/invar-v0.2-rules.md`, checked the same way.
 
 ## 2. Attributes
 
@@ -70,9 +71,6 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 [NA3.10] An intrinsic that names its contract, such as `sum_tree` or `tc_mul_add`, applies it at that call, and a fold tier applies it to that function's folds; neither raises the level of the rest of the region. `src/axes.rs::CONTRACTS`
 [NA3.11] A C0 checked fold may be evaluated by any associative summary that reproduces its value and its first trap position, and `cpu-parallel` evaluates a counted `s = s + a[i]` over `i32` or `u32` by the exact (total, minimum prefix, maximum prefix) carry in 64 bits, rerunning only the chunk that holds the first overflow. `src/checked_fold.rs::Carry`
 [NA3.12] The value, trap category, trap span, fuel prefix and cleanup of such a fold equal the serial fold at every worker count, and `explain` names the plan `checked-sum-carry-if-guard` and the rule `pnf-l3-checked-sum-carry-v1`. `tests/schedule_cpu/checked_fold_carry.rs`
-[NA3.13] Each rule a plan names and each normal-form law has one lowest C level by the table below, checked against the code. `src/axes/rules.rs::RULES`
-[NA3.14] Admission refuses a plan naming a rule above its region's C level, or one the table lacks, with `CONTRACT_LEVEL`, and the region runs serial. `src/axes/rules.rs::gate`
-[NA3.15] The normal-form route applies no law above the lowest C level any function declares, and otherwise falls back with `contract-level`. `src/axes/rules.rs::laws_admitted`
 
 | Level | May vary | Must not vary | Evidence | Minimum receipt |
 | --- | --- | --- | --- | --- |
@@ -90,17 +88,6 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 | `f32-exact-v2` | `fold = "exact"`, `sum_exact`, `dot_exact` | c1 |
 | `f32-relaxed-v2` | `fold = "relaxed"`, `reassoc_add` | c2 |
 | `tc-f16-f32-v1` | `tc_mul_add` | c2 |
-
-| Rule | Level | Plan |
-| --- | --- | --- |
-| `counted-wrapping-map-v1` | c0 | map |
-| `total-u32-map-fusion-v1` | c0 | fused pair |
-| `total-u32-dag-fusion-v1` | c0 | fused chain |
-| `sealed-wrapping-u32-laws-v1` | c0 | reduction |
-| `ordered-affine-pair-reduction-v1` | c0 | pair reduction |
-| `wrapping-affine-recurrence-v1` | c0 | scan |
-| `pnf-l3-checked-sum-carry-v1` | c0 | checked carry |
-| L1 to L20 | c0 | normal form |
 
 Note: the C2 bounds are the Relaxed bound of `docs/numeric.md` and the amended D5 bound of `tc-f16-f32-v1`.
 Note: C5 has no implementation until #201; its fixture is the refused declaration of section 4.
@@ -241,7 +228,6 @@ fn main() -> i32 { return 0; }
 [NA6.8] A region's `candidate_identity` also covers its levels and contract unless every level is safe and no contract is named, and `source_identity` covers the attribute bytes, so a changed level changes both identities and misses every cache keyed by them or by the source. `tests/numeric_tiers/explain_v6.rs::changing_any_axis_level_changes_the_plan_identity`
 [NA6.9] Removing the fields of this section and restoring `schema` and `schema_version` turns the v6 document of an undeclared program into its v5 document byte for byte, and the v5 schema stays in the tree. `tests/numeric_tiers/explain_v6.rs::undeclared_documents_project_to_the_committed_v5_goldens`
 [NA6.10] `admission::validate_serialized` accepts only the current schema version, so a persisted v5 record is refused with `ADMISSION_SCHEMA`, never re-read as v6. `tests/diagnostics/machine_diagnostics/fault_fixtures.rs::machine_diagnostics_admission_fault_fixtures_validate`
-[NA6.11] `rule_levels` gives the lowest C level of each `rule_identities` entry, and a region refused by NA3.14 carries `c_refused`, that rule and its level. `src/axes/rules.rs::receipt`
 
 | Contract | Level | `bound` |
 | --- | --- | --- |
