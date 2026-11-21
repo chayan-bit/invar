@@ -144,9 +144,9 @@ if [ "$build_rc" = 0 ]; then
         while [ "$(jobs -rp | grep -cv "^$sampler\$")" -ge "$LANES" ]; do wait -n; done
         (
             t=$SECONDS
-            # shellcheck disable=SC2086 # the suite is a flag and its value
             meter=()
             [ ${#rss_of[@]} -gt 0 ] && meter=("${rss_of[@]}" "$here/suite-$i.rss")
+            # shellcheck disable=SC2086 # the suite is a flag and its value
             timeout -k 30 "$(left)" "${meter[@]}" \
                 cargo test "${common[@]}" ${suites[$i]} -- --include-ignored "${skips[@]}" \
                 "${filters[@]}" >"$here/suite-$i.log" 2>&1
