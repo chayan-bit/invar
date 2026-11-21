@@ -38,6 +38,8 @@ pub struct Program {
     pub layout_version: u32,
     pub tensor_contracts: Vec<crate::tensor::Contract>,
     pub lowered_folds: crate::numeric_contract::LoweredFolds,
+    /// The declared `#[region(...)]` axes of each function that has them, by name.
+    pub region_axes: std::collections::BTreeMap<String, crate::axes::Axes>,
     pub functions: Vec<Function>,
     pub records: Vec<crate::front::RecordDecl>,
     pub variants: Vec<crate::front::VariantDecl>,
@@ -369,6 +371,13 @@ pub fn lower(source: &CheckedProgram) -> Result<Program, Error> {
         layout_version: crate::layout_contract::VERSION,
         tensor_contracts: Vec::new(),
         lowered_folds: source.lowered_folds.clone(),
+        region_axes: source
+            .program
+            .functions
+            .iter()
+            .filter(|function| function.axes.is_declared())
+            .map(|function| (function.name.clone(), function.axes))
+            .collect(),
         functions,
         records: source.program.records.clone(),
         variants: source.program.variants.clone(),
