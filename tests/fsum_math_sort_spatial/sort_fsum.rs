@@ -2,7 +2,7 @@
 //! reductions through the fsum CPU engine, with the same receipts as the
 //! program without the sort.
 
-use invar::{check, front, mir, schedule};
+use invar::{check, front, mir, schedule, schedule::reductions};
 
 const FUEL: u64 = 50_000_000;
 
@@ -23,9 +23,9 @@ fn receipts(run: &schedule::Run) -> Vec<String> {
     run.reductions
         .iter()
         .map(|r| {
-            let (family, backend, reason) = (r.family, r.backend, r.reason);
+            let (family, backend, reason, law) = (r.family, r.backend, r.reason, r.law);
             format!(
-                "{} {family} {} {backend} {reason} {}",
+                "{} {family} {} {backend} {reason} {} {law:?}",
                 r.function, r.elements, r.workers
             )
         })
@@ -51,6 +51,15 @@ fn sort_and_spatial_runs_reduce_like_the_fsum_only_program() {
                 receipts(&expected),
                 "{prefix} workers {workers}"
             );
+            // #206: a split names the law that admitted it; one worker names none.
+            for r in &actual.reductions {
+                let law = if r.kind.is_exact() {
+                    reductions::EXACT_LAW
+                } else {
+                    reductions::TREE_LAW
+                };
+                assert_eq!(r.law, (r.backend == "cpu-parallel").then_some(law), "{r:?}");
+            }
             assert!(
                 !actual.executed.is_empty(),
                 "the sort or query ran: {prefix}"

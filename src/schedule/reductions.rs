@@ -179,11 +179,12 @@ pub fn calibration(kind: Kind) -> Calibration {
 
 // Provisional: Apple M4, one worker at 2^26 terms, and the largest per-worker
 // start-up seen at 2^10..2^12 on ten workers (load average 4.1). Linux CUDA-host rows
-// are pending a quiet window; see `calibration/fsum-v1.json`.
+// are pending a quiet window; see `calibration/fsum-v1.json`. The exact rows are
+// the #206 banked deposits, measured the same way.
 const SUM_TREE_NS: f64 = 0.653;
 const DOT_TREE_NS: f64 = 0.493;
-const SUM_EXACT_NS: f64 = 3.109;
-const DOT_EXACT_NS: f64 = 2.287;
+const SUM_EXACT_NS: f64 = 0.798;
+const DOT_EXACT_NS: f64 = 1.43;
 const SPAWN_NS: f64 = 8930.0;
 // End to end (upload, kernel, host finish), Metal on an Apple M4 lost to the
 // CPU workers at every size from 2^10 to 2^26 for all four families; `null`

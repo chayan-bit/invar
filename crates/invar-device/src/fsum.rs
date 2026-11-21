@@ -120,11 +120,10 @@ impl Launch {
     }
 }
 
-/// Shared deposit logic, written once in the common C subset of CUDA and MSL.
-/// `fsum_i64`/`fsum_u64` are the backend's 64-bit integer spellings.
-const DEPOSIT: &str = r#"
-// Every digit takes a predicated add with a constant index, so the digits
-// stay in registers; an indexed `d[q]` would put them in local memory.
+/// Digit update of the CUDA deposit: every digit takes a predicated add with a
+/// constant index, so the digits stay in registers (an indexed `d[q]` spills
+/// them to local memory: 1.89 ms against 0.54 ms at 2^26 on an RTX 5070 Ti).
+const ADD_AT_REGISTERS: &str = r#"
 static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint digits, uint pos, uint value, bool neg) {
     fsum_u64 wide = ((fsum_u64)value) << (pos & 31u);
     uint q = pos >> 5;
@@ -134,7 +133,24 @@ static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint digits, uint p
     #pragma unroll
     for (uint k = 0u; k < digits; ++k) { d[k] += (k == q) ? lo : ((k == q + 1u) ? hi : (fsum_i64)0); }
 }
+"#;
 
+/// Digit update of the Metal deposit: two indexed adds, which the Apple GPU
+/// compiler runs faster than the unrolled form (3.6 ms against 5.1 ms at 2^26
+/// on an M4). Both forms add the same integers to the same digits.
+const ADD_AT_INDEXED: &str = r#"
+static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint digits, uint pos, uint value, bool neg) {
+    fsum_u64 wide = ((fsum_u64)value) << (pos & 31u);
+    uint q = pos >> 5;
+    fsum_i64 lo = (fsum_i64)(wide & 0xffffffffull);
+    fsum_i64 hi = (fsum_i64)(wide >> 32);
+    if (neg) { d[q] -= lo; d[q + 1] -= hi; } else { d[q] += lo; d[q + 1] += hi; }
+}
+"#;
+
+/// Shared deposit logic, written once in the common C subset of CUDA and MSL.
+/// `fsum_i64`/`fsum_u64` are the backend's 64-bit integer spellings.
+const DEPOSIT: &str = r#"
 static fsum_inline void fsum_deposit(fsum_thread fsum_i64* d, fsum_thread uint* flags, uint x) {
     uint e = (x >> 23) & 0xffu;
     uint f = x & 0x7fffffu;
@@ -169,7 +185,7 @@ static fsum_inline void fsum_deposit_product(fsum_thread fsum_i64* d, fsum_threa
 
 /// Metal Shading Language 3.1 source with both kernels.
 pub fn msl() -> String {
-    let deposit = DEPOSIT
+    let deposit = format!("{ADD_AT_INDEXED}{DEPOSIT}")
         .replace("fsum_inline ", "")
         .replace("fsum_thread ", "thread ")
         .replace("fsum_i64", "long")
@@ -179,7 +195,7 @@ pub fn msl() -> String {
 
 /// CUDA C++ source for NVRTC with both kernels (no FMA: explicit `_rn`).
 pub fn cuda() -> String {
-    let deposit = DEPOSIT
+    let deposit = format!("{ADD_AT_REGISTERS}{DEPOSIT}")
         .replace("static fsum_inline ", "__device__ __forceinline__ ")
         .replace("fsum_thread ", "")
         .replace("fsum_i64", "long long")
@@ -471,6 +487,9 @@ mod tests {
             assert!(!source.contains("fma"));
         }
         assert!(cuda().contains("__fmul_rn"));
+        // CUDA keeps exact digits in registers; Metal indexes them (#206).
+        assert!(cuda().contains("(k == q)") && !cuda().contains("d[q] -="));
+        assert!(msl().contains("d[q] -=") && !msl().contains("(k == q)"));
         assert!(!msl().contains("fsum_thread") && !cuda().contains("fsum_inline"));
     }
 }
