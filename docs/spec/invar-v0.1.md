@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=302 citations=324
-Size record: tokens=27918 estimator=bytes/3 limit=30000
+Counts: statements=304 citations=327
+Size record: tokens=28228 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1303,3 +1303,20 @@ fn main() -> i32 {
 ### B.6 Attributes, contract axes and receipts
 
 Note: the attribute registry, the contract axes and their receipts are specified in the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, which has its own size record and budget.
+
+### B.7 Language surface
+
+[NB.7.1] An integer literal may separate digits with single `_` characters and take a `0x`, `0o` or `0b` radix prefix, and its token value is the decimal literal it denotes, so the range checks of N2.2.3 and every later stage are unchanged (#253). `src/front/lexer.rs::integer_literal` `tests/language/surface_sugar.rs::literal_spellings_give_identical_mir_outcomes_and_receipts`
+[NB.7.2] A leading, trailing or doubled `_`, a digit outside the radix, a radix value above 128 bits, or a separator or prefix before a decimal point is `LEX_INVALID_LITERAL`. `tests/language/surface_sugar.rs::literal_separators_and_radix_prefixes_lex_to_the_same_token_value`
+
+```invar outcome=value:1
+fn main() -> i32 {
+    let mask: u32 = 0xFFFF_0000u32;
+    if mask == 4_294_901_760u32 and 0b1010 == 10 { return 1; }
+    return 0;
+}
+```
+
+```invar outcome=diag:LEX_INVALID_LITERAL
+fn main() -> i32 { return 1__0; }
+```
