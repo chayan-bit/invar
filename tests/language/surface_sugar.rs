@@ -104,13 +104,20 @@ fn receipt(source: &str, program: &mir::Program) -> serde_json::Value {
 /// `sugared` and `plain` must give the same MIR, the same reference and MIR
 /// outcome and fuel prefix, and the same cpu-parallel receipt, spans aside.
 pub fn assert_same_program(sugared: &str, plain: &str) {
+    assert_same_program_renamed(sugared, plain, &[]);
+}
+
+/// [`assert_same_program`] where the sugared MIR names the hidden locals in
+/// `renames` (hidden name, plain name) and the plain program spells them out.
+pub fn assert_same_program_renamed(sugared: &str, plain: &str, renames: &[(String, &str)]) {
     let (sugared_checked, sugared_mir) = lower(sugared);
     let (plain_checked, plain_mir) = lower(plain);
-    assert_eq!(
-        mir_shape(&sugared_mir),
-        mir_shape(&plain_mir),
-        "MIR\n{sugared}\n{plain}"
-    );
+    let shape = renames
+        .iter()
+        .fold(mir_shape(&sugared_mir), |shape, (hidden, name)| {
+            shape.replace(&format!("{hidden:?}"), &format!("{name:?}"))
+        });
+    assert_eq!(shape, mir_shape(&plain_mir), "MIR\n{sugared}\n{plain}");
     assert_eq!(
         outcome(&sugared_checked, &sugared_mir, 1_000_000),
         outcome(&plain_checked, &plain_mir, 1_000_000),
@@ -264,4 +271,130 @@ fn literal_spellings_give_identical_mir_outcomes_and_receipts() {
     );
     let trapping = |big: &str| format!("fn main() -> i32 {{ let x: i32 = {big}; return x + 1; }}");
     assert_same_program(&trapping("0x7FFF_FFFF"), &trapping("2147483647"));
+}
+
+/// A `main` over `ys = [1, 2, 3, 4]` and `acc`, running `body` and returning a checksum.
+fn compound_main(body: &str) -> String {
+    format!(
+        "fn main() -> i32 {{
+            var ys: Array<u32> = [1u32, 2u32, 3u32, 4u32];
+            var acc: u32 = 7u32;
+            var k: u32 = 1u32;
+            {body}
+            if acc == 0u32 {{ return 1; }}
+            return 0;
+        }}"
+    )
+}
+
+#[test]
+fn compound_assignment_is_the_plain_assignment() {
+    let cases = [
+        (
+            "for i in 0u32 .. len(ys) { ys[i] *= 3u32; }",
+            "for i in 0u32 .. len(ys) { ys[i] = ys[i] * 3u32; }",
+        ),
+        (
+            "for i in 0u32 .. len(ys) { acc += ys[i]; }",
+            "for i in 0u32 .. len(ys) { acc = acc + ys[i]; }",
+        ),
+        ("acc -= 2u32 + 1u32;", "acc = acc - (2u32 + 1u32);"),
+        ("acc *= k * 2u32;", "acc = acc * (k * 2u32);"),
+        ("acc /= 2u32;", "acc = acc / 2u32;"),
+        ("acc %= 4u32;", "acc = acc % 4u32;"),
+        ("ys[2u32] += k;", "ys[2u32] = ys[2u32] + k;"),
+        ("ys[k] -= 1u32;", "ys[k] = ys[k] - 1u32;"),
+        // Each of these traps, at the same operation and fuel prefix.
+        ("acc -= 8u32;", "acc = acc - 8u32;"),
+        ("acc /= k - 1u32;", "acc = acc / (k - 1u32);"),
+        (
+            "for i in 0u32 .. len(ys) { ys[i] *= 2147483648u32; }",
+            "for i in 0u32 .. len(ys) { ys[i] = ys[i] * 2147483648u32; }",
+        ),
+        ("ys[9u32] += 1u32;", "ys[9u32] = ys[9u32] + 1u32;"),
+    ];
+    for (sugared, plain) in cases {
+        assert_same_program(&compound_main(sugared), &compound_main(plain));
+    }
+    let sum = |update: &str| {
+        format!(
+            "fn sum(xs: read Array<i32>) -> i32 {{
+                var result: i32 = 0;
+                for i in 0 .. len(xs) {{ {update} }}
+                return result;
+            }}
+            fn main() -> i32 {{ let values: Array<i32> = [1, 2, 3, 4]; return sum(values); }}"
+        )
+    };
+    assert_same_program(&sum("result += xs[i];"), &sum("result = result + xs[i];"));
+}
+
+#[test]
+fn compound_assignment_evaluates_a_computed_index_once() {
+    let hidden = |source: &str, index: &str| format!("index@{}", source.find(index).unwrap());
+    for (sugared, plain) in [
+        (
+            "ys[k + 1u32] += 5u32;",
+            "let index_t: u32 = k + 1u32; ys[index_t] = ys[index_t] + 5u32;",
+        ),
+        // A trapping index traps once, before the right side is evaluated.
+        (
+            "ys[k - 2u32] += 1u32 / 0u32;",
+            "let index_t: u32 = k - 2u32; ys[index_t] = ys[index_t] + 1u32 / 0u32;",
+        ),
+        (
+            "ys[k + 8u32] *= 2u32;",
+            "let index_t: u32 = k + 8u32; ys[index_t] = ys[index_t] * 2u32;",
+        ),
+        (
+            "for i in 0u32 .. 3u32 { ys[i + 1u32] -= ys[i]; }",
+            "for i in 0u32 .. 3u32 { let index_t: u32 = i + 1u32; ys[index_t] = ys[index_t] - ys[i]; }",
+        ),
+    ] {
+        let source = compound_main(sugared);
+        let index = &sugared[sugared.find('[').unwrap() + 1..sugared.find(']').unwrap()];
+        assert_same_program_renamed(
+            &source,
+            &compound_main(plain),
+            &[(hidden(&source, index), "index_t")],
+        );
+    }
+    // Repeating a five-step index costs ten steps; binding it once costs one
+    // dispatch, five steps and two reads.
+    let fuel = |source: &str| fuel_prefix(&lower(&compound_main(source)).0);
+    assert!(
+        fuel("ys[k + 1u32 + 0u32] += 5u32;")
+            < fuel("ys[k + 1u32 + 0u32] = ys[k + 1u32 + 0u32] + 5u32;"),
+        "the index is evaluated once"
+    );
+}
+
+#[test]
+fn compound_assignment_refuses_what_assignment_refuses() {
+    for (sugared, plain) in [
+        (
+            "let x: u32 = 1u32; x += 1u32;",
+            "let x: u32 = 1u32; x = x + 1u32;",
+        ),
+        ("acc += 1i32;", "acc = acc + 1i32;"),
+        ("ys[1i32] += 1u32;", "ys[1i32] = ys[1i32] + 1u32;"),
+        ("nope += 1u32;", "nope = nope + 1u32;"),
+    ] {
+        let code = first_code(&compound_main(plain));
+        assert_ne!(code, "OK", "{plain}");
+        assert_eq!(first_code(&compound_main(sugared)), code, "{sugared}");
+    }
+    for bad in [
+        "1u32 += 2u32;",
+        "len(ys) += 1u32;",
+        "acc += ;",
+        "acc + = 1u32;",
+        "acc += 1u32",
+    ] {
+        assert_eq!(
+            first_code(&compound_main(bad)),
+            "PARSE_EXPECTED_TOKEN",
+            "{bad}"
+        );
+    }
 }

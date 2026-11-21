@@ -319,9 +319,7 @@ fn cell_control_files(
             return Err(invalid("S1504", "robot rotation has no finite orientation"));
         }
         let (w, x, y, z) = (q[0] / norm, q[1] / norm, q[2] / norm, q[3] / norm);
-        let roll = (2.0 * (w * x + y * z)).atan2(1.0 - 2.0 * (x * x + y * y));
-        let pitch = (2.0 * (w * y - z * x)).clamp(-1.0, 1.0).asin();
-        let yaw = (2.0 * (w * z + x * y)).atan2(1.0 - 2.0 * (y * y + z * z));
+        let (roll, pitch, yaw) = super::euler::rpy(w, x, y, z);
         Ok(format!(
             "<origin xyz=\"{xyz}\" rpy=\"{roll} {pitch} {yaw}\"/>"
         ))
