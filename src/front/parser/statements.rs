@@ -71,7 +71,7 @@ impl Parser {
             value
         };
         let end = self.expect_symbol(";")?.end;
-        self.hoisted = hoisted;
+        self.hoisted.extend(hoisted);
         let value_span = Span {
             start: span.start,
             end: value.span.end,
@@ -103,7 +103,7 @@ impl Parser {
                     return Err(parser.expected("}"));
                 }
                 let statement = parser.statement()?;
-                statements.extend(parser.hoisted.take());
+                statements.append(&mut parser.hoisted);
                 statements.push(statement);
             }
             let end = parser.expect_symbol("}")?.end;
@@ -188,6 +188,10 @@ impl Parser {
                 return self.for_each(start.start, name, name_span, lower);
             }
             let upper = self.expression()?;
+            if matches!(&self.current().kind, TokenKind::Name(word) if word == "step") {
+                self.bump();
+                return self.stepped_for(start.start, (name, name_span), lower, upper);
+            }
             let body = self.block()?;
             let span = Span {
                 start: start.start,

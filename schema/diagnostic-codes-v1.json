@@ -652,6 +652,11 @@
       "reachability": "source"
     },
     {
+      "code": "PARSE_ZERO_STEP",
+      "meaning": "for step is a literal zero",
+      "reachability": "source"
+    },
+    {
       "code": "PHYSICAL_BOUNDS",
       "meaning": "candidate physical memory bounds are not proved",
       "reachability": "source"

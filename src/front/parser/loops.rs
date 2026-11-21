@@ -1,5 +1,6 @@
 // Surface forms of `for` desugared to the counted loop before checking and
-// family recognition, which reparses source (N11.4.3): for-each (#255).
+// family recognition, which reparses source (N11.4.3): for-each (#255)
+// and stepped ranges (#256).
 //
 // Checking keys expression types by span, and MIR spans must be non-empty,
 // so every synthesized node takes a span no parsed expression has: a range
@@ -308,4 +309,156 @@ fn place_expr(expr: Expr, site: &Element) -> Result<Expr, FrontError> {
         kind => kind,
     };
     Expr::new(kind, span)
+}
+
+/// Distinct spans for the synthesized nodes of a stepped loop: ranges from
+/// the `for` keyword, then from the loop variable, to successive ends within
+/// the header, so no parsed expression has one (see the top of this file).
+struct Fresh<I: Iterator<Item = Span>>(I, Span);
+
+impl<I: Iterator<Item = Span>> Fresh<I> {
+    fn span(&mut self) -> Result<Span, FrontError> {
+        self.0.next().ok_or_else(|| {
+            FrontError::source(
+                "PARSE_EXPECTED_TOKEN",
+                "a stepped `for` header is too short to desugar",
+                self.1,
+            )
+        })
+    }
+
+    fn name(&mut self, name: &str) -> Result<Expr, FrontError> {
+        Expr::new(ExprKind::Name(name.to_owned()), self.span()?)
+    }
+
+    fn int(&mut self, value: &str) -> Result<Expr, FrontError> {
+        Expr::new(ExprKind::Integer(value.to_owned()), self.span()?)
+    }
+
+    fn binary(&mut self, left: Expr, op: BinaryOp, right: Expr) -> Result<Expr, FrontError> {
+        let span = self.span()?;
+        binary(left, op, right, span)
+    }
+}
+
+fn binary(left: Expr, op: BinaryOp, right: Expr, span: Span) -> Result<Expr, FrontError> {
+    let kind = ExprKind::Binary {
+        left: Box::new(left),
+        op,
+        op_span: span,
+        right: Box::new(right),
+    };
+    Expr::new(kind, span)
+}
+
+impl Parser {
+    /// `for i in lo .. hi step k { body }` (#256): the bounds and step are
+    /// bound once, in that order, to hidden `u32` locals placed before the
+    /// loop, which then counts `ceil((hi - lo) / k)` trips, the view stride
+    /// rule (N5.5.2), with `i = lo + trip * k`. The trip count is zero when
+    /// `hi <= lo`, so neither `hi - lo - 1` nor `lo + trip * k` can overflow,
+    /// and a zero step traps `DIVISION_BY_ZERO`, over the header, only on a
+    /// non-empty range.
+    fn stepped_for(
+        &mut self,
+        start: usize,
+        (element, element_span): (String, Span),
+        lower: Expr,
+        upper: Expr,
+    ) -> Result<Stmt, FrontError> {
+        let step = self.expression()?;
+        if let ExprKind::Integer(value) = &step.kind
+            && ["u32", "i32", ""]
+                .iter()
+                .find_map(|suffix| value.strip_suffix(suffix))
+                .is_some_and(|digits| digits.bytes().all(|digit| digit == b'0'))
+        {
+            return Err(FrontError::source(
+                "PARSE_ZERO_STEP",
+                "a `for` step must be a positive `u32`",
+                step.span,
+            ));
+        }
+        let header = Span {
+            start,
+            end: step.span.end,
+        };
+        let body = self.block()?;
+        let hidden = |role: &str| format!("{role}@{}", element_span.start);
+        let (low, high, stride, trips, trip) = (
+            hidden("lo"),
+            hidden("hi"),
+            hidden("step"),
+            hidden("trips"),
+            hidden("trip"),
+        );
+        let (variable, header_end) = (element_span.start, body.span.start);
+        let mut fresh = Fresh(
+            (start + 1..=header_end)
+                .filter(|end| *end != header.end)
+                .map(|end| Span { start, end })
+                .chain((variable + 1..=header_end).map(|end| Span {
+                    start: variable,
+                    end,
+                })),
+            header,
+        );
+        let bind = |mutable: bool, name: &str, value: Expr, span: Span| {
+            let kind = StmtKind::Binding {
+                mutable,
+                name: name.to_owned(),
+                annotation: Some(Type::U32),
+                value,
+            };
+            Stmt::new(kind, span)
+        };
+        let (lower_span, upper_span, step_span) = (lower.span, upper.span, step.span);
+        let mut hoisted = vec![
+            bind(false, &low, lower, lower_span)?,
+            bind(false, &high, upper, upper_span)?,
+            bind(false, &stride, step, step_span)?,
+            bind(true, &trips, fresh.int("0u32")?, element_span)?,
+        ];
+        // if hi > lo { trips = (hi - lo - 1u32) / step + 1u32; }
+        let (left, right) = (fresh.name(&high)?, fresh.name(&low)?);
+        let nonempty = fresh.binary(left, BinaryOp::Gt, right)?;
+        let (left, right) = (fresh.name(&high)?, fresh.name(&low)?);
+        let gap = fresh.binary(left, BinaryOp::Sub, right)?;
+        let one = fresh.int("1u32")?;
+        let last = fresh.binary(gap, BinaryOp::Sub, one)?;
+        let divisor = fresh.name(&stride)?;
+        let count = binary(last, BinaryOp::Div, divisor, header)?;
+        let one = fresh.int("1u32")?;
+        let count = fresh.binary(count, BinaryOp::Add, one)?;
+        let assign = StmtKind::Assign {
+            place: Place::Name(trips.clone(), element_span),
+            value: count,
+        };
+        let then_block = Block::new(vec![Stmt::new(assign, header)?], header)?;
+        let branch = StmtKind::If {
+            condition: nonempty,
+            then_block,
+            else_arm: None,
+        };
+        hoisted.push(Stmt::new(branch, header)?);
+        // let i: u32 = lo + trip * step;
+        let (left, right) = (fresh.name(&trip)?, fresh.name(&stride)?);
+        let offset = fresh.binary(left, BinaryOp::Mul, right)?;
+        let base = fresh.name(&low)?;
+        let value = fresh.binary(base, BinaryOp::Add, offset)?;
+        let mut statements = vec![bind(false, &element, value, element_span)?];
+        statements.extend(body.statements);
+        let end = body.span.end;
+        let body = Block::new(statements, body.span)?;
+        let kind = StmtKind::For {
+            name: trip,
+            lower: fresh.int("0u32")?,
+            upper: fresh.name(&trips)?,
+            body,
+        };
+        // Placed before the loop by the enclosing block, after the body has
+        // taken its own hoisted statements.
+        self.hoisted.extend(hoisted);
+        Stmt::new(kind, Span { start, end })
+    }
 }
