@@ -96,18 +96,18 @@ fn machine_diagnostics_admission_fault_fixtures_validate() {
             "ADMISSION_SOURCE",
         ),
         (
-            invar::admission::validate_serialized(&json!({"schema_version": 2}), source, &mir)
+            invar::admission::validate_serialized(&json!({"schema_version": 5}), source, &mir)
                 .unwrap_err(),
             "ADMISSION_SCHEMA",
         ),
         (
-            invar::admission::validate_serialized(&json!({"schema_version": 5}), source, &mir)
+            invar::admission::validate_serialized(&json!({"schema_version": 6}), source, &mir)
                 .unwrap_err(),
             "ADMISSION_STALE",
         ),
         (
             invar::admission::validate_serialized(
-                &json!({"schema_version": 5, "padding": "x".repeat(1_000_000)}),
+                &json!({"schema_version": 6, "padding": "x".repeat(1_000_000)}),
                 source,
                 &mir,
             )

@@ -1,0 +1,24 @@
+// Highlighting sample: keywords, types, literals and a reserved word.
+/* block comments /* nest */ like the lexer's */
+fn axpy(a: f32, xs: read Array<f32>, ys: mut Array<f32>) -> Unit {
+    for i in 0 .. len(xs) {
+        ys[i] = fma(a, xs[i], ys[i]);
+    }
+    return;
+}
+
+fn main() -> i32 {
+    let label: String = "inv\n";
+    let raw: Bytes = b"\x00\xff";
+    var acc: i32 = 40i32 + 2;
+    if acc == 42 and not false {
+        return acc;
+    }
+    async acc;
+    return 0;
+}
+
+fn literals() -> u32 {
+    let mask: u32 = 0xFFu32 + 1_000u32 + 0b1010;
+    return mask;
+}
