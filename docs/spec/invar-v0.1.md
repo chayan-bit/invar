@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=304 citations=327
-Size record: tokens=28228 estimator=bytes/3 limit=30000
+Counts: statements=305 citations=329
+Size record: tokens=28421 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1319,4 +1319,14 @@ fn main() -> i32 {
 
 ```invar outcome=diag:LEX_INVALID_LITERAL
 fn main() -> i32 { return 1__0; }
+```
+[NB.7.3] `p op= e;` with `op` one of `+ - * / %` is exactly `p = p op (e);`, desugared before checking and family recognition, except that an index other than a name or literal is first bound to a hidden immutable `u32` local, so it evaluates once and before `e` (#254). `src/front/parser/statements.rs::compound_assignment` `tests/language/surface_sugar.rs::compound_assignment_evaluates_a_computed_index_once`
+
+```invar outcome=trap:INDEX_OUT_OF_BOUNDS
+fn main() -> i32 {
+    var ys: Array<u32> = [1u32, 2u32];
+    ys[0u32] *= 3u32;
+    ys[ys[0u32]] += 1u32;
+    return 0;
+}
 ```

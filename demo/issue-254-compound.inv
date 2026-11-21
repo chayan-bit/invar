@@ -1,0 +1,18 @@
+// #254: compound assignment desugars to `place = place op (value);`.
+fn main() -> i32 {
+    var ys: Array<u32> = [1u32, 2u32, 3u32, 4u32];
+    for i in 0u32 .. len(ys) {
+        ys[i] *= 3u32;
+    }
+    var acc: u32 = 0u32;
+    for j in 0u32 .. len(ys) {
+        acc += ys[j];
+    }
+    var k: u32 = 0u32;
+    ys[k + 1u32] -= 2u32 + 1u32;
+    acc %= 7u32;
+    if acc == 2u32 and ys[1u32] == 3u32 {
+        return 1;
+    }
+    return 0;
+}
