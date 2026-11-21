@@ -147,6 +147,7 @@ pub(crate) fn intrinsic(name: &str) -> bool {
         || matches!(
             name,
             "len"
+                | "assert"
                 | "view"
                 | "view_mut"
                 | "fma"
@@ -882,7 +883,7 @@ impl FunctionChecker<'_> {
                     Some(Type::Named("Result<String,Utf8Error>".to_owned()))
                 }
                 "argsort" => Some(Type::ArrayU32),
-                "sort" | "sort_by_key" | "segmented_sort" => Some(Type::Unit),
+                "sort" | "sort_by_key" | "segmented_sort" | "assert" => Some(Type::Unit),
                 value if storage::filled(value).is_some() => {
                     storage::filled(value).map(|(_, array)| array)
                 }
@@ -1474,6 +1475,22 @@ impl FunctionChecker<'_> {
                 Some(if name == "Result::Ok" { &ok } else { &err }),
             )?;
             return Ok(Type::Named(nominal.clone()));
+        }
+        if name == "assert" {
+            let [condition, message] = args else {
+                return Err(mismatch("assert expects a condition and a message", span));
+            };
+            if self.expr(condition, Some(&Type::Bool))? != Type::Bool {
+                return Err(mismatch("assert condition must be Bool", condition.span));
+            }
+            if !matches!(message.kind, ExprKind::Text(_)) {
+                return Err(mismatch(
+                    "assert message must be a string literal",
+                    message.span,
+                ));
+            }
+            self.expr(message, None)?;
+            return Ok(Type::Unit);
         }
         if let Some(modes) = sort_modes(name) {
             if args.len() != modes.len() {

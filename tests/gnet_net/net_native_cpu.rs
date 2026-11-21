@@ -36,6 +36,7 @@ fn expected(observation: &eval::Observation) -> (i32, Json) {
                 TrapCategory::DivisionByZero => "DIVISION_BY_ZERO",
                 TrapCategory::IndexOutOfBounds => "INDEX_OUT_OF_BOUNDS",
                 TrapCategory::UnitConversionInexact => "UNIT_CONVERSION_INEXACT",
+                TrapCategory::AssertionFailed => "ASSERTION_FAILED",
             };
             (
                 3,

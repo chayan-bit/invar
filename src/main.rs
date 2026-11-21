@@ -963,7 +963,8 @@ fn execute_native(
         c_library.map(std::path::Path::new),
         native_command::debug(),
     ) {
-        Ok((status, document)) => {
+        Ok((status, mut document)) => {
+            invar::eval::annotate_assertion(&mut document, &diagnostic_source(path));
             if json {
                 if print_run_json(document, path) == 2 {
                     return 2;
@@ -987,6 +988,12 @@ fn report_eval(error: EvalError, path: &OsString, json: bool) -> i32 {
         );
     } else {
         eprintln!("{}: {error:?}", path.to_string_lossy());
+        if let EvalError::Trap { span, .. } = &error
+            && error.trap_code() == Some("ASSERTION_FAILED")
+            && let Some(message) = invar::eval::assertion_message(&diagnostic_source(path), *span)
+        {
+            eprintln!("assertion failed: {message}");
+        }
     }
     match error {
         EvalError::Trap { .. } => 3,

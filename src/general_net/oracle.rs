@@ -216,7 +216,12 @@ fn admit(net: &Net, program: &mir::Program) -> Result<(), OracleError> {
         if let Some(CallTarget::Intrinsic(name)) = &agent.call
             && !matches!(
                 name.as_str(),
-                "wrapping_add" | "wrapping_mul" | "filled_i32" | "filled_u32" | "filled_f32"
+                "wrapping_add"
+                    | "wrapping_mul"
+                    | "filled_i32"
+                    | "filled_u32"
+                    | "filled_f32"
+                    | "assert"
             )
             && !floating::supports_intrinsic(name)
             && units::rule(name).is_none()
@@ -743,6 +748,19 @@ fn operation(
             }
             if matches!(name.as_str(), "filled_i32" | "filled_u32" | "filled_f32") {
                 return arrays::filled(name, args, frame, arena).map(Some);
+            }
+            if name == "assert" {
+                let [condition] = args.as_slice() else {
+                    return Err(internal());
+                };
+                return match frame.get(*condition)? {
+                    Scalar::Bool(true) => Ok(Some(Scalar::Unit)),
+                    Scalar::Bool(false) => Err(OracleError::from(EvalError::Trap {
+                        category: TrapCategory::AssertionFailed,
+                        span,
+                    })),
+                    _ => Err(internal()),
+                };
             }
             let [left, right] = args.as_slice() else {
                 return Err(internal());

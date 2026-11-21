@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=305 citations=329
-Size record: tokens=28421 estimator=bytes/3 limit=30000
+Counts: statements=307 citations=333
+Size record: tokens=28733 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1327,6 +1327,15 @@ fn main() -> i32 {
     var ys: Array<u32> = [1u32, 2u32];
     ys[0u32] *= 3u32;
     ys[ys[0u32]] += 1u32;
+    return 0;
+}
+```
+[NB.7.4] `assert(c, "m")` takes a `Bool` condition and a string-literal message and returns `Unit`, costs one step plus its condition, never evaluates the message, and on a false condition traps `ASSERTION_FAILED` at the call span, which the CLI reports with the message (#258). `src/eval/engine.rs` `tests/language/assertions.rs::the_cli_reports_the_assertion_message_and_span`
+[NB.7.5] The reference, MIR, net oracle, native and cpu-parallel engines agree on that trap and its fuel prefix, a loop holding an assert is not admitted, so its first failing iteration in source order traps, and the compiled net route refuses it as `unsupported_call`. `tests/language/assertions.rs::a_false_assert_traps_identically_on_every_engine` `tests/language/assertions.rs::a_loop_with_an_assert_is_not_admitted_and_runs_serially`
+
+```invar outcome=trap:ASSERTION_FAILED
+fn main() -> i32 {
+    assert(2 + 2 == 5, "arithmetic");
     return 0;
 }
 ```

@@ -14,6 +14,8 @@ pub enum TrapCategory {
     DivisionByZero,
     IndexOutOfBounds,
     UnitConversionInexact,
+    /// A false `assert(condition, "message")` (#258); the span is the call.
+    AssertionFailed,
 }
 
 impl TrapCategory {
@@ -23,7 +25,37 @@ impl TrapCategory {
             Self::DivisionByZero => "DIVISION_BY_ZERO",
             Self::IndexOutOfBounds => "INDEX_OUT_OF_BOUNDS",
             Self::UnitConversionInexact => "UNIT_CONVERSION_INEXACT",
+            Self::AssertionFailed => "ASSERTION_FAILED",
         }
+    }
+}
+
+/// The message of the `assert` call at `span`: every engine reports the
+/// call span, and the message is the call's last argument, a string literal.
+pub fn assertion_message(source: &[u8], span: Span) -> Option<String> {
+    let call = std::str::from_utf8(source.get(span.start..span.end)?).ok()?;
+    crate::front::last_string_literal(call)
+}
+
+/// Add the assertion message to a trap document whose span came from an
+/// engine that reports only the category and span (the native host).
+pub fn annotate_assertion(document: &mut JsonValue, source: &[u8]) {
+    if document["trap"]["category"] != "ASSERTION_FAILED" {
+        return;
+    }
+    let bound = |key: &str| {
+        document["trap"]["span"][key]
+            .as_u64()
+            .and_then(|at| usize::try_from(at).ok())
+    };
+    let (Some(start), Some(end)) = (bound("start"), bound("end")) else {
+        return;
+    };
+    if let Some(message) = assertion_message(source, Span { start, end }) {
+        if document["diagnostics"][0]["code"] == "ASSERTION_FAILED" {
+            document["diagnostics"][0]["message"] = json!(format!("assertion failed: {message}"));
+        }
+        document["trap"]["message"] = json!(message);
     }
 }
 
@@ -150,21 +182,38 @@ impl EvalError {
         }
     }
 
+    /// The stable code of a trap, or `None` for any other error.
+    pub fn trap_code(&self) -> Option<&'static str> {
+        match self {
+            Self::Trap { category, .. } => Some(category.code()),
+            _ => None,
+        }
+    }
+
     /// CLI representation; preserves the established status and exit codes.
     pub fn to_diagnostics_json(&self, path: &str, source: &[u8]) -> JsonValue {
         match self {
             Self::Trap { category, span } => {
+                let message = (*category == TrapCategory::AssertionFailed)
+                    .then(|| assertion_message(source, *span))
+                    .flatten();
                 let mut document = crate::diagnostics::document(
                     "trap",
                     vec![crate::diagnostics::diagnostic(
                         category.code(),
-                        "evaluation trapped",
+                        &message.as_ref().map_or_else(
+                            || "evaluation trapped".to_owned(),
+                            |message| format!("assertion failed: {message}"),
+                        ),
                         path,
                         source,
                         Some(*span),
                     )],
                 );
                 document["trap"] = json!({"category": category.code(), "span": {"start": span.start, "end": span.end}});
+                if let Some(message) = message {
+                    document["trap"]["message"] = json!(message);
+                }
                 document
             }
             Self::EvaluationLimit {

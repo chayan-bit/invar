@@ -559,6 +559,7 @@ fn trap_code(category: eval::TrapCategory) -> &'static str {
         eval::TrapCategory::DivisionByZero => "DIVISION_BY_ZERO",
         eval::TrapCategory::IndexOutOfBounds => "INDEX_OUT_OF_BOUNDS",
         eval::TrapCategory::UnitConversionInexact => "UNIT_CONVERSION_INEXACT",
+        eval::TrapCategory::AssertionFailed => "ASSERTION_FAILED",
     }
 }
 
