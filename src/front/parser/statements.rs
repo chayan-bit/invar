@@ -115,6 +115,9 @@ impl Parser {
         if self.is_keyword("let") || self.is_keyword("var") {
             let mutable = self.is_keyword("var");
             let start = self.bump().span.start;
+            if self.is_symbol("(") {
+                return self.pair_binding(mutable, start);
+            }
             let (name, _) = self.expect_name()?;
             let annotation = if self.take_symbol(":").is_some() {
                 Some(self.ty()?)

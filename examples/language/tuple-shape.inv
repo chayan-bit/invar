@@ -1,0 +1,5 @@
+// A tuple is a pair of i32, u32, f32 or Bool values; three elements are TUPLE_SHAPE.
+fn main() -> i32 {
+    let t = (1, 2, 3);
+    return t.0;
+}

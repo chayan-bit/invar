@@ -43,7 +43,7 @@ fn value_type(ty: &Type) -> bool {
                 && !name.starts_with("Array<")
                 && name != "Unit"
         }
-        Type::Unit => false,
+        Type::Unit | Type::Pair(_) => false,
     }
 }
 
@@ -175,6 +175,7 @@ fn substitute_expr(expr: &mut Expr, arguments: &HashMap<String, Type>) {
             }
         }
         ExprKind::Index { base, index }
+        | ExprKind::Pair(base, index)
         | ExprKind::Binary {
             left: base,
             right: index,
@@ -450,6 +451,7 @@ pub(super) fn rewrite_calls(
                 }
             }
             ExprKind::Index { base, index }
+            | ExprKind::Pair(base, index)
             | ExprKind::Binary {
                 left: base,
                 right: index,

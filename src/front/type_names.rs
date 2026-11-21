@@ -1,4 +1,4 @@
-// The parts of `Result<..>` and view type names.
+// The parts of `Result<..>` and view type names, and pair spellings.
 
 pub(crate) fn result_parts(name: &str) -> Option<(Type, Type)> {
     fn component(value: &str, depth: usize) -> Option<Type> {
@@ -46,4 +46,21 @@ pub(crate) fn view_parts(name: &str) -> Option<(Type, bool)> {
         "MutView<u32>" => Some((Type::U32, true)),
         _ => None,
     }
+}
+
+/// The source spelling of a pair type, whose elements are 32-bit scalars (#262).
+pub(crate) fn pair_source_name(first: &Type, second: &Type) -> &'static str {
+    const NAMES: [[&str; 4]; 4] = [
+        ["(i32, i32)", "(i32, u32)", "(i32, f32)", "(i32, Bool)"],
+        ["(u32, i32)", "(u32, u32)", "(u32, f32)", "(u32, Bool)"],
+        ["(f32, i32)", "(f32, u32)", "(f32, f32)", "(f32, Bool)"],
+        ["(Bool, i32)", "(Bool, u32)", "(Bool, f32)", "(Bool, Bool)"],
+    ];
+    let at = |ty: &Type| match ty {
+        Type::I32 => 0,
+        Type::U32 => 1,
+        Type::F32 => 2,
+        _ => 3,
+    };
+    NAMES[at(first)][at(second)]
 }

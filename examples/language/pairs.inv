@@ -1,0 +1,8 @@
+// A function returns a pair of scalars and let binds both fields.
+fn divmod(a: i32, b: i32) -> (i32, i32) { return (a / b, a % b); }
+fn main() -> i32 {
+    let (q, r) = divmod(23, 4);
+    let p: (u32, Bool) = (7u32, true);
+    if p.1 { return q * 10 + r; }
+    return 0;
+}
