@@ -96,6 +96,15 @@ impl Launch {
         })
     }
 
+    /// The same exact launch over `groups` blocks (1 to [`MAX_EXACT_GROUPS`]):
+    /// any block count gives the same merged digits (law `fsum-exact-merge-v1`).
+    pub fn with_exact_groups(self, groups: u32) -> Result<Self, Error> {
+        if !self.op.is_exact() || !(1..=MAX_EXACT_GROUPS).contains(&groups) {
+            return Err(Error::Limit);
+        }
+        Ok(Self { groups, ..self })
+    }
+
     /// Output words: one f32 word per tree group, or one i64 row per exact group.
     pub fn output_words(&self) -> usize {
         if self.op.is_exact() {
@@ -445,6 +454,13 @@ mod tests {
         assert_eq!(exact.groups, MAX_EXACT_GROUPS);
         assert_eq!(exact.output_words(), MAX_EXACT_GROUPS as usize * ROW);
         assert_eq!(exact.params, [1 << 30, 1, 0, 19]);
+        assert_eq!(exact.with_exact_groups(7).unwrap().output_words(), 7 * ROW);
+        assert_eq!(exact.with_exact_groups(0), Err(Error::Limit));
+        assert_eq!(
+            exact.with_exact_groups(MAX_EXACT_GROUPS + 1),
+            Err(Error::Limit)
+        );
+        assert_eq!(launch.with_exact_groups(1), Err(Error::Limit));
     }
 
     #[test]

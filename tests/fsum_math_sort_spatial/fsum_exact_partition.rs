@@ -121,7 +121,9 @@ fn floats(words: &[u32]) -> Vec<F32Bits> {
 fn specials(words: &[u32], at: usize) -> [(Vec<u32>, u32); 3] {
     let with = |values: &[(usize, u32)]| {
         let mut copy = words.to_vec();
-        values.iter().for_each(|&(index, value)| copy[index] = value);
+        values
+            .iter()
+            .for_each(|&(index, value)| copy[index] = value);
         copy
     };
     let last = words.len() - 1;
@@ -157,7 +159,7 @@ fn fsum_exact_sums_admit_any_partition_up_to_2_pow_26() {
 
 #[test]
 fn fsum_exact_dots_admit_any_partition_up_to_2_pow_24() {
-    let mut rng = Rng(0x0206_d07);
+    let mut rng = Rng(0x0020_6d07);
     for log2 in [20u32, 24] {
         let n = 1usize << log2;
         let (ta, tb) = (

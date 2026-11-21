@@ -1,8 +1,8 @@
 # Invar v0.2: attributes, axes and receipts
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
-Counts: statements=45 citations=48
-Size record: tokens=5469 estimator=bytes/3 limit=6000
+Counts: statements=47 citations=50
+Size record: tokens=5706 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
@@ -70,6 +70,8 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 [NA3.10] An intrinsic that names its contract, such as `sum_tree` or `tc_mul_add`, applies it at that call, and a fold tier applies it to that function's folds; neither raises the level of the rest of the region. `src/axes.rs::CONTRACTS`
 [NA3.11] A C0 checked fold may be evaluated by any associative summary that reproduces its value and its first trap position, and `cpu-parallel` evaluates a counted `s = s + a[i]` over `i32` or `u32` by the exact (total, minimum prefix, maximum prefix) carry in 64 bits, rerunning only the chunk that holds the first overflow. `src/checked_fold.rs::Carry`
 [NA3.12] The value, trap category, trap span, fuel prefix and cleanup of such a fold equal the serial fold at every worker count, and `explain` names the plan `checked-sum-carry-if-guard` and the rule `pnf-l3-checked-sum-carry-v1`. `tests/schedule_cpu/checked_fold_carry.rs`
+[NA3.15] `sum_exact` and `dot_exact` admit any partition of their terms, because each part deposits into an integer accumulator, merged partials give the one exact total in any order, and it rounds once (NB.1.3) with the special values and signed zero of NB.1.7, so `cpu-parallel` splits a call over any worker count and CUDA and Metal over any block count with no new contract. `src/fsum.rs::Exact`
+[NA3.16] A float reduction receipt that ran on more than one worker or on a device names the law that admitted the split, `fsum-exact-merge-v1` for `sum_exact` and `dot_exact` or `fsum-aligned-tree-v1` for `sum_tree` and `dot_tree`, and a call on one worker has no law. `src/schedule/reductions.rs::EXACT_LAW`
 
 | Level | May vary | Must not vary | Evidence | Minimum receipt |
 | --- | --- | --- | --- | --- |
