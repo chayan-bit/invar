@@ -17,6 +17,7 @@ const MAX_CALL_DEPTH: usize = 64;
 mod aggregates;
 #[path = "oracle_arrays.rs"]
 mod arrays;
+pub(super) use aggregates::external_alias;
 #[path = "oracle_f32.rs"]
 mod floating;
 #[path = "oracle_intrinsics.rs"]
@@ -179,8 +180,8 @@ pub fn supports(rule: Rule) -> bool {
         | Rule::VariantPayload
         | Rule::VariantTakePayload
         | Rule::DropValue => true,
-        // GNET has no binary64 encoding; f64 programs stay on the CPU engines.
-        Rule::F64 => false,
+        // GNET has no binary64 or pair (#262) encoding; such programs stay on the CPU engines.
+        Rule::F64 | Rule::Pair | Rule::PairGet => false,
     }
 }
 
@@ -779,6 +780,12 @@ fn operation(
         | O::DropValue(_) => {
             return aggregates::operation(op, frame, ty, span, program, arena, aggregates, cleanup);
         }
+        O::Pair(..) | O::PairGet { .. } => {
+            return Err(tool(
+                ToolFailure::Unsupported,
+                "pairs have no CPU oracle representation",
+            ));
+        }
         O::Move(_)
         | O::ArrayRef { .. }
         | O::Array(_)
@@ -964,16 +971,6 @@ fn observe_entry(
     })
 }
 
-pub(super) fn external_alias(a: &Value, b: &Value) -> bool {
-    use std::rc::Rc;
-    match (a, b) {
-        (Value::ArrayI32(a), Value::ArrayI32(b)) => Rc::ptr_eq(a, b),
-        (Value::ArrayU32(a), Value::ArrayU32(b)) => Rc::ptr_eq(a, b),
-        (Value::ArrayF32(a), Value::ArrayF32(b)) => Rc::ptr_eq(a, b),
-        (Value::Record(a), Value::Record(b)) => Rc::ptr_eq(a, b),
-        _ => false,
-    }
-}
 enum OracleCommit<'a> {
     I32(std::cell::RefMut<'a, Vec<i32>>, Vec<i32>),
     U32(std::cell::RefMut<'a, Vec<u32>>, Vec<u32>),

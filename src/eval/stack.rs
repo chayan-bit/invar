@@ -41,6 +41,7 @@ enum Portable {
     VoxelGrid(crate::spatial::Grid),
     Record(Vec<Portable>),
     Variant(usize, Option<Box<Portable>>),
+    Pair(Box<(Portable, Portable)>),
 }
 
 impl Portable {
@@ -72,6 +73,13 @@ impl Portable {
                     Value::ViewI32(v, range) => Self::ViewI32(v.borrow().clone(), range),
                     Value::ViewU32(v, range) => Self::ViewU32(v.borrow().clone(), range),
                     Value::VoxelGrid(grid) => Self::VoxelGrid(grid.as_ref().clone()),
+                    Value::Pair(pair) => {
+                        let (first, second) = *pair;
+                        Self::Pair(Box::new((
+                            Self::from_value(first),
+                            Self::from_value(second),
+                        )))
+                    }
                     Value::Record(fields) => {
                         let fields = fields.borrow();
                         pending.push(Task::Record(fields.len()));
@@ -125,6 +133,10 @@ impl Portable {
                     Self::ViewI32(v, range) => Value::ViewI32(Rc::new(RefCell::new(v)), range),
                     Self::ViewU32(v, range) => Value::ViewU32(Rc::new(RefCell::new(v)), range),
                     Self::VoxelGrid(grid) => Value::VoxelGrid(Rc::new(grid)),
+                    Self::Pair(pair) => {
+                        let (first, second) = *pair;
+                        Value::Pair(Box::new((first.into_value(), second.into_value())))
+                    }
                     Self::Record(fields) => {
                         pending.push(Task::Record(fields.len()));
                         pending.extend(fields.into_iter().rev().map(Task::Visit));
@@ -183,6 +195,7 @@ fn share(value: &Value) -> Value {
         Value::ViewU32(v, range) => Value::ViewU32(Rc::clone(v), *range),
         Value::VoxelGrid(grid) => Value::VoxelGrid(Rc::clone(grid)),
         Value::Record(v) => Value::Record(Rc::clone(v)),
+        Value::Pair(pair) => super::copy_pair(pair),
         Value::Variant(v) => Value::Variant(Rc::clone(v)),
     }
 }

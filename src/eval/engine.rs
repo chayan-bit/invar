@@ -284,6 +284,8 @@ impl Evaluator<'_> {
                 }
                 result
             }
+            ExprKind::Pair(first, second) => Ok(Value::Pair(Box::new((self.expr(first, env)?, self.expr(second, env)?)))),
+            ExprKind::Field { base, name } if matches!(self.types.get(&base.span), Some(Type::Pair(_))) => pair_field(self.expr(base, env)?, name),
             ExprKind::Field { base, name } => {
                 let ExprKind::Name(binding) = &base.kind else {
                     return Err(EvalError::tool("INTERNAL_TYPE", "invalid checked field base"));
@@ -376,7 +378,9 @@ impl Evaluator<'_> {
                     }
                     return make_view(env.slot(source)?, bounds[0], bounds[1], *bounds.get(2).unwrap_or(&1), name == "view_mut", expr.span);
                 }
-                if let Some(kind) = crate::fsum::Kind::from_name(name) {
+                if crate::fsum::Kind::from_name(name).is_some()
+                    || crate::extremum::Kind::from_name(name).is_some()
+                {
                     let mut operands = Vec::with_capacity(args.len());
                     for arg in args {
                         let ExprKind::Name(actual) = &arg.kind else {
@@ -388,13 +392,7 @@ impl Evaluator<'_> {
                         self.charge()?;
                         operands.push(env.borrow_owned(actual)?);
                     }
-                    return floating::reduction(kind, &operands, expr.span);
-                }
-                if let Some(kind) = crate::extremum::Kind::from_name(name)
-                    && let Some(ExprKind::Name(actual)) = args.first().map(|arg| &arg.kind)
-                {
-                    self.charge()?;
-                    return crate::extremum::evaluate(kind, &env.borrow_owned(actual)?, expr.span);
+                    return floating::reduction(name, &operands, expr.span);
                 }
                 if name == "len" {
                     let Some(Expr {

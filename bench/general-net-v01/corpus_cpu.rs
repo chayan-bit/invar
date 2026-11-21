@@ -58,17 +58,17 @@ fn structural_coverage(rows: &[Json]) -> Json {
     );
     let required = inventory
         .iter()
-        .filter(|name| !matches!(name.as_str(), "F32" | "F64"))
+        .filter(|name| !matches!(name.as_str(), "F32" | "F64" | "Pair" | "PairGet"))
         .cloned()
         .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(
         covered, required,
-        "every integer/owner corpus rule must remain represented; F32 and F64 stay outside this source scope"
+        "every integer/owner corpus rule must remain represented; F32, F64 and pairs stay outside this source scope"
     );
     let missing = inventory.difference(&covered).cloned().collect::<Vec<_>>();
     json!({"scope":"integer_owner_source_corpus","covered_rule_count":covered.len(),"inventory_rule_count":inventory.len(),"covered_rules":covered,"not_represented_rules":missing,"rules":general_net::coverage::ALL_RULES.iter().map(|rule| {
         let name=format!("{rule:?}");
-        json!({"rule":name,"represented":covered.contains(&name),"oracle_supported":oracle::supports(*rule),"corpus_exclusion_reason":if name=="F32" || name=="F64" {Some("outside the integer/owner source corpus; no numeric or device coverage claimed")}else{None}})
+        json!({"rule":name,"represented":covered.contains(&name),"oracle_supported":oracle::supports(*rule),"corpus_exclusion_reason":match name.as_str() {"F32" | "F64" => Some("outside the integer/owner source corpus; no numeric or device coverage claimed"), "Pair" | "PairGet" => Some("pairs (#262) have no net encoding; the oracle refuses them"), _ => None}})
     }).collect::<Vec<_>>()})
 }
 fn report(name: &str, rows: Vec<Json>) {

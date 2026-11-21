@@ -22,6 +22,8 @@ pub enum Value {
     VoxelGrid(Rc<crate::spatial::Grid>),
     Record(Rc<RefCell<Vec<Value>>>),
     Variant(Rc<RefCell<(usize, Option<Value>)>>),
+    /// A pair of 32-bit scalars, copied like a scalar (#262).
+    Pair(Box<(Value, Value)>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

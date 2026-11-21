@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=313 citations=342
-Size record: tokens=29579 estimator=bytes/3 limit=30000
+Counts: statements=315 citations=345
+Size record: tokens=29913 estimator=bytes/3 limit=30000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1233,7 +1233,7 @@ fn main() -> i32 {
 [NB.3.5] A `VoxelGrid` parameter is `read` or `take` and never `mut`, and query result arrays leave their record only through `move result.field`. `src/spatial.rs`
 [NB.3.6] A report with a spatial site names the calibration family `spatial.<op>.f32` and the reason `spatial-cost-unmeasured`. `docs/explain.md`
 [NB.3.7] Squared distances are strict f32 left to right, a positive infinite radius is allowed, a query count times stride beyond `u32` traps with `INTEGER_OVERFLOW`, and read loans hold through all scalar arguments. `src/spatial.rs`
-[NB.3.8] A negative or NaN radius matches nothing, a query with any non-finite coordinate has no neighbours, cell indices are the exact `floor(coord / cell)` converted to `i32`, and query records bind to a name because tuple binding is unsupported. `src/spatial/runtime.rs::finite`
+[NB.3.8] A negative or NaN radius matches nothing, a query with any non-finite coordinate has no neighbours, cell indices are the exact `floor(coord / cell)` converted to `i32`, and query records bind to a name because tuple binding covers only pairs of 32-bit scalars (NB.7.12). `src/spatial/runtime.rs::finite`
 
 ```invar outcome=value:3
 fn main() -> i32 {
@@ -1357,5 +1357,16 @@ fn main() -> i32 {
         }
     }
     return n;
+}
+```
+
+[NB.7.12] `(A, B)` with `A` and `B` each `i32`, `u32`, `f32` or `Bool` is a Copy pair type with value `(a, b)` and fields `p.0` and `p.1`, and `let (x, y) = e;` binds `e` once to a hidden local, then copies its fields in order; any other arity, element type or field index is `TUPLE_SHAPE`, and pairs are not compared, captured, written by field, or held in records, variants, views or generics (#262). `src/front/parser/tuples.rs` `tests/language/tuples.rs::malformed_pairs_are_refused_with_exact_codes`
+[NB.7.13] The reference, MIR, cpu-parallel and native engines agree on pairs, native packing element 0 in the low half of one 64-bit slot; the net oracle, device compilers and C exports refuse them, and a loop reading one has no admitted candidate, so it runs serially. `tests/language/tuples.rs`
+
+```invar outcome=value:8
+fn divmod(a: i32, b: i32) -> (i32, i32) { return (a / b, a % b); }
+fn main() -> i32 {
+    let (q, r) = divmod(23, 4);
+    return q + r;
 }
 ```

@@ -155,6 +155,7 @@ impl Env {
             Value::F64(value) => Ok(Value::F64(*value)),
             Value::Bool(value) => Ok(Value::Bool(*value)),
             Value::Unit => Ok(Value::Unit),
+            Value::Pair(pair) => Ok(copy_pair(pair)),
             Value::ViewI32(values, range) => Ok(Value::ViewI32(Rc::clone(values), *range)),
             Value::ViewU32(values, range) => Ok(Value::ViewU32(Rc::clone(values), *range)),
             Value::ArrayI32(_)
@@ -505,6 +506,27 @@ pub mod named;
 pub(crate) mod stack;
 
 include!("eval/engine.rs");
+
+/// A copy of a pair; its elements are 32-bit scalars (#262).
+pub(crate) fn copy_pair(pair: &(Value, Value)) -> Value {
+    let scalar = |value: &Value| match value {
+        Value::I32(x) => Value::I32(*x),
+        Value::U32(x) => Value::U32(*x),
+        Value::F32(x) => Value::F32(*x),
+        Value::Bool(x) => Value::Bool(*x),
+        // Checking and MIR verification admit no other element.
+        _ => Value::Unit,
+    };
+    Value::Pair(Box::new((scalar(&pair.0), scalar(&pair.1))))
+}
+
+/// Field `0` or `1` of a checked pair (#262).
+fn pair_field(value: Value, name: &str) -> Result<Value, EvalError> {
+    let Value::Pair(pair) = value else {
+        return Err(EvalError::tool("INTERNAL_TYPE", "checked pair missing"));
+    };
+    Ok(if name == "0" { pair.0 } else { pair.1 })
+}
 
 fn named_array(expr: &Expr) -> Option<&str> {
     match &expr.kind {

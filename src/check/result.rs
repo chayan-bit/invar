@@ -45,7 +45,7 @@ fn collect_expr(types: &mut BTreeMap<String, (Type, Type, Span)>, expr: &Expr) {
                 pending.push(base);
                 pending.push(index);
             }
-            ExprKind::Binary { left, right, .. } => {
+            ExprKind::Binary { left, right, .. } | ExprKind::Pair(left, right) => {
                 pending.push(left);
                 pending.push(right);
             }

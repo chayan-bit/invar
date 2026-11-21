@@ -494,6 +494,16 @@ impl Builder<'_> {
                 self.current = join;
                 result
             }
+            ExprKind::Pair(first, second) => {
+                let first = self.expr(first, false)?;
+                let second = self.expr(second, false)?;
+                self.value(Operation::Pair(first, second), ty, expr.span)
+            }
+            ExprKind::Field { base, name } if matches!(self.ty(base), Ok(Type::Pair(_))) => {
+                let pair = self.expr(base, false)?;
+                let index = usize::from(name == "1");
+                self.value(Operation::PairGet { pair, index }, ty, expr.span)
+            }
             ExprKind::Field { base, name } => {
                 let Type::Named(record_name) = self.ty(base)? else {
                     return Err(invalid("checked field base type missing"));

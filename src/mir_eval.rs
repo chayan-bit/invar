@@ -29,8 +29,8 @@ mod values;
 pub(crate) use bulk::{LiveLoop, LoopOverride};
 use bulk::{live_loop, live_trips};
 use frame::{Frame, Slot, copied, park, record_cleanup};
-pub use reduce::{ReduceCall, Reducer, SelectCall, Selector, serial_reduction};
 use reduce::CallHooks;
+pub use reduce::{ReduceCall, Reducer, SelectCall, Selector, serial_reduction};
 #[cfg(test)]
 use values::mir_host_index;
 use values::{array_length, binary, filled, indexed, mir_len_u32, store_index, unary};

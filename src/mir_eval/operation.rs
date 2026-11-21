@@ -100,6 +100,17 @@ impl Interpreter<'_> {
                 admit_live(&mut self.live_elements, values.len())?;
                 Some(Value::Record(Rc::new(RefCell::new(values))))
             }
+            Operation::Pair(first, second) => Some(Value::Pair(Box::new((
+                frame.value(*first)?,
+                frame.value(*second)?,
+            )))),
+            Operation::PairGet { pair, index } => {
+                let Value::Pair(pair) = frame.value(*pair)? else {
+                    return Err(tool("MIR_TYPE", "pair field base is not a pair"));
+                };
+                let (first, second) = *pair;
+                Some(if *index == 0 { first } else { second })
+            }
             Operation::Field { record, index } => {
                 let Value::Record(values) = frame.value(*record)? else {
                     return Err(tool("MIR_TYPE", "field base is not a record"));
