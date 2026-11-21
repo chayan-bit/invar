@@ -108,10 +108,11 @@ RUSTUP_HOME=$PWD/.rustup CARGO_HOME=$PWD/.cargo ./rustup-init -y --no-modify-pat
 The run is built for the other tenants of the host, so it is low impact by default.
 It starts detached (`setsid`), so a dropped ssh session never stops it, and the driver reattaches to its output; exit 5 then means only that the result file is missing.
 It re-executes itself inside a `systemd-run --user --scope` with `MemoryMax` (`REMOTE_CUDA_MEM_MAX`, 12G), `MemorySwapMax=0` and `CPUQuota` (`REMOTE_CUDA_CPU_QUOTA`, 800%), under `nice -n 19` and `ionice -c3`; without a user systemd it keeps nice and ionice and says that no cap applies (`ulimit -v` would break CUDA's address-space reservation).
-Cargo builds with `REMOTE_CUDA_JOBS` (4) jobs, each test process uses as many test threads, at most `REMOTE_CUDA_LANES` (2) suites run at once, and `INVAR_GNET05_DEVICE_JOBS` is `REMOTE_CUDA_DEVICE_JOBS` (2).
+With `OOMPolicy=continue` the cap kills only a process that exceeds it; that suite fails and the summary says how many processes the cap killed.
+Cargo builds with `REMOTE_CUDA_JOBS` (4) jobs, each test process uses as many test threads, `REMOTE_CUDA_LANES` (1) suites run at a time, and `INVAR_GNET05_DEVICE_JOBS` is `REMOTE_CUDA_DEVICE_JOBS` (2).
 Before it starts, the GPU must show three idle samples 5 s apart: at most `REMOTE_CUDA_MAX_UTIL` (5) percent busy, `REMOTE_CUDA_MIN_FREE_MIB` free and a one-minute load average under `REMOTE_CUDA_MAX_LOAD` (8); otherwise it checks again every 5 minutes for `REMOTE_CUDA_WAIT_MIN` (120) minutes and exits 3.
 `REMOTE_CUDA_TIMEOUT_MIN` defaults to 240 there.
-The summary reports the run's own footprint: peak CPU cores over 5 s windows and the scope's memory peak from its cgroup, the peak resident set of its processes, and the peak GPU memory of the processes whose binaries live under the run directory.
+The summary reports the run's own footprint: peak CPU cores over 5 s windows and the scope's memory peak from its cgroup, the peak resident set of its processes and of each suite's largest process, and the peak GPU memory of the processes whose binaries live under the run directory.
 
 ## Later implementation and hardware acceptance
 

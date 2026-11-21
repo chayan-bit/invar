@@ -19,8 +19,9 @@ if [ -z "${REMOTE_CUDA_SCOPED:-}" ]; then
     export REMOTE_CUDA_SCOPED=1
     low=(nice -n 19 ionice -c3 bash "$here/${0##*/}")
     if systemd-run --user --scope -q true 2>/dev/null; then
+        # OOMPolicy=continue: the cap kills only the process over it, which then fails its suite.
         exec systemd-run --user --scope -q -p MemoryMax="$MEM_MAX" -p MemorySwapMax=0 \
-            -p CPUQuota="$CPU_QUOTA" "${low[@]}"
+            -p CPUQuota="$CPU_QUOTA" -p OOMPolicy=continue "${low[@]}"
     fi
     # ulimit -v would break CUDA, which reserves far more address space than it uses.
     say "no systemd user scope: nice and ionice only, no memory or CPU cap"
@@ -134,14 +135,18 @@ build_rc=$?
 say "build: $((SECONDS - begun)) s"
 timed_out=0
 [ "$build_rc" = 124 ] && timed_out=1
-# At most LANES suites at once: each opens its own CUDA context.
+# At most LANES suites at once: each opens its own CUDA context. GNU time, when
+# present, records each suite's largest process.
+rss_of=()
+[ -x /usr/bin/time ] && rss_of=(/usr/bin/time -f %M -o)
 if [ "$build_rc" = 0 ]; then
     for i in "${!suites[@]}"; do
         while [ "$(jobs -rp | grep -cv "^$sampler\$")" -ge "$LANES" ]; do wait -n; done
         (
             t=$SECONDS
             # shellcheck disable=SC2086 # the suite is a flag and its value
-            timeout -k 30 "$(left)" cargo test "${common[@]}" ${suites[$i]} -- --include-ignored "${skips[@]}" \
+            timeout -k 30 "$(left)" ${rss_of[@]+"${rss_of[@]}" "$here/suite-$i.rss"} \
+                cargo test "${common[@]}" ${suites[$i]} -- --include-ignored "${skips[@]}" \
                 "${filters[@]}" >"$here/suite-$i.log" 2>&1
             echo "$? $((SECONDS - t))" >"$here/suite-$i.rc"
         ) &
@@ -158,10 +163,13 @@ for i in "${!suites[@]}"; do
     read -r rc secs <"$here/suite-$i.rc"
     [ "$rc" = 124 ] && timed_out=1
     [ "$rc" = 0 ] || failed_lane=1
-    say "suite ${suites[$i]}: $secs s, exit $rc"
+    rss=$(tail -1 "$here/suite-$i.rss" 2>/dev/null) && rss=", peak RSS $((rss / 1024)) MiB" || rss=
+    say "suite ${suites[$i]}: $secs s, exit $rc$rss"
 done
 read -r cpu gmem rss <"$here/peak" 2>/dev/null || { cpu=0 gmem=0 rss=0; }
 mem_peak=$(($(cat "$cg/memory.peak" 2>/dev/null || echo 0) / 1048576))
+ooms=$(awk '/^oom_kill / { print $2 }' "$cg/memory.events" 2>/dev/null)
+[ "${ooms:-0}" -gt 0 ] && say "MEMORY CAP: $ooms process(es) killed at MemoryMax=$MEM_MAX; their suites fail for memory, not CUDA"
 say "load: peak CPU $cpu cores (5 s windows); peak RSS $rss MiB; scope memory peak $mem_peak MiB (page cache included); peak GPU memory of this run $gmem MiB"
 
 awk '

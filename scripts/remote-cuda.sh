@@ -14,7 +14,7 @@
 # REMOTE_CUDA_PROFILE (device-test) for the cargo profile the suites build with,
 # REMOTE_CUDA_OS (Windows unless `uname -s` on the host prints Linux).
 # A Linux host (scripts/remote-cuda-linux.sh) runs at low load by default:
-# REMOTE_CUDA_LANES (2 suites at once), REMOTE_CUDA_JOBS (4 build jobs and test
+# REMOTE_CUDA_LANES (1 suite at a time), REMOTE_CUDA_JOBS (4 build jobs and test
 # threads), REMOTE_CUDA_MEM_MAX (12G, no swap), REMOTE_CUDA_CPU_QUOTA (800%),
 # REMOTE_CUDA_MAX_LOAD (8), REMOTE_CUDA_DEVICE_JOBS (2 GNET-05 programs), and
 # Linux defaults TIMEOUT_MIN 240, WAIT_MIN 120, MAX_UTIL 5.
@@ -86,7 +86,7 @@ if [ "$os" = Linux ]; then
         q TIMEOUT_MIN "${REMOTE_CUDA_TIMEOUT_MIN:-240}"; q WAIT_MIN "${REMOTE_CUDA_WAIT_MIN:-120}"
         q MIN_FREE_MIB "${REMOTE_CUDA_MIN_FREE_MIB:-8192}"; q MAX_UTIL "${REMOTE_CUDA_MAX_UTIL:-5}"
         q MAX_LOAD "${REMOTE_CUDA_MAX_LOAD:-8}"; q SHARED "${REMOTE_CUDA_SHARED:-0}"
-        q LANES "${REMOTE_CUDA_LANES:-2}"; q JOBS "${REMOTE_CUDA_JOBS:-4}"; q DEVICE_JOBS "${REMOTE_CUDA_DEVICE_JOBS:-2}"
+        q LANES "${REMOTE_CUDA_LANES:-1}"; q JOBS "${REMOTE_CUDA_JOBS:-4}"; q DEVICE_JOBS "${REMOTE_CUDA_DEVICE_JOBS:-2}"
         q MEM_MAX "${REMOTE_CUDA_MEM_MAX:-12G}"; q CPU_QUOTA "${REMOTE_CUDA_CPU_QUOTA:-800%}"
     } >"$tmp/run.env"
     "${ssh_[@]}" "mkdir -p $rd"
