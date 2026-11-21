@@ -124,7 +124,7 @@ block         = "{", { statement }, "}" ;
 statement     = binding | assignment | return_stmt | if_stmt
               | while_stmt | for_stmt | expression, ";" ;
 binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;
-assignment    = place, "=", expression, ";" ;
+assignment    = place, ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ), expression, ";" ;  (* #254 *)
 place         = identifier, [ "[", expression, "]" ] ;
 return_stmt   = "return", [ expression ], ";" ;
 if_stmt       = "if", expression, block, [ "else", ( block | if_stmt ) ] ;
@@ -155,7 +155,12 @@ arguments     = expression, { ",", expression }, [ "," ] ;
 identifier    = identifier_start, { identifier_continue } ;
 identifier_start = letter | "_" ;
 identifier_continue = identifier_start | digit ;
-integer_literal = digit, { digit }, [ "i32" | "u32" ] ;
+integer_literal = ( digit, { [ "_" ], digit } | "0x", hex_digit, { [ "_" ], hex_digit }
+                  | "0o", octal_digit, { [ "_" ], octal_digit }
+                  | "0b", binary_digit, { [ "_" ], binary_digit } ), [ "i32" | "u32" ] ;  (* #253 *)
+hex_digit     = digit | "A" .. "F" | "a" .. "f" ;
+octal_digit   = "0" .. "7" ;
+binary_digit  = "0" | "1" ;
 decimal_literal = digit, { digit }, ".", digit, { digit }, [ float_type ] ;
 letter        = "A" .. "Z" | "a" .. "z" ;
 digit         = "0" .. "9" ;
