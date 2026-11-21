@@ -1,0 +1,12 @@
+#!/bin/sh
+# Print "<exit code> <sha256 of stdout> <path>" for every `run` example in examples/index.json on the
+# reference engine, sorted by path. CI runs this on x86_64 and aarch64 Linux and requires the two lists
+# to be byte-identical (issue #220); the float-heavy examples (fsum, cr trig, fk_panda) are in it.
+# Usage, from the repository root: scripts/cross-arch-digest TARGET/INVAR_BINARY
+set -eu
+bin=${1:?usage: scripts/cross-arch-digest PATH_TO_INVAR_BINARY}
+jq -r '.examples[] | select(.expect.command == "run") | .path' examples/index.json | LC_ALL=C sort |
+while IFS= read -r path; do
+    out=$(timeout 120 "$bin" run "$path" --engine reference --format json 2>/dev/null) && code=0 || code=$?
+    printf '%s %s %s\n' "$code" "$(printf '%s' "$out" | sha256sum | cut -d' ' -f1)" "$path"
+done

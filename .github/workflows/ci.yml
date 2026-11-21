@@ -106,6 +106,117 @@ jobs:
         if: matrix.doctests
         run: cargo test --locked --doc
 
+  # aarch64 Linux (#220): the Linux Debug suite above, unchanged, on GitHub's native arm64 runners, and a
+  # cross-architecture identity check of the reference engine's example outputs. These jobs are not
+  # required checks, so a slow or unavailable arm64 runner never blocks a merge; a failure is still a red
+  # check on the pull request. The default-feature suite only: the native backend (LLVM 21) is not built
+  # here, so the evidence below records no LLVM version.
+  linux-arm:
+    name: Linux arm64 (${{ matrix.name }})
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: shard 1/4
+            args: --partition count:1/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
+            doctests: true
+          - name: shard 2/4
+            args: --partition count:2/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
+          - name: shard 3/4
+            args: --partition count:3/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
+          - name: shard 4/4
+            args: --partition count:4/4 -E 'not test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
+          - name: CPU-model corpus 1/2
+            part: 1/2
+            args: --test gnet_device_model --success-output final -E 'test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
+          - name: CPU-model corpus 2/2
+            part: 2/2
+            args: --test gnet_device_model --success-output final -E 'test(=device_model::device_model_corpus_cpu_model_agrees_with_oracle)'
+    env:
+      INVAR_CI_PROFILE: debug
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
+        with:
+          tool: nextest@0.9.146
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: ci-debug-arm
+      - name: Test (default features, ci-debug profile)
+        env:
+          NEXTEST_ARGS: ${{ matrix.args }}
+          INVAR_CORPUS_PART: ${{ matrix.part }}
+        run: eval "cargo nextest run --locked --profile ci --cargo-profile ci-debug -p invar -p invar-tools $NEXTEST_ARGS"
+      - name: Doctests
+        if: matrix.doctests
+        run: cargo test --locked --doc
+
+  # Each architecture builds the CLI and prints the exit code and stdout digest of every example on the
+  # reference engine (scripts/cross-arch-digest), plus an evidence record of the toolchain, glibc and
+  # runner image. `cross-arch-identity` then requires the two digest lists to be byte-identical.
+  cross-arch:
+    name: Cross-arch digest (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: x86_64
+            os: ubuntu-latest
+          - name: aarch64
+            os: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: cross-arch
+      - name: Build the CLI (ci-debug profile)
+        run: cargo build --locked --profile ci-debug --bin invar
+      - name: Digest every example and record the evidence
+        run: |
+          mkdir evidence
+          scripts/cross-arch-digest target/ci-debug/invar > evidence/digests.txt
+          {
+            echo "revision: $GITHUB_SHA"
+            echo "machine: $(uname -m)"
+            echo "runner image: ${ImageOS:-unknown} ${ImageVersion:-unknown}"
+            echo "glibc: $(ldd --version | head -n 1)"
+            echo "llvm: not used (default-feature build)"
+            echo "digests: $(wc -l < evidence/digests.txt) examples"
+            rustc -vV
+          } > evidence/evidence.txt
+          cat evidence/evidence.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cross-arch-${{ matrix.name }}
+          path: evidence
+
+  cross-arch-identity:
+    name: Cross-arch identity
+    needs: cross-arch
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: cross-arch-*
+      - name: x86_64 and aarch64 digests are byte-identical
+        run: |
+          test -s cross-arch-x86_64/digests.txt
+          diff -u cross-arch-x86_64/digests.txt cross-arch-aarch64/digests.txt
+          echo "identical: $(wc -l < cross-arch-x86_64/digests.txt) examples"
+
   # Windows on CPU: the default-feature suite on MSVC in four shards, and a
   # gnullvm build of every test target. C++ test harnesses compile with
   # llvm-mingw's clang (pinned and checksummed below); children are bounded

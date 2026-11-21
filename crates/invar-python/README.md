@@ -242,7 +242,7 @@ INVAR_CORPUS_SUMMARY=corpus.json python -m pytest crates/invar-python/tests -k a
 On macOS aarch64 the release
 extension with `--features native` builds with maturin inside `nix develop .#python`
 and runs `demo/zero_copy.py` and `tests/test_native_arrays.py`. The Linux qualification ran outside Nix (no Nix on the Linux
-host); the Linux x86_64 and aarch64 shells evaluate but were not built.
+host); the Linux x86_64 and aarch64 shells evaluate but were not built. The Linux aarch64 shell was not built in CI either; the "Linux arm64" and "Cross-arch" CI jobs build and test the Rust core only (see below).
 
 ## L1-06 criteria after HA-1.4
 
@@ -276,3 +276,5 @@ The separate repair step is necessary: maturin's built-in repair copies LLVM and
 Auditwheel gives LLVM and its dependent libraries the local `$ORIGIN` path.
 Native compilation of export hosts still requires rustc on PATH; it is not a bundled runtime dependency.
 The repaired wheel is qualified on Linux x86_64 with glibc 2.41 and CPython 3.12 only (all Python tests on both scalar engines in a fresh virtual environment without `PYTHONPATH`, `LLVM_SYS_211_PREFIX` or workspace library paths); macOS, ARM, older glibc and Nix are not qualified.
+On Linux aarch64, CI (the `Linux arm64` jobs on `ubuntu-24.04-arm`) runs the Rust core's default-feature Debug suite, and the `Cross-arch` jobs require the reference engine's exit code and stdout digest for every `run` example in `examples/index.json` to be byte-identical to the x86_64 result (the evidence record lists the toolchain, glibc and runner image).
+That proves the core's architecture independence on the reference engine only: the wheel, the native backend (no LLVM 21 build on arm64) and the Python tests are not built or run on aarch64.
