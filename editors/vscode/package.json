@@ -1,0 +1,27 @@
+{
+  "name": "invar-language",
+  "displayName": "Invar",
+  "description": "Syntax highlighting for the Invar language (.inv)",
+  "version": "0.1.0",
+  "publisher": "invar-lang",
+  "license": "Apache-2.0",
+  "engines": { "vscode": "^1.80.0" },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "invar",
+        "aliases": ["Invar", "invar"],
+        "extensions": [".inv"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "invar",
+        "scopeName": "source.invar",
+        "path": "./syntaxes/invar.tmLanguage.json"
+      }
+    ]
+  }
+}
