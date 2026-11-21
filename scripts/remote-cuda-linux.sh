@@ -10,6 +10,7 @@ set -uo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=/dev/null
 . "$here/run.env"
+# shellcheck disable=SC2153 # BASE comes from run.env
 base=$HOME/$BASE
 say() { echo "remote-cuda: $*"; }
 
@@ -36,6 +37,8 @@ cg=/sys/fs/cgroup$(cut -d: -f3 /proc/self/cgroup)
 
 # One run at a time: the target dir and the GPU are shared. The kernel drops the
 # lock when the last process holding it (this script or a child) exits.
+# One wait budget covers the lock and the idle gate.
+until_=$((SECONDS + WAIT_MIN * 60))
 exec 9>"$base/lock"
 flock -w $((WAIT_MIN * 60)) 9 || { say 'BUSY: another remote-cuda run holds the lock'; exit 3; }
 # Keep the ten newest runs (ids sort by start time).
@@ -53,7 +56,6 @@ idle() {
         { [ "$SHARED" = 1 ] || [ "$g_util" -le "$MAX_UTIL" ]; }
 }
 # Gate: three idle samples 5 s apart; otherwise check again every 5 minutes.
-until_=$((SECONDS + WAIT_MIN * 60))
 while :; do
     quiet=0
     for _ in 1 2 3; do
@@ -109,6 +111,7 @@ sample() {
             while IFS=', ' read -r pid mem; do
                 case $(readlink "/proc/$pid/exe" 2>/dev/null) in "$base"/*) echo "$mem" ;; esac
             done | awk '{ s += $1 } END { print s + 0 }')
+        # shellcheck disable=SC2016 # $2 is awk's
         r=$(xargs -r -I{} awk '/^VmRSS/ { print $2 }' /proc/{}/status <"$cg/cgroup.procs" 2>/dev/null | awk '{ s += $1 } END { print int(s / 1024) }')
         [ "$g" -gt "$gmem" ] && gmem=$g
         [ "$r" -gt "$rss" ] && rss=$r
