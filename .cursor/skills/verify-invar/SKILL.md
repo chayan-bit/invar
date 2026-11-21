@@ -11,7 +11,7 @@ The feature map is [`references/features/README.md`](references/features/README.
 
 ## Launch
 
-From the repository root, with Rust 1.95.0 (the `rust-toolchain.toml` pin). The helper calls `cargo` and `rustc` from `PATH`. Without the rustup proxies, a system Rust shadows the pin, and doctor reports `toolchain_ok: false`. In that case put the 1.95.0 toolchain's `bin` first, for example `PATH=$HOME/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin:$PATH`:
+From the repository root, with Rust 1.95.0 (the `rust-toolchain.toml` pin). The helper calls `cargo` and `rustc` from `PATH`. Without the rustup proxies, a system Rust shadows the pin, and doctor reports `toolchain_ok: false`. In that case put the rustup proxies first (`export PATH="$HOME/.cargo/bin:$PATH"`) so `rust-toolchain.toml` selects 1.95.0. A build with the wrong `rustc` fails on `rust-version`, and that is not a product failure:
 
 ```sh
 .cursor/skills/verify-invar/scripts/invar-verify build --jobs 2 --format json
@@ -27,7 +27,7 @@ The build writes `target/`. `--dry-run` prints the cargo command and does not ru
 .cursor/skills/verify-invar/scripts/invar-verify doctor --format json
 ```
 
-Read-only. Exit 0 when `ready` is true: the binary answers `--help`, `rustc` is 1.95, and `cargo` is on `PATH`. Exit 1 when the report was produced but the tree is not worth driving (build first). The report also records LLVM 21, `nvidia-smi`, Metal (Darwin or not), `ros2`, `cargo-nextest`, and `just`. Those facts decide later skips. Doctor does not install anything and does not start a GPU.
+Read-only. Exit 0 when `ready` is true: the binary answers `--help`, `rustc` is 1.95, and `cargo` is on `PATH`. Exit 1 when the report was produced but the tree is not worth driving (build first). The report also records LLVM 21, `nvidia-smi`, Metal (Darwin or not), `ros2`, `cargo-nextest`, `just`, and `cxx` (the C++20 `<barrier>` compiler that the `gnet-device` CPU model needs). Those facts decide later skips. Doctor does not install anything and does not start a GPU.
 
 ## Drive
 
@@ -93,7 +93,7 @@ Useful environment:
 The default suite records these as `skipped` when the probe says so:
 
 - `codegen.native-serial-run` — LLVM 21.1.8 is not installed (`native` is not rustc's LLVM).
-- `codegen.cuda-hardware` — no NVIDIA GPU, and the binary has no `cuda` feature. This covers `just test-gpu-cuda`.
+- `codegen.cuda-hardware` — no NVIDIA GPU, and the binary has no `cuda` feature. This covers `just test-gpu-cuda`. `just test-gpu-cuda-remote` needs a remote host (`REMOTE_CUDA_HOST`), and the drive never runs it.
 - `codegen.metal-hardware` — not an Apple Silicon Mac. This covers `just test-metal`.
 - `robotics.ros2-runtime` — `ros2` is not on PATH and there is no robot. Generation of the workspace is still checked.
 - `robotics.component-test` — needs a foreign shared library and the fixture server.
