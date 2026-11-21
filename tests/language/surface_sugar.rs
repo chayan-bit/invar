@@ -45,10 +45,21 @@ fn lower(source: &str) -> (check::CheckedProgram, mir::Program) {
 }
 
 /// MIR of every function with source spans and hash-map order removed.
-fn mir_shape(program: &mir::Program) -> String {
+fn mir_shape(program: &mir::Program, renames: &[(String, &str)]) -> String {
+    let rename = |name: &String| {
+        renames
+            .iter()
+            .find(|(hidden, _)| hidden == name)
+            .map_or(name.as_str(), |(_, plain)| plain)
+            .to_owned()
+    };
     let functions = program.functions.iter().map(|f| {
-        let mut locals = f.locals.iter().collect::<Vec<_>>();
-        locals.sort_by_key(|(name, _)| *name);
+        let mut locals = f
+            .locals
+            .iter()
+            .map(|(name, local)| (rename(name), local))
+            .collect::<Vec<_>>();
+        locals.sort_by(|a, b| a.0.cmp(&b.0));
         format!(
             "{:?}",
             (
@@ -114,10 +125,10 @@ pub fn assert_same_program_renamed(sugared: &str, plain: &str, renames: &[(Strin
     let (plain_checked, plain_mir) = lower(plain);
     let shape = renames
         .iter()
-        .fold(mir_shape(&sugared_mir), |shape, (hidden, name)| {
+        .fold(mir_shape(&sugared_mir, renames), |shape, (hidden, name)| {
             shape.replace(&format!("{hidden:?}"), &format!("{name:?}"))
         });
-    assert_eq!(shape, mir_shape(&plain_mir), "MIR\n{sugared}\n{plain}");
+    assert_eq!(shape, mir_shape(&plain_mir, &[]), "MIR\n{sugared}\n{plain}");
     assert_eq!(
         outcome(&sugared_checked, &sugared_mir, 1_000_000),
         outcome(&plain_checked, &plain_mir, 1_000_000),

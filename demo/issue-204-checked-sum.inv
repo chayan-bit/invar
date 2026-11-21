@@ -1,0 +1,8 @@
+// #204: a checked i32 sum over 2^23 elements runs on CPU workers through
+// the exact (total, min prefix, max prefix) carry of PNF law L3.
+fn main() -> i32 {
+    let a = filled_i32(8388608u32, 1);
+    var s: i32 = -8388608;
+    for i in 0u32..8388608u32 { s = s + a[i]; }
+    return s;
+}

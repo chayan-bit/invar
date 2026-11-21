@@ -69,6 +69,9 @@ pub enum Fault {
     Overlap,
     Timeout,
     Cancel,
+    /// Mutation (#204): the checked-fold carry combine drops the right
+    /// operand's minimum prefix; the differential tests must catch it.
+    LoseMinPrefix,
 }
 
 #[derive(Clone, Debug)]

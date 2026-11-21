@@ -4,10 +4,9 @@ use serde_json::{Value, json};
 
 const MAX_SOURCE_BYTES: usize = 1_048_576;
 const MAX_NESTING: usize = 32;
-/// Bound on the height of the statement/expression tree along any path.
-/// Syntactic nesting is capped at [`MAX_NESTING`], but left-associative
-/// operator chains and `else if` chains deepen the tree without nesting, and
-/// every later pass walks it recursively. This keeps those walkers stack-safe
+/// Bound on the height of the statement/expression tree along any path. Syntactic nesting is capped
+/// at [`MAX_NESTING`], but left-associative operator chains and `else if` chains deepen the tree
+/// without nesting, and every later pass walks it recursively. This keeps those walkers stack-safe
 /// on a 2 MiB thread in Debug builds (see `tests/limits/robustness_limits.rs`).
 const MAX_TREE_HEIGHT: usize = 192;
 
@@ -126,6 +125,8 @@ pub struct Program {
     pub records: Vec<RecordDecl>,
     pub variants: Vec<VariantDecl>,
     pub system_items: Vec<SystemItem>,
+    /// `///` and `//!` comments, each with the item it documents (#257).
+    pub docs: Vec<DocComment>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -453,6 +454,7 @@ pub struct Function {
     pub body: Block,
     pub span: Span,
     pub fold: crate::numeric_contract::FoldTier,
+    pub axes: crate::axes::Axes,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -793,25 +795,4 @@ pub fn parse_system(bytes: &[u8]) -> Result<Program, FrontError> {
             failure
         }
     })
-}
-
-pub fn contains_system_declaration(bytes: &[u8]) -> bool {
-    std::str::from_utf8(bytes)
-        .ok()
-        .and_then(|source| lex(source).ok())
-        .is_some_and(|tokens| {
-            tokens.iter().enumerate().any(|(index, token)| {
-                if matches!(token.kind, TokenKind::Keyword("extern"))
-                    && matches!(tokens.get(index + 1).map(|next| &next.kind), Some(TokenKind::Name(name)) if name == "c")
-                {
-                    return false;
-                }
-                matches!(
-                    token.kind,
-                    TokenKind::Keyword(
-                        "component" | "extern" | "connect" | "flow" | "product" | "system"
-                    )
-                ) || matches!(&token.kind, TokenKind::Name(name) if matches!(name.as_str(), "robot" | "cell"))
-            })
-        })
 }

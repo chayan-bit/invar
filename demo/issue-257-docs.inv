@@ -1,0 +1,23 @@
+//! #257: doc comments document the item that follows them.
+
+/// The sum of `xs`, wrapping on overflow.
+fn sum_all(xs: read Array<u32>) -> u32 {
+    var sum: u32 = 0u32;
+    for x in xs {
+        sum = wrapping_add(sum, x);
+    }
+    return sum;
+}
+
+module grid {
+    //! Grid helpers.
+
+    /// Manhattan length of `(x, y)`.
+    pub fn length(x: u32, y: u32) -> u32 { return x + y; }
+}
+
+fn main() -> i32 {
+    let xs: Array<u32> = [1u32, 2u32, 3u32];
+    if sum_all(xs) == 6u32 { return 1; }
+    return 0;
+}

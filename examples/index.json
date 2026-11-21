@@ -888,6 +888,59 @@
       }
     },
     {
+      "path": "examples/language/assertion-failed.inv",
+      "intent": "A false assert traps with ASSERTION_FAILED and reports its message.",
+      "family": "core",
+      "tags": [
+        "trap"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "trap",
+        "category": "ASSERTION_FAILED"
+      }
+    },
+    {
+      "path": "examples/language/zero-step.inv",
+      "intent": "A literal zero step in a for range is PARSE_ZERO_STEP.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_ZERO_STEP"
+      }
+    },
+    {
+      "path": "examples/language/doc-comment-misplaced.inv",
+      "intent": "A doc comment that documents no item is PARSE_DOC_COMMENT_MISPLACED.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_DOC_COMMENT_MISPLACED"
+      }
+    },
+    {
       "path": "examples/language/division-by-zero.inv",
       "intent": "Division by a zero i32 traps with DIVISION_BY_ZERO.",
       "family": "core",
@@ -1233,7 +1286,7 @@
     },
     {
       "path": "examples/parallel/reduction-checked-sum.inv",
-      "intent": "A checked sum that overflows; the planner rejects the region and the run traps.",
+      "intent": "A checked sum that overflows; the planner admits it through the exact L3 carry and every engine traps at the first overflow.",
       "family": "reduction",
       "tags": [
         "parallel",
@@ -1255,8 +1308,8 @@
           "regions": [
             {
               "function": "main",
-              "status": "rejected",
-              "kind": "serial"
+              "status": "admitted",
+              "kind": "reduction"
             }
           ]
         }
@@ -1342,7 +1395,7 @@
     },
     {
       "path": "examples/sum.inv",
-      "intent": "Checked i32 sum over a read-borrowed array; the planner rejects it because checked addition is not reassociated.",
+      "intent": "Checked i32 sum over a read-borrowed array; the planner admits it through the exact L3 carry, which keeps the first trap.",
       "family": "reduction",
       "tags": [
         "bootstrap",
@@ -1364,8 +1417,8 @@
           "regions": [
             {
               "function": "sum",
-              "status": "rejected",
-              "kind": "serial"
+              "status": "admitted",
+              "kind": "reduction"
             }
           ]
         }

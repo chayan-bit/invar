@@ -87,6 +87,11 @@
       "reachability": "source"
     },
     {
+      "code": "ASSERTION_FAILED",
+      "meaning": "assert condition was false",
+      "reachability": "source"
+    },
+    {
       "code": "CALL_DEPTH_LIMIT",
       "meaning": "call depth limit",
       "reachability": "source"
@@ -642,8 +647,18 @@
       "reachability": "source"
     },
     {
+      "code": "PARSE_DOC_COMMENT_MISPLACED",
+      "meaning": "doc comment documents no item",
+      "reachability": "source"
+    },
+    {
       "code": "PARSE_EXPECTED_TOKEN",
       "meaning": "parse expected token",
+      "reachability": "source"
+    },
+    {
+      "code": "PARSE_ZERO_STEP",
+      "meaning": "for step is a literal zero",
       "reachability": "source"
     },
     {
