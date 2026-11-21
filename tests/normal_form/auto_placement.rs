@@ -41,7 +41,7 @@ type Edit = (&'static str, fn(&mut Value));
 
 fn schema(explain: bool) -> jsonschema::Validator {
     let schema: Value = serde_json::from_str(if explain {
-        include_str!("../../schema/explain-v5.schema.json")
+        include_str!("../../schema/explain-v6.schema.json")
     } else {
         include_str!("../../schema/invar-diagnostics-v3.schema.json")
     })
@@ -106,7 +106,7 @@ fn auto_placement_records_the_legal_set_and_keeps_the_cpu_route() {
 fn auto_placement_legality_schema_refuses_malformed_receipts() {
     let dir = std::env::temp_dir().join(format!("invar-gnet-schema-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
-    // Run receipts (diagnostics-v3) and explain-v5 declare the same object.
+    // Run receipts (diagnostics-v3) and explain-v6 declare the same object.
     let valid = [false, true].map(|explain| (schema(explain), auto(&dir, FORKED, explain)));
     std::fs::remove_dir_all(dir).unwrap();
     let edits: [Edit; 10] = [

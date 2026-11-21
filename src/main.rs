@@ -739,12 +739,12 @@ fn explain(path: &OsString, engine: Option<&str>, artifact: Option<&OsString>) -
     }
 }
 
-/// The numeric contracts and explicit intrinsic sites (sort, spatial) every
-/// explain document carries.
+/// The numeric contracts, axis levels and intrinsic sites (sort, spatial) of every explain.
 fn explain_intrinsics(document: &mut serde_json::Value, program: &invar::mir::Program) {
     if let Some(contracts) = invar::math::contracts(program) {
         document["numeric_contracts"] = contracts;
     }
+    invar::axes::record_levels(document, program);
     let sorts = invar::sorting::explain(program);
     if sorts.as_array().is_some_and(|sites| !sites.is_empty()) {
         document["explicit_sorts"] = sorts;

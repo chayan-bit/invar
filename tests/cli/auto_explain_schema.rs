@@ -1,5 +1,5 @@
 //! #50 parts 1 and 4: one auto version. Every `--engine auto` explain is
-//! `invar-explain-v5` (with `invar-explain-device-v5`) and every auto run
+//! `invar-explain-v6` (with `invar-explain-device-v5`) and every auto run
 //! receipt `invar-diagnostics-v3`; the established path records
 //! `auto_path: "established"`, normal-form route included, and only
 //! `auto_path: "placement"` carries the placement receipt.
@@ -45,7 +45,7 @@ fn established(name: &str, source: &str, command: &str) -> Value {
     assert_eq!(status, Some(0), "{document}");
     assert_eq!(document["auto_path"], "established", "{document}");
     let (schema, version) = match command {
-        "explain" => ("invar-explain-v5", 5),
+        "explain" => ("invar-explain-v6", 6),
         _ => ("invar-diagnostics-v3", 3),
     };
     assert_eq!(document["schema"], schema, "{document}");
@@ -57,7 +57,7 @@ fn established(name: &str, source: &str, command: &str) -> Value {
 #[test]
 fn established_auto_documents_fit_the_unified_versions() {
     let (explain, device, run) = (
-        schema("explain-v5.schema.json"),
+        schema("explain-v6.schema.json"),
         schema("invar-explain-device-v5.schema.json"),
         schema("invar-diagnostics-v3.schema.json"),
     );
@@ -102,7 +102,7 @@ fn established_auto_documents_fit_the_unified_versions() {
 #[test]
 fn auto_path_decides_whether_the_placement_receipt_is_present() {
     let (explain, run) = (
-        schema("explain-v5.schema.json"),
+        schema("explain-v6.schema.json"),
         schema("invar-diagnostics-v3.schema.json"),
     );
     let document = established("sum.inv", SUM, "explain");

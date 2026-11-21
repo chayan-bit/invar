@@ -107,7 +107,7 @@ See [src/schedule/README.md](../src/schedule/README.md).
 
 ### 9. The receipt
 
-`invar explain examples/generated-map.inv --format json` runs steps 1 to 6 and prints one `invar-explain-v5` document built by `Report::to_json` in [src/admission.rs](../src/admission.rs).
+`invar explain examples/generated-map.inv --format json` runs steps 1 to 6 and prints one `invar-explain-v6` document built by `Report::to_json` in [src/admission.rs](../src/admission.rs).
 For the example's region the document says:
 
 | Field | Value |

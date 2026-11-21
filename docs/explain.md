@@ -1,8 +1,8 @@
 # Explain JSON
 
-`invar explain PATH --format json` prints one `invar-explain-v5` document, with `schema_version: 5`, describing how each region of a checked program is admitted.
+`invar explain PATH --format json` prints one `invar-explain-v6` document, with `schema_version: 6`, describing how each region of a checked program is admitted.
 With `--engine cuda|metal|auto` the document also carries `device_execution`, whose `device_schema` is `invar-explain-device-v5`.
-The strict schemas are `schema/explain-v5.schema.json` and `schema/invar-explain-device-v5.schema.json`.
+The strict schemas are `schema/explain-v6.schema.json` and `schema/invar-explain-device-v5.schema.json`.
 
 ## Static report
 
@@ -10,14 +10,19 @@ The strict schemas are `schema/explain-v5.schema.json` and `schema/invar-explain
 Successful analysis exits 0 even when every region is rejected.
 Source and tool errors use the existing `source_error`/`tool_error` documents and exit codes 1/2.
 
-The success document has `schema_version: 5`, `status: "ok"`, `diagnostics: []`, `source_identity`, and `regions` in source/MIR order.
+The success document has `schema_version: 6`, `status: "ok"`, `diagnostics: []`, `source_identity`, and `regions` in source/MIR order.
 `source_identity` is `fnv1a64:` followed by 16 lowercase hexadecimal digits from FNV-1a (64-bit offset `0xcbf29ce484222325`, multiplier `0x100000001b3`) over exact source bytes.
 This checksum establishes identity, not authenticity.
 
 Each region has `function`, byte `span`, `candidate_identity`, `status` (`admitted` or `rejected`), `first_rejected_obligation` (null on admission), `rule_revision`, `rule_identities`, `numeric_policy`, `target`, `chosen_plan`, `fallback_plan`, `runtime_guard`, `facts`, and ordered `obligations`.
 An obligation has `name`, `evidence`, and `detail`; evidence is `checked_invariant`, `trusted_rule`, `runtime_guard`, or `unknown`.
 Unknown evidence rejects admission.
-`candidate_identity` is the same FNV-1a over region source bytes followed by UTF-8 rule revision and `wrapping-u32-v1/cpu`.
+`candidate_identity` is the same FNV-1a over region source bytes followed by UTF-8 rule revision and `wrapping-u32-v1/cpu`, then, when the function declares a non-safe level or a contract, `axes:` with its four levels and contract.
+
+v6 is v5 plus the contract-axis fields of [the axes chapter](spec/invar-v0.2-axes.md) section 6.
+Each region also has `c_level`, `s_level`, `n_level`, `t_level` (its function's `#[region(...)]` levels, `c0`/`s0`/`n0`/`t0` when undeclared), `contract_name` (null when none is named), `bound` (null at C0 and C1, the contract's stated bound at C2), `deterministic` (false only at N4, which is refused today), `n_justification` (null at N0, `serial-reference-bits` at N1 and N2) and `s_artifact` (null until S1 lands).
+A program that declares any level or contract adds `numeric_contracts.levels`, the levels each axis uses across its functions.
+Dropping those fields and restoring `schema`/`schema_version` gives the v5 document of an undeclared program byte for byte; `schema/explain-v5.schema.json` stays for v5 consumers.
 
 The initial candidate is a zero-based counted wrapping `u32` map with one or two ordered reads and one injective fresh-output store.
 `facts` records typed logical reads/writes, ownership, loans, effect order, trap/termination summaries, physical alias assumption, and cleanup policy.

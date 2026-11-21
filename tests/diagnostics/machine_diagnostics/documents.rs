@@ -24,7 +24,7 @@ fn machine_diagnostics_corpus_has_no_invariant_codes() {
     let invariants = invariant_codes();
     let registered = registry_codes();
     let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
-    let explain_schema = schema("explain-v5.schema.json");
+    let explain_schema = schema("explain-v6.schema.json");
     let diagnostic_validator = jsonschema::validator_for(&diagnostic_schema).unwrap();
     let explain_validator = jsonschema::validator_for(&explain_schema).unwrap();
     let mut reached = HashSet::new();
@@ -64,7 +64,7 @@ fn machine_diagnostics_corpus_has_no_invariant_codes() {
                     assert_eq!(document["diagnostics"][0]["code"], code, "{args:?}");
                 }
             }
-            let validator = if document["schema"] == "invar-explain-v5" {
+            let validator = if document["schema"] == "invar-explain-v6" {
                 &explain_validator
             } else {
                 &diagnostic_validator
@@ -273,7 +273,7 @@ fn machine_diagnostics_corpus_has_no_invariant_codes() {
             );
             assert_eq!(document["diagnostics"][0]["severity"], "note");
         }
-        let validator = if document["schema"] == "invar-explain-v5" {
+        let validator = if document["schema"] == "invar-explain-v6" {
             &explain_validator
         } else {
             &diagnostic_validator
@@ -341,7 +341,7 @@ fn machine_diagnostics_corpus_has_no_invariant_codes() {
 #[test]
 fn machine_diagnostics_cli_documents_validate() {
     let diagnostic_schema = schema("invar-diagnostics-v3.schema.json");
-    let explain_schema = schema("explain-v5.schema.json");
+    let explain_schema = schema("explain-v6.schema.json");
     let device_schema = schema("invar-explain-device-v5.schema.json");
     let codes = registry_codes();
     let valid = fixture("valid", b"fn main() -> i32 { return 42; }");
@@ -423,7 +423,7 @@ fn machine_diagnostics_cli_documents_validate() {
             assert_eq!(document["diagnostics"][0]["code"], "EVALUATION_LIMIT");
         }
         let validator = jsonschema::validator_for(if is_explain {
-            assert_eq!(document["schema"], "invar-explain-v5", "{args:?}");
+            assert_eq!(document["schema"], "invar-explain-v6", "{args:?}");
             &explain_schema
         } else {
             &diagnostic_schema

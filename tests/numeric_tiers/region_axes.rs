@@ -10,7 +10,7 @@ use std::process::Command;
 
 /// A fold whose Tree (16777218), Exact (16777224) and Strict (16777216)
 /// results differ, so `main` returns 2, 3 or 1 by which one ran.
-fn program(attribute: &str) -> String {
+pub(super) fn program(attribute: &str) -> String {
     format!(
         "{attribute} fn fold_sum(xs: read Array<f32>) -> f32 {{ var acc: f32 = 0.0; \
          for i in 0u32..len(xs) {{ acc = acc + xs[i]; }} return acc; }} \
@@ -27,13 +27,13 @@ fn code(source: &str) -> &'static str {
     }
 }
 
-fn scratch(name: &str, source: &str) -> std::path::PathBuf {
+pub(super) fn scratch(name: &str, source: &str) -> std::path::PathBuf {
     let path = std::env::temp_dir().join(format!("invar-198-{}-{name}.inv", std::process::id()));
     std::fs::write(&path, source).unwrap();
     path
 }
 
-fn cli(args: &[&str]) -> (i32, String) {
+pub(super) fn cli(args: &[&str]) -> (i32, String) {
     let output = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(args)
         .output()
@@ -220,7 +220,18 @@ fn a_declared_region_admits_the_same_plan_as_the_implicit_one() {
             .is_some_and(|regions| !regions.is_empty()),
         "{regions}"
     );
-    assert_eq!(regions, explain(&implicit));
+    // v6 records the declared N level, which the plan identity includes (#199).
+    let plan = |mut regions: Value| {
+        for region in regions.as_array_mut().unwrap() {
+            let fields = region.as_object_mut().unwrap();
+            fields.retain(|key, _| {
+                !["candidate_identity", "n_level", "n_justification"].contains(&key.as_str())
+            });
+        }
+        regions
+    };
+    assert_eq!(regions[0]["n_level"], "n1");
+    assert_eq!(plan(regions), plan(explain(&implicit)));
     assert_eq!(
         run(declared, &["--engine", "cpu-parallel", "--workers", "2"]),
         4

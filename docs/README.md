@@ -24,7 +24,7 @@ Where one disagrees with the code, one of the two is wrong and the disagreement 
 | [v0.2 attributes, axes and receipts](spec/invar-v0.2-axes.md) | The attribute registry, the contract axes and their receipts; checked like the v0.1 file, with its own size budget |
 | [Grammar](../spec/grammar.ebnf) | The complete syntax |
 | [Placement profile v1](../spec/placement-v1.md) | `--engine auto` placement receipts and calibration profiles |
-| [Explain JSON](explain.md) | The `invar-explain-v5` admission receipt and device execution reports |
+| [Explain JSON](explain.md) | The `invar-explain-v6` admission receipt and device execution reports |
 | [Numeric contracts](numeric.md) | `strict-f32-v1`, fold tiers and storage types |
 | [Shape and layout contract](layout-v1.md) | Layout contract version 1 for the M4 families |
 | [Typed MIR v1](mir-v1.md) | The mid-level IR |
