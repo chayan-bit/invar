@@ -28,7 +28,10 @@ if [ -z "${REMOTE_CUDA_SCOPED:-}" ]; then
     say "no systemd user scope: nice and ionice only, no memory or CPU cap"
     exec "${low[@]}"
 fi
-trap 'rc=$?; rm -rf "$here/tmp" "$here/src.tgz"; echo "$rc" >"$here/rc"' EXIT
+# Background jobs (sampler, suites) hold the lock fd: stop them, and their
+# timeouts (which pass the signal to their process group), on any exit.
+stop_jobs() { local p; for p in $(jobs -p); do pkill -TERM -P "$p"; kill "$p"; done 2>/dev/null; }
+trap 'rc=$?; stop_jobs; rm -rf "$here/tmp" "$here/src.tgz"; echo "$rc" >"$here/rc"' EXIT
 # A stopped run must never record a pass.
 trap 'exit 143' TERM INT HUP
 log=$here/cargo.log

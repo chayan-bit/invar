@@ -67,7 +67,8 @@ os=${REMOTE_CUDA_OS:-$("${ssh_[@]}" uname -s 2>/dev/null | tr -d '\r' || true)}
 [ "${REMOTE_CUDA_NO_SKIP:-0}" = 1 ] && skips=()
 [ -n "${REMOTE_CUDA_TESTS:-}" ] && tests=$REMOTE_CUDA_TESTS
 [ -n "${REMOTE_CUDA_EXTRA_SKIPS:-}" ] && IFS=, read -ra extra <<<"$REMOTE_CUDA_EXTRA_SKIPS" && skips+=("${extra[@]}")
-run="$(date -u +%Y%m%dT%H%M%SZ)-${sha:0:10}"
+# The pid keeps two drivers started in the same second apart.
+run="$(date -u +%Y%m%dT%H%M%SZ)-${sha:0:10}-$$"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
@@ -91,7 +92,8 @@ if [ "$os" = Linux ]; then
         q COMPILE_JOBS "${REMOTE_CUDA_COMPILE_JOBS:-1}"
         q MEM_MAX "${REMOTE_CUDA_MEM_MAX:-12G}"; q CPU_QUOTA "${REMOTE_CUDA_CPU_QUOTA:-800%}"
     } >"$tmp/run.env"
-    "${ssh_[@]}" "mkdir -p $rd"
+    # mkdir without -p: never share a run directory with another driver.
+    "${ssh_[@]}" "mkdir -p $dir/runs && mkdir $rd" || { echo "remote-cuda: cannot create run $rd"; exit 2; }
     scp -q "$here/remote-cuda-linux.sh" "$tmp/src.tgz" "$tmp/run.env" "$host:$rd/"
     # Detached, so a dropped ssh session never stops the run; follow its output.
     pid=$("${ssh_[@]}" "cd $rd || exit; setsid nohup bash remote-cuda-linux.sh >out 2>&1 </dev/null & echo \$!")
