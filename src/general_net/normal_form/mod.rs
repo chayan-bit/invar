@@ -459,7 +459,7 @@ fn derive(partition: &Partition, uncalibrated: bool) -> NormalForm {
             };
             let loops = loops::extract_loops(&context)
                 .into_iter()
-                .map(|form| gate::admit(partition, form, uncalibrated))
+                .map(|form| gate::admit(partition, tree, form, uncalibrated))
                 .collect();
             let (recursion, forks, certificates) = recursion::extract(&context);
             FunctionForm {

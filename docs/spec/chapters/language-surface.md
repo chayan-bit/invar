@@ -119,3 +119,5 @@ fn main() -> i32 {
     return 0;
 }
 ```
+
+[NB.7.20] A pair local does not cost its function's other loops their admission: the region tree tracks it as its two scalar components, and a loop that reads or writes one stays serial as NB.7.13 requires; a pair parameter or result, a field of a pair that is not a local, or a store whose second component reads the first still leaves its function without a tree, so all of that function's loops stay serial (#362). `src/general_net/regions/tree/pairs.rs` `src/general_net/normal_form/gate.rs` `tests/schedule_cpu/pair_admission.rs::issue_362_a_pair_outside_the_loop_keeps_its_admission` `tests/schedule_cpu/pair_admission.rs::issue_362_a_loop_touching_a_pair_component_has_no_normal_form_law`
