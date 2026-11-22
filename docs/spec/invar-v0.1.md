@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=325 citations=367
-Size record: tokens=31588 estimator=bytes/3 limit=60000
+Counts: statements=326 citations=371
+Size record: tokens=31821 estimator=bytes/3 limit=60000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1429,3 +1429,5 @@ fn main() -> i32 {
     return 0;
 }
 ```
+
+[NB.7.20] A pair local does not cost its function's other loops their admission: the region tree tracks it as its two scalar components, and a loop that reads or writes one stays serial as NB.7.13 requires; a pair parameter or result, a field of a pair that is not a local, or a store whose second component reads the first still leaves its function without a tree, so all of that function's loops stay serial (#362). `src/general_net/regions/tree/pairs.rs` `src/general_net/normal_form/gate.rs` `tests/schedule_cpu/pair_admission.rs::issue_362_a_pair_outside_the_loop_keeps_its_admission` `tests/schedule_cpu/pair_admission.rs::issue_362_a_loop_touching_a_pair_component_has_no_normal_form_law`
