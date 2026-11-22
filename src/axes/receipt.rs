@@ -86,19 +86,11 @@ pub fn levels_used(regions: impl IntoIterator<Item = Axes> + Clone) -> Value {
 }
 
 /// Record in `numeric_contracts.levels` the levels each axis uses across the
-/// functions of `program`, undeclared ones at the safe levels; a program that
+/// functions and declared loops of `program`, undeclared functions at the safe levels; a program that
 /// declares nothing gains no field, so its document keeps the v5 shape.
 pub fn record_levels(document: &mut Value, program: &crate::mir::Program) {
-    if program.region_axes.values().any(Axes::is_declared) {
-        let axes = program.functions.iter();
-        let axes = axes.map(|function| {
-            program
-                .region_axes
-                .get(&function.name)
-                .copied()
-                .unwrap_or_default()
-        });
-        document["numeric_contracts"]["levels"] = levels_used(axes);
+    if program.region_axes.values().any(Axes::is_declared) || !program.loop_axes.is_empty() {
+        document["numeric_contracts"]["levels"] = levels_used(super::declarations(program));
     }
 }
 

@@ -573,6 +573,7 @@ Every Metal hardware test, one module per family; `#[ignore]`d unless run with `
 | --- | --- |
 | `tests/family_lowerings.rs` | Families are lowerings of checked normal-form nodes: every recognizer choice on the corpus is the dispatcher's choice or a named refusal, and a forged form is refused before any step. |
 | `tests/spec_examples.rs` | Runs every spec code block, checks every normative citation, validates `examples/index.json`, runs every example and checks documentation links. |
+| `tests/spec_budget.rs` | The spec chapters regenerate `docs/spec/invar-v0.1.md` byte for byte, recorded token counts are fresh under bytes/3 and cl100k, the core, each chapter and the whole spec fit `docs/spec/budget.json`, and `invar spec` assembles topics deterministically or refuses with a typed error. |
 | `tests/device_reductions_scans.rs` | Reductions and scans lowered to the shared device IR, verifier rejections and the CPU shape corpus. |
 | `tests/editor_grammar.rs` | The VS Code TextMate grammar in `editors/vscode` names exactly the lexer's keywords and reserved words, every lexer keyword is a terminal of `spec/grammar.ebnf`, and the grammar's intrinsic and type names are words of that spec grammar. |
 | `tests/schedule_tuning.rs` | Bounded device schedule selection, hints and cost models. |

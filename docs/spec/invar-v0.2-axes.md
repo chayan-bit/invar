@@ -2,13 +2,14 @@
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
 Counts: statements=47 citations=50
-Size record: tokens=5831 estimator=bytes/3 limit=6000
+Size record: tokens=5881 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
 [NA1.2] The chapter carries its own counts and size record, and its size stays below 6,000 tokens by the v0.1 estimator. `tests/spec_examples.rs::SPECS`
 [NA1.3] Statement ids in this chapter start with `NA` and are never reused by the v0.1 file. `tests/spec_examples.rs`
 Note: section 7, the nondeterminism axis N, is `docs/spec/invar-v0.2-axis-n.md`, checked the same way under its own budget.
+Note: section 8, the rule levels a C level admits, is `docs/spec/invar-v0.2-regions.md`, checked the same way.
 
 ## 2. Attributes
 
@@ -16,7 +17,7 @@ Note: section 7, the nondeterminism axis N, is `docs/spec/invar-v0.2-axis-n.md`,
 [NA2.2] One registry lists every attribute name, the positions it may take, its keys and the closed set of values of each key, and every attribute is accepted or refused there and nowhere else. `src/front/items.rs::REGISTRY`
 [NA2.3] An unknown name, an unknown key, a repeated key or an attribute in a position it does not take is `UNSUPPORTED_FEATURE`. `src/front/items.rs::check_position`
 [NA2.4] A value that is not a string literal is `PARSE_EXPECTED_TOKEN`, and a string outside the key's set is the code the registry gives that key. `src/front/items.rs::attribute_value`
-[NA2.5] The only position is a function: the attribute precedes `fn` or `pub fn`, and before a record or variant it is refused. `src/front/items.rs::item_prefix`
+[NA2.5] The positions are a function, where the attribute precedes `fn` or `pub fn`, and for `#[region]` also a loop (NA9.1); before a record or variant it is refused. `src/front/items.rs::item_prefix`
 
 | Attribute | Positions | Key | Values | Unknown value |
 | --- | --- | --- | --- | --- |
