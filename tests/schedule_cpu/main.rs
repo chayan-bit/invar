@@ -14,6 +14,7 @@ mod affine_recurrence_scan;
 mod checked_fold_carry;
 mod cpu_scheduler_fallback;
 mod cpu_workers;
+mod extremum_intrinsics;
 mod fused_map_extraction;
 mod lawful_reductions_and_scans;
 mod pair_admission;

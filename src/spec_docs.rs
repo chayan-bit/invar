@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 const MANIFEST: &str = include_str!("../docs/spec/chapters.json");
 const BUDGETS: &str = include_str!("../docs/spec/budget.json");
 /// Every chapter text by manifest path; a test checks this covers the manifest exactly.
-const TEXTS: [(&str, &str); 18] = [
+const TEXTS: [(&str, &str); 19] = [
     (
         "docs/spec/chapters/core.md",
         include_str!("../docs/spec/chapters/core.md"),
@@ -85,6 +85,10 @@ const TEXTS: [(&str, &str); 18] = [
     (
         "docs/spec/invar-v0.2-regions.md",
         include_str!("../docs/spec/invar-v0.2-regions.md"),
+    ),
+    (
+        "docs/spec/invar-v0.2-extrema.md",
+        include_str!("../docs/spec/invar-v0.2-extrema.md"),
     ),
 ];
 /// A spec line that records the file's own size; no estimator counts it.

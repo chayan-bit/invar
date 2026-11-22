@@ -316,9 +316,19 @@ fn run_auto_source_inner(
             reduce::auto(call, device.as_mut(), calibration, workers, &mut receipts)
         };
         let cpu = if spatial {
-            crate::spatial::run_cpu_with(source, program, fuel, workers, &hooks, &mut reducer)
+            crate::spatial::run_cpu_with(
+                source,
+                program,
+                fuel,
+                workers,
+                &hooks,
+                &mut reducer,
+                &mut |_| Ok(None),
+            )
         } else {
-            crate::sorting::run_cpu_with(source, program, fuel, workers, &mut reducer)
+            crate::sorting::run_cpu_with(source, program, fuel, workers, &mut reducer, &mut |_| {
+                Ok(None)
+            })
         }
         .map_err(|e| Error::mismatch(format!("intrinsic CPU fallback: {e:?}")))?;
         return Ok(super::device::intrinsic_cpu_auto(cpu, receipts));

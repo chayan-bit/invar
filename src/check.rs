@@ -817,10 +817,9 @@ impl FunctionChecker<'_> {
                     args.iter().find_map(|arg| self.hint(arg).filter(is_float))
                 }
                 "tc_mul_add" => Some(Type::F32),
-                reduction if reductions::is_reduction(reduction) => args
-                    .first()
-                    .and_then(|arg| self.hint(arg))
-                    .and_then(|ty| element(&ty)),
+                reduction if reductions::is_reduction(reduction) => {
+                    self.reduction_hint(reduction, args)
+                }
                 _ => self
                     .checker
                     .functions

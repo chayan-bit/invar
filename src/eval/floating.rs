@@ -176,11 +176,16 @@ fn filled<T: Copy>(live: &mut usize, len: u32, value: T) -> Result<Vec<T>, EvalE
 /// Reference `sum_tree`/`dot_tree`/`sum_exact`/`dot_exact`; a dot length
 /// mismatch is the only trap.
 pub(crate) fn reduction(
-    kind: crate::fsum::Kind,
+    name: &str,
     operands: &[Value],
     span: crate::front::Span,
 ) -> Result<Value, EvalError> {
     use crate::{fsum::Kind, fsum_reference as reference};
+    if let (Some(kind), [operand]) = (crate::extremum::Kind::from_name(name), operands) {
+        return crate::extremum::evaluate(kind, operand, span);
+    }
+    let kind = Kind::from_name(name)
+        .ok_or_else(|| EvalError::tool("INTERNAL_TYPE", "unknown checked reduction"))?;
     let arrays = operands
         .iter()
         .map(|operand| match operand {

@@ -378,7 +378,9 @@ impl Evaluator<'_> {
                     }
                     return make_view(env.slot(source)?, bounds[0], bounds[1], *bounds.get(2).unwrap_or(&1), name == "view_mut", expr.span);
                 }
-                if let Some(kind) = crate::fsum::Kind::from_name(name) {
+                if crate::fsum::Kind::from_name(name).is_some()
+                    || crate::extremum::Kind::from_name(name).is_some()
+                {
                     let mut operands = Vec::with_capacity(args.len());
                     for arg in args {
                         let ExprKind::Name(actual) = &arg.kind else {
@@ -390,7 +392,7 @@ impl Evaluator<'_> {
                         self.charge()?;
                         operands.push(env.borrow_owned(actual)?);
                     }
-                    return floating::reduction(kind, &operands, expr.span);
+                    return floating::reduction(name, &operands, expr.span);
                 }
                 if name == "len" {
                     let Some(Expr {

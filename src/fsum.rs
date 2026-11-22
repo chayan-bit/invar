@@ -28,6 +28,9 @@ const DOT_SCALE: i32 = -298;
 pub const DOT_BINS: usize = 532;
 /// 32-bit digits needed for any u32-length sum or dot (608 bits).
 pub const DIGITS: usize = 19;
+/// Bin banks of a bulk deposit: consecutive terms add into different banks,
+/// so a run of equal exponents does not serialize on one bin.
+const BANKS: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Kind {
@@ -256,6 +259,47 @@ fn is_zero(word: u32) -> bool {
     word & 0x7fff_ffff == 0
 }
 
+/// Branch-free summary of a bulk deposit: whether a NaN or infinity was
+/// seen, and whether a term other than `-0` was.
+#[derive(Clone, Copy, Default)]
+struct Seen {
+    special: bool,
+    not_neg_zero: bool,
+}
+
+impl Seen {
+    #[inline(always)]
+    fn word(&mut self, bank: &mut [i64; 256], w: u32) {
+        let exponent = (w >> 23) & 0xff;
+        let normal = u32::from(exponent != 0);
+        let sign = -i64::from(w >> 31);
+        let significand = i64::from(w & 0x007f_ffff | normal << 23);
+        // A nonfinite word lands in bin 254; the flags decide the result.
+        bank[(exponent - normal) as usize] += (significand ^ sign) - sign;
+        self.special |= exponent == 255;
+        self.not_neg_zero |= w != 0x8000_0000;
+    }
+
+    #[inline(always)]
+    fn product(&mut self, bank: &mut [i64; DOT_BINS], x: u32, y: u32) {
+        // (significand, position); nonfinite positions clamp into range.
+        let split = |w: u32| {
+            let exponent = (w >> 23) & 0xff;
+            let normal = u32::from(exponent != 0);
+            let position = (exponent - normal).min(253) as usize;
+            (u64::from(w & 0x007f_ffff | normal << 23), position)
+        };
+        let ((sx, px), (sy, py)) = (split(x), split(y));
+        let product = sx * sy;
+        let sign = -i64::from((x ^ y) >> 31);
+        let (high, low) = ((product >> 24) as i64, (product & 0xff_ffff) as i64);
+        bank[px + py + 24] += (high ^ sign) - sign;
+        bank[px + py] += (low ^ sign) - sign;
+        self.special |= (x | 0x807f_ffff) == u32::MAX || (y | 0x807f_ffff) == u32::MAX;
+        self.not_neg_zero |= !((is_zero(x) || is_zero(y)) && sign != 0);
+    }
+}
+
 impl Exact {
     pub fn new(dot: bool) -> Self {
         Self {
@@ -309,6 +353,72 @@ impl Exact {
         }
     }
 
+    /// Deposit every item's word: the same bins, flags and term count as
+    /// [`Exact::add`] on each in turn, without a branch per term.
+    pub fn add_words<T: Copy>(&mut self, items: &[T], word: impl Fn(T) -> u32) {
+        let mut banks = [[0i64; 256]; BANKS];
+        let mut seen = Seen::default();
+        let mut chunks = items.chunks_exact(BANKS);
+        for chunk in &mut chunks {
+            for (bank, &item) in banks.iter_mut().zip(chunk) {
+                seen.word(bank, word(item));
+            }
+        }
+        for (bank, &item) in banks.iter_mut().zip(chunks.remainder()) {
+            seen.word(bank, word(item));
+        }
+        self.absorb(&banks, items.len(), seen, |probe| {
+            items.iter().for_each(|&item| probe.add(word(item)));
+        });
+    }
+
+    /// Deposit the exact products of paired items, as [`Exact::add_product`]
+    /// on each pair in turn would. Items past the shorter slice are ignored.
+    pub fn add_products<T: Copy>(&mut self, a: &[T], b: &[T], word: impl Fn(T) -> u32) {
+        let n = a.len().min(b.len());
+        let (a, b) = (&a[..n], &b[..n]);
+        let mut banks = [[0i64; DOT_BINS]; BANKS];
+        let mut seen = Seen::default();
+        let (mut left, mut right) = (a.chunks_exact(BANKS), b.chunks_exact(BANKS));
+        for (x, y) in (&mut left).zip(&mut right) {
+            for ((bank, &x), &y) in banks.iter_mut().zip(x).zip(y) {
+                seen.product(bank, word(x), word(y));
+            }
+        }
+        let tail = left.remainder().iter().zip(right.remainder());
+        for (bank, (&x, &y)) in banks.iter_mut().zip(tail) {
+            seen.product(bank, word(x), word(y));
+        }
+        self.absorb(&banks, n, seen, |probe| {
+            a.iter()
+                .zip(b)
+                .for_each(|(&x, &y)| probe.add_product(word(x), word(y)));
+        });
+    }
+
+    /// Merge deposit banks. Items that held a NaN or an infinity take their
+    /// flags from the per-term rules; their bins no longer affect the result.
+    fn absorb<const BINS: usize>(
+        &mut self,
+        banks: &[[i64; BINS]; BANKS],
+        terms: usize,
+        seen: Seen,
+        rescan: impl FnOnce(&mut Self),
+    ) {
+        for bank in banks {
+            for (bin, value) in self.bins.iter_mut().zip(bank) {
+                *bin += value;
+            }
+        }
+        self.terms += terms as u64;
+        self.flags.not_neg_zero |= seen.not_neg_zero;
+        if seen.special {
+            let mut probe = Self::new(self.dot);
+            rescan(&mut probe);
+            self.flags = self.flags.merge(probe.flags);
+        }
+    }
+
     fn mark_inf(&mut self, negative: bool) {
         if negative {
             self.flags.neg_inf = true;
@@ -335,13 +445,13 @@ impl Exact {
 
 pub fn sum_exact(xs: &[u32]) -> u32 {
     let mut exact = Exact::new(false);
-    xs.iter().for_each(|&word| exact.add(word));
+    exact.add_words(xs, |word| word);
     exact.finish()
 }
 
 pub fn dot_exact(a: &[u32], b: &[u32]) -> u32 {
     let mut exact = Exact::new(true);
-    a.iter().zip(b).for_each(|(&x, &y)| exact.add_product(x, y));
+    exact.add_products(a, b, |word| word);
     exact.finish()
 }
 

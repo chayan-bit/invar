@@ -2,7 +2,7 @@
 //! equal the CPU engines bit for bit at every size class, every leaf chunk
 //! exponent and on adversarial inputs, including subnormals (no FTZ).
 use invar_cuda::cuda::CudaDevice;
-use invar_device::fsum::Op;
+use invar_device::fsum::{Launch, Op, ROW};
 use std::path::Path;
 
 #[path = "../support/fsum_cases.rs"]
@@ -23,6 +23,20 @@ fn device_bits(device: &mut Device, op: Op, a: &[u32], b: &[u32], shift: u32) ->
     let second = op.is_dot().then_some(b);
     let result = device.run_fsum(op, a, second, shift, compiler()).unwrap();
     Some(body::finish(op, a.len(), &result.rows, &result.nodes))
+}
+
+/// The exact partials of `groups` blocks, finished on the host.
+fn exact_bits(device: &mut Device, op: Op, a: &[u32], b: &[u32], groups: u32) -> u32 {
+    let launch = Launch::new(op, a.len(), 0)
+        .unwrap()
+        .with_exact_groups(groups)
+        .unwrap();
+    let second = op.is_dot().then_some(b);
+    let result = device
+        .run_fsum_launch(launch, a, second, compiler())
+        .unwrap();
+    assert_eq!(result.rows.len(), groups as usize * ROW);
+    body::finish(op, a.len(), &result.rows, &result.nodes)
 }
 
 fn guard_fires(_op: Op, _label: &str) -> bool {

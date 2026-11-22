@@ -1,0 +1,4 @@
+fn main() -> i32 {
+    let a = filled_i32(0u32, 0);
+    return max_of(a);
+}

@@ -129,9 +129,22 @@ impl CudaDevice {
         leaf_shift: u32,
         compiler: &Path,
     ) -> Result<FsumResult, Error> {
-        self.admit()?;
-        check_operands(op, a, b)?;
         let launch = Launch::new(op, a.len(), leaf_shift).map_err(|_| Error::Limit)?;
+        self.run_fsum_launch(launch, a, b, compiler)
+    }
+
+    /// [`Self::run_fsum`] with a given launch, such as another exact block count.
+    pub fn run_fsum_launch(
+        &mut self,
+        launch: Launch,
+        a: &[u32],
+        b: Option<&[u32]>,
+        compiler: &Path,
+    ) -> Result<FsumResult, Error> {
+        self.admit()?;
+        let op = launch.op;
+        check_operands(op, a, b)?;
+        let launch = launch.checked(a.len()).map_err(|_| Error::Limit)?;
         let transfer_bytes =
             a.len() * 4 * (1 + usize::from(b.is_some())) + launch.output_words() * 12;
         crate::validate_transfer_budget(transfer_bytes, transfer_bytes)?;

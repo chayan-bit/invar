@@ -12,6 +12,7 @@ mod device;
 mod parallel;
 
 mod cp_async_pipeline;
+mod extremum;
 mod f32_contraction;
 mod fold_tier;
 mod fsum;

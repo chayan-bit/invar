@@ -1,0 +1,12 @@
+fn main() -> i32 {
+    var a = filled_f32(4194304u32, 2.5);
+    a[1000u32] = 0.0 / 0.0; // a NaN is ignored
+    a[3000000u32] = -0.0;
+    a[3500000u32] = 0.0; // -0.0 is less than +0.0
+    a[4000000u32] = -0.0; // a tie: the lowest index wins
+    let m = min_of(a);
+    if 1.0 / m > 0.0 {
+        return -1;
+    }
+    return i32_from_f32(f32_from_u32(argmin(a)));
+}

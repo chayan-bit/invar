@@ -32,7 +32,18 @@ pub struct Reduction {
     pub cost: Option<DeviceCost>,
     /// Device time for one completed submission, when a device ran it.
     pub kernel_ms: Option<f64>,
+    /// The law that admitted the split, when more than one worker or a
+    /// device ran the call: [`TREE_LAW`] or [`EXACT_LAW`].
+    pub law: Option<&'static str>,
 }
+
+/// `sum_tree`/`dot_tree` split on aligned power-of-two leaf chunks: each chunk
+/// is a node of the one fixed tree (NB.1.6), so the root is unchanged.
+pub const TREE_LAW: &str = "fsum-aligned-tree-v1";
+/// `sum_exact`/`dot_exact` merge integer partial accumulators: integer
+/// addition is associative and commutative, so every partition of the terms
+/// gives the same exact total, which rounds once (NB.1.3, NB.1.10).
+pub const EXACT_LAW: &str = "fsum-exact-merge-v1";
 
 impl Reduction {
     pub(crate) fn new(call: &ReduceCall<'_>, backend: &'static str, reason: &'static str) -> Self {
@@ -47,6 +58,13 @@ impl Reduction {
             workers: 0,
             cost: None,
             kernel_ms: None,
+            law: matches!(backend, "cpu-parallel" | "cuda" | "metal").then(|| {
+                if call.kind.is_exact() {
+                    EXACT_LAW
+                } else {
+                    TREE_LAW
+                }
+            }),
         }
     }
 }
@@ -101,12 +119,11 @@ fn exact(call: &ReduceCall<'_>, workers: usize) -> Result<u32, Error> {
     let parts = ranges(a.len(), workers);
     let partials = scoped(parts.len(), |part| {
         let mut exact = fsum::Exact::new(dot);
-        for i in parts[part].clone() {
-            if dot {
-                exact.add_product(a[i].to_bits(), b[i].to_bits());
-            } else {
-                exact.add(a[i].to_bits());
-            }
+        let range = parts[part].clone();
+        if dot {
+            exact.add_products(&a[range.clone()], &b[range], F32Bits::to_bits);
+        } else {
+            exact.add_words(&a[range], F32Bits::to_bits);
         }
         exact
     })?;
@@ -129,6 +146,8 @@ pub fn cpu_receipt(call: &ReduceCall<'_>, workers: usize, reason: &'static str) 
     };
     let mut receipt = Reduction::new(call, backend, reason);
     receipt.workers = chosen;
+    // One worker runs the serial evaluator: nothing was split, so no law.
+    receipt.law = receipt.law.filter(|_| chosen > 1);
     receipt
 }
 
@@ -162,11 +181,12 @@ pub fn calibration(kind: Kind) -> Calibration {
 
 // Provisional: Apple M4, one worker at 2^26 terms, and the largest per-worker
 // start-up seen at 2^10..2^12 on ten workers (load average 4.1). Linux CUDA-host rows
-// are pending a quiet window; see `calibration/fsum-v1.json`.
+// are pending a quiet window; see `calibration/fsum-v1.json`. The exact rows are
+// the #206 banked deposits, measured the same way.
 const SUM_TREE_NS: f64 = 0.653;
 const DOT_TREE_NS: f64 = 0.493;
-const SUM_EXACT_NS: f64 = 3.109;
-const DOT_EXACT_NS: f64 = 2.287;
+const SUM_EXACT_NS: f64 = 0.798;
+const DOT_EXACT_NS: f64 = 1.43;
 const SPAWN_NS: f64 = 8930.0;
 // End to end (upload, kernel, host finish), Metal on an Apple M4 lost to the
 // CPU workers at every size from 2^10 to 2^26 for all four families; `null`
