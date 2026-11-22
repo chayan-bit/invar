@@ -13,17 +13,65 @@ const F32_ELEMENTS: &str = "16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 
 
 /// (element type, seed, update of `s` by the element `{e}`, function attribute, elements).
 const FOLDS: &[(&str, &str, &str, &str, &str)] = &[
-    ("u32", "0u32", "s = wrapping_add(s, {e});", "", "4294967295u32, 2u32, 3u32"),
-    ("u32", "0u32", "s = wrapping_add({e}, s);", "#[region(n = \"n1\")]", "7u32, 9u32"),
-    ("u32", "1u32", "s = wrapping_mul(s, {e});", "", "3u32, 5u32, 7u32"),
+    (
+        "u32",
+        "0u32",
+        "s = wrapping_add(s, {e});",
+        "",
+        "4294967295u32, 2u32, 3u32",
+    ),
+    (
+        "u32",
+        "0u32",
+        "s = wrapping_add({e}, s);",
+        "#[region(n = \"n1\")]",
+        "7u32, 9u32",
+    ),
+    (
+        "u32",
+        "1u32",
+        "s = wrapping_mul(s, {e});",
+        "",
+        "3u32, 5u32, 7u32",
+    ),
     ("i32", "0", "s = s + {e};", "", "1, -2, 3"),
-    ("i32", "0", "s += {e};", "#[region(n = \"n2\")]", "2147483647, 1"),
+    (
+        "i32",
+        "0",
+        "s += {e};",
+        "#[region(n = \"n2\")]",
+        "2147483647, 1",
+    ),
     ("u32", "0u32", "s = s + {e};", "", "4294967295u32, 1u32"),
-    ("u32", "5u32", "s = s + {e};", "#[region(n = \"n1\")]", "1u32, 2u32"),
+    (
+        "u32",
+        "5u32",
+        "s = s + {e};",
+        "#[region(n = \"n1\")]",
+        "1u32, 2u32",
+    ),
     ("f32", "0.0", "s = s + {e};", "", F32_ELEMENTS),
-    ("f32", "0.0", "s = s + {e};", "#[region(contract = \"f32-tree-v2\")]", F32_ELEMENTS),
-    ("f32", "0.0", "s = s + {e};", "#[region(contract = \"f32-exact-v2\")]", F32_ELEMENTS),
-    ("f32", "0.0", "s = s + {e};", "#[numeric(fold = \"relaxed\")]", F32_ELEMENTS),
+    (
+        "f32",
+        "0.0",
+        "s = s + {e};",
+        "#[region(contract = \"f32-tree-v2\")]",
+        F32_ELEMENTS,
+    ),
+    (
+        "f32",
+        "0.0",
+        "s = s + {e};",
+        "#[region(contract = \"f32-exact-v2\")]",
+        F32_ELEMENTS,
+    ),
+    (
+        "f32",
+        "0.0",
+        "s = s + {e};",
+        "#[numeric(fold = \"relaxed\")]",
+        F32_ELEMENTS,
+    ),
 ];
 
 /// The for-each loop, its counted form (NB.7.6) and the in-place counted form.
@@ -42,8 +90,10 @@ fn program(fold: &(&str, &str, &str, &str, &str), body: &str, empty: bool) -> St
     let result = match ty {
         "i32" => "return r;",
         "u32" => "return code(r);",
-        _ => "if r == 0.0 { return 4; } if r == 16777216.0 { return 1; } if r == 16777218.0 { return 2; } \
-              if r == 16777224.0 { return 3; } return 0;",
+        _ => {
+            "if r == 0.0 { return 4; } if r == 16777216.0 { return 1; } if r == 16777218.0 { return 2; } \
+              if r == 16777224.0 { return 3; } return 0;"
+        }
     };
     format!(
         "{CODE}{attribute} fn fold_all(xs: read Array<{ty}>) -> {ty} {{ var s: {ty} = {seed}; {body} return s; }} \
@@ -71,7 +121,9 @@ fn regions(source: &str) -> Vec<Value> {
     let mut regions = document["regions"].as_array().unwrap().clone();
     for region in &mut regions {
         let fields = region.as_object_mut().unwrap();
-        fields.retain(|key, _| !["span", "source_identity", "candidate_identity"].contains(&key.as_str()));
+        fields.retain(|key, _| {
+            !["span", "source_identity", "candidate_identity"].contains(&key.as_str())
+        });
     }
     regions
 }
@@ -124,7 +176,11 @@ fn a_for_each_fold_keeps_value_trap_and_fuel_on_every_engine() {
             );
             for workers in [1, 2, 16] {
                 let run = schedule::run_source(each.as_bytes(), &program, fuel, workers).unwrap();
-                assert_eq!(observed(&run.observation.result, run.observation.steps_used), observed(&serial.result, serial.steps_used), "{each} at {workers}");
+                assert_eq!(
+                    observed(&run.observation.result, run.observation.steps_used),
+                    observed(&serial.result, serial.steps_used),
+                    "{each} at {workers}"
+                );
             }
         }
     }
@@ -137,9 +193,18 @@ fn a_for_each_fold_runs_its_parallel_plan() {
     for fold in FOLDS.iter().filter(|fold| fold.0 != "f32") {
         let each = program(fold, &forms(fold.2)[0], false);
         let records = regions(&each);
-        let record = records.iter().find(|r| r["function"] == "fold_all").unwrap();
+        let record = records
+            .iter()
+            .find(|r| r["function"] == "fold_all")
+            .unwrap();
         assert_eq!(record["status"], "admitted", "{each}: {record}");
-        let run = schedule::run_source(each.as_bytes(), &lowered(&each), invar::eval::DEFAULT_FUEL, 2).unwrap();
+        let run = schedule::run_source(
+            each.as_bytes(),
+            &lowered(&each),
+            invar::eval::DEFAULT_FUEL,
+            2,
+        )
+        .unwrap();
         assert_eq!(run.executed.len(), 1, "{each}");
     }
 }
@@ -169,8 +234,15 @@ fn a_for_each_over_a_view_admits_the_record_of_its_counted_form() {
         let (each, counted) = (shell(setup, each), shell(setup, counted));
         assert_eq!(regions(&each), regions(&counted), "{each}");
         let fuel = invar::eval::DEFAULT_FUEL;
-        let (a, b) = (mir_eval::observe(&lowered(&each), fuel), mir_eval::observe(&lowered(&counted), fuel));
-        assert_eq!(format!("{:?}", a.result), format!("{:?}", b.result), "{each}");
+        let (a, b) = (
+            mir_eval::observe(&lowered(&each), fuel),
+            mir_eval::observe(&lowered(&counted), fuel),
+        );
+        assert_eq!(
+            format!("{:?}", a.result),
+            format!("{:?}", b.result),
+            "{each}"
+        );
     }
 }
 
@@ -179,32 +251,47 @@ fn a_for_each_over_a_view_admits_the_record_of_its_counted_form() {
 /// of the array it changes.
 #[test]
 fn an_element_of_an_array_the_loop_writes_is_not_forwarded() {
-    let source = &format!("{CODE}fn main() -> i32 {{ var xs: Array<u32> = [1u32, 2u32, 3u32]; var s: u32 = 0u32; \
-        for i in 0u32 .. len(xs) {{ let x = xs[i]; xs[i] = 9u32; s = wrapping_add(s, x); }} return code(s); }}");
+    let source = &format!(
+        "{CODE}fn main() -> i32 {{ var xs: Array<u32> = [1u32, 2u32, 3u32]; var s: u32 = 0u32; \
+        for i in 0u32 .. len(xs) {{ let x = xs[i]; xs[i] = 9u32; s = wrapping_add(s, x); }} return code(s); }}"
+    );
     let records = regions(source);
     assert_ne!(records[0]["status"], "admitted", "{records:?}");
     let program = lowered(source);
     let fuel = invar::eval::DEFAULT_FUEL;
     let serial = mir_eval::observe(&program, fuel);
     let run = schedule::run_source(source.as_bytes(), &program, fuel, 2).unwrap();
-    assert_eq!(format!("{:?}", run.observation.result), format!("{:?}", serial.result));
+    assert_eq!(
+        format!("{:?}", run.observation.result),
+        format!("{:?}", serial.result)
+    );
 }
 
 /// A for-each `f32` fold takes its tier's bits: strict 1, Tree 2, Exact 3.
 #[test]
 fn a_for_each_fold_takes_its_fold_tier() {
-    for (fold, expected) in FOLDS.iter().filter(|fold| fold.0 == "f32").zip([1, 2, 3, 2]) {
+    for (fold, expected) in FOLDS
+        .iter()
+        .filter(|fold| fold.0 == "f32")
+        .zip([1, 2, 3, 2])
+    {
         let each = program(fold, &forms(fold.2)[0], false);
         let path = std::env::temp_dir().join(format!("invar-344-run-{}.inv", std::process::id()));
         std::fs::write(&path, &each).unwrap();
-        for engine in [&["--engine", "reference"][..], &["--engine", "cpu-parallel", "--workers", "2"]] {
+        for engine in [
+            &["--engine", "reference"][..],
+            &["--engine", "cpu-parallel", "--workers", "2"],
+        ] {
             let output = Command::new(env!("CARGO_BIN_EXE_invar"))
                 .args(["run", path.to_str().unwrap(), "--format", "json"])
                 .args(engine)
                 .output()
                 .unwrap();
             let document: Value = serde_json::from_slice(&output.stdout).unwrap();
-            assert_eq!(document["result"]["value"], expected, "{each} {engine:?}: {document}");
+            assert_eq!(
+                document["result"]["value"], expected,
+                "{each} {engine:?}: {document}"
+            );
         }
     }
 }

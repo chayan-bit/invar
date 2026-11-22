@@ -163,11 +163,19 @@ fn loop_blocks(function: &Function, head: usize, body: usize) -> Vec<usize> {
 /// It is sound because no block of the loop writes, moves or mutably loans
 /// `xs`, so `xs[i]` keeps its value for the whole iteration. Execution and
 /// fuel stay with `function`: a plan publishes an override that MIR checks.
-pub(crate) fn forward_elements(function: &Function, defs: &Defs<'_>, head: usize) -> Option<Function> {
+pub(crate) fn forward_elements(
+    function: &Function,
+    defs: &Defs<'_>,
+    head: usize,
+) -> Option<Function> {
     let (body, _, induction) = counted_head(function, defs, head)?;
     let induction = induction_name(function.blocks.get(body)?, induction)?;
     let blocks = loop_blocks(function, head, body);
-    let instructions = || blocks.iter().flat_map(|id| &function.blocks[*id].instructions);
+    let instructions = || {
+        blocks
+            .iter()
+            .flat_map(|id| &function.blocks[*id].instructions)
+    };
     let untouched = |array: &str| {
         instructions().all(|i| match &i.kind {
             Operation::StoreIndex { name, .. }
@@ -184,7 +192,10 @@ pub(crate) fn forward_elements(function: &Function, defs: &Defs<'_>, head: usize
     let elements: HashMap<&str, ValueId> = instructions()
         .filter_map(|i| match &i.kind {
             Operation::Bind { name, value }
-                if function.locals.get(name).is_some_and(|local| !local.mutable)
+                if function
+                    .locals
+                    .get(name)
+                    .is_some_and(|local| !local.mutable)
                     && element_of(defs, *value, induction).is_some_and(untouched) =>
             {
                 Some((name.as_str(), *value))
@@ -207,7 +218,9 @@ pub(crate) fn forward_elements(function: &Function, defs: &Defs<'_>, head: usize
                         return None;
                     }
                     Operation::Index { .. }
-                        if i.output.as_ref().is_some_and(|(out, _)| elements.values().any(|v| v == out)) =>
+                        if i.output
+                            .as_ref()
+                            .is_some_and(|(out, _)| elements.values().any(|v| v == out)) =>
                     {
                         return None;
                     }
@@ -215,7 +228,10 @@ pub(crate) fn forward_elements(function: &Function, defs: &Defs<'_>, head: usize
                         if let Some(value) = elements.get(name.as_str())
                             && let Some(Operation::Index { array, index }) = defs.get(value)
                         {
-                            i.kind = Operation::Index { array: *array, index: *index };
+                            i.kind = Operation::Index {
+                                array: *array,
+                                index: *index,
+                            };
                         }
                     }
                     Operation::Drop(names) => names.retain(|n| !elements.contains_key(n.as_str())),

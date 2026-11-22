@@ -27,16 +27,19 @@ pub(super) fn forward(inner: &Loop) -> Option<Loop> {
         let Expr::Index { array, .. } = value else {
             return false;
         };
-        rest.iter().all(|stmt| !writes(stmt, array) && !writes(stmt, name))
+        rest.iter()
+            .all(|stmt| !writes(stmt, array) && !writes(stmt, name))
     });
     if elements.is_empty() {
         return None;
     }
     // A binding the body changes stays as written.
-    let kept = inner.body[..leading].iter().filter(|stmt| {
-        !matches!(stmt, Stmt::Let { name, .. } if elements.iter().any(|(x, _)| x == name))
-    });
-    let body = kept.cloned().chain(rest.iter().map(|stmt| statement(stmt, &elements)));
+    let kept = inner.body[..leading].iter().filter(
+        |stmt| !matches!(stmt, Stmt::Let { name, .. } if elements.iter().any(|(x, _)| x == name)),
+    );
+    let body = kept
+        .cloned()
+        .chain(rest.iter().map(|stmt| statement(stmt, &elements)));
     Some(Loop {
         head: inner.head,
         kind: inner.kind.clone(),
@@ -52,9 +55,15 @@ fn writes(stmt: &Stmt, name: &str) -> bool {
     let block = |stmts: &[Stmt]| stmts.iter().any(|s| writes(s, name));
     match stmt {
         Stmt::Let { name: bound, value } => bound == name || changes(value, name),
-        Stmt::Assign { name: target, value } => target == name || changes(value, name),
+        Stmt::Assign {
+            name: target,
+            value,
+        } => target == name || changes(value, name),
         Stmt::Store {
-            array, index, value, ..
+            array,
+            index,
+            value,
+            ..
         } => array == name || exprs(&[index, value]),
         Stmt::Eval(value) => changes(value, name),
         Stmt::If { cond, yes, no } => changes(cond, name) || block(yes) || block(no),
@@ -240,13 +249,19 @@ mod tests {
             value: Expr::U32(9),
             span: Span { start: 5, end: 6 },
         };
-        assert_eq!(forward(&fold(sum(local("s"), local("x")), Some(store))), None);
+        assert_eq!(
+            forward(&fold(sum(local("s"), local("x")), Some(store))),
+            None
+        );
         let moved = Stmt::Eval(Expr::Call {
             name: "consume".to_owned(),
             args: vec![Expr::Move("xs".to_owned())],
             span: Span { start: 7, end: 8 },
         });
-        assert_eq!(forward(&fold(sum(local("s"), local("x")), Some(moved))), None);
+        assert_eq!(
+            forward(&fold(sum(local("s"), local("x")), Some(moved))),
+            None
+        );
         let reassigned = Stmt::Assign {
             name: "x".to_owned(),
             value: Expr::U32(1),
