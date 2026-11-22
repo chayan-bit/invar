@@ -2,7 +2,13 @@
 //! parallel admission. The region tree tracks a pair local as its two scalar
 //! components, so the loops keep their checked form. Value, cleanup trace and
 //! fuel prefix equal the reference evaluator and MIR at every worker count.
-use invar::{check::check, eval, front::parse, mir, mir_eval, schedule};
+use invar::{
+    check::check,
+    eval,
+    front::parse,
+    general_net::{Limits, Net, normal_form},
+    mir, mir_eval, schedule,
+};
 
 const FUEL: u64 = 1_000_000;
 
@@ -71,7 +77,10 @@ fn issue_362_a_pair_outside_the_loop_keeps_its_admission() {
         assert_eq!(run.plan, schedule::PlanKind::Reduction);
         assert_eq!(run.executed.len(), 1);
     }
-    assert_eq!(receipt(STORED), [admitted("wrapping-map-candidate-if-guard")]);
+    assert_eq!(
+        receipt(STORED),
+        [admitted("wrapping-map-candidate-if-guard")]
+    );
     for run in agree(STORED).iter().skip(1) {
         assert_ne!(run.plan, schedule::PlanKind::Serial);
         assert_eq!(run.executed.len(), 1);
@@ -97,4 +106,29 @@ fn issue_362_pair_live_ins_and_boundaries_agree_on_every_engine() {
     // tree form, as before.
     assert_eq!(receipt(BOUNDARY)[0].0, "rejected");
     assert_eq!(receipt(SWAP)[0].0, "rejected");
+}
+
+/// The serial reason of every loop of `main` in the general-net normal form, or
+/// `None` for a loop with a parallel form.
+fn normal_form_loops(source: &str) -> Vec<Option<String>> {
+    let program = mir::lower(&check(parse(source.as_bytes()).unwrap(), true).unwrap()).unwrap();
+    let net = Net::encode(&program, Limits::default()).unwrap();
+    let form = normal_form::extract(&net, &net.verify().unwrap()).unwrap();
+    let main = form.functions.iter().find(|f| f.name == "main").unwrap();
+    assert_eq!(main.opaque, None, "{source}");
+    main.loops
+        .iter()
+        .map(|l| match &l.node {
+            normal_form::Node::Serial { reason } => Some(reason.clone()),
+            _ => None,
+        })
+        .collect()
+}
+
+#[test]
+fn issue_362_a_loop_touching_a_pair_component_has_no_normal_form_law() {
+    let pair = Some("pair component in the loop".to_owned());
+    assert_eq!(normal_form_loops(SIBLING), [None, pair.clone()]);
+    assert_eq!(normal_form_loops(LIVE_IN), [pair]);
+    assert_eq!(normal_form_loops(BEFORE), [None]);
 }

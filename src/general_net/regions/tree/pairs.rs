@@ -2,13 +2,38 @@
 //! local `p` is tracked as the scalar locals `p.0` and `p.1`: `let p = (a, b)` becomes
 //! two lets in evaluation order and `p.0` a read of the local `p.0`. A pair that
 //! crosses a call or return boundary, or a pair value used any other way, still has no
-//! tree form, so only the function holding it stays serial, as before.
+//! tree form, so only the function holding it stays serial, as before. A loop that
+//! touches a component stays serial ([`in_loop`]).
 
 use super::*;
 
 /// Component `index` of pair local `name`; `.` never occurs in a MIR local name.
 pub(super) fn component(name: &str, index: usize) -> String {
     format!("{name}.{index}")
+}
+
+/// Whether the loop whose head is `head` reads or writes a pair component. Such a
+/// loop has no admitted candidate and stays serial (NB.7.13); the components exist
+/// only so that the function's other loops keep their form.
+pub fn in_loop(body: &[Stmt], head: Option<BlockId>) -> bool {
+    let is_component = |name: &String| name.contains('.');
+    let mut found = false;
+    for_each_loop(body, &mut |inner| {
+        if Some(inner.head) != head {
+            return;
+        }
+        walk(&inner.body, &mut Vec::new(), 0, &mut |stmt, _, _| {
+            let mut names = Vec::new();
+            stmt_exprs(stmt)
+                .iter()
+                .for_each(|expr| expr.names(&mut names));
+            if let Stmt::Let { name, .. } | Stmt::Assign { name, .. } = stmt {
+                names.push(name.clone());
+            }
+            found |= names.iter().any(is_component);
+        });
+    });
+    found
 }
 
 /// The tree locals standing for MIR local `name`: itself, or its two components.

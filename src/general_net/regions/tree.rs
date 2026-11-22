@@ -23,6 +23,7 @@ use crate::{
     mir::{BlockId, Function, Instruction, Operation, Terminator, ValueId},
     numeric_contract::F32Bits,
 };
+pub use pairs::in_loop as pair_in_loop;
 pub use same::same;
 
 /// Maximum expression nesting; deeper expressions are refused, not recursed.
