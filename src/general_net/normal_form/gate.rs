@@ -5,7 +5,10 @@
 //! [`super::COST_UNCALIBRATED`], unless the caller admits uncalibrated laws.
 
 use super::{LoopForm, Node, Rep, RepExpr};
-use crate::general_net::regions::Partition;
+use crate::general_net::regions::{
+    Partition,
+    tree::{self, FunctionTree},
+};
 
 /// Matrix groups up to this size are the v0.1 L5 cut and need no cost model.
 pub(super) const CALIBRATED_MATRIX: usize = 4;
@@ -22,11 +25,19 @@ fn serial(form: &LoopForm, reason: &str) -> LoopForm {
 
 /// Admission of an extracted loop: an L8 loop whose table the loop declares or
 /// writes is not a finite-state map, and a cost-gated loop stays serial unless
-/// `uncalibrated`.
-pub(super) fn admit(partition: &Partition, form: LoopForm, uncalibrated: bool) -> LoopForm {
+/// `uncalibrated`. A loop that touches a pair component stays serial (#362).
+pub(super) fn admit(
+    partition: &Partition,
+    function: &FunctionTree,
+    form: LoopForm,
+    uncalibrated: bool,
+) -> LoopForm {
     let Node::Parallel(node) = &form.node else {
         return form;
     };
+    if tree::pair_in_loop(&function.body, form.region.head) {
+        return serial(&form, "pair component in the loop");
+    }
     let tables: Vec<&String> = node
         .carried
         .iter()
