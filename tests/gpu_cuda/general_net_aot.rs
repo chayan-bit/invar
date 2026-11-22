@@ -315,7 +315,7 @@ fn trig_sources_are_refused_before_nvrtc() {
         b"fn run(a: f32) -> f32 { return sin(a) + cos(a); } fn main() -> i32 { return 0; }",
         "run",
         Target::Cuda,
-        Limits::default(),
+        Limits::certified(),
     )
     .unwrap();
     let error = cuda_aot::build(&plan, Path::new("missing-nvrtc"), 89).unwrap_err();
