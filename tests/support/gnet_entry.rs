@@ -238,13 +238,23 @@ fn cr_v1<B: Backend>(backend: &mut B, target: Target) {
         ])
         .collect();
     let sqrt = "fn run(a: read Array<f32>, b: mut Array<f32>) -> u32 { for i in 0u32..len(a) { b[i] = sqrt(a[i]); } return len(a); } fn main() -> i32 { return 0; }";
-    // sin and cos (#163) run CORE-MATH over integer binary64 on every target.
+    // sin and cos (#163) run CORE-MATH over integer binary64 on every target
+    // of an LP64 host; an LLP64 host (Windows) refuses them at admission.
+    let lp64 = std::mem::size_of::<std::ffi::c_long>() == 8;
     for (function, name) in [
         (MathFn::Sqrt, "sqrt"),
         (MathFn::Sin, "sin"),
         (MathFn::Cos, "cos"),
     ] {
         let source = sqrt.replace("sqrt(", &format!("{name}("));
+        if !lp64 && name != "sqrt" {
+            let plan = Plan::from_source(source.as_bytes(), "run", target, limits());
+            assert!(
+                plan.is_err(),
+                "{target:?} admitted cr-v1 {name} on an LLP64 host"
+            );
+            continue;
+        }
         let args = vec![f(&xs), f(&vec![0; xs.len()])];
         let Value::ArrayF32(out) = &args[1] else {
             panic!("{name} output array")

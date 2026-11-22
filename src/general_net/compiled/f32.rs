@@ -127,6 +127,14 @@ fn cr_v1(functions: &[invar_math::Function]) -> String {
 /// The library calls the numeric profile lowers.
 pub(super) const CALLS: [&str; 6] = ["fma", "f32_from_i32", "f32_from_u32", "sqrt", "sin", "cos"];
 
+/// Whether the numeric profile admits `name` on this host: `sin` and `cos`
+/// carry the integer CORE-MATH text, whose prelude needs a 64-bit `long` (as
+/// Metal's), so an LLP64 host (Windows) refuses them before any compile.
+pub(super) fn admits(name: &str) -> bool {
+    CALLS.contains(&name)
+        && (std::mem::size_of::<std::ffi::c_long>() == 8 || !matches!(name, "sin" | "cos"))
+}
+
 pub(super) fn operation(
     w: &mut Writer,
     p: &Program<'_>,
