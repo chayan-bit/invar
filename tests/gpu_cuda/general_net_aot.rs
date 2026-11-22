@@ -305,19 +305,3 @@ fn refuses_a_kernel_less_image_before_the_driver() {
     ));
     refused(&source, &path, "no executable kernel section");
 }
-
-/// A source calling `sin` or `cos` carries the cr-v1 library, which compiles
-/// with one option more than an image header pins (#163): `build` refuses it
-/// before NVRTC, so the run-time path compiles it instead.
-#[test]
-fn trig_sources_are_refused_before_nvrtc() {
-    let plan = Plan::from_source(
-        b"fn run(a: f32) -> f32 { return sin(a) + cos(a); } fn main() -> i32 { return 0; }",
-        "run",
-        Target::Cuda,
-        Limits::certified(),
-    )
-    .unwrap();
-    let error = cuda_aot::build(&plan, Path::new("missing-nvrtc"), 89).unwrap_err();
-    assert!(error.contains("sin and cos compile at run time"), "{error}");
-}

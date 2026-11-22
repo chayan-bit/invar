@@ -20,7 +20,7 @@ pub const MAX_GNET_STORAGE_BYTES: usize = 8 * 1024 * 1024 * 1024;
 /// Generated GNET source only; ordinary device source keeps its smaller cap.
 pub const MAX_GNET_SOURCE_BYTES: usize = 4 * 1024 * 1024;
 /// The line a GNET source carries when it holds the integer `invar-math-cr-v1`
-/// library (`sin`, `cos`): CUDA compiles it with `-default-device`.
+/// library (`sin`, `cos`): CUDA compiles it as C++20 with `-default-device`.
 pub const GNET_CR_V1_MARKER: &str = "// invar-math-cr-v1 integer library";
 pub const MAX_ELEMENTS: u32 = 1_000_000;
 pub const MAX_OPS: usize = 16;

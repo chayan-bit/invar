@@ -61,7 +61,7 @@ Division remains CPU-only unless device admission establishes its required round
 Source `sqrt` runs on a device through a correctly rounded helper that reads a subnormal only through exact integer paths; it is admitted when every probe mismatch of the operations it uses is a subnormal-class case.
 f32 `sin` and `cos` (`invar-math-cr-v1`) run on CUDA and Metal through the vendored CORE-MATH kernels and return the CPU's correctly rounded word, with a NaN result as the canonical quiet NaN.
 A strict f32 region compiles the CUDA text under its declared options (`--std=c++20 -default-device --device-int128`) and the Metal text over `invar-math`'s integer binary64 and binary32 types; the region source may then reach 64 KiB, of which its own code stays within the 16 KiB limit.
-General-net kernels use that integer text on every target, so the CPU models run the device text; a GNET CUDA AOT image refuses them, since its options are pinned.
+General-net kernels use that integer text on every target, so the CPU models run the device text; CUDA compiles a general-net source carrying it as C++20 with `-default-device`.
 A flushing Metal device may execute an operation only behind a sound dispatch guard covering every possible divergence under the documented device model.
 A flagged dispatch is discarded after confirmed completion and rerun on the exact CPU path with an explicit fallback reason.
 Unknown completion quarantines work and forbids publication and CPU replay.
