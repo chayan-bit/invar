@@ -5,6 +5,7 @@ mod admission;
 mod array_limit;
 mod budget_core;
 mod cpu_map;
+mod cpu_reduction;
 mod frontier;
 mod histogram;
 mod indexed_scatter;
