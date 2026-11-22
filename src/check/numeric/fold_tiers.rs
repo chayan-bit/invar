@@ -16,8 +16,8 @@
 //! Tree lowering (ENG-03 step 5'), which the Relaxed contract admits; a shape the
 //! lowering cannot take stays strict, which it admits too.
 //!
-//! A loop whose `#[region]` declares a C level folds at that level's tier, a
-//! C0 loop strict, whatever its function declares (#355).
+//! A loop declared with `#[region]` folds at the tier its own contract selects,
+//! strict without one, whatever its function declares (#355).
 
 use super::visit::{Visit, walk_block, walk_expr};
 use super::*;
@@ -237,11 +237,10 @@ pub(super) fn rewrite(
     let functions: Vec<String> = program.functions.iter().map(|f| f.name.clone()).collect();
     for function in &mut program.functions {
         let sites = reassoc.get(&function.name).cloned().unwrap_or_default();
-        // A loop declaring a C level folds at that level's tier (NA9.4).
+        // A declared loop folds at its own tier, strict without a fold contract (NA9.4).
         let loops: Vec<(Span, FoldTier)> = function
             .loop_axes
             .iter()
-            .filter(|(_, _, axes)| axes.declares_c())
             .map(|(span, _, axes)| (*span, axes.fold().unwrap_or(FoldTier::Strict)))
             .collect();
         if function.fold == FoldTier::Strict && sites.is_empty() && loops.is_empty() {

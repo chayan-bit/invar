@@ -99,11 +99,17 @@ fn a_loop_declaration_governs_its_loop_and_the_loops_inside_it() {
 /// loop in a Tree function folds strict.
 #[test]
 fn a_declared_loop_folds_at_its_tier_on_every_engine() {
-    let mixed = "#[numeric(fold = \"tree\")] fn mixed(xs: read Array<f32>) -> i32 { \
-        var t: f32 = 0.0; for i in 0u32..len(xs) { t = t + xs[i]; } \
-        var s: f32 = 0.0; #[region(c = \"c0\")] for j in 0u32..len(xs) { s = s + xs[j]; } \
-        if t != 16777218.0 { return 5; } if s != 16777216.0 { return 6; } return 1; } \
-        fn main() -> i32 { let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]; return mixed(xs); }";
+    // A loop naming no fold contract folds strict, also when it declares only `n`.
+    let mixed_with = |attribute: &str| {
+        format!(
+            "#[numeric(fold = \"tree\")] fn mixed(xs: read Array<f32>) -> i32 {{ \
+             var t: f32 = 0.0; for i in 0u32..len(xs) {{ t = t + xs[i]; }} \
+             var s: f32 = 0.0; {attribute} for j in 0u32..len(xs) {{ s = s + xs[j]; }} \
+             if t != 16777218.0 {{ return 5; }} if s != 16777216.0 {{ return 6; }} return 1; }} \
+             fn main() -> i32 {{ let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]; return mixed(xs); }}"
+        )
+    };
+    let mixed = &mixed_with("#[region(c = \"c0\")]");
     for (source, value) in [
         (loop_program(""), 1),
         (loop_program("#[region(n = \"n2\")]"), 1),
@@ -111,6 +117,7 @@ fn a_declared_loop_folds_at_its_tier_on_every_engine() {
         (loop_program("#[region(contract = \"f32-exact-v2\")]"), 3),
         (loop_program("#[region(contract = \"f32-relaxed-v2\")]"), 2),
         (mixed.to_owned(), 1),
+        (mixed_with("#[region(n = \"n1\")]"), 1),
     ] {
         assert_eq!(run(&source, &["--engine", "reference"]), value, "{source}");
         for workers in ["1", "2", "16"] {
@@ -242,4 +249,31 @@ fn a_loop_declaration_reaches_neither_callee_nor_closure() {
         assert_eq!(axes.level(&C_AXIS), "c0");
     }
     assert_eq!(run(source, &["--engine", "reference"]), 1);
+}
+
+/// A repeated `#[region]` on one loop is refused, and a declared for-each and
+/// stepped loop record the declared levels in every region they hold.
+#[test]
+fn every_loop_form_takes_one_declaration() {
+    let repeated = "fn main() -> i32 { var s: u32 = 0u32; #[region(n = \"n1\")] #[region(n = \"n1\")] \
+        for i in 0u32..3u32 { s = s + i; } return 0; }";
+    assert_eq!(code(repeated), "UNSUPPORTED_FEATURE");
+    for (header, update, total) in [
+        ("for x in xs", "x", 6),
+        ("for i in 0u32..len(xs) step 2u32", "xs[i]", 4),
+    ] {
+        let source = format!(
+            "fn f(xs: read Array<u32>) -> u32 {{ var s: u32 = 0u32; #[region(n = \"n1\")] \
+             {header} {{ s = wrapping_add(s, {update}); }} return s; }} \
+             fn main() -> i32 {{ let xs: Array<u32> = [1u32, 2u32, 3u32]; \
+             if f(xs) == {total}u32 {{ return 1; }} return 0; }}"
+        );
+        let regions = explain(&source)["regions"].clone();
+        let regions = regions.as_array().unwrap();
+        assert!(!regions.is_empty(), "{source}");
+        for region in regions {
+            assert_eq!(region["n_level"], "n1", "{source}: {region}");
+        }
+        assert_eq!(run(&source, &["--engine", "reference"]), 1, "{source}");
+    }
 }

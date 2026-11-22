@@ -1,0 +1,14 @@
+fn sums(xs: read Array<f32>) -> i32 {
+    var strict: f32 = 0.0;
+    for i in 0u32..len(xs) { strict = strict + xs[i]; }
+    var tree: f32 = 0.0;
+    #[region(contract = "f32-tree-v2", n = "n1")]
+    for j in 0u32..len(xs) { tree = tree + xs[j]; }
+    if strict != 16777216.0 { return 2; }
+    if tree != 16777218.0 { return 3; }
+    return 1;
+}
+fn main() -> i32 {
+    let xs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    return sums(xs);
+}
