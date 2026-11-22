@@ -5,7 +5,7 @@
 959 bench/general-net-v01/gnet05/generate.rs
 963 crates/invar-cuda/src/cuda.rs
 993 crates/invar-device/src/segmented.rs
-1546 src/check.rs
+1545 src/check.rs
 992 src/component_test/planner.rs
 824 src/eval/host_read.rs
 874 src/general_net/compiled/mod.rs
@@ -28,7 +28,7 @@
 930 tests/fsum_math_sort_spatial/placement.rs
 831 tests/robotics/sequencer_binding.rs
 849 tests/schedule_tuning.rs
-1162 tests/spec_examples.rs
+1156 tests/spec_examples.rs
 806 tests/summary/summary_source.rs
 831 tests/support/gnet_device.rs
 873 tests/transpose_stencil/stencil_source.rs

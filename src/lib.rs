@@ -23,6 +23,7 @@ pub mod diagnostics;
 pub mod engine;
 pub mod eval;
 pub mod exports;
+pub mod extremum;
 pub mod f32_source;
 pub mod fixes;
 pub mod front;

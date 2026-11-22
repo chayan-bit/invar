@@ -310,8 +310,8 @@
       "path": "docs/spec/invar-v0.2-axes.md",
       "requires": [],
       "tokens": {
-        "bpe": 5244,
-        "bytes3": 5868
+        "bpe": 5289,
+        "bytes3": 5914
       },
       "topics": [
         "attributes",
@@ -347,13 +347,33 @@
         "axes"
       ],
       "tokens": {
-        "bpe": 742,
-        "bytes3": 867
+        "bpe": 1295,
+        "bytes3": 1589
       },
       "topics": [
         "contract-levels",
         "regions",
         "rule-levels"
+      ]
+    },
+    {
+      "core": false,
+      "id": "extrema",
+      "part": false,
+      "path": "docs/spec/invar-v0.2-extrema.md",
+      "requires": [
+        "axes"
+      ],
+      "tokens": {
+        "bpe": 934,
+        "bytes3": 1008
+      },
+      "topics": [
+        "argmax",
+        "argmin",
+        "extrema",
+        "max-of",
+        "min-of"
       ]
     }
   ],
