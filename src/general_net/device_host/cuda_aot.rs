@@ -417,6 +417,15 @@ pub fn build(plan: &Plan, compiler: &std::path::Path, sm: u32) -> Result<Vec<u8>
     if artifact.target() != Target::Cuda || artifact.abi_version() != 5 {
         return Err("CUDA ABI5 device artifact required".into());
     }
+    // The header records the pinned GNET options; a source carrying the
+    // cr-v1 library compiles with one more, so it compiles at run time.
+    if artifact
+        .source()
+        .lines()
+        .any(|line| line == invar_device::GNET_CR_V1_MARKER)
+    {
+        return Err("sin and cos compile at run time: AOT images keep the pinned options".into());
+    }
     let nvrtc = invar_cuda::cuda::nvrtc_version().map_err(|e| format!("NVRTC:{e:?}"))?;
     let caps = invar_device::Capabilities::Cuda {
         major: nvrtc.0,

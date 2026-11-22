@@ -52,11 +52,28 @@ static inline int invar_ctz32(uint x) { return (int)metal::ctz(x); }
 typedef unsigned long ulong;
 typedef unsigned int uint;
 static_assert(sizeof(ulong) == 8 && sizeof(long) == 8, "LP64 host required");
+#ifdef __CUDACC__
+// NVRTC (GNET sources, compiled with -default-device): CUDA intrinsics; the
+// compile-time branch serves table initializers, as on Metal.
+static inline ulong invar_mulhi(ulong a, ulong b) { return __umul64hi(a, b); }
+static constexpr int invar_clz64(ulong x) {
+  if (__builtin_is_constant_evaluated()) {
+    int n = 0;
+    while (n < 64 && !((x >> (63 - n)) & 1)) n++;
+    return n;
+  }
+  return __clzll((long long)x);
+}
+static constexpr int invar_clz32(uint x) { return x ? invar_clz64(x) - 32 : 32; }
+static inline int invar_ctz64(ulong x) { return x ? __ffsll((long long)x) - 1 : 64; }
+static inline int invar_ctz32(uint x) { return x ? __ffs((int)x) - 1 : 32; }
+#else
 static inline ulong invar_mulhi(ulong a, ulong b) { return (ulong)(((unsigned __int128)a * b) >> 64); }
 static constexpr int invar_clz64(ulong x) { return x ? __builtin_clzl(x) : 64; }
 static constexpr int invar_clz32(uint x) { return x ? __builtin_clz(x) : 32; }
 static inline int invar_ctz64(ulong x) { return x ? __builtin_ctzl(x) : 64; }
 static inline int invar_ctz32(uint x) { return x ? __builtin_ctz(x) : 32; }
+#endif
 #endif
 static constexpr uint invar_bits(float f) { return __builtin_bit_cast(uint, f); }
 static constexpr float invar_float(uint b) { return __builtin_bit_cast(float, b); }

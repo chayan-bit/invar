@@ -190,10 +190,9 @@ pub fn corpus<B: Backend>(backend: &mut B, target: Target) {
     cr_v1(backend, target);
 }
 
-/// f32 `sqrt` is the correctly rounded `invar-math-cr-v1` word on every
-/// target (signed zeros, subnormals, both NaN classes, infinities and a
-/// stratified sweep of normals), and `sin` and `cos` are refused: no device
-/// lowers their cr-v1 kernels yet (#163).
+/// f32 `sqrt`, `sin` and `cos` are the correctly rounded `invar-math-cr-v1`
+/// words on every target (signed zeros, subnormals, both NaN classes,
+/// infinities, a stratified sweep of normals and CORE-MATH's hard cases).
 fn cr_v1<B: Backend>(backend: &mut B, target: Target) {
     use invar::math::{MathFn, eval_f32};
     let xs: Vec<u32> = (0u32..256)
@@ -218,26 +217,48 @@ fn cr_v1<B: Backend>(backend: &mut B, target: Target) {
             0xffc0_0001,
         ])
         .collect();
-    let source = "fn run(a: read Array<f32>, b: mut Array<f32>) -> u32 { for i in 0u32..len(a) { b[i] = sqrt(a[i]); } return len(a); } fn main() -> i32 { return 0; }";
-    let args = vec![f(&xs), f(&vec![0; xs.len()])];
-    let Value::ArrayF32(out) = &args[1] else {
-        panic!("sqrt output array")
-    };
-    let out = Rc::clone(out);
-    assert_eq!(
-        agree(backend, target, source, "run", args, 100_000),
-        compiled::Status::Success
-    );
-    for (&x, y) in xs.iter().zip(out.borrow().iter()) {
-        let want = eval_f32(MathFn::Sqrt, &[F32Bits::from_bits(x)]);
-        assert_eq!(y.to_bits(), want.to_bits(), "{target:?} sqrt {x:#010x}");
-    }
-    for name in ["sin", "cos"] {
-        let source = source.replace("sqrt(", &format!("{name}("));
-        assert!(
-            Plan::from_source(source.as_bytes(), "run", target, limits()).is_err(),
-            "{target:?} admitted cr-v1 {name}"
+    // CORE-MATH's own sinf/cosf hard cases and words near multiples of pi/2.
+    let xs: Vec<u32> = xs
+        .into_iter()
+        .chain([
+            0x4619_9998,
+            0x3f3a_dc51,
+            0x3fa7_832a,
+            0x4116_cbe4,
+            0x4096_cbe4,
+            0x5922_aa80,
+            0x5aa4_542c,
+            0x5f18_b878,
+            0x6115_cb11,
+            0x3fc9_0fdb,
+            0x4049_0fdb,
+            0x40c9_0fdb,
+            0x47c3_5000,
+            0x6f79_be45,
+        ])
+        .collect();
+    let sqrt = "fn run(a: read Array<f32>, b: mut Array<f32>) -> u32 { for i in 0u32..len(a) { b[i] = sqrt(a[i]); } return len(a); } fn main() -> i32 { return 0; }";
+    // sin and cos (#163) run CORE-MATH over integer binary64 on every target.
+    for (function, name) in [
+        (MathFn::Sqrt, "sqrt"),
+        (MathFn::Sin, "sin"),
+        (MathFn::Cos, "cos"),
+    ] {
+        let source = sqrt.replace("sqrt(", &format!("{name}("));
+        let args = vec![f(&xs), f(&vec![0; xs.len()])];
+        let Value::ArrayF32(out) = &args[1] else {
+            panic!("{name} output array")
+        };
+        let out = Rc::clone(out);
+        assert_eq!(
+            agree(backend, target, &source, "run", args, 100_000),
+            compiled::Status::Success,
+            "{target:?} {name}"
         );
+        for (&x, y) in xs.iter().zip(out.borrow().iter()) {
+            let want = eval_f32(function, &[F32Bits::from_bits(x)]);
+            assert_eq!(y.to_bits(), want.to_bits(), "{target:?} {name} {x:#010x}");
+        }
     }
 }
 

@@ -1,6 +1,8 @@
 //! Exact binary32 primitives over bounded unsigned integer storage, for CPU and
-//! the compiled numeric profiles. No host or device float,
-//! floating environment, heap BigInt or executable net interpreter.
+//! the compiled numeric profiles. No host or device float arithmetic,
+//! floating environment, heap BigInt or executable net interpreter: `sin`
+//! and `cos` use CORE-MATH over `invar_math`'s integer-implemented binary64
+//! and binary32 types, the same text on every target and in the CPU models.
 use super::{
     Error, Program, Target,
     emit::{Writer, value},
@@ -92,7 +94,34 @@ static_assert(CHAR_BIT==8 && sizeof(gnet_u)==8 && sizeof(gnet_w)==8 && ULLONG_MA
     if calls.contains(&"sqrt") {
         w.push(SQRT)?;
     }
+    let library: Vec<_> = [invar_math::Function::Sin, invar_math::Function::Cos]
+        .into_iter()
+        .filter(|f| calls.contains(&f.name()))
+        .collect();
+    if !library.is_empty() {
+        w.push(&cr_v1(&library))?;
+    }
     Ok(())
+}
+
+/// The vendored CORE-MATH text of `functions` over `invar_math`'s integer
+/// `D` and `F` (its MSL prelude, which also compiles as host C++ and under
+/// NVRTC), ending its `double` and `float` macros, and one word helper each:
+/// `gnet_f32_<name>(x)`, with a NaN result as the canonical quiet NaN.
+fn cr_v1(functions: &[invar_math::Function]) -> String {
+    let mut text = format!(
+        "\n{}\n{}#undef double\n#undef float\n",
+        invar_device::GNET_CR_V1_MARKER,
+        invar_math::msl_source(functions)
+    );
+    for &f in functions {
+        text.push_str(&format!(
+            "GNET_FN unsigned gnet_f32_{}(unsigned x) {{ F r = {}(F::raw(x)); return invar_f_isnan(r.u) ? 2143289344u : r.u; }}\n",
+            f.name(),
+            invar_math::msl_symbol(f)
+        ));
+    }
+    text
 }
 
 pub(super) fn operation(
@@ -138,7 +167,7 @@ pub(super) fn operation(
         O::Call { name, args }
             if matches!(
                 name.as_str(),
-                "fma" | "f32_from_i32" | "f32_from_u32" | "sqrt"
+                "fma" | "f32_from_i32" | "f32_from_u32" | "sqrt" | "sin" | "cos"
             ) =>
         {
             let name = name.as_str();
@@ -147,10 +176,14 @@ pub(super) fn operation(
                 "f32_from_i32" => "gnet_f32_from_i32",
                 "f32_from_u32" => "gnet_f32_from_u32",
                 "sqrt" => "gnet_f32_sqrt",
+                "sin" => "gnet_f32_sin",
+                "cos" => "gnet_f32_cos",
                 _ => return Err(Error::UnsupportedCall),
             };
             match args.as_slice() {
-                [a] if name == "sqrt" => format!("{helper}((unsigned){})", value(p, f, *a)?),
+                [a] if matches!(name, "sqrt" | "sin" | "cos") => {
+                    format!("{helper}((unsigned){})", value(p, f, *a)?)
+                }
                 [a] => format!("{helper}({})", value(p, f, *a)?),
                 [a, b, c] if name == "fma" => format!(
                     "{helper}({},{},{})",
