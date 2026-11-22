@@ -3,7 +3,9 @@
 //! form that reads `xs[i]` in place, for every sealed fold law, with and
 //! without a `#[region]` declaration, on every engine and worker count.
 
+use std::path::PathBuf;
 use std::process::Command;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use invar::{check::check, front::parse, mir, mir_eval, schedule};
 use serde_json::Value;
@@ -107,15 +109,24 @@ const CODE: &str = "fn code(s: u32) -> i32 { var r: i32 = 0; var p: i32 = 1; var
     for b in 0u32 .. 31u32 { if q % 2u32 == 1u32 { r = r + p; } q = q / 2u32; if b < 30u32 { p = p * 2; } } \
     if q == 1u32 { return -1 - r; } return r; } ";
 
+/// `source` in a temporary file of its own: tests run concurrently in one process.
+fn source_file(source: &str) -> PathBuf {
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+    let n = NEXT.fetch_add(1, Ordering::Relaxed);
+    let path = std::env::temp_dir().join(format!("invar-344-{}-{n}.inv", std::process::id()));
+    std::fs::write(&path, source).unwrap();
+    path
+}
+
 /// The `explain` region records of `source`, without the fields that name
 /// source bytes: `span`, `source_identity` and `candidate_identity`.
 fn regions(source: &str) -> Vec<Value> {
-    let path = std::env::temp_dir().join(format!("invar-344-{}.inv", std::process::id()));
-    std::fs::write(&path, source).unwrap();
+    let path = source_file(source);
     let output = Command::new(env!("CARGO_BIN_EXE_invar"))
         .args(["explain", path.to_str().unwrap(), "--format", "json"])
         .output()
         .unwrap();
+    std::fs::remove_file(&path).unwrap();
     assert!(output.status.success(), "{source}");
     let document: Value = serde_json::from_slice(&output.stdout).unwrap();
     let mut regions = document["regions"].as_array().unwrap().clone();
@@ -276,8 +287,7 @@ fn a_for_each_fold_takes_its_fold_tier() {
         .zip([1, 2, 3, 2])
     {
         let each = program(fold, &forms(fold.2)[0], false);
-        let path = std::env::temp_dir().join(format!("invar-344-run-{}.inv", std::process::id()));
-        std::fs::write(&path, &each).unwrap();
+        let path = source_file(&each);
         for engine in [
             &["--engine", "reference"][..],
             &["--engine", "cpu-parallel", "--workers", "2"],
@@ -293,5 +303,6 @@ fn a_for_each_fold_takes_its_fold_tier() {
                 "{each} {engine:?}: {document}"
             );
         }
+        std::fs::remove_file(&path).unwrap();
     }
 }
