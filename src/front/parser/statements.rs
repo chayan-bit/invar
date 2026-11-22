@@ -112,6 +112,9 @@ impl Parser {
     }
 
     fn statement(&mut self) -> Result<Stmt, FrontError> {
+        if self.is_symbol("#") {
+            return self.declared_loop();
+        }
         if self.is_keyword("let") || self.is_keyword("var") {
             let mutable = self.is_keyword("var");
             let start = self.bump().span.start;

@@ -10,6 +10,8 @@ struct Parser {
     hoisted: Vec<Stmt>,
     /// Labels of the loops enclosing the statement being parsed, innermost last (#261).
     loops: Vec<Option<String>>,
+    /// Each `#[region]` loop of the function being parsed: loop span, attribute span, levels (#355).
+    loop_axes: Vec<(Span, Span, crate::axes::Axes)>,
 }
 
 impl Parser {

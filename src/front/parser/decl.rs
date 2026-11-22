@@ -275,6 +275,7 @@ impl Parser {
             body,
             fold: crate::numeric_contract::FoldTier::Strict,
             axes: crate::axes::Axes::default(),
+            loop_axes: std::mem::take(&mut self.loop_axes),
         })
     }
 
