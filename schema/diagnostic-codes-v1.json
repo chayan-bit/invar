@@ -657,6 +657,11 @@
       "reachability": "source"
     },
     {
+      "code": "PARSE_LET_ELSE_FALLTHROUGH",
+      "meaning": "a let-else block can fall through",
+      "reachability": "source"
+    },
+    {
       "code": "PARSE_LOOP_CONTROL",
       "meaning": "break or continue reaches no enclosing loop",
       "reachability": "source"

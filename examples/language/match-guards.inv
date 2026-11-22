@@ -1,0 +1,23 @@
+// Match guards and let-else (#260): guards try arms in order, let-else exits early.
+enum Reading { Celsius(i32), Missing }
+
+fn band(r: read Reading) -> i32 {
+    return match r {
+        Reading::Celsius(t) if t < 0 => 1,
+        Reading::Celsius(u) if u < 30 => 2,
+        Reading::Celsius(v) => 3,
+        Reading::Missing => 0,
+    };
+}
+
+fn celsius(r: read Reading) -> i32 {
+    let Reading::Celsius(t) = r else { return -100; };
+    return t;
+}
+
+fn main() -> i32 {
+    let warm: Reading = Reading::Celsius(21);
+    let hot: Reading = Reading::Celsius(35);
+    let none: Reading = Reading::Missing();
+    return band(warm) * 1000 + band(hot) * 100 + celsius(warm) + celsius(none);
+}

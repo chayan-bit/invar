@@ -98,6 +98,9 @@ fn collect_expr(expr: &Expr, names: &mut Vec<String>) {
         ExprKind::Match { value, arms } => {
             collect_expr(value, names);
             for arm in arms {
+                arm.guard
+                    .iter()
+                    .for_each(|guard| collect_expr(guard, names));
                 collect_expr(&arm.value, names);
             }
         }
