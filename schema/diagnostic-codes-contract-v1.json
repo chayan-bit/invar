@@ -28,6 +28,13 @@
       "code": "CONTRACT_UNKNOWN",
       "meaning": "a region names an unknown axis key, level or contract",
       "reachability": "source"
+    },
+    {
+      "code": "INVARIANCE_MISMATCH",
+      "meaning": "run --check-workers found a worker count whose result, trap or fuel differs from the reference evaluator",
+      "reachability": "invariant",
+      "justification": "Every plan the CPU engine publishes meets the N0 oracle, so a difference is an engine bug that no correct source program reaches.",
+      "fault_test": "machine_diagnostics_invariance_mismatch_names_the_first_differing_run"
     }
   ]
 }

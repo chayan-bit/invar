@@ -1,8 +1,8 @@
 # Invar v0.2: nondeterminism axis N
 
 Status: DRAFT; section 7 of the v0.2 chapter `docs/spec/invar-v0.2-axes.md`, kept in its own file.
-Counts: statements=12 citations=13
-Size record: tokens=1565 estimator=bytes/3 limit=6000
+Counts: statements=13 citations=14
+Size record: tokens=1709 estimator=bytes/3 limit=6000
 ## 7. Nondeterminism axis N
 
 [NA7.1] This file is section 7 of `docs/spec/invar-v0.2-axes.md`, follows its section 1 conventions and has its own 6,000-token budget. `tests/spec_examples.rs::N_SPEC`
@@ -76,3 +76,5 @@ fn main() -> i32 { return 0; }
 #[region(n = "n4")]
 fn main() -> i32 { return 0; }
 ```
+
+[NA7.13] `invar run --engine cpu-parallel --check-workers W1,W2,...` runs the program on the reference evaluator and on the CPU workers at each listed count, compares result, trap category and position, and fuel used, and records in the receipt's `invariance` field the engines, the counts, what was compared, the fuel and each run's split, while any difference is `INVARIANCE_MISMATCH`. `tests/numeric_tiers/worker_invariance.rs`
