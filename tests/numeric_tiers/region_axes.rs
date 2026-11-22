@@ -20,7 +20,7 @@ pub(super) fn program(attribute: &str) -> String {
     )
 }
 
-fn code(source: &str) -> &'static str {
+pub(super) fn code(source: &str) -> &'static str {
     match invar::front::parse(source.as_bytes()) {
         Err(error) => error.code,
         Ok(parsed) => invar::check::check(parsed, true).map_or_else(|error| error.code, |_| "OK"),
@@ -44,7 +44,7 @@ pub(super) fn cli(args: &[&str]) -> (i32, String) {
     )
 }
 
-fn run(source: &str, engine: &[&str]) -> i64 {
+pub(super) fn run(source: &str, engine: &[&str]) -> i64 {
     let path = scratch("run", source);
     let mut args = vec!["run", path.to_str().unwrap()];
     args.extend(engine);
@@ -56,68 +56,72 @@ fn run(source: &str, engine: &[&str]) -> i64 {
         .unwrap_or_else(|| panic!("{document}"))
 }
 
+/// Every declaration this file checks on a function, and its code; #355 checks
+/// the same set on a loop.
+pub(super) const DECLARATIONS: &[(&str, &str)] = &[
+    ("", "OK"),
+    ("#[region(c = \"c0\")]", "OK"),
+    (
+        "#[region(c = \"c0\", contract = \"strict-f32-v1\", s = \"s0\", n = \"n0\", t = \"t0\")]",
+        "OK",
+    ),
+    ("#[region(c = \"c1\", contract = \"f32-tree-v2\")]", "OK"),
+    ("#[region(contract = \"f32-exact-v2\")]", "OK"),
+    ("#[region(c = \"c2\", contract = \"f32-relaxed-v2\")]", "OK"),
+    ("#[region(c = \"c2\", contract = \"tc-f16-f32-v1\")]", "OK"),
+    ("#[region(n = \"n1\")]", "OK"),
+    ("#[region(n = \"n2\", s = \"s0\")]", "OK"),
+    ("#[numeric(fold = \"tree\")] #[region(n = \"n0\")]", "OK"),
+    ("#[region(t = \"t0\")] #[numeric(fold = \"exact\")]", "OK"),
+    // Unknown axis key, level or contract.
+    ("#[region(d = \"d1\")]", "CONTRACT_UNKNOWN"),
+    ("#[region(c = \"c3\")]", "CONTRACT_UNKNOWN"),
+    ("#[region(c = \"C1\")]", "CONTRACT_UNKNOWN"),
+    ("#[region(n = \"n5\")]", "CONTRACT_UNKNOWN"),
+    (
+        "#[region(contract = \"tc-bf16-f32-v1\")]",
+        "CONTRACT_UNKNOWN",
+    ),
+    ("#[region(c = \"c0\", c = \"c0\")]", "CONTRACT_UNKNOWN"),
+    // Specified levels this engine does not implement.
+    ("#[region(c = \"c5\")]", "CONTRACT_UNAVAILABLE"),
+    ("#[region(s = \"s1\")]", "CONTRACT_UNAVAILABLE"),
+    ("#[region(s = \"s2\")]", "CONTRACT_UNAVAILABLE"),
+    ("#[region(n = \"n3\")]", "CONTRACT_UNAVAILABLE"),
+    ("#[region(n = \"n4\")]", "CONTRACT_UNAVAILABLE"),
+    ("#[region(t = \"t1\")]", "CONTRACT_UNAVAILABLE"),
+    ("#[region(t = \"t3\")]", "CONTRACT_UNAVAILABLE"),
+    // Level and contract disagree, or the contract is named twice.
+    ("#[region(c = \"c1\")]", "CONTRACT_MISMATCH"),
+    ("#[region(c = \"c2\")]", "CONTRACT_MISMATCH"),
+    (
+        "#[region(c = \"c0\", contract = \"f32-tree-v2\")]",
+        "CONTRACT_MISMATCH",
+    ),
+    (
+        "#[region(c = \"c1\", contract = \"tc-f16-f32-v1\")]",
+        "CONTRACT_MISMATCH",
+    ),
+    (
+        "#[numeric(fold = \"tree\")] #[region(contract = \"f32-tree-v2\")]",
+        "CONTRACT_MISMATCH",
+    ),
+    (
+        "#[region(c = \"c0\")] #[numeric(fold = \"strict\")]",
+        "CONTRACT_MISMATCH",
+    ),
+    // Grammar and position.
+    ("#[region(c = c1)]", "PARSE_EXPECTED_TOKEN"),
+    (
+        "#[region(n = \"n0\")] #[region(n = \"n0\")]",
+        "UNSUPPORTED_FEATURE",
+    ),
+];
+
 #[test]
 fn region_attribute_accepts_honoured_levels_and_refuses_the_rest() {
     let mut refused = 0;
-    for (attribute, expected) in [
-        ("", "OK"),
-        ("#[region(c = \"c0\")]", "OK"),
-        (
-            "#[region(c = \"c0\", contract = \"strict-f32-v1\", s = \"s0\", n = \"n0\", t = \"t0\")]",
-            "OK",
-        ),
-        ("#[region(c = \"c1\", contract = \"f32-tree-v2\")]", "OK"),
-        ("#[region(contract = \"f32-exact-v2\")]", "OK"),
-        ("#[region(c = \"c2\", contract = \"f32-relaxed-v2\")]", "OK"),
-        ("#[region(c = \"c2\", contract = \"tc-f16-f32-v1\")]", "OK"),
-        ("#[region(n = \"n1\")]", "OK"),
-        ("#[region(n = \"n2\", s = \"s0\")]", "OK"),
-        ("#[numeric(fold = \"tree\")] #[region(n = \"n0\")]", "OK"),
-        ("#[region(t = \"t0\")] #[numeric(fold = \"exact\")]", "OK"),
-        // Unknown axis key, level or contract.
-        ("#[region(d = \"d1\")]", "CONTRACT_UNKNOWN"),
-        ("#[region(c = \"c3\")]", "CONTRACT_UNKNOWN"),
-        ("#[region(c = \"C1\")]", "CONTRACT_UNKNOWN"),
-        ("#[region(n = \"n5\")]", "CONTRACT_UNKNOWN"),
-        (
-            "#[region(contract = \"tc-bf16-f32-v1\")]",
-            "CONTRACT_UNKNOWN",
-        ),
-        ("#[region(c = \"c0\", c = \"c0\")]", "CONTRACT_UNKNOWN"),
-        // Specified levels this engine does not implement.
-        ("#[region(c = \"c5\")]", "CONTRACT_UNAVAILABLE"),
-        ("#[region(s = \"s1\")]", "CONTRACT_UNAVAILABLE"),
-        ("#[region(s = \"s2\")]", "CONTRACT_UNAVAILABLE"),
-        ("#[region(n = \"n3\")]", "CONTRACT_UNAVAILABLE"),
-        ("#[region(n = \"n4\")]", "CONTRACT_UNAVAILABLE"),
-        ("#[region(t = \"t1\")]", "CONTRACT_UNAVAILABLE"),
-        ("#[region(t = \"t3\")]", "CONTRACT_UNAVAILABLE"),
-        // Level and contract disagree, or the contract is named twice.
-        ("#[region(c = \"c1\")]", "CONTRACT_MISMATCH"),
-        ("#[region(c = \"c2\")]", "CONTRACT_MISMATCH"),
-        (
-            "#[region(c = \"c0\", contract = \"f32-tree-v2\")]",
-            "CONTRACT_MISMATCH",
-        ),
-        (
-            "#[region(c = \"c1\", contract = \"tc-f16-f32-v1\")]",
-            "CONTRACT_MISMATCH",
-        ),
-        (
-            "#[numeric(fold = \"tree\")] #[region(contract = \"f32-tree-v2\")]",
-            "CONTRACT_MISMATCH",
-        ),
-        (
-            "#[region(c = \"c0\")] #[numeric(fold = \"strict\")]",
-            "CONTRACT_MISMATCH",
-        ),
-        // Grammar and position.
-        ("#[region(c = c1)]", "PARSE_EXPECTED_TOKEN"),
-        (
-            "#[region(n = \"n0\")] #[region(n = \"n0\")]",
-            "UNSUPPORTED_FEATURE",
-        ),
-    ] {
+    for &(attribute, expected) in DECLARATIONS {
         assert_eq!(code(&program(attribute)), expected, "{attribute}");
         refused += usize::from(expected != "OK");
     }

@@ -8,6 +8,13 @@
       "reachability": "source"
     },
     {
+      "code": "CONTRACT_LEVEL",
+      "meaning": "a candidate plan names a rule whose lowest C level is above the region's declared level, or a rule the level table lacks",
+      "reachability": "invariant",
+      "justification": "Every rule a plan names today is C0, so no source program reaches this refusal; it guards rules that later levels add.",
+      "fault_test": "machine_diagnostics_contract_level_refuses_a_rule_above_the_region_level"
+    },
+    {
       "code": "CONTRACT_MISMATCH",
       "meaning": "a region's contract and C level disagree, a C1 or C2 level names no contract, or a function names its numeric contract twice",
       "reachability": "source"
