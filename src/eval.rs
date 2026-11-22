@@ -573,6 +573,7 @@ mod tests {
 }
 
 pub(crate) mod floating;
+mod matching;
 mod sorting;
 
 #[cfg(test)]

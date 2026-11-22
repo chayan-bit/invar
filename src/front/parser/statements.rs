@@ -121,6 +121,9 @@ impl Parser {
             if self.is_symbol("(") {
                 return self.pair_binding(mutable, start);
             }
+            if !mutable && matches!(self.tokens.get(self.pos + 1).map(|token| &token.kind), Some(TokenKind::Symbol("::"))) {
+                return self.let_else(start);
+            }
             let (name, _) = self.expect_name()?;
             let annotation = if self.take_symbol(":").is_some() {
                 Some(self.ty()?)

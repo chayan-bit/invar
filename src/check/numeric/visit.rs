@@ -80,7 +80,10 @@ pub(super) fn walk_expr(e: &mut Expr, v: &mut impl Visit) {
         }
         ExprKind::Match { value, arms } => {
             walk_expr(value, v);
-            arms.iter_mut().for_each(|arm| walk_expr(&mut arm.value, v));
+            arms.iter_mut().for_each(|arm| {
+                arm.guard.iter_mut().for_each(|guard| walk_expr(guard, v));
+                walk_expr(&mut arm.value, v);
+            });
         }
         ExprKind::MoveField { base, .. }
         | ExprKind::Field { base, .. }

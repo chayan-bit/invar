@@ -1,0 +1,8 @@
+// A let-else block that can fall through is refused before checking.
+enum Pick { A(u32), B(u32) }
+
+fn main() -> i32 {
+    let p: Pick = Pick::B(1u32);
+    let Pick::A(v) = p else { let w: u32 = 0u32; };
+    return 0;
+}

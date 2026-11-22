@@ -439,6 +439,9 @@ pub(super) fn check_expr(
             }
             let mut common = expected.cloned();
             for arm in arms {
+                if let Some(guard) = &mut arm.guard {
+                    check_expr(guard, scope, context, None)?;
+                }
                 let actual = check_expr(&mut arm.value, scope, context, common.as_ref())?;
                 if let Some(common) = &common {
                     actual.require(common, arm.value.span)?;

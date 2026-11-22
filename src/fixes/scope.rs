@@ -166,7 +166,10 @@ pub(super) fn children(expr: &Expr) -> Vec<Operand<'_>> {
         ExprKind::Binary { left, right, .. } => plain(vec![left, right]),
         ExprKind::Match { value, arms } => plain(
             std::iter::once(&**value)
-                .chain(arms.iter().map(|arm| &arm.value))
+                .chain(
+                    arms.iter()
+                        .flat_map(|arm| arm.guard.iter().chain([&arm.value])),
+                )
                 .collect(),
         ),
         _ => Vec::new(),

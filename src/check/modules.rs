@@ -385,7 +385,10 @@ fn resolve_expr(
         ExprKind::Field { base, .. } => resolve_expr(base, scope, functions, aliases)?,
         ExprKind::Match { value, arms } => {
             resolve_expr(value, scope, functions, aliases)?;
-            for arm in arms { resolve_expr(&mut arm.value, scope, functions, aliases)?; }
+            for arm in arms {
+                if let Some(guard) = &mut arm.guard { resolve_expr(guard, scope, functions, aliases)?; }
+                resolve_expr(&mut arm.value, scope, functions, aliases)?;
+            }
         }
         ExprKind::Pair(base, index) | ExprKind::Index { base, index } | ExprKind::Binary { left: base, right: index, .. } => {
             resolve_expr(base, scope, functions, aliases)?;
@@ -490,6 +493,7 @@ fn resolve_record_expr(
                         arm.variant = format!("{resolved}::{item}");
                     }
                 }
+                if let Some(guard) = &mut arm.guard { resolve_record_expr(guard, scope, records, aliases, generic_params)?; }
                 resolve_record_expr(&mut arm.value, scope, records, aliases, generic_params)?;
             }
         }

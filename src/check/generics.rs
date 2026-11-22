@@ -171,6 +171,9 @@ fn substitute_expr(expr: &mut Expr, arguments: &HashMap<String, Type>) {
         ExprKind::Match { value, arms } => {
             substitute_expr(value, arguments);
             for arm in arms {
+                arm.guard
+                    .iter_mut()
+                    .for_each(|guard| substitute_expr(guard, arguments));
                 substitute_expr(&mut arm.value, arguments);
             }
         }
@@ -447,6 +450,9 @@ pub(super) fn rewrite_calls(
             ExprKind::Match { value, arms } => {
                 rewrite_expr(value, function, calls);
                 for arm in arms {
+                    arm.guard
+                        .iter_mut()
+                        .for_each(|guard| rewrite_expr(guard, function, calls));
                     rewrite_expr(&mut arm.value, function, calls);
                 }
             }
