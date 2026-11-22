@@ -5,6 +5,8 @@
 //! threads, and Invar's `sum_tree`/`sum_exact` as placed by the cost model.
 //! `cargo run --release -- calibrate`: the coefficients recorded in
 //! `calibration/fsum-v1.json` and the measured parallel crossovers.
+//! `cargo run --release -- curve`: medians of every family on exactly 1, 2, 4,
+//! 7, 8 and 16 workers (the #206 speedup curve), with the speedup over one.
 //! Every line ends with the host's one-minute load average.
 
 use std::time::Instant;
@@ -157,11 +159,31 @@ fn crossover(kind: Kind, workers: usize, state: &mut u64) {
     );
 }
 
+fn curve() {
+    let mut state = 0x0206_u64;
+    for log2 in [20u32, 22, 24, 26] {
+        let a = words(1 << log2, &mut state);
+        for kind in KINDS {
+            let one = median_ms(15, || on(kind, &a, 1));
+            for workers in [1, 2, 4, 7, 8, 16] {
+                let ms = median_ms(15, || on(kind, &a, workers));
+                println!(
+                    "curve {} n=2^{log2} workers={workers} ms={ms:.3} speedup={:.2} load={}",
+                    reductions::family_id(kind),
+                    one / ms,
+                    load()
+                );
+            }
+        }
+    }
+}
+
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     match args.get(1).map(String::as_str) {
         Some("bench") => bench(args.get(2).map_or(4, |w| w.parse().expect("workers"))),
         Some("calibrate") => calibrate(),
-        _ => eprintln!("usage: fsum-cpu-bench bench WORKERS | calibrate"),
+        Some("curve") => curve(),
+        _ => eprintln!("usage: fsum-cpu-bench bench WORKERS | calibrate | curve"),
     }
 }

@@ -5,6 +5,7 @@ mod fk_panda;
 #[path = "../support/fsum_cases.rs"]
 mod fsum_cases_support;
 mod fsum_cli;
+mod fsum_exact_partition;
 mod fsum_oracle;
 #[allow(dead_code)]
 #[path = "../support/language_limits.rs"]

@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=317 citations=349
-Size record: tokens=30149 estimator=bytes/3 limit=60000
+Counts: statements=319 citations=351
+Size record: tokens=30283 estimator=bytes/3 limit=60000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1177,6 +1177,8 @@ Note: the statements here are checked and their blocks executed exactly like the
 [NB.1.7] `dot_tree` rounds each product separately, and for `sum_exact` and `dot_exact` an empty input is `+0`, a NaN, an infinity times zero or both infinities is NaN, another infinity wins, and a zero sum is `-0` only when every term is `-0`. `src/fsum.rs`
 [NB.1.8] A call charges one step plus one per operand, forced `cuda` and `metal` run every reached nonempty call on the device, and every reached device or `auto` call leaves a receipt with its backend and a registered reason. `src/fsum.rs` `calibration/fsum-v1.json`
 [NB.1.9] A device that flushes subnormals discards every result that could differ and lets the CPU produce it, and the CPU picks one worker, reported as backend `cpu-serial`, when the measured cost does not repay more. `src/fsum.rs` `src/schedule/reductions.rs::SERIAL_BACKEND`
+[NB.1.10] `sum_exact` and `dot_exact` admit any partition: integer partials merge exactly and round once (NB.1.3, NB.1.7), so every worker or block count gives the same bits. `src/fsum.rs::Exact`
+[NB.1.11] A float reduction split over workers or a device names its receipt law, `fsum-exact-merge-v1` or `fsum-aligned-tree-v1`, and a one-worker call names none. `src/schedule/reductions.rs::EXACT_LAW`
 
 ```invar outcome=value:0
 fn main() -> i32 {

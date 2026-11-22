@@ -249,8 +249,8 @@
       "path": "docs/spec/chapters/v02-numerics.md",
       "requires": [],
       "tokens": {
-        "bpe": 3169,
-        "bytes3": 3347
+        "bpe": 3291,
+        "bytes3": 3481
       },
       "topics": [
         "binary64",

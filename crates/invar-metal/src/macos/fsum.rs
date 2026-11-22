@@ -107,9 +107,21 @@ impl MetalDevice {
         b: Option<&[u32]>,
         leaf_shift: u32,
     ) -> Result<FsumResult, Error> {
-        self.admit()?;
-        check_operands(op, a, b)?;
         let launch = Launch::new(op, a.len(), leaf_shift).map_err(|_| Error::Limit)?;
+        self.run_fsum_launch(launch, a, b)
+    }
+
+    /// [`Self::run_fsum`] with a given launch, such as another exact block count.
+    pub fn run_fsum_launch(
+        &mut self,
+        launch: Launch,
+        a: &[u32],
+        b: Option<&[u32]>,
+    ) -> Result<FsumResult, Error> {
+        self.admit()?;
+        let op = launch.op;
+        check_operands(op, a, b)?;
+        let launch = launch.checked(a.len()).map_err(|_| Error::Limit)?;
         let output_bytes = launch.output_words() * if op.is_exact() { 8 } else { 4 };
         let input_bytes = a.len() * 4;
         let transfer_bytes = input_bytes * (1 + usize::from(b.is_some())) + output_bytes + 16;
