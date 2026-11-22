@@ -144,9 +144,7 @@ impl CudaDevice {
         self.admit()?;
         let op = launch.op;
         check_operands(op, a, b)?;
-        if launch.elements as usize != a.len() {
-            return Err(Error::Limit);
-        }
+        let launch = launch.checked(a.len()).map_err(|_| Error::Limit)?;
         let transfer_bytes =
             a.len() * 4 * (1 + usize::from(b.is_some())) + launch.output_words() * 12;
         crate::validate_transfer_budget(transfer_bytes, transfer_bytes)?;

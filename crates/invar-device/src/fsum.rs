@@ -105,6 +105,24 @@ impl Launch {
         Ok(Self { groups, ..self })
     }
 
+    /// `self` if it is exactly the launch [`Self::new`] (and, for an exact
+    /// op, [`Self::with_exact_groups`]) builds for `elements` terms: a launch
+    /// whose public fields were changed, such as its kernel `params`, is
+    /// refused before any dispatch reads them.
+    pub fn checked(self, elements: usize) -> Result<Self, Error> {
+        let fresh = Self::new(self.op, elements, self.leaf_shift)?;
+        let fresh = if self.op.is_exact() {
+            fresh.with_exact_groups(self.groups)?
+        } else {
+            fresh
+        };
+        if fresh == self {
+            Ok(self)
+        } else {
+            Err(Error::Limit)
+        }
+    }
+
     /// Output words: one f32 word per tree group, or one i64 row per exact group.
     pub fn output_words(&self) -> usize {
         if self.op.is_exact() {
@@ -458,6 +476,36 @@ extern "C" __global__ void __launch_bounds__(256) invar_fsum_exact_v1(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn checked_refuses_a_launch_whose_public_fields_were_changed() {
+        let exact = Launch::new(Op::SumExact, 5000, 0)
+            .unwrap()
+            .with_exact_groups(7)
+            .unwrap();
+        let tree = Launch::new(Op::DotTree, 5000, 2).unwrap();
+        for launch in [exact, tree] {
+            assert_eq!(launch.checked(5000), Ok(launch));
+            assert_eq!(launch.checked(4999), Err(Error::Limit));
+            let mut bound = launch;
+            bound.params[0] = 5001;
+            assert_eq!(bound.checked(5000), Err(Error::Limit));
+            let mut digits = launch;
+            digits.params[3] += 1;
+            assert_eq!(digits.checked(5000), Err(Error::Limit));
+        }
+        // The tree geometry is fixed by the length; an exact launch takes any
+        // block count from 1 to the maximum (law `fsum-exact-merge-v1`).
+        let mut groups = tree;
+        groups.groups += 1;
+        assert_eq!(groups.checked(5000), Err(Error::Limit));
+        let mut regrouped = exact;
+        regrouped.groups = 8;
+        assert_eq!(regrouped.checked(5000), Ok(regrouped));
+        let mut over = exact;
+        over.groups = MAX_EXACT_GROUPS + 1;
+        assert_eq!(over.checked(5000), Err(Error::Limit));
+    }
 
     #[test]
     fn geometry_covers_every_leaf_and_bounds_exact_groups() {

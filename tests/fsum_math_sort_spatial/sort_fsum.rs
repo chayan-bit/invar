@@ -51,14 +51,15 @@ fn sort_and_spatial_runs_reduce_like_the_fsum_only_program() {
                 receipts(&expected),
                 "{prefix} workers {workers}"
             );
-            // #206: a split names the law that admitted it; one worker names none.
+            // #206: a split names the law that admitted it; one worker (serial,
+            // even when it was the requested count) names none.
             for r in &actual.reductions {
                 let law = if r.kind.is_exact() {
                     reductions::EXACT_LAW
                 } else {
                     reductions::TREE_LAW
                 };
-                assert_eq!(r.law, (r.backend == "cpu-parallel").then_some(law), "{r:?}");
+                assert_eq!(r.law, (r.workers > 1).then_some(law), "{r:?}");
             }
             assert!(
                 !actual.executed.is_empty(),

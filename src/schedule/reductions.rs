@@ -146,6 +146,8 @@ pub fn cpu_receipt(call: &ReduceCall<'_>, workers: usize, reason: &'static str) 
     };
     let mut receipt = Reduction::new(call, backend, reason);
     receipt.workers = chosen;
+    // One worker runs the serial evaluator: nothing was split, so no law.
+    receipt.law = receipt.law.filter(|_| chosen > 1);
     receipt
 }
 

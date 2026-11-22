@@ -121,9 +121,7 @@ impl MetalDevice {
         self.admit()?;
         let op = launch.op;
         check_operands(op, a, b)?;
-        if launch.elements as usize != a.len() {
-            return Err(Error::Limit);
-        }
+        let launch = launch.checked(a.len()).map_err(|_| Error::Limit)?;
         let output_bytes = launch.output_words() * if op.is_exact() { 8 } else { 4 };
         let input_bytes = a.len() * 4;
         let transfer_bytes = input_bytes * (1 + usize::from(b.is_some())) + output_bytes + 16;
