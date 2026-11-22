@@ -239,3 +239,38 @@ fn the_normal_form_route_refuses_a_law_above_the_program_level() {
         ));
     });
 }
+
+/// A loop's own level gates its plan (#355): a rule tagged C2 is refused in a
+/// C0 loop and admitted in a C2 loop of the same function, and the run equals
+/// the serial reference.
+#[test]
+fn a_loop_level_gates_its_own_plan() {
+    let source = "fn main() -> i32 { let xs = filled_u32(64u32, 7u32); var a: u32 = 0u32; \
+        for i in 0u32..len(xs) { a = wrapping_add(a, xs[i]); } var b: u32 = 0u32; \
+        #[region(contract = \"f32-relaxed-v2\")] for j in 0u32..len(xs) { b = wrapping_add(b, xs[j]); } \
+        if a == b { return 1; } return 0; }";
+    with_tags(&[crate::laws::RULE_REVISION.to_owned()], CLevel::C2, || {
+        let document = explain(source);
+        let regions = document["regions"].as_array().unwrap();
+        assert_eq!(regions[0]["first_rejected_obligation"], OBLIGATION);
+        assert_eq!(
+            (&regions[0]["c_level"], &regions[1]["c_level"]),
+            (&json!("c0"), &json!("c2"))
+        );
+        assert_eq!(regions[1]["status"], "admitted", "{document}");
+        assert_eq!(regions[1]["rule_levels"], json!(["c2"]));
+        let program = compile(source);
+        let fuel = crate::eval::DEFAULT_FUEL;
+        let reference = crate::mir_eval::observe(&program, fuel);
+        for workers in [1, 2, 16] {
+            let run =
+                crate::schedule::run_source(source.as_bytes(), &program, fuel, workers).unwrap();
+            assert_eq!(
+                format!("{:?}", run.observation.result),
+                format!("{:?}", reference.result)
+            );
+            assert_eq!(run.observation.steps_used, reference.steps_used);
+            assert_eq!(run.executed.len(), 1);
+        }
+    });
+}
