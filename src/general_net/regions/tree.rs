@@ -7,18 +7,23 @@
 //! one Bool parameter). Arm extents follow dominance: an arm ends at the first
 //! block its entry does not dominate. When the other arm returns, the code after
 //! the `if` is dominated by the surviving arm and is placed inside it, which is
-//! the same program. Anything else (match joins, records, views, `?`) is
-//! reported as [`Unstructured`]; such functions stay serial frames.
+//! the same program. Pair locals become their two scalar components ([`pairs`]).
+//! Anything else (match joins, records, views, `?`) is reported as
+//! [`Unstructured`]; such functions stay serial frames.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use super::cfg::Cfg;
+
+mod pairs;
+mod same;
 use crate::{
     front::{BinaryOp, Mode, Span, Type, UnaryOp},
     general_net::coverage,
     mir::{BlockId, Function, Instruction, Operation, Terminator, ValueId},
     numeric_contract::F32Bits,
 };
+pub use same::same;
 
 /// Maximum expression nesting; deeper expressions are refused, not recursed.
 const MAX_DEPTH: usize = 256;
@@ -182,6 +187,9 @@ pub fn decompile(function: &Function, index: usize) -> Result<FunctionTree, Unst
     if function.foreign_oracle.is_some() || function.blocks.is_empty() {
         return Err(Unstructured::Foreign);
     }
+    if pairs::crosses_boundary(function) {
+        return Err(Unstructured::Operation);
+    }
     let cfg = Cfg::new(function).ok_or(Unstructured::Cfg)?;
     let heads = cfg.loop_heads().into_iter().map(|(head, _)| head).collect();
     let mut defs = HashMap::new();
@@ -223,7 +231,7 @@ pub fn decompile(function: &Function, index: usize) -> Result<FunctionTree, Unst
     let mut locals: BTreeMap<String, Type> = function
         .locals
         .iter()
-        .map(|(name, local)| (name.clone(), local.ty.clone()))
+        .flat_map(|(name, local)| pairs::scalars(name, &local.ty))
         .collect();
     for param in &function.params {
         locals.insert(param.name.clone(), param.ty.clone());
@@ -479,6 +487,12 @@ impl<'a> Decompiler<'a> {
                 | Operation::Drop(_)
                 | Operation::DropValue(_)
                 | Operation::ForNext(_) => {}
+                Operation::Bind { name, value } | Operation::Store { name, value }
+                    if self.is_pair(name) =>
+                {
+                    let bind = matches!(instruction.kind, Operation::Bind { .. });
+                    out.extend(self.pair_stmts(name, *value, bind)?);
+                }
                 Operation::Bind { name, value } => {
                     if !self.inductions.contains(value) {
                         let value = self.expr(*value)?;
@@ -552,6 +566,10 @@ impl<'a> Decompiler<'a> {
             Operation::U32(x) => Expr::U32(*x),
             Operation::F32(x) => Expr::F32(*x),
             Operation::Bool(x) => Expr::Bool(*x),
+            Operation::Read(name) | Operation::Move(name) if self.is_pair(name) => {
+                return Err(Unstructured::Operation);
+            }
+            Operation::PairGet { pair, index } => self.pair_get(*pair, *index)?,
             Operation::Read(name) => Expr::Local(name.clone()),
             Operation::ArrayRef { name, loan } => Expr::Owner {
                 name: name.clone(),
@@ -667,54 +685,6 @@ impl Expr {
             Self::U32(x) => Some(i64::from(*x)),
             _ => None,
         }
-    }
-}
-
-/// Structural equality that ignores source spans: two occurrences of the same
-/// source expression at different positions compare equal.
-pub fn same(a: &Expr, b: &Expr) -> bool {
-    match (a, b) {
-        (
-            Expr::Index { array, index, .. },
-            Expr::Index {
-                array: x, index: y, ..
-            },
-        ) => array == x && same(index, y),
-        (
-            Expr::Unary { op, value, .. },
-            Expr::Unary {
-                op: o, value: v, ..
-            },
-        ) => op == o && same(value, v),
-        (
-            Expr::Binary {
-                op, left, right, ..
-            },
-            Expr::Binary {
-                op: o,
-                left: l,
-                right: r,
-                ..
-            },
-        ) => op == o && same(left, l) && same(right, r),
-        (
-            Expr::Logic { and, left, right },
-            Expr::Logic {
-                and: a2,
-                left: l,
-                right: r,
-            },
-        ) => and == a2 && same(left, l) && same(right, r),
-        (
-            Expr::Call { name, args, .. },
-            Expr::Call {
-                name: n, args: a2, ..
-            },
-        ) => name == n && args.len() == a2.len() && args.iter().zip(a2).all(|(x, y)| same(x, y)),
-        (Expr::ArrayLit { elem, items }, Expr::ArrayLit { elem: e, items: i }) => {
-            elem == e && items.len() == i.len() && items.iter().zip(i).all(|(x, y)| same(x, y))
-        }
-        _ => a == b,
     }
 }
 
