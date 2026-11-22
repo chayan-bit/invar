@@ -120,6 +120,7 @@ fn llvm_ir_debug(
          declare i64 @invar_blob_new_v1(i32)\n\
          declare i64 @invar_text_v1(i32, i64, i64, i64, i32, i32)\n\
          declare i64 @invar_fsum_v1(i32, i64, i64, i32, i32)\n\
+         declare i64 @invar_extremum_v1(i32, i32, i64, i32, i32)\n\
          declare i64 @invar_foreign_call_v1(i32, i64, i64, i64, i64, i64, i64, i64, i64)\n\
          declare i64 @invar_view_new_v1(i64, i64, i64, i64, i32, i32, i32)\n\
          declare void @invar_view_drop_v1(i64)\n\

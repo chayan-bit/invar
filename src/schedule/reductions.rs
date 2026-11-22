@@ -42,7 +42,7 @@ pub struct Reduction {
 pub const TREE_LAW: &str = "fsum-aligned-tree-v1";
 /// `sum_exact`/`dot_exact` merge integer partial accumulators: integer
 /// addition is associative and commutative, so every partition of the terms
-/// gives the same exact total, which rounds once (NB.1.3, NA3.15).
+/// gives the same exact total, which rounds once (NB.1.3, NB.1.10).
 pub const EXACT_LAW: &str = "fsum-exact-merge-v1";
 
 impl Reduction {

@@ -20,7 +20,9 @@ const SPEC: &str = "docs/spec/invar-v0.1.md";
 /// The v0.2 chapters: checked like `SPEC`, `NA` ids, the DX-25 (#86) non-core chapter budget.
 const AXES_SPEC: &str = "docs/spec/invar-v0.2-axes.md";
 const N_SPEC: &str = "docs/spec/invar-v0.2-axis-n.md";
-const SPECS: [&str; 4] = [SPEC, AXES_SPEC, N_SPEC, "docs/spec/invar-v0.2-regions.md"];
+const R_SPEC: &str = "docs/spec/invar-v0.2-regions.md";
+const E_SPEC: &str = "docs/spec/invar-v0.2-extrema.md";
+const SPECS: [&str; 5] = [SPEC, AXES_SPEC, N_SPEC, R_SPEC, E_SPEC];
 const INDEX: &str = "examples/index.json";
 const INDEX_SCHEMA: &str = "examples/index.schema.json";
 /// Whole-spec budget, as the size record and `docs/spec/budget.json` state (`tests/spec_budget.rs`).
@@ -284,11 +286,7 @@ fn check_spec_text(
             ));
         }
     }
-    if errors.is_empty() {
-        Ok(stats)
-    } else {
-        Err(errors)
-    }
+    errors.is_empty().then_some(stats).ok_or(errors)
 }
 
 /// Estimator: UTF-8 bytes divided by 3, rounded up, excluding the size-record line.
@@ -419,11 +417,7 @@ fn validate_index(
             ));
         }
     }
-    if errors.is_empty() {
-        Ok(())
-    } else {
-        Err(errors)
-    }
+    errors.is_empty().then_some(()).ok_or(errors)
 }
 
 fn hex(bytes: &[u8]) -> String {
