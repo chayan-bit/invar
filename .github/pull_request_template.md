@@ -9,6 +9,7 @@
 - [ ] `just check` (or the equivalent `cargo fmt`, `cargo clippy`, `cargo nextest` and doctest commands) passes
 - [ ] New behavior has positive, negative and boundary tests
 - [ ] The specification and grammar are updated if language semantics changed
+- [ ] `docs/spec/budget.json` is unchanged, or the raise is justified under Notes
 
 ## Notes
 

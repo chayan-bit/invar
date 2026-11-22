@@ -319,6 +319,13 @@ fn machine_diagnostics_corpus_has_no_invariant_codes() {
         assert!(!output.exists(), "{}", path.display());
         document_codes(&document, &registered, &mut reached);
     }
+    // `invar spec` (DX-25, #86) refusals, as JSON tool errors.
+    for request in [["--topic", "nowhere"], ["--chapter", "nowhere"], ["--budget", "1"]] {
+        let (status, document) = cli(&["spec", request[0], request[1], "--format", "json"]);
+        assert_eq!(status, 2, "{request:?}");
+        assert!(diagnostic_validator.is_valid(&document), "{document}");
+        document_codes(&document, &registered, &mut reached);
+    }
     let mut required = source_codes();
     // `invar-qualify` lives in the `invar-tools` package; tools/tests/bench_tooling/qualify_cli.rs reaches these.
     required.remove("M5_USAGE");
