@@ -67,22 +67,11 @@ pub fn law_level(law: LawId) -> CLevel {
     }
 }
 
-/// The declared C level of `function` in `program`, C0 when undeclared.
-fn declared(program: &crate::mir::Program, function: &str) -> CLevel {
-    program
-        .region_axes
-        .get(function)
-        .and_then(|axes| CLevel::from_name(axes.level(&C_AXIS)))
-        .unwrap_or(CLevel::C0)
-}
-
 /// Whether the normal-form route may apply `laws`: it runs the whole program,
-/// so every law must be admitted at the lowest level any function declares.
+/// so every law must be admitted at the lowest level any function or loop declares.
 pub fn laws_admitted(program: &crate::mir::Program, laws: impl IntoIterator<Item = LawId>) -> bool {
-    let floor = program
-        .functions
-        .iter()
-        .map(|function| declared(program, &function.name))
+    let floor = super::declarations(program)
+        .filter_map(|axes| CLevel::from_name(axes.level(&C_AXIS)))
         .min()
         .unwrap_or(CLevel::C0);
     laws.into_iter().all(|law| law_level(law) <= floor)

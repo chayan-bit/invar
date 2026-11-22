@@ -429,6 +429,14 @@ fn create_closure(
         // A closure's folds stay strict: no tier reaches it from its encloser.
         fold: crate::numeric_contract::FoldTier::Strict,
         axes: crate::axes::Axes::default(),
+        loop_axes: source
+            .loop_axes
+            .iter()
+            .filter(|(span, ..)| {
+                declaration.span.start <= span.start && span.end <= declaration.span.end
+            })
+            .copied()
+            .collect(),
     });
     Ok((
         LiveClosure {

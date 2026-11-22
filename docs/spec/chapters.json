@@ -1,0 +1,381 @@
+{
+  "chapters": [
+    {
+      "core": true,
+      "id": "core",
+      "part": true,
+      "path": "docs/spec/chapters/core.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 4121,
+        "bytes3": 5004
+      },
+      "topics": [
+        "arithmetic",
+        "arrays",
+        "bindings",
+        "control-flow",
+        "fuel",
+        "integers",
+        "intrinsics",
+        "lexical",
+        "literals",
+        "syntax",
+        "traps",
+        "types"
+      ]
+    },
+    {
+      "core": false,
+      "id": "ownership",
+      "part": true,
+      "path": "docs/spec/chapters/ownership.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 876,
+        "bytes3": 1066
+      },
+      "topics": [
+        "borrowing",
+        "cleanup",
+        "drop",
+        "loans",
+        "moves",
+        "ownership"
+      ]
+    },
+    {
+      "core": false,
+      "id": "modules-records",
+      "part": true,
+      "path": "docs/spec/chapters/modules-records.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1505,
+        "bytes3": 1756
+      },
+      "topics": [
+        "enums",
+        "errors",
+        "imports",
+        "match",
+        "modules",
+        "records",
+        "result",
+        "variants"
+      ]
+    },
+    {
+      "core": false,
+      "id": "views",
+      "part": true,
+      "path": "docs/spec/chapters/views.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 867,
+        "bytes3": 910
+      },
+      "topics": [
+        "mutview",
+        "slices",
+        "views"
+      ]
+    },
+    {
+      "core": false,
+      "id": "generics-closures",
+      "part": true,
+      "path": "docs/spec/chapters/generics-closures.md",
+      "requires": [
+        "ownership"
+      ],
+      "tokens": {
+        "bpe": 1565,
+        "bytes3": 1726
+      },
+      "topics": [
+        "closures",
+        "decimal-literals",
+        "f32",
+        "floats",
+        "generics"
+      ]
+    },
+    {
+      "core": false,
+      "id": "units-frames",
+      "part": true,
+      "path": "docs/spec/chapters/units-frames.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1532,
+        "bytes3": 1640
+      },
+      "topics": [
+        "dimensions",
+        "frames",
+        "quantities",
+        "robotics",
+        "transforms",
+        "units"
+      ]
+    },
+    {
+      "core": false,
+      "id": "bytes-cabi",
+      "part": true,
+      "path": "docs/spec/chapters/bytes-cabi.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1356,
+        "bytes3": 1570
+      },
+      "topics": [
+        "bytes",
+        "c-abi",
+        "ffi",
+        "foreign",
+        "strings",
+        "utf8"
+      ]
+    },
+    {
+      "core": false,
+      "id": "system",
+      "part": true,
+      "path": "docs/spec/chapters/system.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1404,
+        "bytes3": 1709
+      },
+      "topics": [
+        "generators",
+        "ros2",
+        "system",
+        "system-dialect",
+        "system-ir"
+      ]
+    },
+    {
+      "core": false,
+      "id": "graph-checks",
+      "part": true,
+      "path": "docs/spec/chapters/graph-checks.md",
+      "requires": [
+        "system"
+      ],
+      "tokens": {
+        "bpe": 1824,
+        "bytes3": 2214
+      },
+      "topics": [
+        "graph-checks",
+        "isolation",
+        "latency",
+        "license",
+        "queues",
+        "rates",
+        "resources"
+      ]
+    },
+    {
+      "core": false,
+      "id": "manifests",
+      "part": true,
+      "path": "docs/spec/chapters/manifests.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1083,
+        "bytes3": 1436
+      },
+      "topics": [
+        "cells",
+        "components",
+        "contract-tests",
+        "grasp",
+        "manifests"
+      ]
+    },
+    {
+      "core": false,
+      "id": "engines",
+      "part": true,
+      "path": "docs/spec/chapters/engines.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 2319,
+        "bytes3": 2931
+      },
+      "topics": [
+        "cli",
+        "cpu-parallel",
+        "cuda",
+        "engines",
+        "exit-codes",
+        "families",
+        "general-net",
+        "gpu",
+        "metal",
+        "mir",
+        "native",
+        "parallel",
+        "reference"
+      ]
+    },
+    {
+      "core": false,
+      "id": "limits-diagnostics",
+      "part": true,
+      "path": "docs/spec/chapters/limits-diagnostics.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1688,
+        "bytes3": 2100
+      },
+      "topics": [
+        "diagnostics",
+        "examples",
+        "explain",
+        "limits",
+        "python",
+        "registry"
+      ]
+    },
+    {
+      "core": false,
+      "id": "v02-numerics",
+      "part": true,
+      "path": "docs/spec/chapters/v02-numerics.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 3169,
+        "bytes3": 3347
+      },
+      "topics": [
+        "binary64",
+        "f64",
+        "float-reductions",
+        "fsum",
+        "math-library",
+        "sort",
+        "spatial"
+      ]
+    },
+    {
+      "core": false,
+      "id": "placement-attributes",
+      "part": true,
+      "path": "docs/spec/chapters/placement-attributes.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 605,
+        "bytes3": 789
+      },
+      "topics": [
+        "attributes",
+        "placement",
+        "profiles"
+      ]
+    },
+    {
+      "core": false,
+      "id": "language-surface",
+      "part": true,
+      "path": "docs/spec/chapters/language-surface.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 1707,
+        "bytes3": 1954
+      },
+      "topics": [
+        "assert",
+        "break",
+        "compound-assignment",
+        "continue",
+        "doc-comments",
+        "for-each",
+        "labels",
+        "language-surface",
+        "pairs",
+        "step",
+        "sugar",
+        "tuples"
+      ]
+    },
+    {
+      "core": false,
+      "id": "axes",
+      "part": false,
+      "path": "docs/spec/invar-v0.2-axes.md",
+      "requires": [],
+      "tokens": {
+        "bpe": 5289,
+        "bytes3": 5914
+      },
+      "topics": [
+        "attributes",
+        "axes",
+        "contracts",
+        "receipts",
+        "regions"
+      ]
+    },
+    {
+      "core": false,
+      "id": "axis-n",
+      "part": false,
+      "path": "docs/spec/invar-v0.2-axis-n.md",
+      "requires": [
+        "axes"
+      ],
+      "tokens": {
+        "bpe": 1394,
+        "bytes3": 1565
+      },
+      "topics": [
+        "axis-n",
+        "nondeterminism"
+      ]
+    },
+    {
+      "core": false,
+      "id": "regions",
+      "part": false,
+      "path": "docs/spec/invar-v0.2-regions.md",
+      "requires": [
+        "axes"
+      ],
+      "tokens": {
+        "bpe": 1295,
+        "bytes3": 1589
+      },
+      "topics": [
+        "contract-levels",
+        "regions",
+        "rule-levels"
+      ]
+    },
+    {
+      "core": false,
+      "id": "extrema",
+      "part": false,
+      "path": "docs/spec/invar-v0.2-extrema.md",
+      "requires": [
+        "axes"
+      ],
+      "tokens": {
+        "bpe": 934,
+        "bytes3": 1008
+      },
+      "topics": [
+        "argmax",
+        "argmin",
+        "extrema",
+        "max-of",
+        "min-of"
+      ]
+    }
+  ],
+  "generated": "docs/spec/invar-v0.1.md"
+}

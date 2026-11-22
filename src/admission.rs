@@ -426,11 +426,7 @@ pub fn analyze_within(
         }
     }
     for region in &mut regions {
-        region.axes = program
-            .region_axes
-            .get(&region.function)
-            .copied()
-            .unwrap_or_default();
+        region.axes = crate::axes::region_levels(program, &region.function, region.span);
         crate::axes::rules::gate(region);
         region.candidate_identity = candidate_identity(source, region)?;
     }

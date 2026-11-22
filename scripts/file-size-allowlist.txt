@@ -18,7 +18,7 @@
 1006 src/general_net/path_sum/emit.rs
 810 src/general_net/path_sum/range.rs
 913 src/histogram_source/bounded.rs
-1014 src/main.rs
+1013 src/main.rs
 1033 src/mir_eval/bulk.rs
 818 src/mir_eval/region/tests.rs
 897 src/placement/calibration.rs
@@ -28,7 +28,7 @@
 930 tests/fsum_math_sort_spatial/placement.rs
 831 tests/robotics/sequencer_binding.rs
 849 tests/schedule_tuning.rs
-1160 tests/spec_examples.rs
+1156 tests/spec_examples.rs
 806 tests/summary/summary_source.rs
 831 tests/support/gnet_device.rs
 873 tests/transpose_stencil/stencil_source.rs

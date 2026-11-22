@@ -81,6 +81,8 @@ cargo nextest run --locked --test language -E 'test(/arithmetic_fuel_and_demand/
 1. Implement the smallest complete behavior, including diagnostics and input limits.
 2. Add focused positive, negative and boundary tests, in the test binary that already covers the area (see the [testing guide](docs/testing.md)).
 3. Update the specification and grammar together when a change affects language semantics, and explain any changed user-visible behavior.
+   Edit the spec chapters in `docs/spec/chapters/` (listed in `docs/spec/chapters.json`), never the generated `docs/spec/invar-v0.1.md`, then run `INVAR_SPEC_BLESS=1 cargo test --test spec_budget` to regenerate it and the recorded token counts.
+   Raising a number in `docs/spec/budget.json` is a deliberate change that the pull request must justify.
 4. Never weaken a test oracle to make a failing test pass without a justified semantic change.
 5. Prefer the standard library; a new dependency needs a concrete need and review.
 

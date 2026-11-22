@@ -61,6 +61,8 @@ invar-cuda = { path = "crates/invar-cuda" }
 # tests/diagnostics/dwarf_debug_info.rs reads the native backend's DWARF back.
 gimli = { version = "=0.34.0", default-features = false, features = ["read", "std"] }
 object = { version = "=0.40.0", default-features = false, features = ["read_core", "elf", "macho", "std"] }
+# tests/spec_budget.rs: the second spec token estimator (cl100k_base, embedded in the crate).
+tiktoken-rs = "=0.12.1"
 
 [build-dependencies]
 sha2 = "=0.11.0"

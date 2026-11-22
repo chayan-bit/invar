@@ -14,12 +14,14 @@ use crate::numeric_contract::FoldTier;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Position {
     Function,
+    Loop,
 }
 
 impl Position {
     const fn noun(self) -> &'static str {
         match self {
             Self::Function => "a function",
+            Self::Loop => "a loop",
         }
     }
 }
@@ -61,7 +63,7 @@ pub(super) const REGISTRY: &[Attribute] = &[
     },
     Attribute {
         name: "region",
-        positions: &[Position::Function],
+        positions: &[Position::Function, Position::Loop],
         unknown_key: "CONTRACT_UNKNOWN",
         keys: &[
             level_key("c", "C level", axes::C_AXIS.levels),
@@ -191,6 +193,49 @@ impl Parser {
         }
         fold = axes.fold().unwrap_or(fold);
         Ok((fold, axes, self.take_keyword("pub").is_some()))
+    }
+
+    /// `#[region(...)]` before a loop statement, then the loop: the loop and the
+    /// loops nested in it are a region of their own (NA9.1), recorded by the
+    /// loop's span for its function. Keys, levels and refusals are a
+    /// function's; `#[numeric]` and any other attribute are refused here.
+    pub(super) fn declared_loop(&mut self) -> Result<Stmt, FrontError> {
+        // In the order of `item_prefix`: each attribute and its levels, then positions.
+        let mut seen: Vec<(&'static Attribute, Span)> = Vec::new();
+        let mut declared = None;
+        while let Some(start) = self.take_symbol("#") {
+            let parsed = self.attribute(start)?;
+            if seen
+                .iter()
+                .any(|(entry, _)| entry.name == parsed.entry.name)
+            {
+                return Err(FrontError::source(
+                    "UNSUPPORTED_FEATURE",
+                    format!("#[{}] may appear only once on a loop", parsed.entry.name),
+                    parsed.span,
+                ));
+            }
+            if parsed.entry.name == "region" {
+                let axes = Axes::resolve(&parsed.values)
+                    .map_err(|(code, message)| FrontError::source(code, message, parsed.span))?;
+                declared = Some((parsed.span, axes));
+            }
+            seen.push((parsed.entry, parsed.span));
+        }
+        let labelled = matches!(self.current().kind, TokenKind::Name(_))
+            && matches!(
+                self.tokens.get(self.pos + 1).map(|t| &t.kind),
+                Some(TokenKind::Symbol(":"))
+            );
+        let is_loop = labelled || self.is_keyword("for") || self.is_keyword("while");
+        for (entry, _) in &seen {
+            self.check_position(entry, is_loop.then_some(Position::Loop))?;
+        }
+        let statement = self.statement()?;
+        if let Some((attribute, axes)) = declared {
+            self.loop_axes.push((statement.span, attribute, axes));
+        }
+        Ok(statement)
     }
 
     /// Refuse an attribute whose following item is not one of its positions.
