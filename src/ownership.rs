@@ -621,7 +621,7 @@ fn expr(
         ExprKind::Unary { value, .. } => {
             expr(program, function, value, state, loop_depth, Context::Value)
         }
-        ExprKind::Binary { left, right, .. } => {
+        ExprKind::Binary { left, right, .. } | ExprKind::Pair(left, right) => {
             expr(program, function, left, state, loop_depth, Context::Value)?;
             expr(program, function, right, state, loop_depth, Context::Value)
         }

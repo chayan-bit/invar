@@ -402,7 +402,7 @@ impl Scan<'_> {
             | ExprKind::Group(base)
             | ExprKind::Try(base)
             | ExprKind::Unary { value: base, .. } => self.expr(base),
-            ExprKind::Binary { left, right, .. } => {
+            ExprKind::Binary { left, right, .. } | ExprKind::Pair(left, right) => {
                 self.expr(left)?;
                 self.expr(right)
             }

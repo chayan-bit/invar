@@ -10,17 +10,12 @@ use invar::{
     schedule::{self, Fault, Hooks, PlanKind},
 };
 
-#[path = "../../test-support/split_mix.rs"]
-mod split_mix;
-use split_mix::Rng;
+use crate::split_mix::Rng;
 
 const FUEL: u64 = 1_000_000;
 const WORKERS: [usize; 4] = [1, 2, 7, 64];
 
 impl Rng {
-    fn below(&mut self, n: u64) -> u64 {
-        self.next() % n
-    }
     fn between(&mut self, lo: i64, hi: i64) -> i64 {
         lo + (self.next() % (hi - lo + 1) as u64) as i64
     }

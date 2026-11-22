@@ -72,6 +72,9 @@ pub enum Fault {
     /// Mutation (#204): the checked-fold carry combine drops the right
     /// operand's minimum prefix; the differential tests must catch it.
     LoseMinPrefix,
+    /// Mutation (#207): the select combine lets a later chunk win a tie of a
+    /// strict compare; the differential tests must catch it.
+    RightmostTie,
 }
 
 #[derive(Clone, Debug)]

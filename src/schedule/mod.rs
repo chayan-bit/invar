@@ -32,7 +32,7 @@ pub mod tuning_resident;
 pub(crate) mod workers;
 
 pub use crate::plan::PlanKind;
-use folds::{checked_fold_step, pair_reduction_step, reduction_step, scan_step};
+use folds::{checked_fold_step, pair_reduction_step, reduction_step, scan_step, select_fold_step};
 pub use lowering::{
     Dispatched, Gap, Selection, has_family_region, regions, selection, serial_only,
 };
@@ -454,6 +454,7 @@ fn region_step(
         Execution::PairReduction(candidate) => pair_reduction_step(candidate, live, workers, hooks),
         Execution::Scan(candidate) => scan_step(candidate, live, workers, hooks),
         Execution::CheckedFold(fold) => checked_fold_step(fold, live, workers, hooks),
+        Execution::SelectFold(select) => select_fold_step(select, live, workers, hooks),
     }
 }
 

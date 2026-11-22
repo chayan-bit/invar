@@ -8,9 +8,10 @@ use crate::{
     admission::{self, Obligation, Region, Status, fact},
     checked_fold,
     front::Span,
+    general_net::normal_form::Order,
     laws, loops,
     mir::{self, Function, Operation, ValueId},
-    recurrence, typed_net,
+    recurrence, select_fold, typed_net,
 };
 
 /// The executed plan family of one region.
@@ -108,6 +109,8 @@ pub enum Execution {
     Scan(Box<recurrence::Candidate>),
     /// A checked integer sum regrouped by the exact carry of PNF law L3 (#204).
     CheckedFold(Box<checked_fold::Fold>),
+    /// A running extremum with companions regrouped by PNF law L7 (#207).
+    SelectFold(Box<select_fold::Select>),
 }
 
 impl Execution {
@@ -140,6 +143,10 @@ impl Execution {
             Self::CheckedFold(fold) => size_of::<checked_fold::Fold>()
                 .saturating_add(fold.state.capacity())
                 .saturating_add(fold.input.capacity()),
+            Self::SelectFold(select) => size_of::<select_fold::Select>()
+                .saturating_add(select.best.capacity())
+                .saturating_add(select.input.capacity())
+                .saturating_add(loops::names_bytes(&select.companions)),
         }
     }
 
@@ -151,9 +158,10 @@ impl Execution {
             | Self::FusedConsumer { .. }
             | Self::DagProducer(_)
             | Self::DagConsumer { .. } => PlanKind::FusedMap,
-            Self::Reduction(_) | Self::PairReduction(_) | Self::CheckedFold(_) => {
-                PlanKind::Reduction
-            }
+            Self::Reduction(_)
+            | Self::PairReduction(_)
+            | Self::CheckedFold(_)
+            | Self::SelectFold(_) => PlanKind::Reduction,
             Self::Scan(_) => PlanKind::Scan,
         }
     }
@@ -173,6 +181,7 @@ impl Execution {
             }
             Self::Scan(_) => vec![recurrence::RULE_REVISION, laws::RULE_REVISION],
             Self::CheckedFold(_) => vec![checked_fold::RULE_REVISION],
+            Self::SelectFold(_) => vec![select_fold::RULE_REVISION],
         }
     }
 
@@ -188,6 +197,7 @@ impl Execution {
             Self::PairReduction(_) => "ordered-affine-pair-reduction-if-guard",
             Self::Scan(_) => "affine-scan-if-guard",
             Self::CheckedFold(_) => "checked-sum-carry-if-guard",
+            Self::SelectFold(_) => "select-records-if-guard",
         }
     }
 
@@ -225,6 +235,17 @@ impl Execution {
             ),
             Self::PairReduction(_) => ("pair-reduction", None, Some("ordered-affine-pair"), None),
             Self::CheckedFold(_) => ("reduction", None, Some("checked-sum-carry"), None),
+            Self::SelectFold(select) => (
+                "reduction",
+                None,
+                Some(match (select.order, select.strict) {
+                    (Order::Min, true) => "select-min-first",
+                    (Order::Min, false) => "select-min-last",
+                    (Order::Max, true) => "select-max-first",
+                    (Order::Max, false) => "select-max-last",
+                }),
+                None,
+            ),
             Self::Scan(candidate) => (
                 "scan",
                 None,
@@ -306,6 +327,31 @@ fn checked_fold_facts() -> Vec<Obligation> {
     ]
 }
 
+fn select_fold_facts() -> Vec<Obligation> {
+    vec![
+        fact(
+            "RANGE",
+            "checked_invariant",
+            "zero-based counted for; trip count and live input length checked at loop entry",
+        ),
+        fact(
+            "DEPENDENCE",
+            "checked_invariant",
+            "running extremum with induction companions regrouped by PNF law L7: per-chunk extrema and an ordered combine, then a per-chunk if-taken count from the incoming best; ties and NaN as the serial compare",
+        ),
+        fact(
+            "TOTALITY",
+            "checked_invariant",
+            "no trap once the live input covers the trip count; MIR re-derives fuel from the if-taken count",
+        ),
+        fact(
+            "SEED",
+            "runtime_guard",
+            "selected value and companions read from the live state at loop entry; no write before the region completes",
+        ),
+    ]
+}
+
 fn scan_facts(candidate: &recurrence::Candidate) -> Vec<Obligation> {
     let publication = match (candidate.publishes_prefixes, candidate.exclusive_prefix) {
         (false, _) => None,
@@ -379,6 +425,12 @@ fn classify(context: &mut Context<'_>, region: &mut Region) {
             region,
             Execution::CheckedFold(Box::new(fold)),
             checked_fold_facts(),
+        );
+    } else if let Some(select) = select_fold::select_in(function, defs, region.head) {
+        admit(
+            region,
+            Execution::SelectFold(Box::new(select)),
+            select_fold_facts(),
         );
     } else if let Err(reason) = scan
         && region.first_rejected_obligation == Some("EFFECT_ORDER")

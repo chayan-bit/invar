@@ -64,6 +64,22 @@ fn net_oracle_corpus_every_runnable_source_agrees_with_both_reference_engines() 
             *tally.entry("binary64_outside_net").or_default() += 1;
             continue;
         }
+        let pair =
+            |i: &mir::Instruction| matches!(i.output, Some((_, invar::front::Type::Pair(_))));
+        if program
+            .functions
+            .iter()
+            .flat_map(|f| &f.blocks)
+            .flat_map(|b| &b.instructions)
+            .any(pair)
+        {
+            // Pairs (#262) have no net word layout: refused before any demand.
+            assert_eq!(observed.failure, Some(oracle::ToolFailure::Unsupported));
+            assert_eq!(observed.semantic.steps_used, 0, "{name}");
+            assert!(observed.events.is_empty(), "{name}");
+            *tally.entry("pair_outside_net").or_default() += 1;
+            continue;
+        }
         assert_eq!(observed.failure, None, "{name}: {:?}", observed.semantic);
         same(&observed.semantic, &reference, name);
         // Exhaustion one step short is the exact source-fuel limit, with only

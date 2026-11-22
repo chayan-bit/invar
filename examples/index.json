@@ -1124,6 +1124,25 @@
       }
     },
     {
+      "path": "examples/language/pairs.inv",
+      "intent": "A function returns a pair of i32 values and let binds both fields.",
+      "family": "core",
+      "tags": [
+        "tuples"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 53
+      }
+    },
+    {
       "path": "examples/language/recursion.inv",
       "intent": "Direct recursion computes a Fibonacci number.",
       "family": "core",
@@ -1159,6 +1178,23 @@
         "command": "run",
         "status": "ok",
         "value": 2
+      }
+    },
+    {
+      "path": "examples/language/tuple-shape.inv",
+      "intent": "A tuple of three values is TUPLE_SHAPE; tuples are pairs of 32-bit scalars.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "TUPLE_SHAPE"
       }
     },
     {
