@@ -152,7 +152,10 @@ fn expr(e: &Expr) -> Result<(), FrontError> {
         ExprKind::Record { fields, .. } => fields.iter().try_for_each(|field| expr(&field.value)),
         ExprKind::Match { value, arms } => {
             expr(value)?;
-            arms.iter().try_for_each(|arm: &MatchArm| expr(&arm.value))
+            arms.iter().try_for_each(|arm: &MatchArm| {
+                arm.guard.iter().try_for_each(&expr)?;
+                expr(&arm.value)
+            })
         }
         ExprKind::MoveField { base, .. }
         | ExprKind::Field { base, .. }

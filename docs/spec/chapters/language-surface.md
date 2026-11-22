@@ -64,3 +64,58 @@ fn main() -> i32 {
     return q + r;
 }
 ```
+
+[NB.7.14] A match arm may carry a guard, `pattern if g => value`: arms are tried in source order, and the guard of an arm whose case matches runs once every earlier arm has failed, with the payload bound, charging its own steps and trapping at its own operator, and a false guard falls through to the next arm (#260). `src/eval/matching.rs` `tests/language/match_guards.rs::each_evaluated_guard_costs_its_own_steps_and_an_unreached_one_none` `tests/language/match_guards.rs::a_trapping_guard_traps_at_its_operator_with_the_reference_fuel_prefix`
+[NB.7.15] A guarded arm never covers its case, so every case still needs an unguarded arm; an arm after its case's unguarded arm is `NAME_DUPLICATE`, a guard must be `Bool`, and an arm with an owned payload takes no guard (`UNSUPPORTED_FEATURE`). `src/check/matching.rs` `tests/language/match_guards.rs::guarded_arms_never_cover_their_case_and_refusals_have_exact_codes`
+[NB.7.16] The reference, MIR, net oracle, native and cpu-parallel engines agree on a guarded match's value, trap, fuel prefix and cleanup, because a guard lowers to a MIR branch between its arm's binding and its value. `src/mir/builder.rs` `tests/language/match_guards.rs::guards_pick_the_first_passing_arm_identically_on_every_engine`
+
+```invar outcome=value:9
+enum Reading { Celsius(i32), Missing }
+
+fn band(r: read Reading) -> i32 {
+    return match r {
+        Reading::Celsius(t) if t < 0 => 1,
+        Reading::Celsius(u) if u < 30 => 2,
+        Reading::Celsius(v) => 3,
+        Reading::Missing => 0,
+    };
+}
+
+fn main() -> i32 {
+    let cold: Reading = Reading::Celsius(-4);
+    let warm: Reading = Reading::Celsius(21);
+    let hot: Reading = Reading::Celsius(35);
+    return band(cold) + band(warm) * 1 + band(hot) * 2;
+}
+```
+
+[NB.7.17] `let V::P(x) = s else { B };`, with `s` a named owner or `move` of one, is exactly the hidden-name statements `let ok: Bool = match s { V::P(c) => true, ... => false }; if not ok { B } let x: T = match s { V::P(v) => v, ... => z };`, where the extraction keeps any `move`, `T` is the scalar payload type and `z` its zero literal, which never runs; without a payload binding only the first two remain (#260). `src/front/parser/let_else.rs` `src/check/let_else.rs::complete` `tests/language/match_guards.rs::let_else_is_the_check_the_diverging_block_and_the_extraction`
+[NB.7.18] The else block must end in a diverging statement, which is `return`, `break`, `continue`, `assert(false, m)` with a literal `false`, or an `if` with an `else` whose blocks all end in one, and any other block is `PARSE_LET_ELSE_FALLTHROUGH`. `src/front/parser/let_else.rs::diverging` `tests/language/match_guards.rs::let_else_refusals_have_exact_codes_and_spans`
+[NB.7.19] A let-else pattern with an owned payload is `UNSUPPORTED_FEATURE`, a `Result` pattern needs an owner whose type a parameter, an annotation, a call's result or a `move` of such an owner declares (else `TYPE_MISMATCH`), any other scrutinee is `PARSE_EXPECTED_TOKEN`, and an unknown arm is reported by the match check. `src/check/let_else.rs` `tests/language/match_guards.rs::let_else_refusals_have_exact_codes_and_spans`
+
+```invar outcome=value:5
+fn half(x: u32) -> Result<u32, u32> {
+    if x % 2u32 == 0u32 { return Result::Ok(x / 2u32); }
+    return Result::Err(x);
+}
+
+fn main() -> i32 {
+    var kept = 0;
+    for i in 0u32 .. 10u32 {
+        let r = half(i);
+        let Result::Ok(h) = r else { continue; };
+        kept += 1;
+    }
+    return kept;
+}
+```
+
+```invar outcome=diag:PARSE_LET_ELSE_FALLTHROUGH
+enum Pick { A(u32), B(u32) }
+
+fn main() -> i32 {
+    let p: Pick = Pick::B(1u32);
+    let Pick::A(v) = p else { let w: u32 = 0u32; };
+    return 0;
+}
+```

@@ -941,6 +941,42 @@
       }
     },
     {
+      "path": "examples/language/let-else-fallthrough.inv",
+      "intent": "A let-else block that can fall through is PARSE_LET_ELSE_FALLTHROUGH.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_LET_ELSE_FALLTHROUGH"
+      }
+    },
+    {
+      "path": "examples/language/match-guards.inv",
+      "intent": "Guarded match arms tried in order, and a let-else that returns early.",
+      "family": "core",
+      "tags": [
+        "variants"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 2221
+      }
+    },
+    {
       "path": "examples/language/doc-comment-misplaced.inv",
       "intent": "A doc comment that documents no item is PARSE_DOC_COMMENT_MISPLACED.",
       "family": "core",

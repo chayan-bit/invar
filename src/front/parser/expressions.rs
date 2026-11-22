@@ -266,9 +266,10 @@ impl Parser {
                     } else {
                         None
                     };
+                    let guard = if parser.take_keyword("if").is_some() { Some(parser.expression()?) } else { None };
                     parser.expect_symbol("=>")?;
                     let arm_value = parser.expression()?;
-                    Ok(MatchArm { variant, binding, span: Span { start: start.start, end: arm_value.span.end }, value: arm_value })
+                    Ok(MatchArm { variant, binding, guard, span: Span { start: start.start, end: arm_value.span.end }, value: arm_value })
                 })?;
                 let end = self.expect_symbol("}")?.end;
                 Expr::new(ExprKind::Match { value: Box::new(value), arms }, Span { start: token.span.start, end })

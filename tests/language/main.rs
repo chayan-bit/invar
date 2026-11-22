@@ -10,6 +10,7 @@ mod engines;
 mod for_each;
 mod generics_and_closures;
 mod loop_control;
+mod match_guards;
 mod names_types_and_calls;
 mod owner_return_fuel;
 mod records_variants_result;

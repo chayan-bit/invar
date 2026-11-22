@@ -64,6 +64,9 @@ fn scan_expr(expr: &Expr, roots: &HashSet<String>) -> Result<(), FrontError> {
         ExprKind::Match { value, arms } => {
             scan_expr(value, roots)?;
             for arm in arms {
+                if let Some(guard) = &arm.guard {
+                    scan_expr(guard, roots)?;
+                }
                 scan_expr(&arm.value, roots)?;
             }
             Ok(())
@@ -207,6 +210,9 @@ fn rewrite_expr(
         ExprKind::Match { value, arms } => {
             rewrite_expr(value, active, inherited_names, allow_call)?;
             for arm in arms {
+                if let Some(guard) = &mut arm.guard {
+                    rewrite_expr(guard, active, inherited_names, allow_call)?;
+                }
                 rewrite_expr(&mut arm.value, active, inherited_names, allow_call)?;
             }
             Ok(())
@@ -245,7 +251,10 @@ fn contains_view_call(block: &Block) -> bool {
             ExprKind::Array(items) => items.iter().any(expr),
             ExprKind::Record { fields, .. } => fields.iter().any(|field| expr(&field.value)),
             ExprKind::Match { value, arms } => {
-                expr(value) || arms.iter().any(|arm| expr(&arm.value))
+                expr(value)
+                    || arms
+                        .iter()
+                        .any(|arm| arm.guard.as_ref().is_some_and(expr) || expr(&arm.value))
             }
             ExprKind::Index { base, index }
             | ExprKind::Pair(base, index)

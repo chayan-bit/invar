@@ -421,6 +421,9 @@ impl Scan<'_> {
             ExprKind::Match { value, arms } => {
                 self.expr(value)?;
                 for arm in arms {
+                    if let Some(guard) = &arm.guard {
+                        self.expr(guard)?;
+                    }
                     self.expr(&arm.value)?;
                 }
                 Ok(())

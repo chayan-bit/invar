@@ -39,7 +39,10 @@ fn collect_expr(types: &mut BTreeMap<String, (Type, Type, Span)>, expr: &Expr) {
             }
             ExprKind::Match { value, arms } => {
                 pending.push(value);
-                pending.extend(arms.iter().map(|arm| &arm.value));
+                pending.extend(
+                    arms.iter()
+                        .flat_map(|arm| arm.guard.iter().chain([&arm.value])),
+                );
             }
             ExprKind::Index { base, index } => {
                 pending.push(base);

@@ -540,6 +540,16 @@ fn expr(
             }
             let mut states = Vec::new();
             for arm in arms {
+                if let Some(guard) = &arm.guard {
+                    expr(
+                        program,
+                        function,
+                        guard,
+                        &mut joined,
+                        loop_depth,
+                        Context::Value,
+                    )?;
+                }
                 let mut arm_state = joined.clone();
                 if let Some(binding) = &arm.binding {
                     let payload = type_of(program, function, value)

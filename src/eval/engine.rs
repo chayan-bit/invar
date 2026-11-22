@@ -240,50 +240,7 @@ impl Evaluator<'_> {
                 admit_live(&mut self.live_elements, values.len())?;
                 Ok(Value::Record(Rc::new(RefCell::new(values))))
             }
-            ExprKind::Match { value, arms } => {
-                let (name, moving) = match &value.kind {
-                    ExprKind::Name(name) => (name, false),
-                    ExprKind::Move(name) => (name, true),
-                    _ => return Err(EvalError::tool("INTERNAL_TYPE", "checked match needs a named owner")),
-                };
-                self.charge()?;
-                let Value::Variant(storage) = env.borrow_owned(name)? else {
-                    return Err(EvalError::tool("INTERNAL_TYPE", "checked match owner is not a variant"));
-                };
-                let (tag, payload) = if moving {
-                    let mut storage = storage.borrow_mut();
-                    (storage.0, storage.1.take())
-                } else {
-                    let storage = storage.borrow();
-                    let payload = storage.1.as_ref().map(|value| match value {
-                        Value::I32(v) => Ok(Value::I32(*v)),
-                        Value::U32(v) => Ok(Value::U32(*v)),
-                        Value::Bool(v) => Ok(Value::Bool(*v)),
-                        Value::F32(v) => Ok(Value::F32(*v)),
-                        Value::F64(v) => Ok(Value::F64(*v)),
-                        _ => Err(EvalError::tool("INTERNAL_TYPE", "borrowed owned variant payload")),
-                    }).transpose()?;
-                    (storage.0, payload)
-                };
-                let nominal = self.types.get(&value.span).and_then(|ty| match ty { Type::Named(name) => Some(name.as_str()), _ => None })
-                    .ok_or_else(|| EvalError::tool("INTERNAL_TYPE", "checked match nominal type missing"))?;
-                let declaration = self.program.program.variants.iter().find(|variant| variant.name == nominal)
-                    .ok_or_else(|| EvalError::tool("INTERNAL_TYPE", "checked variant declaration missing"))?;
-                let case = declaration.arms.get(tag).ok_or_else(|| EvalError::tool("INTERNAL_TYPE", "checked variant tag missing"))?;
-                let selected = arms.iter().find(|arm| arm.variant.rsplit_once("::").is_some_and(|(owner, name)| (owner == nominal || (crate::front::result_parts(nominal).is_some() && owner == "Result")) && name == case.name))
-                    .ok_or_else(|| EvalError::tool("INTERNAL_TYPE", "checked match arm missing"))?;
-                env.scopes.push(Scope::new());
-                if let (Some(binding), Some(payload)) = (&selected.binding, payload) {
-                    env.bind(binding, payload)?;
-                }
-                let result = self.expr(&selected.value, env);
-                env.pop(&mut self.trace, &mut self.live_elements, result.is_ok() || self.pending_result_error.is_some());
-                if moving && (result.is_ok() || self.pending_result_error.is_some()) {
-                    let owned = env.take(name)?;
-                    record_cleanup(&mut self.trace, &mut self.live_elements, name, &owned);
-                }
-                result
-            }
+            ExprKind::Match { value, arms } => self.match_expr(value, arms, env),
             ExprKind::Pair(first, second) => Ok(Value::Pair(Box::new((self.expr(first, env)?, self.expr(second, env)?)))),
             ExprKind::Field { base, name } if matches!(self.types.get(&base.span), Some(Type::Pair(_))) => pair_field(self.expr(base, env)?, name),
             ExprKind::Field { base, name } => {

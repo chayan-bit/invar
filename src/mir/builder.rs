@@ -478,6 +478,14 @@ impl Builder<'_> {
                         self.declaration_order.push(binding.clone());
                         self.emit(Operation::Bind { name: binding.clone(), value: payload }, None, arm.span);
                     }
+                    if let Some(guard) = &arm.guard {
+                        // Checked: a guarded arm is never last, so a next test exists.
+                        let next = next.ok_or_else(|| invalid("checked guarded arm is last"))?;
+                        let condition = self.expr(guard, false)?;
+                        let value = self.new_block();
+                        self.end(Terminator::Branch { condition, yes: value, no: next, span: guard.span });
+                        self.current = value;
+                    }
                     let arm_value = self.expr(&arm.value, false)?;
                     if let Some(binding) = &arm.binding
                         && declaration.arms[index].payload.as_ref().is_some_and(|ty| matches!(ty, Type::Named(_))) {

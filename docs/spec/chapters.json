@@ -285,8 +285,8 @@
       "path": "docs/spec/chapters/language-surface.md",
       "requires": [],
       "tokens": {
-        "bpe": 1707,
-        "bytes3": 1954
+        "bpe": 2770,
+        "bytes3": 3180
       },
       "topics": [
         "assert",
