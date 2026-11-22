@@ -194,6 +194,7 @@
                 {
                   "enum": [
                     "recursion-law-not-routed",
+                    "contract-level",
                     "certificate-rejected",
                     "residue-law-not-routed",
                     "executor-refused",

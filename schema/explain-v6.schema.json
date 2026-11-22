@@ -424,6 +424,42 @@
               }
             ]
           },
+          "rule_levels": {
+            "description": "The lowest C level of each entry of rule_identities, in that order; null for a rule the table lacks.",
+            "type": "array",
+            "items": {
+              "enum": [
+                "c0",
+                "c1",
+                "c2",
+                "c5",
+                null
+              ]
+            }
+          },
+          "c_refused": {
+            "description": "Present only when the C level gate refused the candidate plan: the refused rule and its lowest level.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "c_level": {
+                "enum": [
+                  "c0",
+                  "c1",
+                  "c2",
+                  "c5",
+                  null
+                ]
+              }
+            },
+            "required": [
+              "rule",
+              "c_level"
+            ]
+          },
           "c5": {
             "description": "Present only at c5: the trusted rule, its Invar reference function and the differential-test digest.",
             "type": "object",
@@ -473,7 +509,8 @@
           "bound",
           "deterministic",
           "n_justification",
-          "s_artifact"
+          "s_artifact",
+          "rule_levels"
         ]
       }
     },
@@ -673,6 +710,7 @@
                     {
                       "enum": [
                         "recursion-law-not-routed",
+                        "contract-level",
                         "certificate-rejected",
                         "residue-law-not-routed",
                         "executor-refused",

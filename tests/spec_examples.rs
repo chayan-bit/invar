@@ -20,7 +20,7 @@ const SPEC: &str = "docs/spec/invar-v0.1.md";
 /// The v0.2 chapters: checked like `SPEC`, `NA` ids, the DX-25 (#86) non-core chapter budget.
 const AXES_SPEC: &str = "docs/spec/invar-v0.2-axes.md";
 const N_SPEC: &str = "docs/spec/invar-v0.2-axis-n.md";
-const SPECS: [(&str, usize); 3] = [(SPEC, TOKEN_LIMIT), (AXES_SPEC, 6_000), (N_SPEC, 6_000)];
+const SPECS: [&str; 4] = [SPEC, AXES_SPEC, N_SPEC, "docs/spec/invar-v0.2-regions.md"];
 const INDEX: &str = "examples/index.json";
 const INDEX_SCHEMA: &str = "examples/index.schema.json";
 /// Target from the AI-02 contract. Measured with the stated estimator, see `spec_tokens`.
@@ -863,7 +863,7 @@ fn repo_contains(path: &str, name: &str) -> bool {
 
 #[test]
 fn spec_examples_every_spec_block_runs_with_its_tagged_outcome() {
-    let specs = SPECS.map(|(path, _)| read(path));
+    let specs = SPECS.map(read);
     let blocks: Vec<Block> = specs
         .iter()
         .flat_map(|spec| extract_blocks(spec).unwrap())
@@ -881,7 +881,7 @@ fn spec_examples_every_spec_block_runs_with_its_tagged_outcome() {
 
 #[test]
 fn spec_examples_normative_statements_cite_existing_sources() {
-    for (path, _) in SPECS {
+    for path in SPECS {
         let spec = read(path);
         let stats = check_spec_text(&spec, &repo_has, &repo_contains)
             .unwrap_or_else(|e| panic!("{path}: {}", e.join("\n")));
@@ -893,15 +893,15 @@ fn spec_examples_normative_statements_cite_existing_sources() {
         assert!(!spec.lines().any(foreign), "{path}: NA ids are v0.2 only");
         eprintln!("{path}: {stats:?}");
     }
-    let v02: String = SPECS[1..].iter().map(|(p, _)| read(p)).collect();
+    let v02: String = SPECS[1..].iter().map(|p| read(p)).collect();
     let joined = check_spec_text(&v02, &repo_has, &repo_contains);
     assert!(joined.is_ok(), "the v0.2 chapters share NA ids: {joined:?}");
 }
 
 #[test]
 fn spec_examples_token_count_is_below_the_target_and_recorded() {
-    for (path, limit) in SPECS {
-        let spec = read(path);
+    for path in SPECS {
+        let (spec, limit) = (read(path), if path == SPEC { TOKEN_LIMIT } else { 6_000 });
         let measured = spec_tokens(&spec);
         assert!(measured < limit, "{path}: {measured} tokens");
         assert_eq!(
