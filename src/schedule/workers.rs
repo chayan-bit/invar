@@ -73,7 +73,8 @@ pub enum Fault {
     /// operand's minimum prefix; the differential tests must catch it.
     LoseMinPrefix,
     /// Mutation (#207): the select combine lets a later chunk win a tie of a
-    /// strict compare; the differential tests must catch it.
+    /// strict compare, or the extremum intrinsics' combine prefer the later
+    /// of equal chunk results; the differential tests must catch it.
     RightmostTie,
 }
 

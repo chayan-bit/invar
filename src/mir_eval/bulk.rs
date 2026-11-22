@@ -556,7 +556,7 @@ mod hardening_tests {
             program: &reached.program,
             provider: None,
             sorts: None,
-            reducer: None,
+            calls: CallHooks::default(),
             fuel_limit: 1000,
             steps_used: 17,
             call_depth: 0,

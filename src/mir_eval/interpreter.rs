@@ -58,6 +58,11 @@ impl Interpreter<'_> {
                     {
                         Some(self.reduce(function, name, args, instruction.span, frame)?)
                     }
+                    Operation::Call { name, args }
+                        if crate::extremum::Kind::from_name(name).is_some() =>
+                    {
+                        Some(self.extremum(function, name, args, instruction.span, frame)?)
+                    }
                     kind => self.operation(
                         &function.name,
                         kind,

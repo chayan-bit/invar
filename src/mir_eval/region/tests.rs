@@ -80,7 +80,7 @@ impl<'p> Machine<'p> {
                 program,
                 provider: None,
                 sorts: None,
-                reducer: None,
+                calls: CallHooks::default(),
                 fuel_limit: LIMIT,
                 steps_used: 0,
                 call_depth: 0,
