@@ -4,6 +4,7 @@
 //! live bounds/alias/fuel/numeric checks remain the dispatcher's responsibility.
 
 mod core;
+mod elements;
 mod grid;
 mod indexed;
 mod segmented;
@@ -147,6 +148,8 @@ pub fn analyze(net: &Net, proof: &Proof, form: &NormalForm) -> Result<Report, Er
             let Some(inner) = tree::find_loop(&tree.body, head) else {
                 continue;
             };
+            let forwarded = elements::forward(inner);
+            let inner = forwarded.as_ref().unwrap_or(inner);
             let Some(lowered) = program.functions.get(function.index) else {
                 continue;
             };

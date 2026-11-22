@@ -1,0 +1,22 @@
+fn add_all(xs: read Array<u32>) -> u32 {
+    var acc: u32 = 0u32;
+    for x in xs { acc = wrapping_add(acc, x); }
+    return acc;
+}
+fn add_counted(xs: read Array<u32>) -> u32 {
+    var acc: u32 = 0u32;
+    for i in 0u32..len(xs) { acc = wrapping_add(acc, xs[i]); }
+    return acc;
+}
+#[region(contract = "f32-tree-v2")]
+fn tree_sum(xs: read Array<f32>) -> f32 {
+    var s: f32 = 0.0;
+    for x in xs { s = s + x; }
+    return s;
+}
+fn main() -> i32 {
+    let xs = filled_u32(4096u32, 3u32);
+    let fs: Array<f32> = [16777216.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    if add_all(xs) == add_counted(xs) and tree_sum(fs) == 16777218.0 { return 1; }
+    return 0;
+}
