@@ -1,9 +1,8 @@
 //! #48: f32 `sin`, `cos` and `sqrt` are `invar-math-cr-v1` on every engine.
-//! The CPU engines compute the correctly rounded words; no device lowers cr-v1
-//! `sin` or `cos` yet, so f32 source regions refuse them, CUDA and Metal
-//! requests keep each calling function on the CPU with reason
-//! `math-cr-v1-device-unavailable`, and `sqrt` keeps its exact device helpers.
-//! tests/support/gnet_entry.rs covers the general net on every target.
+//! The CPU engines compute the correctly rounded words, and f32 source regions
+//! lower all three onto the device plan (#163): no device request keeps a
+//! function on the CPU for them. tests/gpu_cuda and tests/gpu_metal compare
+//! the device words; tests/support/gnet_entry.rs covers the general net.
 use invar::{
     check, eval, front,
     math::{self, MathFn},
@@ -65,8 +64,8 @@ fn program(f: MathFn) -> String {
 }
 
 #[test]
-fn f32_trig_regions_stay_on_the_cpu_with_cr_v1_words() {
-    for f in [MathFn::Sin, MathFn::Cos] {
+fn f32_cr_v1_regions_complete_on_the_device_plan_with_cr_v1_words() {
+    for f in [MathFn::Sin, MathFn::Cos, MathFn::Sqrt] {
         let source = program(f);
         let checked = checked(&source);
         let reference = eval::observe(&checked, FUEL);
@@ -80,7 +79,7 @@ fn f32_trig_regions_stay_on_the_cpu_with_cr_v1_words() {
         for workers in [1, 4] {
             let region =
                 invar::f32_source::run_cpu_source(source.as_bytes(), FUEL, workers).unwrap();
-            assert_eq!(region.completed, 0, "{} ran on the device plan", f.name());
+            assert!(region.completed >= 1, "{}: {:?}", f.name(), region.refusals);
             assert_eq!(region.observation.result, reference.result);
             assert_eq!(region.observation.steps_used, reference.steps_used);
             let parallel =
@@ -99,18 +98,6 @@ fn f32_trig_regions_stay_on_the_cpu_with_cr_v1_words() {
     }
 }
 
-#[test]
-fn f32_sqrt_regions_complete_on_the_device_plan_with_cr_v1_words() {
-    let source = program(MathFn::Sqrt);
-    let reference = eval::observe(&checked(&source), FUEL);
-    assert_eq!(reference.result, Ok(eval::Value::I32(7)), "{source}");
-    for workers in [1, 4] {
-        let region = invar::f32_source::run_cpu_source(source.as_bytes(), FUEL, workers).unwrap();
-        assert!(region.completed >= 1, "{:?}", region.refusals);
-        assert_eq!(region.observation.result, reference.result);
-    }
-}
-
 /// `wave` calls f32 `sin`, `turn` only f64 `cos` and `main` neither; `bump`
 /// is a u32 map a forced device runs, so the device request has a region.
 const SITES: &str = "fn wave(x: f32) -> f32 { let y = x * 2.0; return sin(y); }\n\
@@ -120,16 +107,6 @@ const SITES: &str = "fn wave(x: f32) -> f32 { let y = x * 2.0; return sin(y); }\
                      fn main() -> i32 { let xs: Array<u32> = filled_u32(4096u32, 7u32); let ys = bump(xs); \
                      var s: f32 = 0.0; for k in 0u32..4u32 { s = s + wave(f32_from_u32(k)); } \
                      if turn(0.0f64) == 1.0 and s < 0.0 and ys[4095u32] == 10u32 { return 7; } return 0; }\n";
-
-#[test]
-fn cpu_kept_sites_name_each_function_calling_f32_trig() {
-    let program = mir::lower(&checked(SITES)).unwrap();
-    let sites = math::cr_v1_device_sites(&program);
-    let names: Vec<&str> = sites.iter().map(|(f, _)| f.as_str()).collect();
-    assert_eq!(names, ["wave"]);
-    let span = sites[0].1;
-    assert_eq!(&SITES[span.start..span.end], "sin(y)");
-}
 
 fn explain(args: &[&str]) -> serde_json::Value {
     let dir = std::env::temp_dir().join(format!("invar-c4-{}-{}", std::process::id(), args.len()));
@@ -160,16 +137,14 @@ fn explain(args: &[&str]) -> serde_json::Value {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|c| c["reason"] == math::MATH_CR_V1_DEVICE_UNAVAILABLE)
+        .filter(|c| c["function"] == "wave" || c["reason"] == "math-cr-v1-device-unavailable")
         .collect();
-    assert_eq!(kept.len(), 1, "{explain}");
-    assert_eq!(kept[0]["function"], "wave", "{explain}");
-    assert_eq!(kept[0]["backend"], "mir-serial", "{explain}");
+    assert!(kept.is_empty(), "{explain}");
     explain
 }
 
 #[test]
-fn placement_explain_keeps_f32_trig_on_the_cpu() {
+fn placement_explain_keeps_no_function_on_the_cpu_for_f32_trig() {
     let host = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);
     let explain = explain(&["--engine", "auto", "--host-class", &host]);
     assert_eq!(explain["auto_path"], "placement", "{explain}");
@@ -178,7 +153,7 @@ fn placement_explain_keeps_f32_trig_on_the_cpu() {
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
 #[test]
 #[ignore = "requires CUDA or Metal hardware"]
-fn device_explain_keeps_f32_trig_on_the_cpu() {
+fn device_explain_keeps_no_function_on_the_cpu_for_f32_trig() {
     let engine = if cfg!(feature = "cuda") {
         "cuda"
     } else {

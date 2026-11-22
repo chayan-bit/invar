@@ -288,29 +288,3 @@ pub fn f64_sites(program: &crate::mir::Program) -> Vec<(String, crate::front::Sp
         })
         .collect()
 }
-
-/// Explain reason for f32 `sin` and `cos` under a CUDA or Metal request: no
-/// device lowers their `invar-math-cr-v1` kernels yet, so placement keeps each
-/// function that calls them on the CPU rather than change their bits.
-pub const MATH_CR_V1_DEVICE_UNAVAILABLE: &str = "math-cr-v1-device-unavailable";
-
-/// One `(function, span)` per function that calls f32 `sin` or `cos`, at its
-/// first such call: the sites `math-cr-v1-device-unavailable` keeps on the CPU.
-pub fn cr_v1_device_sites(program: &crate::mir::Program) -> Vec<(String, crate::front::Span)> {
-    use crate::{front::Type, mir::Operation};
-    program
-        .functions
-        .iter()
-        .filter_map(|function| {
-            function
-                .blocks
-                .iter()
-                .flat_map(|b| &b.instructions)
-                .find(|i| {
-                    matches!(&i.kind, Operation::Call { name, .. } if matches!(name.as_str(), "sin" | "cos"))
-                        && matches!(i.output, Some((_, Type::F32)))
-                })
-                .map(|i| (function.name.clone(), i.span))
-        })
-        .collect()
-}

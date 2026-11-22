@@ -514,7 +514,7 @@ fn main() -> i32 {
 [N5.8.3] Only an explicit `fma(a, b, c)` fuses a multiply and an add, and `f32_from_i32`, `f32_from_u32` and `filled_f32` are the conversions and constructor. `tests/numeric_layout/source_f32.rs::source_f32_strict_arithmetic_and_ieee_predicates`
 [N5.8.4] An integer is not implicitly an `f32`, `%` is not defined on `f32`, and `main` still returns `i32`. `tests/numeric_layout/source_f32.rs::source_f32_rejects_implicit_conversion_and_remainder`
 [N5.8.5] `i32_from_f32(x)` truncates a finite `f32` toward zero and traps with `INTEGER_OVERFLOW` when the value is not finite or outside the `i32` range. `docs/numeric.md::i32_from_f32`
-[N5.8.6] On `f32`, `sqrt`, `sin` and `cos` are `invar-math-cr-v1` like every library function, and because no device lowers `sin` or `cos` yet, a CUDA or Metal request keeps each function that calls them on the CPU with the reason `math-cr-v1-device-unavailable`. `src/math.rs::cr_v1_device_sites` `docs/numeric.md`
+[N5.8.6] On `f32`, `sqrt`, `sin` and `cos` are `invar-math-cr-v1` like every library function, and CUDA and Metal return the CPU's words. `crates/invar-device/src/f32_ops.rs::cr_v1_helpers` `docs/numeric.md`
 
 ```invar outcome=value:7
 fn nudge(x: f32) -> f32 { return x + 0.2; }
