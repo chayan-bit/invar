@@ -159,19 +159,9 @@ fn compile_cubin_with_cap(
             .map_err(|e| Error::Compile(e.to_string()))?,
     );
     let architecture = format!("--gpu-architecture=sm_{sm}");
-    // The integer cr-v1 library (#163) is C++20 and declares no execution spaces.
-    let cr_v1 = strict
-        && source
-            .lines()
-            .any(|line| line == invar_device::GNET_CR_V1_MARKER);
-    let standard = if cr_v1 { "--std=c++20" } else { "--std=c++17" };
-    let mut options = vec![architecture.as_str(), standard];
-    if strict {
-        options.extend(GNET_STRICT_NVRTC_OPTIONS);
-    }
-    if cr_v1 {
-        options.push("-default-device");
-    }
+    let mut options = vec![architecture.as_str()];
+    options.extend(invar_device::nvrtc_language_options(source, strict));
+    options.extend(GNET_STRICT_NVRTC_OPTIONS.into_iter().filter(|_| strict));
     if let Err(error) =
         // SAFETY: `program` owns a live NVRTC handle, and these options contain
         // no interior NUL. NvrtcProgram keeps the source alive until drop.

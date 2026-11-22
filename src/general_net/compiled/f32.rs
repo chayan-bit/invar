@@ -124,6 +124,9 @@ fn cr_v1(functions: &[invar_math::Function]) -> String {
     text
 }
 
+/// The library calls the numeric profile lowers.
+pub(super) const CALLS: [&str; 6] = ["fma", "f32_from_i32", "f32_from_u32", "sqrt", "sin", "cos"];
+
 pub(super) fn operation(
     w: &mut Writer,
     p: &Program<'_>,
@@ -164,12 +167,7 @@ pub(super) fn operation(
                 }
             }
         }
-        O::Call { name, args }
-            if matches!(
-                name.as_str(),
-                "fma" | "f32_from_i32" | "f32_from_u32" | "sqrt" | "sin" | "cos"
-            ) =>
-        {
+        O::Call { name, args } if CALLS.contains(&name.as_str()) => {
             let name = name.as_str();
             let helper = match name {
                 "fma" => "gnet_f32_fma",

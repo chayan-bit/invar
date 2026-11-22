@@ -347,16 +347,7 @@ impl<'a> Program<'a> {
                                 }
                                 starts.push(i + 1);
                             } else if !(matches!(name.as_str(), "wrapping_add" | "wrapping_mul")
-                                || program.numeric.is_some()
-                                    && matches!(
-                                        name.as_str(),
-                                        "fma"
-                                            | "f32_from_i32"
-                                            | "f32_from_u32"
-                                            | "sqrt"
-                                            | "sin"
-                                            | "cos"
-                                    )
+                                || program.numeric.is_some() && f32::CALLS.contains(&name.as_str())
                                 || program.owned.is_some()
                                     && (matches!(name.as_str(), "filled_i32" | "filled_u32")
                                         || program.numeric.is_some() && name == "filled_f32"))
