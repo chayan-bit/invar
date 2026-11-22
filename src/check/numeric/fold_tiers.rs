@@ -45,6 +45,20 @@ impl Visit for Uses<'_> {
 /// Whether a body holds a `break` or `continue`, at any depth (#261).
 struct Exits(bool);
 
+/// Renames the stand-in `.0` to the loop counter `.1` in statements parsed
+/// from fixed text: a for-each counter (`each@N`, #255) is no identifier.
+struct Counter<'a>(&'a str, &'a str);
+
+impl Visit for Counter<'_> {
+    fn expr(&mut self, e: &mut Expr) {
+        if let ExprKind::Name(name) = &mut e.kind
+            && name == self.0
+        {
+            self.1.clone_into(name);
+        }
+    }
+}
+
 impl Visit for Exits {
     fn stmt(&mut self, s: &mut Stmt) {
         self.0 |= matches!(s.kind, StmtKind::Break(_) | StmtKind::Continue(_));
@@ -529,6 +543,7 @@ impl Rewriter {
         self.folds += 1;
         let id = format!("{}{id}", self.prefix);
         let (lo, hi, n) = (format!("{id}_lo"), format!("{id}_hi"), format!("{id}_n"));
+        let index = format!("{id}_i");
         let exact = self.tier == FoldTier::Exact;
         // Exact adds the init slot, saturating: a count past the array limit
         // traps ARRAY_SIZE_LIMIT in `filled_f32`, never INTEGER_OVERFLOW.
@@ -560,9 +575,10 @@ impl Rewriter {
                 String::new()
             };
             out.append(&mut self.parse(&format!("var {terms} = filled_f32({n}, -0.0);{init}"))?);
-            let slot = self
-                .parse(&format!("{terms}[{counter} - {lo}{plus}] = 0.0;"))?
-                .remove(0);
+            let parsed = self.parse(&format!("{terms}[{index} - {lo}{plus}] = 0.0;"))?;
+            let mut parsed = Block::new(parsed, span)?;
+            walk_block(&mut parsed, &mut Counter(&index, &counter));
+            let slot = parsed.statements.remove(0);
             for statement in &mut body.statements {
                 if let StmtKind::Assign {
                     place: Place::Name(target, _),
@@ -587,7 +603,7 @@ impl Rewriter {
             })?);
         }
         let StmtKind::For { lower, upper, .. } = self
-            .parse(&format!("for {counter} in {lo}..{hi} {{ }}"))?
+            .parse(&format!("for {index} in {lo}..{hi} {{ }}"))?
             .remove(0)
             .kind
         else {
