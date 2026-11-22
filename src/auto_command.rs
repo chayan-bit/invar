@@ -316,9 +316,13 @@ pub fn command(args: &[OsString]) -> i32 {
             .reductions
             .iter()
             .map(|r| {
-                json!({"function":r.function,"span":{"start":r.span.start,"end":r.span.end},
+                let mut site = json!({"function":r.function,"span":{"start":r.span.start,"end":r.span.end},
                 "backend":r.backend,"kind":r.family,"reason":r.reason,
-                "cost_ms":r.cost.map(|c|json!({"cpu":c.cpu_ms,"device":c.device_ms}))})
+                "cost_ms":r.cost.map(|c|json!({"cpu":c.cpu_ms,"device":c.device_ms}))});
+                if let Some(law) = r.law {
+                    site["law"] = json!(law);
+                }
+                site
             })
             .collect();
         Ok((status, doc))

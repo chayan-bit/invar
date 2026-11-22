@@ -96,6 +96,33 @@ impl Launch {
         })
     }
 
+    /// The same exact launch over `groups` blocks (1 to [`MAX_EXACT_GROUPS`]):
+    /// any block count gives the same merged digits (law `fsum-exact-merge-v1`).
+    pub fn with_exact_groups(self, groups: u32) -> Result<Self, Error> {
+        if !self.op.is_exact() || !(1..=MAX_EXACT_GROUPS).contains(&groups) {
+            return Err(Error::Limit);
+        }
+        Ok(Self { groups, ..self })
+    }
+
+    /// `self` if it is exactly the launch [`Self::new`] (and, for an exact
+    /// op, [`Self::with_exact_groups`]) builds for `elements` terms: a launch
+    /// whose public fields were changed, such as its kernel `params`, is
+    /// refused before any dispatch reads them.
+    pub fn checked(self, elements: usize) -> Result<Self, Error> {
+        let fresh = Self::new(self.op, elements, self.leaf_shift)?;
+        let fresh = if self.op.is_exact() {
+            fresh.with_exact_groups(self.groups)?
+        } else {
+            fresh
+        };
+        if fresh == self {
+            Ok(self)
+        } else {
+            Err(Error::Limit)
+        }
+    }
+
     /// Output words: one f32 word per tree group, or one i64 row per exact group.
     pub fn output_words(&self) -> usize {
         if self.op.is_exact() {
@@ -111,17 +138,37 @@ impl Launch {
     }
 }
 
-/// Shared deposit logic, written once in the common C subset of CUDA and MSL.
-/// `fsum_i64`/`fsum_u64` are the backend's 64-bit integer spellings.
-const DEPOSIT: &str = r#"
-static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint pos, uint value, bool neg) {
+/// Digit update of the CUDA deposit: every digit takes a predicated add with a
+/// constant index, so the digits stay in registers (an indexed `d[q]` spills
+/// them to local memory: 1.89 ms against 0.54 ms at 2^26 on an RTX 5070 Ti).
+const ADD_AT_REGISTERS: &str = r#"
+static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint digits, uint pos, uint value, bool neg) {
+    fsum_u64 wide = ((fsum_u64)value) << (pos & 31u);
+    uint q = pos >> 5;
+    fsum_i64 lo = (fsum_i64)(wide & 0xffffffffull);
+    fsum_i64 hi = (fsum_i64)(wide >> 32);
+    if (neg) { lo = -lo; hi = -hi; }
+    #pragma unroll
+    for (uint k = 0u; k < digits; ++k) { d[k] += (k == q) ? lo : ((k == q + 1u) ? hi : (fsum_i64)0); }
+}
+"#;
+
+/// Digit update of the Metal deposit: two indexed adds, which the Apple GPU
+/// compiler runs faster than the unrolled form (3.6 ms against 5.1 ms at 2^26
+/// on an M4). Both forms add the same integers to the same digits.
+const ADD_AT_INDEXED: &str = r#"
+static fsum_inline void fsum_add_at(fsum_thread fsum_i64* d, uint digits, uint pos, uint value, bool neg) {
     fsum_u64 wide = ((fsum_u64)value) << (pos & 31u);
     uint q = pos >> 5;
     fsum_i64 lo = (fsum_i64)(wide & 0xffffffffull);
     fsum_i64 hi = (fsum_i64)(wide >> 32);
     if (neg) { d[q] -= lo; d[q + 1] -= hi; } else { d[q] += lo; d[q + 1] += hi; }
 }
+"#;
 
+/// Shared deposit logic, written once in the common C subset of CUDA and MSL.
+/// `fsum_i64`/`fsum_u64` are the backend's 64-bit integer spellings.
+const DEPOSIT: &str = r#"
 static fsum_inline void fsum_deposit(fsum_thread fsum_i64* d, fsum_thread uint* flags, uint x) {
     uint e = (x >> 23) & 0xffu;
     uint f = x & 0x7fffffu;
@@ -130,7 +177,7 @@ static fsum_inline void fsum_deposit(fsum_thread fsum_i64* d, fsum_thread uint* 
     if (e == 255u) { *flags |= (f != 0u) ? 1u : (neg ? 4u : 2u); return; }
     uint sig = (e != 0u) ? (f | 0x800000u) : f;
     uint pos = (e != 0u) ? (e - 1u) : 0u;
-    fsum_add_at(d, pos, sig, neg);
+    fsum_add_at(d, 9u, pos, sig, neg);
 }
 
 static fsum_inline void fsum_deposit_product(fsum_thread fsum_i64* d, fsum_thread uint* flags, uint x, uint y) {
@@ -149,14 +196,14 @@ static fsum_inline void fsum_deposit_product(fsum_thread fsum_i64* d, fsum_threa
     fsum_u64 sy = (fsum_u64)((ey != 0u) ? ((my & 0x7fffffu) | 0x800000u) : my);
     uint pos = ((ex != 0u) ? ex - 1u : 0u) + ((ey != 0u) ? ey - 1u : 0u);
     fsum_u64 product = sx * sy;
-    fsum_add_at(d, pos, (uint)(product & 0xffffffull), neg);
-    fsum_add_at(d, pos + 24u, (uint)(product >> 24), neg);
+    fsum_add_at(d, 18u, pos, (uint)(product & 0xffffffull), neg);
+    fsum_add_at(d, 18u, pos + 24u, (uint)(product >> 24), neg);
 }
 "#;
 
 /// Metal Shading Language 3.1 source with both kernels.
 pub fn msl() -> String {
-    let deposit = DEPOSIT
+    let deposit = format!("{ADD_AT_INDEXED}{DEPOSIT}")
         .replace("fsum_inline ", "")
         .replace("fsum_thread ", "thread ")
         .replace("fsum_i64", "long")
@@ -166,7 +213,7 @@ pub fn msl() -> String {
 
 /// CUDA C++ source for NVRTC with both kernels (no FMA: explicit `_rn`).
 pub fn cuda() -> String {
-    let deposit = DEPOSIT
+    let deposit = format!("{ADD_AT_REGISTERS}{DEPOSIT}")
         .replace("static fsum_inline ", "__device__ __forceinline__ ")
         .replace("fsum_thread ", "")
         .replace("fsum_i64", "long long")
@@ -431,6 +478,36 @@ mod tests {
     use super::*;
 
     #[test]
+    fn checked_refuses_a_launch_whose_public_fields_were_changed() {
+        let exact = Launch::new(Op::SumExact, 5000, 0)
+            .unwrap()
+            .with_exact_groups(7)
+            .unwrap();
+        let tree = Launch::new(Op::DotTree, 5000, 2).unwrap();
+        for launch in [exact, tree] {
+            assert_eq!(launch.checked(5000), Ok(launch));
+            assert_eq!(launch.checked(4999), Err(Error::Limit));
+            let mut bound = launch;
+            bound.params[0] = 5001;
+            assert_eq!(bound.checked(5000), Err(Error::Limit));
+            let mut digits = launch;
+            digits.params[3] += 1;
+            assert_eq!(digits.checked(5000), Err(Error::Limit));
+        }
+        // The tree geometry is fixed by the length; an exact launch takes any
+        // block count from 1 to the maximum (law `fsum-exact-merge-v1`).
+        let mut groups = tree;
+        groups.groups += 1;
+        assert_eq!(groups.checked(5000), Err(Error::Limit));
+        let mut regrouped = exact;
+        regrouped.groups = 8;
+        assert_eq!(regrouped.checked(5000), Ok(regrouped));
+        let mut over = exact;
+        over.groups = MAX_EXACT_GROUPS + 1;
+        assert_eq!(over.checked(5000), Err(Error::Limit));
+    }
+
+    #[test]
     fn geometry_covers_every_leaf_and_bounds_exact_groups() {
         assert_eq!(Launch::new(Op::SumTree, 0, 2), Err(Error::Empty));
         assert_eq!(Launch::new(Op::SumTree, 1, 4), Err(Error::Limit));
@@ -441,6 +518,13 @@ mod tests {
         assert_eq!(exact.groups, MAX_EXACT_GROUPS);
         assert_eq!(exact.output_words(), MAX_EXACT_GROUPS as usize * ROW);
         assert_eq!(exact.params, [1 << 30, 1, 0, 19]);
+        assert_eq!(exact.with_exact_groups(7).unwrap().output_words(), 7 * ROW);
+        assert_eq!(exact.with_exact_groups(0), Err(Error::Limit));
+        assert_eq!(
+            exact.with_exact_groups(MAX_EXACT_GROUPS + 1),
+            Err(Error::Limit)
+        );
+        assert_eq!(launch.with_exact_groups(1), Err(Error::Limit));
     }
 
     #[test]
@@ -451,6 +535,9 @@ mod tests {
             assert!(!source.contains("fma"));
         }
         assert!(cuda().contains("__fmul_rn"));
+        // CUDA keeps exact digits in registers; Metal indexes them (#206).
+        assert!(cuda().contains("(k == q)") && !cuda().contains("d[q] -="));
+        assert!(msl().contains("d[q] -=") && !msl().contains("(k == q)"));
         assert!(!msl().contains("fsum_thread") && !cuda().contains("fsum_inline"));
     }
 }

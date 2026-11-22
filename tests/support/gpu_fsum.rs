@@ -2,9 +2,10 @@
 //! equal the CPU engines bit for bit at every size class, every leaf chunk
 //! exponent and on adversarial inputs. Shared by the CUDA and Metal binaries;
 //! the including module supplies `Device`, `open`, `device_bits` and
-//! `guard_fires` (a backend whose subnormal guard discards a dispatch returns
+//! `exact_bits` (exact partials over a given block count) and `guard_fires`
+//! (a backend whose subnormal guard discards a dispatch returns
 //! `None` from `device_bits`, and says where that is expected).
-use super::{Device, device_bits, guard_fires, open};
+use super::{Device, device_bits, exact_bits, guard_fires, open};
 use invar::fsum;
 use invar_device::fsum::Op;
 
@@ -87,6 +88,35 @@ fn v02_fsum_group_boundaries_and_leaf_shifts_are_bit_identical() {
             }
         }
     }
+}
+
+/// #206: exact sums merge integer digits, so every block count gives the CPU
+/// bits on finite, cancelling and special inputs (law `fsum-exact-merge-v1`).
+#[test]
+#[ignore = "requires a GPU (CUDA with NVRTC, or Apple Metal)"]
+fn v02_fsum_exact_bits_are_independent_of_block_count() {
+    let mut device: Device = open();
+    let mut rng = Rng(0x0020_69e0);
+    let mut checked = 0;
+    for n in [1usize, 255, 65_543, 1 << 20, 3_000_017] {
+        let words = (0..n).map(|_| rng.word()).collect::<Vec<_>>();
+        let finite = (0..n).map(|_| rng.finite()).collect::<Vec<_>>();
+        // `finite` then its negations reversed: partials cancel only when merged.
+        let mut cancel = finite[..n / 2].to_vec();
+        cancel.extend(finite[..n / 2].iter().rev().map(|w| w ^ 0x8000_0000));
+        cancel.resize(n, 0x3f80_0000);
+        for input in [&words, &finite, &cancel] {
+            for op in [Op::SumExact, Op::DotExact] {
+                let want = expected(op, input, &finite);
+                for groups in [1, 2, 7, 64, 1000, 1024] {
+                    let got = exact_bits(&mut device, op, input, &finite, groups);
+                    assert_eq!(got, want, "n={n} {op:?} groups={groups}");
+                    checked += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(checked, 5 * 3 * 2 * 6);
 }
 
 #[test]
