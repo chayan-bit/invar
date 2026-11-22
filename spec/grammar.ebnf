@@ -1,6 +1,7 @@
 (* Invar source syntax. Lexical, typing and evaluation rules: docs/spec/invar-v0.1.md. *)
 (* v0.2 spatial queries use opaque VoxelGrid and built-in Neighbors/Knn
-   records through ordinary bindings and field moves. No tuple binding. *)
+   records through ordinary bindings and field moves. Tuples are pairs of
+   32-bit scalars only (#262). *)
 program       = { top_item } ;
 top_item      = module | import | component_import | frame | system_item | foreign_function | [ attribute ], [ "pub" ], function | [ "pub" ], ( record | variant ) ;
 module        = "module", identifier, [ "::", identifier ], "{", { import | component_import | system_item | [ attribute ], [ "pub" ], function | [ "pub" ], ( record | variant ) }, "}" ;
@@ -106,7 +107,7 @@ generic_param = identifier, ":", "Value" ;
 params        = param, { ",", param }, [ "," ] ;
 param         = identifier, ":", [ mode ], type ;
 mode          = "read" | "mut" | "take" ;
-type          = scalar | "Array", "<", ( numeric_type | "Bool" | identifier ), ">" | view_type | result_type | quantity_type | geometric_type | identifier, { "::", identifier }, [ "<", type_arg, { ",", type_arg }, ">" ] ;
+type          = scalar | "(", scalar, ",", scalar, [ "," ], ")" | "Array", "<", ( numeric_type | "Bool" | identifier ), ">" | view_type | result_type | quantity_type | geometric_type | identifier, { "::", identifier }, [ "<", type_arg, { ",", type_arg }, ">" ] ;
 type_arg      = type | integer_literal ;
 quantity_type = "Quantity", "<", ( integer_type | identifier ), ",", unit_type, ">" ;
 geometric_type = "Vector3", "<", ( integer_type | identifier ), ",", unit_type, ",", identifier, ">"
@@ -125,7 +126,7 @@ statement     = binding | assignment | return_stmt | if_stmt
               | [ attribute ], [ identifier, ":" ], ( while_stmt | for_stmt )
               | ( "break" | "continue" ), [ identifier ], ";"  (* #261 *)
               | expression, ";" ;
-binding       = ( "let" | "var" ), identifier, [ ":", type ], "=", expression, ";" ;
+binding       = ( "let" | "var" ), ( identifier, [ ":", type ] | "(", identifier, ",", identifier, [ "," ], ")" ), "=", expression, ";" ;  (* pair #262 *)
 assignment    = place, ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ), expression, ";" ;  (* #254 *)
 place         = identifier, [ "[", expression, "]" ] ;
 return_stmt   = "return", [ expression ], ";" ;
@@ -140,9 +141,9 @@ compare_op    = "==" | "!=" | "<" | "<=" | ">" | ">=" ;
 add_expr      = mul_expr, { ( "+" | "-" ), mul_expr } ;
 mul_expr      = unary_expr, { ( "*" | "/" | "%" ), unary_expr } ;
 unary_expr    = ( "not" | "-" ), unary_expr | "move", identifier, [ ".", identifier ] | postfix_expr ;
-postfix_expr  = primary, { "[", expression, "]" | ".", identifier | "?" } ;
+postfix_expr  = primary, { "[", expression, "]" | ".", ( identifier | "0" | "1" ) | "?" } ;
 primary       = integer_literal | decimal_literal | string_literal | byte_literal | "true" | "false" | name_or_call | match_expr | closure_expr
-              | "(", expression, ")" | "[", [ arguments ], "]" ;
+              | "(", expression, [ ",", expression, [ "," ] ], ")" | "[", [ arguments ], "]" ;
 name_or_call  = identifier, { "::", identifier }, [ "<", type_args, ">" | "::", "<", type_args, ">" ], [ "(", [ arguments ], ")" | "{", [ record_inits, [ "," ] ], "}" ] ;
 type_args     = type, { ",", type } ;
 closure_expr  = "closure", "[", [ captures ], "]", "(", [ params ], ")", "->", type, block ;

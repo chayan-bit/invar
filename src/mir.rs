@@ -154,6 +154,12 @@ pub enum Operation {
         record: ValueId,
         index: usize,
     },
+    /// A pair of 32-bit scalars (#262), and field `index` of one.
+    Pair(ValueId, ValueId),
+    PairGet {
+        pair: ValueId,
+        index: usize,
+    },
     Variant {
         name: String,
         tag: usize,

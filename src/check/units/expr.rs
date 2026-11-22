@@ -402,9 +402,16 @@ pub(super) fn check_expr(
             }
             PhysicalType::plain(Type::Named(name.clone()))
         }
+        ExprKind::Pair(first, second) => pair([first, second], scope, context, expected)?,
         ExprKind::Field { base, name } | ExprKind::MoveField { base, field: name } => {
             let base_ty = check_expr(base, scope, context, None)?;
-            if let Type::Named(record_name) = base_ty.scalar {
+            if let Type::Pair(pair) = &base_ty.scalar {
+                PhysicalType::plain(if name == "0" {
+                    pair.0.clone()
+                } else {
+                    pair.1.clone()
+                })
+            } else if let Type::Named(record_name) = base_ty.scalar {
                 context
                     .records
                     .get(&record_name)
@@ -446,4 +453,35 @@ pub(super) fn check_expr(
         ty.clone().require(expected, expr.span)?;
     }
     Ok(ty)
+}
+
+/// A pair literal (#262): each element takes the expected element type, and an
+/// element with a unit or frame is `TUPLE_SHAPE`, since a pair holds only plain
+/// 32-bit scalars and would otherwise erase that tag.
+fn pair(
+    elements: [&mut Box<Expr>; 2],
+    scope: &HashMap<String, PhysicalType>,
+    context: &PhysicalContext,
+    expected: Option<&PhysicalType>,
+) -> Result<PhysicalType, FrontError> {
+    let hints = match expected.map(|ty| &ty.scalar) {
+        Some(Type::Pair(pair)) => [Some(pair.0.clone()), Some(pair.1.clone())],
+        _ => [None, None],
+    };
+    let mut types = Vec::with_capacity(2);
+    for (element, hint) in elements.into_iter().zip(hints) {
+        let ty = check_expr(
+            element,
+            scope,
+            context,
+            hint.map(PhysicalType::plain).as_ref(),
+        )?;
+        if ty.unit.is_some() || ty.frame.is_some() {
+            return Err(crate::front::tuple_shape(element.span));
+        }
+        types.push(ty.scalar);
+    }
+    let second = types.pop().expect("two elements");
+    let first = types.pop().expect("two elements");
+    Ok(PhysicalType::plain(Type::Pair(Box::new((first, second)))))
 }

@@ -488,6 +488,8 @@ pub enum Type {
     ArrayF64,
     ArrayBool,
     Named(String),
+    /// A pair of 32-bit scalars, copied like a scalar (#262).
+    Pair(Box<(Type, Type)>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -649,6 +651,7 @@ impl Expr {
                 right: index,
                 ..
             } => base.height.max(index.height),
+            ExprKind::Pair(first, second) => first.height.max(second.height),
             ExprKind::Unary { value, .. } | ExprKind::Group(value) | ExprKind::Try(value) => {
                 value.height
             }
@@ -698,6 +701,8 @@ pub enum ExprKind {
         field: String,
     },
     Group(Box<Expr>),
+    /// `(first, second)`, a pair of 32-bit scalars (#262).
+    Pair(Box<Expr>, Box<Expr>),
     Try(Box<Expr>),
     Call {
         name: String,

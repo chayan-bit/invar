@@ -184,7 +184,7 @@ impl Parser {
                 let span = Span { start: base.span.start, end };
                 base = Expr::new(ExprKind::Index { base: Box::new(base), index: Box::new(index) }, span)?;
             } else if self.take_symbol(".").is_some() {
-                let (name, field_span) = self.expect_name()?;
+                let (name, field_span) = self.field_name()?;
                 let span = Span { start: base.span.start, end: field_span.end };
                 base = Expr::new(ExprKind::Field { base: Box::new(base), name }, span)?;
             } else if let Some(end) = self.take_symbol("?") {
@@ -343,6 +343,9 @@ impl Parser {
             }
             TokenKind::Symbol("(") => {
                 let expr = self.expression()?;
+                if self.is_symbol(",") {
+                    return self.pair_literal(token.span, expr);
+                }
                 let end = self.expect_symbol(")")?.end;
                 Expr::new(
                     ExprKind::Group(Box::new(expr)),

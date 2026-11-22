@@ -160,6 +160,7 @@ fn expr(e: &Expr) -> Result<(), FrontError> {
         | ExprKind::Try(base)
         | ExprKind::Unary { value: base, .. } => expr(base),
         ExprKind::Index { base, index }
+        | ExprKind::Pair(base, index)
         | ExprKind::Binary {
             left: base,
             right: index,

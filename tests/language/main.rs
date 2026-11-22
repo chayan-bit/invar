@@ -17,4 +17,5 @@ mod reference_corpus_and_json;
 mod stepped_ranges;
 mod surface_sugar;
 mod syntax_and_limits;
+mod tuples;
 mod units_and_frames;

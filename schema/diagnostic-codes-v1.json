@@ -756,6 +756,11 @@
       "reachability": "source"
     },
     {
+      "code": "TUPLE_SHAPE",
+      "meaning": "tuple is not a pair of i32, u32, f32 or Bool",
+      "reachability": "source"
+    },
+    {
       "code": "TYPE_MISMATCH",
       "meaning": "type mismatch",
       "reachability": "source"

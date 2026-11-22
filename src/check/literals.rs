@@ -19,3 +19,24 @@ pub(super) fn split_literal(raw: &str) -> (&str, Option<Type>) {
         (raw, None)
     }
 }
+
+/// An unsuffixed decimal literal, possibly grouped or negated, whose float
+/// type comes from context (default `f32`).
+pub(super) fn flexible_float(expr: &Expr) -> bool {
+    match &expr.kind {
+        ExprKind::Float(raw) => crate::numeric_contract::decimal_digits(raw).1.is_none(),
+        ExprKind::Group(inner) => flexible_float(inner),
+        ExprKind::Unary {
+            op: UnaryOp::Neg,
+            value,
+            ..
+        } => flexible_float(value),
+        ExprKind::Binary {
+            op: BinaryOp::Add | BinaryOp::Sub | BinaryOp::Mul | BinaryOp::Div,
+            left,
+            right,
+            ..
+        } => flexible_float(left) || flexible_float(right),
+        _ => false,
+    }
+}
