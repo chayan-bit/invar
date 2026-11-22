@@ -8,8 +8,10 @@
 use crate::front::FrontError;
 use crate::numeric_contract::{FoldTier, NumericPolicy};
 
+mod loops;
 mod receipt;
 pub mod rules;
+pub use loops::{declarations, region_levels};
 pub use receipt::{N_JUSTIFICATION, contract_bound, levels_used, record_levels};
 
 /// A level of the numeric contract axis C. C3 and C4 do not exist on this
@@ -240,6 +242,7 @@ pub fn check_caps(
                 function.span,
             ));
         }
+        loops::check_caps(function, caps)?;
     }
     Ok(())
 }

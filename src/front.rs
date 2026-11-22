@@ -455,6 +455,8 @@ pub struct Function {
     pub span: Span,
     pub fold: crate::numeric_contract::FoldTier,
     pub axes: crate::axes::Axes,
+    /// Each loop declared with `#[region]`: its span, the attribute span and its levels (#355).
+    pub loop_axes: Vec<(Span, Span, crate::axes::Axes)>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

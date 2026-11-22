@@ -17,7 +17,7 @@ Note: section 8, the rule levels a C level admits, is `docs/spec/invar-v0.2-regi
 [NA2.2] One registry lists every attribute name, the positions it may take, its keys and the closed set of values of each key, and every attribute is accepted or refused there and nowhere else. `src/front/items.rs::REGISTRY`
 [NA2.3] An unknown name, an unknown key, a repeated key or an attribute in a position it does not take is `UNSUPPORTED_FEATURE`. `src/front/items.rs::check_position`
 [NA2.4] A value that is not a string literal is `PARSE_EXPECTED_TOKEN`, and a string outside the key's set is the code the registry gives that key. `src/front/items.rs::attribute_value`
-[NA2.5] The only position is a function: the attribute precedes `fn` or `pub fn`, and before a record or variant it is refused. `src/front/items.rs::item_prefix`
+[NA2.5] The positions are a function, where the attribute precedes `fn` or `pub fn`, and for `#[region]` also a loop (NA9.1); before a record or variant it is refused. `src/front/items.rs::item_prefix`
 
 | Attribute | Positions | Key | Values | Unknown value |
 | --- | --- | --- | --- | --- |
@@ -73,8 +73,8 @@ Note: this section defines C; schedule freedom and ordering freedom are not C le
 [NA3.12] The value, trap category, trap span, fuel prefix and cleanup of such a fold equal the serial fold at every worker count, and `explain` names the plan `checked-sum-carry-if-guard` and the rule `pnf-l3-checked-sum-carry-v1`. `tests/schedule_cpu/checked_fold_carry.rs`
 [NA3.13] A C0 select loop `if a[i] op m { m = a[i]; c = i; }` over `i32`, `u32` or `f32`, with `op` one of `<`, `<=`, `>` or `>=` in either operand order and any number of companions `c = i`, may be evaluated by per-chunk local records and an ordered combine, because an element replaces `m` exactly when it is a record of its chunk and beats the best entering that chunk; `cpu-parallel` does so with the serial compare, so a strict compare keeps the first of equal values and a non-strict one the last, a NaN element never replaces `m`, nothing replaces a NaN seed, and `-0.0` equals `+0.0`. `src/select_fold.rs::combine`
 [NA3.14] The selected value bits, companions, if-taken count, fuel prefix and cleanup of such a loop equal the serial loop at every worker count, a trip past the input stays serial and traps at the first out-of-bounds index, and `explain` names the plan `select-records-if-guard`, one of the laws `select-min-first`, `select-min-last`, `select-max-first` and `select-max-last`, and the rule `pnf-l7-select-records-v1`. `tests/schedule_cpu/select_fold_records.rs`
-[NA3.15] `sum_exact` and `dot_exact` admit any partition: integer partials merge exactly and round once (NB.1.3, NB.1.7), so any worker or block count gives the same bits. `src/fsum.rs::Exact`
-[NA3.16] A float reduction split over workers or a device names its receipt law: `fsum-exact-merge-v1` or `fsum-aligned-tree-v1`. `src/schedule/reductions.rs::EXACT_LAW`
+[NA3.15] `sum_exact` and `dot_exact` admit any partition: integer partials merge exactly and round once (NB.1.3, NB.1.7); the bits never depend on the split. `src/fsum.rs::Exact`
+[NA3.16] A split float reduction names its receipt law: `fsum-exact-merge-v1` or `fsum-aligned-tree-v1`. `src/schedule/reductions.rs::EXACT_LAW`
 
 | Level | May vary | Must not vary | Evidence | Minimum receipt |
 | --- | --- | --- | --- | --- |

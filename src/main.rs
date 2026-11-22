@@ -11,6 +11,7 @@ mod gnet_device_command;
 mod metal_build;
 mod native_command;
 mod source_device_command;
+mod spec_command;
 
 use cli::{source_directory, usage};
 use std::ffi::OsString;
@@ -42,14 +43,12 @@ fn run(args: Vec<OsString>) -> i32 {
     {
         return auto_command::command(&args);
     }
-    if args.get(1).is_some_and(|arg| arg == "calibrate") {
-        return calibrate_command::command(&args[2..]);
-    }
-    if args.get(1).is_some_and(|arg| arg == "source-device") {
-        return source_device_command::command(&args[2..]);
-    }
-    if args.get(1).is_some_and(|arg| arg == "gnet-device") {
-        return gnet_device_command::command(&args[2..]);
+    match args.get(1).and_then(|arg| arg.to_str()) {
+        Some("calibrate") => return calibrate_command::command(&args[2..]),
+        Some("source-device") => return source_device_command::command(&args[2..]),
+        Some("gnet-device") => return gnet_device_command::command(&args[2..]),
+        Some("spec") => return spec_command::command(&args[2..]),
+        _ => {}
     }
     if args.len() == 2 && (args[1] == "--help" || args[1] == "-h") {
         print!("{}", invar::help());

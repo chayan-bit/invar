@@ -77,13 +77,25 @@ pub(crate) fn region_options(args: Vec<OsString>) -> Result<Vec<OsString>, i32> 
     let rows: Vec<_> = program
         .functions
         .iter()
-        .map(|function| {
-            // `name` is already qualified by its module.
-            let mut row = serde_json::json!({"function": function.name, "contract": function.axes.contract()});
-            for axis in AXES {
-                row[axis.key] = function.axes.level(axis).into();
-            }
-            row
+        .flat_map(|function| {
+            // `name` is already qualified by its module; a declared loop adds a row (#355).
+            let loops = function
+                .loop_axes
+                .iter()
+                .map(|(span, _, axes)| (Some(span), axes));
+            std::iter::once((None, &function.axes))
+                .chain(loops)
+                .map(|(span, axes)| {
+                    let mut row =
+                        serde_json::json!({"function": function.name, "contract": axes.contract()});
+                    if let Some(span) = span {
+                        row["loop"] = serde_json::json!({"start": span.start, "end": span.end});
+                    }
+                    for axis in AXES {
+                        row[axis.key] = axes.level(axis).into();
+                    }
+                    row
+                })
         })
         .collect();
     if json {
@@ -95,9 +107,18 @@ pub(crate) fn region_options(args: Vec<OsString>) -> Result<Vec<OsString>, i32> 
         );
         for row in &rows {
             let text = |key: &str| row[key].as_str().unwrap_or("-").to_owned();
+            let region = match &row["loop"] {
+                serde_json::Value::Null => text("function"),
+                span => format!(
+                    "{} loop {}..{}",
+                    text("function"),
+                    span["start"],
+                    span["end"]
+                ),
+            };
             println!(
                 "{:<24} {:<4} {:<18} {:<4} {:<4} {}",
-                text("function"),
+                region,
                 text("c"),
                 text("contract"),
                 text("s"),

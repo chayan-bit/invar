@@ -15,10 +15,13 @@
 //! A Relaxed fold, and a `reassoc_add` fold in a Strict function, takes the
 //! Tree lowering (ENG-03 step 5'), which the Relaxed contract admits; a shape the
 //! lowering cannot take stays strict, which it admits too.
+//!
+//! A loop declared with `#[region]` folds at the tier its own contract selects,
+//! strict without one, whatever its function declares (#355).
 
 use super::visit::{Visit, walk_block, walk_expr};
 use super::*;
-use crate::numeric_contract::FoldTier;
+use crate::numeric_contract::{FoldTier, LoweredFolds};
 
 fn refuse(tier: FoldTier, message: &str, span: Span) -> FrontError {
     FrontError::source(
@@ -233,13 +236,17 @@ pub(super) fn rewrite(
     let mut suspects = Vec::new();
     let functions: Vec<String> = program.functions.iter().map(|f| f.name.clone()).collect();
     for function in &mut program.functions {
-        let only = match function.fold {
-            FoldTier::Tree | FoldTier::Exact | FoldTier::Relaxed => None,
-            FoldTier::Strict => match reassoc.get(&function.name) {
-                Some(sites) if !sites.is_empty() => Some(sites.clone()),
-                _ => continue,
-            },
-        };
+        let sites = reassoc.get(&function.name).cloned().unwrap_or_default();
+        // A declared loop folds at its own tier, strict without a fold contract (NA9.4).
+        let loops: Vec<(Span, FoldTier)> = function
+            .loop_axes
+            .iter()
+            .map(|(span, _, axes)| (*span, axes.fold().unwrap_or(FoldTier::Strict)))
+            .collect();
+        if function.fold == FoldTier::Strict && sites.is_empty() && loops.is_empty() {
+            continue;
+        }
+        let (tier, relaxed, only) = Rewriter::mode(function.fold, &sites);
         let mut taken = Taken::default();
         taken.spans.insert(function.span);
         taken.names.extend(functions.iter().cloned());
@@ -248,12 +255,13 @@ pub(super) fn rewrite(
             .extend(function.params.iter().map(|p| p.name.clone()));
         walk_block(&mut function.body, &mut taken);
         let mut rewriter = Rewriter {
-            tier: match function.fold {
-                FoldTier::Exact => FoldTier::Exact,
-                _ => FoldTier::Tree,
-            },
-            relaxed: matches!(function.fold, FoldTier::Relaxed | FoldTier::Strict),
+            tier,
+            relaxed,
             only,
+            source: function.fold,
+            sites,
+            loops,
+            lowered: LoweredFolds::new(),
             floats: function
                 .params
                 .iter()
@@ -280,19 +288,8 @@ pub(super) fn rewrite(
                 function.span,
             ));
         }
-        if rewriter.folds > 0 {
-            let declared = match function.fold {
-                FoldTier::Strict => FoldTier::Relaxed,
-                tier => tier,
-            };
-            lowered.insert((declared, rewriter.tier));
-        }
-        suspects.extend(
-            rewriter
-                .suspects
-                .into_iter()
-                .map(|span| (function.fold, span)),
-        );
+        lowered.extend(rewriter.lowered);
+        suspects.extend(rewriter.suspects);
     }
     Ok(suspects)
 }
@@ -325,6 +322,14 @@ struct Rewriter {
     relaxed: bool,
     /// In a Strict function, only the `reassoc_add` updates (by span) lower.
     only: Option<HashSet<Span>>,
+    /// The declared tier in force: the function's, or a declared loop's.
+    source: FoldTier,
+    /// The function's `reassoc_add` updates, which lower at any tier.
+    sites: HashSet<Span>,
+    /// Each loop that declares a C level and the tier it selects (#355).
+    loops: Vec<(Span, FoldTier)>,
+    /// (declared, ran) of every fold lowered, for the receipt.
+    lowered: LoweredFolds,
     /// Names declared `f32` (annotation, float literal or parameter).
     floats: HashSet<String>,
     /// The loop depth of every declaration; shadowing is refused, and a later
@@ -336,10 +341,41 @@ struct Rewriter {
     /// Starts every generated name; no source name starts with it.
     prefix: String,
     respan: Respan,
-    suspects: Vec<Span>,
+    suspects: Vec<Suspect>,
 }
 
 impl Rewriter {
+    /// The lowering, whether a misfit stays strict, and the updates that lower
+    /// under the declared tier `fold`.
+    fn mode(fold: FoldTier, sites: &HashSet<Span>) -> (FoldTier, bool, Option<HashSet<Span>>) {
+        let tier = match fold {
+            FoldTier::Exact => FoldTier::Exact,
+            _ => FoldTier::Tree,
+        };
+        let only = (fold == FoldTier::Strict).then(|| sites.clone());
+        (
+            tier,
+            matches!(fold, FoldTier::Relaxed | FoldTier::Strict),
+            only,
+        )
+    }
+
+    /// Rewrite a loop statement under the tier its own declaration selects,
+    /// if it declares one; the enclosing tier comes back afterwards.
+    fn in_loop<T>(&mut self, span: Span, body: impl FnOnce(&mut Self) -> T) -> T {
+        let Some(&(_, fold)) = self.loops.iter().find(|(declared, _)| *declared == span) else {
+            return body(self);
+        };
+        let (tier, relaxed, only) = Self::mode(fold, &self.sites);
+        let outer = (self.tier, self.relaxed, self.source);
+        let outer_only = std::mem::replace(&mut self.only, only);
+        (self.tier, self.relaxed, self.source) = (tier, relaxed, fold);
+        let result = body(self);
+        (self.tier, self.relaxed, self.source) = outer;
+        self.only = outer_only;
+        result
+    }
+
     fn block(&mut self, block: Block) -> Result<Block, FrontError> {
         let mut statements = Vec::with_capacity(block.statements.len());
         for statement in block.statements {
@@ -388,7 +424,7 @@ impl Rewriter {
                         .is_some_and(|&at| at < self.depth)
                     && terms_contain(&value, &target)
                 {
-                    self.suspects.push(value.span);
+                    self.suspects.push((self.source, value.span));
                 }
                 StmtKind::Assign {
                     place: Place::Name(target, place),
@@ -419,7 +455,7 @@ impl Rewriter {
             }
             StmtKind::While { condition, body } => StmtKind::While {
                 condition,
-                body: self.nested(body)?,
+                body: self.in_loop(span, |this| this.nested(body))?,
             },
             StmtKind::For {
                 name,
@@ -427,8 +463,10 @@ impl Rewriter {
                 upper,
                 body,
             } => {
-                let body = self.nested(body)?;
-                return self.fold_loop(name, lower, upper, body, span, out);
+                return self.in_loop(span, |this| {
+                    let body = this.nested(body)?;
+                    this.fold_loop(name, lower, upper, body, span, out)
+                });
             }
             other => other,
         };
@@ -527,6 +565,11 @@ impl Rewriter {
         }
         let id = self.folds;
         self.folds += 1;
+        let declared = match self.source {
+            FoldTier::Strict => FoldTier::Relaxed,
+            tier => tier,
+        };
+        self.lowered.insert((declared, self.tier));
         let id = format!("{}{id}", self.prefix);
         let (lo, hi, n) = (format!("{id}_lo"), format!("{id}_hi"), format!("{id}_n"));
         let exact = self.tier == FoldTier::Exact;
@@ -571,7 +614,7 @@ impl Rewriter {
                     && target == acc
                     && let Some(term) = fold_term(acc, value)
                 {
-                    self.suspects.retain(|&site| site != value.span);
+                    self.suspects.retain(|&(_, site)| site != value.span);
                     let mut write = slot.clone();
                     if let StmtKind::Assign { value, .. } = &mut write.kind {
                         *value = term.clone();
