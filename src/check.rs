@@ -840,7 +840,7 @@ impl FunctionChecker<'_> {
             },
             ExprKind::Array(_) => None,
             ExprKind::Record { name, .. } => Some(Type::Named(name.clone())),
-            ExprKind::Match { arms, .. } => arms.first().and_then(|arm| self.hint(&arm.value)),
+            ExprKind::Match { .. } | ExprKind::If { .. } => self.branch_hint(expr),
             ExprKind::Field { base, name } if self.is_pair(base) => {
                 self.pair_field_hint(base, name)
             }
@@ -1022,7 +1022,7 @@ impl FunctionChecker<'_> {
                 }
                 Type::Named(name.clone())
             }
-            ExprKind::Match { value, arms } => self.match_expr(value, arms, expected, expr.span)?,
+            ExprKind::Match { .. } | ExprKind::If { .. } => self.branch_expr(expr, expected)?,
             ExprKind::Pair(first, second) => self.pair(first, second, expected, expr.span)?,
             ExprKind::Field { base, name } if self.positional(base, name) => {
                 self.pair_field(base, name, expr.span)?

@@ -658,6 +658,11 @@ impl Expr {
                 ..
             } => base.height.max(index.height),
             ExprKind::Pair(first, second) => first.height.max(second.height),
+            ExprKind::If {
+                condition,
+                then,
+                otherwise,
+            } => condition.height.max(then.height).max(otherwise.height),
             ExprKind::Unary { value, .. } | ExprKind::Group(value) | ExprKind::Try(value) => {
                 value.height
             }
@@ -722,6 +727,12 @@ pub enum ExprKind {
     Match {
         value: Box<Expr>,
         arms: Vec<MatchArm>,
+    },
+    /// `if c { a } else { b }` in expression position (#361): only the selected arm runs.
+    If {
+        condition: Box<Expr>,
+        then: Box<Expr>,
+        otherwise: Box<Expr>,
     },
     Field {
         base: Box<Expr>,

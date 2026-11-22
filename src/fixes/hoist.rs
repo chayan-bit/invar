@@ -109,7 +109,7 @@ fn in_order(expr: &Expr, target: Span) -> Option<bool> {
     if !contains(expr.span, target) {
         return None;
     }
-    if matches!(expr.kind, ExprKind::Match { .. }) {
+    if matches!(expr.kind, ExprKind::Match { .. } | ExprKind::If { .. }) {
         return Some(false);
     }
     let mut before = true;

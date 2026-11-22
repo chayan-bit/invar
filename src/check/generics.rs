@@ -177,6 +177,15 @@ fn substitute_expr(expr: &mut Expr, arguments: &HashMap<String, Type>) {
                 substitute_expr(&mut arm.value, arguments);
             }
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => {
+            [condition, then, otherwise]
+                .into_iter()
+                .for_each(|part| substitute_expr(part, arguments));
+        }
         ExprKind::Index { base, index }
         | ExprKind::Pair(base, index)
         | ExprKind::Binary {
@@ -455,6 +464,15 @@ pub(super) fn rewrite_calls(
                         .for_each(|guard| rewrite_expr(guard, function, calls));
                     rewrite_expr(&mut arm.value, function, calls);
                 }
+            }
+            ExprKind::If {
+                condition,
+                then,
+                otherwise,
+            } => {
+                [condition, then, otherwise]
+                    .into_iter()
+                    .for_each(|part| rewrite_expr(part, function, calls));
             }
             ExprKind::Index { base, index }
             | ExprKind::Pair(base, index)

@@ -9,6 +9,7 @@ mod doc_comments;
 mod engines;
 mod for_each;
 mod generics_and_closures;
+mod if_expressions;
 mod loop_control;
 mod match_guards;
 mod names_types_and_calls;

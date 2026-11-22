@@ -306,6 +306,11 @@ fn place_expr(expr: Expr, site: &Element) -> Result<Expr, FrontError> {
                 })
                 .collect::<Result<_, FrontError>>()?,
         },
+        ExprKind::If { condition, then, otherwise } => ExprKind::If {
+            condition: boxed(condition)?,
+            then: boxed(then)?,
+            otherwise: boxed(otherwise)?,
+        },
         ExprKind::Field { base, name } => ExprKind::Field {
             base: boxed(base)?,
             name,

@@ -2,6 +2,8 @@
 
 use std::collections::{HashMap, HashSet};
 
+mod branches;
+
 use crate::{
     check::CheckedProgram,
     front::{
@@ -512,108 +514,19 @@ fn expr(
             Ok(())
         }
         ExprKind::Match { value, arms } => {
-            let moving = matches!(value.kind, ExprKind::Move(_));
-            if !moving && !matches!(value.kind, ExprKind::Name(_)) {
-                return Err(error(
-                    "UNSUPPORTED_FEATURE",
-                    "this match subset uses a named variant owner",
-                    value.span,
-                ));
-            }
-            expr(
-                program,
-                function,
-                value,
-                state,
-                loop_depth,
-                if moving {
-                    Context::Value
-                } else {
-                    Context::Read
-                },
-            )?;
-            let mut joined = state.clone();
-            if let ExprKind::Name(name) = &value.kind
-                && let Some(owner) = joined.get_mut(name)
-            {
-                owner.read_loans += 1;
-            }
-            let mut states = Vec::new();
-            // A guard runs only for its own case, so its effects reach its arm and
-            // the later arms of that case, never another case's arms (#260).
-            let mut fallthrough = HashMap::new();
-            for arm in arms {
-                let case = arm.variant.rsplit("::").next();
-                let mut arm_state = fallthrough.get(&case).unwrap_or(&joined).clone();
-                if let Some(guard) = &arm.guard {
-                    expr(
-                        program,
-                        function,
-                        guard,
-                        &mut arm_state,
-                        loop_depth,
-                        Context::Value,
-                    )?;
-                    fallthrough.insert(case, arm_state.clone());
-                }
-                if let Some(binding) = &arm.binding {
-                    let payload = type_of(program, function, value)
-                        .and_then(|ty| match ty {
-                            Type::Named(name) => program
-                                .program
-                                .variants
-                                .iter()
-                                .find(|variant| variant.name == *name),
-                            _ => None,
-                        })
-                        .and_then(|variant| {
-                            arm.variant.rsplit_once("::").and_then(|(_, case)| {
-                                variant.arms.iter().find(|item| item.name == case)
-                            })
-                        })
-                        .and_then(|case| case.payload.as_ref());
-                    if payload.is_some_and(affine) {
-                        arm_state.insert(
-                            binding.clone(),
-                            Owner {
-                                available: true,
-                                owned: moving,
-                                mutable: false,
-                                mode: None,
-                                declared_loop: loop_depth,
-                                read_loans: 0,
-                                mut_loan: false,
-                                protected: false,
-                                moved_fields: HashSet::new(),
-                            },
-                        );
-                    }
-                }
-                expr(
-                    program,
-                    function,
-                    &arm.value,
-                    &mut arm_state,
-                    loop_depth,
-                    Context::Value,
-                )?;
-                if let Some(binding) = &arm.binding {
-                    arm_state.remove(binding);
-                }
-                states.push(arm_state);
-            }
-            for (name, owner) in state.iter_mut() {
-                owner.available = states
-                    .iter()
-                    .all(|arm_state| arm_state.get(name).is_none_or(|item| item.available));
-                owner.moved_fields = states
-                    .iter()
-                    .filter_map(|arm_state| arm_state.get(name))
-                    .flat_map(|item| item.moved_fields.iter().cloned())
-                    .collect();
-            }
-            Ok(())
+            branches::match_expr(program, function, value, arms, state, loop_depth)
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => branches::if_expr(
+            program,
+            function,
+            [condition, then, otherwise],
+            state,
+            loop_depth,
+        ),
         ExprKind::Field { base, name } => {
             expr(program, function, base, state, loop_depth, Context::Read)?;
             if let ExprKind::Name(owner) = &base.kind

@@ -510,6 +510,21 @@ impl Builder<'_> {
                 self.current = join;
                 result
             }
+            // The shape of a two-arm match without its tag test (#361): a branch to two
+            // arms that each pass their value to one join block parameter.
+            ExprKind::If { condition, then, otherwise } => {
+                let condition = self.expr(condition, false)?;
+                let (yes, no, join) = (self.new_block(), self.new_block(), self.new_block());
+                let result = self.param(join, ty);
+                self.end(Terminator::Branch { condition, yes, no, span: expr.span });
+                for (block, arm) in [(yes, then), (no, otherwise)] {
+                    self.current = block;
+                    let value = self.expr(arm, false)?;
+                    self.end(Terminator::Goto { target: join, args: vec![value], span: arm.span });
+                }
+                self.current = join;
+                result
+            }
             ExprKind::Pair(first, second) => {
                 let first = self.expr(first, false)?;
                 let second = self.expr(second, false)?;

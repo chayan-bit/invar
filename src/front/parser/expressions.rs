@@ -274,6 +274,7 @@ impl Parser {
                 let end = self.expect_symbol("}")?.end;
                 Expr::new(ExprKind::Match { value: Box::new(value), arms }, Span { start: token.span.start, end })
             }
+            TokenKind::Keyword("if") => self.if_expr(token.span),
             TokenKind::Name(name) => {
                 let mut name = name;
                 while self.is_symbol("::") && !matches!(self.tokens.get(self.pos + 1).map(|token| &token.kind), Some(TokenKind::Symbol("<"))) {
@@ -373,6 +374,34 @@ impl Parser {
                 token.span,
             )),
         }
+    }
+
+    /// `if c { a } else { b }` after its `if` (#361); `else if` nests another one.
+    fn if_expr(&mut self, start: Span) -> Result<Expr, FrontError> {
+        let condition = self.expression()?;
+        let arm = |parser: &mut Self| -> Result<Expr, FrontError> {
+            parser.expect_symbol("{")?;
+            let value = parser.expression()?;
+            parser.expect_symbol("}")?;
+            Ok(value)
+        };
+        let then = arm(self)?;
+        if self.take_keyword("else").is_none() {
+            return Err(FrontError::source(
+                "PARSE_IF_WITHOUT_ELSE",
+                "an if expression needs an else arm",
+                Span { start: start.start, end: self.tokens[self.pos - 1].span.end },
+            ));
+        }
+        let otherwise = match self.take_keyword("if") {
+            Some(nested) => self.nested(|parser| parser.if_expr(nested))?,
+            None => arm(self)?,
+        };
+        let end = self.tokens[self.pos - 1].span.end;
+        Expr::new(
+            ExprKind::If { condition: Box::new(condition), then: Box::new(then), otherwise: Box::new(otherwise) },
+            Span { start: start.start, end },
+        )
     }
 
     fn comma_list<T>(

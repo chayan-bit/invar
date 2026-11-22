@@ -1,0 +1,15 @@
+// `if c { a } else { b }` as a scalar expression: only the selected arm runs.
+fn grade(x: i32) -> i32 {
+    return if x > 90 { 4 } else if x > 75 { 3 } else if x > 50 { 2 } else { 1 };
+}
+
+fn main() -> i32 {
+    let z = 0;
+    var acc = 0;
+    for i in 0u32 .. 10u32 {
+        acc = acc + if i % 2u32 == 0u32 { 1 } else { 100 };
+    }
+    // The else arm would divide by zero, but it is never evaluated.
+    let safe = if z == 0 { grade(95) * 1000 + grade(80) * 100 } else { 10 / z };
+    return safe + acc;
+}

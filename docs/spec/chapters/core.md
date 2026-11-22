@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=326 citations=371
-Size record: tokens=31785 estimator=bytes/3 limit=60000
+Counts: statements=329 citations=382
+Size record: tokens=32604 estimator=bytes/3 limit=60000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations

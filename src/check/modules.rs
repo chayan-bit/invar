@@ -390,6 +390,9 @@ fn resolve_expr(
                 resolve_expr(&mut arm.value, scope, functions, aliases)?;
             }
         }
+        ExprKind::If { condition, then, otherwise } => {
+            for part in [condition, then, otherwise] { resolve_expr(part, scope, functions, aliases)?; }
+        }
         ExprKind::Pair(base, index) | ExprKind::Index { base, index } | ExprKind::Binary { left: base, right: index, .. } => {
             resolve_expr(base, scope, functions, aliases)?;
             resolve_expr(index, scope, functions, aliases)?;
@@ -496,6 +499,9 @@ fn resolve_record_expr(
                 if let Some(guard) = &mut arm.guard { resolve_record_expr(guard, scope, records, aliases, generic_params)?; }
                 resolve_record_expr(&mut arm.value, scope, records, aliases, generic_params)?;
             }
+        }
+        ExprKind::If { condition, then, otherwise } => {
+            for part in [condition, then, otherwise] { resolve_record_expr(part, scope, records, aliases, generic_params)?; }
         }
         ExprKind::Field { base, .. } | ExprKind::Group(base) | ExprKind::Unary { value: base, .. } | ExprKind::Try(base) => {
             resolve_record_expr(base, scope, records, aliases, generic_params)?;

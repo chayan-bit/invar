@@ -157,6 +157,13 @@ fn expr(e: &Expr) -> Result<(), FrontError> {
                 expr(&arm.value)
             })
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => [condition, then, otherwise]
+            .into_iter()
+            .try_for_each(|part| expr(part)),
         ExprKind::MoveField { base, .. }
         | ExprKind::Field { base, .. }
         | ExprKind::Group(base)

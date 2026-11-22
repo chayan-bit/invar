@@ -657,6 +657,11 @@
       "reachability": "source"
     },
     {
+      "code": "PARSE_IF_WITHOUT_ELSE",
+      "meaning": "an if expression has no else arm",
+      "reachability": "source"
+    },
+    {
       "code": "PARSE_LET_ELSE_FALLTHROUGH",
       "meaning": "a let-else block can fall through",
       "reachability": "source"

@@ -44,6 +44,13 @@ fn collect_expr(types: &mut BTreeMap<String, (Type, Type, Span)>, expr: &Expr) {
                         .flat_map(|arm| arm.guard.iter().chain([&arm.value])),
                 );
             }
+            ExprKind::If {
+                condition,
+                then,
+                otherwise,
+            } => {
+                pending.extend([&**condition, &**then, &**otherwise]);
+            }
             ExprKind::Index { base, index } => {
                 pending.push(base);
                 pending.push(index);

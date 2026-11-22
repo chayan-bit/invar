@@ -121,3 +121,35 @@ fn main() -> i32 {
 ```
 
 [NB.7.20] A pair local does not cost its function's other loops their admission: the region tree tracks it as its two scalar components, and a loop that reads or writes one stays serial as NB.7.13 requires; a pair parameter or result, a field of a pair that is not a local, or a store whose second component reads the first still leaves its function without a tree, so all of that function's loops stay serial (#362). `src/general_net/regions/tree/pairs.rs` `src/general_net/normal_form/gate.rs` `tests/schedule_cpu/pair_admission.rs::issue_362_a_pair_outside_the_loop_keeps_its_admission` `tests/schedule_cpu/pair_admission.rs::issue_362_a_loop_touching_a_pair_component_has_no_normal_form_law`
+
+[NB.7.21] `if c { a } else { b }` in expression position, where `else if` nests another, is a scalar expression: `c` is `Bool`, and both arms are single expressions of one type among `i32`, `u32`, `f32`, `f64` and `Bool`, taken from the expected type, else from the first arm whose type is known; another condition or arm type is `TYPE_MISMATCH`, another result type `UNSUPPORTED_FEATURE`, a missing `else` `PARSE_IF_WITHOUT_ELSE`, and an `if` starting a statement stays the statement (#361). `src/front/parser/expressions.rs::if_expr` `src/check/matching.rs::if_expr` `tests/language/if_expressions.rs::malformed_if_expressions_are_refused_with_exact_codes`
+[NB.7.22] It costs one step, then its condition, then only the selected arm, so a trap in either is reported at its own operator and the other arm never runs; an owner either arm moves is moved after it, as for match arms. `src/eval/engine.rs` `src/ownership.rs` `tests/language/if_expressions.rs::an_if_expression_costs_one_step_its_condition_and_its_selected_arm` `tests/language/if_expressions.rs::a_trap_is_reported_at_its_operator_and_the_unselected_arm_never_runs` `tests/language/if_expressions.rs::an_owner_moved_in_either_arm_is_moved_after_the_expression`
+[NB.7.23] Its MIR is a two-arm match without the tag test, so every engine agrees on its value, trap, fuel prefix and cleanup, and a loop holding one gets the equivalent match's receipt. `src/mir/builder.rs` `tests/language/if_expressions.rs::the_mir_of_an_if_expression_is_a_two_arm_match_without_its_tag_test` `tests/language/if_expressions.rs::a_loop_holding_an_if_expression_has_the_receipt_of_the_equivalent_match`
+
+```invar outcome=value:4322
+fn grade(x: i32) -> i32 { return if x > 90 { 4 } else if x > 75 { 3 } else if x > 50 { 2 } else { 1 }; }
+fn main() -> i32 {
+    let a = grade(95) * 1000 + grade(80) * 100 + grade(60) * 10 + grade(3);
+    return if a == 4321 { a + 1 } else { 0 };
+}
+```
+
+```invar outcome=trap:DIVISION_BY_ZERO
+fn main() -> i32 { let z = 0; return if 10 / z > 1 { 1 } else { 2 }; }
+```
+
+```invar outcome=trap:DIVISION_BY_ZERO
+fn main() -> i32 { let z = 0; return if z == 0 { 10 / z } else { 10 / 1 }; }
+```
+
+```invar outcome=diag:TYPE_MISMATCH
+fn main() -> i32 { return if 1 { 2 } else { 3 }; }
+```
+
+```invar outcome=diag:TYPE_MISMATCH
+fn main() -> i32 { let v = if true { 2i32 } else { 3u32 }; return 0; }
+```
+
+```invar outcome=diag:PARSE_IF_WITHOUT_ELSE
+fn main() -> i32 { return if true { 1 }; }
+```

@@ -104,6 +104,15 @@ fn collect_expr(expr: &Expr, names: &mut Vec<String>) {
                 collect_expr(&arm.value, names);
             }
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => {
+            [condition, then, otherwise]
+                .into_iter()
+                .for_each(|part| collect_expr(part, names));
+        }
         ExprKind::Integer(_)
         | ExprKind::Float(_)
         | ExprKind::Bool(_)
