@@ -279,6 +279,7 @@ fn machine_diagnostics_registry_covers_emitted_literals() {
         include_str!("../../../src/eval/host_read.rs"),
         include_str!("../../../src/eval/host_read/tests.rs"),
         include_str!("../../../src/eval/floating.rs"),
+        include_str!("../../../src/invariance.rs"),
         include_str!("../../../src/main.rs"),
         include_str!("../../../crates/invar-python/src/tests.rs"),
         include_str!("../../../crates/invar-python/src/tests/bridge_faults.rs"),

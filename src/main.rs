@@ -10,6 +10,7 @@ mod fix_cli;
 mod gnet_device_command;
 mod metal_build;
 mod native_command;
+mod scheduled_command;
 mod source_device_command;
 mod spec_command;
 
@@ -115,7 +116,16 @@ fn run(args: Vec<OsString>) -> i32 {
         {
             return system_command(&args[2], SystemAction::Check);
         }
-        return execute(&args[2], args.len() == 5, None, None, None, None, None);
+        return execute(
+            &args[2],
+            args.len() == 5,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
     }
     if args.len() == 5 && args[1] == "explain" && args[3] == "--format" && args[4] == "json" {
         return explain(&args[2], None, None);
@@ -212,6 +222,7 @@ fn run(args: Vec<OsString>) -> i32 {
         let mut fuel = invar::eval::DEFAULT_FUEL;
         let mut fuel_seen = false;
         let mut workers = None;
+        let mut check_workers = None;
         let mut c_library = None;
         let mut artifact = None;
         let mut options = args[3..].chunks_exact(2);
@@ -235,6 +246,12 @@ fn run(args: Vec<OsString>) -> i32 {
                     return usage();
                 }
                 workers = Some(count);
+            } else if pair[0] == "--check-workers" && check_workers.is_none() {
+                let Some(counts) = pair[1].to_str().and_then(invar::invariance::parse_counts)
+                else {
+                    return usage();
+                };
+                check_workers = Some(counts);
             } else if pair[0] == "--format" && pair[1] == "json" && !json {
                 json = true;
             } else if pair[0] == "--c-library" && c_library.is_none() {
@@ -263,6 +280,11 @@ fn run(args: Vec<OsString>) -> i32 {
         let Some(engine) = engine else {
             return usage();
         };
+        // `--check-workers` replaces `--workers`: the run uses the largest listed count.
+        if check_workers.is_some() && workers.is_some() {
+            return usage();
+        }
+        let workers = workers.or_else(|| check_workers.as_ref().and_then(|c| c.last().copied()));
         if (engine == "cpu-parallel") != workers.is_some()
             || (artifact.is_some() && engine != "metal" && engine != "auto")
         {
@@ -276,6 +298,7 @@ fn run(args: Vec<OsString>) -> i32 {
             workers,
             c_library,
             artifact,
+            check_workers.as_deref(),
         );
     }
     usage()
@@ -775,6 +798,7 @@ fn report_front(error: FrontError, path: &OsString, json: bool) -> i32 {
     }
 }
 
+#[allow(clippy::too_many_arguments)] // CLI flags map one-to-one onto the run options.
 fn execute(
     path: &OsString,
     json: bool,
@@ -783,6 +807,7 @@ fn execute(
     workers: Option<usize>,
     c_library: Option<&OsString>,
     artifact: Option<&OsString>,
+    check_workers: Option<&[usize]>,
 ) -> i32 {
     if let Some(error) = unhonored_artifact(artifact) {
         return report_eval(error, path, json);
@@ -830,7 +855,7 @@ fn execute(
     if let Some(selected) = engine.and_then(invar::engine::Engine::parse)
         && !matches!(selected, invar::engine::Engine::Reference)
     {
-        return execute_scheduled(
+        return scheduled_command::execute(
             &source,
             &checked,
             path,
@@ -839,6 +864,7 @@ fn execute(
             selected,
             workers.unwrap_or(1),
             artifact,
+            check_workers,
         );
     }
     match invar::eval::run(&checked, fuel) {
@@ -867,56 +893,6 @@ fn execute(
             ),
         },
         Err(error) => report_eval(error, path, json),
-    }
-}
-
-#[allow(clippy::too_many_arguments)] // CLI flags map one-to-one onto the shared engine call.
-fn execute_scheduled(
-    source: &[u8],
-    checked: &invar::check::CheckedProgram,
-    path: &OsString,
-    json: bool,
-    fuel: u64,
-    engine: invar::engine::Engine,
-    workers: usize,
-    artifact: Option<&OsString>,
-) -> i32 {
-    let program = match invar::mir::lower(checked) {
-        Ok(program) => program,
-        Err(error) => return report_front(FrontError::tool(error.code, error.message), path, json),
-    };
-    let image = match invar::engine::metal_image(artifact.map(std::path::Path::new)) {
-        Ok(image) => image,
-        Err(error) => return auto_command::report(error, path, json, engine),
-    };
-    match invar::engine::run_mir(source, &program, engine, fuel, workers, image.as_ref()) {
-        Ok(receipt) => {
-            if json {
-                let mut diagnostics = Vec::new();
-                if let Some(reason) = receipt["fallback_reason"].as_str() {
-                    let mut note = invar::diagnostics::diagnostic(
-                        reason,
-                        "CPU execution used the serial fallback",
-                        &path.to_string_lossy(),
-                        source,
-                        None,
-                    );
-                    note["severity"] = serde_json::json!("note");
-                    diagnostics.push(note);
-                }
-                let mut document = serde_json::json!({
-                    "schema_version":3, "status":"ok", "diagnostics":diagnostics,
-                    "result":{"type":"i32", "value":receipt["result"]},
-                });
-                if let Some(route) = receipt.get("normal_form") {
-                    document["normal_form"] = route.clone();
-                }
-                return auto_command::receipt(document, path, engine);
-            }
-            println!("Result: {}", receipt["result"]);
-            0
-        }
-        Err(error) => auto_command::report(error, path, json, engine),
     }
 }
 

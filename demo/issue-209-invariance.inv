@@ -1,0 +1,24 @@
+// #209 demo: an admitted wrapping map and reduction over 100000 elements, and a
+// C1 f32 fold whose terms make the summation order visible (strict gives 12, the tree 14).
+fn keyed(ids: read Array<u32>) -> Array<u32> {
+    var keys: Array<u32> = filled_u32(len(ids), 0u32);
+    for k in 0u32 .. len(ids) { keys[k] = wrapping_mul(ids[k], 2654435761u32); }
+    return keys;
+}
+#[region(contract = "f32-tree-v2")]
+fn tree(xs: read Array<f32>) -> f32 {
+    var s: f32 = 0.0;
+    for i in 0u32 .. len(xs) { s = s + xs[i]; }
+    return s;
+}
+fn main() -> i32 {
+    var ids: Array<u32> = filled_u32(100000u32, 0u32);
+    for d in 0u32 .. len(ids) { ids[d] = d; }
+    let keys: Array<u32> = keyed(ids);
+    var h: u32 = 0u32;
+    for q in 0u32 .. len(keys) { h = wrapping_add(h, keys[q]); }
+    let xs: Array<f32> = [16777216.0, 1.0, 1.0, 3.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0];
+    let t: i32 = i32_from_f32(tree(xs) - 16777216.0);
+    if h % 2u32 == 0u32 { return t; }
+    return 0 - t;
+}
