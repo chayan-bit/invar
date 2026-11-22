@@ -24,6 +24,7 @@ Where one disagrees with the code, one of the two is wrong and the disagreement 
 | [v0.2 attributes, axes and receipts](spec/invar-v0.2-axes.md) | The attribute registry, the contract axes and their receipts; checked like the v0.1 file, with its own size budget |
 | [v0.2 nondeterminism axis N](spec/invar-v0.2-axis-n.md) | Section 7 of the axes chapter: levels N0 to N4, their oracles, fixtures and conformance holes |
 | [v0.2 region rules](spec/invar-v0.2-regions.md) | Section 8 onward of the axes chapter: the lowest C level of every plan rule and normal-form law, and the admission gate |
+| [v0.2 array extrema](spec/invar-v0.2-extrema.md) | Section 10 of the axes chapter: `min_of`, `max_of`, `argmin` and `argmax`, their tie, NaN and empty-input rules |
 | [Grammar](../spec/grammar.ebnf) | The complete syntax |
 | [Placement profile v1](../spec/placement-v1.md) | `--engine auto` placement receipts and calibration profiles |
 | [Explain JSON](explain.md) | The `invar-explain-v6` admission receipt and device execution reports |

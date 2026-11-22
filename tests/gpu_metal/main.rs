@@ -12,6 +12,7 @@ mod parallel;
 mod backend_archives;
 mod compiled_ahead;
 mod dispatch_and_kernels;
+mod extremum;
 mod f32_contraction;
 mod fold_tier;
 mod fsum;
