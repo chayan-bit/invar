@@ -1,0 +1,15 @@
+// #206: 2^20 ones hidden between +1e8 and -1e8; sum_exact and dot_exact
+// return the exact total however the terms are split across workers.
+fn main() -> i32 {
+    var a: Array<f32> = filled_f32(3145728u32, 0.0);
+    let b: Array<f32> = filled_f32(3145728u32, 2.0);
+    for k in 0u32..1048576u32 {
+        a[3u32 * k] = 100000000.0;
+        a[3u32 * k + 1u32] = 1.0;
+        a[3u32 * k + 2u32] = -100000000.0;
+    }
+    let s = sum_exact(a);
+    let d = dot_exact(a, b);
+    if s != 1048576.0 or d != 2097152.0 { return 1; }
+    return 0;
+}

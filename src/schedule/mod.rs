@@ -18,6 +18,7 @@ use crate::{
 pub mod cuda;
 #[cfg(any(feature = "cuda", all(feature = "metal", target_os = "macos")))]
 mod device;
+pub mod extrema;
 mod families;
 mod folds;
 mod lowering;
@@ -64,6 +65,8 @@ pub struct Run {
     pub executed: Vec<Executed>,
     /// Every reached float reduction, in execution order.
     pub reductions: Vec<reductions::Reduction>,
+    /// Reached `min_of`/`max_of`/`argmin`/`argmax` calls run on CPU workers (#207).
+    pub selections: Vec<extrema::Selection>,
 }
 
 /// A staged fused output, valid only while the consumer's input still equals
@@ -469,15 +472,16 @@ fn keep_published<T>(offered: Vec<T>, published: &[bool]) -> Vec<T> {
         .collect()
 }
 
-/// Whether any function calls a deterministic float reduction. The whole-program
-/// f32 CPU path has no reduction hook, so such programs keep the MIR path, which
-/// records a receipt for every reached call.
+/// Whether any function calls a deterministic float reduction or an extremum
+/// intrinsic (#207). The whole-program f32 CPU path has neither hook, so such
+/// programs keep the MIR path, which records a receipt for every reached call.
 fn has_reduction(program: &mir::Program) -> bool {
     program.functions.iter().any(|function| {
         function.blocks.iter().any(|block| {
             block.instructions.iter().any(|instruction| {
                 matches!(&instruction.kind, mir::Operation::Call { name, .. }
-                    if crate::fsum::Kind::from_name(name).is_some())
+                    if crate::fsum::Kind::from_name(name).is_some()
+                        || crate::extremum::Kind::from_name(name).is_some())
             })
         })
     })
@@ -533,6 +537,11 @@ pub fn run_source_with_hooks(
         receipts.push(receipt);
         Ok(Some(bits))
     };
+    let mut selections = Vec::new();
+    let mut select_fault = None;
+    let mut selector = |call: &mir_eval::SelectCall<'_>| {
+        extrema::select(call, workers, hooks, &mut selections, &mut select_fault)
+    };
     if regions.is_empty() {
         if hooks.fault == Fault::None
             && !has_reduction(program)
@@ -554,11 +563,18 @@ pub fn run_source_with_hooks(
                     fallback_reason: None,
                     executed: floating.executed,
                     reductions: Vec::new(),
+                    selections: Vec::new(),
                 });
             }
         }
-        let (observation, _) = mir_eval::observe_engine(program, fuel, None, Some(&mut reducer));
-        if let Some(error) = reduce_fault {
+        let (observation, _) = mir_eval::observe_selecting(
+            program,
+            fuel,
+            None,
+            Some(&mut reducer),
+            Some(&mut selector),
+        );
+        if let Some(error) = reduce_fault.or(select_fault) {
             return Err(error);
         }
         return Ok(Run {
@@ -567,9 +583,11 @@ pub fn run_source_with_hooks(
             workers_used: 0,
             chunks: Vec::new(),
             joined: 0,
-            fallback_reason: receipts.is_empty().then_some("NO_ADMITTED_CANDIDATE"),
+            fallback_reason: (receipts.is_empty() && selections.is_empty())
+                .then_some("NO_ADMITTED_CANDIDATE"),
             executed: Vec::new(),
             reductions: receipts,
+            selections,
         });
     }
     let mut executed = Vec::new();
@@ -619,9 +637,14 @@ pub fn run_source_with_hooks(
             }
         }
     };
-    let (observation, published) =
-        mir_eval::observe_engine(program, fuel, Some(&mut provider), Some(&mut reducer));
-    if let Some(error) = fault.or(reduce_fault) {
+    let (observation, published) = mir_eval::observe_selecting(
+        program,
+        fuel,
+        Some(&mut provider),
+        Some(&mut reducer),
+        Some(&mut selector),
+    );
+    if let Some(error) = fault.or(reduce_fault).or(select_fault) {
         return Err(error);
     }
     let executed = keep_published(executed, &published);
@@ -631,10 +654,11 @@ pub fn run_source_with_hooks(
         workers_used: joined,
         chunks: ranges,
         joined,
-        fallback_reason: (executed.is_empty() && receipts.is_empty())
+        fallback_reason: (executed.is_empty() && receipts.is_empty() && selections.is_empty())
             .then_some("UNREACHED_OR_GUARD_FALSE"),
         executed,
         reductions: receipts,
+        selections,
     })
 }
 

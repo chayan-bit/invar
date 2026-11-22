@@ -1,7 +1,7 @@
 //! v0.2 reductions on a live Metal device: kernel partials finished on the
 //! host equal the CPU engines bit for bit at every size class, every leaf
 //! chunk exponent and on adversarial inputs; the CLI records each placement.
-use invar_device::fsum::Op;
+use invar_device::fsum::{Launch, Op, ROW};
 use invar_metal::MetalDevice;
 use std::process::Command;
 
@@ -27,6 +27,19 @@ fn device_bits(device: &mut Device, op: Op, a: &[u32], b: &[u32], shift: u32) ->
         other => other.unwrap(),
     };
     Some(body::finish(op, a.len(), &result.rows, &result.nodes))
+}
+
+/// The exact partials of `groups` threadgroups, finished on the host; the
+/// exact kernel is integer-only, so its guard never fires.
+fn exact_bits(device: &mut Device, op: Op, a: &[u32], b: &[u32], groups: u32) -> u32 {
+    let launch = Launch::new(op, a.len(), 0)
+        .unwrap()
+        .with_exact_groups(groups)
+        .unwrap();
+    let second = op.is_dot().then_some(b);
+    let result = device.run_fsum_launch(launch, a, second).unwrap();
+    assert_eq!(result.rows.len(), groups as usize * ROW);
+    body::finish(op, a.len(), &result.rows, &result.nodes)
 }
 
 /// The guard discards the dispatches whose operands or exact result are subnormal:

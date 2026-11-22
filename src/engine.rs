@@ -543,13 +543,17 @@ fn annotate_sort_implementations(
 
 /// One reached float reduction as an explain device choice.
 fn reduction_choice(receipt: &crate::schedule::reductions::Reduction) -> serde_json::Value {
-    serde_json::json!({
+    let mut choice = serde_json::json!({
         "function": receipt.function,
         "span": {"start": receipt.span.start, "end": receipt.span.end},
         // `kind` carries the calibration family id; the device schema is closed.
         "backend": receipt.backend, "kind": receipt.family, "reason": receipt.reason,
         "cost_ms": receipt.cost.map(|cost| serde_json::json!({"cpu": cost.cpu_ms, "device": cost.device_ms})),
-    })
+    });
+    if let Some(law) = receipt.law {
+        choice["law"] = serde_json::json!(law);
+    }
+    choice
 }
 
 /// Project a receipt onto the frozen AI-01 device-explain schema.

@@ -210,6 +210,7 @@ say "gpu after: util $g_util%, free $g_free MiB"
 ran=$(sed -nE 's/^test (\S+) \.\.\. (ok|FAILED)$/\1/p' "$log")
 [ -z "$ran" ] && { say 'NO TESTS RAN: check the filters against this ref'; exit 1; }
 for f in "${filters[@]}"; do
+    case $f in -*) continue ;; esac # a libtest flag, not a name filter
     grep -qF -- "$f" <<<"$ran" || { say "FILTER MATCHED NO TEST: $f"; exit 1; }
 done
 if [ "$failed_lane" = 1 ] || [ "$failed" -gt 0 ] || [ "$rows" -lt "${#suites[@]}" ]; then
