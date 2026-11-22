@@ -299,7 +299,7 @@ fn place_expr(expr: Expr, site: &Element) -> Result<Expr, FrontError> {
                         return Err(rebound(arm.span));
                     }
                     Ok(MatchArm {
-                        guard: arm.guard.map(|guard| go(guard)).transpose()?,
+                        guard: arm.guard.map(&go).transpose()?,
                         value: go(arm.value)?,
                         ..arm
                     })
