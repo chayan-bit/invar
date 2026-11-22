@@ -1,8 +1,8 @@
 # Invar v0.1 language specification
 
 Status: DRAFT; open v0.1 work is tracked in GitHub issues, and v0.2 features already on `main` appear only in Appendix B.
-Counts: statements=325 citations=365
-Size record: tokens=31509 estimator=bytes/3 limit=60000
+Counts: statements=325 citations=367
+Size record: tokens=31588 estimator=bytes/3 limit=60000
 ## 1. Conventions and scope
 
 ### 1.1 Normative statements, notes and citations
@@ -1376,7 +1376,7 @@ fn main() -> i32 {
 ```
 
 [NB.7.14] A match arm may carry a guard, `pattern if g => value`: arms are tried in source order, and the guard of an arm whose case matches runs once every earlier arm has failed, with the payload bound, charging its own steps and trapping at its own operator, and a false guard falls through to the next arm (#260). `src/eval/matching.rs` `tests/language/match_guards.rs::each_evaluated_guard_costs_its_own_steps_and_an_unreached_one_none` `tests/language/match_guards.rs::a_trapping_guard_traps_at_its_operator_with_the_reference_fuel_prefix`
-[NB.7.15] A guarded arm never covers its case, so every case still needs an unguarded arm; an arm after its case's unguarded arm is `NAME_DUPLICATE`, a guard must be `Bool`, and an arm with an owned payload takes no guard (`UNSUPPORTED_FEATURE`). `src/check/matching.rs` `tests/language/match_guards.rs::guarded_arms_never_cover_their_case_and_refusals_have_exact_codes`
+[NB.7.15] A guarded arm never covers its case, so every case still needs an unguarded arm; an arm after its case's unguarded arm is `NAME_DUPLICATE`, a guard must be `Bool`, and an arm with an owned payload takes no guard (`UNSUPPORTED_FEATURE`); a false guard continues at the next arm of its own case, so a move in a guard reaches only its arm and that case's later arms. `src/check/matching.rs` `src/ownership.rs` `tests/language/match_guards.rs::guarded_arms_never_cover_their_case_and_refusals_have_exact_codes` `tests/language/match_guards.rs::a_guard_that_moves_an_owner_moves_it_only_on_its_own_case`
 [NB.7.16] The reference, MIR, net oracle, native and cpu-parallel engines agree on a guarded match's value, trap, fuel prefix and cleanup, because a guard lowers to a MIR branch between its arm's binding and its value. `src/mir/builder.rs` `tests/language/match_guards.rs::guards_pick_the_first_passing_arm_identically_on_every_engine`
 
 ```invar outcome=value:9

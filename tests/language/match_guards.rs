@@ -130,6 +130,30 @@ fn main() -> i32 {
 }";
 
 #[test]
+fn a_guard_that_moves_an_owner_moves_it_only_on_its_own_case() {
+    let program = |later_a: &str| {
+        format!(
+            "{PICK}fn big(a: take Array<u32>) -> Bool {{ return len(a) > 1u32; }}
+fn first(a: take Array<u32>) -> i32 {{ return 3; }}
+fn main() -> i32 {{
+    let xs: Array<u32> = [1u32, 2u32];
+    let p: Pick = Pick::B(4u32);
+    return match p {{
+        Pick::A(a) if big(move xs) => 1,
+        Pick::A(b) => {later_a},
+        Pick::B(c) => first(move xs),
+    }};
+}}"
+        )
+    };
+    // Case B never runs case A's guard, so it may still move `xs`.
+    agree(&program("2"), Ok(3), true);
+    // A later arm of case A runs after that guard, so `xs` is gone there.
+    let source = program("first(move xs)");
+    assert_eq!(first_code(&source), "OWN_USE_AFTER_MOVE");
+}
+
+#[test]
 fn guarded_arms_never_cover_their_case_and_refusals_have_exact_codes() {
     for (arms, code, at) in [
         (
