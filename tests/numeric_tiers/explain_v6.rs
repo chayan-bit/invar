@@ -5,7 +5,7 @@
 use super::region_axes::{cli, program, scratch};
 use serde_json::{Value, json};
 
-const AXIS_FIELDS: [&str; 9] = [
+const AXIS_FIELDS: [&str; 11] = [
     "c_level",
     "s_level",
     "n_level",
@@ -15,6 +15,8 @@ const AXIS_FIELDS: [&str; 9] = [
     "deterministic",
     "n_justification",
     "s_artifact",
+    "rule_levels",
+    "c_refused",
 ];
 
 fn schema(name: &str) -> jsonschema::Validator {
@@ -147,7 +149,8 @@ fn every_honoured_level_has_its_receipt() {
             .collect();
         let expected = json!({"c_level": c, "s_level": s, "n_level": n, "t_level": t,
             "contract_name": contract, "bound": bound, "deterministic": true,
-            "n_justification": justification, "s_artifact": null});
+            "n_justification": justification, "s_artifact": null,
+            "rule_levels": ["c0"], "c_refused": null});
         assert_eq!(fields, expected, "{attribute}");
         let levels = &document["numeric_contracts"]["levels"];
         if attribute.is_empty() {
