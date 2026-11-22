@@ -23,6 +23,8 @@ const LIVE_IN: &str = "fn main() -> i32 { let p: (u32, u32) = (3u32, 4u32); let 
 /// A swap store: its second component reads `p.0` after the first is stored, so
 /// it has no tree form and the function keeps the old serial frame.
 const SWAP: &str = "fn main() -> i32 { var p: (u32, u32) = (3u32, 4u32); p = (p.1, p.0); let xs: Array<u32> = filled_u32(64u32, 7u32); var acc: u32 = 0u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } if acc == 448u32 and p.0 == 4u32 and p.1 == 3u32 { return 1; } return 0; }";
+/// A loop whose only pair read is its bound: it reads the pair, so it stays serial.
+const HEADER: &str = "fn main() -> i32 { let p: (u32, u32) = (3u32, 4096u32); let xs: Array<u32> = filled_u32(4096u32, 7u32); var acc: u32 = 0u32; for i in 0u32 .. p.1 { acc = wrapping_add(acc, xs[i]); } if acc == 28672u32 { return 1; } return 0; }";
 /// A pair crossing a call boundary still has no tree form; values still agree.
 const BOUNDARY: &str = "fn swap(p: (u32, u32)) -> (u32, u32) { return (p.1, p.0); } fn main() -> i32 { let p: (u32, u32) = swap((3u32, 4u32)); let xs: Array<u32> = filled_u32(64u32, 7u32); var acc: u32 = 0u32; for i in 0u32 .. len(xs) { acc = wrapping_add(acc, xs[i]); } if acc == 448u32 and p.0 == 4u32 { return 1; } return 0; }";
 
@@ -100,12 +102,15 @@ fn issue_362_a_pair_in_a_sibling_loop_demotes_only_that_loop() {
 #[test]
 fn issue_362_pair_live_ins_and_boundaries_agree_on_every_engine() {
     agree(LIVE_IN);
+    agree(HEADER);
     agree(BOUNDARY);
     agree(SWAP);
     // A pair parameter or result, or a swap store, keeps the function without a
     // tree form, as before.
     assert_eq!(receipt(BOUNDARY)[0].0, "rejected");
     assert_eq!(receipt(SWAP)[0].0, "rejected");
+    assert_eq!(receipt(HEADER)[0].0, "rejected");
+    assert_eq!(receipt(LIVE_IN)[0].0, "rejected");
 }
 
 /// The serial reason of every loop of `main` in the general-net normal form, or
@@ -129,6 +134,7 @@ fn normal_form_loops(source: &str) -> Vec<Option<String>> {
 fn issue_362_a_loop_touching_a_pair_component_has_no_normal_form_law() {
     let pair = Some("pair component in the loop".to_owned());
     assert_eq!(normal_form_loops(SIBLING), [None, pair.clone()]);
-    assert_eq!(normal_form_loops(LIVE_IN), [pair]);
+    assert_eq!(normal_form_loops(LIVE_IN), std::slice::from_ref(&pair));
+    assert_eq!(normal_form_loops(HEADER), [pair]);
     assert_eq!(normal_form_loops(BEFORE), [None]);
 }

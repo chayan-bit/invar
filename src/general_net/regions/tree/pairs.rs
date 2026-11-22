@@ -12,9 +12,9 @@ pub(super) fn component(name: &str, index: usize) -> String {
     format!("{name}.{index}")
 }
 
-/// Whether the loop whose head is `head` reads or writes a pair component. Such a
-/// loop has no admitted candidate and stays serial (NB.7.13); the components exist
-/// only so that the function's other loops keep their form.
+/// Whether the loop whose head is `head` reads or writes a pair component in its
+/// header or body. Such a loop has no admitted candidate and stays serial (NB.7.13);
+/// the components exist only so that the function's other loops keep their form.
 pub fn in_loop(body: &[Stmt], head: Option<BlockId>) -> bool {
     let is_component = |name: &String| name.contains('.');
     let mut found = false;
@@ -22,6 +22,12 @@ pub fn in_loop(body: &[Stmt], head: Option<BlockId>) -> bool {
         if Some(inner.head) != head {
             return;
         }
+        let mut names = Vec::new();
+        match &inner.kind {
+            LoopKind::For { lo, hi, .. } => [lo, hi].iter().for_each(|e| e.names(&mut names)),
+            LoopKind::While { cond } => cond.names(&mut names),
+        }
+        found |= names.iter().any(is_component);
         walk(&inner.body, &mut Vec::new(), 0, &mut |stmt, _, _| {
             let mut names = Vec::new();
             stmt_exprs(stmt)
