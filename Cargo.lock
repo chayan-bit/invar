@@ -420,6 +420,7 @@ dependencies = [
 name = "invar-device"
 version = "0.1.0"
 dependencies = [
+ "invar-math",
  "serde",
  "serde_json",
 ]

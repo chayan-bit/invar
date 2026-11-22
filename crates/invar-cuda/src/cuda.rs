@@ -159,10 +159,9 @@ fn compile_cubin_with_cap(
             .map_err(|e| Error::Compile(e.to_string()))?,
     );
     let architecture = format!("--gpu-architecture=sm_{sm}");
-    let mut options = vec![architecture.as_str(), "--std=c++17"];
-    if strict {
-        options.extend(GNET_STRICT_NVRTC_OPTIONS);
-    }
+    let mut options = vec![architecture.as_str()];
+    options.extend(invar_device::nvrtc_language_options(source, strict));
+    options.extend(GNET_STRICT_NVRTC_OPTIONS.into_iter().filter(|_| strict));
     if let Err(error) =
         // SAFETY: `program` owns a live NVRTC handle, and these options contain
         // no interior NUL. NvrtcProgram keeps the source alive until drop.

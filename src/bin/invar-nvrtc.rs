@@ -49,10 +49,11 @@ fn main() {
     let mut input = Vec::new();
     let read = std::io::stdin()
         .take(
-            (if mode.as_deref() == Some("--gnet-v5") {
-                invar_device::MAX_GNET_SOURCE_BYTES + 1
-            } else {
-                invar_device::MAX_SOURCE_BYTES + 1
+            (match mode.as_deref() {
+                Some("--gnet-v5") => invar_device::MAX_GNET_SOURCE_BYTES + 1,
+                // compile_floating_cubin applies the cap the source's options allow.
+                Some("strict-f32-v1") => invar_device::f32_ops::MAX_CR_V1_SOURCE_BYTES + 1,
+                _ => invar_device::MAX_SOURCE_BYTES + 1,
             }) as u64,
         )
         .read_to_end(&mut input);

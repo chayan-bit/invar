@@ -53,19 +53,33 @@ fn source_policy(source: &str) -> Option<&'static str> {
         })
 }
 
-fn strict_options(source: &str, caps: Capabilities) -> Result<Vec<String>, Error> {
-    if source.len() > invar_device::MAX_SOURCE_BYTES || source.contains('\0') {
+/// The pinned options a strict source declares. Only a strict f32 source
+/// (`cr_v1`) may declare the CORE-MATH options, under their larger source cap.
+fn strict_options(source: &str, caps: Capabilities, cr_v1: bool) -> Result<Vec<String>, Error> {
+    let declares = |options: &[String]| {
+        source
+            .lines()
+            .any(|line| line == format!("// required-options: {}", options.join(" ")))
+    };
+    let library = ir::cuda_cr_v1_options(caps).filter(|options| cr_v1 && declares(options));
+    let cap = if library.is_some() {
+        invar_device::f32_ops::MAX_CR_V1_SOURCE_BYTES
+    } else {
+        invar_device::MAX_SOURCE_BYTES
+    };
+    if source.len() > cap || source.contains('\0') {
         return Err(Error::Limit);
     }
-    let options = ir::cuda_strict_options(caps).ok_or(Error::Unavailable)?;
+    let options = match library {
+        Some(options) => options,
+        None => ir::cuda_strict_options(caps).ok_or(Error::Unavailable)?,
+    };
     if source_policy(source).is_none()
         || !source
             .lines()
             .nth(1)
             .is_some_and(|line| line.ends_with(&format!("caps={caps:?}")))
-        || !source
-            .lines()
-            .any(|line| line == format!("// required-options: {}", options.join(" ")))
+        || !declares(&options)
     {
         return Err(Error::Compile(
             "floating source/capability/options identity mismatch".into(),
@@ -173,7 +187,7 @@ fn probe_options(source: &str, caps: Capabilities) -> Result<Vec<String>, Error>
 /// NVRTC version must exactly match caps. CUBIN requires sm_N instead of the
 /// plan's virtual compute_N target; numeric options are unchanged and ordered.
 pub fn compile_floating_cubin(source: &str, caps: Capabilities) -> Result<CompiledCubin, Error> {
-    let options = strict_options(source, caps)?;
+    let options = strict_options(source, caps, true)?;
     if source_policy(source) != Some(ir::NUMERIC_POLICY) {
         return Err(Error::Compile(
             "floating helper mode/policy mismatch".into(),
@@ -185,7 +199,7 @@ pub fn compile_floating_cubin(source: &str, caps: Capabilities) -> Result<Compil
 /// `tc-f16-f32-v1` helper entry: the same pinned options and NVRTC identity,
 /// for a source whose header declares the explicit Tensor Core contract.
 pub fn compile_tc_cubin(source: &str, caps: Capabilities) -> Result<CompiledCubin, Error> {
-    let options = strict_options(source, caps)?;
+    let options = strict_options(source, caps, false)?;
     if source_policy(source) != Some(ir::TC_POLICY) {
         return Err(Error::Compile("tc helper mode/policy mismatch".into()));
     }
@@ -302,7 +316,7 @@ fn compile_bounded(
     caps: Capabilities,
     timeout: Duration,
 ) -> Result<CompiledCubin, Error> {
-    strict_options(source, caps)?;
+    strict_options(source, caps, true)?;
     let mode = source_policy(source).ok_or(Error::Limit)?;
     compile_child(source, compiler, caps, timeout, mode)
 }
@@ -599,7 +613,7 @@ impl CudaDevice {
                 limit: free,
             });
         }
-        if strict_options(source, self.caps)? != plan.nvrtc_options()
+        if strict_options(source, self.caps, false)? != plan.nvrtc_options()
             || source_policy(source) != Some(plan.ir().numeric_policy.as_str())
         {
             return Err(Error::Limit);

@@ -78,6 +78,8 @@ pub(super) fn validate(program: &mir::Program, entry: &str, target: Target) -> R
                                     | "f32_from_i32"
                                     | "f32_from_u32"
                                     | "sqrt"
+                                    | "sin"
+                                    | "cos"
                             ) =>
                     {
                         return Err(Error::UnsupportedType);

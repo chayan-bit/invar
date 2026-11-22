@@ -20,6 +20,8 @@ fn evaluate(p: &Program, inputs: &[u32], index: usize) -> Result<u32, Error> {
             Node::FromI32(a) => F32Bits::from_i32(w(a)? as i32).to_bits(),
             Node::TruncI32(a) => f(a)?.trunc_i32().map_err(|_| Error::IntegerOverflow)? as u32,
             Node::Sqrt(a) => f(a)?.sqrt().to_bits(),
+            Node::Sin(a) => crate::math::eval_f32(crate::math::MathFn::Sin, &[f(a)?]).to_bits(),
+            Node::Cos(a) => crate::math::eval_f32(crate::math::MathFn::Cos, &[f(a)?]).to_bits(),
             Node::Compare(op, a, b) => u32::from(f(a)?.compare(
                 match op {
                     Compare::Eq => Comparison::Eq,

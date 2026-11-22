@@ -492,28 +492,19 @@ fn annotate_native_document(document: &mut serde_json::Value, path: &str, source
 }
 
 /// Functions a device request keeps on the CPU (`mir-serial`), never
-/// emulated: on Metal each function computing f64 (`metal-no-f64`), and on
-/// CUDA and Metal each function calling f32 `sin` or `cos`
-/// (`math-cr-v1-device-unavailable`).
+/// emulated: on Metal each function computing f64 (`metal-no-f64`). CUDA
+/// keeps none: f32 `sin` and `cos` lower on both devices (#163).
 pub fn cpu_kept_choices(program: &crate::mir::Program, metal: bool) -> Vec<serde_json::Value> {
-    let f64_sites = if metal {
-        crate::math::f64_sites(program)
-    } else {
-        Vec::new()
-    };
-    f64_sites
+    if !metal {
+        return Vec::new();
+    }
+    crate::math::f64_sites(program)
         .into_iter()
-        .map(|site| (site, crate::math::METAL_NO_F64))
-        .chain(
-            crate::math::cr_v1_device_sites(program)
-                .into_iter()
-                .map(|site| (site, crate::math::MATH_CR_V1_DEVICE_UNAVAILABLE)),
-        )
-        .map(|((function, span), reason)| {
+        .map(|(function, span)| {
             serde_json::json!({
                 "function": function,
                 "span": {"start": span.start, "end": span.end},
-                "backend": "mir-serial", "reason": reason,
+                "backend": "mir-serial", "reason": crate::math::METAL_NO_F64,
             })
         })
         .collect()

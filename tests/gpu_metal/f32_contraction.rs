@@ -614,3 +614,51 @@ mod hardware {
         assert_eq!(device.quarantine_len(), 0);
     }
 }
+
+/// #163: f32 `sin` and `cos` (`invar-math-cr-v1`) in strict f32 regions equal
+/// the CPU words on CORE-MATH's hard cases, near k*pi/2, specials, subnormals
+/// and a stride through all 2^32 words. The integer-implemented library reads
+/// no float operation, so `sin` and `cos` maps never fall back; a multiply or
+/// fold after them keeps its guard and runs on arguments with normal results.
+#[test]
+#[ignore = "requires a real Metal GPU"]
+fn metal_gpu_v2_cr_v1_sin_and_cos_match_the_cpu_words() {
+    let mut device = source_device();
+    let caps = device.capabilities();
+    let n = invar_device::f32_ops::MAX_LENGTH;
+    let words = ops::cr_v1_words(n as usize);
+    // Exponents 100..=150: every sin, cos and product of them is normal.
+    let normal: Vec<u32> = words
+        .iter()
+        .copied()
+        .filter(|w| (100..=150).contains(&((w >> 23) & 0xff)))
+        .take(1 << 16)
+        .collect();
+    let fold = normal.len() as u32;
+    let programs = ops::cr_v1_programs(n).into_iter().take(2);
+    let guarded = ops::cr_v1_programs(fold).into_iter().skip(2);
+    for p in programs.chain(guarded) {
+        let input = if p.length == n {
+            &words[..]
+        } else {
+            &normal[..]
+        };
+        let plan = ops::plan(p.clone(), caps);
+        let expected = invar::f32_source::cpu(&plan, input, 1).unwrap();
+        let actual = device
+            .run_f32_ops(&plan, input)
+            .unwrap_or_else(|error| panic!("{error:?}: {:?}", p.nodes));
+        ops::same(&actual, &expected, true);
+    }
+    let source = "fn kernel(a:f32)->f32{return sin(a) + cos(a);} fn main()->i32{return 7;}";
+    let plan = invar::f32_source::Region::from_checked(&ops::checked(source), "kernel")
+        .unwrap()
+        .bind(1, caps)
+        .unwrap();
+    for &word in &normal[..256] {
+        let expected = invar::f32_source::cpu(&plan, &[word], 1).unwrap();
+        let actual = device.run_f32_ops(&plan, &[word]).unwrap();
+        ops::same(&actual, &expected, true);
+    }
+    eprintln!("#163 Metal cr-v1 sin/cos: {n} words per map, {fold} guarded terms");
+}

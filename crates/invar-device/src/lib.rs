@@ -19,6 +19,19 @@ pub fn hex(bytes: &[u8]) -> String {
 pub const MAX_GNET_STORAGE_BYTES: usize = 8 * 1024 * 1024 * 1024;
 /// Generated GNET source only; ordinary device source keeps its smaller cap.
 pub const MAX_GNET_SOURCE_BYTES: usize = 4 * 1024 * 1024;
+/// The line a GNET source carries when it holds the integer `invar-math-cr-v1`
+/// library (`sin`, `cos`): CUDA compiles it as C++20 with `-default-device`.
+pub const GNET_CR_V1_MARKER: &str = "// invar-math-cr-v1 integer library";
+/// NVRTC language options of a CUDA source: C++17, or for a GNET source that
+/// carries the integer cr-v1 library (#163), C++20 with `-default-device`
+/// (the library declares no execution spaces).
+pub fn nvrtc_language_options(source: &str, gnet: bool) -> &'static [&'static str] {
+    if gnet && source.lines().any(|line| line == GNET_CR_V1_MARKER) {
+        &["--std=c++20", "-default-device"]
+    } else {
+        &["--std=c++17"]
+    }
+}
 pub const MAX_ELEMENTS: u32 = 1_000_000;
 pub const MAX_OPS: usize = 16;
 pub const MAX_SOURCE_BYTES: usize = 16 * 1024;
@@ -649,3 +662,21 @@ pub fn check_memory(
 
 /// Shared bounded integer binary32 primitives for emitted CPU/CUDA/Metal text.
 pub const EXACT_F32: &str = include_str!("f32-exact.inc");
+
+#[cfg(test)]
+mod language_options_tests {
+    #[test]
+    fn only_a_gnet_source_with_the_cr_v1_library_compiles_as_cpp20() {
+        let library = format!("x\n{}\ny", super::GNET_CR_V1_MARKER);
+        let cpp20: &[&str] = &["--std=c++20", "-default-device"];
+        assert_eq!(super::nvrtc_language_options(&library, true), cpp20);
+        assert_eq!(
+            super::nvrtc_language_options(&library, false),
+            ["--std=c++17"]
+        );
+        assert_eq!(
+            super::nvrtc_language_options("x // invar-math-cr-v1 integer library", true),
+            ["--std=c++17"]
+        );
+    }
+}

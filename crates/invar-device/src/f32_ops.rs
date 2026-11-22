@@ -44,6 +44,10 @@ pub enum Node {
     TruncI32(usize),
     /// Correctly rounded `sqrt` (`invar-math-cr-v1`), see [`sqrt_helper`].
     Sqrt(usize),
+    /// CORE-MATH `sinf` (`invar-math-cr-v1`), see [`cr_v1_helpers`].
+    Sin(usize),
+    /// CORE-MATH `cosf` (`invar-math-cr-v1`), see [`cr_v1_helpers`].
+    Cos(usize),
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Kind {
@@ -94,7 +98,7 @@ impl Program {
             let ty = match *node {
                 Node::Input(slot) => *self.inputs.get(slot).ok_or(v2::Error::Bounds)?,
                 Node::Constant(_, ty) => ty,
-                Node::Neg(a) | Node::Sqrt(a) => {
+                Node::Neg(a) | Node::Sqrt(a) | Node::Sin(a) | Node::Cos(a) => {
                     float(a)?;
                     Scalar::F32
                 }
@@ -292,9 +296,72 @@ pub fn word_helpers(cuda: bool) -> String {
     )
 }
 
+/// Ceiling on an f32 source that carries the vendored CORE-MATH text: the
+/// generated part keeps [`crate::MAX_SOURCE_BYTES`]; the library text is fixed.
+pub const MAX_CR_V1_SOURCE_BYTES: usize = 64 * 1024;
+
+/// The `invar-math-cr-v1` library functions `p` calls, once each in node order.
+pub fn cr_v1_functions(p: &Program) -> Vec<invar_math::Function> {
+    let mut functions = Vec::new();
+    for node in &p.nodes {
+        let f = match node {
+            Node::Sin(_) => invar_math::Function::Sin,
+            Node::Cos(_) => invar_math::Function::Cos,
+            _ => continue,
+        };
+        if !functions.contains(&f) {
+            functions.push(f);
+        }
+    }
+    functions
+}
+
+/// NVRTC options of `p` on `caps`: the strict options, or for a program that
+/// calls the CORE-MATH library [`floating::cuda_cr_v1_options`].
+pub fn cuda_options(p: &Program, caps: Capabilities) -> Option<Vec<String>> {
+    if cr_v1_functions(p).is_empty() {
+        floating::cuda_strict_options(caps)
+    } else {
+        floating::cuda_cr_v1_options(caps)
+    }
+}
+
+/// The vendored CORE-MATH text of `functions` and one word helper each,
+/// `invar_cr_<name>(x)`: the binary32 word of the correctly rounded result,
+/// with a NaN result as the canonical quiet NaN (as `invar::math::eval_f32`).
+/// CUDA compiles upstream's C with IEEE double under the strict options;
+/// Metal uses the integer-implemented `D` and `F` of `invar_math`'s MSL
+/// prelude, whose `#define double D` and `#define float F` end with the
+/// library. Neither reads a device float operation's subnormal behaviour,
+/// so no dispatch guard applies. Returns (text, library bytes).
+pub fn cr_v1_helpers(functions: &[invar_math::Function], cuda: bool) -> (String, usize) {
+    if functions.is_empty() {
+        return (String::new(), 0);
+    }
+    let mut s = if cuda {
+        invar_math::cuda_source(&functions.iter().map(|&f| (f, false)).collect::<Vec<_>>())
+    } else {
+        invar_math::msl_source(functions) + "#undef double\n#undef float\n"
+    };
+    let library = s.len();
+    for &f in functions {
+        let name = f.name();
+        if cuda {
+            let symbol = invar_math::cuda_symbol(f, false);
+            writeln!(s, "__device__ static inline unsigned invar_cr_{name}(unsigned x) {{ float r = {symbol}(__uint_as_float(x)); return r != r ? 0x7fc00000u : __float_as_uint(r); }}")
+        } else {
+            let symbol = invar_math::msl_symbol(f);
+            writeln!(s, "static inline uint invar_cr_{name}(uint x) {{ F r = {symbol}(F::raw(x)); return invar_f_isnan(r.u) ? 0x7fc00000u : r.u; }}")
+        }
+        .expect("String write");
+    }
+    (s, library)
+}
+
 pub fn emit(plan: &v2::Verified) -> Result<String, v2::Error> {
     let p = program(plan)?;
     let cuda = matches!(plan.capabilities(), Capabilities::Cuda { .. });
+    let (library, library_bytes) = cr_v1_helpers(&cr_v1_functions(p), cuda);
     let u = if cuda { "unsigned" } else { "uint" };
     let bits = |x: &str| {
         if cuda {
@@ -317,10 +384,11 @@ pub fn emit(plan: &v2::Verified) -> Result<String, v2::Error> {
         p
     );
     if cuda {
-        let opts =
-            floating::cuda_strict_options(plan.capabilities()).ok_or(v2::Error::Capability)?;
+        let opts = cuda_options(p, plan.capabilities()).ok_or(v2::Error::Capability)?;
         writeln!(s, "// required-options: {}", opts.join(" ")).map_err(|_| v2::Error::Bounds)?;
+        s.push_str(&library);
     } else {
+        s.push_str(&library);
         s.push_str(
             "#include <metal_stdlib>\n#pragma METAL fp contract(off)\nusing namespace metal;\n",
         );
@@ -421,6 +489,9 @@ pub fn emit(plan: &v2::Verified) -> Result<String, v2::Error> {
             // No dispatch guard: the helper never reads a subnormal float (see
             // `sqrt_helper`). Later nodes still guard their own operands.
             Node::Sqrt(a) => format!("invar_sqrt_f32(v{a})"),
+            // No dispatch guard either: see `cr_v1_helpers`.
+            Node::Sin(a) => format!("invar_cr_sin(v{a})"),
+            Node::Cos(a) => format!("invar_cr_cos(v{a})"),
             Node::FromU32(a) => bits(&if cuda {
                 format!("__uint2float_rn(v{a})")
             } else {
@@ -485,7 +556,7 @@ pub fn emit(plan: &v2::Verified) -> Result<String, v2::Error> {
         .map_err(|_| v2::Error::Bounds)?;
     }
     s.push_str("}\n");
-    if s.len() > crate::MAX_SOURCE_BYTES {
+    if s.len() - library_bytes > crate::MAX_SOURCE_BYTES || s.len() > MAX_CR_V1_SOURCE_BYTES {
         return Err(v2::Error::Bounds);
     }
     Ok(s)

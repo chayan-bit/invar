@@ -119,6 +119,87 @@ pub fn sources() -> Vec<String> {
     }
     cases
 }
+/// The binary32 arguments CORE-MATH's own `sinf`/`cosf` treat as exceptional
+/// (their `st[]` hard-case tables), parsed from the vendored text.
+pub fn cr_v1_hard_cases() -> Vec<u32> {
+    let mut words = Vec::new();
+    for f in [invar_math::Function::Sin, invar_math::Function::Cos] {
+        let text = invar_math::source(f, false).0;
+        for entry in text.split("{{0x1.").skip(1) {
+            let literal = entry.split('}').next().unwrap();
+            let Some((digits, exponent)) = literal.split_once('p') else {
+                continue;
+            };
+            if digits.len() > 6 {
+                continue; // a binary64 constant, not a binary32 argument
+            }
+            let fraction = u32::from_str_radix(digits, 16).unwrap() << (24 - 4 * digits.len());
+            assert_eq!(fraction & 1, 0, "{literal} is not a binary32 value");
+            let biased = u32::try_from(exponent.parse::<i32>().unwrap() + 127).unwrap();
+            words.push(biased << 23 | fraction >> 1);
+        }
+    }
+    assert!(words.len() >= 9, "hard-case tables: {words:x?}");
+    words
+}
+
+/// `sin`/`cos` arguments: the hard cases and the words within two ulps of
+/// k*pi/2 (k < 4096) with both signs, specials, subnormals, the largest
+/// finite words, then a stride through all 2^32 words up to `n` in total.
+pub fn cr_v1_words(n: usize) -> Vec<u32> {
+    let mut words = cr_v1_hard_cases();
+    for k in 1..4096u32 {
+        let near = (f64::from(k) * std::f64::consts::FRAC_PI_2) as f32;
+        for delta in -2i32..=2 {
+            words.push(near.to_bits().wrapping_add_signed(delta));
+        }
+    }
+    words.extend(WORDS);
+    words.extend([
+        0x0000_0002,
+        0x0040_0000,
+        0x3400_0000,
+        0x7f7f_fffe,
+        0x4f80_0000,
+        0x5f00_0000,
+    ]);
+    let signed: Vec<u32> = words.iter().map(|w| w ^ 0x8000_0000).collect();
+    words.extend(signed);
+    let stride = (u64::from(u32::MAX) / (n - words.len()) as u64) | 1;
+    let mut word = 0x1234_5677u64;
+    while words.len() < n {
+        words.push(word as u32);
+        word = (word + stride) & 0xffff_ffff;
+    }
+    words
+}
+
+/// One-input maps calling `sin` and `cos`, both in one kernel next to a
+/// guarded multiply, and a source-order fold of `sin`.
+pub fn cr_v1_programs(length: u32) -> Vec<Program> {
+    let map = |nodes| Program {
+        length,
+        inputs: vec![Scalar::F32],
+        nodes,
+        kind: Kind::Map,
+    };
+    vec![
+        map(vec![Node::Input(0), Node::Sin(0)]),
+        map(vec![Node::Input(0), Node::Cos(0)]),
+        map(vec![
+            Node::Input(0),
+            Node::Sin(0),
+            Node::Cos(0),
+            Node::Mul(1, 2),
+        ]),
+        Program {
+            length,
+            inputs: vec![Scalar::F32],
+            nodes: vec![Node::Input(0), Node::Sin(0)],
+            kind: Kind::Reduce { initial: 0 },
+        },
+    ]
+}
 pub fn scalar_sources() -> Vec<String> {
     let mut sources=vec!["fn kernel(a:Quantity<f32,m>,b:Quantity<f32,m>)->Quantity<f32,m>{return a+b;} fn main()->i32{return 7;}".into()];
     for op in ["==", "!=", "<", "<=", ">", ">="] {

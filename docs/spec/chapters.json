@@ -90,8 +90,8 @@
         "ownership"
       ],
       "tokens": {
-        "bpe": 1565,
-        "bytes3": 1726
+        "bpe": 1541,
+        "bytes3": 1690
       },
       "topics": [
         "closures",
