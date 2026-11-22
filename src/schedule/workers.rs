@@ -307,6 +307,9 @@ pub(crate) fn parallel_chunks_with_limit<T: Send>(
     }
 }
 
+/// Reductions, pair reductions and scans follow the live element policy (#368).
+const LIVE: usize = crate::array_limits::MAX_LIVE_ELEMENTS;
+
 pub(super) fn reduction_output(
     law: Law,
     input: &[u32],
@@ -317,19 +320,20 @@ pub(super) fn reduction_output(
     // available; chunks and their combine order are the same either way.
     #[cfg(feature = "native")]
     let kernel = crate::native::region::reduce_kernel(law, input.len());
-    let (parts, ranges, joined) = parallel_chunks(input.len(), workers, hooks, |range| {
-        #[cfg(feature = "native")]
-        if let Some(part) = kernel
-            .as_ref()
-            .and_then(|kernel| kernel.reduce(&input[range.clone()]))
-        {
-            return Ok(part);
-        }
-        Ok(input[range]
-            .iter()
-            .copied()
-            .fold(law.identity(), |a, b| law.combine(a, b)))
-    })?;
+    let (parts, ranges, joined) =
+        parallel_chunks_with_limit(input.len(), workers, hooks, LIVE, |range| {
+            #[cfg(feature = "native")]
+            if let Some(part) = kernel
+                .as_ref()
+                .and_then(|kernel| kernel.reduce(&input[range.clone()]))
+            {
+                return Ok(part);
+            }
+            Ok(input[range]
+                .iter()
+                .copied()
+                .fold(law.identity(), |a, b| law.combine(a, b)))
+        })?;
     Ok((
         parts
             .into_iter()
@@ -348,12 +352,13 @@ pub(super) fn pair_reduction_output(
     if a.len() != b.len() {
         return Err(Error::Candidate);
     }
-    let (parts, ranges, joined) = parallel_chunks(a.len(), workers, hooks, |range| {
-        Ok(a[range.clone()]
-            .iter()
-            .zip(&b[range])
-            .fold(Affine::IDENTITY, |acc, (&a, &b)| acc.then(Affine { a, b })))
-    })?;
+    let (parts, ranges, joined) =
+        parallel_chunks_with_limit(a.len(), workers, hooks, LIVE, |range| {
+            Ok(a[range.clone()]
+                .iter()
+                .zip(&b[range])
+                .fold(Affine::IDENTITY, |acc, (&a, &b)| acc.then(Affine { a, b })))
+        })?;
     Ok((
         parts.into_iter().fold(Affine::IDENTITY, Affine::then),
         ranges,
@@ -367,11 +372,19 @@ pub(super) fn scan_output(
     workers: usize,
     hooks: &Hooks,
 ) -> Result<Scheduled<Vec<u32>>, Error> {
-    let (parts, ranges, joined) = parallel_chunks(values.len(), workers, hooks, |range| {
-        Ok(laws::scan_affine(&values[range])
-            .map_err(|_| Error::ResourceLimit)?
-            .prefixes)
-    })?;
+    let (parts, ranges, joined) =
+        parallel_chunks_with_limit(values.len(), workers, hooks, LIVE, |range| {
+            // Affine maps over wrapping u32 compose associatively, so a linear
+            // prefix is exactly the tree scan, without its tree or size cap.
+            let mut carry = Affine::IDENTITY;
+            Ok(values[range]
+                .iter()
+                .map(|value| {
+                    carry = carry.then(*value);
+                    carry
+                })
+                .collect::<Vec<_>>())
+        })?;
     let mut result = Vec::new();
     result
         .try_reserve_exact(values.len())

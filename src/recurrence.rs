@@ -61,7 +61,9 @@ impl Plan {
         let Plan::AffineScan { a, b, .. } = self else {
             return Err(Error::InvalidPlan);
         };
-        if len > laws::MAX_ELEMENTS {
+        // Callers bound the length: the CPU scan by host bytes (#368), the
+        // tree scans and compaction by `laws::MAX_ELEMENTS`.
+        if len > crate::array_limits::MAX_LIVE_ELEMENTS {
             return Err(Error::ResourceLimit);
         }
         let column = |source: &Source| -> Result<Option<&[u32]>, Error> {

@@ -8,7 +8,9 @@ fn borrow_live<'a>(
     names: &[String],
     len: usize,
 ) -> Option<Vec<std::cell::Ref<'a, Vec<u32>>>> {
-    if len > laws::MAX_ELEMENTS
+    // #368: the live element policy, as for checked and select folds; the
+    // wrapping laws are total and associative at any length.
+    if len > crate::array_limits::MAX_LIVE_ELEMENTS
         || !names
             .iter()
             .all(|name| live.lengths.get(name).is_some_and(|n| *n >= len))
@@ -123,6 +125,11 @@ pub(super) fn scan_step(
         return Err(Error::Candidate);
     };
     let len = live.iterations;
+    // Live inputs, the affine coefficients and chunk prefixes (two words each),
+    // the joined states and an exclusive copy.
+    if !map_pass_fits(len, candidate.arrays.len() + 6) {
+        return Ok(None);
+    }
     let target = match (prefix, &candidate.output) {
         (Prefix::None, _) => None,
         (_, Some(name)) if live.lengths.get(name).is_some_and(|n| *n >= len) => Some(name),
