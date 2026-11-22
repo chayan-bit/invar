@@ -9,6 +9,7 @@ use crate::front::FrontError;
 use crate::numeric_contract::{FoldTier, NumericPolicy};
 
 mod receipt;
+pub mod rules;
 pub use receipt::{N_JUSTIFICATION, contract_bound, levels_used, record_levels};
 
 /// A level of the numeric contract axis C. C3 and C4 do not exist on this
