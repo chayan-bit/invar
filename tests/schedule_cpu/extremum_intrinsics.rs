@@ -452,3 +452,32 @@ fn extremum_intrinsics_native_serial_matches_value_trap_and_fuel() {
         }
     }
 }
+
+#[test]
+fn extremum_intrinsics_beside_sort_and_spatial_calls_run_on_workers() {
+    // Sort and spatial programs take their own CPU runners; the call must
+    // still reach the workers and record its selection there.
+    let tail = "var a = filled_f32(100000u32, 2.5); a[70000u32] = -1.0; a[90000u32] = -1.0; \
+                a[5u32] = 0.0 / 0.0; return i32_from_f32(f32_from_u32(argmin(a)));";
+    let sources = [
+        format!("fn main() -> i32 {{ var s: Array<u32> = [3u32, 1u32, 2u32]; sort(s); {tail} }}"),
+        format!(
+            "fn main() -> i32 {{ let p: Array<f32> = [0.0, 1.0]; let grid = voxel_grid_build(p, p, p, 1.0); \
+             let q: Array<f32> = [0.0]; let near = knn(grid, q, q, q, 1u32); {tail} }}"
+        ),
+    ];
+    for source in &sources {
+        let (checked, program) = compile(source);
+        let reference = eval::observe(&checked, FUEL);
+        assert_eq!(reference.result, Ok(eval::Value::I32(70_000)), "{source}");
+        let run = schedule::run_source(source.as_bytes(), &program, FUEL, 7).unwrap();
+        assert_eq!(run.observation.result, reference.result, "{source}");
+        assert_eq!(run.observation.steps_used, reference.steps_used, "{source}");
+        assert_eq!(run.selections.len(), 1, "{source}: {:?}", run.selections);
+        assert!(
+            run.selections[0].workers > 1,
+            "{source}: {:?}",
+            run.selections
+        );
+    }
+}

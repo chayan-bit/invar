@@ -539,18 +539,8 @@ pub fn run_source_with_hooks(
     };
     let mut selections = Vec::new();
     let mut select_fault = None;
-    let mut selector = |call: &mir_eval::SelectCall<'_>| match extrema::cpu(call, workers, hooks) {
-        Ok((result, receipt)) => {
-            selections.push(receipt);
-            result.map(Some)
-        }
-        Err(error) => {
-            select_fault = Some(error.clone());
-            Err(EvalError::Tool {
-                code: error.code(),
-                message: format!("CPU extremum failure: {error:?}"),
-            })
-        }
+    let mut selector = |call: &mir_eval::SelectCall<'_>| {
+        extrema::select(call, workers, hooks, &mut selections, &mut select_fault)
     };
     if regions.is_empty() {
         if hooks.fault == Fault::None

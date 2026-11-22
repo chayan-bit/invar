@@ -200,5 +200,19 @@ pub fn outcome<T: Elem>(kind: Kind, found: Option<(usize, T)>) -> Option<Outcome
 
 /// The serial reference of `kind` over `values`.
 pub fn reference<T: Elem>(kind: Kind, values: &[T]) -> Option<Outcome<T>> {
-    outcome(kind, extremum(kind.is_max(), values, 0))
+    reference_iter(kind, values.iter().copied())
+}
+
+/// [`reference`] over an iterator, so a caller that adapts element words
+/// (the native host) scans them in place instead of copying the array.
+pub fn reference_iter<T: Elem>(
+    kind: Kind,
+    values: impl IntoIterator<Item = T>,
+) -> Option<Outcome<T>> {
+    let max = kind.is_max();
+    let found = values
+        .into_iter()
+        .enumerate()
+        .reduce(|best, next| step(max, best, next, false));
+    outcome(kind, found)
 }

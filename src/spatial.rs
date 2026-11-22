@@ -99,10 +99,26 @@ pub(crate) fn run_cpu(
     let mut reducer = |call: &crate::mir_eval::ReduceCall<'_>| {
         crate::sorting::cpu_reduce(call, workers, &mut reductions, &mut fault)
     };
-    let run = run_cpu_with(source, program, fuel, workers, hooks, &mut reducer)?;
-    match fault {
+    let (mut selections, mut select_fault) = (Vec::new(), None);
+    let mut selector = |call: &crate::mir_eval::SelectCall<'_>| {
+        crate::schedule::extrema::select(call, workers, hooks, &mut selections, &mut select_fault)
+    };
+    let run = run_cpu_with(
+        source,
+        program,
+        fuel,
+        workers,
+        hooks,
+        &mut reducer,
+        &mut selector,
+    )?;
+    match fault.or(select_fault) {
         Some(error) => Err(error),
-        None => Ok(crate::schedule::Run { reductions, ..run }),
+        None => Ok(crate::schedule::Run {
+            reductions,
+            selections,
+            ..run
+        }),
     }
 }
 
@@ -115,6 +131,7 @@ pub(crate) fn run_cpu_with(
     workers: usize,
     hooks: &crate::schedule::Hooks,
     reducer: &mut crate::mir_eval::Reducer<'_>,
+    selector: &mut crate::mir_eval::Selector<'_>,
 ) -> Result<crate::schedule::Run, crate::schedule::Error> {
     use crate::{
         plan::PlanKind,
@@ -132,8 +149,15 @@ pub(crate) fn run_cpu_with(
         |function: &str, name: &str, args: &[crate::eval::Value], span, live: &mut usize| {
             cpu.invoke(function, name, args, span, live)
         };
-    let observation =
-        crate::mir_eval::observe_all(program, fuel, None, Some(&mut provider), Some(reducer)).0;
+    let observation = crate::mir_eval::observe_hooks(
+        program,
+        fuel,
+        None,
+        Some(&mut provider),
+        Some(reducer),
+        Some(selector),
+    )
+    .0;
     let CpuIntrinsics {
         joined, executed, ..
     } = cpu;

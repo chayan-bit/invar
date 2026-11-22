@@ -92,3 +92,29 @@ pub(crate) fn cpu(
     };
     Ok((result, receipt))
 }
+
+/// The `cpu-parallel` selector step shared by every CPU run: the call on
+/// `workers` with its receipt pushed to `selections`; a worker failure is
+/// kept in `fault` for the run's error.
+pub(crate) fn select(
+    call: &SelectCall<'_>,
+    workers: usize,
+    hooks: &Hooks,
+    selections: &mut Vec<Selection>,
+    fault: &mut Option<Error>,
+) -> Result<Option<Value>, EvalError> {
+    match cpu(call, workers, hooks) {
+        Ok((result, receipt)) => {
+            selections.push(receipt);
+            result.map(Some)
+        }
+        Err(error) => {
+            let failure = EvalError::Tool {
+                code: error.code(),
+                message: format!("CPU extremum failure: {error:?}"),
+            };
+            *fault = Some(error);
+            Err(failure)
+        }
+    }
+}

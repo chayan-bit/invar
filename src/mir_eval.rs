@@ -146,7 +146,7 @@ pub(crate) fn observe_all<'a>(
     observe_hooks(program, fuel_limit, provider, sorts, reducer, None)
 }
 
-fn observe_hooks<'a>(
+pub(crate) fn observe_hooks<'a>(
     program: &'a mir::Program,
     fuel_limit: u64,
     provider: Option<&'a mut BulkProvider<'a>>,
