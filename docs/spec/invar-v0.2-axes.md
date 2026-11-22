@@ -2,13 +2,14 @@
 
 Status: DRAFT; a v0.2 chapter on `main`, beside Appendix B of the v0.1 specification.
 Counts: statements=47 citations=50
-Size record: tokens=5831 estimator=bytes/3 limit=6000
+Size record: tokens=5868 estimator=bytes/3 limit=6000
 ## 1. Conventions
 
 [NA1.1] This chapter extends `docs/spec/invar-v0.1.md`, and its statements, notes, citations and fenced blocks follow v0.1 sections 1.1 and 1.2 and are checked by the same test. `tests/spec_examples.rs::AXES_SPEC`
 [NA1.2] The chapter carries its own counts and size record, and its size stays below 6,000 tokens by the v0.1 estimator. `tests/spec_examples.rs::SPECS`
 [NA1.3] Statement ids in this chapter start with `NA` and are never reused by the v0.1 file. `tests/spec_examples.rs`
 Note: section 7, the nondeterminism axis N, is `docs/spec/invar-v0.2-axis-n.md`, checked the same way under its own budget.
+Note: section 8, the rule levels a C level admits, is `docs/spec/invar-v0.2-regions.md`, checked the same way.
 
 ## 2. Attributes
 
