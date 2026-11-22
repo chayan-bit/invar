@@ -405,6 +405,13 @@ fn classify(context: &mut Context<'_>, region: &mut Region) {
     let fallback = context
         .fallback
         .get_or_insert_with(|| Arc::new(program.clone()));
+    // A for-each element is read as `xs[i]` for recognition only (#344).
+    let forwarded = crate::counted::forward_elements(function, defs, region.head);
+    let forwarded_defs = forwarded.as_ref().map(crate::counted::definitions);
+    let (function, defs) = match (&forwarded, &forwarded_defs) {
+        (Some(function), Some(defs)) => (function, defs),
+        _ => (function, &*defs),
+    };
     if let Ok(pair) = crate::pair_reduction::reduction_in(function, defs, region.head) {
         let facts = family_facts(
             "two components composed by the sealed ordered affine-pair law; identity (1,0)",

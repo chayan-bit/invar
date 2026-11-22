@@ -453,12 +453,14 @@ impl Builder<'_> {
                 let tag = self.value(Operation::VariantTag(owner), Type::U32, value.span);
                 let join = self.new_block();
                 let result = self.param(join, ty);
+                // Bodies a false guard enters directly, made when first needed (#260).
+                let mut bodies = std::collections::HashMap::new();
                 for (position, arm) in arms.iter().enumerate() {
                     let case = arm.variant.rsplit_once("::").map(|(_, case)| case)
                         .ok_or_else(|| invalid("checked variant arm missing"))?;
                     let index = declaration.arms.iter().position(|item| item.name == case)
                         .ok_or_else(|| invalid("checked variant tag missing"))?;
-                    let body = self.new_block();
+                    let body = match bodies.remove(&position) { Some(body) => body, None => self.new_block() };
                     let next = if position + 1 == arms.len() {
                         self.end(Terminator::Goto { target: body, args: Vec::new(), span: arm.span });
                         None
@@ -477,6 +479,20 @@ impl Builder<'_> {
                         self.locals.insert(binding.clone(), Local { ty: payload_ty, mutable: false, mode: None });
                         self.declaration_order.push(binding.clone());
                         self.emit(Operation::Bind { name: binding.clone(), value: payload }, None, arm.span);
+                    }
+                    if let Some(guard) = &arm.guard {
+                        // A false guard enters the next arm of its own case, which exists because a
+                        // guarded arm never covers its case; skipping other cases' tag tests charges
+                        // no steps and keeps that guard's moves off their paths.
+                        let same = arms.iter().enumerate().skip(position + 1)
+                            .find(|(_, later)| later.variant.rsplit_once("::").map(|(_, c)| c) == Some(case))
+                            .map(|(later, _)| later)
+                            .ok_or_else(|| invalid("checked guarded arm has no later arm of its case"))?;
+                        let condition = self.expr(guard, false)?;
+                        let value = self.new_block();
+                        let no = *bodies.entry(same).or_insert_with(|| self.new_block());
+                        self.end(Terminator::Branch { condition, yes: value, no, span: guard.span });
+                        self.current = value;
                     }
                     let arm_value = self.expr(&arm.value, false)?;
                     if let Some(binding) = &arm.binding

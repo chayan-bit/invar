@@ -539,8 +539,23 @@ fn expr(
                 owner.read_loans += 1;
             }
             let mut states = Vec::new();
+            // A guard runs only for its own case, so its effects reach its arm and
+            // the later arms of that case, never another case's arms (#260).
+            let mut fallthrough = HashMap::new();
             for arm in arms {
-                let mut arm_state = joined.clone();
+                let case = arm.variant.rsplit("::").next();
+                let mut arm_state = fallthrough.get(&case).unwrap_or(&joined).clone();
+                if let Some(guard) = &arm.guard {
+                    expr(
+                        program,
+                        function,
+                        guard,
+                        &mut arm_state,
+                        loop_depth,
+                        Context::Value,
+                    )?;
+                    fallthrough.insert(case, arm_state.clone());
+                }
                 if let Some(binding) = &arm.binding {
                     let payload = type_of(program, function, value)
                         .and_then(|ty| match ty {

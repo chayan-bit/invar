@@ -618,6 +618,8 @@ pub struct FieldInit {
 pub struct MatchArm {
     pub variant: String,
     pub binding: Option<String>,
+    /// `pattern if guard => value` (#260): evaluated after the pattern binds; false falls through.
+    pub guard: Option<Expr>,
     pub value: Expr,
     pub span: Span,
 }
@@ -642,9 +644,13 @@ impl Expr {
                 .max()
                 .unwrap_or(0),
             ExprKind::Field { base, .. } => base.height,
-            ExprKind::Match { value, arms } => value
-                .height
-                .max(arms.iter().map(|arm| arm.value.height).max().unwrap_or(0)),
+            ExprKind::Match { value, arms } => value.height.max(
+                arms.iter()
+                    .flat_map(|arm| arm.guard.iter().chain([&arm.value]))
+                    .map(|e| e.height)
+                    .max()
+                    .unwrap_or(0),
+            ),
             ExprKind::Index { base, index }
             | ExprKind::Binary {
                 left: base,

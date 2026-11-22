@@ -125,7 +125,9 @@ block         = "{", { statement }, "}" ;
 statement     = binding | assignment | return_stmt | if_stmt
               | [ attribute ], [ identifier, ":" ], ( while_stmt | for_stmt )
               | ( "break" | "continue" ), [ identifier ], ";"  (* #261 *)
+              | let_else  (* #260 *)
               | expression, ";" ;
+let_else      = "let", identifier, "::", identifier, { "::", identifier }, [ "(", identifier, ")" ], "=", [ "move" ], identifier, "else", block, ";" ;
 binding       = ( "let" | "var" ), ( identifier, [ ":", type ] | "(", identifier, ",", identifier, [ "," ], ")" ), "=", expression, ";" ;  (* pair #262 *)
 assignment    = place, ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ), expression, ";" ;  (* #254 *)
 place         = identifier, [ "[", expression, "]" ] ;
@@ -151,7 +153,7 @@ captures     = capture, { ",", capture } ;
 capture      = ( "copy" | "read" | "take" ), identifier, ":", type ;
 match_expr    = "match", expression, "{", [ match_arms, [ "," ] ], "}" ;
 match_arms    = match_arm, { ",", match_arm } ;
-match_arm     = identifier, { "::", identifier }, [ "(", identifier, ")" ], "=>", expression ;
+match_arm     = identifier, { "::", identifier }, [ "(", identifier, ")" ], [ "if", expression ], "=>", expression ;  (* guard #260 *)
 record_inits  = record_init, { ",", record_init } ;
 record_init   = identifier, ":", expression ;
 arguments     = expression, { ",", expression }, [ "," ] ;
@@ -233,4 +235,6 @@ digit         = "0" .. "9" ;
    async, await, scope, match,
    total, effects, requires, ensures, from. Diagnose unsupported use.
    break and continue act on the innermost loop, or on the enclosing loop
-   whose label they name; a closure body is outside every loop (#261). *)
+   whose label they name; a closure body is outside every loop (#261).
+   A guarded match arm never covers its case; a let-else block must end in
+   return, break, continue, assert(false, m) or an if/else that does (#260). *)

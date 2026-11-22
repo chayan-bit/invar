@@ -5,6 +5,7 @@ include!("parser/types.rs");
 include!("parser/statements.rs");
 include!("parser/loops.rs");
 include!("parser/tuples.rs");
+include!("parser/let_else.rs");
 include!("parser/expressions.rs");
 
 fn if_statement(
