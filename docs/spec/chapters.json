@@ -285,8 +285,8 @@
       "path": "docs/spec/chapters/language-surface.md",
       "requires": [],
       "tokens": {
-        "bpe": 3004,
-        "bytes3": 3492
+        "bpe": 3745,
+        "bytes3": 4312
       },
       "topics": [
         "assert",
@@ -295,6 +295,7 @@
         "continue",
         "doc-comments",
         "for-each",
+        "if-expression",
         "labels",
         "language-surface",
         "pairs",

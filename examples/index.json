@@ -958,6 +958,42 @@
       }
     },
     {
+      "path": "examples/language/if-expression.inv",
+      "intent": "An if expression selects one scalar arm; the unselected arm never runs.",
+      "family": "core",
+      "tags": [
+        "control-flow"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "reference",
+        "mir",
+        "native-serial"
+      ],
+      "expect": {
+        "command": "run",
+        "status": "ok",
+        "value": 4805
+      }
+    },
+    {
+      "path": "examples/language/if-without-else.inv",
+      "intent": "An if expression without an else arm is PARSE_IF_WITHOUT_ELSE.",
+      "family": "core",
+      "tags": [
+        "negative"
+      ],
+      "spec_section": "B.7",
+      "engines": [
+        "check"
+      ],
+      "expect": {
+        "command": "check",
+        "status": "source_error",
+        "code": "PARSE_IF_WITHOUT_ELSE"
+      }
+    },
+    {
       "path": "examples/language/match-guards.inv",
       "intent": "Guarded match arms tried in order, and a let-else that returns early.",
       "family": "core",

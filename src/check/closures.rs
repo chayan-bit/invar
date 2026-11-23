@@ -71,6 +71,13 @@ fn scan_expr(expr: &Expr, roots: &HashSet<String>) -> Result<(), FrontError> {
             }
             Ok(())
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => [condition, then, otherwise]
+            .into_iter()
+            .try_for_each(|part| scan_expr(part, roots)),
         ExprKind::Index { base, index }
         | ExprKind::Pair(base, index)
         | ExprKind::Binary {
@@ -217,6 +224,13 @@ fn rewrite_expr(
             }
             Ok(())
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => [condition, then, otherwise]
+            .into_iter()
+            .try_for_each(|part| rewrite_expr(part, active, inherited_names, allow_call)),
         ExprKind::Index { base, index }
         | ExprKind::Pair(base, index)
         | ExprKind::Binary {
@@ -256,6 +270,11 @@ fn contains_view_call(block: &Block) -> bool {
                         .iter()
                         .any(|arm| arm.guard.as_ref().is_some_and(expr) || expr(&arm.value))
             }
+            ExprKind::If {
+                condition,
+                then,
+                otherwise,
+            } => expr(condition) || expr(then) || expr(otherwise),
             ExprKind::Index { base, index }
             | ExprKind::Pair(base, index)
             | ExprKind::Binary {

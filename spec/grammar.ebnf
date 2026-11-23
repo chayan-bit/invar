@@ -144,13 +144,14 @@ add_expr      = mul_expr, { ( "+" | "-" ), mul_expr } ;
 mul_expr      = unary_expr, { ( "*" | "/" | "%" ), unary_expr } ;
 unary_expr    = ( "not" | "-" ), unary_expr | "move", identifier, [ ".", identifier ] | postfix_expr ;
 postfix_expr  = primary, { "[", expression, "]" | ".", ( identifier | "0" | "1" ) | "?" } ;
-primary       = integer_literal | decimal_literal | string_literal | byte_literal | "true" | "false" | name_or_call | match_expr | closure_expr
+primary       = integer_literal | decimal_literal | string_literal | byte_literal | "true" | "false" | name_or_call | match_expr | if_expr | closure_expr
               | "(", expression, [ ",", expression, [ "," ] ], ")" | "[", [ arguments ], "]" ;
 name_or_call  = identifier, { "::", identifier }, [ "<", type_args, ">" | "::", "<", type_args, ">" ], [ "(", [ arguments ], ")" | "{", [ record_inits, [ "," ] ], "}" ] ;
 type_args     = type, { ",", type } ;
 closure_expr  = "closure", "[", [ captures ], "]", "(", [ params ], ")", "->", type, block ;
 captures     = capture, { ",", capture } ;
 capture      = ( "copy" | "read" | "take" ), identifier, ":", type ;
+if_expr       = "if", expression, "{", expression, "}", "else", ( "{", expression, "}" | if_expr ) ;  (* #361 *)
 match_expr    = "match", expression, "{", [ match_arms, [ "," ] ], "}" ;
 match_arms    = match_arm, { ",", match_arm } ;
 match_arm     = identifier, { "::", identifier }, [ "(", identifier, ")" ], [ "if", expression ], "=>", expression ;  (* guard #260 *)
@@ -237,4 +238,6 @@ digit         = "0" .. "9" ;
    break and continue act on the innermost loop, or on the enclosing loop
    whose label they name; a closure body is outside every loop (#261).
    A guarded match arm never covers its case; a let-else block must end in
-   return, break, continue, assert(false, m) or an if/else that does (#260). *)
+   return, break, continue, assert(false, m) or an if/else that does (#260).
+   An if starting a statement is if_stmt; anywhere else it is if_expr, whose
+   arms are single scalar expressions of one type (#361). *)

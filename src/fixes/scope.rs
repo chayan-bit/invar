@@ -172,6 +172,11 @@ pub(super) fn children(expr: &Expr) -> Vec<Operand<'_>> {
                 )
                 .collect(),
         ),
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => plain(vec![condition, then, otherwise]),
         _ => Vec::new(),
     }
 }

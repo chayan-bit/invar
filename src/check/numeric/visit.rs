@@ -85,6 +85,15 @@ pub(super) fn walk_expr(e: &mut Expr, v: &mut impl Visit) {
                 walk_expr(&mut arm.value, v);
             });
         }
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => {
+            [condition, then, otherwise]
+                .into_iter()
+                .for_each(|part| walk_expr(part, v));
+        }
         ExprKind::MoveField { base, .. }
         | ExprKind::Field { base, .. }
         | ExprKind::Group(base)

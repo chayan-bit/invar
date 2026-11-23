@@ -428,6 +428,13 @@ impl Scan<'_> {
                 }
                 Ok(())
             }
+            ExprKind::If {
+                condition,
+                then,
+                otherwise,
+            } => [condition, then, otherwise]
+                .into_iter()
+                .try_for_each(|part| self.expr(part)),
             ExprKind::Integer(_)
             | ExprKind::Float(_)
             | ExprKind::Bool(_)

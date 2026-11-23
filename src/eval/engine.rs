@@ -241,6 +241,12 @@ impl Evaluator<'_> {
                 Ok(Value::Record(Rc::new(RefCell::new(values))))
             }
             ExprKind::Match { value, arms } => self.match_expr(value, arms, env),
+            // One step (charged above), then the condition, then only the selected arm (#361).
+            ExprKind::If { condition, then, otherwise } => match self.expr(condition, env)? {
+                Value::Bool(true) => self.expr(then, env),
+                Value::Bool(false) => self.expr(otherwise, env),
+                _ => Err(EvalError::tool("INTERNAL_TYPE", "checked if condition is not Bool")),
+            },
             ExprKind::Pair(first, second) => Ok(Value::Pair(Box::new((self.expr(first, env)?, self.expr(second, env)?)))),
             ExprKind::Field { base, name } if matches!(self.types.get(&base.span), Some(Type::Pair(_))) => pair_field(self.expr(base, env)?, name),
             ExprKind::Field { base, name } => {

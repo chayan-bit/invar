@@ -451,6 +451,17 @@ pub(super) fn check_expr(
             }
             common.unwrap_or_else(|| PhysicalType::plain(Type::Unit))
         }
+        // Both arms carry the same unit and frame, as match arms do (#361).
+        ExprKind::If {
+            condition,
+            then,
+            otherwise,
+        } => {
+            check_expr(condition, scope, context, None)?;
+            let first = check_expr(then, scope, context, expected)?;
+            check_expr(otherwise, scope, context, Some(&first))?;
+            first
+        }
     };
     if let Some(expected) = expected {
         ty.clone().require(expected, expr.span)?;

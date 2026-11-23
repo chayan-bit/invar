@@ -1,0 +1,6 @@
+// An if expression without an else arm is PARSE_IF_WITHOUT_ELSE.
+fn main() -> i32 {
+    let t: Bool = true;
+    let v = if t { 1 };
+    return v;
+}

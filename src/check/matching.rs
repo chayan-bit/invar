@@ -1,4 +1,5 @@
-//! Checking `match`: arm types, payload bindings, guards (#260) and exhaustiveness.
+//! Checking `match`: arm types, payload bindings, guards (#260) and exhaustiveness,
+//! and the `if` expression (#361), whose two arms return the same scalar subset.
 
 use super::*;
 
@@ -26,16 +27,7 @@ impl FunctionChecker<'_> {
             .cloned()
             .or_else(|| self.hint(&first.value))
             .unwrap_or(Type::I32);
-        if !matches!(
-            result_ty,
-            Type::I32 | Type::U32 | Type::F32 | Type::F64 | Type::Bool
-        ) {
-            return Err(FrontError::source(
-                "UNSUPPORTED_FEATURE",
-                "this match subset returns a scalar",
-                span,
-            ));
-        }
+        scalar_result(&result_ty, "this match subset returns a scalar", span)?;
         let mut seen = HashSet::new();
         for arm in arms {
             let (prefix, case) = arm.variant.rsplit_once("::").ok_or_else(|| {
@@ -126,5 +118,64 @@ impl FunctionChecker<'_> {
             ));
         }
         Ok(result_ty)
+    }
+
+    /// The type the arms of a `match` or an `if` expression suggest.
+    pub(super) fn branch_hint(&self, expr: &Expr) -> Option<Type> {
+        match &expr.kind {
+            ExprKind::Match { arms, .. } => arms.first().and_then(|arm| self.hint(&arm.value)),
+            ExprKind::If {
+                then, otherwise, ..
+            } => self.hint(then).or_else(|| self.hint(otherwise)),
+            _ => None,
+        }
+    }
+
+    pub(super) fn branch_expr(
+        &mut self,
+        expr: &Expr,
+        expected: Option<&Type>,
+    ) -> Result<Type, FrontError> {
+        match &expr.kind {
+            ExprKind::Match { value, arms } => self.match_expr(value, arms, expected, expr.span),
+            ExprKind::If {
+                condition,
+                then,
+                otherwise,
+            } => self.if_expr(condition, [then, otherwise], expected, expr.span),
+            _ => Err(mismatch("match or if expression required", expr.span)),
+        }
+    }
+
+    /// `if c { a } else { b }` (#361): a `Bool` condition and two arms of one scalar
+    /// type, taken from the expected type, else from the first arm whose type is known.
+    fn if_expr(
+        &mut self,
+        condition: &Expr,
+        arms: [&Expr; 2],
+        expected: Option<&Type>,
+        span: Span,
+    ) -> Result<Type, FrontError> {
+        self.expr(condition, Some(&Type::Bool))?;
+        let result_ty = expected
+            .cloned()
+            .or_else(|| arms.iter().find_map(|arm| self.hint(arm)))
+            .unwrap_or(Type::I32);
+        scalar_result(&result_ty, "an if expression returns a scalar", span)?;
+        for arm in arms {
+            self.expr(arm, Some(&result_ty))?;
+        }
+        Ok(result_ty)
+    }
+}
+
+fn scalar_result(ty: &Type, message: &str, span: Span) -> Result<(), FrontError> {
+    if matches!(
+        ty,
+        Type::I32 | Type::U32 | Type::F32 | Type::F64 | Type::Bool
+    ) {
+        Ok(())
+    } else {
+        Err(FrontError::source("UNSUPPORTED_FEATURE", message, span))
     }
 }
